@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小红书选品 Top1000 推荐</title>
+<script>
+(function(){try{var t=localStorage.getItem('xhs_report_theme')||localStorage.getItem('pa_ui_theme');document.documentElement.dataset.theme=(t==='classic')?'classic':'aurora';}catch(e){document.documentElement.dataset.theme='aurora';}})();
+</script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="data.js"></script>
+<link rel="stylesheet" href="report_theme.css">
+<style>
+:root, [data-theme="classic"]{
+  --bg-1:#0f0c29;--bg-2:#1a1a3e;--bg-3:#24243e;
+  --glass:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
+  --card:rgba(255,255,255,0.03);
+  --text:#f0f0f5;--text2:#a8a8b8;--text3:#6e6e80;
+  --xhs-red:#FF2442;--xhs-grad:linear-gradient(135deg,#FF2442 0%,#FF6B35 100%);
+  --orange:#FF8C42;--gold:#FFD700;--cyan:#00D9FF;--green:#06D6A0;--purple:#9D5CFF;
+  --virtual-grad:linear-gradient(135deg,#9D5CFF 0%,#B084F0 100%);
+  --physical-grad:linear-gradient(135deg,#06D6A0 0%,#4ECDC4 100%);
+  --sidebar-w:240px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:linear-gradient(135deg,var(--bg-1),var(--bg-2),var(--bg-3));color:var(--text);min-height:100vh;font-size:14px}
+
+#app{display:flex;min-height:100vh}
+
+.sidebar{width:var(--sidebar-w);position:fixed;top:0;left:0;bottom:0;background:rgba(15,12,41,0.85);backdrop-filter:blur(20px);border-right:1px solid var(--glass-border);padding:20px 16px;overflow-y:auto;z-index:100}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:rgba(255,36,66,0.3);border-radius:2px}
+
+.sidebar-logo{font-size:16px;font-weight:800;background:var(--xhs-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;letter-spacing:0.5px}
+.sidebar-sub{font-size:11px;color:var(--text3);margin-bottom:24px;line-height:1.5}
+
+.side-section{margin-bottom:24px}
+.side-section-title{font-size:11px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:10px;text-transform:uppercase;padding-left:4px;display:flex;align-items:center;justify-content:space-between}
+.side-section-title.collapsible{cursor:pointer;user-select:none;padding:8px 4px;border-radius:6px;transition:background .2s}
+.side-section-title.collapsible:hover{background:var(--glass)}
+.collapse-icon{font-size:10px;opacity:0.6;flex-shrink:0}
+.type-count{font-size:11px;font-weight:600;color:var(--text2);background:var(--glass);padding:2px 8px;border-radius:10px;letter-spacing:0}
+.side-section:nth-child(3) .side-section-title{color:var(--purple)}
+.side-section:nth-child(4) .side-section-title{color:var(--green)}
+
+.type-tabs{display:flex;flex-direction:column;gap:8px}
+.type-tab{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:10px;cursor:pointer;border:1px solid var(--glass-border);background:var(--card);transition:all .25s;font-size:13px;font-weight:600}
+.type-tab .icon{margin-right:8px}
+.type-tab .count{font-size:11px;color:var(--text3);font-weight:500}
+.type-tab.virtual:hover,.type-tab.virtual.active{background:var(--virtual-grad);color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(157,92,255,0.4)}
+.type-tab.physical:hover,.type-tab.physical.active{background:var(--physical-grad);color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(6,214,160,0.4)}
+.type-tab.active .count{color:rgba(255,255,255,0.85)}
+
+.metric-list{display:flex;flex-direction:column;gap:4px}
+.metric-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:12px;color:var(--text2);transition:all .2s;border:1px solid transparent}
+.metric-item:hover{background:var(--glass);color:var(--text)}
+.metric-item.active{background:rgba(255,36,66,0.15);color:var(--xhs-red);border-color:rgba(255,36,66,0.3);font-weight:700}
+.metric-item .metric-icon{font-size:14px;margin-right:8px}
+.metric-item .metric-arrow{font-size:10px;opacity:0.6}
+
+.side-stat{background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;padding:12px;margin-bottom:8px}
+.side-stat .v{font-size:18px;font-weight:800;background:var(--xhs-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.side-stat .l{font-size:10px;color:var(--text3);margin-top:2px}
+
+.main{margin-left:var(--sidebar-w);flex:1;padding:24px 32px;min-width:0}
+
+.header{margin-bottom:24px}
+.header h1{font-size:24px;font-weight:800;background:var(--xhs-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.header .meta{font-size:12px;color:var(--text2);line-height:1.7}
+.header .meta .time{color:var(--xhs-red);font-weight:600}
+
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:12px;padding:14px 16px;transition:all .3s;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--xhs-grad);opacity:0;transition:opacity .3s}
+.stat-card:hover{transform:translateY(-2px);border-color:rgba(255,36,66,0.3)}
+.stat-card:hover::before{opacity:1}
+.stat-card .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.stat-card .l{font-size:11px;color:var(--text3);margin-top:4px;font-weight:500}
+.stat-card.red .v{color:var(--xhs-red)}
+.stat-card.purple .v{color:var(--purple)}
+.stat-card.mint .v{color:var(--green)}
+.stat-card.gold .v{color:var(--gold)}
+.stat-card.orange .v{color:var(--orange)}
+.stat-card.cyan .v{color:var(--cyan)}
+
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:12px}
+.toolbar input{flex:1;min-width:200px;background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);color:var(--text);padding:8px 14px;border-radius:8px;font-size:13px;outline:none}
+.toolbar input:focus{border-color:var(--xhs-red)}
+.toolbar input::placeholder{color:var(--text3)}
+.toolbar select{background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:12px;outline:none;cursor:pointer}
+.toolbar .btn{background:var(--card);border:1px solid var(--glass-border);color:var(--text);padding:7px 14px;border-radius:8px;cursor:pointer;font-size:12px;transition:all .2s;font-weight:500}
+.toolbar .btn:hover{border-color:var(--xhs-red);color:var(--xhs-red)}
+.toolbar .btn.active{background:var(--xhs-grad);color:#fff;border-color:transparent}
+.toolbar .btn.primary{background:var(--xhs-grad);color:#fff;border:none}
+.toolbar .btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,36,66,0.4)}
+
+.current-sort{display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:12px;color:var(--text2)}
+.current-sort .label{color:var(--text3)}
+.current-sort .value{color:var(--xhs-red);font-weight:700}
+.current-sort .total{color:var(--text3)}
+
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+
+.product-card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:14px;padding:16px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;animation:cardFadeIn .3s ease}
+.product-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--xhs-grad);opacity:0;transition:opacity .3s}
+.product-card:hover{transform:translateY(-4px);border-color:rgba(255,36,66,0.4);box-shadow:0 12px 32px rgba(255,36,66,0.15)}
+.product-card:hover::before{opacity:1}
+.product-card.hot-card{border-color:rgba(255,36,66,0.5);background:rgba(255,36,66,0.06);box-shadow:0 4px 20px rgba(255,36,66,0.1)}
+.product-card.hot-card::before{opacity:1}
+@keyframes cardFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.hot-badge{position:absolute;top:0;left:0;background:var(--xhs-grad);color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:0 0 8px 0;letter-spacing:1px;z-index:2}
+
+.card-rank{position:absolute;top:12px;right:12px;font-size:11px;font-weight:800;color:var(--text3);background:rgba(0,0,0,0.3);padding:3px 8px;border-radius:6px}
+.card-rank.top10{background:var(--xhs-grad);color:#fff}
+.card-rank.top50{background:rgba(255,215,0,0.2);color:var(--gold);border:1px solid rgba(255,215,0,0.3)}
+
+.card-header{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;padding-right:40px}
+.card-type{flex-shrink:0;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:0.5px}
+.card-type.virtual{background:rgba(157,92,255,0.2);color:var(--purple);border:1px solid rgba(157,92,255,0.3)}
+.card-type.physical{background:rgba(6,214,160,0.2);color:var(--green);border:1px solid rgba(6,214,160,0.3)}
+.card-pool{flex-shrink:0;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:0.5px}
+.pool-BURST{background:rgba(255,36,66,0.2);color:var(--xhs-red);border:1px solid rgba(255,36,66,0.3)}
+.pool-ACCEL{background:rgba(255,140,66,0.2);color:var(--orange);border:1px solid rgba(255,140,66,0.3)}
+.pool-WATCH{background:rgba(0,217,255,0.2);color:var(--cyan);border:1px solid rgba(0,217,255,0.3)}
+.pool-NEW{background:rgba(110,118,129,0.2);color:var(--text2);border:1px solid rgba(110,118,129,0.3)}
+
+.card-title{font-size:13px;font-weight:600;line-height:1.4;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+
+.card-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.metric{background:rgba(0,0,0,0.2);padding:8px 10px;border-radius:8px;border:1px solid var(--glass-border)}
+.metric .ml{font-size:10px;color:var(--text3);font-weight:500}
+.metric .mv{font-size:15px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;margin-top:2px}
+.metric.highlight{background:rgba(255,36,66,0.08);border-color:rgba(255,36,66,0.2)}
+.metric.highlight .mv{background:linear-gradient(135deg,#FF2442,#FF6B35);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.metric.green .mv{background:linear-gradient(135deg,#06D6A0,#4ECDC4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.metric.gold .mv{background:linear-gradient(135deg,#FFD700,#FFB627);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.metric.cyan .mv{background:linear-gradient(135deg,#00D9FF,#4ECDC4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.metric.purple .mv{background:linear-gradient(135deg,#9D5CFF,#B084F0);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.metric.orange .mv{background:linear-gradient(135deg,#FF8C42,#FFB627);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+.card-footer{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text2);padding-top:10px;border-top:1px solid var(--glass-border);gap:8px}
+.card-store{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-date{color:var(--text3);flex-shrink:0}
+
+.loading-more{text-align:center;padding:32px;color:var(--text3);font-size:13px}
+.loading-more .spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--glass-border);border-top-color:var(--xhs-red);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.no-more{text-align:center;padding:24px;color:var(--text3);font-size:12px}
+
+.empty{text-align:center;padding:48px;color:var(--text2);font-size:14px}
+
+.back-top{position:fixed;bottom:32px;right:32px;width:44px;height:44px;border-radius:50%;background:var(--xhs-grad);border:none;color:#fff;font-size:18px;cursor:pointer;box-shadow:0 4px 16px rgba(255,36,66,0.4);z-index:999;opacity:0;pointer-events:none;transform:translateY(12px);transition:opacity .3s,transform .3s}
+.back-top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.back-top:hover{transform:scale(1.1) translateY(-2px);box-shadow:0 8px 24px rgba(255,36,66,0.5)}
+
+.animate-in{opacity:0;transform:translateY(20px);transition:opacity .4s ease,transform .4s ease}
+.animate-in.visible{opacity:1;transform:translateY(0)}
+
+.modal-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:9998;display:flex;align-items:center;justify-content:center}
+.modal{background:linear-gradient(135deg,rgba(26,26,62,0.95),rgba(36,36,62,0.95));backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:20px;padding:28px;max-width:600px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.6);position:relative}
+.modal h3{color:var(--text);margin-bottom:18px;font-size:18px;font-weight:700;line-height:1.4;padding-right:40px}
+.modal .close{position:absolute;top:16px;right:20px;font-size:28px;color:var(--text3);cursor:pointer;line-height:1;transition:color .2s}
+.modal .close:hover{color:var(--xhs-red)}
+.modal .detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:18px}
+.modal .detail-item{background:rgba(0,0,0,0.3);padding:12px 14px;border-radius:10px;border:1px solid var(--glass-border)}
+.modal .detail-item .dl{font-size:11px;color:var(--text3);font-weight:500}
+.modal .detail-item .dv{font-size:16px;font-weight:800;color:var(--text);margin-top:4px;font-variant-numeric:tabular-nums}
+
+@media (max-width:900px){
+  :root{--sidebar-w:0px}
+  .sidebar{transform:translateX(-100%);transition:transform .3s;width:240px}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;padding:16px}
+  .menu-toggle{display:block!important}
+}
+.menu-toggle{display:none;position:fixed;top:16px;right:16px;z-index:101;width:40px;height:40px;border-radius:8px;background:var(--xhs-grad);border:none;color:#fff;font-size:18px;cursor:pointer}
+
+.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:var(--bg-1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+.loading-spinner{width:48px;height:48px;border:3px solid var(--glass-border);border-top-color:var(--xhs-red);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:var(--text2);font-size:14px;font-weight:500}
+.loading-sub{color:var(--text3);font-size:12px;margin-top:-12px}
+.loading-bar{width:260px;height:4px;background:var(--glass-border);border-radius:2px;overflow:hidden}
+.loading-bar-inner{width:60%;height:100%;background:var(--xhs-grad);border-radius:2px;animation:loading-bar 1.5s ease-in-out infinite}
+@keyframes loading-bar{0%{transform:translateX(-100%)}100%{transform:translateX(260px)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="loading-overlay" v-if="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">正在加载数据...</div>
+    <div class="loading-sub">正在读取 data.js 商品数据...</div>
+    <div class="loading-bar"><div class="loading-bar-inner"></div></div>
+  </div>
+  <div class="loading-overlay" v-if="!loading && meta.error" style="background:rgba(255,36,66,0.08)">
+    <div style="font-size:48px;margin-bottom:12px">⚠️</div>
+    <div class="loading-text" style="color:var(--xhs-red)">{{ meta.error }}</div>
+    <button class="btn primary" style="margin-top:16px;padding:10px 28px" @click="retryLoad">重新加载</button>
+  </div>
+  <button class="menu-toggle" @click="sidebarOpen=!sidebarOpen">&#9776;</button>
+
+  <div :class="['sidebar', sidebarOpen && 'open']">
+    <div class="sidebar-logo">小红书选品</div>
+    <div class="sidebar-sub">Top1000 卡片推荐系统<br>{{ meta.date }} {{ (meta.time || '').slice(11, 19) }}</div>
+
+    <div class="side-section">
+      <div class="side-section-title collapsible" @click="virtualCollapsed=!virtualCollapsed">
+        <span>虚拟商品 <span class="type-count">{{ formatNum(virtualCount) }}</span></span>
+        <span class="collapse-icon">{{ virtualCollapsed ? '▶' : '▼' }}</span>
+      </div>
+      <div class="metric-list" v-show="!virtualCollapsed">
+        <div v-for="m in metrics" :key="'v_'+m.key"
+             :class="['metric-item', activeType==='virtual' && activeMetric===m.key && 'active']"
+             @click="switchTypeMetric('virtual', m.key)">
+          <span><span class="metric-icon">{{ m.icon }}</span>{{ m.label }}</span>
+          <span class="metric-arrow">{{ m.asc ? '▲' : '▼' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-section-title collapsible" @click="physicalCollapsed=!physicalCollapsed">
+        <span>实体商品 <span class="type-count">{{ formatNum(physicalCount) }}</span></span>
+        <span class="collapse-icon">{{ physicalCollapsed ? '▶' : '▼' }}</span>
+      </div>
+      <div class="metric-list" v-show="!physicalCollapsed">
+        <div v-for="m in metrics" :key="'p_'+m.key"
+             :class="['metric-item', activeType==='physical' && activeMetric===m.key && 'active']"
+             @click="switchTypeMetric('physical', m.key)">
+          <span><span class="metric-icon">{{ m.icon }}</span>{{ m.label }}</span>
+          <span class="metric-arrow">{{ m.asc ? '▲' : '▼' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-section-title">数据概览</div>
+      <div class="side-stat">
+        <div class="v">{{ formatNum(currentCount) }}</div>
+        <div class="l">当前类型商品数</div>
+      </div>
+      <div class="side-stat">
+        <div class="v">{{ Math.min(1000, currentCount) }}</div>
+        <div class="l">展示 Top 数</div>
+      </div>
+      <div class="side-stat">
+        <div class="v">{{ loadedCount }}</div>
+        <div class="l">已加载卡片数</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="header animate-in">
+      <h1>Top1000 选品推荐 <span style="font-size:13px;color:var(--text3);font-weight:500">· {{ activeMetricLabel }}</span></h1>
+      <div class="meta">
+        <span class="time">{{ meta.date }} {{ (meta.time || '').slice(11, 19) }}</span>
+        <span style="margin:0 8px;color:var(--text3)">|</span>
+        <span>{{ activeType==='virtual' ? '📱 虚拟商品' : '📦 实体商品' }}</span>
+        <span style="margin:0 8px;color:var(--text3)">|</span>
+        <span>共 {{ formatNum(currentCount) }} 个商品，展示 Top{{ Math.min(1000, currentCount) }}</span>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card animate-in red"><div class="v">{{ formatNum(meta.count) }}</div><div class="l">入选商品</div></div>
+      <div class="stat-card animate-in red"><div class="v">{{ meta.pool_burst }}</div><div class="l">BURST 爆发池</div></div>
+      <div class="stat-card animate-in orange"><div class="v">{{ meta.pool_accel }}</div><div class="l">ACCEL 加速池</div></div>
+      <div class="stat-card animate-in cyan"><div class="v">{{ meta.pool_new }}</div><div class="l">NEW 新品池</div></div>
+      <div class="stat-card animate-in purple"><div class="v">{{ virtualCount }}</div><div class="l">虚拟商品</div></div>
+      <div class="stat-card animate-in mint"><div class="v">{{ physicalCount }}</div><div class="l">实体商品</div></div>
+      <div class="stat-card animate-in gold"><div class="v">¥{{ meta.median_price }}</div><div class="l">价格中位数</div></div>
+      <div class="stat-card animate-in orange"><div class="v">{{ meta.avg_actual_v1d }}</div><div class="l">平均真实增量</div></div>
+    </div>
+
+    <div class="toolbar animate-in">
+      <input type="text" v-model="searchQuery" placeholder="搜索商品标题/店铺名/商品ID...">
+      <select v-model="poolFilter">
+        <option value="ALL">全部分层</option>
+        <option value="BURST">BURST 爆发</option>
+        <option value="ACCEL">ACCEL 加速</option>
+        <option value="WATCH">WATCH 观察</option>
+        <option value="NEW">NEW 新品</option>
+      </select>
+      <select v-model="priceBand">
+        <option value="ALL">全部价格</option>
+        <option value="0-30">0-30 元</option>
+        <option value="30-50">30-50 元</option>
+        <option value="50-100">50-100 元</option>
+        <option value="100-200">100-200 元</option>
+        <option value="200+">200 元以上</option>
+      </select>
+      <button class="btn primary" @click="exportCSV">导出当前CSV</button>
+    </div>
+
+    <div class="current-sort animate-in">
+      <span class="label">当前排序：</span>
+      <span class="value">{{ activeMetricLabel }} ▼</span>
+      <span class="total">· 共 {{ filteredCount }} 个匹配，展示 Top{{ Math.min(1000, filteredCount) }}</span>
+    </div>
+
+    <div class="card-grid" ref="cardGrid">
+      <div v-for="(item, idx) in displayItems" :key="item.goods_id"
+           :class="['product-card', idx<10 && 'hot-card']"
+           @click="showDetail(item)">
+        <div v-if="idx<10" class="hot-badge">🔥 强推</div>
+        <div :class="['card-rank', idx<10 && 'top10', idx>=10 && idx<50 && 'top50']">#{{ idx + 1 }}</div>
+        <div class="card-header">
+          <span :class="['card-type', item.is_virtual ? 'virtual' : 'physical']">{{ item.is_virtual ? '虚拟' : '实体' }}</span>
+          <span :class="['card-pool', 'pool-' + item.pool]">{{ item.pool }}</span>
+          <div class="card-title">{{ item.title }}</div>
+        </div>
+        <div class="card-metrics">
+          <div class="metric highlight"><div class="ml">真实增量</div><div class="mv">{{ formatNum(item.actual_v1d) }}</div></div>
+          <div class="metric"><div class="ml">销量</div><div class="mv">{{ formatNum(item.sold) }}</div></div>
+          <div class="metric green"><div class="ml">日增速</div><div class="mv">{{ (item.actual_gr * 100).toFixed(1) }}%</div></div>
+          <div class="metric cyan"><div class="ml">增销比</div><div class="mv">{{ (item.actual_vsr * 100).toFixed(1) }}%</div></div>
+          <div class="metric gold"><div class="ml">价格</div><div class="mv">¥{{ item.price }}</div></div>
+          <div class="metric purple"><div class="ml">爆发分</div><div class="mv">{{ item.burst }}</div></div>
+          <div class="metric"><div class="ml">店铺粉丝</div><div class="mv">{{ formatNum(item.shop_fans) }}</div></div>
+          <div class="metric"><div class="ml">商品粉销比</div><div class="mv">{{ (item.goods_fsr || 0).toFixed(3) }}</div></div>
+          <div class="metric orange"><div class="ml">店铺粉销比</div><div class="mv">{{ (item.shop_fsr || 0).toFixed(3) }}</div></div>
+        </div>
+        <div class="card-footer">
+          <a class="gid-link card-gid" :href="'https://www.xiaohongshu.com/goods-detail/' + encodeURIComponent(item.goods_id)" rel="noopener noreferrer" @click.stop>{{ item.goods_id }}</a>
+          <button type="button" class="pa-gid-copy" :data-gid="item.goods_id" title="复制商品 ID">复制</button>
+          <span class="card-store">{{ item.store_name || '-' }}</span>
+          <span class="card-date">{{ (item.first_seen || '').slice(0, 10) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="loadingMore && displayItems.length > 0" class="loading-more">
+      <span class="spinner"></span>加载更多...
+    </div>
+    <div v-else-if="!hasMore && displayItems.length > 0" class="no-more">
+      — 已展示全部 {{ displayItems.length }} / {{ sortedItems.length }} 商品 —
+    </div>
+    <div v-else-if="displayItems.length === 0 && !loading" class="empty">无符合条件的商品，请调整筛选条件</div>
+  </div>
+
+  <button class="back-top" ref="backTop" @click="scrollToTop" title="回到顶部">&#9650;</button>
+
+  <div class="modal-mask" v-if="detailItem" @click.self="detailItem=null">
+    <div class="modal">
+      <span class="close" @click="detailItem=null">&times;</span>
+      <h3>{{ detailItem.title }}</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="dl">真实增量</div><div class="dv">{{ formatNum(detailItem.actual_v1d) }}</div></div>
+        <div class="detail-item"><div class="dl">预估日增量</div><div class="dv">{{ formatNum(detailItem.v1d) }}</div></div>
+        <div class="detail-item"><div class="dl">销量</div><div class="dv">{{ formatNum(detailItem.sold) }}</div></div>
+        <div class="detail-item"><div class="dl">价格</div><div class="dv">&yen;{{ detailItem.price }}</div></div>
+        <div class="detail-item"><div class="dl">真实日增速</div><div class="dv">{{ (detailItem.actual_gr * 100).toFixed(2) }}%</div></div>
+        <div class="detail-item"><div class="dl">真实增销比</div><div class="dv">{{ (detailItem.actual_vsr * 100).toFixed(2) }}%</div></div>
+        <div class="detail-item"><div class="dl">爆发分</div><div class="dv">{{ detailItem.burst }}</div></div>
+        <div class="detail-item"><div class="dl">分层</div><div class="dv">{{ detailItem.pool }}</div></div>
+        <div class="detail-item"><div class="dl">类型</div><div class="dv">{{ detailItem.is_virtual ? '虚拟' : '实体' }}</div></div>
+        <div class="detail-item"><div class="dl">店铺粉丝</div><div class="dv">{{ formatNum(detailItem.shop_fans) }}</div></div>
+        <div class="detail-item"><div class="dl">店铺销量</div><div class="dv">{{ formatNum(detailItem.shop_sales) }}</div></div>
+        <div class="detail-item"><div class="dl">商品粉销比</div><div class="dv">{{ (detailItem.goods_fsr || 0).toFixed(3) }}</div></div>
+        <div class="detail-item"><div class="dl">店铺粉销比</div><div class="dv">{{ (detailItem.shop_fsr || 0).toFixed(3) }}</div></div>
+        <div class="detail-item"><div class="dl">店铺</div><div class="dv" style="font-size:13px">{{ detailItem.store_name || '-' }}</div></div>
+        <div class="detail-item"><div class="dl">首次发现</div><div class="dv" style="font-size:12px">{{ detailItem.first_seen }}</div></div>
+        <div class="detail-item"><div class="dl">商品ID</div><div class="dv" style="font-size:11px">
+          <a class="gid-link" :href="'https://www.xiaohongshu.com/goods-detail/' + encodeURIComponent(detailItem.goods_id)" rel="noopener noreferrer" @click.stop>{{ detailItem.goods_id }}</a>
+          <button type="button" class="pa-gid-copy" :data-gid="detailItem.goods_id" title="复制商品 ID">复制</button>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted, onUnmounted, nextTick, watch } = Vue;
+
+createApp({
+  setup() {
+    const rawData = ref(null);
+    const meta = ref({});
+    const items = ref([]);
+    const loading = ref(true);
+
+    const sidebarOpen = ref(false);
+    const virtualCollapsed = ref(true);
+    const physicalCollapsed = ref(true);
+    const activeType = ref('virtual');
+    const activeMetric = ref('actual_v1d');
+    const searchQuery = ref('');
+    const poolFilter = ref('ALL');
+    const priceBand = ref('ALL');
+
+    const detailItem = ref(null);
+    const backTop = ref(null);
+    const cardGrid = ref(null);
+
+    const PAGE_SIZE = 60;
+    const loadedCount = ref(PAGE_SIZE);
+    const loadingMore = ref(false);
+    let scrollObserver = null;
+
+    const metrics = [
+      { key: 'actual_v1d', label: '真实增量', icon: '🔥', asc: false },
+      { key: 'actual_gr', label: '真实日增速', icon: '📈', asc: false },
+      { key: 'actual_vsr', label: '真实增销比', icon: '⚡', asc: false },
+      { key: 'sold', label: '销量', icon: '📦', asc: false },
+      { key: 'burst', label: '爆发分', icon: '💥', asc: false },
+      { key: 'price', label: '价格', icon: '💰', asc: false },
+      { key: 'shop_fans', label: '店铺粉丝', icon: '👥', asc: true },
+      { key: 'goods_fsr', label: '商品粉销比(低粉高销)', icon: '🎯', asc: true },
+      { key: 'shop_fsr', label: '店铺粉销比(低粉高销)', icon: '🏪', asc: true }
+    ];
+
+    const activeMetricLabel = computed(() => {
+      const m = metrics.find(m => m.key === activeMetric.value);
+      return m ? m.label : '';
+    });
+
+    const virtualItems = computed(() => items.value.filter(i => i.is_virtual === 1));
+    const physicalItems = computed(() => items.value.filter(i => i.is_virtual === 0));
+    const virtualCount = computed(() => virtualItems.value.length);
+    const physicalCount = computed(() => physicalItems.value.length);
+
+    const currentCount = computed(() => activeType.value === 'virtual' ? virtualCount.value : physicalCount.value);
+
+    const sortedItems = computed(() => {
+      let list = activeType.value === 'virtual' ? virtualItems.value : physicalItems.value;
+      if (poolFilter.value !== 'ALL') {
+        list = list.filter(i => i.pool === poolFilter.value);
+      }
+      if (priceBand.value !== 'ALL') {
+        list = list.filter(i => {
+          const p = Number(i.price) || 0;
+          if (priceBand.value === '200+') return p >= 200;
+          const [min, max] = priceBand.value.split('-').map(Number);
+          return p >= min && p < max;
+        });
+      }
+      if (searchQuery.value.trim()) {
+        const q = searchQuery.value.toLowerCase().trim();
+        list = list.filter(i =>
+          (i.title || '').toLowerCase().includes(q) ||
+          (i.store_name || '').toLowerCase().includes(q) ||
+          (i.goods_id || '').toLowerCase().includes(q)
+        );
+      }
+      const sb = activeMetric.value;
+      const m = metrics.find(m => m.key === sb);
+      const asc = m && m.asc;
+      const sorted = [...list].sort((a, b) => {
+        const va = Number(a[sb]) || 0;
+        const vb = Number(b[sb]) || 0;
+        return asc ? va - vb : vb - va;
+      });
+      return sorted.slice(0, 1000);
+    });
+
+    const filteredCount = computed(() => {
+      let list = activeType.value === 'virtual' ? virtualItems.value : physicalItems.value;
+      if (poolFilter.value !== 'ALL') list = list.filter(i => i.pool === poolFilter.value);
+      if (priceBand.value !== 'ALL') {
+        list = list.filter(i => {
+          const p = Number(i.price) || 0;
+          if (priceBand.value === '200+') return p >= 200;
+          const [min, max] = priceBand.value.split('-').map(Number);
+          return p >= min && p < max;
+        });
+      }
+      if (searchQuery.value.trim()) {
+        const q = searchQuery.value.toLowerCase().trim();
+        list = list.filter(i =>
+          (i.title || '').toLowerCase().includes(q) ||
+          (i.store_name || '').toLowerCase().includes(q) ||
+          (i.goods_id || '').toLowerCase().includes(q)
+        );
+      }
+      return list.length;
+    });
+
+    const hasMore = computed(() => loadedCount.value < sortedItems.value.length);
+    const displayItems = computed(() => sortedItems.value.slice(0, loadedCount.value));
+
+    function switchType(type) {
+      activeType.value = type;
+      resetLoading();
+    }
+
+    function switchMetric(key) {
+      activeMetric.value = key;
+      resetLoading();
+    }
+
+    function switchTypeMetric(type, key) {
+      activeType.value = type;
+      activeMetric.value = key;
+      resetLoading();
+    }
+
+    function resetLoading() {
+      loadedCount.value = PAGE_SIZE;
+      if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+      const grid = cardGrid.value;
+      if (grid) grid.querySelectorAll('.scroll-sentinel').forEach(el => el.remove());
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      nextTick(() => setupCardObserver());
+    }
+
+    function loadMore() {
+      if (loadingMore.value || !hasMore.value) return;
+      loadingMore.value = true;
+      setTimeout(() => {
+        loadedCount.value = Math.min(loadedCount.value + PAGE_SIZE, sortedItems.value.length);
+        loadingMore.value = false;
+        nextTick(() => setupCardObserver());
+      }, 200);
+    }
+
+    function setupCardObserver() {
+      if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+      const grid = cardGrid.value;
+      if (!grid) return;
+      grid.querySelectorAll('.scroll-sentinel').forEach(el => el.remove());
+      if (!hasMore.value) return;
+      const sentinel = document.createElement('div');
+      sentinel.className = 'scroll-sentinel';
+      sentinel.style.height = '1px';
+      grid.appendChild(sentinel);
+      scrollObserver = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore.value) {
+          loadMore();
+        }
+      }, { rootMargin: '200px' });
+      scrollObserver.observe(sentinel);
+    }
+
+    function setupAnimateObserver() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, i) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => entry.target.classList.add('visible'), i * 40);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+      document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+    }
+
+    function handleScroll() {
+      if (backTop.value) {
+        backTop.value.classList.toggle('show', window.scrollY > 400);
+      }
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showDetail(item) {
+      detailItem.value = item;
+    }
+
+    function formatNum(n) {
+      if (n === null || n === undefined || n === '') return '-';
+      const num = Number(n);
+      if (isNaN(num)) return n;
+      if (num >= 10000) return (num / 10000).toFixed(1) + '万';
+      if (num >= 1000) return num.toLocaleString();
+      return num;
+    }
+
+    function exportCSV() {
+      const rows = sortedItems.value;
+      const headers = ['排名','商品ID','标题','类型','价格','销量','真实增量','预估日增','真实日增速','真实增销比','爆发分','分层','店铺粉丝','店铺销量','商品粉销比','店铺粉销比','店铺','首次发现'];
+      const csv = [headers.join(',')];
+      rows.forEach((item, idx) => {
+        csv.push([
+          idx + 1, item.goods_id, '"' + (item.title || '').replace(/"/g, '""') + '"',
+          item.is_virtual ? '虚拟' : '实体',
+          item.price, item.sold, item.actual_v1d, item.v1d,
+          (item.actual_gr * 100).toFixed(2) + '%',
+          (item.actual_vsr * 100).toFixed(2) + '%',
+          item.burst, item.pool, item.shop_fans, item.shop_sales,
+          (item.goods_fsr || 0).toFixed(3), (item.shop_fsr || 0).toFixed(3),
+          '"' + (item.store_name || '') + '"', item.first_seen
+        ].join(','));
+      });
+      const blob = new Blob(['\ufeff' + csv.join('\n')], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'top1000_' + activeType.value + '_' + activeMetric.value + '_' + (meta.value.date || 'unknown') + '.csv';
+      a.click();
+    }
+
+    function loadData() {
+      loading.value = true;
+      meta.value = {};
+      console.log('[loadData] start, REPORT_DATA defined?', typeof REPORT_DATA !== 'undefined');
+      if (typeof REPORT_DATA !== 'undefined') {
+        console.log('[loadData] REPORT_DATA items count:', (REPORT_DATA.items || []).length);
+        processData(REPORT_DATA);
+        return;
+      }
+      let attempts = 0;
+      const maxAttempts = 50;
+      const timer = setInterval(() => {
+        attempts++;
+        if (typeof REPORT_DATA !== 'undefined') {
+          clearInterval(timer);
+          console.log('[loadData] REPORT_DATA found after', attempts, 'attempts');
+          processData(REPORT_DATA);
+        } else if (attempts >= maxAttempts) {
+          clearInterval(timer);
+          loading.value = false;
+          meta.value = { error: 'data.js 加载超时，请确保 data.js 与本文件在同一目录' };
+          console.error('[loadData] timeout: REPORT_DATA not found');
+        }
+      }, 100);
+    }
+
+    function retryLoad() {
+      loading.value = false;
+      meta.value = {};
+      loadData();
+    }
+
+    function processData(d) {
+      console.log('[processData] start, items:', (d.items || []).length, 'columns:', (d.columns || []).length);
+      rawData.value = d;
+      meta.value = d.meta || {};
+      const cols = d.columns || [];
+      const colIdx = {};
+      cols.forEach((c, i) => colIdx[c] = i);
+      const col_goods_id = colIdx.goods_id;
+      const col_title = colIdx.title;
+      const col_price = colIdx.price;
+      const col_sold = colIdx.sold;
+      const col_actual_v1d = colIdx.actual_v1d;
+      const col_v1d = colIdx.v1d;
+      const col_actual_gr = colIdx.actual_gr;
+      const col_actual_vsr = colIdx.actual_vsr;
+      const col_vsr = colIdx.vsr;
+      const col_burst = colIdx.burst;
+      const col_pool = colIdx.pool;
+      const col_first_seen = colIdx.first_seen;
+      const col_store_id = colIdx.store_id;
+      const col_store_name = colIdx.store_name;
+      const col_shop_sales = colIdx.shop_sales;
+      const col_shop_fans = colIdx.shop_fans;
+      const col_shop_fsr = colIdx.shop_fsr;
+      const col_goods_fsr = colIdx.goods_fsr;
+      const col_behavior = colIdx.behavior;
+      const col_is_virtual = colIdx.is_virtual;
+      const col_anomaly = colIdx.anomaly;
+      const src = d.items || [];
+      const len = src.length;
+      const result = new Array(len);
+      for (let i = 0; i < len; i++) {
+        const row = src[i];
+        result[i] = {
+          goods_id: row[col_goods_id],
+          title: row[col_title],
+          price: row[col_price],
+          sold: row[col_sold],
+          actual_v1d: row[col_actual_v1d],
+          v1d: row[col_v1d],
+          actual_gr: row[col_actual_gr],
+          actual_vsr: row[col_actual_vsr],
+          vsr: row[col_vsr],
+          burst: row[col_burst],
+          pool: row[col_pool],
+          first_seen: row[col_first_seen],
+          store_id: row[col_store_id],
+          store_name: row[col_store_name],
+          shop_sales: row[col_shop_sales],
+          shop_fans: row[col_shop_fans],
+          shop_fsr: row[col_shop_fsr],
+          goods_fsr: row[col_goods_fsr],
+          behavior: row[col_behavior],
+          is_virtual: row[col_is_virtual],
+          anomaly: row[col_anomaly]
+        };
+      }
+      items.value = result;
+      const vCount = result.filter(i => i.is_virtual === 1).length;
+      const pCount = result.filter(i => i.is_virtual === 0).length;
+      console.log('[processData] done, total:', result.length, 'virtual:', vCount, 'physical:', pCount);
+      loading.value = false;
+      nextTick(() => {
+        setupAnimateObserver();
+        setupCardObserver();
+      });
+    }
+
+    onMounted(() => {
+      loadData();
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollObserver) scrollObserver.disconnect();
+    });
+
+    return {
+      loading, meta, items, sidebarOpen, virtualCollapsed, physicalCollapsed,
+      activeType, activeMetric, activeMetricLabel, metrics,
+      searchQuery, poolFilter, priceBand,
+      detailItem, backTop, cardGrid,
+      virtualCount, physicalCount, currentCount,
+      sortedItems, filteredCount, displayItems, hasMore,
+      loadedCount, loadingMore,
+      switchType, switchMetric, switchTypeMetric, showDetail, scrollToTop,
+      formatNum, exportCSV, retryLoad
+    };
+  }
+}).mount('#app');
+</script>
+<script src="report_theme.js"></script>
+</body>
+</html>

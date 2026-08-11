@@ -1,0 +1,11 @@
+[Unit]
+Description=Poll advisor incoming context every 5 minutes
+After=network.target
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

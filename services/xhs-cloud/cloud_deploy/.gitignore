@@ -1,0 +1,11 @@
+# 选品云端独立仓库忽略项
+venv/
+data/
+.env
+__pycache__/
+*.pyc
+crawler_runtime/crawl_data/*
+!crawler_runtime/crawl_data/.gitkeep
+*.db
+*.db-wal
+*.db-shm

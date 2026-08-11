@@ -1,0 +1,15 @@
+[Unit]
+Description=XHS AI Advisor cloud generate (pickup incoming context)
+After=network.target
+
+[Service]
+Type=oneshot
+User=admin
+WorkingDirectory=/opt/xhs-cloud
+EnvironmentFile=-/opt/xhs-cloud/.env
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/opt/xhs-cloud
+ExecStart=/opt/xhs-cloud/venv/bin/python cloud_deploy/scripts/advisor_cloud_generate.py
+
+[Install]
+WantedBy=multi-user.target

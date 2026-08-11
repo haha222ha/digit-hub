@@ -1,0 +1,15 @@
+[Unit]
+Description=XHS V2 daily ops (T0 journal + health + workflow reminders)
+After=network.target xhs-cloud-api.service
+
+[Service]
+Type=oneshot
+User=admin
+WorkingDirectory=/opt/xhs-cloud
+EnvironmentFile=-/opt/xhs-cloud/.env
+ExecStart=/bin/bash /opt/xhs-cloud/cloud_deploy/scripts/launch_daily_ops.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

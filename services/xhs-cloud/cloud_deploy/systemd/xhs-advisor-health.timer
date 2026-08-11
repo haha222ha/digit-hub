@@ -1,0 +1,10 @@
+[Unit]
+Description=Run advisor health check daily at 08:15
+
+[Timer]
+OnCalendar=*-*-* 08:15:00
+Persistent=true
+Unit=xhs-advisor-health.service
+
+[Install]
+WantedBy=timers.target

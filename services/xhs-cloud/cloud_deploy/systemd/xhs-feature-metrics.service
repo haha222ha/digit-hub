@@ -1,0 +1,18 @@
+[Unit]
+Description=XHS Feature Engine PG Metrics (growth_rate / acceleration / consecutive_days)
+After=postgresql.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/xhs-cloud
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/opt/xhs-cloud/.env
+ExecStart=/opt/xhs-cloud/venv/bin/python3 /opt/xhs-cloud/cloud_deploy/scripts/compute_feature_metrics.py
+TimeoutStartSec=600
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

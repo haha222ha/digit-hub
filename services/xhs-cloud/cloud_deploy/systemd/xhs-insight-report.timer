@@ -1,0 +1,11 @@
+[Unit]
+Description=Run V2 insight shadow precompute at 16:30 (skip if generation record ok)
+After=network.target
+
+[Timer]
+# 16:30 — 等当日选品增量进 PG 后再预生成类目情报；人工/提前跑成功后不再二次执行
+OnCalendar=*-*-* 16:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

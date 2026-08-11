@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="trial">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>选品报告 · 免费体验包</title>
+<script>
+(function () {
+  var path = location.pathname || '';
+  var base = '';
+  if (path.indexOf('/public/trial') === 0) base = '/public/trial/';
+  else if (path.indexOf('/api/v1/public/trial-report/view') === 0) base = '/api/v1/public/trial-report/view/';
+  window.__TRIAL_ASSET_BASE__ = base;
+  var link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = base + 'trial_theme.css';
+  document.head.appendChild(link);
+})();
+</script>
+<style>
+.trial-preview-shell{min-height:100vh;display:flex;flex-direction:column;background:var(--bg,#f4f7fb)}
+.trial-preview-top{background:#fff;border-bottom:1px solid var(--line,rgba(15,23,42,.08));padding:12px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+.trial-preview-top .row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.trial-preview-top h1{margin:0;font-size:16px;font-weight:800;color:var(--text,#0f172a);letter-spacing:-.02em}
+.trial-preview-top .meta{font-size:12px;color:var(--text2,#475569);line-height:1.5}
+.trial-preview-top .meta strong{color:var(--accent,#2563eb)}
+.trial-view-seg{display:inline-flex;gap:6px;background:#eef2f8;padding:4px;border-radius:12px}
+.trial-view-seg button{padding:8px 14px;border:none;border-radius:10px;background:transparent;color:var(--text2,#475569);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.trial-view-seg button.active{background:var(--accent-grad,linear-gradient(135deg,#2563eb,#0ea5e9));color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.25)}
+.trial-preview-actions{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
+.trial-preview-actions a,.trial-preview-actions button{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid transparent}
+.trial-preview-actions .btn-dl{background:#fff;color:var(--accent,#2563eb);border-color:rgba(37,99,235,.25)}
+.trial-preview-actions .btn-member{background:var(--accent-grad,linear-gradient(135deg,#2563eb,#0ea5e9));color:#fff}
+.trial-preview-frame{flex:1;border:0;width:100%;min-height:calc(100vh - 88px);background:#fff}
+.trial-preview-note{padding:8px 16px;font-size:11px;color:var(--text3,#94a3b8);background:#fff;border-top:1px solid var(--line,rgba(15,23,42,.08));line-height:1.55}
+@media(max-width:640px){.trial-preview-top .row{flex-direction:column;align-items:flex-start}.trial-preview-actions{margin-left:0;width:100%}}
+</style>
+</head>
+<body class="trial-preview-shell">
+<header class="trial-preview-top">
+  <div class="row">
+    <div>
+      <h1>🎁 免费选品体验包</h1>
+      <div class="meta" id="trialPreviewMeta">明亮科技极简 · 选品情报样本预览</div>
+    </div>
+    <div class="trial-view-seg" id="viewSeg">
+      <button type="button" data-entry="index_trial_gr.html" class="active" onclick="setEntry('index_trial_gr.html')">表格 GR</button>
+      <button type="button" data-entry="index_vue.html" onclick="setEntry('index_vue.html')">Vue 列表</button>
+    </div>
+    <div class="trial-preview-actions">
+      <a class="btn-dl" id="trialDlLink" href="/api/v1/public/trial-report/download">下载 ZIP</a>
+      <a class="btn-member" href="https://monitor.xhs365.cn/member" target="_blank" rel="noopener">开通会员</a>
+    </div>
+  </div>
+</header>
+<iframe id="frame" class="trial-preview-frame" title="体验包报告内容"></iframe>
+<p class="trial-preview-note">数据基于公开商品信息与系统计算，仅供研究参考。完整全量日报/周报/月报与 PC 分析工具需付费会员。</p>
+<script>
+const STORAGE_KEY = 'xhs_trial_view_mode';
+const base = window.__TRIAL_ASSET_BASE__ || './';
+let entry = 'index_trial_gr.html';
+
+try {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved === 'index_vue.html') entry = saved;
+  else entry = 'index_trial_gr.html';
+} catch (e) {}
+
+function setEntry(ent) {
+  entry = ent || 'index_trial_gr.html';
+  try { localStorage.setItem(STORAGE_KEY, entry); } catch (e) {}
+  document.querySelectorAll('#viewSeg button').forEach(b => {
+    b.classList.toggle('active', b.dataset.entry === entry);
+  });
+  loadFrame();
+}
+
+function loadFrame() {
+  const frame = document.getElementById('frame');
+  frame.src = base + entry + '?theme=trial&_=' + Date.now();
+}
+
+async function loadMeta() {
+  const el = document.getElementById('trialPreviewMeta');
+  try {
+    const res = await fetch('/api/v1/public/trial-report/info', { cache: 'no-store' });
+    if (!res.ok) return;
+    const d = await res.json();
+    el.innerHTML = '样本 <strong>' + (d.count || 0) + '</strong> 条 · 虚拟 ' + (d.virtual_count || 0)
+      + ' / 实体 ' + (d.physical_count || 0) + ' · ' + (d.date || '') + ' · 合规上限 3000';
+  } catch (e) {}
+}
+
+document.querySelectorAll('#viewSeg button').forEach(b => {
+  b.classList.toggle('active', b.dataset.entry === entry);
+});
+const dl = document.getElementById('trialDlLink');
+if (dl && base !== './') dl.href = '/api/v1/public/trial-report/download';
+loadFrame();
+loadMeta();
+</script>
+</body>
+</html>

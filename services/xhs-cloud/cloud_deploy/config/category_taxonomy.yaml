@@ -1,0 +1,117 @@
+# V2 情报类目树（标题关键词 → 赛道 / 子类）
+# 匹配顺序：从上到下，首个命中生效；均未命中 → fallback
+# category 一律用日报规范名；aliases 兼容历史异名 / 千帆脏类
+version: "taxonomy-v1.2"
+fallback:
+  category: 综合类目
+  sub_category: 其他
+
+aliases:
+  小学教辅: 小学资料
+  幼教启蒙: 小学资料
+  家居收纳: 家居生活
+  家纺床品: 家居生活
+  家居软装: 家居生活
+  美甲美睫: 美妆护肤
+  彩妆: 美妆护肤
+  美妆: 美妆护肤
+  食品轻食: 食品生鲜
+  水产肉类: 食品生鲜
+  粮油调味: 食品生鲜
+  零食: 食品生鲜
+  文创文具: 文具教具
+  文具电教: 文具教具
+  洗护清洁剂: 家清日用
+  教育培训: 网盘课程
+  数字素材: 设计素材
+  电子资源: 网盘课程
+  虚拟商品: 其他虚拟
+  虚拟综合: 其他虚拟
+  带货笔记: 未分类
+  收纳整理: 家居生活
+  女装: 女装服饰
+  男装: 男装服饰
+  服装: 女装服饰
+  书籍: 图书文教
+  宠物: 宠物用品
+  家居: 家居生活
+  玩具: 潮玩玩具
+  模玩: 潮玩玩具
+  厨房: 厨房用品
+  厨房电器: 厨房用品
+  户外: 户外露营
+  数码: 数码配件
+  数码相机: 数码配件
+  母婴: 童装母婴
+  婴童用品: 童装母婴
+  女士内衣: 内衣配饰
+  女鞋: 鞋靴箱包
+  流行男鞋: 鞋靴箱包
+  箱包皮具: 鞋靴箱包
+  包包: 鞋靴箱包
+  家居饰品: 家居生活
+
+rules:
+  - pattern: "小学|语文|数学|英语|教辅|暑假|衔接|口算|练字|试卷"
+    category: 小学资料
+    sub_category: K12
+  - pattern: "幼儿园|早教|绘本|识字|拼音"
+    category: 小学资料
+    sub_category: K12
+  - pattern: "美甲|穿戴甲|甲片|甲油"
+    category: 美妆护肤
+    sub_category: 美业
+  - pattern: "假睫毛|美睫|眼线"
+    category: 美妆护肤
+    sub_category: 美业
+  - pattern: "收纳|置物|整理|储物|衣架|挂钩"
+    category: 家居生活
+    sub_category: 家居
+  - pattern: "宠物|猫粮|狗粮|猫砂|猫窝|狗窝"
+    category: 宠物用品
+    sub_category: 宠物
+  - pattern: "面膜|护肤|精华|防晒|洁面|化妆"
+    category: 美妆护肤
+    sub_category: 美业
+  - pattern: "口红|唇釉|粉底|眼影"
+    category: 美妆护肤
+    sub_category: 美业
+  - pattern: "女装|连衣裙|半身裙|T恤|卫衣|外套"
+    category: 女装服饰
+    sub_category: 服饰
+  - pattern: "男装|男士|男款"
+    category: 男装服饰
+    sub_category: 服饰
+  - pattern: "童装|儿童|宝宝|婴儿"
+    category: 童装母婴
+    sub_category: 母婴
+  - pattern: "手机壳|数据线|充电器|耳机|数码"
+    category: 数码配件
+    sub_category: 3C
+  - pattern: "零食|坚果|咖啡|茶叶|代餐"
+    category: 食品生鲜
+    sub_category: 食品
+  - pattern: "露营|户外|登山|徒步|防晒衣"
+    category: 户外露营
+    sub_category: 户外
+  - pattern: "文具|笔记本|中性笔|贴纸|手账"
+    category: 文具教具
+    sub_category: 文具
+  - pattern: "玩具|积木|盲盒|手办"
+    category: 潮玩玩具
+    sub_category: 玩具
+  - pattern: "健身|瑜伽|运动|跑步|球"
+    category: 运动健身
+    sub_category: 运动
+  - pattern: "厨房|锅|碗|刀具|烘焙"
+    category: 厨房用品
+    sub_category: 家居
+  - pattern: "床品|四件套|枕头|被子|毛巾"
+    category: 家居生活
+    sub_category: 家居
+  - pattern: "汽车|车载|车饰|雨刮"
+    category: 车载用品
+    sub_category: 汽车
+  - pattern: "壁纸|海报|装饰|摆件|香薰"
+    category: 家居生活
+    sub_category: 家居

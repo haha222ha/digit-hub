@@ -1,0 +1,2891 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta name="portal-build" content="20260715r3">
+<link rel="stylesheet" href="/assets/member_theme.css?v=20260713p">
+<link rel="stylesheet" href="/assets/member_reader.css?v=20260714w28">
+<link rel="stylesheet" href="/assets/member_portal_themes.css?v=20260714w14">
+<meta name="theme-color" content="#0071e3">
+<title>选品 AI 顾问 · 会员中心</title>
+<script>
+(function () {
+  if (location.protocol === 'http:' && !/localhost|127\.0\.0\.1/.test(location.hostname)) {
+    location.replace('https:' + location.href.slice(location.protocol.length));
+  }
+})();
+</script>
+<style>
+:root{
+  --bg:#f5f5f7;--surface:#fff;--text:#1d1d1f;--text2:#6e6e73;
+  --accent:#0071e3;--red:#ff3b30;--orange:#ff9500;--green:#34c759;
+  --line:rgba(0,0,0,.08);--radius:12px;--safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:var(--safe-b)}
+.wrap{max-width:1600px;margin:0 auto;padding:20px 24px calc(48px + var(--safe-b))}
+h1{font-size:clamp(22px,5vw,28px);font-weight:700;margin-bottom:4px;letter-spacing:-.02em}
+.sub{color:var(--text2);font-size:clamp(13px,3.2vw,14px);margin-bottom:20px;line-height:1.5}
+.card{background:var(--surface);border-radius:var(--radius);padding:clamp(16px,4vw,20px);margin-bottom:16px;border:1px solid var(--line);box-shadow:var(--card-shadow,0 1px 3px rgba(0,0,0,.04))}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tab{flex:1;text-align:center;padding:10px 12px;border-radius:20px;font-size:14px;cursor:pointer;background:var(--chip-bg,#e8e8ed);color:var(--text2);-webkit-tap-highlight-color:transparent}
+.tab.active{background:var(--accent);color:#fff}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px}
+.field input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:16px;background:var(--surface)}
+.field input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,113,227,.15)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 20px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.btn-block{width:100%}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-ghost{background:transparent;color:var(--accent);min-height:36px;padding:6px 12px;font-size:14px}
+.alert{padding:12px 14px;border-radius:10px;font-size:14px;margin-bottom:16px;line-height:1.5}
+.alert-warn{background:#fff4e5;color:#8a6100;border:1px solid #ffd699}
+.alert-error{background:#ffebe9;color:#c41e00;border:1px solid #ffc9c4}
+.alert-ok{background:#e8f8ee;color:#1a7f37;border:1px solid #b8e6c8}
+.profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+@media(min-width:520px){.profile-grid{grid-template-columns:repeat(4,1fr)}}
+.profile-item{background:#f9f9fb;padding:12px;border-radius:10px}
+.profile-item .v{font-size:clamp(16px,4vw,20px);font-weight:700;word-break:break-all}
+.profile-item .l{font-size:11px;color:var(--text2);margin-top:4px}
+.seg{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.seg button{flex-shrink:0;padding:10px 18px;border-radius:20px;font-size:14px;border:1px solid var(--line);background:var(--surface);cursor:pointer;min-height:40px}
+.seg button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.report-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:520px}
+th,td{padding:12px 10px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--text2);font-weight:500;font-size:12px;white-space:nowrap}
+.report-cards{display:none}
+.report-card{background:#f9f9fb;border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid var(--line)}
+.report-card .rc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px}
+.report-card .rc-date{font-size:16px;font-weight:700}
+.report-card .rc-meta{font-size:12px;color:var(--text2);line-height:1.6}
+.report-card .btn{width:100%;margin-top:10px}
+@media(max-width:640px){
+  .report-table-wrap{display:none}
+  .report-cards{display:block}
+  .topbar{flex-direction:column;align-items:flex-start!important;gap:8px}
+}
+.empty{text-align:center;padding:36px 16px;color:var(--text2);font-size:14px}
+.hidden{display:none!important}
+.demo-card-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:8px}
+@media(max-width:1280px){.demo-card-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:960px){.demo-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){.demo-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.demo-card-item{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.04);cursor:pointer;min-height:96px;transition:transform .18s,box-shadow .18s,border-color .18s;position:relative;overflow:hidden}
+.demo-card-item:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1);border-color:var(--accent)}
+.demo-card-item.unlocked:hover{border-color:var(--accent)}
+.demo-card-item.locked{background:linear-gradient(135deg,#f5f5f7 0%,#e8e8ed 100%);opacity:.75}
+.demo-card-item.locked:hover{opacity:.95;border-color:var(--accent)}
+.demo-card-item .demo-card-icon{font-size:22px;margin-bottom:8px}
+.demo-card-item .demo-card-title{font-size:13px;font-weight:700;line-height:1.4;color:var(--text);word-break:break-word;flex:1;display:flex;align-items:center;justify-content:center}
+.demo-card-item .demo-card-tag{font-size:10px;font-weight:600;color:var(--text2);background:rgba(0,0,0,.06);padding:2px 8px;border-radius:6px;margin-top:6px}
+.demo-card-item.unlocked .demo-card-tag{color:var(--accent);background:rgba(0,113,227,.1)}
+.demo-detail-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px}
+.demo-detail-overlay.hidden{display:none!important}
+.demo-detail-modal{width:min(640px,100%);max-height:80vh;overflow-y:auto;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid var(--line)}
+.demo-detail-head{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:10;border-radius:16px 16px 0 0}
+.demo-detail-head h3{margin:0;font-size:18px;font-weight:700}
+.demo-detail-close{font-size:24px;color:var(--text2);cursor:pointer;line-height:1;background:none;border:none}
+.demo-detail-body{padding:20px;font-size:14px;line-height:1.7;color:var(--text)}
+.demo-detail-body h1,.demo-detail-body h2,.demo-detail-body h3,.demo-detail-body h4{margin:1em 0 .5em;font-weight:700}
+.demo-detail-body h1{font-size:20px}.demo-detail-body h2{font-size:18px}.demo-detail-body h3{font-size:16px}.demo-detail-body h4{font-size:15px}
+.demo-detail-body blockquote{border-left:3px solid var(--accent);padding:8px 12px;margin:8px 0;background:#f0f7ff;border-radius:0 6px 6px 0}
+.demo-detail-body ul{margin:8px 0;padding-left:20px}
+.demo-detail-body li{margin-bottom:4px}
+.demo-detail-body strong{color:var(--accent)}
+.demo-detail-body code{background:#f5f5f7;padding:2px 6px;border-radius:4px;font-size:13px}
+.demo-detail-body hr{border:none;border-top:1px solid var(--line);margin:12px 0}
+.demo-detail-body p{margin-bottom:10px}
+.contact-float{position:fixed;right:24px;bottom:24px;z-index:9000}
+.contact-float-toggle{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#07c160,#07c160);color:#fff;border:none;box-shadow:0 4px 16px rgba(7,193,96,.4);cursor:pointer;font-size:26px;display:flex;align-items:center;justify-content:center;transition:transform .2s;overflow:hidden}
+.contact-float-toggle:hover{transform:scale(1.08)}
+.contact-float-icon-img{width:56px;height:56px;object-fit:cover;border-radius:50%}
+.contact-float-card{position:absolute;right:0;bottom:72px;width:240px;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.15);border:1px solid var(--line);padding:16px;animation:contactFadeIn .25s ease}
+@keyframes contactFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.contact-float-close{position:absolute;top:8px;right:8px;width:24px;height:24px;border:none;background:transparent;font-size:18px;color:var(--text2);cursor:pointer;line-height:1}
+.contact-float-title{font-size:14px;font-weight:600;text-align:center;margin-bottom:10px;color:var(--text)}
+.contact-float-qr-wrap{width:200px;height:200px;margin:0 auto 10px;border-radius:8px;overflow:hidden;background:#f5f5f7;display:flex;align-items:center;justify-content:center}
+.contact-float-qr{width:100%;height:100%;object-fit:cover;display:none}
+.contact-float-qr.loaded{display:block}
+.contact-float-placeholder{font-size:12px;color:var(--text2);text-align:center;padding:20px}
+.contact-float-text{font-size:12px;color:var(--text2);text-align:center;margin-bottom:10px;line-height:1.5}
+.contact-float-cta{width:100%;padding:8px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+.contact-float-cta:hover{background:#0058b8}
+@media(max-width:640px){.contact-float{right:16px;bottom:16px}.contact-float-card{width:220px}}
+.demo-detail-body p{margin-bottom:12px}
+.demo-detail-body strong{color:var(--accent)}
+.demo-detail-cta{padding:16px 20px;border-top:1px solid var(--line);background:#f9f9fb;border-radius:0 0 16px 16px;text-align:center}
+.expiry-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.topbar{z-index:10000;position:relative}
+.welcome-chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);background:#e8e8ed;padding:6px 12px;border-radius:20px;margin-top:8px}
+.welcome-chip strong{color:var(--text)}
+.portal-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px}
+.portal-tab{text-align:center;padding:12px 10px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;background:var(--chip-bg,#e8e8ed);color:var(--text2);-webkit-tap-highlight-color:transparent;transition:background .2s,color .2s,box-shadow .2s,transform .2s}
+.portal-tab.active{background:var(--accent);color:#fff}
+.benefit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+@media(min-width:520px){.benefit-grid{grid-template-columns:repeat(3,1fr)}}
+.benefit-item{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.benefit-item .bi-icon{font-size:20px;margin-bottom:6px}
+.benefit-item .bi-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.benefit-item .bi-desc{font-size:12px;color:var(--text2);line-height:1.55}
+.section-title{font-size:16px;font-weight:600}
+.renew-box{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.notice-card{background:var(--notice-grad,linear-gradient(135deg,#f0f7ff 0%,#f9f9fb 100%));border:1px solid var(--notice-border,#c5d9f5)}
+.notice-card .notice-title{font-size:15px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.notice-card ul{margin:0;padding-left:18px;font-size:13px;color:var(--text2);line-height:1.75}
+.notice-card li{margin-bottom:4px}
+.notice-card .notice-tip{margin-top:12px;padding-top:12px;border-top:1px dashed #c5d9f5;font-size:12px;color:var(--text2);line-height:1.6}
+.month-groups{display:flex;flex-direction:column;gap:10px}
+.month-group{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.month-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;cursor:pointer;background:#f9f9fb;-webkit-tap-highlight-color:transparent;user-select:none}
+.month-header:hover{background:#f0f0f5}
+.month-header .mh-left{display:flex;align-items:center;gap:8px;min-width:0}
+.month-header .mh-title{font-size:15px;font-weight:600}
+.month-header .mh-badge{font-size:12px;color:var(--text2);background:#e8e8ed;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.month-header .mh-chevron{font-size:12px;color:var(--text2);transition:transform .2s;flex-shrink:0}
+.month-group.expanded .mh-chevron{transform:rotate(90deg)}
+.month-body{display:none;border-top:1px solid var(--line)}
+.month-group.expanded .month-body{display:block}
+.month-body .report-table-wrap table{margin:0}
+.month-body .report-cards{padding:10px 10px 4px}
+.month-body tbody tr:last-child td{border-bottom:none}
+.month-current .month-header{background:linear-gradient(135deg,#eef5ff 0%,#f9f9fb 100%);border-left:3px solid var(--accent)}
+.batch-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px 14px;margin-bottom:14px;background:#f9f9fb;border:1px solid var(--line);border-radius:10px}
+.batch-bar.hidden{display:none!important}
+.batch-bar .selected-count{font-size:13px;color:var(--text2);flex:1;min-width:120px}
+.batch-bar .btn{padding:8px 16px;min-height:38px;font-size:14px}
+.report-check{width:18px;height:18px;cursor:pointer;accent-color:var(--accent);flex-shrink:0}
+th.check-col,td.check-col{width:42px;text-align:center;padding-left:8px;padding-right:4px}
+.month-header .month-check{display:inline-flex;align-items:center;margin-right:2px}
+.report-card .rc-top{align-items:center}
+.report-card .rc-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.watchlist-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.watchlist-table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+.watchlist-table th,.watchlist-table td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.watchlist-table th{color:var(--text2);font-weight:500;font-size:12px}
+.watchlist-title{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.watchlist-gid{font-family:ui-monospace,monospace;font-size:11px;color:var(--text2)}
+.watchlist-actions{display:flex;gap:6px;flex-wrap:wrap}
+.btn-xs{padding:6px 10px;min-height:32px;font-size:12px;border-radius:8px}
+.dash-tabs{display:flex;gap:8px;margin-bottom:16px}
+.dash-tab{flex:1;text-align:center;padding:10px 12px;border-radius:20px;font-size:14px;cursor:pointer;background:#e8e8ed;color:var(--text2)}
+.dash-tab.active{background:var(--accent);color:#fff}
+.dash-tab.hidden{display:none!important}
+.insight-plan-bar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:14px;font-size:13px}
+.insight-badge{background:#eef5ff;color:var(--accent);padding:4px 10px;border-radius:16px;font-weight:600}
+.insight-meta{color:var(--text2)}
+.insight-lib-list{display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto;margin-bottom:14px}
+.insight-lib-item{display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px;background:#f9f9fb;cursor:pointer}
+.insight-lib-item:hover{border-color:var(--accent)}
+.insight-lib-meta{font-size:12px;color:var(--text2);margin-top:4px}
+.insight-preview-wrap{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.insight-preview-wrap iframe{width:100%;height:min(520px,60vh);border:none;display:block}
+.insight-preview-hint{font-size:12px;color:var(--text2);margin:8px 0 10px}
+.insight-banner{padding:12px 14px;border-radius:10px;background:#eef5ff;border:1px solid #c5d9f5;font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.55}
+.insight-tools-bar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.insight-watch-btn{min-width:32px;font-size:14px;line-height:1;padding:4px 8px}
+.insight-watch-btn.active{color:var(--accent)}
+.insight-panel{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#f9f9fb;margin-bottom:12px;font-size:13px;line-height:1.5}
+.insight-panel table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.insight-panel th,.insight-panel td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.insight-radar-chip{cursor:pointer}
+.insight-cmp-pick{margin:4px 6px 4px 0;padding:4px 10px;border:1px solid var(--line);border-radius:16px;cursor:pointer;display:inline-block;font-size:12px}
+.insight-cmp-pick.active{background:#eef5ff;border-color:var(--accent);font-weight:600}
+/* 报告中心 · 类目解读筛选（对齐 index_vue cat-bar，Apple 风 --accent） */
+.cat-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0 10px;padding:0 2px}
+.cat-bar .cat-label{font-size:11px;color:var(--text2);font-weight:600;margin-right:2px;letter-spacing:.3px}
+.cat-chip{background:#f9f9fb;border:1px solid var(--line);color:var(--text2);padding:4px 10px;border-radius:14px;cursor:pointer;font-size:11px;line-height:1.3;transition:border-color .15s,color .15s,background .15s;-webkit-tap-highlight-color:transparent}
+.cat-chip:hover{border-color:var(--accent);color:var(--accent)}
+.cat-chip.active{background:#eef5ff;border-color:var(--accent);color:var(--accent);font-weight:600}
+.cat-chip .n{opacity:.7;margin-left:4px;font-size:10px;font-family:ui-monospace,monospace}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+@media(min-width:768px){.plan-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}}
+.plan-card{border:1px solid var(--line);border-radius:10px;padding:14px 12px;cursor:pointer;background:#f9f9fb;text-align:center;-webkit-tap-highlight-color:transparent}
+.plan-card.active{border-color:var(--accent);background:#eef5ff;box-shadow:0 0 0 2px rgba(0,113,227,.15)}
+.plan-card .price{font-size:22px;font-weight:700;color:var(--accent);margin:6px 0 4px}
+.plan-card .name{font-size:13px;font-weight:600}
+.plan-card .hint{font-size:11px;color:var(--text2);margin-top:2px}
+.plan-card.plan-entry{border-color:#93c5fd;background:#f0f7ff}
+.pay-qr-wrap{text-align:center;padding:16px 0}
+.pay-qr-wrap img,.pay-qr-wrap canvas{max-width:220px;border-radius:8px;border:1px solid var(--line)}
+.pay-meta{font-size:13px;color:var(--text2);line-height:1.7;margin-top:12px}
+.version-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.version-item{border:1px solid var(--line);border-radius:10px;padding:14px;background:#f9f9fb}
+.version-item.is-latest{border-color:#93c5fd;background:linear-gradient(135deg,#eef5ff 0%,#f9f9fb 100%)}
+.version-item .vi-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.version-item .vi-ver{font-size:16px;font-weight:700}
+.version-item .vi-date{font-size:12px;color:var(--text2)}
+.version-item .vi-notes{font-size:13px;color:var(--text2);line-height:1.65;margin:0 0 10px}
+.version-item .vi-notes ul{margin:4px 0 0;padding-left:18px}
+.version-item .vi-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.version-badge{font-size:11px;font-weight:600;color:var(--accent);background:#eef5ff;padding:2px 8px;border-radius:10px}
+.topbar-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;position:relative;z-index:20}
+.btn-broadcast{position:relative;min-height:36px;padding:6px 12px;font-size:13px}
+.btn-broadcast .broadcast-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--surface)}
+.broadcast-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px 16px calc(20px + var(--safe-b))}
+.broadcast-overlay.hidden{display:none!important}
+.broadcast-modal{width:min(520px,100%);max-height:min(86vh,720px);overflow:auto;background:var(--surface);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid var(--line)}
+.broadcast-head{padding:20px 20px 12px;background:linear-gradient(135deg,#0ea5e9 0%,#6366f1 100%);color:#fff;border-radius:16px 16px 0 0;position:relative;padding-right:48px}
+.broadcast-head .bh-badge{display:inline-block;font-size:11px;font-weight:700;background:rgba(255,255,255,.22);padding:3px 10px;border-radius:20px;margin-bottom:8px}
+.broadcast-close-x{position:absolute;top:14px;right:14px;width:32px;height:32px;border:none;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.broadcast-close-x:hover{background:rgba(255,255,255,.28)}
+.broadcast-head h2{font-size:clamp(18px,4.5vw,22px);font-weight:800;line-height:1.35;margin:0 0 6px}
+.broadcast-head p{margin:0;font-size:13px;opacity:.92;line-height:1.55}
+.broadcast-body{padding:18px 20px 8px;font-size:14px;line-height:1.65;color:var(--text)}
+.broadcast-body ul{margin:8px 0 0;padding-left:18px;color:var(--text2)}
+.broadcast-body li{margin-bottom:6px}
+.broadcast-section{margin-bottom:14px}
+.broadcast-section h3{font-size:14px;font-weight:700;margin:0 0 6px;color:var(--text)}
+.broadcast-foot{padding:12px 20px 18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px}
+.auth-code-box{margin-top:12px;padding:12px;background:#f0f7ff;border:1px dashed #c5d9f5;border-radius:10px;font-family:ui-monospace,monospace;font-size:15px;word-break:break-all;text-align:center}
+</style>
+</head>
+<body>
+<div class="mp-orb" aria-hidden="true"></div>
+<div class="wrap">
+  <div class="topbar portal-hero">
+    <div>
+      <h1 class="portal-title">选品 AI 顾问 · 会员中心</h1>
+      <p class="sub">每晚 AI 预生成选品分析，点开即读 · 不含可下载商品表格 · 方向级文字结论</p>
+      <div class="welcome-chip hidden" id="welcomeChip">欢迎回来，<strong id="welcomeName"></strong></div>
+    </div>
+    <div class="topbar-actions">
+      <label class="theme-switch-wrap" title="界面主题（5 套风格）">
+        <span>主题</span>
+        <select id="memberThemeSelect" aria-label="会员中心主题"></select>
+      </label>
+      <button type="button" class="btn btn-ghost btn-broadcast hidden" id="btnBroadcast" onclick="openBroadcastModal(true)" title="查看最新站内动态">
+        📢 站内动态
+        <span class="broadcast-dot hidden" id="broadcastDot"></span>
+      </button>
+      <button class="btn btn-ghost hidden" id="btnLogout" onclick="logout()">退出登录</button>
+    </div>
+  </div>
+
+  <div id="sessionStatusBar" class="session-status" data-state="guest">
+    <span class="ss-badge" id="sessionStatusBadge">访客</span>
+    <span id="sessionStatusHint">未登录：可先看「免费样例」，需要完整能力请「开通会员」。PC 下载在上方独立 Tab。</span>
+    <div class="ss-actions" id="sessionStatusActions"></div>
+  </div>
+
+  <nav class="portal-topnav" id="portalTopnav" aria-label="站点分区">
+    <button type="button" class="topnav-item active" data-topnav="member" onclick="switchTopNav('member')">
+      <span class="topnav-label">会员中心</span>
+      <span class="topnav-desc">样例 · 订阅 · AI 阅读</span>
+    </button>
+    <button type="button" class="topnav-item" data-topnav="pc" onclick="switchTopNav('pc')">
+      <span class="topnav-label">PC 客户端</span>
+      <span class="topnav-desc">下载安装包 · 独立分区</span>
+    </button>
+  </nav>
+
+  <div id="topnavMemberZone">
+  <div id="guestShell" class="guest-shell">
+
+  <div class="card notice-card guest-notice-card" id="reportScheduleCard">
+    <div class="notice-title">📋 AI 分析更新说明</div>
+    <ul>
+      <li><strong>类目情报</strong>：系统夜间预生成，一般 <strong>18:00～19:00</strong>（北京时间）可在「AI 选品分析」阅读</li>
+      <li><strong>AI 阅读样例</strong>：未登录访客可预览历史期次样例（非最新期次）</li>
+      <li>报告为<strong>方向级文字结论</strong>，不含可排序商品表、店铺明细或数据包下载</li>
+      <li>PC 端登录后自动同步云端 AI 分析；会员鉴权与授权码逻辑保持不变</li>
+    </ul>
+    <div class="notice-tip">
+      本服务仅供研究参考，不构成投资建议。数据基于公开信息与系统计算，存在延迟与误差，请理性参考。
+    </div>
+  </div>
+
+  <div class="portal-tabs" id="portalTabs">
+    <div class="portal-tab active" data-portal="demo" onclick="switchPortal('demo')">免费样例</div>
+    <div class="portal-tab" data-portal="center" onclick="switchPortal('center')">开通会员</div>
+    <div class="portal-tab" data-portal="login" onclick="switchPortal('login')">登录</div>
+  </div>
+
+  <div id="portalTrial" class="portal-panel hidden"></div>
+
+  <div id="portalDemo" class="portal-panel hidden">
+  <div class="card notice-card" style="background:linear-gradient(135deg,#fff8e6 0%,#f0f7ff 100%);border:1px solid #f0d78a">
+    <div class="notice-title">📖 AI 选品情报 · 免费样例</div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:6px">
+      <strong>报告日期：<span id="demoReportDate">加载中</span></strong> · <span id="demoDirectionCount">30</span> 个方向解读（前 10 个可预览，其余开通会员阅读）
+    </p>
+    <div class="demo-card-grid" id="demoCardGrid"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px">
+      <button type="button" class="btn btn-primary" onclick="switchPortal('center')">开通体验卡 ¥9.9</button>
+      <button type="button" class="btn btn-ghost" onclick="switchPortal('center');switchPricingCategory('custom')">定制分析</button>
+    </div>
+  </div>
+  </div>
+
+  <div id="portalCenter" class="portal-panel hidden">
+  <div id="renewBackBar" class="renew-back-bar hidden">
+    <button type="button" class="btn btn-ghost btn-sm" onclick="closeRenewPricing()">← 返回会员中心</button>
+  </div>
+  <div class="card notice-card" id="memberPricingCard" style="background:var(--hero-grad);border:1px solid var(--line)">
+    <div class="notice-title">💎 会员套餐与价格</div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:14px">
+      开通会员后可阅读<strong> AI 选品分析</strong>与类目情报，并使用 PC 端 ProductAnalyzer。数据仅供研究参考，不构成投资建议。
+    </p>
+    <div class="pricing-category-tabs">
+      <button type="button" class="pricing-category-tab active" data-pricing="membership" onclick="switchPricingCategory('membership')">会员订阅</button>
+      <button type="button" class="pricing-category-tab" data-pricing="custom" onclick="switchPricingCategory('custom')">定制分析</button>
+    </div>
+    <div id="pricingMembershipPanel">
+    <div class="plan-grid" id="portalPlanGrid"></div>
+    </div>
+    <div id="pricingCustomPanel" class="hidden">
+      <div class="custom-analysis-card">
+        <div class="section-title" style="margin-bottom:8px">定制分析 · 定向词库分析</div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.6;margin:0 0 4px">按次购买，支付后在 PC 端「使用说明」提交词库需求，或联系会员客服。不延长会员天数。</p>
+        <div class="custom-analysis-prices" id="customAnalysisPrices">
+          <div class="custom-analysis-price" id="customPriceMember">
+            <div class="label">有效会员</div>
+            <div class="amount">¥9.9</div>
+            <div style="font-size:11px;color:var(--text2)">/ 次</div>
+          </div>
+          <div class="custom-analysis-price" id="customPriceGuest">
+            <div class="label">非会员 / 访客</div>
+            <div class="amount">¥29.9</div>
+            <div style="font-size:11px;color:var(--text2)">/ 次</div>
+          </div>
+        </div>
+        <p id="customAnalysisHint" style="font-size:12px;color:var(--text2);line-height:1.55;margin:0 0 12px"></p>
+        <button type="button" class="btn btn-primary btn-block" id="btnBuyCustomAnalysis" onclick="startCustomAnalysisPay()">购买定制分析</button>
+      </div>
+    </div>
+    <div class="seg" id="portalPayChannelSeg" style="margin-bottom:14px">
+      <button type="button" class="active" data-channel="wxpay" onclick="setPayChannel('wxpay')">微信扫码</button>
+      <button type="button" data-channel="alipay" onclick="setPayChannel('alipay')">支付宝扫码</button>
+    </div>
+    <button class="btn btn-primary btn-block" id="portalBtnStartPay" onclick="startWxPay()">微信扫码支付</button>
+    <div id="portalPayCheckout" class="hidden" style="margin-top:16px">
+      <div class="pay-qr-wrap">
+        <img id="portalPayQrImg" class="pay-qr-img hidden" alt="支付二维码" width="220" height="220">
+        <canvas id="portalPayQrCanvas" class="hidden"></canvas>
+        <p style="font-size:13px;color:var(--text2);margin-top:10px" id="portalPayQrHint">请使用微信扫一扫完成支付</p>
+      </div>
+      <div class="pay-meta" id="portalPayMeta"></div>
+      <div id="portalPayCompleteBox" class="hidden" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line)">
+        <p class="alert alert-ok" style="margin-bottom:14px">支付成功！请完成最后一步以开通/续费会员</p>
+        <div class="seg" id="portalPayCompleteModeSeg" style="margin-bottom:14px">
+          <button type="button" class="active" data-mode="register" onclick="setPayCompleteMode('register')">我是新用户</button>
+          <button type="button" data-mode="login" onclick="setPayCompleteMode('login')">已有账号续费</button>
+        </div>
+        <div class="field"><label id="portalPayCompleteUserLabel">新建用户名</label><input id="portalPayCompleteUser" autocomplete="username"></div>
+        <div class="field"><label>密码</label><input id="portalPayCompletePass" type="password" autocomplete="new-password" enterkeyhint="go" onkeydown="if(event.key==='Enter')submitPayComplete()"></div>
+        <button class="btn btn-primary btn-block" id="portalBtnPayComplete" onclick="submitPayComplete()">完成开通并进入会员中心</button>
+      </div>
+    </div>
+    <div id="portalPayMsg" style="margin-top:12px"></div>
+    <div class="notice-tip" style="margin-top:14px">
+      会员订阅含体验卡 ¥9.9（3 天）/ 月度 / 季度 / 半年 / 年度。<strong>定制分析</strong>：有效会员 ¥9.9/次，非会员 ¥29.9/次（按次加购，不含会员天数）。
+    </div>
+  </div>
+  </div>
+
+  <div id="portalLogin" class="portal-panel hidden">
+  <div id="authView">
+    <div class="card" id="panelLogin">
+      <div class="section-title" style="margin-bottom:8px">账号登录</div>
+      <p class="sub" style="margin:0 0 14px;font-size:13px;color:var(--text2)">已有账号请在此登录。新用户请切换到「开通会员」扫码支付后设置账号。</p>
+      <div class="field"><label>用户名</label><input id="loginUser" autocomplete="username" enterkeyhint="next"></div>
+      <div class="field"><label>密码</label><input id="loginPass" type="password" autocomplete="current-password" enterkeyhint="go" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn btn-primary btn-block" onclick="doLogin()">登录</button>
+      <p style="font-size:12px;color:var(--text2);margin-top:12px;text-align:center">
+        还没有账号？<button type="button" class="btn btn-link" style="padding:0;min-height:auto;font-size:12px" onclick="switchPortal('center')">去开通会员</button>
+        · <button type="button" class="btn btn-link" style="padding:0;min-height:auto;font-size:12px" onclick="toggleForgotPassword(true)">忘记密码</button>
+      </p>
+      <details style="margin-top:14px;font-size:13px;color:var(--text2)">
+        <summary style="cursor:pointer;color:var(--primary);font-weight:600">老用户：授权码登录</summary>
+        <p style="margin:10px 0 8px;line-height:1.55">早期仅授权码、未设密码的用户可在此登录。日常新购请用「购买会员」扫码支付。</p>
+        <div class="field"><label>授权码</label><input id="loginCode" placeholder="XHS-XXXX-XXXX-XXXX" autocomplete="off" enterkeyhint="go" onkeydown="if(event.key==='Enter')doLoginCode()"></div>
+        <button class="btn btn-ghost btn-block" onclick="doLoginCode()">授权码登录</button>
+      </details>
+      <details style="margin-top:10px;font-size:13px;color:var(--text2)">
+        <summary style="cursor:pointer;color:var(--primary);font-weight:600">客服授权码激活（私发）</summary>
+        <p style="margin:10px 0 10px;line-height:1.55">客服私发的授权码在此开通或续费；<strong>自助购买请用「购买会员」扫码</strong>，支付后无需手动输入授权码。</p>
+        <div class="seg" id="csCodeModeSeg" style="margin-bottom:12px">
+          <button type="button" class="active" data-mode="register" onclick="setCsCodeMode('register')">新用户开通</button>
+          <button type="button" data-mode="renew" onclick="setCsCodeMode('renew')">已有账号续费</button>
+        </div>
+        <div id="csCodeRegister">
+          <div class="field"><label>授权码</label><input id="regCode" placeholder="客服提供的授权码" autocomplete="off"></div>
+          <div class="field"><label>新建用户名</label><input id="regUser" autocomplete="username"></div>
+          <div class="field"><label>设置密码</label><input id="regPass" type="password" autocomplete="new-password" enterkeyhint="go" onkeydown="if(event.key==='Enter')doRegister()"></div>
+          <button class="btn btn-ghost btn-block" onclick="doRegister()">授权码开通</button>
+        </div>
+        <div id="csCodeRenew" class="hidden">
+          <div class="field"><label>授权码</label><input id="renewAuthCode" placeholder="客服提供的授权码" autocomplete="off"></div>
+          <div class="field"><label>用户名</label><input id="renewUser" autocomplete="username"></div>
+          <div class="field"><label>密码</label><input id="renewPass" type="password" autocomplete="current-password" enterkeyhint="go" onkeydown="if(event.key==='Enter')doRenewWithCode()"></div>
+          <button class="btn btn-ghost btn-block" id="btnRenewWithCode" onclick="doRenewWithCode()">授权码续费</button>
+        </div>
+        <div id="csCodeMsg" style="margin-top:10px"></div>
+      </details>
+    </div>
+    <div class="card hidden" id="panelForgot">
+      <p style="font-size:13px;color:var(--text2);margin:0 0 14px">输入注册邮箱，我们将发送重置链接（2 小时内有效）。未设密码的老用户请先用上方「授权码登录」。</p>
+      <div class="field"><label>邮箱</label><input id="forgotEmail" type="email" autocomplete="email" enterkeyhint="go" onkeydown="if(event.key==='Enter')doForgotPassword()"></div>
+      <button class="btn btn-primary btn-block" id="btnForgot" onclick="doForgotPassword()">发送重置邮件</button>
+      <button type="button" class="btn btn-link btn-block" style="margin-top:8px" onclick="toggleForgotPassword(false)">返回登录</button>
+    </div>
+    <div class="card hidden" id="panelReset">
+      <p style="font-size:13px;color:var(--text2);margin:0 0 14px">请设置新密码（至少 6 位），完成后将自动登录。</p>
+      <div class="field"><label>新密码</label><input id="resetPass" type="password" autocomplete="new-password" enterkeyhint="go" onkeydown="if(event.key==='Enter')doResetPassword()"></div>
+      <div class="field"><label>确认新密码</label><input id="resetPass2" type="password" autocomplete="new-password" enterkeyhint="go" onkeydown="if(event.key==='Enter')doResetPassword()"></div>
+      <button class="btn btn-primary btn-block" id="btnReset" onclick="doResetPassword()">重置密码并登录</button>
+    </div>
+    <div id="authMsg"></div>
+  </div>
+  </div><!-- /portalLogin -->
+  </div><!-- /guestShell -->
+
+  <!-- 悬浮微信二维码（仅未登录显示） -->
+  <div id="contactFloat" class="contact-float hidden">
+    <button type="button" class="contact-float-toggle" onclick="toggleContactFloat()" aria-label="联系客服">
+      <span class="contact-float-icon" id="contactFloatIconEmoji">💬</span>
+      <img id="contactFloatIconImg" class="contact-float-icon-img hidden" alt="" src="">
+    </button>
+    <div id="contactFloatCard" class="contact-float-card hidden">
+      <button type="button" class="contact-float-close" onclick="toggleContactFloat()" aria-label="关闭">×</button>
+      <div class="contact-float-title" id="contactFloatLabel">扫码联系客服</div>
+      <div class="contact-float-qr-wrap">
+        <img id="contactFloatQr" class="contact-float-qr" alt="微信二维码" src="">
+        <div id="contactFloatPlaceholder" class="contact-float-placeholder">二维码加载中…</div>
+      </div>
+      <div class="contact-float-text" id="contactFloatText">开通会员 / 定制分析 / 技术支持</div>
+      <button type="button" class="contact-float-cta" onclick="location.hash='#center'">立即开通 →</button>
+    </div>
+  </div>
+
+  <div id="memberShell" class="member-shell hidden">
+  <div id="aiGenOverlay" class="ai-gen-overlay hidden" aria-live="polite" aria-atomic="true">
+    <div class="ai-gen-card">
+      <div class="ai-gen-header">
+        <span class="ai-gen-pulse"></span>
+        <span class="ai-gen-title">AI 选品顾问实时分析中</span>
+      </div>
+      <div class="ai-gen-sub" id="aiGenSub">正在连接云端 AI 模型…</div>
+      <div class="ai-gen-bar"><span id="aiGenBarFill"></span></div>
+      <div class="ai-gen-meta">
+        <span id="aiGenPct">0%</span>
+        <span class="ai-gen-dot">·</span>
+        <span id="aiGenStage">初始化</span>
+        <span class="ai-gen-dot">·</span>
+        <span class="ai-gen-model">DeepSeek V4</span>
+      </div>
+      <div class="ai-gen-hint">本报告由云端 AI 实时生成，预计 1–2 秒</div>
+    </div>
+  </div>
+  <div id="dashView" class="hidden">
+    <div id="expiryBanner"></div>
+    <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">📊</div>
+        <div>
+          <div class="brand-text">选品 AI 顾问</div>
+          <div class="brand-sub" id="sidebarPlanLabel">会员版</div>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">核心功能</div>
+        <button type="button" class="nav-item active" data-app-nav="archive" onclick="switchAppPanel('archive')">
+          <span class="nav-icon">📚</span><span class="nav-label">报告中心</span>
+        </button>
+        <button type="button" class="nav-item" data-app-nav="watchlist" onclick="switchAppPanel('watchlist')">
+          <span class="nav-icon">⭐</span><span class="nav-label">我的收藏</span>
+        </button>
+        <button type="button" class="nav-item" data-app-nav="account" onclick="switchAppPanel('account')">
+          <span class="nav-icon">⚙️</span><span class="nav-label">账户设置</span>
+        </button>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="nav-section">
+        <div class="nav-section-title">帮助与合规</div>
+        <button type="button" class="nav-item" onclick="openHelpModal('help')">
+          <span class="nav-icon">📖</span><span class="nav-label">使用说明</span>
+        </button>
+        <button type="button" class="nav-item" onclick="openHelpModal('compliance')">
+          <span class="nav-icon">🛡️</span><span class="nav-label">合规声明</span>
+        </button>
+        <button type="button" class="nav-item" onclick="logout()">
+          <span class="nav-icon">🚪</span><span class="nav-label">退出登录</span>
+        </button>
+      </div>
+      <div class="sidebar-footer">
+        <div>报告每日 18:30 更新</div>
+        <div style="margin-top:4px;opacity:0.6">build 20260714w26</div>
+      </div>
+    </aside>
+    <div class="app-content">
+    <!-- 兼容旧路由：today 面板保留空壳，入口已合并进报告中心 -->
+    <div class="app-panel" id="panelToday" aria-hidden="true">
+      <div id="dashInsight" class="hidden"></div>
+    </div>
+    <div class="app-panel active" id="panelArchive">
+    <div id="dashArchive">
+    <div class="kpi-row" id="kpiRow">
+      <div class="kpi-card"><div class="kpi-icon">📋</div><div class="kpi-label">今日榜单</div><div class="kpi-value" id="kpiRankings">—</div><div class="kpi-delta neutral" id="kpiRankingsDelta">加载中</div></div>
+      <div class="kpi-card"><div class="kpi-icon">🎯</div><div class="kpi-label">方向解读</div><div class="kpi-value" id="kpiDirections">—</div><div class="kpi-delta neutral" id="kpiDirectionsDelta">加载中</div></div>
+      <div class="kpi-card"><div class="kpi-icon">💎</div><div class="kpi-label">蓝海机会</div><div class="kpi-value" id="kpiBlueOcean">—</div><div class="kpi-delta neutral">方向级</div></div>
+      <div class="kpi-card"><div class="kpi-icon">📈</div><div class="kpi-label">报告日期</div><div class="kpi-value" id="kpiDate" style="font-size:20px">—</div><div class="kpi-delta neutral" id="kpiMode">AI</div></div>
+    </div>
+    <div class="card" style="padding:0;border:none;background:transparent;box-shadow:none">
+      <section id="routeToday" class="member-route">
+        <div class="reader-layout-v2">
+          <div id="archiveBrowse" class="reader-card-list">
+            <div class="reader-card-list-header">
+              <h2>📚 报告中心</h2>
+              <p id="cardListDate">月份 → 日期网格 → 方向 / 类目 · 今日置顶</p>
+            </div>
+            <div id="archiveList"><div class="reader-empty">加载中…</div></div>
+          </div>
+          <div id="readerDetail" class="reader-detail hidden">
+            <div class="reader-detail-bar">
+              <button type="button" class="reader-back-btn" onclick="backToCardList()">← 返回报告中心</button>
+              <header class="reader-chrome" id="readerChrome"><h2>报告中心</h2><p>加载中…</p></header>
+            </div>
+            <div id="readerLocked" class="reader-locked">
+              <p style="font-size:15px;color:var(--text2)">会员已过期，请续费后阅读 AI 分析</p>
+              <button type="button" class="btn btn-primary" onclick="openBuyFromDash()">扫码续费</button>
+            </div>
+            <div id="readerError" class="reader-error"></div>
+            <div id="readerBody" class="reader-body"></div>
+            <div id="readerFrameWrap" class="reader-frame-wrap hidden">
+              <iframe id="readerFrame" class="reader-frame" title="类目情报" src="about:blank"></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <details id="insightAdvancedTools" style="margin-top:12px">
+      <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);padding:8px 0">高级情报工具（对比 / 时间线 / PDF）</summary>
+    <div id="insightPreviewBanner" class="insight-banner hidden">
+      类目情报可在报告中心展开阅读；对比 / 时间线 / PDF 等高级工具在此展开。
+    </div>
+    <div class="card" style="margin-top:10px">
+      <div class="section-title">高级工具</div>
+      <div id="insightPlanBar" class="insight-plan-bar">加载中…</div>
+      <div id="insightRadarBar" class="insight-banner hidden"></div>
+      <div id="insightRecommendBar" class="insight-banner hidden"></div>
+      <div id="insightWatchlistBar" class="insight-banner hidden"></div>
+      <div id="insightNotifBar" class="insight-panel hidden"></div>
+      <div id="insightHealthBar" class="insight-meta" style="margin:6px 0 10px;font-size:13px;color:var(--text2)"></div>
+      <div id="insightToolsBar" class="insight-tools-bar hidden"></div>
+      <div id="insightComparePanel" class="insight-panel hidden"></div>
+      <div id="insightTimelinePanel" class="insight-panel hidden"></div>
+      <div id="insightWorkflowPanel" class="insight-panel hidden"></div>
+      <div id="insightLibraryEmpty" class="empty hidden">暂无预生成情报。</div>
+      <div id="insightLibraryList" class="insight-lib-list hidden" aria-hidden="true"></div>
+      <div id="insightMsg" style="font-size:13px;color:var(--text2);margin-top:12px"></div>
+    </div>
+    </details>
+    </div>
+    </div><!-- /panelArchive -->
+    <div class="app-panel" id="panelWatchlist">
+    <div id="dashWatchlist">
+    <div class="card">
+      <div class="section-title">我的收藏</div>
+      <p style="font-size:13px;color:var(--text2);margin:8px 0 14px">与 PC 端 ProductAnalyzer 共享收藏夹。在 PC 报告页勾选商品点「同步收藏」后，此处与 Web 均可查看。</p>
+      <div class="batch-bar" id="watchlistBar">
+        <label style="display:inline-flex;align-items:center;gap:6px;font-size:14px;cursor:pointer">
+          <input type="checkbox" id="watchlistSelectAll" onchange="toggleWatchlistAll(this.checked)"> 全选
+        </label>
+        <span class="selected-count" id="watchlistSelectedCount">已选 0 项</span>
+        <button class="btn btn-primary btn-xs" id="btnWatchlistRemove" onclick="removeSelectedWatchlist()" disabled>移除选中</button>
+        <button class="btn btn-ghost btn-xs" onclick="loadWatchlist()">刷新</button>
+      </div>
+      <div id="watchlistTable"></div>
+    </div>
+    </div>
+    </div><!-- /panelWatchlist -->
+    <div class="app-panel" id="panelAccount">
+    <div id="dashAccount">
+    <div class="card account-card">
+      <div class="section-title">会员信息</div>
+      <div class="profile-grid" id="profileGrid"></div>
+      <div class="renew-box">
+        <p style="font-size:13px;color:var(--text2);margin:0 0 12px">续费请使用微信或支付宝扫码，支付成功后会员天数自动叠加。</p>
+        <button class="btn btn-primary btn-block" onclick="openBuyFromDash()">扫码续费（微信/支付宝）</button>
+        <details style="margin-top:12px;font-size:13px;color:var(--text2)">
+          <summary style="cursor:pointer;color:var(--primary);font-weight:600">客服授权码续费（私发）</summary>
+          <p style="margin:10px 0 8px;line-height:1.55">已登录用户可在此输入客服私发的授权码续费（支持剩余天数叠加）。</p>
+          <div class="field"><label>授权码</label><input id="renewCode" placeholder="XHS-XXXX-XXXX-XXXX" autocomplete="off" enterkeyhint="go" onkeydown="if(event.key==='Enter')doRenew()"></div>
+          <button class="btn btn-ghost btn-block" id="btnActivateCode" onclick="doRenew()">激活授权码</button>
+          <div id="dashRenewMsg" style="margin-top:10px"></div>
+        </details>
+      </div>
+      <div class="renew-box">
+        <div class="section-title" style="margin-bottom:10px">修改密码</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">设置或修改登录密码后，下次可用「账号密码」登录。</p>
+        <div class="field"><label>当前密码（可选）</label><input id="pwdCurrent" type="password" autocomplete="current-password" placeholder="记得旧密码时填写，忘记可留空"></div>
+        <div class="field"><label>新密码（至少 6 位）</label><input id="pwdNew" type="password" autocomplete="new-password" enterkeyhint="go" onkeydown="if(event.key==='Enter')doChangePassword()"></div>
+        <button class="btn btn-primary btn-block" onclick="doChangePassword()">保存新密码</button>
+      </div>
+      <div class="account-pc-link" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line)">
+        <p style="font-size:13px;color:var(--text2);margin:0 0 10px">PC 客户端下载与版本历史在独立分区，不与订阅混排。</p>
+        <button type="button" class="btn btn-ghost btn-block" onclick="switchTopNav('pc')">前往 PC 客户端下载</button>
+      </div>
+    </div>
+    </div>
+    </div><!-- /panelAccount -->
+    </div><!-- /app-content -->
+    </div><!-- /app-shell -->
+    <div id="dashMsg"></div>
+
+  <!-- 使用说明 Modal -->
+  <div class="help-modal" id="helpModal" onclick="if(event.target===this)closeHelpModal()">
+    <div class="help-modal-body">
+      <div class="help-modal-header">
+        <div class="help-modal-title">📖 使用说明</div>
+        <button type="button" class="help-modal-close" onclick="closeHelpModal()">✕</button>
+      </div>
+      <div class="help-modal-section">
+        <h4>📊 这是什么？</h4>
+        <p>选品 AI 顾问是一个基于小红书商品榜单数据的智能选品分析服务。由云端 AI（DeepSeek V4）自动生成方向级文字分析报告，帮助您快速识别市场趋势与蓝海机会。</p>
+      </div>
+      <div class="help-modal-section">
+        <h4>🕐 更新时间</h4>
+        <ul>
+          <li><strong>类目情报</strong>：系统夜间预生成，一般 18:00～19:00（北京时间）可阅读</li>
+          <li><strong>AI 选品分析</strong>：每日更新，含今日简报 + 方向解读 + 跨榜综述</li>
+          <li>报告为方向级文字结论，不含可排序商品表或数据包下载</li>
+        </ul>
+      </div>
+      <div class="help-modal-section">
+        <h4>📋 如何阅读</h4>
+        <ul>
+          <li>左侧「今日简报」为 AI 生成的当日市场总览，建议先读</li>
+          <li>「方向解读」为各榜单的结构化分析，可按需选读</li>
+          <li>「类目情报」为具体类目的深度分析</li>
+          <li>底部「高级工具」可展开类目对比、时间轴、PDF 导出等</li>
+        </ul>
+        <div class="help-callout">💡 提示：报告内容由 AI 基于榜单数据生成，不含商品 ID、店铺名等敏感信息，可放心参考。</div>
+      </div>
+      <div class="help-modal-section">
+        <h4>💎 会员权益</h4>
+        <ul>
+          <li>每日 AI 选品分析报告阅读权限</li>
+          <li>类目情报库访问</li>
+          <li>类目对比 / 时间轴 / PDF 导出等高级工具</li>
+          <li>PC 端 ProductAnalyzer 客户端同步</li>
+        </ul>
+      </div>
+      <div class="help-modal-footer">如有疑问请联系会员客服 · 选品 AI 顾问</div>
+    </div>
+  </div>
+
+  <!-- 合规声明 Modal -->
+  <div class="help-modal" id="complianceModal" onclick="if(event.target===this)closeHelpModal()">
+    <div class="help-modal-body">
+      <div class="help-modal-header">
+        <div class="help-modal-title">🛡️ 合规声明</div>
+        <button type="button" class="help-modal-close" onclick="closeHelpModal()">✕</button>
+      </div>
+      <div class="help-modal-section">
+        <h4>⚠️ 免责声明</h4>
+        <p>本服务仅供研究参考，<strong>不构成投资建议</strong>。数据基于公开信息与系统计算，存在延迟与误差，请理性参考。使用者需自行承担依据本服务内容做出决策的一切风险与责任。</p>
+      </div>
+      <div class="help-modal-section">
+        <h4>🔒 数据合规</h4>
+        <ul>
+          <li>所有报告内容基于<strong>榜单数据</strong>生成，不含商品 ID、店铺名称、商品链接、完整商品标题</li>
+          <li>AI 分析仅提及类目、价格带、关注度等级等抽象维度</li>
+          <li>不提供可下载的商品表格、数据包或店铺明细</li>
+        </ul>
+        <div class="help-callout">✅ 合规保障：系统已对输入数据做合规处理，对 AI 输出进行合规校验，拦截敏感信息。</div>
+      </div>
+      <div class="help-modal-section">
+        <h4>📋 使用规范</h4>
+        <ul>
+          <li>会员账号仅限本人使用，禁止共享或转售</li>
+          <li>报告内容禁止批量爬取、复制传播或用于商业再分发</li>
+          <li>PC 客户端需联网校验会员身份，与网页登录逻辑一致</li>
+          <li>违反使用规范可能导致账号封禁</li>
+        </ul>
+      </div>
+      <div class="help-modal-section">
+        <h4>📞 联系方式</h4>
+        <p>如有合规疑问或侵权投诉，请联系会员客服。</p>
+      </div>
+      <div class="help-modal-footer">© 选品 AI 顾问 · 最终解释权归本站所有</div>
+    </div>
+  </div>
+
+  </div>
+  <nav id="readerMobileNav" class="reader-mobile-nav hidden" aria-label="阅读导航">
+    <button type="button" class="reader-mobile-nav-btn" data-route="archive">报告</button>
+    <button type="button" class="reader-mobile-nav-btn" data-route="watchlist">收藏</button>
+    <button type="button" class="reader-mobile-nav-btn" data-route="account">我的</button>
+  </nav>
+  </div><!-- /memberShell -->
+  </div><!-- /topnavMemberZone -->
+
+  <div id="topnavPcZone" class="portal-panel hidden">
+    <div class="card notice-card pc-zone-intro">
+      <div class="notice-title">独立下载区</div>
+      <p class="pc-zone-lead">PC 客户端与网页会员订阅<strong>分开管理</strong>：此处仅提供安装包下载；安装后需用会员账号登录才能同步 AI 分析与收藏。</p>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="switchTopNav('member');switchPortal('center')">前往开通会员 →</button>
+    </div>
+    <div class="card notice-card pc-download-card">
+      <div class="notice-title">💻 PC 端 ProductAnalyzer</div>
+      <p class="pc-download-lead">安装后可在本地阅读 AI 选品分析、同步收藏与监控配置。启动时会<strong>联网校验会员</strong>（授权码 / 账号密码），与网页登录逻辑一致。</p>
+      <div id="paUpdateNotice" class="hidden pa-update-banner">
+        <strong>📦 新版本已发布</strong>
+        <div id="paUpdateNoticeText"></div>
+      </div>
+      <div class="pc-download-actions">
+        <a id="paInstallerLink" class="btn btn-primary" href="https://www.xhs365.cn/downloads/XHS365-Setup-latest.exe" download>下载最新版 Windows 安装包</a>
+        <span id="paInstallerMeta" class="pc-download-meta">版本加载中…</span>
+      </div>
+      <p class="pc-download-hint">覆盖安装即可升级，无需卸载。如遇 Windows 安全提示，请点击「更多信息」→「仍要运行」。</p>
+      <div class="section-title" style="margin-top:18px">版本历史</div>
+      <p class="pc-download-hint">以下为已安全发版的历史版本，可按需下载对应安装包。</p>
+      <div class="client-versions-host" id="clientVersionsGuest"></div>
+    </div>
+  </div>
+
+</div>
+<script src="/assets/member_portal_state.js?v=20260714w24"></script>
+<script src="/assets/member_core.js?v=20260713p"></script>
+<script src="/assets/member_reader.js?v=20260715r3"></script>
+<script src="/assets/member_router.js?v=20260714w24"></script>
+<script src="/assets/member_insight.js?v=20260714w24"></script>
+<script>
+const STORAGE = {
+  token: 'xhs_member_token',
+  username: 'xhs_member_username',
+  profile: 'xhs_member_profile',
+  reportType: 'xhs_member_report_type',
+  viewMode: 'xhs_member_view_mode',
+  activated: 'xhs_member_activated',
+  deviceId: 'xhs_member_device_id',
+  portalTab: 'xhs_member_portal_tab',
+  topNav: 'xhs_portal_topnav',
+};
+const TOKEN_COOKIE = 'xhs_member_token';
+let payPollTimer = null;
+let payPlans = [];
+let addonPlans = [];
+let customAnalysis = { member_price_yuan: 9.9, guest_price_yuan: 29.9, label: '定制分析' };
+let pricingCategory = 'membership';
+let payChannels = [];
+let selectedPlanCode = 'monthly';
+let selectedPayChannel = 'wxpay';
+let currentPayOrder = null;
+let payCompleteMode = 'register';
+let csCodeMode = 'register';
+let resetToken = '';
+const TOKEN_COOKIE_MAX_AGE = 30 * 86400;
+
+function storageOk() {
+  try {
+    const k = '__xhs_storage_test__';
+    localStorage.setItem(k, '1');
+    localStorage.removeItem(k);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+function cookieSecure() {
+  return location.protocol === 'https:';
+}
+
+function loadTokenCookie() {
+  try {
+    const parts = ('; ' + document.cookie).split('; ' + TOKEN_COOKIE + '=');
+    if (parts.length < 2) return null;
+    return decodeURIComponent(parts.pop().split(';').shift() || '');
+  } catch (_) {
+    return null;
+  }
+}
+
+function saveTokenCookie(token) {
+  if (!token || !cookieSecure()) return;
+  try {
+    document.cookie = TOKEN_COOKIE + '=' + encodeURIComponent(token)
+      + '; path=/; max-age=' + TOKEN_COOKIE_MAX_AGE + '; SameSite=Lax; Secure';
+  } catch (_) {}
+}
+
+function clearTokenCookie() {
+  try {
+    document.cookie = TOKEN_COOKIE + '=; path=/; max-age=0; SameSite=Lax'
+      + (cookieSecure() ? '; Secure' : '');
+  } catch (_) {}
+}
+
+function loadStored(key) {
+  try {
+    if (key === STORAGE.token) {
+      const ls = localStorage.getItem(key);
+      if (ls) return ls;
+      const ck = loadTokenCookie();
+      if (ck) {
+        try { localStorage.setItem(key, ck); } catch (_) {}
+        return ck;
+      }
+      return null;
+    }
+    return localStorage.getItem(key);
+  } catch (_) {
+    if (key === STORAGE.token) return loadTokenCookie();
+    return null;
+  }
+}
+
+function saveStored(key, val) {
+  try { localStorage.setItem(key, val); } catch (_) {}
+  if (key === STORAGE.token) saveTokenCookie(val);
+}
+
+function removeStored(key) {
+  try { localStorage.removeItem(key); } catch (_) {}
+  if (key === STORAGE.token) clearTokenCookie();
+}
+
+function randomDeviceSuffix() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID().replace(/-/g, '').slice(0, 32).toUpperCase();
+  return (Date.now().toString(36) + Math.random().toString(36).slice(2)).replace(/[^A-Z0-9]/gi, '').slice(0, 32).toUpperCase();
+}
+
+function getMemberDeviceId() {
+  let raw = loadStored(STORAGE.deviceId);
+  if (!raw || raw.length < 8) {
+    raw = randomDeviceSuffix();
+    saveStored(STORAGE.deviceId, raw);
+  }
+  return 'web:' + String(raw).toUpperCase();
+}
+
+function deviceAuthPayload() {
+  return {
+    device_id: getMemberDeviceId(),
+    device_label: '会员网页',
+  };
+}
+
+function isDeviceKickedMessage(msg) {
+  const text = String(msg || '');
+  return text.indexOf('其他设备登录') >= 0
+    || text.indexOf('其他电脑登录') >= 0
+    || text.indexOf('其他浏览器登录') >= 0;
+}
+
+let watchlistItems = [];
+let watchlistSelected = new Set();
+
+// ===== 新布局 v2：左侧栏面板切换 =====
+function switchAppPanel(name) {
+  var validPanels = ['today', 'archive', 'watchlist', 'account'];
+  if (name === 'today' || name === 'insight' || name === 'reports') name = 'archive';
+  if (validPanels.indexOf(name) < 0) name = 'archive';
+  // 更新侧栏 nav-item active
+  document.querySelectorAll('.app-sidebar .nav-item[data-app-nav]').forEach(function(btn) {
+    btn.classList.toggle('active', btn.getAttribute('data-app-nav') === name);
+  });
+  // 切换 app-panel
+  var panelMap = { today: 'panelArchive', archive: 'panelArchive', watchlist: 'panelWatchlist', account: 'panelAccount' };
+  var panelId = panelMap[name];
+  document.querySelectorAll('.app-panel').forEach(function(p) {
+    p.classList.toggle('active', p.id === panelId);
+  });
+  // 保存当前 tab
+  try { localStorage.setItem('xhs_member_dash_tab', name); } catch(_) {}
+  // 路由同步：MemberRouter.go → applyRoute 负责数据加载（archive/watchlist/account/profile）
+  // 不在此处重复调用 loadArchive/loadWatchlist/loadProfile，避免与 applyRoute 双触发
+  if (window.MemberRouter && typeof MemberRouter.go === 'function') {
+    MemberRouter.go(name);
+  }
+}
+
+// ===== 使用说明 / 合规 Modal =====
+function openHelpModal(type) {
+  var modal = document.getElementById(type === 'compliance' ? 'complianceModal' : 'helpModal');
+  if (modal) modal.classList.add('open');
+}
+function closeHelpModal() {
+  document.querySelectorAll('.help-modal.open').forEach(function(m) { m.classList.remove('open'); });
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeHelpModal();
+});
+
+function switchDash(name) {
+  switchAppPanel(name);
+}
+
+function saveSession(token, membership, username) {
+  if (token) saveStored(STORAGE.token, token);
+  if (username) saveStored(STORAGE.username, username);
+  if (membership) saveStored(STORAGE.profile, JSON.stringify(membership));
+  saveStored(STORAGE.activated, '1');
+  if (token && !loadStored(STORAGE.token) && !loadTokenCookie()) {
+    console.warn('xhs member: token not persisted — check browser privacy / incognito settings');
+  }
+}
+
+function loadCachedProfile() {
+  try {
+    const raw = loadStored(STORAGE.profile);
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) { return null; }
+}
+
+function restoreFormFields() {
+  const u = loadStored(STORAGE.username);
+  if (u) {
+    const loginUser = document.getElementById('loginUser');
+    if (loginUser) loginUser.value = u;
+    const regUser = document.getElementById('regUser');
+    if (regUser) regUser.value = u;
+    const renewUser = document.getElementById('renewUser');
+    if (renewUser) renewUser.value = u;
+  }
+}
+
+function formatApiError(data, statusText, status) {
+  if (typeof data.detail === 'string') return data.detail;
+  if (Array.isArray(data.detail)) {
+    const fieldLabels = {
+      username: '用户名',
+      password: '密码',
+      auth_code: '授权码',
+      device_id: '设备标识',
+    };
+    return data.detail.map(e => {
+      const field = Array.isArray(e.loc) ? e.loc[e.loc.length - 1] : '';
+      const label = fieldLabels[field] || field || '参数';
+      if (e.type === 'missing') return `请填写${label}`;
+      if (e.type === 'string_too_short') return `${label}长度不足（至少 ${(e.ctx && e.ctx.min_length) || ''} 位）`;
+      if (e.type === 'string_too_long') return `${label}过长`;
+      return e.msg || JSON.stringify(e);
+    }).join('；');
+  }
+  if (data.detail && typeof data.detail === 'object') {
+    return JSON.stringify(data.detail);
+  }
+  if (data.message) return data.message;
+  if (statusText) return statusText;
+  if (status) return `请求失败 (HTTP ${status})`;
+  return '请求失败';
+}
+
+function api(path, opts = {}) {
+  const headers = { ...(opts.headers || {}) };
+  if (opts.auth) {
+    const t = loadStored(STORAGE.token);
+    if (t) headers['Authorization'] = 'Bearer ' + t;
+  }
+  return fetch(path, { ...opts, credentials: 'include', headers }).then(async r => {
+    const text = await r.text();
+    let data = {};
+    if (text) {
+      try { data = JSON.parse(text); } catch (_) {
+        if (!r.ok) {
+          const err = new Error(text.slice(0, 300) || r.statusText || formatApiError({}, r.statusText, r.status));
+          err.status = r.status;
+          throw err;
+        }
+      }
+    }
+    if (!r.ok) {
+      const err = new Error(formatApiError(data, r.statusText, r.status));
+      err.status = r.status;
+      err.data = data;
+      throw err;
+    }
+    return data;
+  });
+}
+
+function showAuthView() {
+  document.getElementById('dashView').classList.add('hidden');
+  document.getElementById('guestShell')?.classList.remove('hidden');
+  document.getElementById('memberShell')?.classList.add('hidden');
+  document.getElementById('btnLogout').classList.add('hidden');
+  document.getElementById('renewBackBar')?.classList.add('hidden');
+  const btnBc = document.getElementById('btnBroadcast');
+  if (btnBc) btnBc.classList.add('hidden');
+  updatePortalVisibility(null, false);
+  if (window.MemberPortalState) MemberPortalState.renderSessionBar(null, false);
+  restoreTopNavFromStorage();
+}
+
+function switchTopNav(zone) {
+  zone = zone === 'pc' ? 'pc' : 'member';
+  try { localStorage.setItem(STORAGE.topNav, zone); } catch (_) {}
+  document.querySelectorAll('#portalTopnav .topnav-item').forEach(function (btn) {
+    btn.classList.toggle('active', btn.dataset.topnav === zone);
+    btn.setAttribute('aria-current', btn.dataset.topnav === zone ? 'page' : 'false');
+  });
+  var memberZone = document.getElementById('topnavMemberZone');
+  var pcZone = document.getElementById('topnavPcZone');
+  if (memberZone) memberZone.classList.toggle('hidden', zone !== 'member');
+  if (pcZone) pcZone.classList.toggle('hidden', zone !== 'pc');
+  if (zone === 'pc') {
+    loadClientDownload();
+    try {
+      if (location.hash !== '#pc') {
+        history.replaceState(null, '', location.pathname + location.search + '#pc');
+      }
+    } catch (_) {}
+    return zone;
+  }
+  return zone;
+}
+
+var DEMO_DIRECTIONS = [];
+var DEMO_REPORT_DATE = '';
+function renderMarkdown(md) {
+  if (!md) return '';
+  var text = String(md).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  text = text.replace(/^#### (.+)$/gm, '\n<h4>$1</h4>\n');
+  text = text.replace(/^### (.+)$/gm, '\n<h3>$1</h3>\n');
+  text = text.replace(/^## (.+)$/gm, '\n<h2>$1</h2>\n');
+  text = text.replace(/^# (.+)$/gm, '\n<h1>$1</h1>\n');
+  text = text.replace(/^&gt; (.+)$/gm, '\n<blockquote>$1</blockquote>\n');
+  text = text.replace(/^---+$/gm, '\n<hr>\n');
+  text = text.replace(/^[\-\*] (.+)$/gm, '\n<li>$1</li>\n');
+  text = text.replace(/^\d+\. (.+)$/gm, '\n<li>$1</li>\n');
+  text = text.replace(/(?:<li>[\s\S]*?<\/li>\s*)+/g, function (m) { return '<ul>' + m.replace(/\s+/g, ' ') + '</ul>'; });
+  text = text.replace(/\*\*([^\*]+?)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/`([^`]+?)`/g, '<code>$1</code>');
+  var blocks = text.split(/\n{2,}/);
+  var out = [];
+  for (var i = 0; i < blocks.length; i++) {
+    var b = blocks[i].replace(/^\n+|\n+$/g, '');
+    if (!b) continue;
+    if (/^<(h[1-6]|ul|ol|blockquote|hr|pre|table|div|p)/.test(b)) { out.push(b); }
+    else { out.push('<p>' + b.replace(/\n/g, '<br>') + '</p>'); }
+  }
+  return out.join('\n');
+}
+function renderDemoCards() {
+  var grid = document.getElementById('demoCardGrid');
+  if (!grid) return;
+  var html = '';
+  if (DEMO_DIRECTIONS.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">加载中…</div>';
+    loadDemoDirections();
+    return;
+  }
+  for (var i = 0; i < DEMO_DIRECTIONS.length; i++) {
+    var d = DEMO_DIRECTIONS[i];
+    var unlocked = d.unlocked;
+    var cls = unlocked ? 'unlocked' : 'locked';
+    var onclick = 'showDemoDetail(' + i + ')';
+    var tag = unlocked ? (d.opportunity_score != null ? ('机会 ' + d.opportunity_score) : '可预览') : '会员专享';
+    if (unlocked && d.signal_track && d.signal_track !== '综合机会') {
+      tag = d.signal_track + ' · ' + tag;
+    }
+    var icon = unlocked ? '✨' : '🔒';
+    html += '<div class="demo-card-item ' + cls + '" onclick="' + onclick + '">'
+      + '<div class="demo-card-icon">' + icon + '</div>'
+      + '<div class="demo-card-title">' + d.title + '</div>'
+      + '<div class="demo-card-tag">' + tag + '</div>'
+      + '</div>';
+  }
+  grid.innerHTML = html;
+  var dateEl = document.getElementById('demoReportDate');
+  if (dateEl) dateEl.textContent = DEMO_REPORT_DATE;
+}
+var CONTACT_CONFIG = null;
+function loadContactConfig() {
+  fetch('/api/v1/public/member-contact').then(function (r) { return r.json(); }).then(function (data) {
+    if (data && data.config) {
+      CONTACT_CONFIG = data.config;
+      updateContactFloat();
+    }
+  }).catch(function () {});
+}
+function updateContactFloat() {
+  if (!CONTACT_CONFIG) return;
+  var url = CONTACT_CONFIG.wechat_qr_url || '';
+  var iconUrl = CONTACT_CONFIG.float_icon_url || '';
+  var label = CONTACT_CONFIG.wechat_label || '扫码联系客服';
+  var text = CONTACT_CONFIG.contact_text || '开通会员 / 定制分析 / 技术支持';
+  var qr = document.getElementById('contactFloatQr');
+  var ph = document.getElementById('contactFloatPlaceholder');
+  var lbl = document.getElementById('contactFloatLabel');
+  var txt = document.getElementById('contactFloatText');
+  var iconEmoji = document.getElementById('contactFloatIconEmoji');
+  var iconImg = document.getElementById('contactFloatIconImg');
+  if (lbl) lbl.textContent = label;
+  if (txt) txt.textContent = text;
+  // 悬浮按钮图标：有图片用图片，否则用默认 💬 emoji
+  if (iconImg && iconEmoji) {
+    if (iconUrl) {
+      iconImg.src = iconUrl;
+      iconImg.classList.remove('hidden');
+      iconEmoji.classList.add('hidden');
+      iconImg.onerror = function () {
+        iconImg.classList.add('hidden');
+        iconEmoji.classList.remove('hidden');
+      };
+    } else {
+      iconImg.classList.add('hidden');
+      iconEmoji.classList.remove('hidden');
+    }
+  }
+  if (url && qr) {
+    qr.src = url;
+    qr.onload = function () {
+      qr.classList.add('loaded');
+      if (ph) ph.style.display = 'none';
+    };
+    qr.onerror = function () {
+      if (ph) ph.textContent = '二维码加载失败，请稍后重试';
+    };
+  } else if (ph) {
+    ph.textContent = '管理员尚未配置二维码';
+  }
+}
+function toggleContactFloat() {
+  var card = document.getElementById('contactFloatCard');
+  if (card) card.classList.toggle('hidden');
+}
+function showContactFloat() {
+  var cf = document.getElementById('contactFloat');
+  if (cf) cf.classList.remove('hidden');
+}
+function hideContactFloat() {
+  var cf = document.getElementById('contactFloat');
+  if (cf) cf.classList.add('hidden');
+  var card = document.getElementById('contactFloatCard');
+  if (card) card.classList.add('hidden');
+}
+function loadDemoDirections() {
+  fetch('/api/v1/public/advisor-demo/directions').then(function (r) { return r.json(); }).then(function (data) {
+    if (data && data.available && data.directions && data.directions.length) {
+      DEMO_DIRECTIONS = data.directions;
+      DEMO_REPORT_DATE = (data.report_date || '').replace(/-/g, '').slice(4);
+      renderDemoCards();
+    } else {
+      var grid = document.getElementById('demoCardGrid');
+      if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">样例报告筹备中，请稍后刷新</div>';
+    }
+  }).catch(function () {
+    var grid = document.getElementById('demoCardGrid');
+    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">加载失败，请刷新重试</div>';
+  });
+}
+function showDemoDetail(idx) {
+  var d = DEMO_DIRECTIONS[idx];
+  if (!d) return;
+  document.getElementById('demoDetailTitle').textContent = d.title;
+  var bodyEl = document.getElementById('demoDetailBody');
+  var ctaEl = document.querySelector('#demoDetailOverlay .demo-detail-cta');
+  if (d.unlocked) {
+    // 解锁项：渲染完整内容 + 样例提示
+    bodyEl.innerHTML = renderMarkdown(d.content) + '<p style="color:var(--text2);font-size:13px;margin-top:16px;border-top:1px solid var(--line);padding-top:12px">⚠️ 以上为脱敏研究样例。开通会员可阅读全部机会卡（含高增速/高加速度轨道）+ 每日最新 AI 研究。</p>';
+    if (ctaEl) ctaEl.style.display = '';
+  } else {
+    var lockedHtml = '<div style="text-align:center;padding:32px 16px;">'
+      + '<div style="font-size:48px;margin-bottom:12px">🔒</div>'
+      + '<h3 style="font-size:18px;font-weight:700;margin-bottom:10px;color:var(--text)">本机会为会员专享</h3>'
+      + '<p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:8px">开通 <strong style="color:var(--accent)">¥9.9 体验卡（3 天）</strong> 或正式会员即可：</p>'
+      + '<ul style="text-align:left;max-width:420px;margin:12px auto;color:var(--text2);font-size:13px;line-height:1.9;list-style:none;padding:0">'
+      + '<li>✅ 解锁全部 AI 机会卡与决策简报</li>'
+      + '<li>✅ 高增速 / 高加速度研究轨道</li>'
+      + '<li>✅ 每日最新选品研究（非全量原始数据）</li>'
+      + '<li>✅ AI 顾问对话能力</li>'
+      + '</ul>'
+      + '<p style="color:var(--text2);font-size:12px;margin-top:12px">点击下方「开通会员」按钮立即开通。</p>'
+      + '</div>';
+    bodyEl.innerHTML = lockedHtml;
+    if (ctaEl) ctaEl.style.display = '';
+  }
+  document.getElementById('demoDetailOverlay').classList.remove('hidden');
+}
+function closeDemoDetail() {
+  document.getElementById('demoDetailOverlay').classList.add('hidden');
+}
+function switchPortal(name) {
+  switchTopNav('member');
+  const tab = (name === 'center' || name === 'demo' || name === 'login') ? name : 'demo';
+  try { localStorage.setItem(STORAGE.portalTab, tab); } catch (_) {}
+  document.querySelectorAll('#portalTabs .portal-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.portal === tab);
+  });
+  const trial = document.getElementById('portalTrial');
+  const demo = document.getElementById('portalDemo');
+  const center = document.getElementById('portalCenter');
+  const login = document.getElementById('portalLogin');
+  if (trial) trial.classList.add('hidden');
+  if (demo) demo.classList.toggle('hidden', tab !== 'demo');
+  if (center) center.classList.toggle('hidden', tab !== 'center');
+  if (login) login.classList.toggle('hidden', tab !== 'login');
+  if (tab === 'center') loadPayPlans();
+  if (tab === 'login') {
+    document.getElementById('panelLogin')?.classList.remove('hidden');
+    document.getElementById('panelForgot')?.classList.add('hidden');
+    document.getElementById('panelReset')?.classList.add('hidden');
+  }
+  try {
+    var hash = tab === 'center' ? '#center' : (tab === 'login' ? '#login' : '#demo');
+    if (location.hash !== hash) history.replaceState(null, '', location.pathname + location.search + hash);
+  } catch (_) {}
+}
+
+function updatePortalVisibility(membership, loggedIn) {
+  const tabs = document.getElementById('portalTabs');
+  const demoPanel = document.getElementById('portalDemo');
+  const centerPanel = document.getElementById('portalCenter');
+  const loginPanel = document.getElementById('portalLogin');
+  const reportSchedule = document.getElementById('reportScheduleCard');
+  const guestShell = document.getElementById('guestShell');
+  const dashView = document.getElementById('dashView');
+  const topnav = document.getElementById('portalTopnav');
+  if (!tabs || !centerPanel) return;
+
+  if (loggedIn === undefined) {
+    loggedIn = dashView && !dashView.classList.contains('hidden');
+  }
+
+  if (topnav) topnav.classList.remove('hidden');
+
+  if (loggedIn) {
+    if (guestShell && !document.getElementById('renewBackBar')?.classList.contains('hidden')) {
+      /* 续费扫码模式：保留 guestShell 中的定价面板 */
+    } else {
+      if (guestShell) guestShell.classList.add('hidden');
+    }
+    tabs.classList.add('hidden');
+    if (demoPanel) demoPanel.classList.add('hidden');
+    if (loginPanel) loginPanel.classList.add('hidden');
+    if (reportSchedule) reportSchedule.classList.add('hidden');
+    if (!document.getElementById('renewBackBar')?.classList.contains('hidden')) {
+      centerPanel.classList.remove('hidden');
+    } else {
+      centerPanel.classList.add('hidden');
+    }
+    hideContactFloat();
+    restoreTopNavFromStorage();
+    return;
+  }
+
+  if (guestShell) guestShell.classList.remove('hidden');
+  showContactFloat();
+  loadContactConfig();
+  document.getElementById('renewBackBar')?.classList.add('hidden');
+  if (reportSchedule) reportSchedule.classList.remove('hidden');
+  tabs.classList.remove('hidden');
+  restoreTopNavFromStorage();
+}
+
+function restoreTopNavFromStorage() {
+  var zone = 'member';
+  var tab = 'demo';
+  try {
+    if (location.hash === '#pc' || location.hash === '#download') zone = 'pc';
+    else if (location.hash === '#center') { zone = 'member'; tab = 'center'; }
+    else if (location.hash === '#login') { zone = 'member'; tab = 'login'; }
+    else if (location.hash === '#demo') { zone = 'member'; tab = 'demo'; }
+    else {
+      var storedNav = localStorage.getItem(STORAGE.topNav);
+      if (storedNav === 'pc') zone = 'pc';
+      var v = localStorage.getItem(STORAGE.portalTab);
+      if (v === 'center' || v === 'demo' || v === 'login') tab = v;
+    }
+  } catch (_) {}
+  switchTopNav(zone);
+  var dashView = document.getElementById('dashView');
+  var loggedIn = dashView && !dashView.classList.contains('hidden');
+  var renewMode = document.getElementById('renewBackBar') && !document.getElementById('renewBackBar').classList.contains('hidden');
+  if (zone === 'member' && (!loggedIn || renewMode)) switchPortal(tab);
+}
+
+function isAuthError(err) {
+  const s = err && err.status;
+  return s === 401 || s === 402;
+}
+
+async function refreshSessionToken() {
+  const res = await api('/api/v1/auth/refresh', { method: 'POST', auth: true });
+  const username = (res.membership && res.membership.username) || loadStored(STORAGE.username) || '';
+  saveSession(res.access_token, res.membership, username);
+  return res;
+}
+
+async function restoreSession() {
+  const token = loadStored(STORAGE.token);
+  if (!token) return false;
+
+  const cached = loadCachedProfile();
+  if (cached) showDashboard(cached);
+
+  try {
+    await loadDashboard(!!cached);
+    return true;
+  } catch (e) {
+    if (!isAuthError(e)) {
+      if (cached) {
+        showDashboard(cached);
+        showMsg(document.getElementById('dashMsg'), '网络异常，已显示本地缓存（报告列表可能不是最新）', 'warn');
+        return true;
+      }
+      showMsg(document.getElementById('authMsg'), (e.message || '网络异常') + '，请稍后刷新', 'warn');
+      switchTab('login');
+      return false;
+    }
+  }
+
+  try {
+    await refreshSessionToken();
+    await loadDashboard(false);
+    return true;
+  } catch (e) {
+    if (isAuthError(e)) {
+      removeStored(STORAGE.token);
+      showAuthView();
+      const authMsg = document.getElementById('authMsg');
+      const kicked = isDeviceKickedMessage(e.message);
+      if (cached) {
+        renderProfile({ ...cached, is_active: false, expiry_warning: kicked ? '账号已在其他设备登录' : '登录已过期，请重新登录' });
+        showMsg(authMsg, kicked ? '账号已在其他设备登录，请在本浏览器重新登录' : '会话已过期，请重新输入密码或授权码', 'warn');
+        switchLoginMode('code');
+      } else {
+        showMsg(authMsg, kicked ? '账号已在其他设备登录，请重新登录' : (e.message || '请重新登录'), 'warn');
+      }
+      switchTab('login');
+      return false;
+    }
+    if (cached) {
+      showDashboard(cached);
+      showMsg(document.getElementById('dashMsg'), '网络异常，已显示本地缓存（报告列表可能不是最新）', 'warn');
+      return true;
+    }
+    showMsg(document.getElementById('authMsg'), (e.message || '网络异常') + '，请稍后刷新', 'warn');
+    switchTab('login');
+    return false;
+  }
+}
+
+function showMsg(el, text, kind) {
+  if (!el) return;
+  el.innerHTML = text ? `<div class="alert alert-${kind}">${text}</div>` : '';
+  if (text) {
+    try { el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (_) {}
+  }
+}
+
+function showAuthFeedback(text, kind) {
+  showMsg(document.getElementById('csCodeMsg'), text, kind);
+  showMsg(document.getElementById('authMsg'), text, kind);
+}
+
+function showDashRenewFeedback(text, kind) {
+  showMsg(document.getElementById('dashRenewMsg'), text, kind);
+  showMsg(document.getElementById('dashMsg'), text, kind);
+}
+
+function switchTab(name) {
+  stopPayPoll();
+  if (name === 'buy') {
+    switchPortal('center');
+    loadPayPlans();
+    return;
+  }
+  switchPortal('login');
+  if (name === 'login' && !resetToken) {
+    document.getElementById('panelForgot')?.classList.add('hidden');
+    document.getElementById('panelReset')?.classList.add('hidden');
+    document.getElementById('panelLogin')?.classList.remove('hidden');
+  }
+}
+
+function toggleForgotPassword(show) {
+  document.getElementById('panelLogin')?.classList.toggle('hidden', !!show);
+  document.getElementById('panelForgot')?.classList.toggle('hidden', !show);
+  document.getElementById('panelReset')?.classList.add('hidden');
+  if (show) document.getElementById('forgotEmail')?.focus();
+}
+
+function showResetPanel(token) {
+  resetToken = (token || '').trim();
+  document.getElementById('panelLogin')?.classList.add('hidden');
+  document.getElementById('panelForgot')?.classList.add('hidden');
+  document.getElementById('panelReset')?.classList.remove('hidden');
+  showAuthView();
+  switchPortal('login');
+}
+
+function setCsCodeMode(mode) {
+  csCodeMode = mode === 'renew' ? 'renew' : 'register';
+  document.querySelectorAll('#csCodeModeSeg button').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === csCodeMode);
+  });
+  document.getElementById('csCodeRegister')?.classList.toggle('hidden', csCodeMode !== 'register');
+  document.getElementById('csCodeRenew')?.classList.toggle('hidden', csCodeMode !== 'renew');
+}
+
+function openBuyFromDash() {
+  const dashVisible = document.getElementById('dashView') && !document.getElementById('dashView').classList.contains('hidden');
+  switchTopNav('member');
+  document.getElementById('guestShell')?.classList.remove('hidden');
+  document.getElementById('portalTabs')?.classList.add('hidden');
+  document.getElementById('reportScheduleCard')?.classList.add('hidden');
+  document.getElementById('portalDemo')?.classList.add('hidden');
+  document.getElementById('portalLogin')?.classList.add('hidden');
+  if (dashVisible) {
+    document.getElementById('memberShell')?.classList.add('hidden');
+    document.getElementById('renewBackBar')?.classList.remove('hidden');
+  } else {
+    document.getElementById('renewBackBar')?.classList.add('hidden');
+  }
+  switchPortal('center');
+  switchPricingCategory('membership');
+  loadPayPlans();
+  document.getElementById('memberPricingCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeRenewPricing() {
+  document.getElementById('renewBackBar')?.classList.add('hidden');
+  document.getElementById('guestShell')?.classList.add('hidden');
+  document.getElementById('portalCenter')?.classList.add('hidden');
+  document.getElementById('memberShell')?.classList.remove('hidden');
+  document.getElementById('dashView')?.classList.remove('hidden');
+  document.getElementById('portalTabs')?.classList.remove('hidden');
+  if (window.MemberRouter) {
+    MemberRouter.go(MemberRouter.current ? MemberRouter.current() : 'today', true);
+  }
+}
+
+function stopPayPoll() {
+  if (payPollTimer) {
+    clearInterval(payPollTimer);
+    payPollTimer = null;
+  }
+}
+
+function payMsgEl() {
+  return document.getElementById('portalPayMsg') || document.getElementById('authMsg');
+}
+
+async function loadPayPlans() {
+  if (payPlans.length) {
+    renderPlanGrid();
+    renderPayChannels();
+    renderCustomAnalysisPricing();
+    return;
+  }
+  try {
+    const [planData, chData] = await Promise.all([
+      api('/api/v1/payment/plans'),
+      api('/api/v1/payment/channels').catch(() => ({ channels: [] })),
+    ]);
+    payPlans = (planData && planData.plans) ? planData.plans : [];
+    addonPlans = (planData && planData.addons) ? planData.addons : [];
+    if (planData.custom_analysis) customAnalysis = planData.custom_analysis;
+    payChannels = chData.channels || [];
+    if (payPlans.length && !payPlans.some(p => p.plan_code === selectedPlanCode)) {
+      selectedPlanCode = payPlans[0].plan_code;
+    }
+    if (payChannels.length && !payChannels.some(c => c.channel === selectedPayChannel)) {
+      selectedPayChannel = payChannels[0].channel;
+    }
+    renderPlanGrid();
+    renderPayChannels();
+    renderCustomAnalysisPricing();
+  } catch (e) {
+    showMsg(payMsgEl(), e.message || '加载套餐失败', 'error');
+  }
+}
+
+function switchPricingCategory(name) {
+  pricingCategory = name === 'custom' ? 'custom' : 'membership';
+  document.querySelectorAll('.pricing-category-tab').forEach(function (btn) {
+    btn.classList.toggle('active', btn.dataset.pricing === pricingCategory);
+  });
+  document.getElementById('pricingMembershipPanel')?.classList.toggle('hidden', pricingCategory !== 'membership');
+  document.getElementById('pricingCustomPanel')?.classList.toggle('hidden', pricingCategory !== 'custom');
+  const btn = document.getElementById('portalBtnStartPay');
+  if (btn) btn.classList.toggle('hidden', pricingCategory === 'custom');
+  renderCustomAnalysisPricing();
+}
+
+function resolveCustomAnalysisPlanCode() {
+  const profile = loadCachedProfile();
+  const active = !!(profile && profile.is_active === true);
+  const addon = addonPlans.find(function (p) {
+    return active ? p.plan_code === 'custom_analysis_member' : p.plan_code === 'custom_analysis_guest';
+  });
+  return addon ? addon.plan_code : (active ? 'custom_analysis_member' : 'custom_analysis_guest');
+}
+
+function renderCustomAnalysisPricing() {
+  const memberEl = document.getElementById('customPriceMember');
+  const guestEl = document.getElementById('customPriceGuest');
+  const hint = document.getElementById('customAnalysisHint');
+  const profile = loadCachedProfile();
+  const active = !!(profile && profile.is_active === true);
+  const memberPrice = customAnalysis.member_price_yuan != null ? customAnalysis.member_price_yuan : 9.9;
+  const guestPrice = customAnalysis.guest_price_yuan != null ? customAnalysis.guest_price_yuan : 29.9;
+  if (memberEl) memberEl.querySelector('.amount').textContent = '¥' + memberPrice;
+  if (guestEl) guestEl.querySelector('.amount').textContent = '¥' + guestPrice;
+  if (memberEl) memberEl.classList.toggle('highlight', active);
+  if (guestEl) guestEl.classList.toggle('highlight', !active);
+  if (hint) {
+    var credits = profile && profile.custom_analysis_credits;
+    var creditsLine = (credits != null && credits > 0) ? (' 当前剩余 ' + credits + ' 次可用。') : '';
+    hint.textContent = active
+      ? '您当前为有效会员，将按 ¥' + memberPrice + '/次 结算。支付后可在 PC 端或联系客服提交词库需求。' + creditsLine
+      : (loadStored(STORAGE.token)
+        ? '当前账号非有效会员，将按 ¥' + guestPrice + '/次 结算。开通会员后定制分析享 ¥' + memberPrice + '/次。' + creditsLine
+        : '未登录将按 ¥' + guestPrice + '/次 结算；登录且为有效会员享 ¥' + memberPrice + '/次。');
+  }
+  const buyBtn = document.getElementById('btnBuyCustomAnalysis');
+  if (buyBtn) {
+    buyBtn.textContent = '购买定制分析 · ¥' + (active ? memberPrice : guestPrice);
+  }
+}
+
+function startCustomAnalysisPay() {
+  selectedPlanCode = resolveCustomAnalysisPlanCode();
+  switchPricingCategory('custom');
+  startWxPay();
+}
+
+function renderPayChannels() {
+  const seg = document.getElementById('portalPayChannelSeg');
+  if (!seg) return;
+  const channels = payChannels.length ? payChannels : [
+    { channel: 'wxpay', label: '微信扫码' },
+    { channel: 'alipay', label: '支付宝扫码' },
+  ];
+  seg.innerHTML = channels.map(c => `
+    <button type="button" class="${c.channel === selectedPayChannel ? 'active' : ''}" data-channel="${esc(c.channel)}" onclick="setPayChannel('${esc(c.channel)}')">${esc(c.label)}</button>
+  `).join('');
+  setPayChannel(selectedPayChannel);
+}
+
+function renderPlanGrid() {
+  const grid = document.getElementById('portalPlanGrid');
+  if (!grid) return;
+  grid.innerHTML = payPlans.map(p => `
+    <div class="plan-card ${p.plan_code === selectedPlanCode ? 'active' : ''} ${p.is_test ? 'plan-test' : ''} ${p.recommended ? 'plan-recommended' : ''} ${p.plan_code === 'experience_3d' ? 'plan-entry' : ''}" onclick="selectPlan('${esc(p.plan_code)}')">
+      <div class="name">${esc(p.label)}${p.recommended ? ' <span style="font-size:10px;color:#0ea5e9">推荐</span>' : ''}${p.plan_code === 'experience_3d' ? ' <span style="font-size:10px;color:#2563eb">尝鲜</span>' : ''}${p.is_test ? ' <span style="font-size:10px;color:#b45309">联调</span>' : ''}</div>
+      <div class="price">¥${p.price_yuan}</div>
+      <div class="hint">${esc(p.summary || (p.duration_days ? p.duration_days + ' 天' : ''))}</div>
+    </div>
+  `).join('');
+}
+
+function selectPlan(code) {
+  selectedPlanCode = code;
+  renderPlanGrid();
+}
+
+function renderPayQrcode(qrText) {
+  const img = document.getElementById('portalPayQrImg');
+  const canvas = document.getElementById('portalPayQrCanvas');
+  if (!qrText) {
+    if (img) img.classList.add('hidden');
+    if (canvas) canvas.classList.add('hidden');
+    return false;
+  }
+  if (img) {
+    img.src = '/api/v1/payment/qrcode?data=' + encodeURIComponent(qrText);
+    img.classList.remove('hidden');
+    img.onerror = () => {
+      showMsg(payMsgEl(), '二维码加载失败，请刷新页面重试', 'error');
+    };
+  }
+  if (canvas) canvas.classList.add('hidden');
+  return true;
+}
+
+function setPayChannel(channel) {
+  selectedPayChannel = channel === 'alipay' ? 'alipay' : 'wxpay';
+  document.querySelectorAll('#portalPayChannelSeg button').forEach(b => {
+    b.classList.toggle('active', b.dataset.channel === selectedPayChannel);
+  });
+  const btn = document.getElementById('portalBtnStartPay');
+  const hint = document.getElementById('portalPayQrHint');
+  if (btn) btn.textContent = selectedPayChannel === 'alipay' ? '支付宝扫码支付' : '微信扫码支付';
+  if (hint) hint.textContent = selectedPayChannel === 'alipay' ? '请使用支付宝扫一扫完成支付' : '请使用微信扫一扫完成支付';
+}
+
+async function startWxPay() {
+  const msgEl = payMsgEl();
+  showMsg(msgEl, '', '');
+  stopPayPoll();
+  document.getElementById('portalPayCheckout')?.classList.add('hidden');
+  document.getElementById('portalPayCompleteBox')?.classList.add('hidden');
+  const btn = document.getElementById('portalBtnStartPay');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.textContent = '正在创建订单…';
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    const token = loadStored(STORAGE.token);
+    const opts = {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ plan_code: selectedPlanCode, channel: selectedPayChannel }),
+    };
+    if (token) opts.auth = true;
+    const order = await api('/api/v1/payment/orders', opts);
+    currentPayOrder = order.order_no;
+    document.getElementById('portalPayCheckout')?.classList.remove('hidden');
+    document.getElementById('portalPayMeta').innerHTML =
+      `订单号：<strong>${esc(order.order_no)}</strong><br>套餐：${esc(order.plan_label)} · ¥${esc(order.amount)}<br>支付方式：${order.channel === 'alipay' ? '支付宝' : '微信'}<br>请在 30 分钟内完成支付`;
+    const qrText = order.qrcode || order.payurl || '';
+    if (/MicroMessenger/i.test(navigator.userAgent) && order.payurl && order.channel !== 'alipay') {
+      location.href = order.payurl;
+      return;
+    }
+    if (!renderPayQrcode(qrText)) {
+      showMsg(msgEl, '未获取到支付二维码，请稍后重试', 'error');
+      return;
+    }
+    payPollTimer = setInterval(() => pollPayOrder(order.order_no), 2500);
+    pollPayOrder(order.order_no);
+  } catch (e) {
+    showMsg(msgEl, e.message || '创建订单失败', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = selectedPayChannel === 'alipay' ? '支付宝扫码支付' : '微信扫码支付';
+  }
+}
+
+async function pollPayOrder(orderNo) {
+  try {
+    const data = await api('/api/v1/payment/orders/' + encodeURIComponent(orderNo));
+    if (data.status === 'paid') {
+      stopPayPoll();
+      await onPaySuccess(data);
+    } else if (data.status === 'expired') {
+      stopPayPoll();
+      showMsg(payMsgEl(), '订单已过期，请重新下单', 'warn');
+    }
+  } catch (_) {}
+}
+
+async function onPaySuccess(data) {
+  const msgEl = payMsgEl();
+  document.getElementById('portalPayQrImg')?.classList.add('hidden');
+  if (data.fulfilled) {
+    showMsg(msgEl, data.message || '支付成功，会员已生效', 'ok');
+    if (loadStored(STORAGE.token)) {
+      try {
+        const profile = await api('/api/v1/member/profile', { auth: true });
+        showDashboard(profile);
+        await loadDashboard(false);
+      } catch (_) {}
+    } else {
+      switchTab('login');
+      showMsg(msgEl, '支付成功，请登录进入会员中心', 'ok');
+    }
+    return;
+  }
+  if (loadStored(STORAGE.token)) {
+    try {
+      const claimed = await api('/api/v1/payment/orders/' + encodeURIComponent(data.order_no) + '/claim', {
+        method: 'POST',
+        auth: true,
+      });
+      saveSession(claimed.access_token, claimed.membership, claimed.membership?.username);
+      showMsg(msgEl, claimed.message || '支付成功，会员已延长', 'ok');
+      showDashboard(claimed.membership);
+      await loadDashboard(false);
+      return;
+    } catch (e) {
+      showMsg(msgEl, e.message || '自动续期失败，请在下方面板完成账号绑定', 'warn');
+    }
+  }
+  if (data.next_action === 'complete_account') {
+    currentPayOrder = data.order_no;
+    document.getElementById('portalPayCompleteBox')?.classList.remove('hidden');
+    setPayCompleteMode('register');
+    showMsg(msgEl, '支付成功！请设置账号或登录已有账号完成开通', 'ok');
+    return;
+  }
+  showMsg(msgEl, data.message || '支付成功', 'ok');
+}
+
+function setPayCompleteMode(mode) {
+  payCompleteMode = mode === 'login' ? 'login' : 'register';
+  document.querySelectorAll('#portalPayCompleteModeSeg button').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === payCompleteMode);
+  });
+  const label = document.getElementById('portalPayCompleteUserLabel');
+  const btn = document.getElementById('portalBtnPayComplete');
+  if (label) label.textContent = payCompleteMode === 'login' ? '用户名' : '新建用户名';
+  if (btn) btn.textContent = payCompleteMode === 'login' ? '登录并续费' : '完成开通并进入会员中心';
+}
+
+async function submitPayComplete() {
+  const orderNo = currentPayOrder;
+  if (!orderNo) return toastPayCompleteError('缺少订单号，请重新购买');
+  const username = (document.getElementById('portalPayCompleteUser')?.value || '').trim();
+  const password = document.getElementById('portalPayCompletePass')?.value || '';
+  if (!username || !password) return toastPayCompleteError('请填写用户名和密码');
+  const btn = document.getElementById('portalBtnPayComplete');
+  if (btn) { btn.disabled = true; btn.textContent = '处理中…'; }
+  try {
+    const res = await api('/api/v1/payment/orders/' + encodeURIComponent(orderNo) + '/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...deviceAuthPayload(), mode: payCompleteMode, username, password }),
+    });
+    saveSession(res.access_token, res.membership, res.membership?.username || username);
+    document.getElementById('payCompleteBox')?.classList.add('hidden');
+    showMsg(document.getElementById('authMsg'), res.message || '开通成功', 'ok');
+    showDashboard(res.membership);
+    await loadDashboard(false);
+  } catch (e) {
+    toastPayCompleteError(e.message || '开通失败');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      setPayCompleteMode(payCompleteMode);
+    }
+  }
+}
+
+function toastPayCompleteError(msg) {
+  showMsg(payMsgEl(), msg, 'error');
+}
+
+function switchLoginMode(mode) {
+  document.querySelectorAll('#loginModeSeg button').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  document.getElementById('panelLoginPassword').classList.toggle('hidden', mode !== 'password');
+  document.getElementById('panelLoginCode').classList.toggle('hidden', mode !== 'code');
+}
+
+function fmtSize(n) {
+  if (!n) return '-';
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1048576).toFixed(1) + ' MB';
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+}
+
+function renderProfile(m) {
+  if (!m) return;
+  const hasIdentity = !!(m.username || m.plan_code || m.id);
+  if (!hasIdentity) {
+    const banner = document.getElementById('expiryBanner');
+    if (banner) banner.innerHTML = '<div class="alert alert-warn">正在加载会员信息…</div>';
+    return;
+  }
+  saveStored(STORAGE.profile, JSON.stringify(m));
+  if (m.username) saveStored(STORAGE.username, m.username);
+
+  document.getElementById('profileGrid').innerHTML = `
+    <div class="profile-item"><div class="v">${esc(m.username)}</div><div class="l">用户名</div></div>
+    <div class="profile-item"><div class="v">${esc(m.plan_label || m.plan_code)}</div><div class="l">套餐</div></div>
+    <div class="profile-item"><div class="v">${m.days_remaining ?? '-'}</div><div class="l">剩余天数</div></div>
+    <div class="profile-item"><div class="v" style="font-size:14px">${esc(m.expires_at)}</div><div class="l">到期时间</div></div>
+  `;
+
+  const chip = document.getElementById('welcomeChip');
+  const nameEl = document.getElementById('welcomeName');
+  if (m.username) {
+    nameEl.textContent = m.username;
+    chip.classList.remove('hidden');
+  }
+
+  const banner = document.getElementById('expiryBanner');
+  if (m.is_active === true) {
+    if (m.expiry_warning) {
+      const kind = (m.days_remaining ?? 99) <= 7 ? 'warn' : 'ok';
+      banner.innerHTML = `<div class="alert alert-${kind}">${esc(m.expiry_warning)}</div>`;
+    } else {
+      banner.innerHTML = `<div class="alert alert-ok">会员有效，可阅读 AI 选品分析与类目情报</div>`;
+    }
+  } else if (m.is_active === false) {
+    banner.innerHTML = '<div class="alert alert-error">'
+      + '会员已过期，请续费后阅读 AI 选品分析。'
+      + '<div class="expiry-actions">'
+      + '<button type="button" class="btn btn-primary" style="min-height:36px;padding:8px 14px;font-size:13px" onclick="switchDash(\'account\')">扫码续费</button>'
+      + '<button type="button" class="btn btn-ghost" style="min-height:36px;padding:8px 14px;font-size:13px" onclick="logout()">退出登录</button>'
+      + '</div></div>';
+    try { localStorage.setItem('xhs_member_expired_hint', '1'); } catch (_) {}
+  } else {
+    banner.innerHTML = `<div class="alert alert-warn">会员状态加载中，请稍候…</div>`;
+  }
+  updatePortalVisibility(m, true);
+  if (window.MemberPortalState) MemberPortalState.renderSessionBar(m, true);
+  renderCustomAnalysisPricing();
+}
+
+function goodsDetailUrl(gid) {
+  return 'https://www.xiaohongshu.com/goods-detail/' + encodeURIComponent(gid);
+}
+
+function updateWatchlistToolbar() {
+  const n = watchlistSelected.size;
+  document.getElementById('watchlistSelectedCount').textContent = '已选 ' + n + ' 项';
+  document.getElementById('btnWatchlistRemove').disabled = n === 0;
+  const allCb = document.getElementById('watchlistSelectAll');
+  if (allCb) {
+    allCb.checked = watchlistItems.length > 0 && n === watchlistItems.length;
+    allCb.indeterminate = n > 0 && n < watchlistItems.length;
+  }
+}
+
+function toggleWatchlistItem(gid, checked) {
+  if (checked) watchlistSelected.add(gid);
+  else watchlistSelected.delete(gid);
+  updateWatchlistToolbar();
+}
+
+function toggleWatchlistAll(checked) {
+  watchlistSelected.clear();
+  if (checked) watchlistItems.forEach(it => { if (it.goods_id) watchlistSelected.add(it.goods_id); });
+  document.querySelectorAll('.watchlist-item-check').forEach(cb => { cb.checked = checked; });
+  updateWatchlistToolbar();
+}
+
+async function loadWatchlist() {
+  const el = document.getElementById('watchlistTable');
+  const dashMsg = document.getElementById('dashMsg');
+  el.innerHTML = '<div class="empty">加载中…</div>';
+  try {
+    const data = await api('/api/v1/member/watchlist?limit=500', { auth: true });
+    watchlistItems = data.items || [];
+    watchlistSelected.clear();
+    renderWatchlist();
+    showMsg(dashMsg, '', 'ok');
+  } catch (e) {
+    el.innerHTML = '<div class="empty">' + esc(e.message || '加载失败') + '</div>';
+    showMsg(dashMsg, e.message, 'error');
+  }
+}
+
+function renderWatchlist() {
+  const el = document.getElementById('watchlistTable');
+  if (!watchlistItems.length) {
+    el.innerHTML = '<div class="empty">暂无收藏。在 PC 端报告页勾选商品后点「同步收藏」，或后续在此手动添加。</div>';
+    updateWatchlistToolbar();
+    return;
+  }
+  let html = '<div class="watchlist-table-wrap"><table class="watchlist-table"><thead><tr>'
+    + '<th style="width:36px"></th><th>商品</th><th>店铺</th><th>来源</th><th>更新时间</th><th></th></tr></thead><tbody>';
+  watchlistItems.forEach(it => {
+    const gid = esc(it.goods_id || '');
+    const safeGid = String(it.goods_id || '').replace(/'/g, '');
+    const checked = watchlistSelected.has(it.goods_id);
+    html += `<tr>
+      <td><input type="checkbox" class="watchlist-item-check" ${checked ? 'checked' : ''} onchange="toggleWatchlistItem('${safeGid}', this.checked)"></td>
+      <td><div class="watchlist-title" title="${esc(it.title || '')}">${esc(it.title || '—')}</div><div class="watchlist-gid">${gid}</div></td>
+      <td>${esc(it.store_name || '—')}</td>
+      <td style="font-size:12px;color:var(--text2)">${esc(it.source || '—')}</td>
+      <td style="font-size:12px;color:var(--text2)">${esc(String(it.updated_at || '').slice(0, 16))}</td>
+      <td><div class="watchlist-actions">
+        <a class="btn btn-primary btn-xs" href="${goodsDetailUrl(it.goods_id)}" target="_blank" rel="noopener">打开</a>
+        <button class="btn btn-ghost btn-xs" onclick="removeWatchlistOne('${safeGid}')">移除</button>
+      </div></td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+  updateWatchlistToolbar();
+}
+
+async function removeWatchlistOne(gid) {
+  if (!gid) return;
+  await removeWatchlistIds([gid]);
+}
+
+async function removeSelectedWatchlist() {
+  const ids = Array.from(watchlistSelected);
+  if (!ids.length) return;
+  if (!confirm('确定移除选中的 ' + ids.length + ' 个收藏？')) return;
+  await removeWatchlistIds(ids);
+}
+
+async function removeWatchlistIds(ids) {
+  const dashMsg = document.getElementById('dashMsg');
+  try {
+    await api('/api/v1/member/watchlist', {
+      method: 'DELETE',
+      auth: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ goods_ids: ids }),
+    });
+    showMsg(dashMsg, '已移除 ' + ids.length + ' 项', 'ok');
+    await loadWatchlist();
+  } catch (e) {
+    showMsg(dashMsg, e.message, 'error');
+  }
+}
+
+function showDashboard(cachedProfile) {
+  document.getElementById('dashView').classList.remove('hidden');
+  document.getElementById('guestShell')?.classList.add('hidden');
+  document.getElementById('renewBackBar')?.classList.add('hidden');
+  document.getElementById('memberShell')?.classList.remove('hidden');
+  document.getElementById('btnLogout').classList.remove('hidden');
+  const btnBc = document.getElementById('btnBroadcast');
+  if (btnBc) btnBc.classList.remove('hidden');
+  const profile = cachedProfile || loadCachedProfile();
+  updatePortalVisibility(profile, true);
+  if (profile) renderProfile(profile);
+  if (window.MemberPortalState) MemberPortalState.renderSessionBar(profile, true);
+  renderCustomAnalysisPricing();
+}
+
+async function loadDashboard(useCacheFirst) {
+  const cached = loadCachedProfile();
+  if (!loadStored(STORAGE.token)) {
+    showAuthView();
+    return;
+  }
+  if (useCacheFirst && cached) {
+    showDashboard(cached);
+  }
+  let profile = null;
+  try {
+    profile = await api('/api/v1/member/profile', { auth: true });
+  } catch (e) {
+    if (isAuthError(e)) throw e;
+    if (cached) {
+      profile = cached;
+      showMsg(document.getElementById('dashMsg'), '网络异常，已显示本地缓存的会员信息', 'warn');
+    } else {
+      throw e;
+    }
+  }
+  const membership = profile || cached || null;
+  if (!membership) {
+    showMsg(document.getElementById('dashMsg'), '无法加载会员信息', 'error');
+    return;
+  }
+  renderProfile(membership);
+  if (membership.is_active === false) {
+    showMsg(document.getElementById('dashMsg'), '会员已过期，续费成功后可阅读 AI 分析', 'warn');
+  } else {
+    showMsg(document.getElementById('dashMsg'), '', 'ok');
+  }
+  // 先显示 dashboard 界面（让 memberShell 可见），再初始化路由触发 AI 动画
+  await loadMemberBroadcast(membership);
+  showDashboard(membership);
+  if (window.MemberRouter) {
+    if (membership.is_active === false) {
+      MemberRouter.go('account', true);
+    } else {
+      try { localStorage.removeItem('xhs_member_expired_hint'); } catch (_) {}
+      MemberRouter.init();
+    }
+  }
+  if (window.MemberInsight) {
+    MemberInsight.applyEntitlements(membership);
+    if (membership.is_active !== false) MemberInsight.load();
+  }
+}
+
+function logout() {
+  var overlay = document.getElementById('broadcastOverlay');
+  if (overlay) overlay.classList.add('hidden');
+  _broadcastPendingAck = false;
+  api('/api/v1/auth/logout', { method: 'POST', auth: true }).catch(function () {});
+  removeStored(STORAGE.token);
+  removeStored(STORAGE.profile);
+  removeStored(STORAGE.activated);
+  try { localStorage.removeItem('xhs_member_dash_tab'); } catch (_) {}
+  try { localStorage.removeItem('xhs_member_portal_tab'); } catch (_) {}
+  try { localStorage.removeItem('xhs_member_expired_hint'); } catch (_) {}
+  if (window.MemberRouter && MemberRouter.resetBoot) MemberRouter.resetBoot();
+  document.body.removeAttribute('data-reader-state');
+  var banner = document.getElementById('expiryBanner');
+  if (banner) banner.innerHTML = '';
+  history.replaceState(null, '', location.pathname + location.search);
+  showAuthView();
+  switchTab('login');
+  showMsg(document.getElementById('authMsg'), '已退出登录', 'ok');
+}
+
+async function doLogin() {
+  const authMsg = document.getElementById('authMsg');
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  try {
+    const res = await api('/api/v1/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, ...deviceAuthPayload() })
+    });
+    saveSession(res.access_token, res.membership, username);
+    await loadDashboard(false);
+    showMsg(authMsg, '', 'ok');
+  } catch (e) {
+    showMsg(authMsg, e.message, 'error');
+  }
+}
+
+async function doLoginCode() {
+  const authMsg = document.getElementById('authMsg');
+  const auth_code = document.getElementById('loginCode').value.trim();
+  try {
+    const res = await api('/api/v1/auth/login-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ auth_code, ...deviceAuthPayload() })
+    });
+    const username = (res.membership && res.membership.username) || '';
+    saveSession(res.access_token, res.membership, username);
+    document.getElementById('loginCode').value = '';
+    await loadDashboard(false);
+    showMsg(authMsg, '', 'ok');
+  } catch (e) {
+    showMsg(authMsg, e.message, 'error');
+  }
+}
+
+async function doForgotPassword() {
+  const authMsg = document.getElementById('authMsg');
+  const email = (document.getElementById('forgotEmail')?.value || '').trim();
+  if (!email) return showMsg(authMsg, '请输入邮箱', 'error');
+  const btn = document.getElementById('btnForgot');
+  if (btn) { btn.disabled = true; btn.textContent = '发送中…'; }
+  try {
+    const res = await api('/api/v1/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    showMsg(authMsg, res.message || '邮件已发送', 'ok');
+    toggleForgotPassword(false);
+  } catch (e) {
+    showMsg(authMsg, e.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '发送重置邮件'; }
+  }
+}
+
+async function doResetPassword() {
+  const authMsg = document.getElementById('authMsg');
+  const p1 = document.getElementById('resetPass')?.value || '';
+  const p2 = document.getElementById('resetPass2')?.value || '';
+  if (!resetToken) return showMsg(authMsg, '重置链接无效，请重新申请', 'error');
+  if (p1.length < 6) return showMsg(authMsg, '新密码至少 6 位', 'error');
+  if (p1 !== p2) return showMsg(authMsg, '两次输入的密码不一致', 'error');
+  const btn = document.getElementById('btnReset');
+  if (btn) { btn.disabled = true; btn.textContent = '处理中…'; }
+  try {
+    const res = await api('/api/v1/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: resetToken, new_password: p1, ...deviceAuthPayload() }),
+    });
+    const username = res.membership?.username || '';
+    saveSession(res.access_token, res.membership, username);
+    resetToken = '';
+    history.replaceState(null, '', location.pathname);
+    await loadDashboard(false);
+    showMsg(document.getElementById('dashMsg'), res.message || '密码已重置', 'ok');
+  } catch (e) {
+    showMsg(authMsg, e.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '重置密码并登录'; }
+  }
+}
+
+async function doChangePassword() {
+  const dashMsg = document.getElementById('dashMsg');
+  const new_password = document.getElementById('pwdNew').value;
+  const current_password = document.getElementById('pwdCurrent').value;
+  try {
+    const res = await api('/api/v1/member/change-password', {
+      method: 'POST',
+      auth: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ new_password, current_password })
+    });
+    document.getElementById('pwdCurrent').value = '';
+    document.getElementById('pwdNew').value = '';
+    showMsg(dashMsg, res.message || '密码已更新', 'ok');
+  } catch (e) {
+    showMsg(dashMsg, e.message, 'error');
+  }
+}
+
+async function doRegister() {
+  const authMsg = document.getElementById('authMsg');
+  const username = document.getElementById('regUser').value.trim();
+  const password = document.getElementById('regPass').value;
+  const auth_code = document.getElementById('regCode').value.trim();
+  try {
+    const res = await api('/api/v1/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ auth_code, username, password, ...deviceAuthPayload() })
+    });
+    saveSession(res.access_token, res.membership, username);
+    document.getElementById('regCode').value = '';
+    await loadDashboard(false);
+    showMsg(authMsg, '', 'ok');
+  } catch (e) {
+    showMsg(authMsg, e.message, 'error');
+    if (e.message && e.message.indexOf('用户名已存在') >= 0) {
+      setCsCodeMode('renew');
+    }
+  }
+}
+
+async function doRenewWithCode() {
+  const username = document.getElementById('renewUser').value.trim();
+  const password = document.getElementById('renewPass').value;
+  const auth_code = document.getElementById('renewAuthCode').value.trim();
+  if (!auth_code) return showAuthFeedback('请输入客服提供的授权码', 'error');
+  if (!username) return showAuthFeedback('请输入用户名', 'error');
+  if (username.length < 3) return showAuthFeedback('用户名至少 3 个字符', 'error');
+  if (!password) return showAuthFeedback('请输入密码', 'error');
+  if (password.length < 6) return showAuthFeedback('密码至少 6 位', 'error');
+  const btn = document.getElementById('btnRenewWithCode');
+  if (btn) { btn.disabled = true; btn.textContent = '续费中…'; }
+  showAuthFeedback('', '');
+  try {
+    const res = await api('/api/v1/auth/renew-with-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, auth_code, ...deviceAuthPayload() })
+    });
+    saveSession(res.access_token, res.membership, username);
+    document.getElementById('renewAuthCode').value = '';
+    showAuthFeedback(res.message || '续费成功，正在进入会员中心…', 'ok');
+    try {
+      await loadDashboard(false);
+    } catch (dashErr) {
+      if (res.membership) showDashboard(res.membership);
+      showAuthFeedback((res.message || '续费成功') + '（报告列表加载失败，请刷新页面）', 'warn');
+      return;
+    }
+    showAuthFeedback(res.message || '续费成功', 'ok');
+  } catch (e) {
+    showAuthFeedback(e.message || '续费失败，请检查账号、密码与授权码', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '授权码续费'; }
+  }
+}
+
+async function doRenew() {
+  const auth_code = document.getElementById('renewCode').value.trim();
+  if (!auth_code) return showDashRenewFeedback('请输入客服提供的授权码', 'error');
+  if (auth_code.length < 8) return showDashRenewFeedback('授权码格式不正确', 'error');
+  const btn = document.getElementById('btnActivateCode');
+  if (btn) { btn.disabled = true; btn.textContent = '激活中…'; }
+  showDashRenewFeedback('', '');
+  try {
+    const res = await api('/api/v1/auth/activate', {
+      method: 'POST',
+      auth: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ auth_code })
+    });
+    const membership = res.membership || {};
+    saveSession(loadStored(STORAGE.token), membership, membership.username || loadStored(STORAGE.username));
+    renderProfile(membership);
+    document.getElementById('renewCode').value = '';
+    showDashRenewFeedback(res.message || '续费成功，会员状态已更新', 'ok');
+    if (membership.is_active) {
+      try {
+        await loadDashboard(false);
+        showDashRenewFeedback(res.message || '续费成功，会员状态已更新', 'ok');
+      } catch (_) {
+        showDashRenewFeedback((res.message || '续费成功') + '（报告列表刷新失败，请手动刷新页面）', 'warn');
+      }
+    }
+  } catch (e) {
+    const msg = e.message || '激活失败';
+    if (e.status === 401) {
+      showDashRenewFeedback(msg + '。登录已失效，请退出后重新登录，或使用登录页「已有账号续费」', 'error');
+    } else {
+      showDashRenewFeedback(msg, 'error');
+    }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '激活授权码'; }
+  }
+}
+
+async function loadClientDownload() {
+  const link = document.getElementById('paInstallerLink');
+  const meta = document.getElementById('paInstallerMeta');
+  const notice = document.getElementById('paUpdateNotice');
+  const noticeText = document.getElementById('paUpdateNoticeText');
+  const latestUrl = 'https://www.xhs365.cn/downloads/XHS365-Setup-latest.exe';
+  const setLinks = function (url, label) {
+    if (link) { link.href = url; }
+    if (meta) meta.textContent = label;
+  };
+  setLinks(latestUrl, '最新版加载中…');
+  let manifest = null;
+  try {
+    const mres = await fetch('https://www.xhs365.cn/downloads/productanalyzer-version.json', { cache: 'no-store', mode: 'cors' });
+    if (mres.ok) manifest = await mres.json();
+  } catch (e) { /* ignore */ }
+  let apiData = null;
+  try {
+    const res = await fetch('https://www.xhs365.cn/api/v1/public/downloads', { cache: 'no-store', mode: 'cors' });
+    const json = await res.json();
+    apiData = json && json.data ? json.data : null;
+  } catch (e) { /* ignore */ }
+  const manifestVersion = manifest && manifest.version ? String(manifest.version) : '';
+  const apiVersion = apiData && apiData.version ? String(apiData.version) : '';
+  const bestVersion = manifestVersion && apiVersion
+    ? (manifestVersion.localeCompare(apiVersion, undefined, { numeric: true }) >= 0 ? manifestVersion : apiVersion)
+    : (manifestVersion || apiVersion || '2026.07.24');
+  const downloadUrl = (manifest && manifest.download_url) || (apiData && apiData.installer_url) || latestUrl;
+  setLinks(downloadUrl, '最新 v' + bestVersion + ' · Windows 64 位');
+  if (notice && noticeText && manifest && manifest.release_notes) {
+    notice.classList.remove('hidden');
+    noticeText.textContent = 'v' + bestVersion + '：' + manifest.release_notes + '。请下载安装包覆盖安装以体验最新功能。';
+  }
+  renderClientVersionHistory(manifest, bestVersion, downloadUrl);
+}
+
+function renderClientVersionHistory(manifest, latestVersion, latestUrl) {
+  const hosts = document.querySelectorAll('.client-versions-host');
+  if (!hosts.length) return;
+  const changelog = (manifest && Array.isArray(manifest.changelog)) ? manifest.changelog.slice() : [];
+  const historical = (manifest && Array.isArray(manifest.historical_installers)) ? manifest.historical_installers.slice() : [];
+  const byVersion = {};
+  changelog.forEach(function (entry) {
+    if (!entry || !entry.version) return;
+    byVersion[String(entry.version)] = Object.assign({}, byVersion[String(entry.version)] || {}, entry);
+  });
+  historical.forEach(function (item) {
+    if (!item || !item.version) return;
+    const key = String(item.version);
+    byVersion[key] = Object.assign({}, byVersion[key] || {}, item);
+  });
+  const versions = Object.keys(byVersion).sort(function (a, b) {
+    return b.localeCompare(a, undefined, { numeric: true });
+  });
+  if (!versions.length && latestVersion) {
+    versions.push(String(latestVersion));
+    byVersion[String(latestVersion)] = { version: latestVersion, date: '', highlights: [(manifest && manifest.release_notes) || '当前最新版'] };
+  }
+  const html = versions.map(function (ver, idx) {
+    const entry = byVersion[ver] || { version: ver };
+    const isLatest = idx === 0 || ver === String(latestVersion);
+    const url = entry.url || entry.download_url || (isLatest ? latestUrl : ('https://www.xhs365.cn/downloads/ProductAnalyzer_Setup_' + ver.replace(/\./g, '') + '.exe'));
+    const highlights = Array.isArray(entry.highlights) ? entry.highlights : (entry.release_notes ? [entry.release_notes] : []);
+    const notesHtml = highlights.length
+      ? '<ul>' + highlights.map(function (h) { return '<li>' + esc(h) + '</li>'; }).join('') + '</ul>'
+      : '<p style="margin:0">—</p>';
+    return '<div class="version-item' + (isLatest ? ' is-latest' : '') + '">'
+      + '<div class="vi-head"><div><span class="vi-ver">v' + esc(ver) + '</span>'
+      + (isLatest ? ' <span class="version-badge">最新</span>' : '')
+      + '</div><span class="vi-date">' + esc(entry.date || '') + '</span></div>'
+      + '<div class="vi-notes">' + notesHtml + '</div>'
+      + '<div class="vi-actions"><a class="btn btn-primary btn-xs" href="' + esc(url) + '" download style="text-decoration:none;color:#fff">下载此版本</a>'
+      + (entry.file_size ? '<span style="font-size:12px;color:var(--text2)">' + Math.round(entry.file_size / (1024 * 1024)) + ' MB</span>' : '')
+      + '</div></div>';
+  }).join('');
+  hosts.forEach(function (el) {
+    el.innerHTML = html ? ('<div class="version-list">' + html + '</div>') : '<div class="empty">暂无版本记录</div>';
+  });
+}
+
+async function loadTrialPackInfo() {
+  /* 表格体验包已下线 — 保留空函数避免旧调用报错 */
+}
+
+var _broadcastState = null;
+var _broadcastPendingAck = false;
+
+function renderBroadcastModal(b) {
+  if (!b) return;
+  document.getElementById('broadcastBadge').textContent = b.badge || '站内动态';
+  document.getElementById('broadcastTitle').textContent = b.title || '站内通知';
+  document.getElementById('broadcastSubtitle').textContent = b.subtitle || '';
+  var html = '';
+  if (Array.isArray(b.highlights) && b.highlights.length) {
+    html += '<ul>' + b.highlights.map(function (h) { return '<li>' + esc(h) + '</li>'; }).join('') + '</ul>';
+  }
+  if (Array.isArray(b.sections)) {
+    b.sections.forEach(function (sec) {
+      html += '<div class="broadcast-section"><h3>' + esc(sec.heading || '') + '</h3>';
+      if (Array.isArray(sec.items) && sec.items.length) {
+        html += '<ul>' + sec.items.map(function (it) { return '<li>' + esc(it) + '</li>'; }).join('') + '</ul>';
+      }
+      html += '</div>';
+    });
+  }
+  if (b.footer) html += '<p style="font-size:12px;color:var(--text2);margin:12px 0 0">' + esc(b.footer) + '</p>';
+  document.getElementById('broadcastBody').innerHTML = html;
+  var cta = document.getElementById('btnBroadcastClose');
+  if (cta) cta.textContent = b.cta_label || '关闭';
+}
+
+function updateBroadcastButton(data) {
+  var dot = document.getElementById('broadcastDot');
+  if (!dot || !data) return;
+  dot.classList.toggle('hidden', !!(data.acknowledged || !data.broadcast));
+}
+
+function openBroadcastModal(manual) {
+  var data = _broadcastState;
+  if (!data || !data.broadcast) return;
+  _broadcastPendingAck = !manual && !!data.show_popup && !data.acknowledged;
+  renderBroadcastModal(data.broadcast);
+  document.getElementById('broadcastOverlay').classList.remove('hidden');
+}
+
+function closeBroadcastModal() {
+  document.getElementById('broadcastOverlay').classList.add('hidden');
+  if (_broadcastState && _broadcastState.broadcast && _broadcastPendingAck && !_broadcastState.acknowledged) {
+    api('/api/v1/member/broadcast/ack', {
+      method: 'POST',
+      auth: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ broadcast_id: _broadcastState.broadcast.id })
+    }).then(function () {
+      _broadcastState.acknowledged = true;
+      _broadcastState.show_popup = false;
+      updateBroadcastButton(_broadcastState);
+    }).catch(function () {});
+  }
+  _broadcastPendingAck = false;
+}
+
+async function loadMemberBroadcast(membership) {
+  if (!loadStored(STORAGE.token)) return;
+  try {
+    var data = await api('/api/v1/member/broadcast', { auth: true });
+    _broadcastState = data;
+    updateBroadcastButton(data);
+    if (data.show_popup && data.broadcast && membership && membership.is_active) {
+      setTimeout(function () { openBroadcastModal(false); }, 400);
+    }
+  } catch (e) { /* ignore */ }
+}
+
+(async function init() {
+  try {
+  loadClientDownload();
+  restoreFormFields();
+  renderDemoCards();
+  updatePortalVisibility(loadCachedProfile(), !!loadStored(STORAGE.token));
+
+  const resetParam = new URLSearchParams(location.search).get('reset');
+  if (resetParam) {
+    showResetPanel(resetParam);
+  }
+
+  if (!storageOk()) {
+    const authMsg = document.getElementById('authMsg');
+    showMsg(authMsg, '浏览器未允许本站保存登录状态（请关闭无痕模式，或检查隐私/存储权限）', 'warn');
+  }
+
+  const token = loadStored(STORAGE.token);
+  const activated = loadStored(STORAGE.activated);
+  const cached = loadCachedProfile();
+
+  if (activated && cached && !token) {
+    const authMsg = document.getElementById('authMsg');
+    showMsg(authMsg, `欢迎回来 ${cached.username || ''}，登录状态已过期。可用密码登录，或直接输入授权码登录`, 'warn');
+    switchTab('login');
+  }
+
+  if (cached && token) {
+    showDashboard(cached);
+    if (cached.is_active === false) {
+      const banner = document.getElementById('expiryBanner');
+      if (banner) banner.innerHTML = '<div class="alert alert-warn">正在确认会员状态…</div>';
+    }
+  }
+
+  try {
+    await loadDashboard(!!cached);
+  } catch (e) {
+    if (!isAuthError(e)) {
+      if (cached && token) {
+        showDashboard(cached);
+        showMsg(document.getElementById('dashMsg'), '网络异常，已显示本地缓存（报告列表可能不是最新）', 'warn');
+      }
+      return;
+    }
+    if (!token && !cached && !activated) return;
+    try {
+      await refreshSessionToken();
+      await loadDashboard(false);
+    } catch (e2) {
+      if (isAuthError(e2)) {
+        removeStored(STORAGE.token);
+        removeStored(STORAGE.profile);
+        showAuthView();
+        const authMsg = document.getElementById('authMsg');
+        if (cached && cached.username) {
+          showMsg(authMsg, '会话已过期，请重新输入密码或授权码', 'warn');
+        } else if (token || activated) {
+          showMsg(authMsg, e2.message || '请重新登录', 'warn');
+        }
+        switchTab('login');
+      } else if (cached) {
+        showDashboard(cached);
+        showMsg(document.getElementById('dashMsg'), '网络异常，已显示本地缓存（报告列表可能不是最新）', 'warn');
+      }
+    }
+  }
+  } catch (err) {
+    console.error('member init failed', err);
+  }
+})();
+</script>
+
+<div id="demoDetailOverlay" class="demo-detail-overlay hidden" role="dialog" aria-modal="true">
+  <div class="demo-detail-modal">
+    <div class="demo-detail-head">
+      <h3 id="demoDetailTitle">预览</h3>
+      <button type="button" class="demo-detail-close" onclick="closeDemoDetail()">&times;</button>
+    </div>
+    <div class="demo-detail-body" id="demoDetailBody"></div>
+    <div class="demo-detail-cta">
+      <button type="button" class="btn btn-primary" onclick="closeDemoDetail();switchPortal('center')">开通会员 · 阅读完整报告</button>
+    </div>
+  </div>
+</div>
+
+<div id="broadcastOverlay" class="broadcast-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="broadcastTitle">
+  <div class="broadcast-modal">
+    <div class="broadcast-head">
+      <button type="button" class="broadcast-close-x" id="btnBroadcastX" onclick="closeBroadcastModal()" aria-label="关闭">×</button>
+      <div class="bh-badge" id="broadcastBadge">重大更新</div>
+      <h2 id="broadcastTitle">站内通知</h2>
+      <p id="broadcastSubtitle"></p>
+    </div>
+    <div class="broadcast-body" id="broadcastBody"></div>
+    <div class="broadcast-foot">
+      <button type="button" class="btn btn-primary" id="btnBroadcastClose" onclick="closeBroadcastModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI 顾问对话浮动按钮 + 对话面板 -->
+<style>
+.advisor-chat-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent, #0071e3);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 113, 227, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  z-index: 9998;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.advisor-chat-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(0, 113, 227, 0.5);
+}
+.advisor-chat-fab.hidden { display: none !important; }
+
+.advisor-chat-panel {
+  position: fixed;
+  right: 24px;
+  bottom: 92px;
+  width: 380px;
+  max-width: calc(100vw - 48px);
+  max-height: 560px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  z-index: 9998;
+  overflow: hidden;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.advisor-chat-panel.hidden {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  pointer-events: none;
+}
+.advisor-chat-head {
+  padding: 14px 16px;
+  background: var(--accent, #0071e3);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.advisor-chat-head .ac-title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 700;
+}
+.advisor-chat-head .ac-quota {
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.advisor-chat-head .ac-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+.advisor-chat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f5f5f7;
+  min-height: 200px;
+}
+.ac-msg {
+  max-width: 85%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.ac-msg.user {
+  align-self: flex-end;
+  background: var(--accent, #0071e3);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.ac-msg.bot {
+  align-self: flex-start;
+  background: #fff;
+  color: #1d1d1f;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom-left-radius: 4px;
+}
+.ac-msg.bot .ac-disclaimer {
+  display: block;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 11px;
+  color: #6e6e73;
+}
+.ac-empty {
+  text-align: center;
+  color: #6e6e73;
+  font-size: 13px;
+  padding: 24px 12px;
+  line-height: 1.7;
+}
+.ac-typing {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #6e6e73;
+}
+.ac-typing .dot {
+  display: inline-block;
+  animation: acBlink 1.4s infinite;
+}
+.ac-typing .dot:nth-child(2) { animation-delay: 0.2s; }
+.ac-typing .dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes acBlink { 0%, 60%, 100% { opacity: 0.3; } 30% { opacity: 1; } }
+
+.advisor-chat-foot {
+  padding: 10px 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  gap: 8px;
+  background: #fff;
+}
+.advisor-chat-foot textarea {
+  flex: 1;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 13px;
+  resize: none;
+  height: 40px;
+  max-height: 80px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.advisor-chat-foot textarea:focus {
+  border-color: var(--accent, #0071e3);
+}
+.advisor-chat-foot textarea:disabled {
+  background: #f5f5f7;
+  cursor: not-allowed;
+}
+.advisor-chat-foot .ac-send {
+  background: var(--accent, #0071e3);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.advisor-chat-foot .ac-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (max-width: 768px) {
+  .advisor-chat-panel {
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  .advisor-chat-fab { right: 16px; bottom: 16px; }
+}
+</style>
+
+<button id="advisorChatFab" class="advisor-chat-fab hidden" onclick="toggleAdvisorChat()" aria-label="AI 顾问对话" title="AI 顾问对话">💬</button>
+
+<div id="advisorChatPanel" class="advisor-chat-panel hidden" role="dialog" aria-modal="false">
+  <div class="advisor-chat-head">
+    <span class="ac-title">💬 AI 顾问对话</span>
+    <span class="ac-quota" id="acQuota">— / —</span>
+    <button type="button" class="ac-close" onclick="toggleAdvisorChat()" aria-label="关闭">×</button>
+  </div>
+  <div class="advisor-chat-body" id="acBody">
+    <div class="ac-empty">👋 你好！我是 AI 选品顾问。<br>可以问我今日选品方向、类目趋势、蓝海机会等。<br><br>例如：「今天有什么蓝海品类？」「教育资料类目趋势如何？」</div>
+  </div>
+  <div class="advisor-chat-foot">
+    <textarea id="acInput" placeholder="输入你的问题…" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAdvisorChat()}"></textarea>
+    <button type="button" class="ac-send" id="acSend" onclick="sendAdvisorChat()">发送</button>
+  </div>
+</div>
+
+<script>
+var acMessages = [];
+var acSending = false;
+var acQuotaRemaining = -1; // -1 = 未知
+var acQuotaTotal = 0;
+
+function toggleAdvisorChat() {
+  var panel = document.getElementById('advisorChatPanel');
+  if (!panel) return;
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    // 展开时聚焦输入框
+    setTimeout(function() {
+      var input = document.getElementById('acInput');
+      if (input) input.focus();
+    }, 100);
+    // 首次展开时拉取配额
+    if (acQuotaRemaining < 0) {
+      fetchAdvisorQuota();
+    }
+  }
+}
+
+function fetchAdvisorQuota() {
+  // 通过 dashboard 接口获取配额（已有接口返回 advisor_chat_daily）
+  if (typeof api === 'function') {
+    api('/api/v1/member/advisor/dashboard', { auth: true }).then(function(d) {
+      var ent = d.entitlements || {};
+      acQuotaTotal = parseInt(ent.advisor_chat_daily || 0, 10);
+      // 剩余次数需要从后端单独获取，暂用 total 显示
+      if (acQuotaTotal > 0) {
+        updateAcQuota(acQuotaTotal); // 默认显示全部可用
+      } else {
+        updateAcQuota(0);
+        var quotaEl = document.getElementById('acQuota');
+        if (quotaEl) quotaEl.textContent = '不可用';
+      }
+    }).catch(function() {
+      var quotaEl = document.getElementById('acQuota');
+      if (quotaEl) quotaEl.textContent = '—';
+    });
+  }
+}
+
+function updateAcQuota(remaining) {
+  acQuotaRemaining = remaining;
+  var quotaEl = document.getElementById('acQuota');
+  if (quotaEl) {
+    if (acQuotaTotal > 0) {
+      quotaEl.textContent = '剩余 ' + remaining + ' / ' + acQuotaTotal;
+    } else {
+      quotaEl.textContent = remaining > 0 ? '可用' : '不可用';
+    }
+  }
+}
+
+function appendAcMsg(role, text, opts) {
+  opts = opts || {};
+  var body = document.getElementById('acBody');
+  if (!body) return;
+  // 首次发送时清空 empty 提示
+  var empty = body.querySelector('.ac-empty');
+  if (empty) empty.remove();
+  var div = document.createElement('div');
+  div.className = 'ac-msg ' + (role === 'user' ? 'user' : 'bot');
+  var html = escHtml(text);
+  if (opts.disclaimer) {
+    html += '<span class="ac-disclaimer">' + escHtml(opts.disclaimer) + '</span>';
+  }
+  div.innerHTML = html;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function showAcTyping() {
+  var body = document.getElementById('acBody');
+  if (!body) return;
+  var empty = body.querySelector('.ac-empty');
+  if (empty) empty.remove();
+  var div = document.createElement('div');
+  div.className = 'ac-typing';
+  div.id = 'acTyping';
+  div.innerHTML = 'AI 思考中<span class="dot">·</span><span class="dot">·</span><span class="dot">·</span>';
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function hideAcTyping() {
+  var t = document.getElementById('acTyping');
+  if (t) t.remove();
+}
+
+function sendAdvisorChat() {
+  var input = document.getElementById('acInput');
+  var sendBtn = document.getElementById('acSend');
+  if (!input || acSending) return;
+  var query = input.value.trim();
+  if (!query) return;
+
+  // 配额校验
+  if (acQuotaTotal > 0 && acQuotaRemaining <= 0) {
+    appendAcMsg('bot', '⚠️ 今日 AI 对话次数已用尽，请明天再来。或升级更高级套餐获取更多次数。');
+    return;
+  }
+  if (acQuotaTotal === 0) {
+    // 套餐不支持，引导开通
+    appendAcMsg('bot', '🔒 当前套餐不支持 AI 对话。开通正式会员即可使用 AI 顾问对话能力（10 次/日）。点击下方「开通会员」立即升级。');
+    var body = document.getElementById('acBody');
+    if (body) {
+      var cta = document.createElement('div');
+      cta.className = 'ac-msg bot';
+      cta.innerHTML = '<button type="button" class="btn btn-primary" style="margin-top:8px" onclick="switchPortal(\'center\')">开通会员</button>';
+      body.appendChild(cta);
+      body.scrollTop = body.scrollHeight;
+    }
+    return;
+  }
+
+  acSending = true;
+  if (sendBtn) sendBtn.disabled = true;
+  input.value = '';
+  input.style.height = '40px';
+
+  // 显示用户消息
+  appendAcMsg('user', query);
+  // 显示 typing
+  showAcTyping();
+
+  // 调用 API
+  if (typeof api === 'function') {
+    api('/api/v1/member/advisor/chat', {
+      method: 'POST',
+      auth: true,
+      body: JSON.stringify({ query: query, context_date: '' }),
+      headers: { 'Content-Type': 'application/json' }
+    }).then(function(d) {
+      hideAcTyping();
+      acSending = false;
+      if (sendBtn) sendBtn.disabled = false;
+      if (d && d.content) {
+        appendAcMsg('bot', d.content, { disclaimer: d.disclaimer || '' });
+        if (typeof d.quota_remaining === 'number') {
+          updateAcQuota(d.quota_remaining);
+        }
+      } else {
+        appendAcMsg('bot', '抱歉，AI 暂时无法回答，请稍后重试。');
+      }
+    }).catch(function(err) {
+      hideAcTyping();
+      acSending = false;
+      if (sendBtn) sendBtn.disabled = false;
+      var msg = (err && err.message) || '请求失败';
+      if (msg.indexOf('403') >= 0 || msg.indexOf('套餐') >= 0) {
+        appendAcMsg('bot', '🔒 当前套餐不支持 AI 对话。开通正式会员即可使用（10 次/日）。');
+      } else if (msg.indexOf('429') >= 0 || msg.indexOf('用尽') >= 0 || msg.indexOf('次数') >= 0) {
+        appendAcMsg('bot', '⚠️ 今日 AI 对话次数已用尽，请明天再来。');
+      } else {
+        appendAcMsg('bot', '⚠️ ' + msg + '，请稍后重试。');
+      }
+    });
+  } else {
+    hideAcTyping();
+    acSending = false;
+    if (sendBtn) sendBtn.disabled = false;
+    appendAcMsg('bot', '⚠️ 系统未就绪，请刷新页面重试。');
+  }
+}
+
+// 会员登录后显示浮动按钮，未登录隐藏
+function showAdvisorChatFab() {
+  var fab = document.getElementById('advisorChatFab');
+  if (fab) fab.classList.remove('hidden');
+}
+function hideAdvisorChatFab() {
+  var fab = document.getElementById('advisorChatFab');
+  var panel = document.getElementById('advisorChatPanel');
+  if (fab) fab.classList.add('hidden');
+  if (panel) panel.classList.add('hidden');
+}
+
+// 监听会员登录状态
+(function() {
+  // 检查 token 是否存在
+  try {
+    var token = localStorage.getItem('xhs_member_token') || '';
+    if (token) {
+      showAdvisorChatFab();
+    }
+  } catch (e) {}
+  // 监听 storage 变化（其他标签页登录/登出）
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'xhs_member_token') {
+      if (e.newValue) showAdvisorChatFab();
+      else hideAdvisorChatFab();
+    }
+  });
+  // 监听自定义事件（同标签页登录/登出）
+  window.addEventListener('member:login', showAdvisorChatFab);
+  window.addEventListener('member:logout', hideAdvisorChatFab);
+})();
+</script>
+</body>
+</html>

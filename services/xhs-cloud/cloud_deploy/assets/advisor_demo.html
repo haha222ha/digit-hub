@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 选品情报 · 免费样例</title>
+<style>
+:root{--bg:#f5f5f7;--surface:#fff;--text:#1d1d1f;--text2:#6e6e73;--accent:#0071e3;--line:rgba(0,0,0,.08);--warn:#b45309;--warn-bg:#fff8e6;--lock:#8b95a3;--lock-bg:#f3f4f6;--gold:#b8860b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.shell{max-width:960px;margin:0 auto;padding:16px}
+.banner{background:var(--warn-bg);border:1px solid #f0d78a;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.6;margin-bottom:14px}
+.banner strong{color:var(--warn)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.h1{font-size:18px;font-weight:700;margin-bottom:6px}
+.meta{font-size:12px;color:var(--text2);line-height:1.55}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.tool{padding:8px 12px;border-radius:10px;border:1px dashed #d1d5db;background:#f9fafb;font-size:12px;color:#9ca3af;cursor:not-allowed;user-select:none}
+.tool .lock{margin-left:4px}
+.summary-box{background:#fafafa;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:13px;line-height:1.7;color:var(--text)}
+.summary-box .sum-title{font-weight:700;font-size:14px;margin-bottom:6px;color:var(--text)}
+.dir-list{margin-top:8px}
+.dir-item{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden;background:var(--surface);transition:border-color .15s}
+.dir-item.unlocked{cursor:pointer}
+.dir-item.unlocked:hover{border-color:var(--accent)}
+.dir-item.locked{background:var(--lock-bg);border-style:dashed}
+.dir-head{display:flex;align-items:center;gap:10px;padding:12px 14px;font-size:14px;font-weight:600}
+.dir-head .idx{flex:0 0 28px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.dir-item.locked .dir-head .idx{background:var(--lock);color:#fff}
+.dir-head .ttl{flex:1;color:var(--text);word-break:break-word}
+.dir-head .badge{flex:0 0 auto;font-size:11px;padding:3px 8px;border-radius:10px;font-weight:600}
+.badge-free{background:#e8f5e9;color:#2e7d32}
+.badge-vip{background:#fff4e0;color:var(--gold);border:1px solid #f0d78a}
+.dir-head .arrow{flex:0 0 auto;color:var(--text2);transition:transform .2s;font-size:12px}
+.dir-item.expanded .dir-head .arrow{transform:rotate(90deg)}
+.dir-body{display:none;padding:0 14px 14px 42px;font-size:13px;line-height:1.75;color:var(--text);white-space:pre-wrap;word-break:break-word}
+.dir-item.expanded .dir-body{display:block}
+.dir-body.locked-body{color:var(--text2);font-style:italic;text-align:center;padding:14px}
+.dir-body.locked-body .lock-icon{font-size:24px;display:block;margin-bottom:6px}
+.dir-body.locked-body .lock-cta{display:inline-block;margin-top:10px;padding:8px 16px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;font-style:normal}
+.dir-body.locked-body .lock-cta:hover{background:#005bb5}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;border:none;cursor:pointer}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-ghost{background:#fff;color:var(--accent);border:1px solid rgba(0,113,227,.25)}
+.fallback{padding:24px 16px;text-align:center;color:var(--text2);font-size:14px;line-height:1.7}
+.hidden{display:none!important}
+.loading{padding:24px 16px;text-align:center;color:var(--text2);font-size:14px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="banner" id="demoBanner">
+    <strong>免费样例</strong> · 完整 <strong>30 个方向</strong>的 AI 选品分析（历史静态样例，不随实时数据变化） ·
+    前 <strong>15 个方向</strong>免费深度阅读，后 <strong>15 个方向</strong>为会员专享（已加锁引导）。
+    开通 <strong>¥9.9 体验卡（3 天）</strong> 或正式会员即可解锁全部方向 + 每日最新 AI 能力。
+  </div>
+  <div class="card">
+    <div class="h1" id="demoTitle">AI 选品情报 · 样例阅读</div>
+    <div class="meta" id="demoMeta">加载样例信息…</div>
+    <div class="tools" aria-hidden="true">
+      <span class="tool">机会雷达 <span class="lock">🔒</span></span>
+      <span class="tool">类目对比 <span class="lock">🔒</span></span>
+      <span class="tool">AI 动态生成 <span class="lock">🔒</span></span>
+      <span class="tool">顾问对话 <span class="lock">🔒</span></span>
+      <span class="tool">PDF 导出 <span class="lock">🔒</span></span>
+    </div>
+    <div class="summary-box hidden" id="demoSummary">
+      <div class="sum-title" id="demoSummaryTitle"></div>
+      <div id="demoSummaryText"></div>
+    </div>
+    <div class="loading" id="demoLoading">正在加载 30 个方向…</div>
+    <div class="dir-list" id="demoDirList"></div>
+    <div class="fallback hidden" id="demoFallback">样例筹备中，请稍后再来或开通体验卡阅读完整 AI 分析。</div>
+    <div class="cta">
+      <a class="btn btn-primary" href="/member#center" onclick="try{parent.switchPortal&&parent.switchPortal('center')}catch(e){}">开通体验卡 ¥9.9 · 解锁全部</a>
+      <a class="btn btn-ghost" href="/member#demo" onclick="try{parent.switchPortal&&parent.switchPortal('demo')}catch(e){}">刷新样例</a>
+    </div>
+  </div>
+</div>
+<script>
+var demoState = { available: false, report_date: '', title: '', summary: '', direction_count: 0, free_unlock_count: 15 };
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderSummary() {
+  var box = document.getElementById('demoSummary');
+  if (!box) return;
+  if (!demoState.summary) { box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  var t = document.getElementById('demoSummaryTitle');
+  var x = document.getElementById('demoSummaryText');
+  if (t) t.textContent = demoState.title || '今日简报';
+  if (x) x.textContent = demoState.summary;
+}
+
+function renderDirections(dirs, freeCount) {
+  var list = document.getElementById('demoDirList');
+  var loading = document.getElementById('demoLoading');
+  if (loading) loading.classList.add('hidden');
+  if (!list) return;
+  if (!dirs || !dirs.length) {
+    list.innerHTML = '';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < dirs.length; i++) {
+    var d = dirs[i];
+    var idx = d.index || (i + 1);
+    var isUnlocked = !!d.unlocked;
+    var cls = isUnlocked ? 'unlocked' : 'locked';
+    var badge = isUnlocked
+      ? '<span class="badge badge-free">免费</span>'
+      : '<span class="badge badge-vip">会员专享</span>';
+    var arrow = isUnlocked ? '<span class="arrow">▶</span>' : '<span class="lock">🔒</span>';
+    html += '<div class="dir-item ' + cls + '" data-idx="' + idx + '">';
+    html += '<div class="dir-head">';
+    html += '<span class="idx">' + idx + '</span>';
+    html += '<span class="ttl">' + esc(d.title) + '</span>';
+    html += badge + arrow;
+    html += '</div>';
+    if (isUnlocked) {
+      html += '<div class="dir-body">' + esc(d.content) + '</div>';
+    } else {
+      html += '<div class="dir-body locked-body">';
+      html += '<span class="lock-icon">🔒</span>';
+      html += '本方向为会员专享内容。<br>开通 <strong>¥9.9 体验卡（3 天）</strong> 或正式会员即可解锁全部 30 个方向的 AI 深度分析 + 每日最新报告。';
+      html += '<br><a class="lock-cta" href="/member#center" onclick="try{parent.switchPortal&&parent.switchPortal(\'center\')}catch(e){}">立即开通 ¥9.9</a>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  list.innerHTML = html;
+  // 绑定解锁项点击展开/收起
+  list.querySelectorAll('.dir-item.unlocked').forEach(function(el) {
+    el.addEventListener('click', function() {
+      this.classList.toggle('expanded');
+    });
+  });
+  // 加锁项也允许点击展开（展示引导文案）
+  list.querySelectorAll('.dir-item.locked').forEach(function(el) {
+    el.addEventListener('click', function() {
+      this.classList.toggle('expanded');
+    });
+  });
+}
+
+async function initDemo() {
+  var metaEl = document.getElementById('demoMeta');
+  var titleEl = document.getElementById('demoTitle');
+  var loading = document.getElementById('demoLoading');
+  var fb = document.getElementById('demoFallback');
+  try {
+    // 1) 拉取样例信息
+    var res = await fetch('/api/v1/public/advisor-demo/info', { cache: 'no-store' });
+    var d = await res.json();
+    demoState = Object.assign(demoState, d);
+    if (!d.available) {
+      if (loading) loading.classList.add('hidden');
+      if (fb) fb.classList.remove('hidden');
+      if (metaEl) metaEl.textContent = d.message || '样例暂不可用';
+      return;
+    }
+    if (metaEl) {
+      var dirCount = d.direction_count || '—';
+      var freeCnt = d.free_unlock_count || 15;
+      var lockedCnt = d.locked_count || (dirCount - freeCnt);
+      var staticLabel = d.is_static ? '（历史静态样例）' : '';
+      metaEl.innerHTML = '样例日期 <strong>' + esc(d.report_date) + '</strong>' + staticLabel
+        + ' · 共 <strong>' + esc(dirCount) + '</strong> 个方向 · '
+        + '前 <strong>' + esc(freeCnt) + '</strong> 个免费 · 后 <strong>' + esc(lockedCnt) + '</strong> 个会员专享';
+    }
+    if (titleEl && d.title) titleEl.textContent = d.title;
+
+    // 2) 拉取样例 advice（含 daily_overview.summary）
+    try {
+      var res2 = await fetch('/api/v1/public/advisor-demo/directions', { cache: 'no-store' });
+      var dd = await res2.json();
+      if (dd && dd.directions) {
+        renderDirections(dd.directions, dd.free_unlock_count || 15);
+      } else {
+        if (loading) loading.classList.add('hidden');
+      }
+    } catch (e) {
+      if (loading) loading.textContent = '方向加载失败，请刷新重试';
+    }
+
+    // 3) 拉取简报（daily_overview.summary）— 用 advice.json 接口
+    try {
+      var res3 = await fetch('/api/v1/public/advisor-demo/advice', { cache: 'no-store' });
+      if (res3.ok) {
+        var da = await res3.json();
+        var ov = da && (da.daily_overview || {});
+        if (ov.summary) {
+          demoState.summary = ov.summary;
+          demoState.title = ov.title || demoState.title;
+          renderSummary();
+        }
+      }
+    } catch (e) { /* 简报可选 */ }
+  } catch (e) {
+    if (loading) loading.classList.add('hidden');
+    if (metaEl) metaEl.textContent = '样例加载失败，请刷新重试';
+  }
+}
+initDemo();
+</script>
+</body>
+</html>

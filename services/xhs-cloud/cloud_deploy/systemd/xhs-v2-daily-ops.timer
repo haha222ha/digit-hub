@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily V2 ops journal (08:00, after 02:30 insight shadow)
+After=network.target
+
+[Timer]
+OnCalendar=*-*-* 08:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

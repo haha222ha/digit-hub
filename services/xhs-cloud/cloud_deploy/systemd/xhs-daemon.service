@@ -1,0 +1,23 @@
+[Unit]
+Description=XHS Cloud Monitor Daemon (PG scan, 2G optimized)
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=admin
+WorkingDirectory=/opt/xhs-cloud
+EnvironmentFile=-/opt/xhs-cloud/.env
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/opt/xhs-cloud
+Environment=XHS_DAEMON_MODE=cloud
+Environment=XHS_ENABLE_PLAYWRIGHT=0
+Environment=XHS_DAEMON_BATCH_SIZE=500
+Environment=XHS_DAEMON_CONCURRENCY=2
+Environment=XHS_DAEMON_COOLDOWN_SEC=120
+ExecStart=/opt/xhs-cloud/venv/bin/python /opt/xhs-cloud/cloud_deploy/scripts/run_daemon.py
+Restart=on-failure
+RestartSec=30
+MemoryMax=1100M
+
+[Install]
+WantedBy=multi-user.target

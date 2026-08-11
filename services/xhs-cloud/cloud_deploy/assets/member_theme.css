@@ -1,0 +1,84 @@
+/* AI 阅读器主题 token — 由 member_portal_themes.css 在 html 上注入，此处为回退 */
+:root {
+  --reader-bg: #f5f5f7;
+  --reader-surface: #ffffff;
+  --reader-sidebar: #f9f9fb;
+  --reader-accent: #0071e3;
+  --reader-accent-soft: #eef5ff;
+  --reader-text: #1d1d1f;
+  --reader-muted: #6e6e73;
+  --reader-line: rgba(0, 0, 0, 0.08);
+  --reader-radius: 12px;
+  --reader-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --reader-aurora: linear-gradient(135deg, #0ea5e9 0%, #6366f1 55%, #8b5cf6 100%);
+}
+
+body[data-reader-state="LOADING"] .reader-body::after,
+body[data-reader-state="LOADING"] .reader-frame-wrap::after {
+  content: '加载中…';
+  display: block;
+  padding: 24px;
+  text-align: center;
+  color: var(--reader-muted);
+  font-size: 14px;
+}
+
+body[data-reader-state="LOCKED"] .reader-locked {
+  display: flex;
+}
+
+body[data-reader-state="ERROR"] .reader-error {
+  display: block;
+}
+
+.member-main-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.nav-pill {
+  flex: 1;
+  min-width: 88px;
+  text-align: center;
+  padding: 10px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--chip-bg, #e8e8ed);
+  color: var(--reader-muted);
+  border: 1px solid var(--line, transparent);
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.22s ease;
+}
+
+.nav-pill.active {
+  background: var(--btn-grad, var(--reader-accent));
+  color: #fff;
+  box-shadow: var(--btn-shadow, none);
+}
+
+.member-route.hidden {
+  display: none !important;
+}
+
+.reader-chrome h2 {
+  background: var(--title-grad, none);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.reader-sidebar {
+  background: var(--surface) !important;
+  backdrop-filter: blur(var(--glass-blur, 12px));
+  border-color: var(--line) !important;
+}
+
+.reader-main {
+  background: var(--surface) !important;
+  backdrop-filter: blur(var(--glass-blur, 12px));
+}

@@ -1,0 +1,11 @@
+[Unit]
+Description=XHS A/B Test Daily Timer
+
+[Timer]
+# 每天 04:00 跑（普通 advisor 02:00 跑，A/B 测试在 2 小时后避免冲突）
+OnCalendar=*-*-* 04:00:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

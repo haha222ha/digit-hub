@@ -1,0 +1,16 @@
+[Unit]
+Description=XHS Cloud Daily Report (PG → data.js → zip)
+After=network.target postgresql.service
+
+[Service]
+Type=oneshot
+User=admin
+WorkingDirectory=/opt/xhs-cloud
+EnvironmentFile=-/opt/xhs-cloud/.env
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/opt/xhs-cloud
+Environment=XHS_CLOUD_REPORT_SOURCE=auto
+ExecStart=/opt/xhs-cloud/venv/bin/python /opt/xhs-cloud/cloud_deploy/scripts/run_full_pipeline.py full
+
+[Install]
+WantedBy=multi-user.target

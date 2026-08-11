@@ -1,0 +1,10 @@
+[Unit]
+Description=Restart xhs-daemon when last 3 batches are all failures
+After=network.target postgresql.service
+
+[Service]
+Type=oneshot
+User=admin
+WorkingDirectory=/opt/xhs-cloud
+EnvironmentFile=-/opt/xhs-cloud/.env
+ExecStart=/bin/bash /opt/xhs-cloud/cloud_deploy/scripts/daemon_watchdog.sh

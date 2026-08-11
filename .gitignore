@@ -12,6 +12,10 @@ Thumbs.db
 
 # deploy artifacts (regenerable)
 deploy/dist/
+deploy/secrets/
+**/cloud_deploy/crawler_runtime/
+**/cloud_deploy/_ab_test_local/
+**/cloud_deploy/.env
 
 # local-only
 apps/gen-os/

@@ -1,0 +1,16 @@
+[Unit]
+Description=Aggregate daily_category_metrics for V2 insight
+After=network.target postgresql.service
+
+[Service]
+Type=oneshot
+User=root
+EnvironmentFile=-/opt/xhs-cloud/.env
+WorkingDirectory=/opt/xhs-cloud
+Environment=PYTHONPATH=/opt/xhs-cloud
+ExecStart=/bin/bash -lc '/opt/xhs-cloud/venv/bin/python /opt/xhs-cloud/cloud_deploy/scripts/aggregate_daily_category_metrics.py $(date +%%F)'
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

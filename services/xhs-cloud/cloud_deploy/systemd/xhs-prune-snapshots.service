@@ -1,0 +1,15 @@
+[Unit]
+Description=Prune goods_sold_snapshots (only when XHS_SNAPSHOT_RETENTION_DAYS>0)
+After=network.target postgresql.service
+
+[Service]
+Type=oneshot
+User=admin
+WorkingDirectory=/opt/xhs-cloud
+EnvironmentFile=-/opt/xhs-cloud/.env
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/opt/xhs-cloud
+ExecStart=/opt/xhs-cloud/venv/bin/python /opt/xhs-cloud/cloud_deploy/scripts/prune_sold_snapshots.py
+
+[Install]
+WantedBy=multi-user.target

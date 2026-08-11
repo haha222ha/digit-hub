@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily aggregate daily_category_metrics (02:00, before insight shadow 02:30)
+After=network.target
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

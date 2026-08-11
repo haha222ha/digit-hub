@@ -1,0 +1,783 @@
+{
+  "meta": {
+    "target_date": "2026-07-15",
+    "finished_at": "2026-07-15T14:47:21.736750+08:00",
+    "schema_version": "2.0",
+    "mode": "pregen_research",
+    "pack_type": "research_v1",
+    "opportunity_count": 16
+  },
+  "daily_overview": {
+    "title": "今日选品研究",
+    "summary": "一、核心结论\n2026-07-15 AI 研究筛选出 16 个值得关注的机会概念；实体占比档 60-80，虚拟占比档 20-40。活跃簇集中在「实体百货」方向。",
+    "content": "一、核心结论\n2026-07-15 AI 研究筛选出 16 个值得关注的机会概念；实体占比档 60-80，虚拟占比档 20-40。活跃簇集中在「实体百货」方向。\n\n二、今日机会头条\n实体百货方向·实体日用(指数98)、实体百货方向·实体日用(指数98)、服饰配饰方向·实体日用(指数98)。\n\n三、操作提示\n优先阅读机会指数≥80且竞争为「低」的概念卡；用决策简报确认进入窗口与风险，再自行完成供应链验证。\n\n四、免责声明\n本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。"
+  },
+  "opportunity_cards": [
+    {
+      "price_band": "0-30元",
+      "cluster_key": "c_4fec2b882fba",
+      "lifecycle_stage": "波动观察期",
+      "entity_class": "physical",
+      "how_to_act": "建议人群：新手、中小商家、走量型选品。建议关注窗口：暂缓，先验证稳定性。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。",
+      "confidence": "中",
+      "category_cluster": "实体百货",
+      "suggested_entry_window": "暂缓，先验证稳定性",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "近期动能波动较大，警惕活动/数据尖峰干扰",
+        "实体品类需核算物流、退货与库存成本"
+      ],
+      "signal_track": "综合机会",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "走量型选品"
+      ],
+      "concept_name": "实体百货方向·实体日用",
+      "evidence_摘要": {
+        "sample_size_tier": "千级样本",
+        "signal_stability": "波动偏高",
+        "momentum_band": "极高动能",
+        "growth_band": "高增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.4,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.15,
+          "cluster_support": 0.25
+        }
+      },
+      "why_now": "「实体百货方向·实体日用」属综合机会轨道：在0-30元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "trend_label": "高增长",
+      "growth_band": "高增长",
+      "opportunity_id": "opp_20260715_01",
+      "opportunity_score": 98
+    },
+    {
+      "price_band": "30-50元",
+      "cluster_key": "c_20df5b5599cc",
+      "lifecycle_stage": "成长期",
+      "entity_class": "physical",
+      "how_to_act": "建议人群：新手、中小商家、走量型选品。建议关注窗口：未来1-2周。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。",
+      "confidence": "中高",
+      "category_cluster": "实体百货",
+      "suggested_entry_window": "未来1-2周",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "实体品类需核算物流、退货与库存成本"
+      ],
+      "signal_track": "综合机会",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "走量型选品"
+      ],
+      "concept_name": "实体百货方向·实体日用",
+      "evidence_摘要": {
+        "sample_size_tier": "千级样本",
+        "signal_stability": "近窗趋势可用",
+        "momentum_band": "极高动能",
+        "growth_band": "高增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.4,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.25,
+          "cluster_support": 0.25
+        }
+      },
+      "why_now": "「实体百货方向·实体日用」属综合机会轨道：在30-50元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "trend_label": "高增长",
+      "growth_band": "高增长",
+      "opportunity_id": "opp_20260715_02",
+      "opportunity_score": 98
+    },
+    {
+      "price_band": "0-30元",
+      "cluster_key": "c_6d10bf3a3d1d",
+      "lifecycle_stage": "成长期",
+      "entity_class": "physical",
+      "how_to_act": "建议人群：新手、中小商家、走量型选品。建议关注窗口：未来1-2周。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。",
+      "confidence": "中高",
+      "category_cluster": "服饰配饰",
+      "suggested_entry_window": "未来1-2周",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "实体品类需核算物流、退货与库存成本"
+      ],
+      "signal_track": "综合机会",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "走量型选品"
+      ],
+      "concept_name": "服饰配饰方向·实体日用",
+      "evidence_摘要": {
+        "sample_size_tier": "千级样本",
+        "signal_stability": "近窗趋势可用",
+        "momentum_band": "极高动能",
+        "growth_band": "较快增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.34,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.25,
+          "cluster_support": 0.25
+        }
+      },
+      "why_now": "「服饰配饰方向·实体日用」属综合机会轨道：在0-30元呈现较快增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "trend_label": "较快增长",
+      "growth_band": "较快增长",
+      "opportunity_id": "opp_20260715_03",
+      "opportunity_score": 98
+    },
+    {
+      "price_band": "0-30元",
+      "cluster_key": "c_f528e9423042",
+      "lifecycle_stage": "成长期",
+      "entity_class": "physical",
+      "how_to_act": "建议人群：新手、中小商家、走量型选品。建议关注窗口：未来1-2周。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。",
+      "confidence": "中高",
+      "category_cluster": "食品生鲜",
+      "suggested_entry_window": "未来1-2周",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "实体品类需核算物流、退货与库存成本"
+      ],
+      "signal_track": "综合机会",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "走量型选品"
+      ],
+      "concept_name": "食品生鲜方向·实体日用",
+      "evidence_摘要": {
+        "sample_size_tier": "百级样本",
+        "signal_stability": "近窗趋势可用",
+        "momentum_band": "极高动能",
+        "growth_band": "较快增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.39,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.25,
+          "cluster_support": 0.25
+        }
+      },
+      "why_now": "「食品生鲜方向·实体日用」属综合机会轨道：在0-30元呈现较快增长、动能平稳信号；样本百级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "trend_label": "较快增长",
+      "growth_band": "较快增长",
+      "opportunity_id": "opp_20260715_04",
+      "opportunity_score": 98
+    },
+    {
+      "price_band": "100-200元",
+      "cluster_key": "c_2969b025d8d4",
+      "lifecycle_stage": "成长期",
+      "entity_class": "physical",
+      "how_to_act": "建议人群：新手、中小商家、利润型选品。建议关注窗口：未来1-2周。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。",
+      "confidence": "中高",
+      "category_cluster": "实体百货",
+      "suggested_entry_window": "未来1-2周",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "实体品类需核算物流、退货与库存成本"
+      ],
+      "signal_track": "综合机会",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "利润型选品"
+      ],
+      "concept_name": "实体百货方向·实体日用",
+      "evidence_摘要": {
+        "sample_size_tier": "千级样本",
+        "signal_stability": "近窗趋势可用",
+        "momentum_band": "极高动能",
+        "growth_band": "高增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.4,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.25,
+          "cluster_support": 0.25
+        }
+      },
+      "why_now": "「实体百货方向·实体日用」属综合机会轨道：在100-200元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "trend_label": "高增长",
+      "growth_band": "高增长",
+      "opportunity_id": "opp_20260715_05",
+      "opportunity_score": 98
+    },
+    {
+      "price_band": "50-100元",
+      "cluster_key": "c_36f3ba6be596",
+      "lifecycle_stage": "波动观察期",
+      "entity_class": "physical",
+      "how_to_act": "建议人群：新手、中小商家。建议关注窗口：暂缓，先验证稳定性。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。",
+      "confidence": "中",
+      "category_cluster": "实体百货",
+      "suggested_entry_window": "暂缓，先验证稳定性",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "近期动能波动较大，警惕活动/数据尖峰干扰",
+        "实体品类需核算物流、退货与库存成本"
+      ],
+      "signal_track": "综合机会",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家"
+      ],
+      "concept_name": "实体百货方向·实体日用",
+      "evidence_摘要": {
+        "sample_size_tier": "千级样本",
+        "signal_stability": "波动偏高",
+        "momentum_band": "极高动能",
+        "growth_band": "高增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.4,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.15,
+          "cluster_support": 0.25
+        }
+      },
+      "why_now": "「实体百货方向·实体日用」属综合机会轨道：在50-100元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "trend_label": "高增长",
+      "growth_band": "高增长",
+      "opportunity_id": "opp_20260715_06",
+      "opportunity_score": 98
+    },
+    {
+      "price_band": "0-30元",
+      "cluster_key": "c_be84bb532bfa",
+      "lifecycle_stage": "波动观察期",
+      "entity_class": "virtual",
+      "how_to_act": "建议人群：新手、中小商家、内容型卖家、走量型选品。建议关注窗口：暂缓，先验证稳定性。行动要点：优先确认交付形态与售后边界，避免同质化低价卷。",
+      "confidence": "中",
+      "category_cluster": "虚拟商品",
+      "suggested_entry_window": "暂缓，先验证稳定性",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "近期动能波动较大，警惕活动/数据尖峰干扰",
+        "虚拟品类需确认版权与交付合规"
+      ],
+      "signal_track": "综合机会",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "内容型卖家",
+        "走量型选品"
+      ],
+      "concept_name": "虚拟商品方向·虚拟履约",
+      "evidence_摘要": {
+        "sample_size_tier": "千级样本",
+        "signal_stability": "波动偏高",
+        "momentum_band": "极高动能",
+        "growth_band": "高增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.4,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.15,
+          "cluster_support": 0.25
+        }
+      },
+      "why_now": "「虚拟商品方向·虚拟履约」属综合机会轨道：在0-30元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "trend_label": "高增长",
+      "growth_band": "高增长",
+      "opportunity_id": "opp_20260715_07",
+      "opportunity_score": 98
+    },
+    {
+      "price_band": "0-30元",
+      "cluster_key": "c_818416e90a5d",
+      "lifecycle_stage": "成长期",
+      "entity_class": "virtual",
+      "how_to_act": "建议人群：新手、中小商家、内容型卖家、走量型选品。建议关注窗口：未来1-2周。行动要点：优先确认交付形态与售后边界，避免同质化低价卷。",
+      "confidence": "中高",
+      "category_cluster": "教育培训",
+      "suggested_entry_window": "未来1-2周",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "虚拟品类需确认版权与交付合规"
+      ],
+      "signal_track": "综合机会",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "内容型卖家",
+        "走量型选品"
+      ],
+      "concept_name": "教培学习资料",
+      "evidence_摘要": {
+        "sample_size_tier": "千级样本",
+        "signal_stability": "近窗趋势可用",
+        "momentum_band": "极高动能",
+        "growth_band": "高增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.4,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.25,
+          "cluster_support": 0.25
+        }
+      },
+      "why_now": "「教培学习资料」属综合机会轨道：在0-30元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "trend_label": "高增长",
+      "growth_band": "高增长",
+      "opportunity_id": "opp_20260715_08",
+      "opportunity_score": 98
+    },
+    {
+      "price_band": "200-500元",
+      "cluster_key": "c_fad93f04a259",
+      "lifecycle_stage": "波动观察期",
+      "entity_class": "physical",
+      "how_to_act": "建议人群：新手、中小商家、利润型选品。建议关注窗口：暂缓，先验证稳定性。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。",
+      "confidence": "中",
+      "category_cluster": "教育培训",
+      "suggested_entry_window": "暂缓，先验证稳定性",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "近期动能波动较大，警惕活动/数据尖峰干扰",
+        "实体品类需核算物流、退货与库存成本"
+      ],
+      "signal_track": "高增速",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "利润型选品"
+      ],
+      "concept_name": "教育培训方向·实体日用",
+      "evidence_摘要": {
+        "sample_size_tier": "十级样本",
+        "signal_stability": "波动偏高",
+        "momentum_band": "极高动能",
+        "growth_band": "高增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.4,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.15,
+          "cluster_support": 0.25
+        }
+      },
+      "why_now": "「教育培训方向·实体日用」属高增速轨道：在200-500元呈现高增长、动能平稳信号；样本十级样本，竞争「较低」。机会指数 94。输出为研究概念，非平台可定位单品。",
+      "trend_label": "高增长",
+      "growth_band": "高增长",
+      "opportunity_id": "opp_20260715_09",
+      "opportunity_score": 94
+    },
+    {
+      "price_band": ">500元",
+      "cluster_key": "c_03716d03262f",
+      "lifecycle_stage": "成长期",
+      "entity_class": "virtual",
+      "how_to_act": "建议人群：新手、中小商家、内容型卖家、利润型选品。建议关注窗口：未来1-2周。行动要点：优先确认交付形态与售后边界，避免同质化低价卷。",
+      "confidence": "中高",
+      "category_cluster": "教育培训",
+      "suggested_entry_window": "未来1-2周",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "虚拟品类需确认版权与交付合规"
+      ],
+      "signal_track": "高增速",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "内容型卖家",
+        "利润型选品"
+      ],
+      "concept_name": "教培学习资料",
+      "evidence_摘要": {
+        "sample_size_tier": "个位数样本",
+        "signal_stability": "近窗趋势可用",
+        "momentum_band": "极高动能",
+        "growth_band": "高增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.4,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.25,
+          "cluster_support": 0.19
+        }
+      },
+      "why_now": "「教培学习资料」属高增速轨道：在>500元呈现高增长、动能平稳信号；样本个位数样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "trend_label": "高增长",
+      "growth_band": "高增长",
+      "opportunity_id": "opp_20260715_10",
+      "opportunity_score": 98
+    },
+    {
+      "price_band": "30-50元",
+      "cluster_key": "c_cf6648224e2c",
+      "lifecycle_stage": "启动期",
+      "entity_class": "physical",
+      "how_to_act": "建议人群：新手、中小商家、走量型选品。建议关注窗口：未来2-4周。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。",
+      "confidence": "中高",
+      "category_cluster": "数码配件",
+      "suggested_entry_window": "未来2-4周",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "实体品类需核算物流、退货与库存成本"
+      ],
+      "signal_track": "高增速",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "走量型选品"
+      ],
+      "concept_name": "数码配件方向·实体日用",
+      "evidence_摘要": {
+        "sample_size_tier": "个位数样本",
+        "signal_stability": "近窗趋势可用",
+        "momentum_band": "极高动能",
+        "growth_band": "高增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.4,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.25,
+          "cluster_support": 0.03
+        }
+      },
+      "why_now": "「数码配件方向·实体日用」属高增速轨道：在30-50元呈现高增长、动能平稳信号；样本个位数样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "trend_label": "高增长",
+      "growth_band": "高增长",
+      "opportunity_id": "opp_20260715_11",
+      "opportunity_score": 98
+    },
+    {
+      "price_band": "0-30元",
+      "cluster_key": "c_28b4d242fe7c",
+      "lifecycle_stage": "成长期",
+      "entity_class": "physical",
+      "how_to_act": "建议人群：新手、中小商家、走量型选品。建议关注窗口：未来1-2周。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。",
+      "confidence": "中高",
+      "category_cluster": "教育培训",
+      "suggested_entry_window": "未来1-2周",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "实体品类需核算物流、退货与库存成本"
+      ],
+      "signal_track": "高增速",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "走量型选品"
+      ],
+      "concept_name": "应试数字设计素材",
+      "evidence_摘要": {
+        "sample_size_tier": "十级样本",
+        "signal_stability": "近窗趋势可用",
+        "momentum_band": "极高动能",
+        "growth_band": "高增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.4,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.25,
+          "cluster_support": 0.25
+        }
+      },
+      "why_now": "「应试数字设计素材」属高增速轨道：在0-30元呈现高增长、动能平稳信号；样本十级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "trend_label": "高增长",
+      "growth_band": "高增长",
+      "opportunity_id": "opp_20260715_12",
+      "opportunity_score": 98
+    },
+    {
+      "price_band": "0-30元",
+      "cluster_key": "c_7cf198ae86bf",
+      "lifecycle_stage": "成长期",
+      "entity_class": "physical",
+      "how_to_act": "建议人群：新手、中小商家、走量型选品。建议关注窗口：未来1-2周。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。",
+      "confidence": "中",
+      "category_cluster": "实体百货",
+      "suggested_entry_window": "未来1-2周",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "实体品类需核算物流、退货与库存成本"
+      ],
+      "signal_track": "高加速度",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "走量型选品"
+      ],
+      "concept_name": "系统软件资源",
+      "evidence_摘要": {
+        "sample_size_tier": "个位数样本",
+        "signal_stability": "近窗趋势可用",
+        "momentum_band": "低动能",
+        "growth_band": "较快增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.38,
+          "acceleration": 0.11,
+          "competition": 0.3,
+          "stability": 0.25,
+          "cluster_support": 0.13
+        }
+      },
+      "why_now": "「系统软件资源」属高加速度轨道：在0-30元呈现较快增长、动能平稳信号；样本个位数样本，竞争「较低」。机会指数 63。输出为研究概念，非平台可定位单品。",
+      "trend_label": "较快增长",
+      "growth_band": "较快增长",
+      "opportunity_id": "opp_20260715_13",
+      "opportunity_score": 63
+    },
+    {
+      "price_band": "50-100元",
+      "cluster_key": "c_8c7bf4de295b",
+      "lifecycle_stage": "成长期",
+      "entity_class": "physical",
+      "how_to_act": "建议人群：新手、中小商家。建议关注窗口：未来1-2周。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。",
+      "confidence": "中",
+      "category_cluster": "教育培训",
+      "suggested_entry_window": "未来1-2周",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "实体品类需核算物流、退货与库存成本"
+      ],
+      "signal_track": "高加速度",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家"
+      ],
+      "concept_name": "教育培训方向·实体日用",
+      "evidence_摘要": {
+        "sample_size_tier": "百级样本",
+        "signal_stability": "近窗趋势可用",
+        "momentum_band": "低动能",
+        "growth_band": "高增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.4,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.25,
+          "cluster_support": 0.25
+        }
+      },
+      "why_now": "「教育培训方向·实体日用」属高加速度轨道：在50-100元呈现高增长、动能平稳信号；样本百级样本，竞争「较低」。机会指数 66。输出为研究概念，非平台可定位单品。",
+      "trend_label": "高增长",
+      "growth_band": "高增长",
+      "opportunity_id": "opp_20260715_14",
+      "opportunity_score": 66
+    },
+    {
+      "price_band": "0-30元",
+      "cluster_key": "c_5b95a261fff8",
+      "lifecycle_stage": "观察期",
+      "entity_class": "physical",
+      "how_to_act": "建议人群：新手、中小商家、走量型选品。建议关注窗口：持续观察2周。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。",
+      "confidence": "中",
+      "category_cluster": "美妆护肤",
+      "suggested_entry_window": "持续观察2周",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "实体品类需核算物流、退货与库存成本"
+      ],
+      "signal_track": "高加速度",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "走量型选品"
+      ],
+      "concept_name": "护肤护理",
+      "evidence_摘要": {
+        "sample_size_tier": "十级样本",
+        "signal_stability": "近窗趋势可用",
+        "momentum_band": "低动能",
+        "growth_band": "平稳增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.18,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.25,
+          "cluster_support": 0.25
+        }
+      },
+      "why_now": "「护肤护理」属高加速度轨道：在0-30元呈现平稳增长、动能平稳信号；样本十级样本，竞争「较低」。机会指数 58。输出为研究概念，非平台可定位单品。",
+      "trend_label": "平稳增长",
+      "growth_band": "平稳增长",
+      "opportunity_id": "opp_20260715_15",
+      "opportunity_score": 58
+    },
+    {
+      "price_band": "0-30元",
+      "cluster_key": "c_d95a38306d7e",
+      "lifecycle_stage": "成长期",
+      "entity_class": "physical",
+      "how_to_act": "建议人群：新手、中小商家、走量型选品。建议关注窗口：未来1-2周。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。",
+      "confidence": "中",
+      "category_cluster": "服饰配饰",
+      "suggested_entry_window": "未来1-2周",
+      "competition_level": "低",
+      "accel_band": "动能平稳",
+      "risks": [
+        "研究结论基于聚合信号，概念落地需自行验证供需",
+        "实体品类需核算物流、退货与库存成本"
+      ],
+      "signal_track": "高加速度",
+      "suggested_seller_profile": [
+        "新手",
+        "中小商家",
+        "走量型选品"
+      ],
+      "concept_name": "运动服饰",
+      "evidence_摘要": {
+        "sample_size_tier": "百级样本",
+        "signal_stability": "近窗趋势可用",
+        "momentum_band": "低动能",
+        "growth_band": "高增长",
+        "accel_band": "动能平稳",
+        "score_breakdown": {
+          "growth": 0.4,
+          "acceleration": 0.1,
+          "competition": 0.3,
+          "stability": 0.25,
+          "cluster_support": 0.25
+        }
+      },
+      "why_now": "「运动服饰」属高加速度轨道：在0-30元呈现高增长、动能平稳信号；样本百级样本，竞争「较低」。机会指数 66。输出为研究概念，非平台可定位单品。",
+      "trend_label": "高增长",
+      "growth_band": "高增长",
+      "opportunity_id": "opp_20260715_16",
+      "opportunity_score": 66
+    }
+  ],
+  "direction_advices": [
+    {
+      "key": "top_opportunities",
+      "title": "今日高机会精选解读",
+      "content": "一、核心判断\n今日「今日高机会精选」优先关注概念「实体百货方向·实体日用」（机会指数 98，竞争 低）。\n二、结构观察\n- 实体百货方向·实体日用｜指数98｜0-30元｜波动观察期｜竞争低\n- 实体百货方向·实体日用｜指数98｜30-50元｜成长期｜竞争低\n- 服饰配饰方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n- 食品生鲜方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜100-200元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜50-100元｜波动观察期｜竞争低\n三、推荐动作\n建议人群：新手、中小商家、走量型选品。建议关注窗口：暂缓，先验证稳定性。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。\n四、风险与否决\n- 研究结论基于聚合信号，概念落地需自行验证供需\n- 近期动能波动较大，警惕活动/数据尖峰干扰\n- 实体品类需核算物流、退货与库存成本\n\n五、免责声明\n本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。",
+      "summary": "「实体百货方向·实体日用」属综合机会轨道：在0-30元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "category_type": "mixed"
+    },
+    {
+      "key": "high_growth_top",
+      "title": "高增速机会 TOP解读",
+      "content": "一、核心判断\n今日「高增速机会 TOP」优先关注概念「教育培训方向·实体日用」（机会指数 94，竞争 低）。\n二、结构观察\n- 教育培训方向·实体日用｜指数94｜200-500元｜波动观察期｜竞争低\n- 教培学习资料｜指数98｜>500元｜成长期｜竞争低\n- 数码配件方向·实体日用｜指数98｜30-50元｜启动期｜竞争低\n- 应试数字设计素材｜指数98｜0-30元｜成长期｜竞争低\n- 教育培训方向·实体日用｜指数66｜50-100元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜0-30元｜波动观察期｜竞争低\n三、推荐动作\n建议人群：新手、中小商家、利润型选品。建议关注窗口：暂缓，先验证稳定性。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。\n四、风险与否决\n- 研究结论基于聚合信号，概念落地需自行验证供需\n- 近期动能波动较大，警惕活动/数据尖峰干扰\n- 实体品类需核算物流、退货与库存成本\n\n五、免责声明\n本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。",
+      "summary": "「教育培训方向·实体日用」属高增速轨道：在200-500元呈现高增长、动能平稳信号；样本十级样本，竞争「较低」。机会指数 94。输出为研究概念，非平台可定位单品。",
+      "category_type": "mixed"
+    },
+    {
+      "key": "high_accel_top",
+      "title": "高加速度机会 TOP解读",
+      "content": "一、核心判断\n今日「高加速度机会 TOP」优先关注概念「系统软件资源」（机会指数 63，竞争 低）。\n二、结构观察\n- 系统软件资源｜指数63｜0-30元｜成长期｜竞争低\n- 教育培训方向·实体日用｜指数66｜50-100元｜成长期｜竞争低\n- 护肤护理｜指数58｜0-30元｜观察期｜竞争低\n- 运动服饰｜指数66｜0-30元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜30-50元｜成长期｜竞争低\n- 服饰配饰方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n三、推荐动作\n建议人群：新手、中小商家、走量型选品。建议关注窗口：未来1-2周。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。\n四、风险与否决\n- 研究结论基于聚合信号，概念落地需自行验证供需\n- 实体品类需核算物流、退货与库存成本\n\n五、免责声明\n本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。",
+      "summary": "「系统软件资源」属高加速度轨道：在0-30元呈现较快增长、动能平稳信号；样本个位数样本，竞争「较低」。机会指数 63。输出为研究概念，非平台可定位单品。",
+      "category_type": "physical"
+    },
+    {
+      "key": "low_competition_growth",
+      "title": "低竞争增长方向解读",
+      "content": "一、核心判断\n今日「低竞争增长方向」优先关注概念「实体百货方向·实体日用」（机会指数 98，竞争 低）。\n二、结构观察\n- 实体百货方向·实体日用｜指数98｜0-30元｜波动观察期｜竞争低\n- 实体百货方向·实体日用｜指数98｜30-50元｜成长期｜竞争低\n- 服饰配饰方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n- 食品生鲜方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜100-200元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜50-100元｜波动观察期｜竞争低\n三、推荐动作\n建议人群：新手、中小商家、走量型选品。建议关注窗口：暂缓，先验证稳定性。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。\n四、风险与否决\n- 研究结论基于聚合信号，概念落地需自行验证供需\n- 近期动能波动较大，警惕活动/数据尖峰干扰\n- 实体品类需核算物流、退货与库存成本\n\n五、免责声明\n本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。",
+      "summary": "「实体百货方向·实体日用」属综合机会轨道：在0-30元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "category_type": "mixed"
+    },
+    {
+      "key": "virtual_focus",
+      "title": "虚拟履约机会解读",
+      "content": "一、核心判断\n今日「虚拟履约机会」优先关注概念「虚拟商品方向·虚拟履约」（机会指数 98，竞争 低）。\n二、结构观察\n- 虚拟商品方向·虚拟履约｜指数98｜0-30元｜波动观察期｜竞争低\n- 教培学习资料｜指数98｜0-30元｜成长期｜竞争低\n三、推荐动作\n建议人群：新手、中小商家、内容型卖家、走量型选品。建议关注窗口：暂缓，先验证稳定性。行动要点：优先确认交付形态与售后边界，避免同质化低价卷。\n四、风险与否决\n- 研究结论基于聚合信号，概念落地需自行验证供需\n- 近期动能波动较大，警惕活动/数据尖峰干扰\n- 虚拟品类需确认版权与交付合规\n\n五、免责声明\n本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。",
+      "summary": "「虚拟商品方向·虚拟履约」属综合机会轨道：在0-30元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "category_type": "virtual"
+    },
+    {
+      "key": "physical_focus",
+      "title": "实体日用机会解读",
+      "content": "一、核心判断\n今日「实体日用机会」优先关注概念「实体百货方向·实体日用」（机会指数 98，竞争 低）。\n二、结构观察\n- 实体百货方向·实体日用｜指数98｜0-30元｜波动观察期｜竞争低\n- 实体百货方向·实体日用｜指数98｜30-50元｜成长期｜竞争低\n- 服饰配饰方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n- 食品生鲜方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜100-200元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜50-100元｜波动观察期｜竞争低\n三、推荐动作\n建议人群：新手、中小商家、走量型选品。建议关注窗口：暂缓，先验证稳定性。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。\n四、风险与否决\n- 研究结论基于聚合信号，概念落地需自行验证供需\n- 近期动能波动较大，警惕活动/数据尖峰干扰\n- 实体品类需核算物流、退货与库存成本\n\n五、免责声明\n本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。",
+      "summary": "「实体百货方向·实体日用」属综合机会轨道：在0-30元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "category_type": "physical"
+    }
+  ],
+  "decision_briefs": [
+    {
+      "key": "top_opportunities",
+      "title": "今日高机会精选解读",
+      "content": "一、核心判断\n今日「今日高机会精选」优先关注概念「实体百货方向·实体日用」（机会指数 98，竞争 低）。\n二、结构观察\n- 实体百货方向·实体日用｜指数98｜0-30元｜波动观察期｜竞争低\n- 实体百货方向·实体日用｜指数98｜30-50元｜成长期｜竞争低\n- 服饰配饰方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n- 食品生鲜方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜100-200元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜50-100元｜波动观察期｜竞争低\n三、推荐动作\n建议人群：新手、中小商家、走量型选品。建议关注窗口：暂缓，先验证稳定性。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。\n四、风险与否决\n- 研究结论基于聚合信号，概念落地需自行验证供需\n- 近期动能波动较大，警惕活动/数据尖峰干扰\n- 实体品类需核算物流、退货与库存成本\n\n五、免责声明\n本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。",
+      "summary": "「实体百货方向·实体日用」属综合机会轨道：在0-30元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "category_type": "mixed"
+    },
+    {
+      "key": "high_growth_top",
+      "title": "高增速机会 TOP解读",
+      "content": "一、核心判断\n今日「高增速机会 TOP」优先关注概念「教育培训方向·实体日用」（机会指数 94，竞争 低）。\n二、结构观察\n- 教育培训方向·实体日用｜指数94｜200-500元｜波动观察期｜竞争低\n- 教培学习资料｜指数98｜>500元｜成长期｜竞争低\n- 数码配件方向·实体日用｜指数98｜30-50元｜启动期｜竞争低\n- 应试数字设计素材｜指数98｜0-30元｜成长期｜竞争低\n- 教育培训方向·实体日用｜指数66｜50-100元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜0-30元｜波动观察期｜竞争低\n三、推荐动作\n建议人群：新手、中小商家、利润型选品。建议关注窗口：暂缓，先验证稳定性。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。\n四、风险与否决\n- 研究结论基于聚合信号，概念落地需自行验证供需\n- 近期动能波动较大，警惕活动/数据尖峰干扰\n- 实体品类需核算物流、退货与库存成本\n\n五、免责声明\n本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。",
+      "summary": "「教育培训方向·实体日用」属高增速轨道：在200-500元呈现高增长、动能平稳信号；样本十级样本，竞争「较低」。机会指数 94。输出为研究概念，非平台可定位单品。",
+      "category_type": "mixed"
+    },
+    {
+      "key": "high_accel_top",
+      "title": "高加速度机会 TOP解读",
+      "content": "一、核心判断\n今日「高加速度机会 TOP」优先关注概念「系统软件资源」（机会指数 63，竞争 低）。\n二、结构观察\n- 系统软件资源｜指数63｜0-30元｜成长期｜竞争低\n- 教育培训方向·实体日用｜指数66｜50-100元｜成长期｜竞争低\n- 护肤护理｜指数58｜0-30元｜观察期｜竞争低\n- 运动服饰｜指数66｜0-30元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜30-50元｜成长期｜竞争低\n- 服饰配饰方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n三、推荐动作\n建议人群：新手、中小商家、走量型选品。建议关注窗口：未来1-2周。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。\n四、风险与否决\n- 研究结论基于聚合信号，概念落地需自行验证供需\n- 实体品类需核算物流、退货与库存成本\n\n五、免责声明\n本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。",
+      "summary": "「系统软件资源」属高加速度轨道：在0-30元呈现较快增长、动能平稳信号；样本个位数样本，竞争「较低」。机会指数 63。输出为研究概念，非平台可定位单品。",
+      "category_type": "physical"
+    },
+    {
+      "key": "low_competition_growth",
+      "title": "低竞争增长方向解读",
+      "content": "一、核心判断\n今日「低竞争增长方向」优先关注概念「实体百货方向·实体日用」（机会指数 98，竞争 低）。\n二、结构观察\n- 实体百货方向·实体日用｜指数98｜0-30元｜波动观察期｜竞争低\n- 实体百货方向·实体日用｜指数98｜30-50元｜成长期｜竞争低\n- 服饰配饰方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n- 食品生鲜方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜100-200元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜50-100元｜波动观察期｜竞争低\n三、推荐动作\n建议人群：新手、中小商家、走量型选品。建议关注窗口：暂缓，先验证稳定性。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。\n四、风险与否决\n- 研究结论基于聚合信号，概念落地需自行验证供需\n- 近期动能波动较大，警惕活动/数据尖峰干扰\n- 实体品类需核算物流、退货与库存成本\n\n五、免责声明\n本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。",
+      "summary": "「实体百货方向·实体日用」属综合机会轨道：在0-30元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "category_type": "mixed"
+    },
+    {
+      "key": "virtual_focus",
+      "title": "虚拟履约机会解读",
+      "content": "一、核心判断\n今日「虚拟履约机会」优先关注概念「虚拟商品方向·虚拟履约」（机会指数 98，竞争 低）。\n二、结构观察\n- 虚拟商品方向·虚拟履约｜指数98｜0-30元｜波动观察期｜竞争低\n- 教培学习资料｜指数98｜0-30元｜成长期｜竞争低\n三、推荐动作\n建议人群：新手、中小商家、内容型卖家、走量型选品。建议关注窗口：暂缓，先验证稳定性。行动要点：优先确认交付形态与售后边界，避免同质化低价卷。\n四、风险与否决\n- 研究结论基于聚合信号，概念落地需自行验证供需\n- 近期动能波动较大，警惕活动/数据尖峰干扰\n- 虚拟品类需确认版权与交付合规\n\n五、免责声明\n本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。",
+      "summary": "「虚拟商品方向·虚拟履约」属综合机会轨道：在0-30元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "category_type": "virtual"
+    },
+    {
+      "key": "physical_focus",
+      "title": "实体日用机会解读",
+      "content": "一、核心判断\n今日「实体日用机会」优先关注概念「实体百货方向·实体日用」（机会指数 98，竞争 低）。\n二、结构观察\n- 实体百货方向·实体日用｜指数98｜0-30元｜波动观察期｜竞争低\n- 实体百货方向·实体日用｜指数98｜30-50元｜成长期｜竞争低\n- 服饰配饰方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n- 食品生鲜方向·实体日用｜指数98｜0-30元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜100-200元｜成长期｜竞争低\n- 实体百货方向·实体日用｜指数98｜50-100元｜波动观察期｜竞争低\n三、推荐动作\n建议人群：新手、中小商家、走量型选品。建议关注窗口：暂缓，先验证稳定性。行动要点：优先验证供给差异与履约能力，避免只盯单日动能。\n四、风险与否决\n- 研究结论基于聚合信号，概念落地需自行验证供需\n- 近期动能波动较大，警惕活动/数据尖峰干扰\n- 实体品类需核算物流、退货与库存成本\n\n五、免责声明\n本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。",
+      "summary": "「实体百货方向·实体日用」属综合机会轨道：在0-30元呈现高增长、动能平稳信号；样本千级样本，竞争「较低」。机会指数 98。输出为研究概念，非平台可定位单品。",
+      "category_type": "physical"
+    }
+  ],
+  "disclaimer": "本报告为 AI 选品研究结论，基于脱敏聚合统计生成，仅供参考，不构成投资建议或收益承诺。用户应自行核实并独立决策。"
+}

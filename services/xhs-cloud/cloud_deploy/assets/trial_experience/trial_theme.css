@@ -1,0 +1,277 @@
+/* 免费体验包 · 明亮科技极简主题 */
+:root,
+[data-theme="trial"] {
+  --bg: #f4f7fb;
+  --bg2: #ffffff;
+  --bg3: #eef2f8;
+  --text: #0f172a;
+  --text2: #475569;
+  --text3: #94a3b8;
+  --line: rgba(15, 23, 42, 0.08);
+  --accent: #2563eb;
+  --accent2: #0ea5e9;
+  --accent-grad: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+  --red: #ef4444;
+  --green: #10b981;
+  --purple: #8b5cf6;
+  --mint: #14b8a6;
+  --gold: #f59e0b;
+  --orange: #f97316;
+  --virtual-grad: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  --physical-grad: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+  --shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+  --radius: 12px;
+  --sidebar-w: 260px;
+}
+
+body[data-theme="trial"],
+body:not([data-theme="classic"]) {
+  background: var(--bg);
+  color: var(--text);
+}
+
+[data-theme="trial"] .sidebar,
+body:not([data-theme="classic"]) .sidebar {
+  background: rgba(255, 255, 255, 0.92);
+  border-right: 1px solid var(--line);
+  backdrop-filter: blur(12px);
+}
+
+[data-theme="trial"] .sidebar-logo,
+body:not([data-theme="classic"]) .sidebar-logo {
+  background: var(--accent-grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="trial"] .type-tab,
+body:not([data-theme="classic"]) .type-tab {
+  background: var(--bg2);
+  border-color: var(--line);
+  color: var(--text2);
+}
+
+[data-theme="trial"] .metric-item,
+body:not([data-theme="classic"]) .metric-item {
+  color: var(--text2);
+}
+
+[data-theme="trial"] .metric-item.active,
+body:not([data-theme="classic"]) .metric-item.active {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--accent);
+  border-color: rgba(37, 99, 235, 0.25);
+}
+
+[data-theme="trial"] .stat-card,
+body:not([data-theme="classic"]) .stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+[data-theme="trial"] .product-card,
+body:not([data-theme="classic"]) .product-card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+[data-theme="trial"] .product-card:hover,
+body:not([data-theme="classic"]) .product-card:hover {
+  border-color: rgba(37, 99, 235, 0.35);
+  transform: translateY(-3px);
+}
+
+[data-theme="trial"] .toolbar input,
+[data-theme="trial"] .toolbar select,
+body:not([data-theme="classic"]) .toolbar input,
+body:not([data-theme="classic"]) .toolbar select {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.trial-hero {
+  margin: 0 0 20px;
+  padding: 18px 20px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  display: grid;
+  gap: 14px;
+}
+
+.trial-hero h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.trial-hero p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text2);
+}
+
+.trial-hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trial-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--text2);
+}
+
+.trial-badge strong { color: var(--accent); }
+
+.trial-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.trial-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.trial-btn-primary {
+  background: var(--accent-grad);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.trial-btn-primary:hover { transform: translateY(-1px); }
+
+.trial-btn-ghost {
+  background: #fff;
+  color: var(--accent);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+}
+
+.trial-pricing {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .trial-pricing { grid-template-columns: 1fr; }
+}
+
+.trial-price-card {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+
+.trial-price-card .label {
+  font-size: 11px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.trial-price-card .price {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--accent);
+  margin: 4px 0;
+}
+
+.trial-price-card .desc {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+.trial-price-card.highlight {
+  border-color: rgba(37, 99, 235, 0.35);
+  background: linear-gradient(180deg, #fff 0%, #f8fbff 100%);
+}
+
+.metric.acc-highlight .mv {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.trial-footer-note {
+  margin: 24px 0 8px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  font-size: 12px;
+  color: #92400e;
+  line-height: 1.6;
+}
+
+[data-theme="trial"] .leaderboard-tab,
+body:not([data-theme="classic"]) .leaderboard-tab {
+  background: var(--bg2);
+  border-color: var(--line);
+  color: var(--text2);
+}
+
+[data-theme="trial"] .leaderboard-tab.active,
+body:not([data-theme="classic"]) .leaderboard-tab.active {
+  background: var(--accent-grad);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+}
+
+[data-theme="trial"] .card-tier.tier-S,
+body:not([data-theme="classic"]) .card-tier.tier-S {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+[data-theme="trial"] .card-tier.tier-A,
+body:not([data-theme="classic"]) .card-tier.tier-A {
+  background: rgba(249, 115, 22, 0.12);
+  color: #ea580c;
+  border-color: rgba(249, 115, 22, 0.25);
+}
+
+[data-theme="trial"] .card-tier.tier-B,
+body:not([data-theme="classic"]) .card-tier.tier-B {
+  background: rgba(14, 165, 233, 0.12);
+  color: #0284c7;
+  border-color: rgba(14, 165, 233, 0.25);
+}
+
+[data-theme="trial"] .card-tier.tier-C,
+body:not([data-theme="classic"]) .card-tier.tier-C {
+  background: rgba(148, 163, 184, 0.15);
+  color: #64748b;
+  border-color: rgba(148, 163, 184, 0.25);
+}
