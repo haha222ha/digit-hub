@@ -19,8 +19,12 @@
 
 ### 测评套餐 plan_code
 
-- `assess_single` — 7 天 · ¥9.9 · 报告额度 1  
-- `assess_monthly` — 30 天 · ¥29.9 · 额度 30  
+- `assess_single` — 7 天 · ¥1.99 · 报告额度 1  
+- `assess_monthly` — 30 天 · ¥29.9 · 额度 30（前期前端收银台隐藏，API 保留）
+
+发卡渠道授权码 plan 建议 `assess_single` 或 `assess_code`（权益相同，额度 1）。
+
+落地链接：`https://monitor.xhs365.cn/?api=live&code=XXXX` → 自动跳转激活页。
 
 权益写入 `entitlements.products.assess` + `assess_enabled`。
 
@@ -33,7 +37,7 @@
 | GET | `/api/v1/member/profile` | 含 entitlements |
 | GET | `/api/v1/assess/access?skin_id=` | **服务端验权**：`{ allowed, reason, entitlements, skin_id }` |
 
-完整报告阅读前必须 `allowed=true`（前端会缓存 entitlements，但以该接口为准）。
+完整报告阅读前必须 `allowed=true`（live 模式以服务端为准，接口失败视为未解锁，不读 localStorage 缓存权益）。
 
 xhs-cloud 实现：`GET /api/v1/assess/access` → `assess_access_for_user`（未登录返回 `need_login_or_pay`）。
 

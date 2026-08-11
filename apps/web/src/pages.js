@@ -10,6 +10,7 @@ import {
 } from "./quiz/scoring.js";
 import { buildOptionOrders, displayOptions, exitModalHtml } from "./quiz/session.js";
 import { unlockAssessMock, clearSession, getEntitlements, DEMO_AUTH_CODE } from "./api/mock.js";
+import { activateWithAuthCode } from "./api/activate.js";
 import { api, isMockMode } from "./api/client.js";
 import { checkReportAccess, refreshEntitlementsFromProfile } from "./api/access.js";
 import { deviceId } from "./config.js";
@@ -61,7 +62,8 @@ import {
 } from "./motion.js";
 
 function topbar(active = "") {
-  const right = `<a class="topbar-link" href="#/account">${active === "account" ? "会员中心" : "会员·码"}</a>`;
+  const activate = active === "activate" ? "激活" : `<a class="topbar-link" href="#/activate">激活</a>`;
+  const right = `${activate}<a class="topbar-link" href="#/account">${active === "account" ? "会员中心" : "会员·码"}</a>`;
   return baseTopbarHtml({ brand: "心象测", brandHref: "#/", rightHtml: right });
 }
 
@@ -667,6 +669,24 @@ export async function renderSoftResult(root, skinId, query) {
   };
 }
 
+function filterCheckoutPlans(plans) {
+  const assessOnly = (plans || []).filter((x) => {
+    const code = String(x.plan_code || x.code || "");
+    if (code === "pay_test") return false;
+    return code.startsWith("assess");
+  });
+  if (isMockMode()) return assessOnly.length ? assessOnly : plans;
+  return assessOnly.filter((x) => (x.plan_code || x.code) === "assess_single");
+}
+
+const FALLBACK_SINGLE_PLAN = {
+  plan_code: "assess_single",
+  label: "单次完整报告",
+  price_yuan: 1.99,
+  amount: "1.99",
+  summary: "7 天内解锁 1 份完整报告",
+};
+
 async function openPayDrawer(root, skinId, rid) {
   const drawer = root.querySelector("#drawer");
   const bd = root.querySelector("#bd");
@@ -683,19 +703,12 @@ async function openPayDrawer(root, skinId, rid) {
       String(x.plan_code || x.code || "").startsWith("assess")
     );
     plans = fromAssess.length ? fromAssess : fromFilter.length ? fromFilter : p.items || [];
-    if (!plans.length) {
-      plans = [
-        { plan_code: "assess_single", label: "单次完整报告", price_yuan: 9.9 },
-        { plan_code: "assess_monthly", label: "月度测评会员", price_yuan: 29.9 },
-      ];
-    }
+    plans = filterCheckoutPlans(plans);
+    if (!plans.length) plans = [FALLBACK_SINGLE_PLAN];
     const c = await api("/api/v1/payment/channels");
     channels = c.channels || c.items || [];
   } catch {
-    plans = [
-      { plan_code: "assess_single", label: "单次完整报告", price_yuan: 9.9 },
-      { plan_code: "assess_monthly", label: "月度测评会员", price_yuan: 29.9 },
-    ];
+    plans = [FALLBACK_SINGLE_PLAN];
     channels = [
       { channel: "wxpay", label: "微信" },
       { channel: "alipay", label: "支付宝" },
@@ -715,7 +728,7 @@ async function openPayDrawer(root, skinId, rid) {
     <p class="muted">${
       isMockMode()
         ? "本地验收：选套餐 → 模拟支付，或使用演示授权码"
-        : "扫码支付 · 服务端验权后解锁"
+        : "扫码 ¥1.99 解锁 · 小红书/闲鱼买家可用授权码"
     }</p>
     <div class="stack" style="margin-top:14px">
       ${plans
@@ -766,12 +779,7 @@ async function openPayDrawer(root, skinId, rid) {
   drawer.querySelector("#codeBtn").onclick = async () => {
     const code = drawer.querySelector("#code").value.trim();
     try {
-      const res = await api("/api/v1/auth/login-code", {
-        method: "POST",
-        body: JSON.stringify({ auth_code: code, device_id: deviceId(), device_label: "browser" }),
-      });
-      if (res?.access_token) localStorage.setItem("xinxiang_token", res.access_token);
-      await refreshEntitlementsFromProfile().catch(() => null);
+      await activateWithAuthCode(code);
       bd.classList.remove("open");
       drawer.classList.remove("open");
       const ok = await checkReportAccess(skinId);
@@ -1105,6 +1113,61 @@ export async function renderDuoCompare(root, skinId) {
   };
 }
 
+export async function renderActivate(root, query) {
+  const params = new URLSearchParams(query);
+  const initialCode = params.get("code")?.trim() || "";
+  const catalog = await loadCatalog();
+  const featured = liveSkins(catalog)[0];
+  const nextPath = featured ? `/t/${featured.id}` : "/tests";
+
+  root.innerHTML = `
+    ${topbar("activate")}
+    <main class="shell">
+      <h1 class="page-title">激活授权码</h1>
+      <p class="muted">小红书 / 闲鱼购买后，在此激活即可解锁完整测评报告。</p>
+      <section class="section activate-box">
+        <input class="field" id="code" placeholder="粘贴授权码" value="${initialCode.replace(/"/g, "&quot;")}" autocomplete="off" />
+        <button class="btn btn-primary btn-block" id="activateBtn">立即激活</button>
+        <p class="muted" id="status" style="margin:12px 0 0"></p>
+        <div id="successPanel" hidden>
+          <p class="access-badge on"><span class="dot"></span>激活成功 · 权益已生效</p>
+          <p class="muted">建议截图保存授权码，换设备时可再次输入激活。</p>
+          <button class="btn btn-ember btn-block" id="goTest">开始测评</button>
+          <button class="btn btn-ghost btn-block" id="goAccount">查看会员中心</button>
+        </div>
+      </section>
+      <p class="muted" style="font-size:0.85rem">自然流量用户可先免费测题，结果页再扫码 ¥1.99 或填码解锁。</p>
+    </main>
+  `;
+
+  const statusEl = root.querySelector("#status");
+  const successPanel = root.querySelector("#successPanel");
+  const codeInput = root.querySelector("#code");
+  const activateBtn = root.querySelector("#activateBtn");
+
+  const showSuccess = () => {
+    successPanel.hidden = false;
+    activateBtn.hidden = true;
+    statusEl.textContent = "";
+  };
+
+  const runActivate = async () => {
+    statusEl.textContent = "激活中…";
+    try {
+      await activateWithAuthCode(codeInput.value);
+      showSuccess();
+    } catch (e) {
+      statusEl.textContent = e.message || "激活失败，请检查授权码";
+    }
+  };
+
+  activateBtn.onclick = runActivate;
+  root.querySelector("#goTest").onclick = () => navigate(nextPath);
+  root.querySelector("#goAccount").onclick = () => navigate("/account");
+
+  if (initialCode) runActivate();
+}
+
 export async function renderAccount(root) {
   await refreshEntitlementsFromProfile().catch(() => null);
   const ent = getEntitlements();
@@ -1152,12 +1215,7 @@ export async function renderAccount(root) {
   root.querySelector("#codeBtn").onclick = async () => {
     const code = root.querySelector("#code").value.trim();
     try {
-      const res = await api("/api/v1/auth/login-code", {
-        method: "POST",
-        body: JSON.stringify({ auth_code: code, device_id: deviceId(), device_label: "browser" }),
-      });
-      if (res.access_token) localStorage.setItem("xinxiang_token", res.access_token);
-      await refreshEntitlementsFromProfile();
+      await activateWithAuthCode(code);
       renderAccount(root);
     } catch (e) {
       alert(e.message || "失败");

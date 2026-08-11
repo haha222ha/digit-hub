@@ -37,7 +37,7 @@ $lines = @(
   "XHS_PAY_ALIPAY_PID=$($map['XHS_PAY_ALIPAY_PID'])",
   "XHS_PAY_ALIPAY_KEY=$($map['XHS_PAY_ALIPAY_KEY'])",
   "XHS_PAY_NOTIFY_BASE=https://monitor.xhs365.cn",
-  "XHS_PAY_ENABLE_TEST_PLAN=1"
+  "XHS_PAY_ENABLE_TEST_PLAN=0"
 )
 [IO.File]::WriteAllLines($Out, $lines)
 Write-Host "Wrote $Out"

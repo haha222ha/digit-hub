@@ -101,8 +101,43 @@ const UNLOCK_VALUE = [
 
 export function softValueHtml(skin, r, { unlocked } = {}) {
   const tops = topDims(skin, r, 2);
-  const lows = bottomDims(skin, r, 1);
   const conf = confidenceLine(r);
+
+  if (!unlocked) {
+    return `
+    <section class="value-block value-block-teaser">
+      <header class="value-head">
+        <p class="group-label">轻结果预览</p>
+        <h2>你的类型已生成</h2>
+        <p class="muted">完整报告含雷达图、维度分布、场景长文与 7 日行动——解锁后立即可读。</p>
+      </header>
+
+      <div class="value-grid">
+        <article class="value-card accent">
+          <span class="value-kicker">主导信号</span>
+          <strong>${tops.map((t) => t.label).join(" · ") || r.type}</strong>
+          <p>具体百分比与结构图在完整报告中解锁。</p>
+        </article>
+        <article class="value-card">
+          <span class="value-kicker">画像倾向</span>
+          <strong>${conf.level}</strong>
+          <p>${conf.tip.replace(/完整报告/g, "解锁后")}</p>
+        </article>
+      </div>
+
+      ${scenesHtml(skin, r, { unlocked: false, full: false })}
+
+      <div class="value-proof">
+        <p class="group-label">完整报告你将获得</p>
+        <ul class="value-checklist">
+          ${UNLOCK_VALUE.map((x) => `<li><strong>${x.t}</strong><span>${x.d}</span></li>`).join("")}
+        </ul>
+      </div>
+    </section>
+  `;
+  }
+
+  const lows = bottomDims(skin, r, 1);
   const rarity = rarityLine(skin, r);
   const preview = (r.full || []).slice(0, 1)[0];
 

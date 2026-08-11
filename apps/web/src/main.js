@@ -1,3 +1,4 @@
+import { bootstrapCardCodeRedirect, useMock } from "./config.js";
 import { initA2hs, wireA2hsGlobal } from "../base/a2hs.js";
 import { applyStyleToDocument } from "./style/engine.js";
 import { startRouter, onRoute, matchRoute, currentPath } from "./router.js";
@@ -10,7 +11,11 @@ import {
   renderFullReport,
   renderDuoCompare,
   renderAccount,
+  renderActivate,
 } from "./pages.js";
+
+useMock();
+bootstrapCardCodeRedirect();
 
 initA2hs({
   brand: "心象测",
@@ -59,6 +64,7 @@ async function route() {
     if (path === "/" || path === "") return renderHome(root);
     if (path === "/tests") return renderCatalog(root);
     if (path === "/account") return renderAccount(root);
+    if (path === "/activate") return renderActivate(root, query);
 
     let m = matchRoute(path, "/t/:id");
     if (m) return renderIntro(root, m.id);

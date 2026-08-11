@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# 日常热更新：只拉代码 + 同步 API + 重启服务。不 apt、不重写 .env、不轮换 JWT/DB 密码。
+# Usage: sudo bash /opt/digit-hub/deploy/quick_update.sh
+set -euo pipefail
+
+DIGIT_HUB="${DIGIT_HUB:-/opt/digit-hub}"
+XHS_ROOT="${XHS_ROOT:-/opt/xhs-cloud}"
+SRC="${DIGIT_HUB}/services/xhs-cloud/cloud_deploy"
+BRANCH="${BRANCH:-main}"
+
+echo "==> git pull ${DIGIT_HUB}"
+cd "${DIGIT_HUB}"
+git fetch origin
+git checkout "${BRANCH}"
+git pull --ff-only origin "${BRANCH}"
+
+echo "==> sync API code (keep .env / data / venv)"
+mkdir -p "${XHS_ROOT}/cloud_deploy" "${XHS_ROOT}/data"
+rsync -a --delete \
+  --exclude venv --exclude data --exclude .env --exclude '__pycache__' --exclude '*.pyc' \
+  "${SRC}/" "${XHS_ROOT}/cloud_deploy/"
+touch "${XHS_ROOT}/cloud_deploy/__init__.py" 2>/dev/null || true
+
+ENV_OUT="${XHS_ROOT}/.env"
+if [[ -f "${ENV_OUT}" ]]; then
+  if grep -q '^XHS_PAY_ENABLE_TEST_PLAN=' "${ENV_OUT}"; then
+    sed -i 's/^XHS_PAY_ENABLE_TEST_PLAN=.*/XHS_PAY_ENABLE_TEST_PLAN=0/' "${ENV_OUT}"
+  else
+    echo 'XHS_PAY_ENABLE_TEST_PLAN=0' >> "${ENV_OUT}"
+  fi
+  echo "==> kept existing ${ENV_OUT} (JWT/admin/db unchanged)"
+else
+  echo "WARN: ${ENV_OUT} missing — run api_fresh_install.sh once first"
+  exit 1
+fi
+
+echo "==> pip (requirements only)"
+if [[ ! -x "${XHS_ROOT}/venv/bin/pip" ]]; then
+  python3 -m venv "${XHS_ROOT}/venv"
+fi
+"${XHS_ROOT}/venv/bin/pip" install -q -r "${XHS_ROOT}/cloud_deploy/requirements-cloud.txt"
+
+echo "==> nginx reload (no restart)"
+nginx -t
+systemctl reload nginx
+
+echo "==> restart API"
+systemctl restart xhs-cloud-api
+sleep 2
+systemctl is-active xhs-cloud-api
+
+echo "==> smoke"
+curl -fsS -o /dev/null -w "health:%{http_code}\n" http://127.0.0.1:8080/api/v1/health
+curl -fsS http://127.0.0.1:8080/api/v1/payment/plans 2>/dev/null \
+  | python3 -c "import sys,json; d=json.load(sys.stdin); p=next((x for x in d.get('assess_plans',[]) if x.get('plan_code')=='assess_single'),{}); print('assess_single:', p.get('amount'), p.get('price_yuan'))" \
+  || echo "(plans parse skip)"
+echo "DONE quick_update — users stay logged in; Workbench should not drop"

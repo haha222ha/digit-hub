@@ -9,8 +9,7 @@ export async function checkReportAccess(skinId) {
     return !!res?.allowed;
   } catch (e) {
     if (isMockMode()) return hasLocalAccess(skinId);
-    if (e.status === 401) return false;
-    return hasLocalAccess(skinId);
+    return false;
   }
 }
 

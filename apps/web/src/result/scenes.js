@@ -289,9 +289,13 @@ export function scenesHtml(skin, r, { unlocked, full = false } = {}) {
       ${list
         .map(
           (s) => `
-        <article class="scene-card ${unlocked || !full ? "" : "locked"} ${full && unlocked ? "scene-card-full" : ""}">
+        <article class="scene-card ${unlocked || full ? "" : "locked"} ${full && unlocked ? "scene-card-full" : ""}">
           <h3>${s.h}</h3>
-          <p>${s.p}</p>
+          ${
+            unlocked || full
+              ? `<p>${s.p}</p>`
+              : `<p class="scene-tease-blur" aria-hidden="true">${s.p}</p>`
+          }
           ${full && unlocked && s.act ? `<p class="scene-act"><strong>本周动作</strong> ${s.act}</p>` : ""}
           ${!unlocked && !full ? `<span class="scene-lock">完整解读待解锁</span>` : ""}
         </article>`

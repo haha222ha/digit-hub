@@ -30,6 +30,9 @@ _PLAN_DEFAULT_DAYS = {
     "halfyear": 183,
     "yearly": 365,
     "weekly": 7,
+    "assess_single": 7,
+    "assess_code": 7,
+    "assess_monthly": 30,
 }
 
 
@@ -45,7 +48,17 @@ def main() -> None:
     g.add_argument(
         "--plan",
         default="monthly",
-        choices=["experience_3d", "monthly", "quarterly", "halfyear", "yearly", "weekly"],
+        choices=[
+            "experience_3d",
+            "monthly",
+            "quarterly",
+            "halfyear",
+            "yearly",
+            "weekly",
+            "assess_single",
+            "assess_code",
+            "assess_monthly",
+        ],
     )
     g.add_argument("--days", type=int, default=0, help="会员有效天数（0=按套餐默认）")
     g.add_argument("--count", type=int, default=1, help="生成数量")

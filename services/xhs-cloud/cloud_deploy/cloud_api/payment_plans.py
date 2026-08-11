@@ -111,9 +111,9 @@ ASSESS_PAYMENT_PLANS: tuple[dict, ...] = (
         "plan_code": "assess_single",
         "label": "心象测·单次报告",
         "duration_days": 7,
-        "amount": "9.90",
-        "price_yuan": 9.9,
-        "summary": "7 天 · 测评完整报告解锁",
+        "amount": "1.99",
+        "price_yuan": 1.99,
+        "summary": "7 天 · 1 份完整报告解锁",
         "product": "assess",
         "entitlements_template": ASSESS_SINGLE_ENTITLEMENTS,
     },
@@ -215,6 +215,17 @@ def list_active_plans(*, include_addons: bool = False) -> list[dict]:
 
 PLAN_BY_CODE = {p["plan_code"]: p for p in (*PAYMENT_PLANS, *PAYMENT_ADDON_PLANS, *ASSESS_PAYMENT_PLANS)}
 PLAN_BY_CODE[PAYMENT_TEST_PLAN["plan_code"]] = PAYMENT_TEST_PLAN
+# 第三方发卡专用 plan（不在收银台展示，仅授权码生成）
+PLAN_BY_CODE["assess_code"] = {
+    "plan_code": "assess_code",
+    "label": "心象测·发卡码",
+    "duration_days": 7,
+    "amount": "0.00",
+    "price_yuan": 0,
+    "summary": "第三方平台发卡 · 1 份完整报告",
+    "product": "assess",
+    "entitlements_template": ASSESS_SINGLE_ENTITLEMENTS,
+}
 
 
 def list_assess_plans() -> list[dict]:

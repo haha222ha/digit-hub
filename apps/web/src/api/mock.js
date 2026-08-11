@@ -80,7 +80,21 @@ export function unlockAssessMock({ plan_code = "assess_single", skins = ["*"] } 
 export function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(PROFILE_KEY);
+  localStorage.removeItem(ORDERS_KEY);
   setEntitlements(defaultEntitlements());
+}
+
+/** Switching to live API — drop mock entitlements so stale unlocks never apply. */
+export function clearMockSessionForLive() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(PROFILE_KEY);
+  localStorage.removeItem(ORDERS_KEY);
+  setEntitlements(defaultEntitlements());
+}
+
+export function purgeMockArtifactsIfLive() {
+  const token = localStorage.getItem(TOKEN_KEY) || "";
+  if (token.startsWith("mock-jwt")) clearMockSessionForLive();
 }
 
 export function hasReportAccess(skinId) {
@@ -142,20 +156,10 @@ export async function mockFetch(path, options = {}) {
           plan_code: "assess_single",
           label: "单次完整报告",
           duration_days: 7,
-          amount: "9.90",
-          price_yuan: 9.9,
-          summary: "7 天内解锁测评完整报告",
+          amount: "1.99",
+          price_yuan: 1.99,
+          summary: "7 天内解锁 1 份完整报告",
           product: "assess",
-        },
-        {
-          plan_code: "assess_monthly",
-          label: "月度测评会员",
-          duration_days: 30,
-          amount: "29.90",
-          price_yuan: 29.9,
-          summary: "30 天 · 测评报告额度 30",
-          product: "assess",
-          recommended: true,
         },
       ],
       addons: [],
@@ -177,9 +181,9 @@ export async function mockFetch(path, options = {}) {
     const row = {
       order_no,
       plan_code: body.plan_code || "assess_single",
-      plan_label: body.plan_code === "assess_monthly" ? "月度测评会员" : "单次完整报告",
-      amount: body.plan_code === "assess_monthly" ? "29.90" : "9.90",
-      duration_days: body.plan_code === "assess_monthly" ? 30 : 7,
+      plan_label: "单次完整报告",
+      amount: "1.99",
+      duration_days: 7,
       qrcode: `mock://pay/${order_no}`,
       payurl: "",
       expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(),

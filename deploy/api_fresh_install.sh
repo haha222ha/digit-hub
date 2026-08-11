@@ -50,11 +50,21 @@ DB_PASS=""
 JWT_SECRET=""
 SYNC_KEY=""
 ADMIN_PASS=""
+if [[ -f "${XHS_ROOT}/.env" ]]; then
+  echo "==> preserve secrets from ${XHS_ROOT}/.env"
+  # shellcheck disable=SC1091
+  set -a && source "${XHS_ROOT}/.env" && set +a
+  JWT_SECRET="${XHS_CLOUD_JWT_SECRET:-}"
+  ADMIN_PASS="${XHS_CLOUD_ADMIN_PASS:-}"
+  SYNC_KEY="${XHS_CLOUD_SYNC_KEY:-}"
+  if [[ -n "${XHS_DATABASE_URL:-}" ]]; then
+    DB_PASS="$(python3 -c "import os,urllib.parse; u=urllib.parse.urlparse(os.environ['U']); print(urllib.parse.unquote(u.password or ''))" U="${XHS_DATABASE_URL}" 2>/dev/null || true)"
+  fi
+fi
 if [[ -f /tmp/xhs_cloud.env ]]; then
-  echo "==> using /tmp/xhs_cloud.env as base (will merge)"
+  echo "==> merge /tmp/xhs_cloud.env (pay keys)"
   # shellcheck disable=SC1091
   set -a && source /tmp/xhs_cloud.env && set +a
-  DB_PASS="${DB_PASS:-}"
 fi
 
 if [[ -z "${DB_PASS}" ]]; then DB_PASS="$(rand)"; fi
@@ -117,7 +127,7 @@ ALI_PID="${XHS_PAY_ALIPAY_PID:-}"
 ALI_KEY="${XHS_PAY_ALIPAY_KEY:-}"
 PAY_API="${XHS_PAY_API_URL:-https://pay.hwxun.cn/}"
 ALI_API="${XHS_PAY_ALIPAY_API_URL:-https://xapay.hwxun.cn/}"
-TEST_PLAN="${XHS_PAY_ENABLE_TEST_PLAN:-1}"
+TEST_PLAN="${XHS_PAY_ENABLE_TEST_PLAN:-0}"
 
 cat > "$ENV_OUT" <<EOF
 XHS_CLOUD_ROOT=${XHS_ROOT}

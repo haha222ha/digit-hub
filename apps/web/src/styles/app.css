@@ -1376,7 +1376,17 @@ button {
 }
 
 .scene-card.locked {
-  opacity: 0.78;
+  opacity: 0.88;
+}
+
+.scene-tease-blur {
+  margin: 0;
+  color: transparent;
+  text-shadow: 0 0 8px rgba(28, 36, 48, 0.45);
+  user-select: none;
+  filter: blur(4px);
+  max-height: 2.8em;
+  overflow: hidden;
 }
 
 .scene-card h3 {
