@@ -20,6 +20,8 @@ rsync -a --delete \
   --exclude venv --exclude data --exclude .env --exclude '__pycache__' --exclude '*.pyc' \
   "${SRC}/" "${XHS_ROOT}/cloud_deploy/"
 touch "${XHS_ROOT}/cloud_deploy/__init__.py" 2>/dev/null || true
+mkdir -p "${XHS_ROOT}/cloud_deploy/assets/uploads"
+chown -R admin:admin "${XHS_ROOT}/cloud_deploy/assets" 2>/dev/null || true
 
 ENV_OUT="${XHS_ROOT}/.env"
 if [[ -f "${ENV_OUT}" ]]; then

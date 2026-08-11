@@ -170,10 +170,11 @@
         <div class="field"><label>按钮文案</label><input id="contactLabel" value="扫码联系客服" /></div>
         <div class="field"><label>说明文字</label><input id="contactText" value="开通会员 / 技术支持" /></div>
         <div class="row">
-          <input type="file" id="contactFile" accept="image/*" style="width:auto" />
+          <input type="file" id="contactFile" accept="image/png,image/jpeg,image/gif,image/webp" style="width:auto" />
           <button class="ghost" id="uploadQr">上传二维码</button>
           <button id="saveContact">保存配置</button>
         </div>
+        <p class="sub" id="contactUploadHint">选择图片后会自动上传；也可选手动点「上传二维码」。</p>
         <div id="contactPreview" class="sub"></div>
       </div>
     </div>
@@ -381,21 +382,53 @@
       } catch (e) { showMsg($("topMsg"), e.message); }
     }
 
+    async function uploadContactQr(file) {
+      if (!file) return alert("请选择图片");
+      const btn = $("uploadQr");
+      const hint = $("contactUploadHint");
+      btn.disabled = true;
+      hint.textContent = `上传中：${file.name}…`;
+      showMsg($("topMsg"), "");
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+        const data = await api("/member-contact/upload", { method: "POST", body: fd });
+        $("contactQr").value = data.url || "";
+        hint.textContent = "上传成功，记得点「保存配置」写入数据库。";
+        showMsg($("topMsg"), "上传成功", "ok");
+        loadContact();
+      } catch (e) {
+        hint.textContent = "上传失败，请重试或检查登录是否过期。";
+        showMsg($("topMsg"), e.message || "上传失败");
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
     $("uploadQr").onclick = async () => {
-      const f = $("contactFile").files[0]; if (!f) return alert("请选择图片");
-      const fd = new FormData(); fd.append("file", f);
-      const data = await api("/member-contact/upload", { method: "POST", body: fd });
-      $("contactQr").value = data.url || "";
-      showMsg($("topMsg"), "上传成功", "ok"); loadContact();
+      await uploadContactQr($("contactFile").files[0]);
+    };
+
+    $("contactFile").onchange = async () => {
+      const f = $("contactFile").files[0];
+      if (!f) return;
+      $("contactPreview").innerHTML = `<span class="sub">已选：${f.name}（${Math.round(f.size / 1024)} KB）</span>`;
+      await uploadContactQr(f);
     };
 
     $("saveContact").onclick = async () => {
-      await api("/member-contact", { method: "PUT", body: JSON.stringify({
-        wechat_qr_url: $("contactQr").value.trim(),
-        wechat_label: $("contactLabel").value.trim(),
-        contact_text: $("contactText").value.trim(),
-      })});
-      showMsg($("topMsg"), "客服配置已保存", "ok"); loadContact();
+      showMsg($("topMsg"), "");
+      try {
+        await api("/member-contact", { method: "PUT", body: JSON.stringify({
+          wechat_qr_url: $("contactQr").value.trim(),
+          wechat_label: $("contactLabel").value.trim(),
+          contact_text: $("contactText").value.trim(),
+        })});
+        showMsg($("topMsg"), "客服配置已保存", "ok");
+        loadContact();
+      } catch (e) {
+        showMsg($("topMsg"), e.message || "保存失败");
+      }
     };
 
     async function enterApp() {

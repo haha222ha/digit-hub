@@ -14,6 +14,25 @@ MONITOR_DOMAIN="${MONITOR_DOMAIN:-monitor.xhs365.cn}"
 MONITOR_CONF="${CONF_D}/monitor.xhs365.cn.conf"
 
 MARKER="# digit-hub managed locations"
+API_ASSETS_LOCATIONS='    client_max_body_size 16m;
+
+    location /assets/ {
+        proxy_pass http://127.0.0.1:8080/assets/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location /api/ {
+        client_max_body_size 16m;
+        proxy_pass http://127.0.0.1:8080/api/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 120s;
+    }'
 # 精确匹配 + alias 单文件；禁止在该 location 内使用 index 指令（nginx 1.18 会拼成 index.htmlindex.html）
 ADMIN_LOCATIONS='    location = /admin {
         return 302 /admin/index.html;
@@ -50,14 +69,7 @@ server {
         add_header Cache-Control "no-cache, must-revalidate";
     }
 
-    location /api/ {
-        proxy_pass http://127.0.0.1:8080/api/;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_read_timeout 120s;
-    }
+${API_ASSETS_LOCATIONS}
 
 ${admin_block}
 }
@@ -83,14 +95,7 @@ server {
         add_header Cache-Control "no-cache, must-revalidate";
     }
 
-    location /api/ {
-        proxy_pass http://127.0.0.1:8080/api/;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_read_timeout 120s;
-    }
+${API_ASSETS_LOCATIONS}
 
     location = /admin {
         return 302 /admin/index.html;
