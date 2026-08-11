@@ -3,101 +3,70 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>授权码管理 · 统一运营后台</title>
+  <title>运营后台 · 心象测 / 选品</title>
   <style>
     :root {
-      --ink: #1c2430;
-      --muted: #5c6570;
-      --paper: #f3ede3;
-      --line: #d9d0c3;
-      --seal: #1f6b5c;
-      --danger: #a33b2d;
-      --ok: #2f7d4e;
-      --radius: 10px;
+      --ink: #1c2430; --muted: #5c6570; --paper: #f3ede3; --line: #d9d0c3;
+      --seal: #1f6b5c; --danger: #a33b2d; --ok: #2f7d4e; --radius: 10px;
       --font: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
     }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: var(--font);
-      color: var(--ink);
-      background: var(--paper);
-      min-height: 100vh;
-    }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 48px; }
-    h1 { margin: 0 0 4px; font-size: 1.5rem; }
-    .sub { color: var(--muted); margin: 0 0 20px; font-size: 0.92rem; }
-    .card {
-      background: rgba(255, 250, 243, 0.9);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 16px;
-    }
+    body { margin: 0; font-family: var(--font); color: var(--ink); background: var(--paper); min-height: 100vh; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 20px 16px 48px; }
+    h1 { margin: 0 0 4px; font-size: 1.45rem; }
+    h2 { margin: 0 0 12px; font-size: 1.1rem; }
+    .sub { color: var(--muted); margin: 0 0 16px; font-size: 0.9rem; }
+    .card { background: rgba(255,250,243,.92); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
     .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-    .stat b { display: block; font-size: 1.4rem; margin-top: 4px; }
+    .stat b { display: block; font-size: 1.35rem; margin-top: 4px; }
     .stat span { color: var(--muted); font-size: 0.85rem; }
     .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
     label { font-size: 0.85rem; color: var(--muted); display: block; margin-bottom: 4px; }
-    input, select, textarea, button {
-      font: inherit;
-      border-radius: 8px;
-      border: 1px solid var(--line);
-      padding: 8px 10px;
-    }
+    input, select, textarea, button { font: inherit; border-radius: 8px; border: 1px solid var(--line); padding: 8px 10px; }
     input, select, textarea { width: 100%; background: #fff; }
-    textarea { min-height: 120px; font-family: ui-monospace, monospace; font-size: 0.85rem; }
-    button {
-      cursor: pointer;
-      background: var(--seal);
-      color: #fff;
-      border: none;
-      padding: 9px 14px;
-    }
+    textarea { min-height: 100px; font-family: ui-monospace, monospace; font-size: 0.85rem; }
+    button { cursor: pointer; background: var(--seal); color: #fff; border: none; padding: 9px 14px; }
     button.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
     button.danger { background: var(--danger); }
-    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    .nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .nav button { border-radius: 999px; }
+    .nav button.on { background: var(--seal); color: #fff; }
     .tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-    .tab {
-      padding: 8px 12px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: #fff;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
+    .tab { padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; cursor: pointer; font-size: 0.88rem; }
     .tab.on { background: var(--seal); color: #fff; border-color: var(--seal); }
-    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
     th, td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
-    th { color: var(--muted); font-weight: 600; }
-    .code { font-family: ui-monospace, monospace; font-size: 0.82rem; word-break: break-all; }
-    .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; }
-    .tag.unused { background: #e8f5ee; color: var(--ok); }
-    .tag.active { background: #dceaf5; color: #1a5f8a; }
-    .tag.revoked { background: #f5e0dc; color: var(--danger); }
+    th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+    .code { font-family: ui-monospace, monospace; font-size: 0.8rem; word-break: break-all; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; }
+    .tag.unused, .tag.new, .tag.pending { background: #e8f5ee; color: var(--ok); }
+    .tag.active, .tag.read, .tag.merged { background: #dceaf5; color: #1a5f8a; }
+    .tag.revoked, .tag.ignored, .tag.rejected { background: #f5e0dc; color: var(--danger); }
+    .tag.done { background: #eee; color: #555; }
     .msg { padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 0.9rem; }
     .msg.err { background: #fdecea; color: var(--danger); }
     .msg.ok { background: #e8f5ee; color: var(--ok); }
     .hidden { display: none !important; }
-    .login-box { max-width: 360px; margin: 80px auto; }
+    .login-box { max-width: 380px; margin: 72px auto; }
     .field { margin-bottom: 12px; }
+    .online { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+    .link-row { font-size: 0.88rem; margin: 6px 0; word-break: break-all; }
+    .panel { display: none; }
+    .panel.on { display: block; }
+    .mini { padding: 4px 8px; font-size: 0.75rem; }
     @media (max-width: 800px) { .grid { grid-template-columns: repeat(2, 1fr); } }
   </style>
 </head>
 <body>
   <div id="loginView" class="wrap login-box">
     <div class="card">
-      <h1>统一授权码后台</h1>
-      <p class="sub">心象测 · 选品 insight · 云发卡（预留）共用 xhs-cloud 内核</p>
+      <h1>统一运营后台</h1>
+      <p class="sub">复用 vuemonitor / xhs-cloud 内核 · 授权码 · 反馈 · 客服配置</p>
       <div id="loginMsg" class="msg err hidden"></div>
-      <div class="field">
-        <label>管理员账号</label>
-        <input id="loginUser" autocomplete="username" placeholder="XHS_CLOUD_ADMIN_USER" />
-      </div>
-      <div class="field">
-        <label>密码</label>
-        <input id="loginPass" type="password" autocomplete="current-password" />
-      </div>
+      <div class="field"><label>管理员账号</label><input id="loginUser" autocomplete="username" /></div>
+      <div class="field"><label>密码</label><input id="loginPass" type="password" autocomplete="current-password" /></div>
       <button id="loginBtn" style="width:100%">登录</button>
     </div>
   </div>
@@ -105,8 +74,8 @@
   <div id="appView" class="wrap hidden">
     <div class="row" style="justify-content:space-between">
       <div>
-        <h1>授权码管理</h1>
-        <p class="sub">按产品模块发码 · 列表 · 吊销 · 导出激活链接</p>
+        <h1>运营控制台</h1>
+        <p class="sub"><span class="online"><span class="dot" id="onlineDot"></span><span id="onlineText">检测中</span></span></p>
       </div>
       <div class="row">
         <span id="adminName" class="sub" style="margin:0"></span>
@@ -116,77 +85,105 @@
 
     <div id="topMsg" class="msg hidden"></div>
 
-    <div class="grid card" id="statsGrid">
-      <div class="stat"><span>有效会员</span><b id="stMembers">—</b></div>
-      <div class="stat"><span>未用授权码</span><b id="stUnused">—</b></div>
-      <div class="stat"><span>已激活码</span><b id="stActive">—</b></div>
-      <div class="stat"><span>授权码总数</span><b id="stTotal">—</b></div>
+    <div class="nav" id="mainNav">
+      <button type="button" class="on" data-panel="codes">授权码</button>
+      <button type="button" data-panel="feedback">用户反馈</button>
+      <button type="button" data-panel="contact">客服微信</button>
+      <button type="button" data-panel="status">系统状态</button>
     </div>
 
-    <div class="card">
-      <div class="tabs" id="productTabs"></div>
-      <div class="row">
-        <div style="flex:1;min-width:140px">
-          <label>规格 SKU</label>
-          <select id="skuSelect"></select>
-        </div>
-        <div style="width:100px">
-          <label>数量</label>
-          <input id="genCount" type="number" min="1" max="100" value="10" />
-        </div>
-        <div style="width:100px">
-          <label>可激活次数</label>
-          <input id="genMax" type="number" min="1" max="10" value="1" />
-        </div>
-        <div style="flex:1;min-width:160px">
-          <label>渠道/批次（小红书/闲鱼/订单号）</label>
-          <input id="genChannel" placeholder="xianyu-batch-001" />
-        </div>
-        <div style="align-self:flex-end">
-          <button id="genBtn">生成授权码</button>
-        </div>
+    <!-- 授权码（PickMemberView 能力） -->
+    <div id="panel-codes" class="panel on">
+      <div class="grid card">
+        <div class="stat"><span>有效会员</span><b id="stMembers">—</b></div>
+        <div class="stat"><span>未用授权码</span><b id="stUnused">—</b></div>
+        <div class="stat"><span>已激活码</span><b id="stActive">—</b></div>
+        <div class="stat"><span>授权码总数</span><b id="stTotal">—</b></div>
       </div>
-      <div id="genResult" class="hidden">
-        <label>生成结果（码 + 激活链接 TSV，可复制到发卡平台）</label>
-        <textarea id="genText" readonly></textarea>
+      <div class="card">
+        <div class="link-row">心象测站点：<a id="linkAssess" href="#" target="_blank" rel="noopener"></a>
+          <button class="ghost mini" id="copyAssess">复制</button></div>
+        <div class="link-row">激活页：<a id="linkActivate" href="#" target="_blank" rel="noopener"></a>
+          <button class="ghost mini" id="copyActivateTpl">复制模板</button></div>
+      </div>
+      <div class="card">
+        <div class="tabs" id="productTabs"></div>
         <div class="row">
-          <button id="copyGenBtn" class="ghost">复制全部</button>
-          <span id="genMeta" class="sub" style="margin:0"></span>
+          <div style="flex:1;min-width:140px"><label>规格 SKU</label><select id="skuSelect"></select></div>
+          <div style="width:90px"><label>数量</label><input id="genCount" type="number" min="1" max="100" value="10" /></div>
+          <div style="width:90px"><label>可激活</label><input id="genMax" type="number" min="1" max="10" value="1" /></div>
+          <div style="flex:1;min-width:160px"><label>渠道/批次</label><input id="genChannel" placeholder="xianyu-batch-001" /></div>
+          <div style="align-self:flex-end"><button id="genBtn">生成授权码</button></div>
+        </div>
+        <div id="genResult" class="hidden">
+          <label>TSV（码 + 激活链接 · 发卡平台导入）</label>
+          <textarea id="genText" readonly></textarea>
+          <div class="row"><button class="ghost" id="copyGenBtn">复制全部</button><span id="genMeta" class="sub" style="margin:0"></span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row">
+          <div style="width:140px"><label>状态</label>
+            <select id="filterStatus"><option value="">全部</option><option value="unused">未使用</option><option value="active">已激活</option><option value="revoked">已吊销</option></select>
+          </div>
+          <div style="align-self:flex-end"><button class="ghost" id="refreshCodes">刷新</button></div>
+        </div>
+        <div style="overflow:auto">
+          <table>
+            <thead><tr>
+              <th>授权码</th><th>套餐</th><th>天</th><th>激活</th><th>状态</th>
+              <th>激活账号</th><th>到期</th><th>剩余</th><th>渠道</th><th>创建</th><th></th>
+            </tr></thead>
+            <tbody id="codeRows"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="row">
-        <div style="width:140px">
-          <label>状态筛选</label>
-          <select id="filterStatus">
-            <option value="">全部</option>
-            <option value="unused">未使用</option>
-            <option value="active">已激活</option>
-            <option value="revoked">已吊销</option>
-          </select>
+    <!-- 用户反馈（MemberFeedbackView） -->
+    <div id="panel-feedback" class="panel">
+      <div class="card">
+        <div class="tabs" id="fbTabs">
+          <button type="button" class="tab on" data-fb="feedback">功能建议</button>
+          <button type="button" class="tab" data-fb="keywords">关键词申请</button>
         </div>
-        <div style="align-self:flex-end">
-          <button class="ghost" id="refreshBtn">刷新列表</button>
+        <div id="fb-feedback">
+          <div class="row"><select id="fbStatus" style="width:140px"><option value="">全部</option><option value="new">新提交</option><option value="read">已读</option><option value="done">已处理</option><option value="ignored">已忽略</option></select>
+            <button class="ghost" id="refreshFb">刷新</button></div>
+          <div style="overflow:auto"><table><thead><tr><th>ID</th><th>时间</th><th>会员</th><th>类型</th><th>内容</th><th>状态</th><th></th></tr></thead><tbody id="fbRows"></tbody></table></div>
+        </div>
+        <div id="fb-keywords" class="hidden">
+          <p class="sub">会员提交的关键词进入排队；定向定制请引导至付费服务。</p>
+          <div class="row"><select id="kwStatus" style="width:140px"><option value="">全部</option><option value="pending">排队</option><option value="merged">已纳入</option><option value="rejected">已拒绝</option></select>
+            <button class="ghost" id="refreshKw">刷新</button></div>
+          <div style="overflow:auto"><table><thead><tr><th>ID</th><th>时间</th><th>会员</th><th>关键词</th><th>说明</th><th>状态</th><th></th></tr></thead><tbody id="kwRows"></tbody></table></div>
         </div>
       </div>
-      <div style="overflow:auto">
-        <table>
-          <thead>
-            <tr>
-              <th>授权码</th>
-              <th>套餐</th>
-              <th>天数</th>
-              <th>激活</th>
-              <th>状态</th>
-              <th>渠道/备注</th>
-              <th>创建</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="codeRows"></tbody>
-        </table>
+    </div>
+
+    <!-- 客服微信（MemberContactView） -->
+    <div id="panel-contact" class="panel">
+      <div class="card">
+        <h2>客服微信配置</h2>
+        <p class="sub">用于选品会员页浮窗；心象测可在发卡平台自行配置客服。</p>
+        <div class="field"><label>二维码 URL</label><input id="contactQr" placeholder="/assets/uploads/..." /></div>
+        <div class="field"><label>按钮文案</label><input id="contactLabel" value="扫码联系客服" /></div>
+        <div class="field"><label>说明文字</label><input id="contactText" value="开通会员 / 技术支持" /></div>
+        <div class="row">
+          <input type="file" id="contactFile" accept="image/*" style="width:auto" />
+          <button class="ghost" id="uploadQr">上传二维码</button>
+          <button id="saveContact">保存配置</button>
+        </div>
+        <div id="contactPreview" class="sub"></div>
+      </div>
+    </div>
+
+    <!-- 系统状态 -->
+    <div id="panel-status" class="panel">
+      <div class="card">
+        <h2>服务与链接</h2>
+        <div id="statusLinks"></div>
+        <pre id="statusRaw" class="sub" style="white-space:pre-wrap;font-size:0.8rem;margin-top:12px"></pre>
       </div>
     </div>
   </div>
@@ -194,20 +191,19 @@
   <script>
     const TOKEN_KEY = "xhs_admin_portal_token";
     const API = "/api/v1/portal/admin";
-    let products = [];
-    let currentProduct = "assess";
+    let products = [], currentProduct = "assess", portalLinks = {}, activateTemplates = {};
 
     const $ = (id) => document.getElementById(id);
     const token = () => localStorage.getItem(TOKEN_KEY) || "";
 
     function showMsg(el, text, type = "err") {
       if (!text) { el.classList.add("hidden"); return; }
-      el.textContent = text;
-      el.className = "msg " + type;
+      el.textContent = text; el.className = "msg " + type;
     }
 
     async function api(path, opts = {}) {
-      const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
+      const headers = { ...(opts.headers || {}) };
+      if (!(opts.body instanceof FormData)) headers["Content-Type"] = "application/json";
       if (token()) headers.Authorization = "Bearer " + token();
       const res = await fetch(API + path, { ...opts, headers });
       const data = await res.json().catch(() => ({}));
@@ -219,146 +215,236 @@
       try {
         const j = JSON.parse(note || "{}");
         const m = j.meta || {};
-        return [m.channel, m.remark].filter(Boolean).join(" · ");
-      } catch { return note || "—"; }
+        return { channel: m.channel || "", remark: m.remark || "", product: m.product || "" };
+      } catch { return { channel: "", remark: note || "", product: "" }; }
     }
 
-    function fmtTime(s) {
-      if (!s) return "—";
-      return String(s).replace("T", " ").slice(0, 19);
+    function activateLink(code, product) {
+      const tpl = activateTemplates[product] || portalLinks.assess_activate_template || "";
+      return tpl ? tpl.replace("{code}", code) : `/?api=live&code=${encodeURIComponent(code)}`;
     }
 
-    function renderTabs() {
-      const box = $("productTabs");
-      box.innerHTML = products.map((p) =>
+    function fmtTime(s) { return s ? String(s).replace("T", " ").slice(0, 19) : "—"; }
+
+    function switchPanel(name) {
+      document.querySelectorAll(".panel").forEach((p) => p.classList.remove("on"));
+      document.querySelectorAll("#mainNav button").forEach((b) => b.classList.remove("on"));
+      $("panel-" + name).classList.add("on");
+      document.querySelector(`#mainNav button[data-panel="${name}"]`)?.classList.add("on");
+      if (name === "feedback") loadFeedback();
+      if (name === "contact") loadContact();
+      if (name === "status") loadStatus();
+    }
+
+    document.querySelectorAll("#mainNav button").forEach((b) => {
+      b.onclick = () => switchPanel(b.dataset.panel);
+    });
+
+    function renderProductTabs() {
+      $("productTabs").innerHTML = products.map((p) =>
         `<button type="button" class="tab ${p.product === currentProduct ? "on" : ""}" data-p="${p.product}">${p.label}</button>`
       ).join("");
-      box.querySelectorAll(".tab").forEach((btn) => {
-        btn.onclick = () => { currentProduct = btn.dataset.p; renderTabs(); renderSkus(); loadCodes(); };
+      $("productTabs").querySelectorAll(".tab").forEach((btn) => {
+        btn.onclick = () => { currentProduct = btn.dataset.p; renderProductTabs(); renderSkus(); loadCodes(); };
       });
     }
 
     function renderSkus() {
       const prod = products.find((p) => p.product === currentProduct);
-      const sel = $("skuSelect");
-      sel.innerHTML = (prod?.skus || []).filter((s) => !s.reserved).map((s) =>
-        `<option value="${s.sku}">${s.label} · ${s.duration_days}天 · ${s.plan_code}</option>`
+      $("skuSelect").innerHTML = (prod?.skus || []).filter((s) => !s.reserved).map((s) =>
+        `<option value="${s.sku}">${s.label} · ${s.duration_days}天</option>`
       ).join("");
+    }
+
+    async function loadStatus() {
+      const data = await api("/status");
+      $("onlineDot").style.background = data.online ? "var(--ok)" : "var(--danger)";
+      $("onlineText").textContent = data.online ? "API 在线" : "API 离线";
+      portalLinks = data.portal_links || {};
+      activateTemplates = {};
+      (data.products || []).forEach((p) => { activateTemplates[p.product] = p.activate_url_template; });
+      $("linkAssess").href = portalLinks.assess_site || "#";
+      $("linkAssess").textContent = portalLinks.assess_site || "—";
+      $("linkActivate").href = portalLinks.assess_activate || "#";
+      $("linkActivate").textContent = portalLinks.assess_activate || "—";
+      const s = data.stats || {};
+      $("stMembers").textContent = s.active_members ?? "—";
+      $("stUnused").textContent = s.auth_codes_unused ?? "—";
+      $("stActive").textContent = s.auth_codes_active ?? "—";
+      $("stTotal").textContent = s.auth_codes_total ?? "—";
+      $("statusLinks").innerHTML = Object.entries(portalLinks).map(([k, v]) =>
+        `<div class="link-row"><strong>${k}</strong>：<a href="${v}" target="_blank" rel="noopener">${v}</a></div>`
+      ).join("");
+      $("statusRaw").textContent = JSON.stringify(s, null, 2);
     }
 
     async function loadProducts() {
       const data = await api("/auth-products");
       products = (data.products || []).filter((p) => (p.skus || []).some((s) => !s.reserved));
       if (!products.find((p) => p.product === currentProduct)) currentProduct = products[0]?.product || "assess";
-      renderTabs();
-      renderSkus();
-    }
-
-    async function loadStats() {
-      const data = await api("/stats");
-      const s = data.stats || {};
-      $("stMembers").textContent = s.active_members ?? "—";
-      $("stUnused").textContent = s.auth_codes_unused ?? "—";
-      $("stActive").textContent = s.auth_codes_active ?? "—";
-      $("stTotal").textContent = s.auth_codes_total ?? "—";
+      renderProductTabs(); renderSkus();
     }
 
     async function loadCodes() {
       const st = $("filterStatus").value;
       const q = new URLSearchParams({ limit: "100", product: currentProduct });
       if (st) q.set("status", st);
-      const data = await api("/auth-codes?" + q.toString());
-      const rows = data.items || [];
-      $("codeRows").innerHTML = rows.map((r) => `
-        <tr>
-          <td class="code">${r.code}<br><button class="ghost" style="padding:2px 6px;font-size:0.75rem" data-copy="${r.code}">复制</button></td>
-          <td>${r.plan_label || r.plan_code}</td>
-          <td>${r.duration_days}</td>
+      const data = await api("/auth-codes?" + q);
+      $("codeRows").innerHTML = (data.items || []).map((r) => {
+        const meta = noteMeta(r.note);
+        const prod = meta.product || currentProduct;
+        return `<tr>
+          <td class="code">${r.code}<br>
+            <button class="ghost mini" data-copy="${r.code}">复制码</button>
+            <button class="ghost mini" data-link="${r.code}" data-prod="${prod}">复制链接</button></td>
+          <td>${r.plan_label || r.plan_code}</td><td>${r.duration_days}</td>
           <td>${r.current_activations}/${r.max_activations}</td>
           <td><span class="tag ${r.status}">${r.status}</span></td>
-          <td>${noteMeta(r.note)}</td>
+          <td>${r.activated_usernames || "—"}</td>
+          <td>${fmtTime(r.membership_expires_at)}</td>
+          <td>${r.days_remaining != null ? r.days_remaining + "天" : "—"}</td>
+          <td>${meta.channel || meta.remark || "—"}</td>
           <td>${fmtTime(r.created_at)}</td>
-          <td>${r.status !== "revoked" ? `<button class="danger" style="padding:4px 8px;font-size:0.75rem" data-revoke="${r.code}">吊销</button>` : ""}</td>
-        </tr>`).join("") || `<tr><td colspan="8">暂无数据</td></tr>`;
-
-      $("codeRows").querySelectorAll("[data-copy]").forEach((b) => {
-        b.onclick = () => navigator.clipboard.writeText(b.dataset.copy);
-      });
-      $("codeRows").querySelectorAll("[data-revoke]").forEach((b) => {
-        b.onclick = async () => {
-          if (!confirm("确认吊销 " + b.dataset.revoke + "？")) return;
-          await api("/auth-codes/" + encodeURIComponent(b.dataset.revoke) + "/revoke", { method: "POST" });
-          showMsg($("topMsg"), "已吊销", "ok");
-          loadCodes();
-          loadStats();
-        };
+          <td>${r.status !== "revoked" ? `<button class="danger mini" data-revoke="${r.code}">吊销</button>` : ""}</td>
+        </tr>`;
+      }).join("") || `<tr><td colspan="11">暂无</td></tr>`;
+      $("codeRows").querySelectorAll("[data-copy]").forEach((b) => b.onclick = () => navigator.clipboard.writeText(b.dataset.copy));
+      $("codeRows").querySelectorAll("[data-link]").forEach((b) => b.onclick = () => navigator.clipboard.writeText(activateLink(b.dataset.link, b.dataset.prod)));
+      $("codeRows").querySelectorAll("[data-revoke]").forEach((b) => b.onclick = async () => {
+        if (!confirm("吊销 " + b.dataset.revoke + "？")) return;
+        await api("/auth-codes/" + encodeURIComponent(b.dataset.revoke) + "/revoke", { method: "POST" });
+        showMsg($("topMsg"), "已吊销", "ok"); loadCodes(); loadStatus();
       });
     }
+
+    async function loadFeedback() {
+      const st = $("fbStatus").value;
+      const q = new URLSearchParams({ limit: "100" }); if (st) q.set("status", st);
+      const data = await api("/member-feedback?" + q);
+      $("fbRows").innerHTML = (data.items || []).map((r) => `<tr>
+        <td>${r.id}</td><td>${fmtTime(r.created_at)}</td><td>${r.username || "—"}</td>
+        <td>${r.category || "—"}</td><td>${(r.content || "").slice(0, 120)}</td>
+        <td><span class="tag ${r.status}">${r.status}</span></td>
+        <td><button class="ghost mini" data-fb-id="${r.id}" data-fb-st="${r.status}">更新</button></td>
+      </tr>`).join("") || `<tr><td colspan="7">暂无</td></tr>`;
+      $("fbRows").querySelectorAll("[data-fb-id]").forEach((b) => b.onclick = () => patchFeedback(+b.dataset.fbId, b.dataset.fbSt));
+    }
+
+    async function patchFeedback(id, cur) {
+      const status = prompt("状态: new / read / done / ignored", cur || "read");
+      if (!status) return;
+      const admin_note = prompt("管理员备注（可空）", "") || "";
+      await api("/member-feedback/" + id, { method: "PATCH", body: JSON.stringify({ status, admin_note }) });
+      showMsg($("topMsg"), "反馈已更新", "ok"); loadFeedback();
+    }
+
+    async function loadKeywords() {
+      const st = $("kwStatus").value;
+      const q = new URLSearchParams({ limit: "100" }); if (st) q.set("status", st);
+      const data = await api("/member-keyword-requests?" + q);
+      $("kwRows").innerHTML = (data.items || []).map((r) => `<tr>
+        <td>${r.id}</td><td>${fmtTime(r.created_at)}</td><td>${r.username || "—"}</td>
+        <td>${(r.keywords || "").slice(0, 80)}</td><td>${(r.note || "").slice(0, 60)}</td>
+        <td><span class="tag ${r.status}">${r.status}</span></td>
+        <td><button class="ghost mini" data-kw-id="${r.id}" data-kw-st="${r.status}">更新</button></td>
+      </tr>`).join("") || `<tr><td colspan="7">暂无</td></tr>`;
+      $("kwRows").querySelectorAll("[data-kw-id]").forEach((b) => b.onclick = () => patchKeyword(+b.dataset.kwId, b.dataset.kwSt));
+    }
+
+    async function patchKeyword(id, cur) {
+      const status = prompt("状态: pending / merged / rejected", cur || "merged");
+      if (!status) return;
+      const admin_note = prompt("管理员备注（可空）", "") || "";
+      await api("/member-keyword-requests/" + id, { method: "PATCH", body: JSON.stringify({ status, admin_note }) });
+      showMsg($("topMsg"), "关键词申请已更新", "ok"); loadKeywords();
+    }
+
+    document.querySelectorAll("#fbTabs .tab").forEach((t) => {
+      t.onclick = () => {
+        document.querySelectorAll("#fbTabs .tab").forEach((x) => x.classList.remove("on"));
+        t.classList.add("on");
+        const k = t.dataset.fb;
+        $("fb-feedback").classList.toggle("hidden", k !== "feedback");
+        $("fb-keywords").classList.toggle("hidden", k !== "keywords");
+        if (k === "feedback") loadFeedback(); else loadKeywords();
+      };
+    });
+
+    async function loadContact() {
+      try {
+        const data = await api("/member-contact");
+        const c = data.config || {};
+        $("contactQr").value = c.wechat_qr_url || "";
+        $("contactLabel").value = c.wechat_label || "扫码联系客服";
+        $("contactText").value = c.contact_text || "";
+        $("contactPreview").innerHTML = c.wechat_qr_url ? `<img src="${c.wechat_qr_url}" alt="qr" style="max-width:120px;border-radius:8px">` : "未上传二维码";
+      } catch (e) { showMsg($("topMsg"), e.message); }
+    }
+
+    $("uploadQr").onclick = async () => {
+      const f = $("contactFile").files[0]; if (!f) return alert("请选择图片");
+      const fd = new FormData(); fd.append("file", f);
+      const data = await api("/member-contact/upload", { method: "POST", body: fd });
+      $("contactQr").value = data.url || "";
+      showMsg($("topMsg"), "上传成功", "ok"); loadContact();
+    };
+
+    $("saveContact").onclick = async () => {
+      await api("/member-contact", { method: "PUT", body: JSON.stringify({
+        wechat_qr_url: $("contactQr").value.trim(),
+        wechat_label: $("contactLabel").value.trim(),
+        contact_text: $("contactText").value.trim(),
+      })});
+      showMsg($("topMsg"), "客服配置已保存", "ok"); loadContact();
+    };
 
     async function enterApp() {
       $("loginView").classList.add("hidden");
       $("appView").classList.remove("hidden");
-      $("adminName").textContent = "已登录";
+      await loadStatus();
       await loadProducts();
-      await loadStats();
       await loadCodes();
     }
 
     $("loginBtn").onclick = async () => {
       showMsg($("loginMsg"), "");
       try {
-        const data = await api("/login", {
-          method: "POST",
-          body: JSON.stringify({ username: $("loginUser").value.trim(), password: $("loginPass").value }),
-        });
+        const data = await api("/login", { method: "POST", body: JSON.stringify({ username: $("loginUser").value.trim(), password: $("loginPass").value }) });
         localStorage.setItem(TOKEN_KEY, data.access_token);
+        $("adminName").textContent = data.username || "管理员";
         await enterApp();
-      } catch (e) {
-        showMsg($("loginMsg"), e.message || "登录失败");
-      }
+      } catch (e) { showMsg($("loginMsg"), e.message || "登录失败"); }
     };
 
-    $("logoutBtn").onclick = () => {
-      localStorage.removeItem(TOKEN_KEY);
-      location.reload();
-    };
-
+    $("logoutBtn").onclick = () => { localStorage.removeItem(TOKEN_KEY); location.reload(); };
     $("genBtn").onclick = async () => {
       showMsg($("topMsg"), "");
       try {
-        const data = await api("/auth-codes", {
-          method: "POST",
-          body: JSON.stringify({
-            product: currentProduct,
-            sku: $("skuSelect").value,
-            count: Number($("genCount").value || 1),
-            max_activations: Number($("genMax").value || 1),
-            channel: $("genChannel").value.trim(),
-          }),
-        });
+        const data = await api("/auth-codes", { method: "POST", body: JSON.stringify({
+          product: currentProduct, sku: $("skuSelect").value,
+          count: +$("genCount").value || 1, max_activations: +$("genMax").value || 1,
+          channel: $("genChannel").value.trim(),
+        })});
         $("genResult").classList.remove("hidden");
         $("genText").value = data.export_tsv || (data.codes || []).join("\n");
         $("genMeta").textContent = `已生成 ${(data.codes || []).length} 个 · ${data.label || ""}`;
-        showMsg($("topMsg"), "生成成功", "ok");
-        loadCodes();
-        loadStats();
-      } catch (e) {
-        showMsg($("topMsg"), e.message || "生成失败");
-      }
+        showMsg($("topMsg"), "生成成功", "ok"); loadCodes(); loadStatus();
+      } catch (e) { showMsg($("topMsg"), e.message); }
     };
-
     $("copyGenBtn").onclick = () => navigator.clipboard.writeText($("genText").value);
-    $("refreshBtn").onclick = () => { loadCodes(); loadStats(); };
+    $("copyAssess").onclick = () => navigator.clipboard.writeText(portalLinks.assess_site || "");
+    $("copyActivateTpl").onclick = () => navigator.clipboard.writeText(activateTemplates.assess || portalLinks.assess_activate_template || "");
+    $("refreshCodes").onclick = () => { loadCodes(); loadStatus(); };
+    $("refreshFb").onclick = loadFeedback;
+    $("refreshKw").onclick = loadKeywords;
     $("filterStatus").onchange = loadCodes;
+    $("fbStatus").onchange = loadFeedback;
+    $("kwStatus").onchange = loadKeywords;
 
     (async function boot() {
       if (!token()) return;
-      try {
-        await api("/me");
-        await enterApp();
-      } catch {
-        localStorage.removeItem(TOKEN_KEY);
-      }
+      try { await api("/me"); await enterApp(); }
+      catch { localStorage.removeItem(TOKEN_KEY); }
     })();
   </script>
 </body>

@@ -914,11 +914,74 @@ def portal_admin_products(_admin: str = Depends(verify_admin_portal)):
 
 @app.get("/api/v1/portal/admin/stats")
 def portal_admin_stats(_admin: str = Depends(verify_admin_portal)):
+    from cloud_deploy.cloud_api.admin_portal_service import collect_admin_stats
+
+    return {"stats": collect_admin_stats()}
+
+
+@app.get("/api/v1/portal/admin/status")
+def portal_admin_status(_admin: str = Depends(verify_admin_portal)):
+    from cloud_deploy.cloud_api.admin_portal_service import cloud_status_payload
+
+    return cloud_status_payload(health_ok=True)
+
+
+@app.get("/api/v1/portal/admin/member-feedback")
+def portal_admin_list_feedback(
+    _admin: str = Depends(verify_admin_portal),
+    limit: int = 100,
+    status: str | None = None,
+):
     try:
-        stats = db.get_admin_stats()
+        items = db.list_member_feedback(limit=min(max(limit, 1), 500), status=status)
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"数据库未就绪: {e}") from e
-    return {"stats": stats}
+    return {"items": items, "total": len(items)}
+
+
+@app.patch("/api/v1/portal/admin/member-feedback/{item_id}")
+def portal_admin_patch_feedback(
+    item_id: int,
+    body: AdminFeedbackUpdateBody,
+    _admin: str = Depends(verify_admin_portal),
+):
+    try:
+        ok = db.update_member_feedback(item_id, status=body.status, admin_note=body.admin_note)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"数据库未就绪: {e}") from e
+    if not ok:
+        raise HTTPException(status_code=404, detail="记录不存在或无变更")
+    return {"message": "已更新"}
+
+
+@app.get("/api/v1/portal/admin/member-keyword-requests")
+def portal_admin_list_keyword_requests(
+    _admin: str = Depends(verify_admin_portal),
+    limit: int = 100,
+    status: str | None = None,
+):
+    try:
+        items = db.list_member_keyword_requests(limit=min(max(limit, 1), 500), status=status)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"数据库未就绪: {e}") from e
+    return {"items": items, "total": len(items)}
+
+
+@app.patch("/api/v1/portal/admin/member-keyword-requests/{item_id}")
+def portal_admin_patch_keyword_request(
+    item_id: int,
+    body: AdminFeedbackUpdateBody,
+    _admin: str = Depends(verify_admin_portal),
+):
+    try:
+        ok = db.update_member_keyword_request(
+            item_id, status=body.status, admin_note=body.admin_note
+        )
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"数据库未就绪: {e}") from e
+    if not ok:
+        raise HTTPException(status_code=404, detail="记录不存在或无变更")
+    return {"message": "已更新"}
 
 
 @app.get("/api/v1/portal/admin/auth-codes")
@@ -928,24 +991,13 @@ def portal_admin_list_codes(
     status: str | None = None,
     product: str | None = None,
 ):
+    from cloud_deploy.cloud_api.admin_portal_service import filter_auth_codes_by_product
+
     try:
         items = db.list_auth_codes(limit=limit, status=status or None)
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"数据库未就绪: {e}") from e
-    if product:
-        want = product.strip().lower()
-        filtered = []
-        for it in items:
-            note = it.get("note") or ""
-            if f'"product": "{want}"' in note or f'"product":"{want}"' in note.replace(" ", ""):
-                filtered.append(it)
-            elif want == "insight" and (it.get("plan_code") or "").startswith(
-                ("experience", "monthly", "quarterly", "halfyear", "yearly")
-            ):
-                filtered.append(it)
-            elif want == "assess" and (it.get("plan_code") or "").startswith("assess"):
-                filtered.append(it)
-        items = filtered
+    items = filter_auth_codes_by_product(items, product)
     return {"items": items, "total": len(items)}
 
 
@@ -1003,42 +1055,9 @@ def admin_revoke_code(code: str, _: None = Depends(verify_sync_key)):
 
 @app.get("/api/v1/admin/stats")
 def admin_stats(_: None = Depends(verify_sync_key)):
-    try:
-        stats = db.get_admin_stats()
-        archives = db.list_archives()
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"数据库未就绪: {e}") from e
-    pool_size = 0
-    pending_backfill = 0
-    pending_snapshots = 0
-    if os.environ.get("XHS_DATABASE_URL", "").startswith("postgres"):
-        try:
-            from cloud_deploy.cloud_api.database_pg import _conn
+    from cloud_deploy.cloud_api.admin_portal_service import collect_admin_stats
 
-            conn = _conn()
-            with conn.cursor() as c:
-                c.execute("SET search_path TO xhs_monitor, public")
-                c.execute("SELECT COUNT(*) FROM monitor_goods WHERE monitor_status='active'")
-                pool_size = c.fetchone()[0]
-                c.execute(
-                    "SELECT COUNT(*) FROM goods_sync_state WHERE sold_daily_backfill_done=FALSE"
-                )
-                pending_backfill = c.fetchone()[0]
-                c.execute(
-                    "SELECT COUNT(*) FROM goods_sync_state WHERE sold_snapshots_backfill_done=FALSE"
-                )
-                pending_snapshots = c.fetchone()[0]
-            conn.close()
-        except Exception:
-            pass
-    return {
-        **stats,
-        "archive_count_sync": len(archives),
-        "latest_archive": archives[0] if archives else None,
-        "monitor_pool_active": pool_size,
-        "sold_history_pending_backfill": pending_backfill,
-        "sold_snapshots_pending_backfill": pending_snapshots,
-    }
+    return collect_admin_stats()
 
 
 @app.get("/api/v1/admin/member-feedback")
@@ -1278,6 +1297,54 @@ async def admin_upload_member_contact_qr(
         f.write(raw)
     url = f"/assets/uploads/{filename}"
     return {"url": url, "filename": filename, "size": len(raw)}
+
+
+@app.get("/api/v1/portal/admin/member-contact")
+def portal_admin_get_member_contact(_admin: str = Depends(verify_admin_portal)):
+    if not os.environ.get("XHS_DATABASE_URL", "").startswith("postgres"):
+        return {"config": {}}
+    try:
+        from cloud_deploy.cloud_api.database_pg import _conn, init_db
+        from cloud_deploy.cloud_api.member_contact_settings import get_public_config
+
+        init_db()
+        conn = _conn()
+        try:
+            return {"config": get_public_config(conn)}
+        finally:
+            conn.close()
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"读取配置失败: {e}") from e
+
+
+@app.put("/api/v1/portal/admin/member-contact")
+def portal_admin_put_member_contact(
+    body: MemberContactBody,
+    _admin: str = Depends(verify_admin_portal),
+):
+    if not os.environ.get("XHS_DATABASE_URL", "").startswith("postgres"):
+        raise HTTPException(status_code=503, detail="需要 PostgreSQL")
+    try:
+        from cloud_deploy.cloud_api.database_pg import _conn, init_db
+        from cloud_deploy.cloud_api.member_contact_settings import save_config
+
+        init_db()
+        conn = _conn()
+        try:
+            cfg = save_config(conn, body.model_dump(exclude_unset=True))
+            return {"message": "已保存", "config": cfg}
+        finally:
+            conn.close()
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"保存配置失败: {e}") from e
+
+
+@app.post("/api/v1/portal/admin/member-contact/upload")
+async def portal_admin_upload_contact_qr(
+    file: UploadFile = File(...),
+    _admin: str = Depends(verify_admin_portal),
+):
+    return await admin_upload_member_contact_qr(file, _=None)  # type: ignore[arg-type]
 
 
 # ========== A/B 测试指标 API ==========
