@@ -40,6 +40,12 @@ if [[ ! -x "${XHS_ROOT}/venv/bin/pip" ]]; then
 fi
 "${XHS_ROOT}/venv/bin/pip" install -q -r "${XHS_ROOT}/cloud_deploy/requirements-cloud.txt"
 
+echo "==> verify web routes (activate landing)"
+grep -q 'path === "/activate"' "${DIGIT_HUB}/apps/web/src/main.js" || {
+  echo "ERROR: apps/web/src/main.js missing #/activate route — git pull incomplete?"
+  exit 1
+}
+
 echo "==> nginx sites (/admin/ + monitor SSL if cert exists)"
 bash "${DIGIT_HUB}/deploy/nginx_apply.sh"
 
@@ -50,6 +56,9 @@ systemctl is-active xhs-cloud-api
 
 echo "==> smoke"
 curl -fsS -o /dev/null -w "health:%{http_code}\n" http://127.0.0.1:8080/api/v1/health
+curl -fsS -H "Host: monitor.xhs365.cn" http://127.0.0.1/src/main.js 2>/dev/null | grep -q '/activate' \
+  && echo "web_main.js: activate route OK" \
+  || echo "WARN: nginx /src/main.js missing activate — hard-refresh browser or purge CDN"
 curl -fsS http://127.0.0.1:8080/api/v1/payment/plans 2>/dev/null \
   | python3 -c "import sys,json; d=json.load(sys.stdin); p=next((x for x in d.get('assess_plans',[]) if x.get('plan_code')=='assess_single'),{}); print('assess_single:', p.get('amount'), p.get('price_yuan'))" \
   || echo "(plans parse skip)"
