@@ -30,6 +30,8 @@
 
 ## 鉴权 / 验权
 
+详见 **[AUTH_PRODUCTS.md](./AUTH_PRODUCTS.md)** — 统一 product/sku 发码注册表。
+
 | Method | Path | 说明 |
 |--------|------|------|
 | POST | `/api/v1/auth/login-code` | `{ auth_code, device_id, device_label }` |

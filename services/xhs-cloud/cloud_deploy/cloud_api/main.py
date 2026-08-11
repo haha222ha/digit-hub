@@ -188,9 +188,12 @@ class AdminFeedbackUpdateBody(BaseModel):
 
 class GenerateCodesBody(BaseModel):
     count: int = Field(default=1, ge=1, le=100)
-    plan_code: str = "monthly"
-    duration_days: int = Field(default=30, ge=1, le=36500)
-    max_activations: int = Field(default=1, ge=1, le=1000)
+    plan_code: str = Field(default="", max_length=32)
+    product: str = Field(default="", max_length=32)
+    sku: str = Field(default="", max_length=32)
+    channel: str = Field(default="", max_length=128)
+    duration_days: int = Field(default=0, ge=0, le=36500)
+    max_activations: int = Field(default=0, ge=0, le=1000)
     note: str = ""
 
 
@@ -851,20 +854,84 @@ def public_advisor_demo_advice():
     return demo_advice_response()
 
 
+@app.get("/api/v1/admin/auth-products")
+def admin_auth_products(_: None = Depends(verify_sync_key)):
+    from cloud_deploy.cloud_api.auth_product_registry import list_products
+
+    return {"products": list_products()}
+
+
 @app.post("/api/v1/admin/auth-codes")
 def admin_generate_codes(body: GenerateCodesBody, _: None = Depends(verify_sync_key)):
+    from cloud_deploy.cloud_api.auth_product_registry import (
+        build_fulfillment_note,
+        resolve_plan,
+        resolve_sku,
+    )
+    from cloud_deploy.cloud_api.payment_plans import entitlements_note_for_payment_plan
+
+    channel = (body.channel or "").strip()
+    remark = (body.note or "").strip()
+
+    if body.product and body.sku:
+        spec = resolve_sku(body.product, body.sku)
+        plan_code = spec["plan_code"]
+        duration_days = body.duration_days or spec["duration_days"]
+        max_activations = body.max_activations or spec["max_activations"]
+        note = build_fulfillment_note(
+            plan_code,
+            product=spec["product"],
+            sku=spec["sku"],
+            channel=channel,
+            remark=remark,
+        )
+        product = spec["product"]
+        sku = spec["sku"]
+    elif body.plan_code:
+        plan_code = body.plan_code
+        spec = resolve_plan(plan_code)
+        duration_days = body.duration_days or (spec["duration_days"] if spec else 30)
+        max_activations = body.max_activations or (spec["max_activations"] if spec else 1)
+        product = spec["product"] if spec else ""
+        sku = spec["sku"] if spec else ""
+        base = entitlements_note_for_payment_plan(plan_code)
+        if base:
+            import json
+
+            payload = json.loads(base)
+            meta = payload.setdefault("meta", {})
+            if channel:
+                meta["channel"] = channel
+            if remark:
+                meta["remark"] = remark
+            note = json.dumps(payload, ensure_ascii=False)
+        else:
+            note = remark or channel
+    else:
+        raise HTTPException(status_code=400, detail="需要 product+sku 或 plan_code")
+
     codes = db.generate_auth_codes(
         count=body.count,
-        plan_code=body.plan_code,
-        duration_days=body.duration_days,
-        max_activations=body.max_activations,
-        note=body.note,
+        plan_code=plan_code,
+        duration_days=duration_days,
+        max_activations=max_activations,
+        note=note,
     )
+    from cloud_deploy.cloud_api.auth_product_registry import (
+        activation_url_template,
+        format_batch_export,
+    )
+
+    export = format_batch_export(product, sku, codes, channel=channel) if product else ""
     return {
         "codes": codes,
-        "plan_code": body.plan_code,
-        "duration_days": body.duration_days,
-        "max_activations": body.max_activations,
+        "product": product or None,
+        "sku": sku or None,
+        "plan_code": plan_code,
+        "duration_days": duration_days,
+        "max_activations": max_activations,
+        "activate_url_template": activation_url_template(product) if product else None,
+        "export_tsv": export,
     }
 
 
