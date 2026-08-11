@@ -1,0 +1,20 @@
+# secrets / local
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_ed25519*
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+
+# deploy artifacts (regenerable)
+deploy/dist/
+
+# local-only
+apps/gen-os/
+*.log
+.venv/
+node_modules/

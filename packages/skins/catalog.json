@@ -1,0 +1,209 @@
+{
+  "brand": "心象测",
+  "groups": [
+    {
+      "id": "personality",
+      "label": "性格认知",
+      "items": [
+        {
+          "id": "seven_sins",
+          "title": "七宗罪分布",
+          "minutes": 5,
+          "promise": "28 题七维欲望原型完整分布",
+          "status": "live",
+          "file": "seven_sins.json"
+        },
+        {
+          "id": "mbti16",
+          "title": "16 型人格",
+          "minutes": 12,
+          "promise": "72 题专业向 · 非官方认证 · 16 型",
+          "status": "live",
+          "file": "mbti16.json"
+        },
+        {
+          "id": "mental_age",
+          "title": "心理年龄",
+          "minutes": 6,
+          "promise": "原版五维 24+1 题 · 心理年龄阶段",
+          "status": "live",
+          "file": "mental_age.json"
+        }
+      ]
+    },
+    {
+      "id": "emotion",
+      "label": "情感关系",
+      "items": [
+        {
+          "id": "love_brain",
+          "title": "恋爱脑程度",
+          "minutes": 5,
+          "promise": "20 题五维 · 六段位病毒称号 · 可执行边界建议",
+          "status": "live",
+          "file": "love_brain.json",
+          "lane": "情感引流",
+          "source": "恋爱脑程度检测"
+        },
+        {
+          "id": "ambiguity_rank",
+          "title": "暧昧段位",
+          "minutes": 5,
+          "promise": "20 题 · 段位量表 · 迁自生产版",
+          "status": "live",
+          "lane": "情感引流",
+          "source": "暧昧段位深度检测",
+          "file": "ambiguity_rank.json"
+        },
+        {
+          "id": "scam_magnet",
+          "title": "吸渣体质",
+          "minutes": 5,
+          "promise": "20 题 · 段位量表 · 迁自生产版",
+          "status": "live",
+          "file": "scam_magnet.json",
+          "lane": "情感引流",
+          "source": "吸渣体质深度检测"
+        },
+        {
+          "id": "attachment",
+          "title": "依恋类型",
+          "minutes": 5,
+          "promise": "20 题 · 段位量表 · 迁自生产版",
+          "status": "live",
+          "file": "attachment.json",
+          "lane": "情感引流",
+          "source": "依恋类型测试"
+        }
+      ]
+    },
+    {
+      "id": "career",
+      "label": "职场发展",
+      "items": [
+        {
+          "id": "holland",
+          "title": "霍兰德职业兴趣",
+          "minutes": 5,
+          "promise": "18 题 RIASEC · 三联兴趣码 · 邻近职业参考",
+          "status": "live",
+          "file": "holland.json",
+          "lane": "职场链路",
+          "source": "霍兰德职业兴趣测试"
+        },
+        {
+          "id": "burnout",
+          "title": "职场内耗等级",
+          "minutes": 4,
+          "promise": "15 题 · 段位量表 · 迁自生产版",
+          "status": "live",
+          "lane": "职场链路",
+          "source": "职场内耗等级检测",
+          "file": "burnout.json"
+        },
+        {
+          "id": "workplace_pua",
+          "title": "职场 PUA 敏感度",
+          "minutes": 4,
+          "promise": "16 题 · 段位量表 · 迁自生产版",
+          "status": "live",
+          "file": "workplace_pua.json",
+          "lane": "职场链路",
+          "source": "职场PUA敏感度检测"
+        },
+        {
+          "id": "job_burnout",
+          "title": "职业倦怠程度",
+          "minutes": 4,
+          "promise": "18 题 · 段位量表 · 迁自生产版",
+          "status": "live",
+          "file": "job_burnout.json",
+          "lane": "职场链路",
+          "source": "职业倦怠程度检测"
+        }
+      ]
+    },
+    {
+      "id": "retest",
+      "label": "周期复测",
+      "desc": "同一量表按月/季回来，曲线比纠结标签更值钱",
+      "items": [
+        {
+          "id": "monthly_drain",
+          "title": "月度精神内耗",
+          "minutes": 4,
+          "promise": "15 题 · 段位量表 · 迁自生产版",
+          "status": "live",
+          "lane": "周期复测",
+          "file": "monthly_drain.json",
+          "source": "月度精神内耗复测"
+        },
+        {
+          "id": "monthly_mood",
+          "title": "月度情绪稳定度",
+          "minutes": 4,
+          "promise": "18 题 · 段位量表 · 迁自生产版",
+          "status": "live",
+          "lane": "周期复测",
+          "file": "monthly_mood.json",
+          "source": "情绪稳定度月度检测"
+        }
+      ]
+    },
+    {
+      "id": "duo",
+      "label": "双人对照",
+      "desc": "适配与反差——下一阶段产品线",
+      "items": [
+        {
+          "id": "couple_fit",
+          "title": "情侣婚恋适配",
+          "minutes": 4,
+          "promise": "18 题 · 段位量表 · 迁自生产版",
+          "status": "live",
+          "lane": "双人",
+          "file": "couple_fit.json",
+          "source": "情侣婚恋适配度测试",
+          "duo": true
+        },
+        {
+          "id": "friend_contrast",
+          "title": "闺蜜性格反差",
+          "minutes": 3,
+          "promise": "10 题 · 段位量表 · 迁自生产版",
+          "status": "live",
+          "lane": "双人",
+          "file": "friend_contrast.json",
+          "source": "闺蜜性格反差测试",
+          "duo": true
+        }
+      ]
+    },
+    {
+      "id": "fun",
+      "label": "趣味集邮",
+      "items": [
+        {
+          "id": "city_vibe",
+          "title": "性格 × 城市",
+          "minutes": 4,
+          "promise": "15 题 · 段位量表 · 迁自生产版",
+          "status": "live",
+          "lane": "集邮",
+          "file": "city_vibe.json",
+          "source": "城市氛围感"
+        },
+        {
+          "id": "soul_animal",
+          "title": "灵魂动物",
+          "minutes": 4,
+          "promise": "15 题 · 段位量表 · 迁自生产版",
+          "status": "live",
+          "lane": "集邮",
+          "source": "灵魂动物测试",
+          "file": "soul_animal.json"
+        }
+      ]
+    }
+  ]
+}

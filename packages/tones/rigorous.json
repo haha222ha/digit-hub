@@ -1,0 +1,37 @@
+{
+  "id": "rigorous",
+  "label": "严谨",
+  "claim": "结构清晰，结论可复核",
+  "tokens": {
+    "--paper": "#f3ede3",
+    "--paper-deep": "#e7dfd2",
+    "--seal": "#1f6b5c",
+    "--ember": "#8b4513",
+    "--radius": "10px",
+    "--font-display": "\"Fraunces\", \"Noto Serif SC\", serif",
+    "--tone-accent": "#1f6b5c"
+  },
+  "ui": {
+    "resultLayout": "lab",
+    "heroClass": "tone-hero-lab",
+    "optionClass": "tone-opt-lab"
+  },
+  "copy": {
+    "softHead": "测量纪要",
+    "softSub": "以下为本次作答的结构化摘要。完整报告展开证据、场景与行动实验。",
+    "unlockTitle": "解锁完整研究报告",
+    "unlockSub": "含雷达证据层、同龄对照、场景段与 7 日实验协议",
+    "fullHead": "研究报告框架",
+    "fullSub": "置信 → 结构证据 → 场景迁移 → 实验协议",
+    "weekTitle": "7 日实验协议",
+    "shareHint": "导出纪要卡片",
+    "confidenceKicker": "测量置信",
+    "signalKicker": "主导因子",
+    "trainKicker": "待训维度"
+  },
+  "wrap": {
+    "qPrefix": "",
+    "qSuffix": "",
+    "optionStyle": "plain"
+  }
+}

@@ -1,0 +1,15 @@
+[Unit]
+Description=digit-hub API (xhs-cloud kernel)
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/digit-hub
+EnvironmentFile=/opt/digit-hub/.env
+ExecStart=/opt/digit-hub/.venv/bin/uvicorn cloud_deploy.cloud_api.main:app --host 127.0.0.1 --port 8080
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,35 @@
+{
+  "packs": [
+    {
+      "file": "seven_sins_humor.md",
+      "json": "seven_sins_humor.json",
+      "n": 28
+    },
+    {
+      "file": "seven_sins_funny.md",
+      "json": "seven_sins_funny.json",
+      "n": 28
+    },
+    {
+      "file": "mbti16_humor.md",
+      "json": "mbti16_humor.json",
+      "n": 72
+    },
+    {
+      "file": "mbti16_funny.md",
+      "json": "mbti16_funny.json",
+      "n": 72
+    },
+    {
+      "file": "mental_age_humor.md",
+      "json": "mental_age_humor.json",
+      "n": 29
+    },
+    {
+      "file": "mental_age_funny.md",
+      "json": "mental_age_funny.json",
+      "n": 29
+    }
+  ],
+  "note": "幽默/搞笑题库导出 · 可单独卖给运营/投放"
+}

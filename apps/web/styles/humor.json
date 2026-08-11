@@ -1,0 +1,37 @@
+{
+  "id": "humor",
+  "label": "幽默",
+  "tagline": "说人话 · 会心一笑 · 不端着",
+  "icon": "幽",
+  "tokens": {
+    "--paper": "#f6f0e6",
+    "--paper-deep": "#ebe3d4",
+    "--ink": "#243044",
+    "--ink-muted": "#667083",
+    "--seal": "#2a7a6a",
+    "--seal-soft": "#d8efe8",
+    "--ember": "#d97706",
+    "--ember-soft": "#fef3c7",
+    "--line": "#ddd4c4",
+    "--radius": "16px",
+    "--font-display": "\"Fraunces\", \"Noto Serif SC\", serif",
+    "--font-body": "\"DM Sans\", \"PingFang SC\", sans-serif",
+    "--tone-surface": "rgba(254,243,199,0.35)",
+    "--tone-accent-wash": "rgba(42,122,106,0.1)"
+  },
+  "voice": {
+    "questionPrefix": "",
+    "optionTone": "witty",
+    "resultKicker": "今日份说人话洞察",
+    "resultLead": "测完了。下面用轻松一点的说法把你讲清楚——笑归笑，结构还在。",
+    "ctaUnlock": "解锁完整「说人话」报告",
+    "ctaShare": "导出一张会心一笑的分享图",
+    "typePrefix": "",
+    "quotePrefix": "金句翻译："
+  },
+  "ui": {
+    "heroMotion": "brandUp",
+    "optionShape": "soft",
+    "resultDensity": "airy"
+  }
+}

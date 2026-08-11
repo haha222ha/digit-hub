@@ -1,0 +1,37 @@
+{
+  "id": "comedy",
+  "label": "搞笑",
+  "claim": "先好玩，洞察偷偷塞进去",
+  "tokens": {
+    "--paper": "#faf4ea",
+    "--paper-deep": "#f0e4d4",
+    "--seal": "#1a5c8a",
+    "--ember": "#d4522a",
+    "--radius": "20px",
+    "--font-display": "\"Fraunces\", \"Noto Serif SC\", serif",
+    "--tone-accent": "#d4522a"
+  },
+  "ui": {
+    "resultLayout": "stage",
+    "heroClass": "tone-hero-stage",
+    "optionClass": "tone-opt-stage"
+  },
+  "copy": {
+    "softHead": "今日份人设新鲜出炉",
+    "softSub": "警告：以下内容可能导致你点头如捣蒜。完整报告还有高能场景解读和一周整活任务。",
+    "unlockTitle": "解锁高能完整剧本",
+    "unlockSub": "雷达图、对照表、名场面解读、7 日整活清单全开",
+    "fullHead": "你的人生剧本拆解",
+    "fullSub": "支点角色、对手戏、训练关卡，外加本周打卡任务",
+    "weekTitle": "7 日整活打卡",
+    "shareHint": "导出人设海报",
+    "confidenceKicker": "人设清晰度",
+    "signalKicker": "本季主线",
+    "trainKicker": "副本难点"
+  },
+  "wrap": {
+    "qPrefix": "【现场提问】",
+    "qSuffix": "",
+    "optionStyle": "punchy"
+  }
+}

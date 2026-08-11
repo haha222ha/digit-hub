@@ -1,0 +1,35 @@
+{
+  "id": "rigorous",
+  "label": "严谨",
+  "tagline": "克制、可信、实验室质感",
+  "icon": "严",
+  "tokens": {
+    "--paper": "#f3ede3",
+    "--paper-deep": "#e7dfd2",
+    "--ink": "#1c2430",
+    "--ink-muted": "#5c6570",
+    "--seal": "#1f6b5c",
+    "--seal-soft": "#d5e8e2",
+    "--ember": "#c45c26",
+    "--ember-soft": "#f3e0d4",
+    "--line": "#d9d0c3",
+    "--radius": "12px",
+    "--font-display": "\"Fraunces\", \"Noto Serif SC\", serif",
+    "--font-body": "\"DM Sans\", \"PingFang SC\", sans-serif",
+    "--tone-surface": "rgba(255,250,243,0.72)",
+    "--tone-accent-wash": "rgba(31,107,92,0.08)"
+  },
+  "voice": {
+    "questionPrefix": "",
+    "optionTone": "neutral",
+    "resultKicker": "结构报告",
+    "resultLead": "以下结论基于你的作答结构，供自我探索使用。",
+    "ctaUnlock": "解锁完整报告",
+    "ctaShare": "导出报告卡片"
+  },
+  "ui": {
+    "heroMotion": "paperIn",
+    "optionShape": "rect",
+    "resultDensity": "dense"
+  }
+}

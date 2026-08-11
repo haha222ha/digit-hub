@@ -1,0 +1,21 @@
+:root {
+  --ink: #1c2430;
+  --ink-muted: #5c6570;
+  --paper: #f3ede3;
+  --paper-deep: #e7dfd2;
+  --seal: #1f6b5c;
+  --seal-soft: #d5e8e2;
+  --ember: #c45c26;
+  --ember-soft: #f3e0d4;
+  --line: #d9d0c3;
+  --ok: #2f7d4e;
+  --warn: #b45309;
+  --danger: #a33b2d;
+  --radius: 12px;
+  --radius-btn: 14px;
+  --max: 720px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --font-display: "Fraunces", "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
+  --font-body: "DM Sans", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --shadow-none: none;
+}

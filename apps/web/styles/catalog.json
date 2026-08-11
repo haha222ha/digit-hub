@@ -1,0 +1,9 @@
+{
+  "styles": [
+    { "id": "rigorous", "file": "rigorous.json", "label": "严谨", "desc": "实验室质感 · 可信克制" },
+    { "id": "humor", "file": "humor.json", "label": "幽默", "desc": "说人话 · 小剧场 · 会心一笑" },
+    { "id": "funny", "file": "funny.json", "label": "搞笑", "desc": "鉴定大会 · 弹幕选项 · 敢选才好笑" }
+  ],
+  "default": "rigorous",
+  "note": "本地测评生成 OS 专用；不上云。用户开测前选择风格，界面/题目/结果三层同步切换。"
+}

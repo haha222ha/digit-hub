@@ -1,0 +1,37 @@
+{
+  "id": "humor",
+  "label": "幽默",
+  "claim": "认真测，语气可以不端着",
+  "tokens": {
+    "--paper": "#f6f0e6",
+    "--paper-deep": "#ebe2d3",
+    "--seal": "#2a6f62",
+    "--ember": "#c45c26",
+    "--radius": "16px",
+    "--font-display": "\"Fraunces\", \"Noto Serif SC\", serif",
+    "--tone-accent": "#c45c26"
+  },
+  "ui": {
+    "resultLayout": "warm",
+    "heroClass": "tone-hero-warm",
+    "optionClass": "tone-opt-warm"
+  },
+  "copy": {
+    "softHead": "先给你个痛快的结论",
+    "softSub": "标签只是开场白。下面这层才是「测完不亏」的部分——完整版还有场景吐槽和一周小作业。",
+    "unlockTitle": "解锁完整体检报告",
+    "unlockSub": "雷达、同龄对照、生活场景段、7 天微行动，一次看清",
+    "fullHead": "从标签走到行动",
+    "fullSub": "我们尽量说人话：你强在哪、卡在哪、这周先动哪一块",
+    "weekTitle": "7 天不怕麻烦的小实验",
+    "shareHint": "做成分享图发给懂的人",
+    "confidenceKicker": "靠谱程度",
+    "signalKicker": "你最显眼的信号",
+    "trainKicker": "建议练的那块"
+  },
+  "wrap": {
+    "qPrefix": "",
+    "qSuffix": "（凭第一反应就好）",
+    "optionStyle": "casual"
+  }
+}

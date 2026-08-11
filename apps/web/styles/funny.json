@@ -1,0 +1,37 @@
+{
+  "id": "funny",
+  "label": "搞笑",
+  "tagline": "鉴定大会 · 弹幕选项 · 敢选才好笑",
+  "icon": "搞",
+  "tokens": {
+    "--paper": "#fff8ef",
+    "--paper-deep": "#f0e4d4",
+    "--ink": "#1a1a1a",
+    "--ink-muted": "#5a5348",
+    "--seal": "#0f766e",
+    "--seal-soft": "#ccfbf1",
+    "--ember": "#e11d48",
+    "--ember-soft": "#ffe4e6",
+    "--line": "#e7d8c5",
+    "--radius": "18px",
+    "--font-display": "\"Fraunces\", \"Noto Serif SC\", serif",
+    "--font-body": "\"DM Sans\", \"PingFang SC\", sans-serif",
+    "--tone-surface": "rgba(255,228,230,0.4)",
+    "--tone-accent-wash": "rgba(15,118,110,0.12)"
+  },
+  "voice": {
+    "questionPrefix": "",
+    "optionTone": "meme",
+    "resultKicker": "鉴定结果出炉（娱乐向）",
+    "resultLead": "恭喜通关。下面是整活版读心——笑完记得带走那一点真的，别只截图骂朋友。",
+    "ctaUnlock": "解锁完整整活报告",
+    "ctaShare": "导出整活卡片 · 去温和地嘲笑朋友",
+    "typePrefix": "鉴定完毕：",
+    "quotePrefix": "弹幕总结："
+  },
+  "ui": {
+    "heroMotion": "brandUp",
+    "optionShape": "pillish",
+    "resultDensity": "punchy"
+  }
+}
