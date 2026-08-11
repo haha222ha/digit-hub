@@ -44,8 +44,8 @@ server {
     }
 
     location ^~ /admin/ {
-        alias ${ADMIN_DIR}/;
-        index index.html;
+        alias ${ADMIN_DIR}/index.html;
+        default_type text/html;
         add_header Cache-Control "no-cache, must-revalidate";
     }
 }
@@ -106,8 +106,8 @@ server {
     }
 
     location ^~ /admin/ {
-        alias ${ADMIN_DIR}/;
-        index index.html;
+        alias ${ADMIN_DIR}/index.html;
+        default_type text/html;
         add_header Cache-Control "no-cache, must-revalidate";
     }
 }
@@ -130,6 +130,8 @@ systemctl reload nginx
 echo "==> smoke"
 curl -fsS -o /dev/null -w "admin_local:%{http_code} bytes:%{size_download}\n" \
   -H "Host: ${MONITOR_DOMAIN}" http://127.0.0.1/admin/ || true
+ADMIN_BYTES=$(wc -c < "${ADMIN_DIR}/index.html" | tr -d ' ')
+echo "admin file bytes on disk: ${ADMIN_BYTES}"
 head -c 80 "${ADMIN_DIR}/index.html" | tr '\n' ' '
 echo
 echo "DONE nginx_apply -> https://${MONITOR_DOMAIN}/admin/"
