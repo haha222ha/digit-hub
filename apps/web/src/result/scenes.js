@@ -276,17 +276,19 @@ export function buildScenes(skin, r) {
   return SIN_SCENES[key] || SIN_SCENES[r.type] || sceneTeasers(skin, r).map((s) => ({ ...s, act: "选一个场景，本周只做一个可勾选动作。" }));
 }
 
-export function scenesHtml(skin, r, { unlocked, full = false } = {}) {
-  const list = full && unlocked ? buildScenes(skin, r) : sceneTeasers(skin, r);
+export function scenesHtml(skin, r, { unlocked, full = false, maxCards = 0 } = {}) {
+  const fullList = full && unlocked ? buildScenes(skin, r) : sceneTeasers(skin, r);
+  const capped = maxCards > 0 && !unlocked && !full ? fullList.slice(0, maxCards) : fullList;
+  const more = fullList.length - capped.length;
   return `
-    <div class="scene-grid">
+    <div class="scene-grid" id="result-scenes">
       <p class="group-label">${full && unlocked ? "场景翻译 · 可执行" : "场景价值预告"}</p>
       <p class="muted scene-lead">${
         full && unlocked
           ? "把标签翻译成生活场景，并附带一句本周可做的行动。"
           : "解锁后可读完整段落与行动句——这是完整报告最值钱的部分。"
       }</p>
-      ${list
+      ${capped
         .map(
           (s) => `
         <article class="scene-card ${unlocked || full ? "" : "locked"} ${full && unlocked ? "scene-card-full" : ""}">
@@ -301,6 +303,11 @@ export function scenesHtml(skin, r, { unlocked, full = false } = {}) {
         </article>`
         )
         .join("")}
+      ${
+        more > 0
+          ? `<p class="muted scene-more">另有 ${more} 个场景待解锁</p>`
+          : ""
+      }
     </div>
   `;
 }

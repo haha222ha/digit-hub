@@ -148,9 +148,28 @@ function evidenceChips(skin, r, tops) {
 }
 
 function shareLine(skin, r, style, hook) {
-  if (style === "funny") return hook.replace(/^鉴定[：:]?\s*/, "我的心象测鉴定：");
-  if (style === "humor") return `心象测说人话：${r.type}——${(r.quote || "").slice(0, 28)}`;
-  return `我在心象测是「${r.type}」· ${(r.quote || "").slice(0, 32)}`;
+  const invite = "你也来测？ https://monitor.xhs365.cn/";
+  if (style === "funny") {
+    return `我的心象测鉴定：${r.type}｜${invite}`;
+  }
+  if (style === "humor") {
+    return `心象测说人话：我是「${r.type}」｜${invite}`;
+  }
+  return `我是「${r.type}」· 心象测｜${invite}`;
+}
+
+/** Soft / sticky 共用的 outcome-matched 解锁文案 */
+export function unlockCtaLabel(skin, r) {
+  if (skin?.id === "seven_sins") return "¥1.99 解锁七维调节实验";
+  if (skin?.id === "love_brain") return "¥1.99 解锁边界与本周动作";
+  if (r?.mode === "mbti") return "¥1.99 解锁四维弹性区间解读";
+  if (r?.mode === "holland") return "¥1.99 解锁兴趣码与邻近职业";
+  if (r?.mode === "mental_age") return "¥1.99 解锁五维与阶段对照";
+  if (r?.mode === "score_bands") {
+    const band = r.band?.label || r.type;
+    return band ? `¥1.99 解锁「${band}」完整解读` : "¥1.99 解锁完整报告";
+  }
+  return "¥1.99 解锁完整报告";
 }
 
 /**
@@ -179,7 +198,7 @@ export function buildNarrative(skin, r, pack) {
   return {
     hook,
     portrait,
-    chips: evidenceChips(skin, r, tops),
+    chips: evidenceChips(skin, r, tops).slice(0, 2),
     shareLine: shareLine(skin, r, style, hook),
     ctaHint:
       style === "funny"
@@ -187,10 +206,11 @@ export function buildNarrative(skin, r, pack) {
         : style === "humor"
           ? "解锁后把标签翻译成生活场景与本周可勾选动作"
           : "解锁结构证据、场景段落、7 日微实验与复测基线",
+    ctaLabel: unlockCtaLabel(skin, r),
   };
 }
 
-export function narrativeHeroHtml(narr, chrome, pack, skin, r) {
+export function narrativeHeroHtml(narr, chrome, pack, skin, r, { compactShare = false } = {}) {
   const band = r.band;
   const bandBadge =
     band && (r.mode === "score_bands" || r.mode === "holland" || r.mode === "mental_age")
@@ -198,6 +218,10 @@ export function narrativeHeroHtml(narr, chrome, pack, skin, r) {
           band.emoji ? `${band.emoji} ` : ""
         }${band.label || r.type}</p>`
       : "";
+  const shareBlock = compactShare
+    ? `<p class="share-prompt muted">金句已写入下方分享卡</p>`
+    : `<p class="share-prompt muted">一键导出分享卡发小红书 / 朋友圈</p>
+      <p class="share-line">「${narr.shareLine}」</p>`;
   return `
     <section class="result-hero result-hero-pro">
       <p class="muted">${skin.title} · ${chrome.kicker}</p>
@@ -212,8 +236,7 @@ export function narrativeHeroHtml(narr, chrome, pack, skin, r) {
         ${narr.chips.map((c) => `<span class="evidence-chip"><i>${c.k}</i><b>${c.v}</b></span>`).join("")}
       </div>
       <div class="tags">${(r.tags || []).map((t) => `<span class="tag">${t}</span>`).join("")}</div>
-      <p class="share-prompt muted">截图这句话也能发朋友圈 ↓ 或一键导出分享卡</p>
-      <p class="share-line">「${narr.shareLine}」</p>
+      ${shareBlock}
     </section>
   `;
 }

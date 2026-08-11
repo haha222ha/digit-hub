@@ -100,6 +100,28 @@ export function drawShareCard({
   ctx.font = "650 58px Fraunces, 'Noto Serif SC', Georgia, serif";
   wrapText(ctx, type || "", 72, 420, W - 144, 68, 2);
 
+  // type accent band
+  ctx.fillStyle = t.seal;
+  ctx.fillRect(72, 500, 120, 5);
+
+  // wax seal 「心」
+  const sx = W - 118;
+  const sy = 96;
+  ctx.beginPath();
+  ctx.arc(sx, sy, 36, 0, Math.PI * 2);
+  ctx.fillStyle = t.ember;
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(sx, sy, 28, 0, Math.PI * 2);
+  ctx.strokeStyle = "rgba(255,250,243,0.55)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.fillStyle = "#F7F3EC";
+  ctx.font = "650 28px Fraunces, 'Noto Serif SC', Georgia, serif";
+  ctx.textAlign = "center";
+  ctx.fillText("心", sx, sy + 10);
+  ctx.textAlign = "left";
+
   // quote
   ctx.fillStyle = t.muted;
   ctx.font = "400 26px 'DM Sans', 'PingFang SC', sans-serif";
@@ -149,7 +171,7 @@ export function drawShareCard({
 
   ctx.fillStyle = t.muted;
   ctx.font = "400 16px 'DM Sans', 'PingFang SC', sans-serif";
-  ctx.fillText("自我探索 · 非临床诊断 · 非 MBTI® 官方", 72, H - 72);
+  ctx.fillText("monitor.xhs365.cn · 自我探索 · 非临床诊断", 72, H - 72);
 
   return canvas;
 }

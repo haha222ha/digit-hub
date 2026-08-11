@@ -1008,6 +1008,95 @@ button {
   box-shadow: 0 -8px 28px rgba(28, 36, 48, 0.08);
 }
 
+.hero-cta-inline {
+  margin: 4px 0 18px;
+  padding: 14px 0 4px;
+  border-top: 1px solid var(--line);
+}
+
+.hero-cta-hint {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
+
+.hero-cta-inline .btn {
+  min-height: 48px;
+}
+
+.proof-fold,
+.report-fold {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper-deep);
+}
+
+.proof-fold summary,
+.report-fold summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--seal);
+  list-style: none;
+}
+
+.proof-fold summary::-webkit-details-marker,
+.report-fold summary::-webkit-details-marker {
+  display: none;
+}
+
+.proof-fold[open] summary,
+.report-fold[open] summary {
+  margin-bottom: 8px;
+}
+
+.result-toc {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 14px;
+  margin: 0 0 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.result-toc::-webkit-scrollbar {
+  display: none;
+}
+
+.toc-anchor {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.toc-anchor:active,
+.toc-anchor:focus-visible {
+  border-color: var(--seal);
+  color: var(--seal);
+  background: var(--seal-soft);
+}
+
+.scene-more {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+}
+
+#result-value,
+#result-scenes,
+#result-plan,
+#result-evidence,
+#result-depth,
+#result-share {
+  scroll-margin-top: 72px;
+}
+
 .unlock-bar:not(.is-unlocked)::after {
   content: "";
   position: absolute;

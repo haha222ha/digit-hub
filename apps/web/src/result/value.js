@@ -105,11 +105,11 @@ export function softValueHtml(skin, r, { unlocked } = {}) {
 
   if (!unlocked) {
     return `
-    <section class="value-block value-block-teaser">
+    <section class="value-block value-block-teaser" id="result-value">
       <header class="value-head">
         <p class="group-label">轻结果预览</p>
         <h2>你的类型已生成</h2>
-        <p class="muted">完整报告含雷达图、维度分布、场景长文与 7 日行动——解锁后立即可读。</p>
+        <p class="muted">主导信号已出；雷达、场景长文与 7 日行动在完整报告中。</p>
       </header>
 
       <div class="value-grid">
@@ -125,14 +125,14 @@ export function softValueHtml(skin, r, { unlocked } = {}) {
         </article>
       </div>
 
-      ${scenesHtml(skin, r, { unlocked: false, full: false })}
+      ${scenesHtml(skin, r, { unlocked: false, full: false, maxCards: 1 })}
 
-      <div class="value-proof">
-        <p class="group-label">完整报告你将获得</p>
+      <details class="proof-fold">
+        <summary>完整报告你将获得 · ${UNLOCK_VALUE.length} 项权益</summary>
         <ul class="value-checklist">
           ${UNLOCK_VALUE.map((x) => `<li><strong>${x.t}</strong><span>${x.d}</span></li>`).join("")}
         </ul>
-      </div>
+      </details>
     </section>
   `;
   }
@@ -142,7 +142,7 @@ export function softValueHtml(skin, r, { unlocked } = {}) {
   const preview = (r.full || []).slice(0, 1)[0];
 
   return `
-    <section class="value-block">
+    <section class="value-block" id="result-value">
       <header class="value-head">
         <p class="group-label">本次测评价值</p>
         <h2>不止一个标签</h2>
@@ -215,7 +215,7 @@ export function fullValueHtml(skin, r) {
   const actions = buildWeekPlan(skin, r, tops, lows);
 
   return `
-    <section class="value-block value-block-full">
+    <section class="value-block value-block-full" id="result-value">
       <header class="value-head">
         <p class="group-label">高价值解读框架</p>
         <h2>从标签到行动</h2>
@@ -247,7 +247,7 @@ export function fullValueHtml(skin, r) {
 
       ${scenesHtml(skin, r, { unlocked: true, full: true })}
 
-      <div class="week-plan">
+      <div class="week-plan" id="result-plan">
         <h3>7 日微实验</h3>
         <p class="muted">每天只做一个可勾选动作，比读完所有文案更值钱。</p>
         <ol>

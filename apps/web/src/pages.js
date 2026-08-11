@@ -20,7 +20,7 @@ import { pushHistory, historyCurveHtml } from "./viz/history.js";
 import { shareOrDownload } from "./share/exportCard.js";
 import { downloadReportPdf } from "./share/exportPdf.js";
 import { softValueHtml, fullValueHtml, unlockValueStripHtml, accessBadgeHtml } from "./result/value.js";
-import { buildNarrative, narrativeHeroHtml } from "./result/narrative.js";
+import { buildNarrative, narrativeHeroHtml, unlockCtaLabel } from "./result/narrative.js";
 import { retestBannerHtml, wireRetestBanner } from "./result/retest.js";
 import {
   skinDemographics,
@@ -634,12 +634,21 @@ export async function renderSoftResult(root, skinId, query) {
   const pack = await applyStyleToDocument(styleId);
   const chrome = resultChrome(pack, r);
   const narr = buildNarrative(skin, r, pack);
+  const ctaLabel = narr.ctaLabel || unlockCtaLabel(skin, r);
 
   root.innerHTML = `
     ${topbar()}
     <main class="shell tone-result">
-      ${narrativeHeroHtml(narr, chrome, pack, skin, r)}
-      ${softValueHtml(skin, r, { unlocked })}
+      ${narrativeHeroHtml(narr, chrome, pack, skin, r, { compactShare: true })}
+      ${
+        unlocked
+          ? ""
+          : `<div class="hero-cta-inline">
+              <p class="muted hero-cta-hint">${narr.ctaHint}</p>
+              <button class="btn btn-ember btn-block" type="button" id="ctaHero">${ctaLabel}</button>
+              <p class="pay-anchor muted">原价 <s>¥9.9</s> · 体验价 <strong class="price-now">¥1.99</strong></p>
+            </div>`
+      }
       ${
         unlocked
           ? `${radarFromResult(skin, r)}${renderBars(skin, r)}`
@@ -648,6 +657,7 @@ export async function renderSoftResult(root, skinId, query) {
               <p class="dim-tease-hint">雷达图与维度分布在完整报告中解锁</p>
             </div>`
       }
+      ${softValueHtml(skin, r, { unlocked })}
       <div class="unlock-bar unlock-bar-sticky ${unlocked ? "is-unlocked" : ""}">
         ${accessBadgeHtml(unlocked)}
         <h3>${unlocked ? "完整报告已解锁" : chrome.ctaUnlock}</h3>
@@ -661,7 +671,7 @@ export async function renderSoftResult(root, skinId, query) {
             : `<p class="unlock-social muted">原价 <s>¥9.9</s> · 现 <strong class="price-now">¥1.99</strong> · 扫码即读完整报告</p>`
         }
         <button class="btn ${unlocked ? "btn-primary" : "btn-ember"} btn-block" id="cta">
-          ${unlocked ? "阅读完整高价值报告" : "¥1.99 解锁完整报告"}
+          ${unlocked ? "阅读完整高价值报告" : ctaLabel}
         </button>
       </div>
       <div class="share-card" id="shareCard">
@@ -670,9 +680,9 @@ export async function renderSoftResult(root, skinId, query) {
         <div class="type">${chrome.type || r.type}</div>
         <div class="quote">${chrome.quote || r.quote || ""}</div>
       </div>
-      <div class="stack" style="margin-bottom:20px">
-        <button class="btn btn-primary btn-block" id="shareBtn">${chrome.ctaShare || "导出分享卡"}</button>
-        <p class="muted" style="text-align:center;margin:0">一张卡发小红书 / 朋友圈</p>
+      <div class="stack share-actions" style="margin-bottom:20px">
+        <button class="btn btn-primary btn-block" id="shareBtn">一键导出分享图</button>
+        <p class="muted" style="text-align:center;margin:0">含类型名 · 发小红书 / 朋友圈</p>
         ${
           skin.duo
             ? packed.duoSeat === "A" || new URLSearchParams(query).get("duo") === "A"
@@ -696,10 +706,12 @@ export async function renderSoftResult(root, skinId, query) {
     root.querySelector("#drawer").classList.remove("open");
   };
 
-  root.querySelector("#cta").onclick = () => {
+  const goUnlock = () => {
     if (unlocked) navigate(`/report/${rid}`);
     else openDrawer();
   };
+  root.querySelector("#cta").onclick = goUnlock;
+  root.querySelector("#ctaHero")?.addEventListener("click", goUnlock);
   root.querySelector("#bd").onclick = closeDrawer;
   root.querySelector("#duoB")?.addEventListener("click", () => {
     setDuoSeat(skinId, "B");
@@ -1115,6 +1127,19 @@ function renderBars(skin, r) {
     .join("")}</div>`;
 }
 
+function wireResultToc(root) {
+  root.querySelectorAll(".result-toc a.toc-anchor").forEach((a) => {
+    a.addEventListener("click", (e) => {
+      const id = (a.getAttribute("href") || "").replace(/^#/, "");
+      const el = id ? root.querySelector(`#${CSS.escape(id)}`) : null;
+      if (!el) return;
+      e.preventDefault();
+      if (el.tagName === "DETAILS") el.open = true;
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}
+
 function animateBars(root) {
   requestAnimationFrame(() => {
     root.querySelectorAll(".dim-fill").forEach((n) => {
@@ -1144,28 +1169,49 @@ export async function renderFullReport(root, resultId) {
     ${topbar()}
     <main class="shell report-shell tone-result">
       <p class="muted">${skin.title} · 完整报告 · ${pack.label}</p>
-      ${narrativeHeroHtml(narr, chrome, pack, skin, r)}
+      ${narrativeHeroHtml(narr, chrome, pack, skin, r, { compactShare: true })}
+      <nav class="result-toc" aria-label="报告目录">
+        <a class="toc-anchor" href="#result-value">画像</a>
+        <a class="toc-anchor" href="#result-scenes">场景</a>
+        <a class="toc-anchor" href="#result-plan">7日</a>
+        <a class="toc-anchor" href="#result-evidence">证据</a>
+        <a class="toc-anchor" href="#result-depth">深度</a>
+        <a class="toc-anchor" href="#result-share">分享</a>
+      </nav>
       ${fullValueHtml(skin, r)}
-      <section class="report-block">
+      ${retestBannerHtml(packed.skinId)}
+      <section class="report-block" id="result-evidence">
         <h3>结构证据</h3>
         <p class="muted">雷达与维度条是「证据层」——先看图，再读场景文案。</p>
         ${radarFromResult(skin, r)}
         ${renderBars(skin, r)}
       </section>
-      ${peerCompareHtml(skin, r)}
-      ${historyCurveHtml(skin, packed.skinId)}
-      <p class="group-label" style="margin-top:28px">深度解读</p>
-      ${sections
-        .map(
-          (s) => `
+      <details class="report-fold">
+        <summary>同龄参考对照</summary>
+        ${peerCompareHtml(skin, r)}
+      </details>
+      <details class="report-fold">
+        <summary>复测历史曲线</summary>
+        ${historyCurveHtml(skin, packed.skinId)}
+      </details>
+      <details class="report-fold" id="result-depth">
+        <summary>深度解读 · ${sections.length || 0} 段</summary>
+        ${
+          sections.length
+            ? sections
+                .map(
+                  (s) => `
         <article class="report-block">
           <h3>${s.h}</h3>
           <p class="muted">${s.p}</p>
         </article>`
-        )
-        .join("")}
-      <div class="stack" style="margin:24px 0">
-        <button class="btn btn-ember btn-block" id="shareBtn">${chrome.ctaShare}</button>
+                )
+                .join("")
+            : `<p class="muted">本皮暂无额外深度文案，场景与 7 日计划已足够行动。</p>`
+        }
+      </details>
+      <div class="stack" style="margin:24px 0" id="result-share">
+        <button class="btn btn-ember btn-block" id="shareBtn">一键导出分享图</button>
         <button class="btn btn-primary btn-block" id="pdfBtn">下载完整报告 PDF</button>
         <button class="btn btn-primary btn-block" data-go="#/t/${packed.skinId}/play">复测此皮 · 更新曲线</button>
         ${
@@ -1173,7 +1219,6 @@ export async function renderFullReport(root, resultId) {
             ? `<button class="btn btn-ghost btn-block" data-go="#/t/${packed.skinId}/duo">双人对照</button>`
             : ""
         }
-        ${retestBannerHtml(packed.skinId)}
         ${a2hsButtonHtml({ variant: "ghost", label: "添加到主屏幕" })}
         <button class="btn btn-ghost btn-block" data-go="#/tests">返回目录</button>
       </div>
@@ -1182,6 +1227,7 @@ export async function renderFullReport(root, resultId) {
   animateBars(root);
   wireA2hs(root);
   wireRetestBanner(root, packed.skinId, navigate);
+  wireResultToc(root);
   root.querySelector("#shareBtn").onclick = () =>
     shareOrDownload({
       title: `${skin.title} · ${pack.label}`,
