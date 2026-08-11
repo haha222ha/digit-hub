@@ -43,7 +43,8 @@ touch "$XHS_ROOT/cloud_deploy/__init__.py" 2>/dev/null || true
 # cloud_deploy is imported as top-level under PYTHONPATH=/opt/xhs-cloud
 # layout: /opt/xhs-cloud/cloud_deploy/...  ✓
 
-rand() { openssl rand -base64 32 | tr -d '\n/+' | head -c 40; }
+rand() { openssl rand -hex 20; }
+urlenc() { python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$1"; }
 
 DB_PASS=""
 JWT_SECRET=""
@@ -118,7 +119,7 @@ XHS_CLOUD_JWT_SECRET=${JWT_SECRET}
 XHS_CLOUD_JWT_TTL_DAYS=30
 XHS_CLOUD_ADMIN_USER=admin
 XHS_CLOUD_ADMIN_PASS=${ADMIN_PASS}
-XHS_DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@127.0.0.1:5432/${DB_NAME}
+XHS_DATABASE_URL=postgresql://${DB_USER}:$(urlenc "${DB_PASS}")@127.0.0.1:5432/${DB_NAME}
 XHS_DAEMON_API_ONLY=1
 XHS_PAY_API_URL=${PAY_API}
 XHS_PAY_PID=${PAY_PID}
@@ -149,7 +150,20 @@ chown -R admin:admin "$XHS_ROOT"
 cp "$XHS_ROOT/cloud_deploy/systemd/xhs-cloud-api.service" /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable xhs-cloud-api.service
+
+echo "==> preflight import test"
+if ! sudo -u admin bash -lc "set -a; source ${ENV_OUT}; set +a; cd ${XHS_ROOT}; PYTHONPATH=${XHS_ROOT} ${XHS_ROOT}/venv/bin/python -c 'from cloud_deploy.cloud_api.main import app; print(\"import_ok\")'" 2>&1; then
+  echo "ERROR: API import failed — see above"
+  exit 1
+fi
+
 systemctl restart xhs-cloud-api.service
+sleep 3
+if ! systemctl is-active --quiet xhs-cloud-api.service; then
+  echo "ERROR: xhs-cloud-api not active"
+  journalctl -u xhs-cloud-api -n 60 --no-pager || true
+  exit 1
+fi
 
 echo "==> nginx: IP default_server + monitor.xhs365.cn"
 cat > /etc/nginx/conf.d/assess.xinxiang.conf <<'NGX'
@@ -199,8 +213,19 @@ systemctl reload nginx
 
 sleep 2
 echo "==> smoke"
+HEALTH_OK=0
+for i in $(seq 1 20); do
+  code=$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/v1/health 2>/dev/null || echo 000)
+  if [[ "$code" == "200" ]]; then HEALTH_OK=1; break; fi
+  echo "  wait health ($i/20): $code"
+  sleep 2
+done
 curl -sS -o /dev/null -w "health:%{http_code}\n" http://127.0.0.1:8080/api/v1/health || true
 curl -sS -o /dev/null -w "proxy_health:%{http_code}\n" http://127.0.0.1/api/v1/health || true
+if [[ "$HEALTH_OK" != "1" ]]; then
+  echo "WARN: API health not 200"
+  journalctl -u xhs-cloud-api -n 40 --no-pager || true
+fi
 curl -sS http://127.0.0.1:8080/api/v1/payment/plans 2>/dev/null | head -c 400 || true
 echo
 echo "DONE."
