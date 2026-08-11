@@ -219,8 +219,8 @@ export function narrativeHeroHtml(narr, chrome, pack, skin, r, { compactShare = 
         }${band.label || r.type}</p>`
       : "";
   const shareBlock = compactShare
-    ? `<p class="share-prompt muted">金句已写入下方分享卡</p>`
-    : `<p class="share-prompt muted">一键导出分享卡发小红书 / 朋友圈</p>
+    ? `<p class="share-prompt muted">金句已写入下方分享卡 · 导出后可直接发笔记</p>`
+    : `<p class="share-prompt muted">一键导出分享卡 · 发小红书 / 朋友圈都行</p>
       <p class="share-line">「${narr.shareLine}」</p>`;
   return `
     <section class="result-hero result-hero-pro">

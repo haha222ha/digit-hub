@@ -1535,6 +1535,37 @@ def mark_payment_order_fulfilled(order_no: str, user_id: int) -> None:
     conn.close()
 
 
+def mark_payment_order_fulfill_error(order_no: str, *, error: str) -> None:
+    """Flag paid order whose auto renew/addon fulfill failed (needs manual ops)."""
+    payload = {
+        "needs_manual_fulfill": True,
+        "fulfill_error": (error or "")[:500],
+        "fulfill_error_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    conn = _conn()
+    try:
+        row = conn.execute(
+            "SELECT meta_json FROM payment_orders WHERE order_no=?",
+            (order_no,),
+        ).fetchone()
+        meta = {}
+        if row and row["meta_json"]:
+            try:
+                meta = json.loads(row["meta_json"]) or {}
+            except Exception:
+                meta = {}
+        if not isinstance(meta, dict):
+            meta = {}
+        meta.update(payload)
+        conn.execute(
+            "UPDATE payment_orders SET meta_json=? WHERE order_no=?",
+            (json.dumps(meta, ensure_ascii=False), order_no),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def get_user_by_email(email: str) -> dict | None:
     addr = (email or "").strip().lower()
     if not addr:

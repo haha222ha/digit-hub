@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import ipaddress
 from typing import Any
 from urllib.parse import urljoin
@@ -69,7 +70,7 @@ def verify_notify_epay(params: dict[str, Any], key: str) -> bool:
     if not sign:
         return False
     expect = _epay_sign(params, key)
-    return sign.lower() == expect.lower()
+    return hmac.compare_digest(sign.lower(), expect.lower())
 
 
 def _channel_credentials(channel: str) -> tuple[str, str, str]:

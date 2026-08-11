@@ -2077,6 +2077,28 @@ def mark_payment_order_fulfilled(order_no: str, user_id: int) -> None:
         conn.close()
 
 
+def mark_payment_order_fulfill_error(order_no: str, *, error: str) -> None:
+    """Flag paid order whose auto renew/addon fulfill failed (needs manual ops)."""
+    payload = {
+        "needs_manual_fulfill": True,
+        "fulfill_error": (error or "")[:500],
+        "fulfill_error_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    conn = _conn()
+    try:
+        with conn.cursor() as c:
+            c.execute("SET search_path TO xhs_monitor, public")
+            c.execute(
+                """UPDATE payment_orders
+                   SET meta_json = COALESCE(meta_json, '{}'::jsonb) || %s::jsonb
+                   WHERE order_no=%s""",
+                (json.dumps(payload, ensure_ascii=False), order_no),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def get_user_by_email(email: str) -> dict | None:
     addr = (email or "").strip().lower()
     if not addr:

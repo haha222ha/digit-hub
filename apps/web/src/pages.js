@@ -682,7 +682,7 @@ export async function renderSoftResult(root, skinId, query) {
       </div>
       <div class="stack share-actions" style="margin-bottom:20px">
         <button class="btn btn-primary btn-block" id="shareBtn">一键导出分享图</button>
-        <p class="muted" style="text-align:center;margin:0">含类型名 · 发小红书 / 朋友圈</p>
+        <p class="muted" style="text-align:center;margin:0">含类型名 · 配一句感想发笔记就够了</p>
         ${
           skin.duo
             ? packed.duoSeat === "A" || new URLSearchParams(query).get("duo") === "A"
@@ -693,6 +693,7 @@ export async function renderSoftResult(root, skinId, query) {
       </div>
       ${retestBannerHtml(skinId)}
       <button class="btn btn-ghost btn-block" data-go="#/tests">再测一个</button>
+      <p class="result-legal muted">娱乐向自我探索，不构成心理咨询、临床诊断或情感建议。完整报告为一次性数字内容，支付成功后不可退款。</p>
     </main>
     <div class="drawer-backdrop" id="bd"></div>
     <div class="drawer" id="drawer"></div>
@@ -832,6 +833,7 @@ async function openPayDrawer(root, skinId, rid) {
         : "点微信/支付宝即可出码 · 小红书/闲鱼买家可用授权码"
     }</p>
     <p class="pay-anchor muted">原价 <s>¥9.9</s> · 体验价 <strong class="price-now">¥1.99</strong></p>
+    <p class="pay-digital-note muted">数字内容说明：支付成功即解锁本机可读的完整报告（含场景解读与 7 日微实验）。属一次性数字内容，成功履约后不支持退款；授权码同样按已购权益核销。</p>
     <div class="stack" style="margin-top:14px">
       <p class="group-label">套餐</p>
       <div class="plan-cards">${planCards}</div>
@@ -1212,6 +1214,7 @@ export async function renderFullReport(root, resultId) {
       </details>
       <div class="stack" style="margin:24px 0" id="result-share">
         <button class="btn btn-ember btn-block" id="shareBtn">一键导出分享图</button>
+        <p class="muted" style="text-align:center;margin:0">含类型名 · 配一句感想发笔记就够了</p>
         <button class="btn btn-primary btn-block" id="pdfBtn">下载完整报告 PDF</button>
         <button class="btn btn-primary btn-block" data-go="#/t/${packed.skinId}/play">复测此皮 · 更新曲线</button>
         ${
@@ -1222,6 +1225,7 @@ export async function renderFullReport(root, resultId) {
         ${a2hsButtonHtml({ variant: "ghost", label: "添加到主屏幕" })}
         <button class="btn btn-ghost btn-block" data-go="#/tests">返回目录</button>
       </div>
+      <p class="result-legal muted">娱乐向自我探索，不构成心理咨询、临床诊断或情感建议。完整报告为一次性数字内容，支付成功后不可退款。</p>
     </main>
   `;
   animateBars(root);

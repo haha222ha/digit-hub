@@ -1440,6 +1440,20 @@ button {
   font-weight: 600;
 }
 
+.result-legal {
+  margin: 20px 0 8px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.pay-digital-note {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .radar-wrap {
   display: flex;
   justify-content: center;

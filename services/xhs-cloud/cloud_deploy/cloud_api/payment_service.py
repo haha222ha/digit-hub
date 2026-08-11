@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import secrets
 from datetime import datetime, timedelta
 
@@ -10,6 +11,8 @@ from cloud_deploy.cloud_api import database as db
 from cloud_deploy.cloud_api.config import get_settings
 from cloud_deploy.cloud_api.hwxun_pay import channel_merchant_credentials, create_epay_order, verify_notify_epay
 from cloud_deploy.cloud_api.payment_plans import get_plan
+
+logger = logging.getLogger(__name__)
 
 # Same actor (IP / user) + channel: min gap between new gateway creates.
 _PAY_CREATE_COOLDOWN_SEC = 10
@@ -435,12 +438,39 @@ def handle_hwxun_notify(params: dict) -> str:
             try:
                 db.renew_with_auth_code(int(user_id), auth_code)
                 db.mark_payment_order_fulfilled(order_no, int(user_id))
-            except Exception:
-                pass
+            except Exception as e:
+                logger.exception(
+                    "payment auto-fulfill renew failed order_no=%s user_id=%s",
+                    order_no,
+                    user_id,
+                )
+                try:
+                    db.mark_payment_order_fulfill_error(
+                        order_no,
+                        error=f"renew_failed: {type(e).__name__}: {e}",
+                    )
+                except Exception:
+                    logger.exception(
+                        "mark_payment_order_fulfill_error failed order_no=%s", order_no
+                    )
         else:
             try:
                 db.fulfill_addon_order(int(user_id), auth_code, row["plan_code"])
                 db.mark_payment_order_fulfilled(order_no, int(user_id))
-            except Exception:
-                pass
+            except Exception as e:
+                logger.exception(
+                    "payment auto-fulfill addon failed order_no=%s user_id=%s plan=%s",
+                    order_no,
+                    user_id,
+                    row.get("plan_code"),
+                )
+                try:
+                    db.mark_payment_order_fulfill_error(
+                        order_no,
+                        error=f"addon_failed: {type(e).__name__}: {e}",
+                    )
+                except Exception:
+                    logger.exception(
+                        "mark_payment_order_fulfill_error failed order_no=%s", order_no
+                    )
     return "success"
