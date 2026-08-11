@@ -5,18 +5,27 @@ set -euo pipefail
 
 WEB_ROOT="${WEB_ROOT:-/opt/digit-hub/apps/web}"
 ADMIN_DIR="${ADMIN_DIR:-/opt/digit-hub/apps/admin}"
+# 防止误设 ADMIN_DIR=.../index.html 导致 index.htmlindex.html
+ADMIN_DIR="${ADMIN_DIR%/index.html}"
+ADMIN_DIR="${ADMIN_DIR%/}"
+ADMIN_INDEX="${ADMIN_DIR}/index.html"
 CONF_D="${CONF_D:-/etc/nginx/conf.d}"
 MONITOR_DOMAIN="${MONITOR_DOMAIN:-monitor.xhs365.cn}"
 MONITOR_CONF="${CONF_D}/monitor.xhs365.cn.conf"
 
 MARKER="# digit-hub managed locations"
+# 精确匹配 + alias 单文件；禁止在该 location 内使用 index 指令（nginx 1.18 会拼成 index.htmlindex.html）
 ADMIN_LOCATIONS='    location = /admin {
-        return 302 /admin/;
+        return 302 /admin/index.html;
     }
 
-    location ^~ /admin/ {
-        alias ADMIN_DIR_PLACEHOLDER/;
-        index index.html;
+    location = /admin/ {
+        return 302 /admin/index.html;
+    }
+
+    location = /admin/index.html {
+        alias ADMIN_INDEX_PLACEHOLDER;
+        default_type text/html;
         add_header Cache-Control "no-cache, must-revalidate";
     }'
 
@@ -25,7 +34,7 @@ write_web_server() {
   local listen="$2"
   local server_name="$3"
   local ssl_block="${4:-}"
-  local admin_block="${ADMIN_LOCATIONS//ADMIN_DIR_PLACEHOLDER/${ADMIN_DIR}}"
+  local admin_block="${ADMIN_LOCATIONS//ADMIN_INDEX_PLACEHOLDER/${ADMIN_INDEX}}"
 
   cat > "${outfile}" <<NGX
 server {
@@ -84,12 +93,16 @@ server {
     }
 
     location = /admin {
-        return 302 /admin/;
+        return 302 /admin/index.html;
     }
 
-    location ^~ /admin/ {
-        alias ${ADMIN_DIR}/;
-        index index.html;
+    location = /admin/ {
+        return 302 /admin/index.html;
+    }
+
+    location = /admin/index.html {
+        alias ${ADMIN_INDEX};
+        default_type text/html;
         add_header Cache-Control "no-cache, must-revalidate";
     }
 }
@@ -126,30 +139,47 @@ purge_stale_monitor_configs() {
   done
 }
 
+verify_written_config() {
+  echo "==> verify ${MONITOR_CONF} admin block"
+  grep -n 'admin' "${MONITOR_CONF}" || true
+  if grep -E 'location.*/admin/' "${MONITOR_CONF}" | grep -qv 'return 302'; then
+    if grep -A3 'location.*/admin/' "${MONITOR_CONF}" | grep -q 'index index.html'; then
+      echo "ERROR: /admin/ location must not use index directive (causes index.htmlindex.html on nginx 1.18)"
+      exit 1
+    fi
+  fi
+  if grep -q 'index.htmlindex.html' /var/log/nginx/error.log 2>/dev/null; then
+    echo "WARN: error.log still mentions index.htmlindex.html — will reload nginx"
+  fi
+}
+
 smoke_admin() {
   local scheme="$1"
   local url="$2"
   local label="$3"
+  local expect_code="${4:-200}"
   local curl_opts=(-sS -H "Host: ${MONITOR_DOMAIN}")
   [[ "${scheme}" == "https" ]] && curl_opts+=(-k)
   local code size
   code=$(curl "${curl_opts[@]}" -o /dev/null -w '%{http_code}' "${url}" 2>/dev/null || echo "000")
   size=$(curl "${curl_opts[@]}" "${url}" 2>/dev/null | wc -c | tr -d ' ')
   echo "${label}: code=${code} bytes=${size}"
-  if [[ "${code}" != "200" ]]; then
-    echo "ERROR: ${label} returned ${code}"
+  if [[ "${code}" != "${expect_code}" ]]; then
+    echo "ERROR: ${label} expected ${expect_code}, got ${code}"
+    echo "==> nginx -T (admin snippets)"
+    nginx -T 2>/dev/null | grep -n -A5 -B2 'admin' | head -60 || true
     tail -n 8 /var/log/nginx/error.log 2>/dev/null || true
     return 1
   fi
-  if [[ "${size}" -lt 5000 ]]; then
+  if [[ "${expect_code}" == "200" && "${size}" -lt 5000 ]]; then
     echo "ERROR: ${label} too small (${size})"
     return 1
   fi
 }
 
 echo "==> ensure admin static exists"
-test -f "${ADMIN_DIR}/index.html" || {
-  echo "ERROR: missing ${ADMIN_DIR}/index.html — git pull digit-hub first"
+test -f "${ADMIN_INDEX}" || {
+  echo "ERROR: missing ${ADMIN_INDEX} — git pull digit-hub first"
   exit 1
 }
 
@@ -178,21 +208,23 @@ else
   write_web_server "${MONITOR_CONF}" "80" "${MONITOR_DOMAIN}"
 fi
 
+verify_written_config
 nginx -t
 systemctl reload nginx
 
 echo "==> smoke (match browser paths)"
-ADMIN_BYTES=$(wc -c < "${ADMIN_DIR}/index.html" | tr -d ' ')
+ADMIN_BYTES=$(wc -c < "${ADMIN_INDEX}" | tr -d ' ')
 echo "admin file bytes on disk: ${ADMIN_BYTES}"
 
-smoke_admin http "http://127.0.0.1/admin/" "admin_http_slash"
-smoke_admin http "http://127.0.0.1/admin/index.html" "admin_http_index"
+smoke_admin http "http://127.0.0.1/admin/index.html" "admin_http_index" 200
+smoke_admin http "http://127.0.0.1/admin/" "admin_http_slash" 302
+code=$(curl -sS -o /dev/null -w '%{http_code}' -L -H "Host: ${MONITOR_DOMAIN}" http://127.0.0.1/admin/ 2>/dev/null || echo "000")
+size=$(curl -sS -L -H "Host: ${MONITOR_DOMAIN}" http://127.0.0.1/admin/ 2>/dev/null | wc -c | tr -d ' ')
+echo "admin_http_slash_follow: code=${code} bytes=${size}"
+[[ "${code}" == "200" && "${size}" -ge 5000 ]] || { echo "ERROR: follow /admin/ failed"; exit 1; }
 
 if command -v ss >/dev/null 2>&1 && ss -tln | grep -q ':443 '; then
-  smoke_admin https "https://127.0.0.1/admin/" "admin_https_slash" || {
-    echo "HINT: browser uses HTTPS; stale :443 vhost may still exist — re-run this script after purge"
-    exit 1
-  }
+  smoke_admin https "https://127.0.0.1/admin/index.html" "admin_https_index" 200 || exit 1
 fi
 
 echo "DONE nginx_apply -> https://${MONITOR_DOMAIN}/admin/"
