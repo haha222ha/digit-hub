@@ -3,6 +3,26 @@
 set -euo pipefail
 XHS_ROOT="${XHS_ROOT:-/opt/xhs-cloud}"
 ENV_OUT="${XHS_ROOT}/.env"
+DB_NAME="${DB_NAME:-vuemonitor}"
+DB_USER="${DB_USER:-xhs_monitor_user}"
+
+echo "==> fix pg ownership (tables created by postgres, API runs as ${DB_USER})"
+sudo -u postgres psql -d "$DB_NAME" -v ON_ERROR_STOP=1 <<SQL
+ALTER SCHEMA xhs_monitor OWNER TO ${DB_USER};
+DO \$\$
+DECLARE r RECORD;
+BEGIN
+  FOR r IN SELECT tablename FROM pg_tables WHERE schemaname = 'xhs_monitor'
+  LOOP
+    EXECUTE format('ALTER TABLE xhs_monitor.%I OWNER TO ${DB_USER}', r.tablename);
+  END LOOP;
+  FOR r IN SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'xhs_monitor'
+  LOOP
+    EXECUTE format('ALTER SEQUENCE xhs_monitor.%I OWNER TO ${DB_USER}', r.sequence_name);
+  END LOOP;
+END
+\$\$;
+SQL
 
 echo "==> status"
 systemctl status xhs-cloud-api --no-pager -l || true

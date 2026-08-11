@@ -87,6 +87,20 @@ sed "s/CHANGE_ME_STRONG_PASSWORD/${DB_PASS}/g" \
   | sudo -u postgres psql -d "$DB_NAME" -v ON_ERROR_STOP=1 -f -
 
 sudo -u postgres psql -d "$DB_NAME" -v ON_ERROR_STOP=1 <<SQL
+ALTER SCHEMA xhs_monitor OWNER TO ${DB_USER};
+DO \$\$
+DECLARE r RECORD;
+BEGIN
+  FOR r IN SELECT tablename FROM pg_tables WHERE schemaname = 'xhs_monitor'
+  LOOP
+    EXECUTE format('ALTER TABLE xhs_monitor.%I OWNER TO ${DB_USER}', r.tablename);
+  END LOOP;
+  FOR r IN SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'xhs_monitor'
+  LOOP
+    EXECUTE format('ALTER SEQUENCE xhs_monitor.%I OWNER TO ${DB_USER}', r.sequence_name);
+  END LOOP;
+END
+\$\$;
 GRANT ALL ON SCHEMA xhs_monitor TO ${DB_USER};
 GRANT ALL ON ALL TABLES IN SCHEMA xhs_monitor TO ${DB_USER};
 GRANT ALL ON ALL SEQUENCES IN SCHEMA xhs_monitor TO ${DB_USER};
