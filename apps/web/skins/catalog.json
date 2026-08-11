@@ -184,6 +184,16 @@
       "label": "趣味集邮",
       "items": [
         {
+          "id": "wuxing_city",
+          "title": "五行城市匹配",
+          "minutes": 5,
+          "promise": "【进阶版】20 题五维 · 找到最旺你的城市",
+          "status": "live",
+          "lane": "集邮",
+          "file": "wuxing_city.json",
+          "source": "五行城市匹配测试"
+        },
+        {
           "id": "city_vibe",
           "title": "性格 × 城市",
           "minutes": 4,

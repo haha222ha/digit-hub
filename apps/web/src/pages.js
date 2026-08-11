@@ -273,7 +273,7 @@ export async function renderIntro(root, skinId) {
       ${topbar()}
       <main class="shell">
         <h1 class="page-title">${skin.title}</h1>
-        <p class="muted">约 ${skin.minutes} 分钟 · ${qCount} 题${skin.duo ? " · 支持双人对照" : ""}</p>
+        <p class="muted">约 ${skin.minutes} 分钟 · ${qCount} 题${skin.duo ? " · 支持双人对照" : ""}${skin.badge ? ` · ${skin.badge}` : ""}</p>
         ${skin.disclaimer ? `<p class="disclaimer-pill">${skin.disclaimer}</p>` : ""}
         <p style="margin:18px 0">${introText}</p>
         ${
