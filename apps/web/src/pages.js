@@ -687,6 +687,15 @@ const FALLBACK_SINGLE_PLAN = {
   summary: "7 天内解锁 1 份完整报告",
 };
 
+let payPollTimer = null;
+
+function clearPayPollTimer() {
+  if (payPollTimer) {
+    clearInterval(payPollTimer);
+    payPollTimer = null;
+  }
+}
+
 async function openPayDrawer(root, skinId, rid) {
   const drawer = root.querySelector("#drawer");
   const bd = root.querySelector("#bd");
@@ -767,10 +776,13 @@ async function openPayDrawer(root, skinId, rid) {
   });
   drawer.querySelector("[data-ch]")?.classList.add("selected-ch");
 
-  drawer.querySelector("#close").onclick = () => {
+  const closeDrawer = () => {
+    clearPayPollTimer();
     bd.classList.remove("open");
     drawer.classList.remove("open");
   };
+
+  drawer.querySelector("#close").onclick = closeDrawer;
 
   drawer.querySelectorAll("[data-plan]").forEach((btn) => {
     btn.onclick = () => startCheckout(drawer, btn.dataset.plan, channel, skinId, rid);
@@ -780,8 +792,7 @@ async function openPayDrawer(root, skinId, rid) {
     const code = drawer.querySelector("#code").value.trim();
     try {
       await activateWithAuthCode(code);
-      bd.classList.remove("open");
-      drawer.classList.remove("open");
+      closeDrawer();
       const ok = await checkReportAccess(skinId);
       if (ok) navigate(`/report/${rid}`);
       else navigate(`/t/${skinId}/result?rid=${encodeURIComponent(rid)}`);
@@ -847,6 +858,7 @@ async function completeAccountRegisterForm(panel, orderNo) {
 }
 
 async function startCheckout(drawer, plan_code, channel, skinId, rid) {
+  clearPayPollTimer();
   const panel = drawer.querySelector("#payPanel");
   panel.innerHTML = `<p class="muted">创建订单中…</p>`;
   try {
@@ -881,7 +893,6 @@ async function startCheckout(drawer, plan_code, channel, skinId, rid) {
 
     let settled = false;
     let awaitingRegister = false;
-    let pollTimer = null;
 
     const finishAfterPay = async () => {
       await refreshEntitlementsFromProfile();
@@ -903,10 +914,7 @@ async function startCheckout(drawer, plan_code, channel, skinId, rid) {
       if (statusEl) statusEl.textContent = `状态：${st.status}`;
       if (st.status !== "paid") return false;
 
-      if (pollTimer) {
-        clearInterval(pollTimer);
-        pollTimer = null;
-      }
+      clearPayPollTimer();
 
       if (isMockMode()) {
         await api(`/api/v1/payment/orders/${order.order_no}/complete`, {
@@ -950,13 +958,10 @@ async function startCheckout(drawer, plan_code, channel, skinId, rid) {
     });
 
     let n = 0;
-    pollTimer = setInterval(async () => {
+    payPollTimer = setInterval(async () => {
       n += 1;
       const done = await fulfill().catch(() => false);
-      if (done || n > 40) {
-        clearInterval(pollTimer);
-        pollTimer = null;
-      }
+      if (done || n > 40) clearPayPollTimer();
     }, 3000);
   } catch (e) {
     panel.innerHTML = `<p class="muted">下单失败：${e.message}</p>`;

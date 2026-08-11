@@ -14,7 +14,22 @@ MONITOR_DOMAIN="${MONITOR_DOMAIN:-monitor.xhs365.cn}"
 MONITOR_CONF="${CONF_D}/monitor.xhs365.cn.conf"
 
 MARKER="# digit-hub managed locations"
+GZIP_DIRECTIVES='    gzip on;
+    gzip_vary on;
+    gzip_min_length 256;
+    gzip_types text/plain text/css application/json application/javascript application/xml image/svg+xml;'
 API_ASSETS_LOCATIONS='    client_max_body_size 16m;
+
+    location /api/v1/auth/ {
+        limit_req zone=digit_hub_auth burst=5 nodelay;
+        client_max_body_size 16m;
+        proxy_pass http://127.0.0.1:8080/api/v1/auth/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 120s;
+    }
 
     location /assets/ {
         proxy_pass http://127.0.0.1:8080/assets/;
@@ -64,6 +79,8 @@ server {
 
     ${MARKER}
 
+${GZIP_DIRECTIVES}
+
     location / {
         try_files \$uri \$uri/ /index.html;
         add_header Cache-Control "no-cache, must-revalidate";
@@ -89,6 +106,8 @@ server {
     ssl_certificate_key ${SSL_KEY};${ssl_extra}
 
     ${MARKER}
+
+${GZIP_DIRECTIVES}
 
     location / {
         try_files \$uri \$uri/ /index.html;
@@ -144,6 +163,15 @@ purge_stale_monitor_configs() {
   done
 }
 
+write_rate_limit_zone() {
+  echo "==> write ${CONF_D}/digit-hub-rate-limit.conf"
+  cat > "${CONF_D}/digit-hub-rate-limit.conf" <<'NGX'
+# digit-hub managed — limit auth code brute-force (/api/v1/auth/)
+limit_req_zone $binary_remote_addr zone=digit_hub_auth:10m rate=10r/m;
+limit_req_status 429;
+NGX
+}
+
 verify_written_config() {
   echo "==> verify ${MONITOR_CONF} admin block"
   grep -n 'admin' "${MONITOR_CONF}" || true
@@ -189,6 +217,8 @@ test -f "${ADMIN_INDEX}" || {
 }
 
 purge_stale_monitor_configs
+
+write_rate_limit_zone
 
 echo "==> write ${CONF_D}/assess.xinxiang.conf (default_server :80)"
 write_web_server "${CONF_D}/assess.xinxiang.conf" "80 default_server" "_"

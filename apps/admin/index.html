@@ -197,6 +197,14 @@
     const $ = (id) => document.getElementById(id);
     const token = () => localStorage.getItem(TOKEN_KEY) || "";
 
+    function logoutPortal(message) {
+      localStorage.removeItem(TOKEN_KEY);
+      $("appView").classList.add("hidden");
+      $("loginView").classList.remove("hidden");
+      $("adminName").textContent = "";
+      if (message) showMsg($("loginMsg"), message, "err");
+    }
+
     function showMsg(el, text, type = "err") {
       if (!text) { el.classList.add("hidden"); return; }
       el.textContent = text; el.className = "msg " + type;
@@ -208,6 +216,10 @@
       if (token()) headers.Authorization = "Bearer " + token();
       const res = await fetch(API + path, { ...opts, headers });
       const data = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        logoutPortal("登录已过期，请重新登录");
+        throw new Error(data.detail || "登录已过期");
+      }
       if (!res.ok) throw new Error(data.detail || data.error || res.statusText);
       return data;
     }
