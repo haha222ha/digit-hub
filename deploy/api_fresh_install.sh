@@ -79,12 +79,12 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${DB_NAME}')\gexec
 GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO ${DB_USER};
 SQL
 
-# init schema (replace placeholder password in SQL file for role create skip)
-TMP_SQL=$(mktemp)
-sed "s/CHANGE_ME_STRONG_PASSWORD/${DB_PASS}/g" "$XHS_ROOT/cloud_deploy/database/init_xhs_monitor.sql" > "$TMP_SQL"
-sudo -u postgres psql -d "$DB_NAME" -v ON_ERROR_STOP=1 -f "$TMP_SQL" || true
-rm -f "$TMP_SQL"
-# ensure grants
+# init schema (postgres user must read input — avoid root-only mktemp)
+echo "==> postgres: init xhs_monitor schema"
+sed "s/CHANGE_ME_STRONG_PASSWORD/${DB_PASS}/g" \
+  "$XHS_ROOT/cloud_deploy/database/init_xhs_monitor.sql" \
+  | sudo -u postgres psql -d "$DB_NAME" -v ON_ERROR_STOP=1 -f -
+
 sudo -u postgres psql -d "$DB_NAME" -v ON_ERROR_STOP=1 <<SQL
 GRANT ALL ON SCHEMA xhs_monitor TO ${DB_USER};
 GRANT ALL ON ALL TABLES IN SCHEMA xhs_monitor TO ${DB_USER};
