@@ -208,6 +208,13 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_read_timeout 120s;
     }
+    location = /admin { return 302 /admin/; }
+    location /admin/ {
+        root /opt/digit-hub/apps;
+        index index.html;
+        try_files $uri /admin/index.html;
+        add_header Cache-Control "no-cache, must-revalidate";
+    }
 }
 NGX
 
@@ -228,6 +235,13 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_read_timeout 120s;
+    }
+    location = /admin { return 302 /admin/; }
+    location /admin/ {
+        root /opt/digit-hub/apps;
+        index index.html;
+        try_files $uri /admin/index.html;
+        add_header Cache-Control "no-cache, must-revalidate";
     }
 }
 NGX

@@ -45,6 +45,19 @@
 
 已在 registry 占位，`reserved: true`，上线前不可发码。
 
+## 统一运营后台（浏览器）
+
+| URL | 说明 |
+|-----|------|
+| `https://monitor.xhs365.cn/admin/` | 授权码管理 UI（按 product 分模块） |
+| `POST /api/v1/portal/admin/login` | 管理员登录（`XHS_CLOUD_ADMIN_USER/PASS`） |
+| `GET /api/v1/portal/admin/auth-products` | 产品/SKU 注册表 |
+| `POST /api/v1/portal/admin/auth-codes` | 按 product+sku 发码 |
+| `GET /api/v1/portal/admin/auth-codes` | 列表（可按 product/status 筛） |
+| `POST /api/v1/portal/admin/auth-codes/{code}/revoke` | 吊销 |
+
+机器对接仍用 Sync Key：`/api/v1/admin/auth-codes`（vuemonitor BFF 同款）。
+
 ## CLI 用法（推荐）
 
 ```bash

@@ -37,6 +37,11 @@ from cloud_deploy.cloud_api.auth import (
     verify_sync_key,
     optional_user,
 )
+from cloud_deploy.cloud_api.admin_portal_auth import (
+    create_admin_portal_token,
+    verify_admin_credentials,
+    verify_admin_portal,
+)
 from cloud_deploy.cloud_api.config import get_settings
 from cloud_deploy.cloud_api import payment_service as pay
 from cloud_deploy.cloud_api.email_service import smtp_configured
@@ -195,6 +200,11 @@ class GenerateCodesBody(BaseModel):
     duration_days: int = Field(default=0, ge=0, le=36500)
     max_activations: int = Field(default=0, ge=0, le=1000)
     note: str = ""
+
+
+class AdminPortalLoginBody(BaseModel):
+    username: str = Field(..., min_length=2, max_length=64)
+    password: str = Field(..., min_length=4, max_length=128)
 
 
 class DailyReportSyncBody(BaseModel):
@@ -863,76 +873,109 @@ def admin_auth_products(_: None = Depends(verify_sync_key)):
 
 @app.post("/api/v1/admin/auth-codes")
 def admin_generate_codes(body: GenerateCodesBody, _: None = Depends(verify_sync_key)):
-    from cloud_deploy.cloud_api.auth_product_registry import (
-        build_fulfillment_note,
-        resolve_plan,
-        resolve_sku,
-    )
-    from cloud_deploy.cloud_api.payment_plans import entitlements_note_for_payment_plan
+    from cloud_deploy.cloud_api.admin_auth_codes_service import generate_auth_codes_request
 
-    channel = (body.channel or "").strip()
-    remark = (body.note or "").strip()
-
-    if body.product and body.sku:
-        spec = resolve_sku(body.product, body.sku)
-        plan_code = spec["plan_code"]
-        duration_days = body.duration_days or spec["duration_days"]
-        max_activations = body.max_activations or spec["max_activations"]
-        note = build_fulfillment_note(
-            plan_code,
-            product=spec["product"],
-            sku=spec["sku"],
-            channel=channel,
-            remark=remark,
-        )
-        product = spec["product"]
-        sku = spec["sku"]
-    elif body.plan_code:
-        plan_code = body.plan_code
-        spec = resolve_plan(plan_code)
-        duration_days = body.duration_days or (spec["duration_days"] if spec else 30)
-        max_activations = body.max_activations or (spec["max_activations"] if spec else 1)
-        product = spec["product"] if spec else ""
-        sku = spec["sku"] if spec else ""
-        base = entitlements_note_for_payment_plan(plan_code)
-        if base:
-            import json
-
-            payload = json.loads(base)
-            meta = payload.setdefault("meta", {})
-            if channel:
-                meta["channel"] = channel
-            if remark:
-                meta["remark"] = remark
-            note = json.dumps(payload, ensure_ascii=False)
-        else:
-            note = remark or channel
-    else:
-        raise HTTPException(status_code=400, detail="需要 product+sku 或 plan_code")
-
-    codes = db.generate_auth_codes(
+    return generate_auth_codes_request(
         count=body.count,
-        plan_code=plan_code,
-        duration_days=duration_days,
-        max_activations=max_activations,
-        note=note,
-    )
-    from cloud_deploy.cloud_api.auth_product_registry import (
-        activation_url_template,
-        format_batch_export,
+        plan_code=body.plan_code,
+        product=body.product,
+        sku=body.sku,
+        channel=body.channel,
+        note=body.note,
+        duration_days=body.duration_days,
+        max_activations=body.max_activations,
     )
 
-    export = format_batch_export(product, sku, codes, channel=channel) if product else ""
+
+@app.post("/api/v1/portal/admin/login")
+def portal_admin_login(body: AdminPortalLoginBody):
+    if not verify_admin_credentials(body.username, body.password):
+        raise HTTPException(status_code=401, detail="管理员账号或密码错误")
+    token = create_admin_portal_token(body.username)
     return {
-        "codes": codes,
-        "product": product or None,
-        "sku": sku or None,
-        "plan_code": plan_code,
-        "duration_days": duration_days,
-        "max_activations": max_activations,
-        "activate_url_template": activation_url_template(product) if product else None,
-        "export_tsv": export,
+        "access_token": token,
+        "token_type": "bearer",
+        "username": body.username.strip(),
+        "role": "cloud_admin",
     }
+
+
+@app.get("/api/v1/portal/admin/me")
+def portal_admin_me(admin_user: str = Depends(verify_admin_portal)):
+    return {"username": admin_user, "role": "cloud_admin"}
+
+
+@app.get("/api/v1/portal/admin/auth-products")
+def portal_admin_products(_admin: str = Depends(verify_admin_portal)):
+    from cloud_deploy.cloud_api.auth_product_registry import list_products
+
+    return {"products": list_products(include_reserved=True)}
+
+
+@app.get("/api/v1/portal/admin/stats")
+def portal_admin_stats(_admin: str = Depends(verify_admin_portal)):
+    try:
+        stats = db.get_admin_stats()
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"数据库未就绪: {e}") from e
+    return {"stats": stats}
+
+
+@app.get("/api/v1/portal/admin/auth-codes")
+def portal_admin_list_codes(
+    _admin: str = Depends(verify_admin_portal),
+    limit: int = 100,
+    status: str | None = None,
+    product: str | None = None,
+):
+    try:
+        items = db.list_auth_codes(limit=limit, status=status or None)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"数据库未就绪: {e}") from e
+    if product:
+        want = product.strip().lower()
+        filtered = []
+        for it in items:
+            note = it.get("note") or ""
+            if f'"product": "{want}"' in note or f'"product":"{want}"' in note.replace(" ", ""):
+                filtered.append(it)
+            elif want == "insight" and (it.get("plan_code") or "").startswith(
+                ("experience", "monthly", "quarterly", "halfyear", "yearly")
+            ):
+                filtered.append(it)
+            elif want == "assess" and (it.get("plan_code") or "").startswith("assess"):
+                filtered.append(it)
+        items = filtered
+    return {"items": items, "total": len(items)}
+
+
+@app.post("/api/v1/portal/admin/auth-codes")
+def portal_admin_generate_codes(
+    body: GenerateCodesBody,
+    _admin: str = Depends(verify_admin_portal),
+):
+    from cloud_deploy.cloud_api.admin_auth_codes_service import generate_auth_codes_request
+
+    return generate_auth_codes_request(
+        count=body.count,
+        plan_code=body.plan_code,
+        product=body.product,
+        sku=body.sku,
+        channel=body.channel,
+        note=body.note,
+        duration_days=body.duration_days,
+        max_activations=body.max_activations,
+    )
+
+
+@app.post("/api/v1/portal/admin/auth-codes/{code}/revoke")
+def portal_admin_revoke_code(code: str, _admin: str = Depends(verify_admin_portal)):
+    try:
+        return db.revoke_auth_code(code)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"数据库未就绪: {e}") from e
 
 
 @app.get("/api/v1/admin/auth-codes")

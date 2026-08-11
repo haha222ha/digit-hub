@@ -48,6 +48,13 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_read_timeout 120s;
     }
+    location = /admin { return 302 /admin/; }
+    location /admin/ {
+        root /opt/digit-hub/apps;
+        index index.html;
+        try_files $uri /admin/index.html;
+        add_header Cache-Control "no-cache, must-revalidate";
+    }
 }
 EOF
 rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
