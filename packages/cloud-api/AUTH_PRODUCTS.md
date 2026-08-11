@@ -45,18 +45,22 @@
 
 已在 registry 占位，`reserved: true`，上线前不可发码。
 
-## 统一运营后台（浏览器）
+## 统一运营后台（浏览器 · 已搬运 vuemonitor 能力）
 
-| URL | 说明 |
-|-----|------|
-| `https://monitor.xhs365.cn/admin/` | 授权码管理 UI（按 product 分模块） |
-| `POST /api/v1/portal/admin/login` | 管理员登录（`XHS_CLOUD_ADMIN_USER/PASS`） |
-| `GET /api/v1/portal/admin/auth-products` | 产品/SKU 注册表 |
-| `POST /api/v1/portal/admin/auth-codes` | 按 product+sku 发码 |
-| `GET /api/v1/portal/admin/auth-codes` | 列表（可按 product/status 筛） |
-| `POST /api/v1/portal/admin/auth-codes/{code}/revoke` | 吊销 |
+| Tab | vuemonitor 来源 | portal API |
+|-----|-----------------|------------|
+| 授权码 | PickMemberView | `/portal/admin/auth-codes` |
+| 用户反馈 | MemberFeedbackView | `/portal/admin/member-feedback` |
+| 客服微信 | MemberContactView | `/portal/admin/member-contact` |
+| 系统状态 | member_cloud status | `/portal/admin/status` |
 
-机器对接仍用 Sync Key：`/api/v1/admin/auth-codes`（vuemonitor BFF 同款）。
+| URL / API | 说明 |
+|-----------|------|
+| `https://monitor.xhs365.cn/admin/` | 运营控制台 |
+| `POST /api/v1/portal/admin/login` | 管理员登录 |
+| `GET /api/v1/portal/admin/status` | 在线状态 + 统计 + 各产品链接 |
+
+机器对接仍用 Sync Key：`/api/v1/admin/*`
 
 ## CLI 用法（推荐）
 
