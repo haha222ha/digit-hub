@@ -1438,7 +1438,6 @@ button {
 .retest-banner.ready {
   border-color: color-mix(in srgb, var(--seal) 40%, var(--line));
   background: var(--seal-soft);
-}
   color: var(--ember);
   letter-spacing: 0.04em;
 }

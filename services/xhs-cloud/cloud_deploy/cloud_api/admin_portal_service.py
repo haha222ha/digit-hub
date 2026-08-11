@@ -63,7 +63,7 @@ def cloud_status_payload(*, health_ok: bool = True) -> dict:
     products = list_products(include_reserved=True)
     portal_links = {
         "assess_site": f"{origin}/?api=live",
-        "assess_activate": f"{origin}/#/activate",
+        "assess_activate": f"{origin}/?api=live#/activate",
         "admin_console": f"{origin}/admin/",
         "insight_member": f"{origin}/member",
     }

@@ -791,6 +791,61 @@ async function openPayDrawer(root, skinId, rid) {
   };
 }
 
+async function completeAccountRegisterForm(panel, orderNo) {
+  return new Promise((resolve, reject) => {
+    panel.innerHTML = `
+      <div class="pay-box">
+        <p><strong>支付成功</strong></p>
+        <p class="muted">设置账号以绑定本次购买的权益</p>
+        <div class="stack" id="registerForm">
+          <input class="field" id="regUser" placeholder="用户名（3–64 位）" autocomplete="username" maxlength="64" />
+          <input class="field" id="regPass" type="password" placeholder="密码（至少 6 位）" autocomplete="new-password" minlength="6" />
+          <p class="muted" id="regHint" style="margin:0;font-size:0.85rem"></p>
+          <button class="btn btn-primary btn-block" id="regSubmit">注册并开通</button>
+        </div>
+      </div>
+    `;
+    const hint = panel.querySelector("#regHint");
+    const submit = panel.querySelector("#regSubmit");
+    const run = async () => {
+      const username = panel.querySelector("#regUser").value.trim();
+      const password = panel.querySelector("#regPass").value;
+      if (username.length < 3 || username.length > 64) {
+        hint.textContent = "用户名需 3–64 位";
+        return;
+      }
+      if (password.length < 6) {
+        hint.textContent = "密码至少 6 位";
+        return;
+      }
+      submit.disabled = true;
+      hint.textContent = "注册中…";
+      try {
+        const res = await api(`/api/v1/payment/orders/${orderNo}/complete`, {
+          method: "POST",
+          body: JSON.stringify({
+            mode: "register",
+            username,
+            password,
+            device_id: deviceId(),
+            device_label: "browser",
+          }),
+        });
+        if (res.access_token) localStorage.setItem("xinxiang_token", res.access_token);
+        resolve();
+      } catch (e) {
+        submit.disabled = false;
+        hint.textContent = e.message || "注册失败，请重试";
+        reject(e);
+      }
+    };
+    submit.onclick = run;
+    panel.querySelector("#regPass").addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") run();
+    });
+  });
+}
+
 async function startCheckout(drawer, plan_code, channel, skinId, rid) {
   const panel = drawer.querySelector("#payPanel");
   panel.innerHTML = `<p class="muted">创建订单中…</p>`;
@@ -825,12 +880,34 @@ async function startCheckout(drawer, plan_code, channel, skinId, rid) {
     `;
 
     let settled = false;
+    let awaitingRegister = false;
+    let pollTimer = null;
+
+    const finishAfterPay = async () => {
+      await refreshEntitlementsFromProfile();
+      const ok = await checkReportAccess(skinId);
+      if (ok) {
+        navigate(`/report/${rid}`);
+        return true;
+      }
+      const statusEl = panel.querySelector("#payStatus");
+      if (statusEl) statusEl.textContent = "已支付但权益未生效，请刷新或联系客服";
+      return false;
+    };
+
     const fulfill = async () => {
       if (settled) return true;
+      if (awaitingRegister) return false;
       const st = await api(`/api/v1/payment/orders/${order.order_no}`);
-      panel.querySelector("#payStatus").textContent = `状态：${st.status}`;
+      const statusEl = panel.querySelector("#payStatus");
+      if (statusEl) statusEl.textContent = `状态：${st.status}`;
       if (st.status !== "paid") return false;
-      settled = true;
+
+      if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+
       if (isMockMode()) {
         await api(`/api/v1/payment/orders/${order.order_no}/complete`, {
           method: "POST",
@@ -842,37 +919,28 @@ async function startCheckout(drawer, plan_code, channel, skinId, rid) {
             device_label: "browser",
           }),
         });
-      } else {
-        // live: after paid, complete_account or claim
-        if (st.next_action === "complete_account") {
-          const username = prompt("设置用户名以绑定权益") || `user_${Date.now().toString(36)}`;
-          const password = prompt("设置密码（至少 6 位）") || "changeme1";
-          const res = await api(`/api/v1/payment/orders/${order.order_no}/complete`, {
-            method: "POST",
-            body: JSON.stringify({
-              mode: "register",
-              username,
-              password,
-              device_id: deviceId(),
-              device_label: "browser",
-            }),
-          });
-          if (res.access_token) localStorage.setItem("xinxiang_token", res.access_token);
-        } else if (localStorage.getItem("xinxiang_token")) {
-          await api(`/api/v1/payment/orders/${order.order_no}/claim`, { method: "POST", body: "{}" });
+      } else if (st.next_action === "complete_account") {
+        awaitingRegister = true;
+        try {
+          await completeAccountRegisterForm(panel, order.order_no);
+        } catch {
+          awaitingRegister = false;
+          return false;
         }
-        await refreshEntitlementsFromProfile();
+      } else if (localStorage.getItem("xinxiang_token")) {
+        await api(`/api/v1/payment/orders/${order.order_no}/claim`, { method: "POST", body: "{}" });
       }
-      const ok = await checkReportAccess(skinId);
-      if (ok) {
-        navigate(`/report/${rid}`);
-        return true;
-      }
-      panel.querySelector("#payStatus").textContent = "已支付但权益未生效，请刷新或联系客服";
-      return false;
+
+      settled = true;
+      return finishAfterPay();
     };
 
-    panel.querySelector("#poll").onclick = () => fulfill();
+    panel.querySelector("#poll").onclick = () => {
+      fulfill().catch((e) => {
+        const el = panel.querySelector("#payStatus");
+        if (el) el.textContent = e.message || "处理失败";
+      });
+    };
     panel.querySelector("#mockPay")?.addEventListener("click", async () => {
       await api("/api/v1/payment/mock-pay", {
         method: "POST",
@@ -881,12 +949,14 @@ async function startCheckout(drawer, plan_code, channel, skinId, rid) {
       await fulfill();
     });
 
-    // auto-poll a few times
     let n = 0;
-    const timer = setInterval(async () => {
+    pollTimer = setInterval(async () => {
       n += 1;
       const done = await fulfill().catch(() => false);
-      if (done || n > 40) clearInterval(timer);
+      if (done || n > 40) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
     }, 3000);
   } catch (e) {
     panel.innerHTML = `<p class="muted">下单失败：${e.message}</p>`;
