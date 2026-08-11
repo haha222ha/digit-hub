@@ -9,12 +9,22 @@ CONF_D="${CONF_D:-/etc/nginx/conf.d}"
 MONITOR_DOMAIN="${MONITOR_DOMAIN:-monitor.xhs365.cn}"
 
 MARKER="# digit-hub managed locations"
+ADMIN_LOCATIONS='    location = /admin {
+        return 302 /admin/;
+    }
+
+    location = /admin/ {
+        alias ADMIN_DIR_PLACEHOLDER/index.html;
+        default_type text/html;
+        add_header Cache-Control "no-cache, must-revalidate";
+    }'
 
 write_web_server() {
   local outfile="$1"
   local listen="$2"
   local server_name="$3"
   local ssl_block="${4:-}"
+  local admin_block="${ADMIN_LOCATIONS//ADMIN_DIR_PLACEHOLDER/${ADMIN_DIR}}"
 
   cat > "${outfile}" <<NGX
 server {
@@ -39,17 +49,20 @@ server {
         proxy_read_timeout 120s;
     }
 
-    location = /admin {
-        return 302 /admin/;
-    }
-
-    location ^~ /admin/ {
-        root ${WEB_ROOT%/web};
-        index index.html;
-        add_header Cache-Control "no-cache, must-revalidate";
-    }
+${admin_block}
 }
 NGX
+}
+
+disable_duplicate_monitor_vhosts() {
+  echo "==> disable stale monitor vhosts in sites-enabled (avoid index.htmlindex.html)"
+  for f in /etc/nginx/sites-enabled/*; do
+    [[ -e "$f" ]] || continue
+    if grep -q "monitor.xhs365.cn" "$f" 2>/dev/null; then
+      echo "  remove $f"
+      rm -f "$f"
+    fi
+  done
 }
 
 echo "==> ensure admin static exists"
@@ -57,6 +70,8 @@ test -f "${ADMIN_DIR}/index.html" || {
   echo "ERROR: missing ${ADMIN_DIR}/index.html — git pull digit-hub first"
   exit 1
 }
+
+disable_duplicate_monitor_vhosts
 
 echo "==> write ${CONF_D}/assess.xinxiang.conf (default_server :80)"
 write_web_server "${CONF_D}/assess.xinxiang.conf" "80 default_server" "_"
@@ -105,9 +120,9 @@ server {
         return 302 /admin/;
     }
 
-    location ^~ /admin/ {
-        root ${WEB_ROOT%/web};
-        index index.html;
+    location = /admin/ {
+        alias ${ADMIN_DIR}/index.html;
+        default_type text/html;
         add_header Cache-Control "no-cache, must-revalidate";
     }
 }
