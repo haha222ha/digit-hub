@@ -67,6 +67,17 @@ function topbar(active = "") {
   return baseTopbarHtml({ brand: "心象测", brandHref: "#/", rightHtml: right });
 }
 
+const LANE_LABEL = {
+  情感引流: "关系向",
+  职场链路: "职场向",
+  集邮: "趣味向",
+};
+
+function friendlyLane(lane) {
+  if (!lane) return "";
+  return LANE_LABEL[lane] || lane;
+}
+
 export async function renderHome(root) {
   const catalog = await loadCatalog();
   const live = liveSkins(catalog);
@@ -75,6 +86,7 @@ export async function renderHome(root) {
     root.innerHTML = `${topbar()}<main class="shell"><p>暂无可用测评，请检查 skins/catalog.json</p></main>`;
     return;
   }
+  const railItems = live.slice(1, 6);
   const why = [
     {
       id: "w1",
@@ -117,21 +129,31 @@ export async function renderHome(root) {
         </div>
       </section>
 
+      <section class="shell home-featured-wrap">
+        <p class="group-label">今日实验</p>
+        <a class="featured-card" href="#/t/${featured.id}" data-skin="${featured.id}">
+          <span class="featured-badge">今日主推</span>
+          <strong class="featured-title">${featured.title}</strong>
+          <span class="muted">约 ${featured.minutes} 分钟 · ${featured.promise || "结构清晰的自我对照"}</span>
+          <span class="featured-cta">进入实验 ›</span>
+        </a>
+      </section>
+
       <section class="home-rail-wrap" id="homeCards">
         <div class="shell">
           <div class="rail-head">
             <div>
               <p class="group-label">横向滑动</p>
-              <h2 class="rail-title">今日测评卡</h2>
+              <h2 class="rail-title">更多测评</h2>
             </div>
-            <p class="muted rail-tip">点卡片即可开始</p>
+            <p class="muted rail-tip">共 ${live.length} 套可测</p>
           </div>
           <div class="home-rail" id="homeRail" tabindex="0" aria-label="测评卡片横向列表">
-            ${live
+            ${railItems
               .map(
                 (item, i) => `
-              <a class="rail-card" href="#/t/${item.id}">
-                <span class="rail-index">${String(i + 1).padStart(2, "0")}</span>
+              <a class="rail-card" href="#/t/${item.id}" data-skin="${item.id}">
+                <span class="rail-index">${String(i + 2).padStart(2, "0")}</span>
                 <strong>${item.title}</strong>
                 <span class="muted">约 ${item.minutes} 分钟</span>
                 <span class="rail-promise">${item.promise}</span>
@@ -141,15 +163,11 @@ export async function renderHome(root) {
               .join("")}
             <a class="rail-card rail-card-more" href="#/tests">
               <strong>全部测评</strong>
-              <span class="muted">目录与即将上线</span>
-              <span class="rail-cta">打开 ›</span>
+              <span class="muted">${live.length > 1 ? `目录共 ${live.length} 套` : "打开完整目录"}</span>
+              <span class="rail-cta">打开目录 ›</span>
             </a>
           </div>
         </div>
-      </section>
-
-      <section class="shell home-install">
-        ${a2hsBannerHtml()}
       </section>
 
       <section class="shell home-why">
@@ -176,6 +194,10 @@ export async function renderHome(root) {
             .join("")}
         </div>
         <button type="button" class="btn btn-ghost acc-expand-all" id="expandAll">展开全部要点</button>
+      </section>
+
+      <section class="shell home-install">
+        ${a2hsBannerHtml()}
       </section>
 
       <section class="shell home-footer-cta">
@@ -212,34 +234,35 @@ export async function renderCatalog(root) {
     ${topbar()}
     <main class="shell">
       <h1 class="page-title" data-reveal>全部测评</h1>
-      <p class="muted" data-reveal style="--d:0.08s">${liveCount} 套已开放 · 分组对齐复购剧本（职场 / 情感 / 复测 / 双人 / 集邮）</p>
+      <p class="muted" data-reveal style="--d:0.08s">${liveCount} 套已开放 · 按场景选一张开始</p>
+      <div class="catalog-chips" data-reveal style="--d:0.1s" id="catalogChips">
+        <button type="button" class="catalog-chip on" data-filter="all">全部</button>
+        <button type="button" class="catalog-chip" data-filter="short">≤5 分钟</button>
+        <button type="button" class="catalog-chip" data-filter="emotion">关系向</button>
+        <button type="button" class="catalog-chip" data-filter="career">职场向</button>
+      </div>
       ${catalog.groups
         .map(
           (g, gi) => `
-        <section class="catalog-group" data-reveal style="--d:${0.05 * gi}s">
-          <p class="group-label">${g.label}${g.items.some((x) => x.lane) && g.id !== "personality" ? ` · ${g.items.find((x) => x.lane)?.lane || ""}` : ""}</p>
+        <section class="catalog-group" data-reveal data-group="${g.id}" style="--d:${0.05 * gi}s">
+          <p class="group-label">${g.label}</p>
           ${g.desc ? `<p class="muted catalog-group-desc">${g.desc}</p>` : ""}
           ${g.items
-            .map((item, i) => {
+            .map((item) => {
               const disabled = item.status !== "live";
               const href = disabled ? "#" : `#/t/${item.id}`;
-              const lane = item.lane && !disabled ? `<span class="lane-pill">${item.lane}</span>` : "";
+              const lane = item.lane && !disabled ? `<span class="lane-pill">${friendlyLane(item.lane)}</span>` : "";
+              const mins = Number(item.minutes) || 99;
               return `
-              <div class="catalog-acc">
+              <div class="catalog-acc" data-mins="${mins}" data-lane="${item.lane || ""}" data-group-id="${g.id}">
                 <a class="test-row ${disabled ? "disabled" : ""}" href="${href}">
                   <div>
                     <strong>${item.title}${disabled ? " · 即将上线" : ""}</strong>
                     <span class="muted">约 ${item.minutes} 分钟 ${lane}</span>
+                    <span class="catalog-promise">${item.promise || "更多母题陆续上线"}</span>
                   </div>
                   <span class="chev">›</span>
                 </a>
-                <button type="button" class="acc-btn catalog-more" data-acc="c-${item.id}" aria-expanded="false">
-                  <span>展开简介</span>
-                  <span class="acc-icon" aria-hidden="true"></span>
-                </button>
-                <div class="acc-panel" data-acc-panel="c-${item.id}">
-                  <p>${item.promise || "更多母题陆续上线"}</p>
-                </div>
               </div>
             `;
             })
@@ -251,7 +274,26 @@ export async function renderCatalog(root) {
     </main>
   `;
   wireReveal(root);
-  wireAccordions(root);
+  const applyFilter = (key) => {
+    root.querySelectorAll(".catalog-chip").forEach((c) => c.classList.toggle("on", c.dataset.filter === key));
+    root.querySelectorAll(".catalog-acc").forEach((row) => {
+      const mins = Number(row.dataset.mins) || 99;
+      const lane = row.dataset.lane || "";
+      const gid = row.dataset.groupId || "";
+      let show = true;
+      if (key === "short") show = mins <= 5;
+      else if (key === "emotion") show = gid === "emotion" || /情感|关系/.test(lane);
+      else if (key === "career") show = gid === "career" || /职场/.test(lane);
+      row.hidden = !show;
+    });
+    root.querySelectorAll(".catalog-group").forEach((sec) => {
+      const any = [...sec.querySelectorAll(".catalog-acc")].some((r) => !r.hidden);
+      sec.hidden = !any;
+    });
+  };
+  root.querySelectorAll(".catalog-chip").forEach((btn) => {
+    btn.onclick = () => applyFilter(btn.dataset.filter || "all");
+  });
 }
 
 export async function renderIntro(root, skinId) {
@@ -271,6 +313,7 @@ export async function renderIntro(root, skinId) {
     const pack = await loadStylePack(styleId);
     const introText =
       (skin.introByStyle && skin.introByStyle[styleId]) || skin.intro;
+    const hasQuestionStyles = (skin.questions || []).some((q) => q.styles || q.variants);
     root.innerHTML = `
       ${topbar()}
       <main class="shell">
@@ -297,14 +340,20 @@ export async function renderIntro(root, skinId) {
             )
             .join("")}
         </div>
-        <p class="tone-hint muted">当前：${pack.label} · ${pack.tagline}</p>
+        <p class="tone-claim">${pack.claim || pack.tagline || ""}</p>
+        <p class="tone-hint muted">当前：${pack.label} · ${pack.tagline || ""}</p>
+        ${
+          !hasQuestionStyles
+            ? `<p class="disclaimer-pill">本题库暂以统一题干呈现；所选风格主要影响结果页语气与界面气质。</p>`
+            : ""
+        }
 
         <p class="group-label">你会得到</p>
         <ul class="why-list">
           ${skin.youGet.map((x) => `<li>${x}</li>`).join("")}
         </ul>
         <div class="stack" style="margin-top:28px">
-          <button class="btn btn-primary btn-block" id="start">以「${pack.label}」风格开始</button>
+          <button class="btn btn-primary btn-block" id="start">以「${pack.label}」风格开始 · 约 ${skin.minutes} 分钟</button>
           <button class="btn btn-ghost" data-go="#/tests">返回目录</button>
         </div>
       </main>
@@ -443,12 +492,21 @@ export async function renderPlay(root, skinId) {
     const q = questions[index];
     const pct = Math.round((index / questions.length) * 100);
     const opts = displayOptions(q, optionOrders[index]);
+    const milestone =
+      pct >= 75 && pct < 100
+        ? "最后一程 · 结构即将成型"
+        : pct >= 50
+          ? "过半 · 画像轮廓已出现"
+          : pct >= 25
+            ? "进入节奏 · 继续就好"
+            : "";
     root.innerHTML = `
       ${topbar()}
       <main class="shell quiz-body">
         <div class="quiz-top">
           <div class="progress-meta"><span>${skin.title}${duoSeat ? ` · ${duoSeat}` : ""}</span><span>${index + 1} / ${questions.length}</span></div>
           <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+          ${milestone ? `<p class="quiz-milestone">${milestone}</p>` : ""}
         </div>
         ${q.d ? `<div class="quiz-dim">${dimLabel(skin, q.d)}${q.t && q.t !== dimLabel(skin, q.d) && q.t !== q.d ? ` · ${q.t}` : ""}${q.reverse ? " · 反向题" : ""}</div>` : ""}
         <div class="quiz-stage" id="quizStage">
@@ -590,15 +648,20 @@ export async function renderSoftResult(root, skinId, query) {
               <p class="dim-tease-hint">雷达图与维度分布在完整报告中解锁</p>
             </div>`
       }
-      <div class="unlock-bar ${unlocked ? "is-unlocked" : ""}">
+      <div class="unlock-bar unlock-bar-sticky ${unlocked ? "is-unlocked" : ""}">
         ${accessBadgeHtml(unlocked)}
         <h3>${unlocked ? "完整报告已解锁" : chrome.ctaUnlock}</h3>
         ${unlockValueStripHtml(unlocked)}
         <p class="muted" style="margin:12px 0">${
           unlocked ? "场景长文、本周动作与 7 日微实验已开放。" : narr.ctaHint
         }</p>
+        ${
+          unlocked
+            ? ""
+            : `<p class="unlock-social muted">原价 <s>¥9.9</s> · 现 <strong class="price-now">¥1.99</strong> · 扫码即读完整报告</p>`
+        }
         <button class="btn ${unlocked ? "btn-primary" : "btn-ember"} btn-block" id="cta">
-          ${unlocked ? "阅读完整高价值报告" : chrome.ctaUnlock}
+          ${unlocked ? "阅读完整高价值报告" : "¥1.99 解锁完整报告"}
         </button>
       </div>
       <div class="share-card" id="shareCard">
@@ -608,8 +671,8 @@ export async function renderSoftResult(root, skinId, query) {
         <div class="quote">${chrome.quote || r.quote || ""}</div>
       </div>
       <div class="stack" style="margin-bottom:20px">
-        <button class="btn btn-primary btn-block" id="shareBtn">${chrome.ctaShare}</button>
-        <p class="muted" style="text-align:center;margin:0">高密度分享卡 · 系统分享或下载 PNG</p>
+        <button class="btn btn-primary btn-block" id="shareBtn">${chrome.ctaShare || "导出分享卡"}</button>
+        <p class="muted" style="text-align:center;margin:0">一张卡发小红书 / 朋友圈</p>
         ${
           skin.duo
             ? packed.duoSeat === "A" || new URLSearchParams(query).get("duo") === "A"
@@ -701,6 +764,7 @@ async function openPayDrawer(root, skinId, rid) {
   const bd = root.querySelector("#bd");
   bd.classList.add("open");
   drawer.classList.add("open");
+  document.body.style.overflow = "hidden";
   drawer.innerHTML = `<p class="muted">加载支付方案…</p>`;
 
   let plans = [];
@@ -737,8 +801,9 @@ async function openPayDrawer(root, skinId, rid) {
     <p class="muted">${
       isMockMode()
         ? "本地验收：选套餐 → 模拟支付，或使用演示授权码"
-        : "扫码 ¥1.99 解锁 · 小红书/闲鱼买家可用授权码"
+        : "扫码解锁完整报告 · 小红书/闲鱼买家可用授权码"
     }</p>
+    <p class="pay-anchor muted">原价 <s>¥9.9</s> · 体验价 <strong class="price-now">¥1.99</strong></p>
     <div class="stack" style="margin-top:14px">
       ${plans
         .map((pl) => {
@@ -746,22 +811,24 @@ async function openPayDrawer(root, skinId, rid) {
           const label = pl.label || pl.title;
           const price = pl.price_yuan ?? pl.amount;
           const tip = pl.summary ? `<span class="plan-tip">${pl.summary}</span>` : "";
-          return `<button class="btn btn-ember btn-block plan-pick" data-plan="${code}"><strong>${label} · ¥${price}</strong>${tip}</button>`;
+          return `<button class="btn btn-ember btn-block plan-pick" data-plan="${code}"><strong>${label} · ¥${price}</strong><span class="plan-anchor muted">原价 ¥9.9</span>${tip}</button>`;
         })
         .join("")}
       <p class="group-label">支付渠道</p>
       <div class="channel-row">${channelOpts}</div>
       <div id="payPanel"></div>
-      <p class="group-label">授权码解锁</p>
-      <input class="field" id="code" placeholder="${isMockMode() ? DEMO_AUTH_CODE : "输入授权码"}" value="${
-        isMockMode() ? DEMO_AUTH_CODE : ""
-      }" />
-      ${
-        isMockMode()
-          ? `<p class="muted" style="margin:0;font-size:0.85rem">演示码已填好：<code>${DEMO_AUTH_CODE}</code></p>`
-          : ""
-      }
-      <button class="btn btn-primary btn-block" id="codeBtn">使用授权码登录解锁</button>
+      <details class="code-fold">
+        <summary>已有购买码？点此输入授权码</summary>
+        <input class="field" id="code" placeholder="${isMockMode() ? DEMO_AUTH_CODE : "输入授权码"}" value="${
+          isMockMode() ? DEMO_AUTH_CODE : ""
+        }" />
+        ${
+          isMockMode()
+            ? `<p class="muted" style="margin:0;font-size:0.85rem">演示码已填好：<code>${DEMO_AUTH_CODE}</code></p>`
+            : ""
+        }
+        <button class="btn btn-primary btn-block" id="codeBtn">使用授权码登录解锁</button>
+      </details>
       <button class="btn btn-ghost btn-block" id="close">取消</button>
     </div>
   `;
@@ -780,9 +847,11 @@ async function openPayDrawer(root, skinId, rid) {
     clearPayPollTimer();
     bd.classList.remove("open");
     drawer.classList.remove("open");
+    document.body.style.overflow = "";
   };
 
   drawer.querySelector("#close").onclick = closeDrawer;
+  bd.onclick = closeDrawer;
 
   drawer.querySelectorAll("[data-plan]").forEach((btn) => {
     btn.onclick = () => startCheckout(drawer, btn.dataset.plan, channel, skinId, rid);
@@ -860,7 +929,7 @@ async function completeAccountRegisterForm(panel, orderNo) {
 async function startCheckout(drawer, plan_code, channel, skinId, rid) {
   clearPayPollTimer();
   const panel = drawer.querySelector("#payPanel");
-  panel.innerHTML = `<p class="muted">创建订单中…</p>`;
+  panel.innerHTML = `<p class="muted pay-loading"><span class="spinner" aria-hidden="true"></span>创建订单中…</p>`;
   try {
     const order = await api("/api/v1/payment/orders", {
       method: "POST",

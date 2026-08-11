@@ -333,6 +333,35 @@ button {
     var(--paper);
   box-shadow: 0 12px 40px rgba(28, 36, 48, 0.06);
   transition: transform 0.25s ease, border-color 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.rail-card::before,
+.featured-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--seal);
+}
+
+.rail-card[data-skin="seven_sins"]::before,
+.featured-card[data-skin="seven_sins"]::before {
+  background: #8b3a2f;
+}
+
+.rail-card[data-skin="mbti16"]::before,
+.featured-card[data-skin="mbti16"]::before {
+  background: var(--seal);
+}
+
+.rail-card[data-skin="mental_age"]::before,
+.featured-card[data-skin="mental_age"]::before,
+.rail-card[data-skin="love_brain"]::before {
+  background: var(--ember);
 }
 
 .rail-card:hover {
@@ -358,6 +387,93 @@ button {
   color: var(--ink-muted);
   font-size: 0.9rem;
   line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.home-featured-wrap {
+  padding: 8px 0 4px;
+}
+
+.featured-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px 18px 18px 22px;
+  border-radius: calc(var(--radius) + 4px);
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(145deg, rgba(255, 250, 243, 0.98), rgba(213, 232, 226, 0.45)),
+    var(--paper);
+  box-shadow: 0 14px 44px rgba(28, 36, 48, 0.07);
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  overflow: hidden;
+}
+
+.featured-badge {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--seal);
+  background: var(--seal-soft);
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+.featured-title {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  line-height: 1.2;
+}
+
+.featured-cta {
+  margin-top: 6px;
+  font-weight: 600;
+  color: var(--ember);
+}
+
+.catalog-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 18px;
+}
+
+.catalog-chip {
+  border: 1px solid var(--line);
+  background: #fffaf3;
+  color: var(--ink-muted);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.catalog-chip.on {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: #fffaf3;
+}
+
+.catalog-promise {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  line-height: 1.35;
+}
+
+.tone-claim {
+  margin: 12px 0 4px;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--seal);
+  line-height: 1.35;
 }
 
 .rail-cta {
@@ -512,7 +628,8 @@ button {
   .home-aurora .blob,
   .home-scroll-hint i,
   .brand-char,
-  .option.is-pop {
+  .option.is-pop,
+  .spinner {
     animation: none !important;
   }
   .brand-char,
@@ -652,7 +769,8 @@ button {
   height: 3px;
   background: var(--paper-deep);
   border-radius: 2px;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
 }
 
 .progress-fill {
@@ -660,6 +778,29 @@ button {
   background: var(--seal);
   width: 0;
   transition: width 0.35s ease;
+  border-radius: 2px;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.45), transparent 55%), var(--seal);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.quiz-milestone {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--seal);
 }
 
 .quiz-body {
@@ -857,6 +998,42 @@ button {
   background: var(--ember-soft);
   border-radius: var(--radius);
   margin-bottom: 20px;
+  position: relative;
+}
+
+.unlock-bar-sticky {
+  position: sticky;
+  bottom: calc(10px + var(--safe-b));
+  z-index: 12;
+  box-shadow: 0 -8px 28px rgba(28, 36, 48, 0.08);
+}
+
+.unlock-bar:not(.is-unlocked)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 8px;
+  background: var(--ember-soft);
+  clip-path: polygon(
+    0 0,
+    6% 100%,
+    12% 20%,
+    18% 90%,
+    25% 10%,
+    32% 95%,
+    40% 25%,
+    48% 100%,
+    55% 15%,
+    62% 85%,
+    70% 30%,
+    78% 100%,
+    86% 20%,
+    93% 90%,
+    100% 0
+  );
+  pointer-events: none;
 }
 
 .unlock-bar.is-unlocked {
@@ -867,6 +1044,65 @@ button {
   margin: 0 0 6px;
   font-family: var(--font-display);
   font-size: 1.15rem;
+}
+
+.unlock-social,
+.pay-anchor {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+}
+
+.price-now {
+  color: var(--ember);
+  font-weight: 700;
+}
+
+.plan-anchor {
+  display: block;
+  font-size: 0.78rem;
+  margin-top: 4px;
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+
+.code-fold {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: rgba(255, 250, 243, 0.65);
+}
+
+.code-fold summary {
+  cursor: pointer;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.code-fold[open] summary {
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+
+.pay-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--line);
+  border-top-color: var(--seal);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .access-badge {
@@ -988,6 +1224,31 @@ button {
   border-radius: var(--radius);
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.share-card::after {
+  content: "心";
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: #fffaf3;
+  background:
+    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.35), transparent 45%),
+    linear-gradient(145deg, var(--ember), var(--seal));
+  box-shadow:
+    0 2px 0 rgba(28, 36, 48, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transform: rotate(8deg);
+  pointer-events: none;
 }
 
 .share-card .brand {
