@@ -217,11 +217,22 @@ ADMIN_BYTES=$(wc -c < "${ADMIN_INDEX}" | tr -d ' ')
 echo "admin file bytes on disk: ${ADMIN_BYTES}"
 
 smoke_admin http "http://127.0.0.1/admin/index.html" "admin_http_index" 200
-smoke_admin http "http://127.0.0.1/admin/" "admin_http_slash" 302
-code=$(curl -sS -o /dev/null -w '%{http_code}' -L -H "Host: ${MONITOR_DOMAIN}" http://127.0.0.1/admin/ 2>/dev/null || echo "000")
-size=$(curl -sS -L -H "Host: ${MONITOR_DOMAIN}" http://127.0.0.1/admin/ 2>/dev/null | wc -c | tr -d ' ')
-echo "admin_http_slash_follow: code=${code} bytes=${size}"
-[[ "${code}" == "200" && "${size}" -ge 5000 ]] || { echo "ERROR: follow /admin/ failed"; exit 1; }
+slash_code=$(curl -sS -o /dev/null -w '%{http_code}' -H "Host: ${MONITOR_DOMAIN}" http://127.0.0.1/admin/ 2>/dev/null || echo "000")
+slash_size=$(curl -sS -H "Host: ${MONITOR_DOMAIN}" http://127.0.0.1/admin/ 2>/dev/null | wc -c | tr -d ' ')
+echo "admin_http_slash: code=${slash_code} bytes=${slash_size}"
+if [[ "${slash_code}" == "302" ]]; then
+  code=$(curl -sS -o /dev/null -w '%{http_code}' -L -H "Host: ${MONITOR_DOMAIN}" http://127.0.0.1/admin/ 2>/dev/null || echo "000")
+  size=$(curl -sS -L -H "Host: ${MONITOR_DOMAIN}" http://127.0.0.1/admin/ 2>/dev/null | wc -c | tr -d ' ')
+  echo "admin_http_slash_follow: code=${code} bytes=${size}"
+  [[ "${code}" == "200" && "${size}" -ge 5000 ]] || { echo "ERROR: follow /admin/ failed"; exit 1; }
+elif [[ "${slash_code}" == "200" && "${slash_size}" -ge 5000 ]]; then
+  echo "admin_http_slash: direct 200 OK"
+else
+  echo "ERROR: /admin/ expected 200 or 302, got ${slash_code} (${slash_size} bytes)"
+  nginx -T 2>/dev/null | grep -n -A5 -B2 'admin' | head -60 || true
+  tail -n 8 /var/log/nginx/error.log 2>/dev/null || true
+  exit 1
+fi
 
 if command -v ss >/dev/null 2>&1 && ss -tln | grep -q ':443 '; then
   smoke_admin https "https://127.0.0.1/admin/index.html" "admin_https_index" 200 || exit 1
