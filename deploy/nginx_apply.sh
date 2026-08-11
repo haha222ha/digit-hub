@@ -44,8 +44,8 @@ server {
     }
 
     location ^~ /admin/ {
-        alias ${ADMIN_DIR}/index.html;
-        default_type text/html;
+        root ${WEB_ROOT%/web};
+        index index.html;
         add_header Cache-Control "no-cache, must-revalidate";
     }
 }
@@ -106,8 +106,8 @@ server {
     }
 
     location ^~ /admin/ {
-        alias ${ADMIN_DIR}/index.html;
-        default_type text/html;
+        root ${WEB_ROOT%/web};
+        index index.html;
         add_header Cache-Control "no-cache, must-revalidate";
     }
 }
@@ -128,10 +128,18 @@ nginx -t
 systemctl reload nginx
 
 echo "==> smoke"
-curl -fsS -o /dev/null -w "admin_local:%{http_code} bytes:%{size_download}\n" \
-  -H "Host: ${MONITOR_DOMAIN}" http://127.0.0.1/admin/ || true
+ADMIN_CODE=$(curl -sS -o /dev/null -w '%{http_code}' -H "Host: ${MONITOR_DOMAIN}" http://127.0.0.1/admin/ || echo "000")
+ADMIN_SIZE=$(curl -sS -H "Host: ${MONITOR_DOMAIN}" http://127.0.0.1/admin/ 2>/dev/null | wc -c | tr -d ' ')
+echo "admin_local: code=${ADMIN_CODE} bytes=${ADMIN_SIZE}"
 ADMIN_BYTES=$(wc -c < "${ADMIN_DIR}/index.html" | tr -d ' ')
 echo "admin file bytes on disk: ${ADMIN_BYTES}"
-head -c 80 "${ADMIN_DIR}/index.html" | tr '\n' ' '
-echo
+if [[ "${ADMIN_CODE}" != "200" ]]; then
+  echo "ERROR: /admin/ returned ${ADMIN_CODE} — check nginx error.log"
+  tail -n 5 /var/log/nginx/error.log 2>/dev/null || true
+  exit 1
+fi
+if [[ "${ADMIN_SIZE}" -lt 5000 ]]; then
+  echo "ERROR: /admin/ too small (${ADMIN_SIZE}), likely wrong index"
+  exit 1
+fi
 echo "DONE nginx_apply -> https://${MONITOR_DOMAIN}/admin/"
