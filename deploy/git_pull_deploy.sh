@@ -29,38 +29,8 @@ git pull --ff-only origin "${BRANCH}"
 echo "==> web at ${WEB_ROOT}"
 test -f "${WEB_ROOT}/index.html"
 
-echo "==> nginx default_server (IP, no DNS required)"
-cat > "${NGINX_SITE}" <<'EOF'
-server {
-    listen 80 default_server;
-    server_name _;
-    root /opt/digit-hub/apps/web;
-    index index.html;
-    location / {
-        try_files $uri $uri/ /index.html;
-        add_header Cache-Control "no-cache, must-revalidate";
-    }
-    location /api/ {
-        proxy_pass http://127.0.0.1:8080/api/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_read_timeout 120s;
-    }
-    location = /admin { return 302 /admin/; }
-    location /admin/ {
-        root /opt/digit-hub/apps;
-        index index.html;
-        try_files $uri /admin/index.html;
-        add_header Cache-Control "no-cache, must-revalidate";
-    }
-}
-EOF
-rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
-nginx -t
-systemctl enable nginx
-systemctl restart nginx
+echo "==> nginx sites"
+bash "${REPO_DIR}/deploy/nginx_apply.sh"
 
 echo "==> smoke"
 curl -sS -o /dev/null -w "home:%{http_code}\n" http://127.0.0.1/ || true

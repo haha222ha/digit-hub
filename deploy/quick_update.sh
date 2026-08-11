@@ -40,9 +40,8 @@ if [[ ! -x "${XHS_ROOT}/venv/bin/pip" ]]; then
 fi
 "${XHS_ROOT}/venv/bin/pip" install -q -r "${XHS_ROOT}/cloud_deploy/requirements-cloud.txt"
 
-echo "==> nginx reload (no restart)"
-nginx -t
-systemctl reload nginx
+echo "==> nginx sites (/admin/ + monitor SSL if cert exists)"
+bash "${DIGIT_HUB}/deploy/nginx_apply.sh"
 
 echo "==> restart API"
 systemctl restart xhs-cloud-api

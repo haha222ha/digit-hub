@@ -190,64 +190,7 @@ if ! systemctl is-active --quiet xhs-cloud-api.service; then
 fi
 
 echo "==> nginx: IP default_server + monitor.xhs365.cn"
-cat > /etc/nginx/conf.d/assess.xinxiang.conf <<'NGX'
-server {
-    listen 80 default_server;
-    server_name _;
-    root /opt/digit-hub/apps/web;
-    index index.html;
-    location / {
-        try_files $uri $uri/ /index.html;
-        add_header Cache-Control "no-cache, must-revalidate";
-    }
-    location /api/ {
-        proxy_pass http://127.0.0.1:8080/api/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_read_timeout 120s;
-    }
-    location = /admin { return 302 /admin/; }
-    location /admin/ {
-        root /opt/digit-hub/apps;
-        index index.html;
-        try_files $uri /admin/index.html;
-        add_header Cache-Control "no-cache, must-revalidate";
-    }
-}
-NGX
-
-cat > /etc/nginx/conf.d/monitor.xhs365.cn.conf <<'NGX'
-server {
-    listen 80;
-    server_name monitor.xhs365.cn;
-    root /opt/digit-hub/apps/web;
-    index index.html;
-    location / {
-        try_files $uri $uri/ /index.html;
-        add_header Cache-Control "no-cache, must-revalidate";
-    }
-    location /api/ {
-        proxy_pass http://127.0.0.1:8080/api/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_read_timeout 120s;
-    }
-    location = /admin { return 302 /admin/; }
-    location /admin/ {
-        root /opt/digit-hub/apps;
-        index index.html;
-        try_files $uri /admin/index.html;
-        add_header Cache-Control "no-cache, must-revalidate";
-    }
-}
-NGX
-rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
-nginx -t
-systemctl reload nginx
+bash "${DIGIT_HUB}/deploy/nginx_apply.sh"
 
 sleep 2
 echo "==> smoke"
