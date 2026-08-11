@@ -17,6 +17,18 @@ if [[ ! -d "$SRC/cloud_api" ]]; then
 fi
 
 export DEBIAN_FRONTEND=noninteractive
+echo "==> wait for dpkg lock (unattended-upgrades)"
+for i in $(seq 1 90); do
+  if ! fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 \
+    && ! fuser /var/lib/dpkg/lock >/dev/null 2>&1 \
+    && ! fuser /var/lib/apt/lists/lock >/dev/null 2>&1; then
+    break
+  fi
+  echo "  dpkg busy ($i/90)..."
+  sleep 10
+done
+dpkg --configure -a || true
+
 echo "==> apt: postgresql python3-venv nginx curl openssl"
 apt-get update -y
 apt-get install -y postgresql postgresql-contrib python3-venv python3-pip nginx curl openssl rsync
