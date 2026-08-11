@@ -9,12 +9,35 @@
 from __future__ import annotations
 
 import hashlib
+import ipaddress
 from typing import Any
 from urllib.parse import urljoin
 
 import requests
 
 from cloud_deploy.cloud_api.config import get_settings
+
+_PAY_FALLBACK_IPV4 = "1.1.1.1"
+
+
+def _sanitize_clientip(clientip: str) -> str:
+    """hwxun mapi 要求公网 IPv4；IPv6/内网会返回「用户IP地址不合法」。"""
+    raw = (clientip or "").strip().strip("[]")
+    if raw.count(":") == 1 and "." in raw:
+        host, _, port = raw.rpartition(":")
+        if port.isdigit():
+            raw = host
+    try:
+        ip = ipaddress.ip_address(raw)
+    except ValueError:
+        return _PAY_FALLBACK_IPV4
+    if isinstance(ip, ipaddress.IPv4Address) and ip.is_global:
+        return str(ip)
+    if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped is not None:
+        mapped = ip.ipv4_mapped
+        if mapped.is_global:
+            return str(mapped)
+    return _PAY_FALLBACK_IPV4
 
 PAY_CHANNELS = {
     "wxpay": {
@@ -94,7 +117,7 @@ def create_epay_order(
         "notify_url": notify_url,
         "name": name[:127],
         "money": f"{float(amount):.2f}",
-        "clientip": clientip or "127.0.0.1",
+        "clientip": _sanitize_clientip(clientip),
         "device": "pc",
     }
     params["sign"] = _epay_sign(params, key)

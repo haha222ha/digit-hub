@@ -31,6 +31,17 @@ API_ASSETS_LOCATIONS='    client_max_body_size 16m;
         proxy_read_timeout 120s;
     }
 
+    location = /api/v1/payment/orders {
+        limit_req zone=digit_hub_pay burst=3 nodelay;
+        client_max_body_size 16m;
+        proxy_pass http://127.0.0.1:8080/api/v1/payment/orders;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 120s;
+    }
+
     location /assets/ {
         proxy_pass http://127.0.0.1:8080/assets/;
         proxy_set_header Host \$host;
@@ -166,8 +177,9 @@ purge_stale_monitor_configs() {
 write_rate_limit_zone() {
   echo "==> write ${CONF_D}/digit-hub-rate-limit.conf"
   cat > "${CONF_D}/digit-hub-rate-limit.conf" <<'NGX'
-# digit-hub managed — limit auth code brute-force (/api/v1/auth/)
+# digit-hub managed — limit auth code brute-force + payment create spam
 limit_req_zone $binary_remote_addr zone=digit_hub_auth:10m rate=10r/m;
+limit_req_zone $binary_remote_addr zone=digit_hub_pay:10m rate=6r/m;
 limit_req_status 429;
 NGX
 }

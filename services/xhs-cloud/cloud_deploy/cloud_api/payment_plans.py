@@ -237,6 +237,11 @@ def is_addon_plan(plan_code: str) -> bool:
     return bool(plan and plan.get("plan_type") == "addon")
 
 
+def is_assess_plan(plan_code: str) -> bool:
+    code = str(plan_code or "").strip()
+    return code.startswith("assess")
+
+
 def resolve_custom_analysis_plan(*, is_active_member: bool) -> str:
     return "custom_analysis_member" if is_active_member else "custom_analysis_guest"
 

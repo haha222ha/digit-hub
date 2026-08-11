@@ -11,6 +11,16 @@ from cloud_deploy.cloud_api.config import get_settings
 from cloud_deploy.cloud_api.hwxun_pay import channel_merchant_credentials, create_epay_order, verify_notify_epay
 from cloud_deploy.cloud_api.payment_plans import get_plan
 
+# Same actor (IP / user) + channel: min gap between new gateway creates.
+_PAY_CREATE_COOLDOWN_SEC = 10
+# Cap open pending orders in a rolling window.
+_PAY_MAX_PENDING = 5
+_PAY_PENDING_WINDOW_MIN = 30
+
+
+class PayRateLimitError(ValueError):
+    """Too many create-order attempts; map to HTTP 429."""
+
 
 def _notify_url() -> str:
     base = (get_settings().xhs_pay_notify_base or "").strip().rstrip("/")
@@ -110,7 +120,7 @@ def create_order(
     client_ip: str,
     channel: str = "wxpay",
 ) -> dict:
-    from cloud_deploy.cloud_api.payment_plans import is_addon_plan
+    from cloud_deploy.cloud_api.payment_plans import is_addon_plan, is_assess_plan
 
     plan = get_plan(plan_code)
     if not plan:
@@ -124,6 +134,48 @@ def create_order(
     pay_channel = (channel or "wxpay").strip().lower()
     if pay_channel not in ("wxpay", "alipay"):
         raise ValueError("支付方式仅支持 wxpay 或 alipay")
+
+    # Reuse unpaid QR for same actor / plan / channel (avoids spam + better UX)
+    reusable = db.find_reusable_pending_payment_order(
+        plan_code=plan["plan_code"],
+        channel=pay_channel,
+        client_ip=client_ip or "",
+        user_id=user_id,
+    )
+    if reusable:
+        return {
+            "order_no": reusable["order_no"],
+            "plan_code": plan["plan_code"],
+            "plan_label": plan["label"],
+            "amount": plan["amount"],
+            "duration_days": plan["duration_days"],
+            "qrcode": reusable.get("qrcode") or "",
+            "payurl": reusable.get("payurl") or "",
+            "expires_at": reusable.get("expires_at") or "",
+            "status": "pending",
+            "channel": pay_channel,
+            "reused": True,
+        }
+
+    recent = db.count_recent_payment_orders(
+        client_ip=client_ip or "",
+        user_id=user_id,
+        channel=pay_channel,
+        within_seconds=_PAY_CREATE_COOLDOWN_SEC,
+    )
+    if recent > 0:
+        raise PayRateLimitError(
+            f"下单过于频繁，请 {_PAY_CREATE_COOLDOWN_SEC} 秒后再试"
+        )
+
+    pending_n = db.count_pending_payment_orders(
+        client_ip=client_ip or "",
+        user_id=user_id,
+        within_minutes=_PAY_PENDING_WINDOW_MIN,
+    )
+    if pending_n >= _PAY_MAX_PENDING:
+        raise PayRateLimitError("待支付订单过多，请先完成已有扫码或稍后再试")
+
     order_no = _gen_order_no()
     expires_at = (datetime.now() + timedelta(minutes=30)).strftime("%Y-%m-%d %H:%M:%S")
     db.insert_payment_order(
@@ -136,11 +188,17 @@ def create_order(
         client_ip=client_ip,
         expires_at=expires_at,
     )
+    if is_assess_plan(plan["plan_code"]):
+        goods_name = f"心象测-{plan['label']}"
+    elif is_addon_plan(plan["plan_code"]):
+        goods_name = f"定制分析-{plan['label']}"
+    else:
+        goods_name = f"AI选品会员-{plan['label']}"
     gw = create_epay_order(
         channel=pay_channel,
         out_trade_no=order_no,
         amount=plan["amount"],
-        name=f"{'定制分析' if is_addon_plan(plan['plan_code']) else 'AI选品会员'}-{plan['label']}",
+        name=goods_name,
         notify_url=_notify_url(),
         clientip=client_ip,
     )

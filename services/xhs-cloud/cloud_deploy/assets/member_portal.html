@@ -357,11 +357,12 @@ th.check-col,td.check-col{width:42px;text-align:center;padding-left:8px;padding-
         <button type="button" class="btn btn-primary btn-block" id="btnBuyCustomAnalysis" onclick="startCustomAnalysisPay()">购买定制分析</button>
       </div>
     </div>
+    <p style="font-size:13px;color:var(--text2);margin:0 0 8px">点选支付方式后自动出码</p>
     <div class="seg" id="portalPayChannelSeg" style="margin-bottom:14px">
-      <button type="button" class="active" data-channel="wxpay" onclick="setPayChannel('wxpay')">微信扫码</button>
-      <button type="button" data-channel="alipay" onclick="setPayChannel('alipay')">支付宝扫码</button>
+      <button type="button" class="active" data-channel="wxpay" onclick="setPayChannel('wxpay', true)">微信扫码</button>
+      <button type="button" data-channel="alipay" onclick="setPayChannel('alipay', true)">支付宝扫码</button>
     </div>
-    <button class="btn btn-primary btn-block" id="portalBtnStartPay" onclick="startWxPay()">微信扫码支付</button>
+    <button class="btn btn-ghost btn-block" id="portalBtnStartPay" onclick="startWxPay()">重新获取二维码</button>
     <div id="portalPayCheckout" class="hidden" style="margin-top:16px">
       <div class="pay-qr-wrap">
         <img id="portalPayQrImg" class="pay-qr-img hidden" alt="支付二维码" width="220" height="220">
@@ -1563,9 +1564,9 @@ function renderPayChannels() {
     { channel: 'alipay', label: '支付宝扫码' },
   ];
   seg.innerHTML = channels.map(c => `
-    <button type="button" class="${c.channel === selectedPayChannel ? 'active' : ''}" data-channel="${esc(c.channel)}" onclick="setPayChannel('${esc(c.channel)}')">${esc(c.label)}</button>
+    <button type="button" class="${c.channel === selectedPayChannel ? 'active' : ''}" data-channel="${esc(c.channel)}" onclick="setPayChannel('${esc(c.channel)}', true)">${esc(c.label)}</button>
   `).join('');
-  setPayChannel(selectedPayChannel);
+  setPayChannel(selectedPayChannel, false);
 }
 
 function renderPlanGrid() {
@@ -1604,27 +1605,43 @@ function renderPayQrcode(qrText) {
   return true;
 }
 
-function setPayChannel(channel) {
+let payCreateBusy = false;
+let lastPayCreateAt = 0;
+const PAY_CLIENT_COOLDOWN_MS = 2500;
+
+function setPayChannel(channel, autoStart) {
   selectedPayChannel = channel === 'alipay' ? 'alipay' : 'wxpay';
   document.querySelectorAll('#portalPayChannelSeg button').forEach(b => {
     b.classList.toggle('active', b.dataset.channel === selectedPayChannel);
   });
   const btn = document.getElementById('portalBtnStartPay');
   const hint = document.getElementById('portalPayQrHint');
-  if (btn) btn.textContent = selectedPayChannel === 'alipay' ? '支付宝扫码支付' : '微信扫码支付';
+  if (btn) btn.textContent = '重新获取二维码';
   if (hint) hint.textContent = selectedPayChannel === 'alipay' ? '请使用支付宝扫一扫完成支付' : '请使用微信扫一扫完成支付';
+  if (autoStart) startWxPay();
 }
 
 async function startWxPay() {
   const msgEl = payMsgEl();
   showMsg(msgEl, '', '');
+  if (payCreateBusy) return;
+  const now = Date.now();
+  if (now - lastPayCreateAt < PAY_CLIENT_COOLDOWN_MS) {
+    showMsg(msgEl, '操作太快，请稍候再试', 'error');
+    return;
+  }
   stopPayPoll();
   document.getElementById('portalPayCheckout')?.classList.add('hidden');
   document.getElementById('portalPayCompleteBox')?.classList.add('hidden');
   const btn = document.getElementById('portalBtnStartPay');
-  if (!btn) return;
-  btn.disabled = true;
-  btn.textContent = '正在创建订单…';
+  const channelBtns = document.querySelectorAll('#portalPayChannelSeg button');
+  payCreateBusy = true;
+  lastPayCreateAt = now;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '正在创建订单…';
+  }
+  channelBtns.forEach(b => { b.disabled = true; });
   try {
     const headers = { 'Content-Type': 'application/json' };
     const token = loadStored(STORAGE.token);
@@ -1653,8 +1670,12 @@ async function startWxPay() {
   } catch (e) {
     showMsg(msgEl, e.message || '创建订单失败', 'error');
   } finally {
-    btn.disabled = false;
-    btn.textContent = selectedPayChannel === 'alipay' ? '支付宝扫码支付' : '微信扫码支付';
+    payCreateBusy = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '重新获取二维码';
+    }
+    channelBtns.forEach(b => { b.disabled = false; });
   }
 }
 

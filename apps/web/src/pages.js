@@ -789,10 +789,26 @@ async function openPayDrawer(root, skinId, rid) {
   }
 
   const channelOpts = channels
-    .map((ch) => {
+    .map((ch, i) => {
       const code = typeof ch === "string" ? ch : ch.channel;
       const label = typeof ch === "string" ? ch : ch.label;
-      return `<button class="btn btn-ghost" data-ch="${code}">${label}</button>`;
+      const primary = i === 0 ? "btn-primary" : "btn-ghost";
+      return `<button class="btn ${primary} btn-block channel-pay" type="button" data-ch="${code}">${label}</button>`;
+    })
+    .join("");
+
+  const planCards = plans
+    .map((pl, i) => {
+      const code = pl.plan_code || pl.code;
+      const label = pl.label || pl.title;
+      const price = pl.price_yuan ?? pl.amount;
+      const tip = pl.summary || "";
+      const sel = i === 0 ? "selected-plan" : "";
+      return `<button type="button" class="plan-card ${sel}" data-plan="${code}" aria-pressed="${i === 0}">
+        <strong>${label} · ¥${price}</strong>
+        <span class="plan-anchor muted">原价 ¥9.9</span>
+        ${tip ? `<span class="plan-tip">${tip}</span>` : ""}
+      </button>`;
     })
     .join("");
 
@@ -800,22 +816,15 @@ async function openPayDrawer(root, skinId, rid) {
     <h3 style="font-family:var(--font-display);margin:0 0 8px">解锁完整报告</h3>
     <p class="muted">${
       isMockMode()
-        ? "本地验收：选套餐 → 模拟支付，或使用演示授权码"
-        : "扫码解锁完整报告 · 小红书/闲鱼买家可用授权码"
+        ? "本地验收：选渠道后自动模拟出码，或使用演示授权码"
+        : "点微信/支付宝即可出码 · 小红书/闲鱼买家可用授权码"
     }</p>
     <p class="pay-anchor muted">原价 <s>¥9.9</s> · 体验价 <strong class="price-now">¥1.99</strong></p>
     <div class="stack" style="margin-top:14px">
-      ${plans
-        .map((pl) => {
-          const code = pl.plan_code || pl.code;
-          const label = pl.label || pl.title;
-          const price = pl.price_yuan ?? pl.amount;
-          const tip = pl.summary ? `<span class="plan-tip">${pl.summary}</span>` : "";
-          return `<button class="btn btn-ember btn-block plan-pick" data-plan="${code}"><strong>${label} · ¥${price}</strong><span class="plan-anchor muted">原价 ¥9.9</span>${tip}</button>`;
-        })
-        .join("")}
-      <p class="group-label">支付渠道</p>
-      <div class="channel-row">${channelOpts}</div>
+      <p class="group-label">套餐</p>
+      <div class="plan-cards">${planCards}</div>
+      <p class="group-label">支付渠道 · 点选即出二维码</p>
+      <div class="channel-row channel-row-stack">${channelOpts}</div>
       <div id="payPanel"></div>
       <details class="code-fold">
         <summary>已有购买码？点此输入授权码</summary>
@@ -834,11 +843,54 @@ async function openPayDrawer(root, skinId, rid) {
   `;
 
   let channel = (channels[0] && (channels[0].channel || channels[0])) || "wxpay";
-  drawer.querySelectorAll("[data-ch]").forEach((b) => {
+  let planCode =
+    (plans[0] && (plans[0].plan_code || plans[0].code)) || FALLBACK_SINGLE_PLAN.plan_code;
+  let checkoutBusy = false;
+  let lastCheckoutAt = 0;
+  const CLIENT_COOLDOWN_MS = 2500;
+
+  const setChannelsEnabled = (on) => {
+    drawer.querySelectorAll("[data-ch]").forEach((b) => {
+      b.disabled = !on;
+    });
+  };
+
+  drawer.querySelectorAll("[data-plan]").forEach((b) => {
     b.onclick = () => {
+      planCode = b.dataset.plan;
+      drawer.querySelectorAll("[data-plan]").forEach((x) => {
+        x.classList.toggle("selected-plan", x === b);
+        x.setAttribute("aria-pressed", x === b ? "true" : "false");
+      });
+    };
+  });
+
+  drawer.querySelectorAll("[data-ch]").forEach((b) => {
+    b.onclick = async () => {
       channel = b.dataset.ch;
-      drawer.querySelectorAll("[data-ch]").forEach((x) => x.classList.remove("selected-ch"));
-      b.classList.add("selected-ch");
+      drawer.querySelectorAll("[data-ch]").forEach((x) => {
+        x.classList.toggle("selected-ch", x === b);
+        x.classList.toggle("btn-primary", x === b);
+        x.classList.toggle("btn-ghost", x !== b);
+      });
+      if (checkoutBusy) return;
+      const now = Date.now();
+      if (now - lastCheckoutAt < CLIENT_COOLDOWN_MS) {
+        const panel = drawer.querySelector("#payPanel");
+        if (panel && !panel.querySelector(".pay-box")) {
+          panel.innerHTML = `<p class="muted">操作太快，请稍候再试</p>`;
+        }
+        return;
+      }
+      checkoutBusy = true;
+      lastCheckoutAt = now;
+      setChannelsEnabled(false);
+      try {
+        await startCheckout(drawer, planCode, channel, skinId, rid);
+      } finally {
+        checkoutBusy = false;
+        setChannelsEnabled(true);
+      }
     };
   });
   drawer.querySelector("[data-ch]")?.classList.add("selected-ch");
@@ -852,10 +904,6 @@ async function openPayDrawer(root, skinId, rid) {
 
   drawer.querySelector("#close").onclick = closeDrawer;
   bd.onclick = closeDrawer;
-
-  drawer.querySelectorAll("[data-plan]").forEach((btn) => {
-    btn.onclick = () => startCheckout(drawer, btn.dataset.plan, channel, skinId, rid);
-  });
 
   drawer.querySelector("#codeBtn").onclick = async () => {
     const code = drawer.querySelector("#code").value.trim();

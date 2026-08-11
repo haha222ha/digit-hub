@@ -1337,6 +1337,117 @@ def insert_payment_order(
     conn.close()
 
 
+def count_recent_payment_orders(
+    *,
+    client_ip: str = "",
+    user_id: int | None = None,
+    channel: str = "",
+    within_seconds: int = 10,
+) -> int:
+    ip = (client_ip or "").strip()
+    ch = (channel or "").strip().lower()
+    uid = int(user_id) if user_id else None
+    if not ip and not uid:
+        return 0
+    since = (datetime.now() - timedelta(seconds=max(1, int(within_seconds)))).strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+    clauses = ["created_at >= ?"]
+    args: list = [since]
+    actor = []
+    if uid:
+        actor.append("user_id=?")
+        args.append(uid)
+    if ip:
+        actor.append("client_ip=?")
+        args.append(ip)
+    clauses.append("(" + " OR ".join(actor) + ")")
+    if ch:
+        clauses.append("channel=?")
+        args.append(ch)
+    conn = _conn()
+    row = conn.execute(
+        "SELECT COUNT(*) AS n FROM payment_orders WHERE " + " AND ".join(clauses),
+        tuple(args),
+    ).fetchone()
+    conn.close()
+    return int(row["n"] if row else 0)
+
+
+def count_pending_payment_orders(
+    *,
+    client_ip: str = "",
+    user_id: int | None = None,
+    within_minutes: int = 30,
+) -> int:
+    ip = (client_ip or "").strip()
+    uid = int(user_id) if user_id else None
+    if not ip and not uid:
+        return 0
+    since = (datetime.now() - timedelta(minutes=max(1, int(within_minutes)))).strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    clauses = ["status='pending'", "created_at >= ?", "(expires_at IS NULL OR expires_at > ?)"]
+    args: list = [since, now]
+    actor = []
+    if uid:
+        actor.append("user_id=?")
+        args.append(uid)
+    if ip:
+        actor.append("client_ip=?")
+        args.append(ip)
+    clauses.append("(" + " OR ".join(actor) + ")")
+    conn = _conn()
+    row = conn.execute(
+        "SELECT COUNT(*) AS n FROM payment_orders WHERE " + " AND ".join(clauses),
+        tuple(args),
+    ).fetchone()
+    conn.close()
+    return int(row["n"] if row else 0)
+
+
+def find_reusable_pending_payment_order(
+    *,
+    plan_code: str,
+    channel: str,
+    client_ip: str = "",
+    user_id: int | None = None,
+) -> dict | None:
+    ip = (client_ip or "").strip()
+    uid = int(user_id) if user_id else None
+    code = (plan_code or "").strip()
+    ch = (channel or "").strip().lower()
+    if not code or not ch or (not ip and not uid):
+        return None
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    clauses = [
+        "plan_code=?",
+        "channel=?",
+        "status='pending'",
+        "(expires_at IS NULL OR expires_at > ?)",
+        "(COALESCE(qrcode,'') != '' OR COALESCE(payurl,'') != '')",
+    ]
+    args: list = [code, ch, now]
+    actor = []
+    if uid:
+        actor.append("user_id=?")
+        args.append(uid)
+    if ip:
+        actor.append("client_ip=?")
+        args.append(ip)
+    clauses.append("(" + " OR ".join(actor) + ")")
+    conn = _conn()
+    row = conn.execute(
+        "SELECT * FROM payment_orders WHERE "
+        + " AND ".join(clauses)
+        + " ORDER BY created_at DESC LIMIT 1",
+        tuple(args),
+    ).fetchone()
+    conn.close()
+    return _payment_order_row(row)
+
+
 def update_payment_order_gateway(
     order_no: str,
     *,

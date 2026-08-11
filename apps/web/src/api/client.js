@@ -18,7 +18,14 @@ export async function api(path, options = {}) {
   const res = await fetch(apiBase() + path, { ...options, headers });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.detail || data.error || res.statusText);
+    const detail = data.detail;
+    const msg =
+      typeof detail === "string"
+        ? detail
+        : Array.isArray(detail)
+          ? detail.map((d) => d.msg || d).join("; ")
+          : data.error || res.statusText;
+    const err = new Error(msg || "请求失败");
     err.status = res.status;
     err.data = data;
     throw err;

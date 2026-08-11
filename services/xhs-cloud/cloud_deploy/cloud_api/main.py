@@ -44,6 +44,7 @@ from cloud_deploy.cloud_api.admin_portal_auth import (
 )
 from cloud_deploy.cloud_api.config import get_settings
 from cloud_deploy.cloud_api import payment_service as pay
+from cloud_deploy.cloud_api.request_ip import public_ipv4_for_pay, resolve_client_ip
 from cloud_deploy.cloud_api.email_service import smtp_configured
 from cloud_deploy.cloud_api.password_reset_service import (
     request_password_reset,
@@ -134,12 +135,7 @@ class BindEmailBody(BaseModel):
 
 
 def _client_ip(request: Request) -> str:
-    forwarded = (request.headers.get("X-Forwarded-For") or "").split(",")[0].strip()
-    if forwarded:
-        return forwarded
-    if request.client:
-        return request.client.host or ""
-    return "127.0.0.1"
+    return resolve_client_ip(request) or "127.0.0.1"
 
 
 def _renew_message(profile: dict) -> str:
@@ -499,9 +495,12 @@ def payment_create_order(
         order = pay.create_order(
             plan_code=body.plan_code,
             user_id=user["id"] if user else None,
-            client_ip=_client_ip(request),
+            # hwxun 拒收 IPv6 / 内网 / 空 IP →「用户IP地址不合法」
+            client_ip=public_ipv4_for_pay(request),
             channel=body.channel,
         )
+    except pay.PayRateLimitError as e:
+        raise HTTPException(status_code=429, detail=str(e)) from e
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except RuntimeError as e:

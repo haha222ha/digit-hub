@@ -1843,6 +1843,129 @@ def insert_payment_order(
         conn.close()
 
 
+def count_recent_payment_orders(
+    *,
+    client_ip: str = "",
+    user_id: int | None = None,
+    channel: str = "",
+    within_seconds: int = 10,
+) -> int:
+    """Count recent creates for rate-limit (same actor + optional channel)."""
+    ip = (client_ip or "").strip()
+    ch = (channel or "").strip().lower()
+    uid = int(user_id) if user_id else None
+    if not ip and not uid:
+        return 0
+    conn = _conn()
+    try:
+        with conn.cursor() as c:
+            c.execute("SET search_path TO xhs_monitor, public")
+            clauses = ["created_at >= NOW() - (%s || ' seconds')::interval"]
+            args: list = [str(max(1, int(within_seconds)))]
+            actor = []
+            if uid:
+                actor.append("user_id=%s")
+                args.append(uid)
+            if ip:
+                actor.append("client_ip::text=%s")
+                args.append(ip)
+            clauses.append("(" + " OR ".join(actor) + ")")
+            if ch:
+                clauses.append("channel=%s")
+                args.append(ch)
+            c.execute(
+                "SELECT COUNT(*) AS n FROM payment_orders WHERE " + " AND ".join(clauses),
+                tuple(args),
+            )
+            row = c.fetchone()
+            return int((row["n"] if isinstance(row, dict) else row[0]) or 0)
+    finally:
+        conn.close()
+
+
+def count_pending_payment_orders(
+    *,
+    client_ip: str = "",
+    user_id: int | None = None,
+    within_minutes: int = 30,
+) -> int:
+    ip = (client_ip or "").strip()
+    uid = int(user_id) if user_id else None
+    if not ip and not uid:
+        return 0
+    conn = _conn()
+    try:
+        with conn.cursor() as c:
+            c.execute("SET search_path TO xhs_monitor, public")
+            clauses = [
+                "status='pending'",
+                "created_at >= NOW() - (%s || ' minutes')::interval",
+                "(expires_at IS NULL OR expires_at > NOW())",
+            ]
+            args: list = [str(max(1, int(within_minutes)))]
+            actor = []
+            if uid:
+                actor.append("user_id=%s")
+                args.append(uid)
+            if ip:
+                actor.append("client_ip::text=%s")
+                args.append(ip)
+            clauses.append("(" + " OR ".join(actor) + ")")
+            c.execute(
+                "SELECT COUNT(*) AS n FROM payment_orders WHERE " + " AND ".join(clauses),
+                tuple(args),
+            )
+            row = c.fetchone()
+            return int((row["n"] if isinstance(row, dict) else row[0]) or 0)
+    finally:
+        conn.close()
+
+
+def find_reusable_pending_payment_order(
+    *,
+    plan_code: str,
+    channel: str,
+    client_ip: str = "",
+    user_id: int | None = None,
+) -> dict | None:
+    """Return newest unpaid order with QR for same actor/plan/channel."""
+    ip = (client_ip or "").strip()
+    uid = int(user_id) if user_id else None
+    code = (plan_code or "").strip()
+    ch = (channel or "").strip().lower()
+    if not code or not ch or (not ip and not uid):
+        return None
+    conn = _conn()
+    try:
+        with conn.cursor() as c:
+            c.execute("SET search_path TO xhs_monitor, public")
+            clauses = [
+                "plan_code=%s",
+                "channel=%s",
+                "status='pending'",
+                "(expires_at IS NULL OR expires_at > NOW())",
+                "(COALESCE(qrcode,'') <> '' OR COALESCE(payurl,'') <> '')",
+            ]
+            args: list = [code, ch]
+            actor = []
+            if uid:
+                actor.append("user_id=%s")
+                args.append(uid)
+            if ip:
+                actor.append("client_ip::text=%s")
+                args.append(ip)
+            clauses.append("(" + " OR ".join(actor) + ")")
+            c.execute(
+                "SELECT * FROM payment_orders WHERE "
+                + " AND ".join(clauses)
+                + " ORDER BY created_at DESC LIMIT 1",
+                tuple(args),
+            )
+            return _payment_order_row(c.fetchone())
+    finally:
+        conn.close()
+
+
 def update_payment_order_gateway(
     order_no: str,
     *,

@@ -1439,11 +1439,39 @@ button {
   gap: 8px;
 }
 
+.channel-row-stack {
+  flex-direction: column;
+}
+
 .channel-row .selected-ch {
-  color: var(--seal);
   font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 4px;
+}
+
+.plan-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plan-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper-deep);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.plan-card.selected-plan {
+  border-color: var(--seal);
+  background: var(--seal-soft);
 }
 
 .plan-pick {
