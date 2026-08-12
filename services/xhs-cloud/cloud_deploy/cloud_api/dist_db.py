@@ -215,6 +215,21 @@ def _row_dict(row) -> dict | None:
     return None
 
 
+def _pg_scalar(row, key: str = "id"):
+    """RealDictCursor 行不能用 [0] 下标。"""
+    if row is None:
+        return None
+    if hasattr(row, "keys"):
+        if key in row:
+            return row[key]
+        # COUNT(*) AS n / 单列匿名
+        vals = list(row.values())
+        return vals[0] if vals else None
+    if isinstance(row, (list, tuple)):
+        return row[0]
+    return row
+
+
 def ensure_distributor(user_id: int, *, default_quota: int = 5) -> dict:
     init_dist_tables()
     from cloud_deploy.cloud_api import database as db
@@ -485,6 +500,7 @@ def _map_link(row: dict | None) -> dict:
     return {
         "id": row.get("id"),
         "token": row.get("token"),
+        "user_id": row.get("user_id"),
         "test_code": row.get("test_code"),
         "status": row.get("status") or "unused",
         "used_count": int(row.get("used_count") or 0),
@@ -664,7 +680,7 @@ def _insert_test_result(
                VALUES (%s,%s,%s,%s,%s,%s::jsonb,%s) RETURNING id""",
             (link_id, token, test_code, user_id, perspective, payload, unlimited),
         )
-        rid = c.fetchone()[0]
+        rid = _pg_scalar(c.fetchone(), "id")
         conn.commit()
         conn.close()
         return int(rid)
@@ -786,27 +802,33 @@ def admin_dist_stats() -> dict:
     if _USE_PG:
         conn = _pg_conn()
         c = _pg_cur(conn)
-        c.execute("SELECT COUNT(*), COALESCE(SUM(quota),0), COALESCE(SUM(used_quota),0) FROM dist_distributors")
-        drow = c.fetchone()
-        c.execute("SELECT COUNT(*) FROM dist_links")
-        links_total = int(c.fetchone()[0])
-        c.execute("SELECT COUNT(*) FROM dist_links WHERE status='unused'")
-        links_unused = int(c.fetchone()[0])
-        c.execute("SELECT COUNT(*) FROM dist_links WHERE status='used'")
-        links_used = int(c.fetchone()[0])
-        c.execute("SELECT COUNT(*) FROM dist_links WHERE status='revoked'")
-        links_revoked = int(c.fetchone()[0])
-        c.execute("SELECT COUNT(*) FROM dist_test_results")
-        results_total = int(c.fetchone()[0])
         c.execute(
-            """SELECT test_code, COUNT(*) FROM dist_links
-               GROUP BY test_code ORDER BY COUNT(*) DESC LIMIT 12"""
+            """SELECT COUNT(*) AS n, COALESCE(SUM(quota),0) AS q, COALESCE(SUM(used_quota),0) AS u
+               FROM dist_distributors"""
         )
-        by_test = [{"test_code": r[0], "links": int(r[1])} for r in c.fetchall()]
+        drow = _row_dict(c.fetchone()) or {}
+        distributors = int(drow.get("n") or 0)
+        quota_sum = int(drow.get("q") or 0)
+        used_sum = int(drow.get("u") or 0)
+        c.execute("SELECT COUNT(*) AS n FROM dist_links")
+        links_total = int(_pg_scalar(c.fetchone(), "n") or 0)
+        c.execute("SELECT COUNT(*) AS n FROM dist_links WHERE status='unused'")
+        links_unused = int(_pg_scalar(c.fetchone(), "n") or 0)
+        c.execute("SELECT COUNT(*) AS n FROM dist_links WHERE status='used'")
+        links_used = int(_pg_scalar(c.fetchone(), "n") or 0)
+        c.execute("SELECT COUNT(*) AS n FROM dist_links WHERE status='revoked'")
+        links_revoked = int(_pg_scalar(c.fetchone(), "n") or 0)
+        c.execute("SELECT COUNT(*) AS n FROM dist_test_results")
+        results_total = int(_pg_scalar(c.fetchone(), "n") or 0)
+        c.execute(
+            """SELECT test_code, COUNT(*) AS n FROM dist_links
+               GROUP BY test_code ORDER BY n DESC LIMIT 12"""
+        )
+        by_test = []
+        for x in c.fetchall():
+            r = _row_dict(x) or {}
+            by_test.append({"test_code": r.get("test_code"), "links": int(r.get("n") or 0)})
         conn.close()
-        distributors = int(drow[0] or 0)
-        quota_sum = int(drow[1] or 0)
-        used_sum = int(drow[2] or 0)
     else:
         conn = _sqlite_conn()
         c = conn.cursor()

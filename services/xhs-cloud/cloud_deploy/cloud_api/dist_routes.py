@@ -147,6 +147,8 @@ def dist_links_complete_v1(body: CompleteTestBody):
         )
     except ValueError as e:
         return JSONResponse(_fail(str(e)), status_code=200)
+    except Exception as e:
+        return JSONResponse(_fail(f"完成失败: {e}"), status_code=200)
 
 
 @router.post("/api/v1/dist/quota/redeem")
