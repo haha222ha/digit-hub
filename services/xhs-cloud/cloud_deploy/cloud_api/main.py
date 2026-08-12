@@ -44,6 +44,7 @@ from cloud_deploy.cloud_api.admin_portal_auth import (
     verify_admin_credentials,
     verify_admin_portal,
 )
+from cloud_deploy.cloud_api.config import get_settings
 from cloud_deploy.cloud_api.dist_routes import compat_router as dist_compat_router
 from cloud_deploy.cloud_api.dist_routes import router as dist_router
 from cloud_deploy.cloud_api import payment_service as pay
