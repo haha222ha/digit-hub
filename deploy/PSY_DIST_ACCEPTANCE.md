@@ -1,42 +1,37 @@
 # 心理分销（psy.xhs365.cn）上线验收
 
+> **默认假设**：域名走 Cloudflare **Flexible（灵活）** + Always Use HTTPS。  
+> 访客 HTTPS 由 CF 终结，**源站只开 :80 HTTP，不申请 Let's Encrypt**。可橙云。
+
 ## 1. DNS
 
-在域名 DNS（Cloudflare 建议先**关闭代理/灰云**）添加：
-
-| 类型 | 主机记录 | 值 |
-|------|----------|-----|
-| A | `psy` | `47.239.181.111`（ECS 公网 IP） |
+| 类型 | 主机记录 | 值 | 代理 |
+|------|----------|-----|------|
+| A | `psy` | `47.239.181.111`（ECS 公网 IP） | 可橙云（Flexible） |
 
 验证：
 
 ```bash
 dig +short psy.xhs365.cn
-# 应返回 ECS IP
-curl -I http://psy.xhs365.cn/
+# 橙云时可能是 CF Anycast IP，属正常
+curl -I https://psy.xhs365.cn/
 ```
 
-## 2. SSL（Let's Encrypt）
+## 2. 源站（无证书）
 
-DNS 生效后，在 ECS 执行：
+只需部署 nginx :80 + API，**不要**跑 `certbot_psy.sh`（除非以后改 Full/Strict）。
 
 ```bash
 cd /opt/digit-hub
 sudo git pull
 sudo bash deploy/quick_update.sh
-sudo bash deploy/certbot_psy.sh
 ```
 
-证书路径：`/etc/letsencrypt/live/psy.xhs365.cn/`  
-`nginx_apply.sh` 检测到证书后会自动写 **443 + 80→HTTPS 跳转**。
+`nginx_apply.sh` 在无证书时只写 `:80`；有证书才会写 443（本站默认不用）。
 
 ## 3. 代码部署
 
-```bash
-cd /opt/digit-hub && sudo git pull && sudo bash deploy/quick_update.sh
-```
-
-Smoke 期望含：`psy_dist_tests: 36`
+同上 `quick_update.sh`。Smoke 期望含：`psy_dist_tests: 36`
 
 ## 4. 完整业务链路验收
 

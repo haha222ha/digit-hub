@@ -1,0 +1,15 @@
+---
+description: xhs365.cn Cloudflare SSL defaults to Flexible (no origin cert)
+alwaysApply: true
+---
+
+# Cloudflare Flexible（默认）
+
+`*.xhs365.cn` 默认使用 Cloudflare **Flexible（灵活）** + Always Use HTTPS：
+
+- 访客 HTTPS 由 CF 终结；源站 nginx **只开 :80 HTTP**
+- **不要**默认要求灰云、不要默认跑 certbot / Let's Encrypt
+- 可橙云；DNS A → ECS `47.239.181.111`
+- 仅当用户明确要改 Full / Full (strict) 时，才配置源站证书
+
+相关域名：`monitor.xhs365.cn`、`psy.xhs365.cn` 等。

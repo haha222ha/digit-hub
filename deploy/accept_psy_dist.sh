@@ -17,8 +17,7 @@ if curl -fsSI --max-time 15 "${PSY_ORIGIN}/" >"${TMP}/head.txt" 2>/dev/null; the
   head -n 5 "${TMP}/head.txt"
   echo "HTTPS OK: ${PSY_ORIGIN}"
 else
-  echo "WARN: ${PSY_ORIGIN} 不可达 — 请先配 DNS A 记录并执行:"
-  echo "  sudo bash /opt/digit-hub/deploy/certbot_psy.sh"
+  echo "WARN: ${PSY_ORIGIN} 不可达 — 请确认 Cloudflare DNS（Flexible 可橙云）已指向本机 :80"
 fi
 
 echo "==> 2) API tests list"
