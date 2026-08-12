@@ -33,8 +33,9 @@ def _sqlite_conn():
 
 def _pg_conn():
     """业务表在 xhs_monitor schema；未 SET search_path 时 CREATE/FK 会失败。"""
-    import psycopg2.extras
-    conn = _pg_conn()
+    from cloud_deploy.cloud_api.database_pg import _conn as _raw_pg_conn
+
+    conn = _raw_pg_conn()
     with conn.cursor() as c:
         c.execute("SET search_path TO xhs_monitor, public")
     return conn
