@@ -10,14 +10,39 @@ from typing import Any
 from cloud_deploy.cloud_api import database as db
 from cloud_deploy.cloud_api import dist_db
 
-_CATALOG_PATH = Path(__file__).resolve().parents[4] / "packages" / "psy-dist" / "tests-catalog.json"
 _DEFAULT_QUOTA = int(os.environ.get("XHS_DIST_DEFAULT_QUOTA", "5"))
 _LINK_MAX_USES = int(os.environ.get("XHS_DIST_LINK_MAX_USES", "3"))
 
 
+def _resolve_catalog_path() -> Path:
+    """digit-hub monorepo 与 ECS /opt/xhs-cloud 双布局均可找到 catalog。"""
+    env = (os.environ.get("XHS_PSY_DIST_CATALOG") or "").strip()
+    if env:
+        p = Path(env)
+        if p.is_file():
+            return p
+    here = Path(__file__).resolve()
+    # cloud_api → cloud_deploy → xhs-cloud → services → digit-hub
+    monorepo = here.parents[4] / "packages" / "psy-dist" / "tests-catalog.json"
+    candidates = [
+        monorepo,
+        Path("/opt/digit-hub/packages/psy-dist/tests-catalog.json"),
+        here.parents[1] / "assets" / "psy-dist" / "tests-catalog.json",
+        Path("/opt/xhs-cloud/cloud_deploy/assets/psy-dist/tests-catalog.json"),
+    ]
+    for p in candidates:
+        if p.is_file():
+            return p
+    return monorepo
+
+
+_CATALOG_PATH = _resolve_catalog_path()
+
+
 def _load_catalog() -> dict:
-    if _CATALOG_PATH.is_file():
-        return json.loads(_CATALOG_PATH.read_text(encoding="utf-8"))
+    path = _resolve_catalog_path()
+    if path.is_file():
+        return json.loads(path.read_text(encoding="utf-8"))
     return {"tests": []}
 
 

@@ -20,7 +20,11 @@ rsync -a --delete \
   --exclude venv --exclude data --exclude .env --exclude '__pycache__' --exclude '*.pyc' \
   "${SRC}/" "${XHS_ROOT}/cloud_deploy/"
 touch "${XHS_ROOT}/cloud_deploy/__init__.py" 2>/dev/null || true
-mkdir -p "${XHS_ROOT}/cloud_deploy/assets/uploads"
+mkdir -p "${XHS_ROOT}/cloud_deploy/assets/uploads" "${XHS_ROOT}/cloud_deploy/assets/psy-dist"
+if [[ -f "${DIGIT_HUB}/packages/psy-dist/tests-catalog.json" ]]; then
+  cp -f "${DIGIT_HUB}/packages/psy-dist/tests-catalog.json" \
+    "${XHS_ROOT}/cloud_deploy/assets/psy-dist/tests-catalog.json"
+fi
 chown -R admin:admin "${XHS_ROOT}/cloud_deploy/assets" 2>/dev/null || true
 
 ENV_OUT="${XHS_ROOT}/.env"
@@ -53,7 +57,20 @@ bash "${DIGIT_HUB}/deploy/nginx_apply.sh"
 
 echo "==> restart API"
 systemctl restart xhs-cloud-api
-sleep 2
+ok=0
+for _ in $(seq 1 15); do
+  if systemctl is-active --quiet xhs-cloud-api; then
+    ok=1
+    break
+  fi
+  sleep 1
+done
+if [[ "$ok" -ne 1 ]]; then
+  echo "ERROR: xhs-cloud-api not active"
+  systemctl status xhs-cloud-api --no-pager -l || true
+  journalctl -u xhs-cloud-api -n 50 --no-pager || true
+  exit 1
+fi
 systemctl is-active xhs-cloud-api
 
 echo "==> smoke"
@@ -65,6 +82,6 @@ curl -fsS http://127.0.0.1:8080/api/v1/payment/plans 2>/dev/null \
   | python3 -c "import sys,json; d=json.load(sys.stdin); p=next((x for x in d.get('assess_plans',[]) if x.get('plan_code')=='assess_single'),{}); print('assess_single:', p.get('amount'), p.get('price_yuan'))" \
   || echo "(plans parse skip)"
 curl -fsS http://127.0.0.1:8080/api/tests/list 2>/dev/null \
-  | python3 -c "import sys,json; d=json.load(sys.stdin); t=(d.get('data') or {}).get('tests') or []; print('psy_dist_tests:', len(t))" \
-  || echo "(dist tests skip)"
+  | python3 -c "import sys,json; d=json.load(sys.stdin); t=(d.get('data') or {}).get('tests') or []; print('psy_dist_tests:', len(t)); assert len(t) >= 30" \
+  || echo "(dist tests skip — check catalog path / API logs)"
 echo "DONE quick_update — users stay logged in; Workbench should not drop"
