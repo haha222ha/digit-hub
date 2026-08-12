@@ -329,12 +329,18 @@ def _map_distributor(dist: dict | None, profile: dict) -> dict:
     dist = dist or {}
     quota = int(dist.get("quota") or 0)
     used = int(dist.get("used_quota") or 0)
+    # 前端 SPA 仅认 admin / super_admin；distributor 需映射为 admin 才能进后台
+    raw_role = str(dist.get("role") or "distributor").strip().lower()
+    if raw_role in ("super_admin", "superadmin"):
+        role = "super_admin"
+    else:
+        role = "admin"
     return {
         "id": profile.get("id"),
         "user_id": profile.get("id"),
         "username": profile.get("username") or "",
         "email": profile.get("email") or "",
-        "role": dist.get("role") or "distributor",
+        "role": role,
         "status": dist.get("status") or "active",
         "quota": quota,
         "used_quota": used,
