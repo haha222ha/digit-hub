@@ -9,7 +9,12 @@ from datetime import datetime, timedelta
 
 from cloud_deploy.cloud_api import database as db
 from cloud_deploy.cloud_api.config import get_settings
-from cloud_deploy.cloud_api.hwxun_pay import channel_merchant_credentials, create_epay_order, verify_notify_epay
+from cloud_deploy.cloud_api.hwxun_pay import (
+    build_epay_submit_url,
+    channel_merchant_credentials,
+    create_epay_order,
+    verify_notify_epay,
+)
 from cloud_deploy.cloud_api.payment_plans import get_plan
 
 logger = logging.getLogger(__name__)
@@ -30,6 +35,14 @@ def _notify_url() -> str:
     if not base:
         raise RuntimeError("未配置 XHS_PAY_NOTIFY_BASE")
     return f"{base}/api/v1/payment/notify/hwxun"
+
+
+def _return_url(order_no: str) -> str:
+    """支付完成浏览器回跳（对齐发卡网 epay_return；履约仍靠异步 notify）。"""
+    base = (get_settings().xhs_pay_notify_base or "").strip().rstrip("/")
+    if not base:
+        raise RuntimeError("未配置 XHS_PAY_NOTIFY_BASE")
+    return f"{base}/?paid_order={order_no}"
 
 
 def _payment_fulfillment_note(order_no: str, channel: str, plan_code: str) -> str:
@@ -141,13 +154,14 @@ def create_order(
     pay_device = (device or "pc").strip().lower()
     if pay_device not in ("pc", "mobile", "wechat", "alipay", "jump"):
         pay_device = "pc"
-    # 手机跳转单不要复用 PC 扫码单（否则可能只有二维码、没有可唤起的 payurl）
-    want_jump = pay_device != "pc"
+    # 支付宝走 submit 整页跳转（发卡网同款），不复用 mapi 扫码单
+    alipay_jump = pay_channel == "alipay"
+    want_fresh = alipay_jump or pay_device != "pc"
 
     # Reuse unpaid QR for same actor / plan / channel (avoids spam + better UX)
     reusable = (
         None
-        if want_jump
+        if want_fresh
         else db.find_reusable_pending_payment_order(
             plan_code=plan["plan_code"],
             channel=pay_channel,
@@ -156,7 +170,7 @@ def create_order(
         )
     )
     if reusable:
-        return {
+        out = {
             "order_no": reusable["order_no"],
             "plan_code": plan["plan_code"],
             "plan_label": plan["label"],
@@ -169,7 +183,9 @@ def create_order(
             "channel": pay_channel,
             "reused": True,
             "device": "pc",
+            "pay_mode": "qrcode",
         }
+        return out
 
     recent = db.count_recent_payment_orders(
         client_ip=client_ip or "",
@@ -208,22 +224,41 @@ def create_order(
         goods_name = f"定制分析-{plan['label']}"
     else:
         goods_name = f"AI选品会员-{plan['label']}"
-    gw = create_epay_order(
-        channel=pay_channel,
-        out_trade_no=order_no,
-        amount=plan["amount"],
-        name=goods_name,
-        notify_url=_notify_url(),
-        clientip=client_ip,
-        device=pay_device,
-    )
-    qrcode = str(gw.get("qrcode") or gw.get("code_url") or "").strip()
-    payurl = str(
-        gw.get("payurl") or gw.get("urlscheme") or gw.get("url") or ""
-    ).strip()
-    gateway_trade_no = str(gw.get("trade_no") or "").strip()
-    if not qrcode and not payurl:
-        raise RuntimeError("支付网关未返回二维码")
+
+    # 支付宝：发卡网同款页面跳转 submit.php（可唤起支付宝 App）
+    # 微信：继续 mapi 扫码（PC/手机扫一扫）
+    if alipay_jump:
+        payurl = build_epay_submit_url(
+            channel="alipay",
+            out_trade_no=order_no,
+            amount=plan["amount"],
+            name=goods_name,
+            notify_url=_notify_url(),
+            return_url=_return_url(order_no),
+            sitename="心象测",
+        )
+        qrcode = ""
+        gateway_trade_no = ""
+        pay_mode = "jump"
+    else:
+        gw = create_epay_order(
+            channel=pay_channel,
+            out_trade_no=order_no,
+            amount=plan["amount"],
+            name=goods_name,
+            notify_url=_notify_url(),
+            clientip=client_ip,
+            device=pay_device,
+        )
+        qrcode = str(gw.get("qrcode") or gw.get("code_url") or "").strip()
+        payurl = str(
+            gw.get("payurl") or gw.get("urlscheme") or gw.get("url") or ""
+        ).strip()
+        gateway_trade_no = str(gw.get("trade_no") or "").strip()
+        if not qrcode and not payurl:
+            raise RuntimeError("支付网关未返回二维码")
+        pay_mode = "qrcode"
+
     db.update_payment_order_gateway(
         order_no,
         qrcode=qrcode,
@@ -243,6 +278,7 @@ def create_order(
         "channel": pay_channel,
         "reused": False,
         "device": pay_device,
+        "pay_mode": pay_mode,
     }
 
 

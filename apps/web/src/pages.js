@@ -776,28 +776,100 @@ function resolvePayDevice(channel) {
   const ua = navigator.userAgent || "";
   if (/AlipayClient/i.test(ua)) return "alipay";
   if (/MicroMessenger/i.test(ua)) return "wechat";
-  if (/Android|iPhone|iPad|iPod|Mobile/i.test(ua)) {
-    // 支付宝手机端优先拿可跳转 payurl；微信仍多用扫码
-    return channel === "alipay" ? "mobile" : "mobile";
-  }
+  if (/Android|iPhone|iPad|iPod|Mobile/i.test(ua)) return "mobile";
   return "pc";
 }
 
-function shouldAutoOpenPay(channel, device) {
+function shouldAutoOpenPay(channel, device, payMode) {
+  // 支付宝 submit 跳转：对齐发卡网 dopay → location.href（PC/手机都整页走收银台）
+  if (channel === "alipay" || payMode === "jump") return true;
   if (device === "pc") return false;
-  if (channel === "alipay") return true;
-  // 微信内打开且有 payurl 时跟会员站一致：直接跳转
   return channel === "wxpay" && device === "wechat";
 }
 
-function tryOpenPayUrl(payurl) {
+function tryOpenPayUrl(payurl, { hardNavigate = false } = {}) {
   const url = String(payurl || "").trim();
   if (!url) return;
+  if (hardNavigate) {
+    location.href = url;
+    return;
+  }
   try {
     const opened = window.open(url, "_blank", "noopener");
     if (!opened) location.href = url;
   } catch {
     location.href = url;
+  }
+}
+
+const PENDING_PAY_KEY = "xinxiang_pending_pay";
+
+function savePendingPay(payload) {
+  try {
+    sessionStorage.setItem(PENDING_PAY_KEY, JSON.stringify({ ...payload, at: Date.now() }));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function loadPendingPay() {
+  try {
+    const raw = sessionStorage.getItem(PENDING_PAY_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data?.order_no) return null;
+    if (Date.now() - (data.at || 0) > 45 * 60 * 1000) {
+      sessionStorage.removeItem(PENDING_PAY_KEY);
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export function clearPendingPay() {
+  try {
+    sessionStorage.removeItem(PENDING_PAY_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** 支付宝 submit 回跳后：查单并回到结果/报告 */
+export async function resumePendingPayAfterReturn() {
+  const q = new URLSearchParams(location.search);
+  const paidOrder = (q.get("paid_order") || "").trim();
+  const pending = loadPendingPay();
+  const orderNo = paidOrder || pending?.order_no || "";
+  if (!orderNo) return false;
+
+  try {
+    const st = await api(`/api/v1/payment/orders/${orderNo}`);
+    if (st.status !== "paid") {
+      if (pending?.skinId && pending?.rid) {
+        navigate(`/t/${pending.skinId}/result?rid=${encodeURIComponent(pending.rid)}`);
+        return true;
+      }
+      return false;
+    }
+    clearPendingPay();
+    await refreshEntitlementsFromProfile();
+    if (pending?.skinId && pending?.rid) {
+      const ok = await checkReportAccess(pending.skinId);
+      navigate(ok ? `/report/${pending.rid}` : `/t/${pending.skinId}/result?rid=${encodeURIComponent(pending.rid)}`);
+      return true;
+    }
+    navigate("/account");
+    return true;
+  } catch {
+    return false;
+  } finally {
+    if (paidOrder) {
+      q.delete("paid_order");
+      const next = `${location.pathname}${q.toString() ? `?${q}` : ""}${location.hash || "#/"}`;
+      history.replaceState(null, "", next);
+    }
   }
 }
 
@@ -1029,21 +1101,69 @@ async function startCheckout(drawer, plan_code, channel, skinId, rid) {
       method: "POST",
       body: JSON.stringify({ plan_code, channel: payChannel, device }),
     });
+    const payMode = order.pay_mode || (payChannel === "alipay" ? "jump" : "qrcode");
+    const payurl = (order.payurl || "").trim();
+
+    // 支付宝：发卡网同款整页跳转 submit.php（最稳，可唤起 App）
+    if (payChannel === "alipay" && payurl) {
+      savePendingPay({ order_no: order.order_no, skinId, rid, plan_code });
+      panel.innerHTML = `
+        <div class="pay-box">
+          <p><strong>${order.plan_label || plan_code}</strong> · ¥${order.amount || ""}</p>
+          <p class="muted">订单 ${order.order_no}</p>
+          <p class="muted pay-channel-hint">正在跳转支付宝收银台…若未跳转请点下方按钮</p>
+          <a class="btn btn-ember btn-block" id="payJump" href="${payurl}">打开支付宝付款</a>
+          <button class="btn btn-primary btn-block" id="poll">我已支付 · 查询订单</button>
+          <div id="payStatus" class="muted"></div>
+        </div>
+      `;
+      // 先画好兜底按钮，再硬跳（对齐发卡网 location.href）
+      setTimeout(() => tryOpenPayUrl(payurl, { hardNavigate: true }), 80);
+      // 若用户拦截了跳转，仍可点按钮 / 轮询
+      let settled = false;
+      let awaitingRegister = false;
+      const finishAfterPay = async () => {
+        clearPendingPay();
+        await refreshEntitlementsFromProfile();
+        const ok = await checkReportAccess(skinId);
+        if (ok) {
+          navigate(`/report/${rid}`);
+          return true;
+        }
+        const statusEl = panel.querySelector("#payStatus");
+        if (statusEl) statusEl.textContent = "已支付但权益未生效，请刷新或联系客服";
+        return false;
+      };
+      const fulfill = async () => {
+        if (settled) return true;
+        if (awaitingRegister) return false;
+        const st = await api(`/api/v1/payment/orders/${order.order_no}`);
+        const statusEl = panel.querySelector("#payStatus");
+        if (statusEl) statusEl.textContent = `状态：${st.status}`;
+        if (st.status !== "paid") return false;
+        clearPayPollTimer();
+        settled = true;
+        return finishAfterPay();
+      };
+      panel.querySelector("#poll").onclick = () => fulfill().catch((e) => alert(e.message || "查询失败"));
+      payPollTimer = setInterval(() => {
+        fulfill().catch(() => {});
+      }, 2500);
+      return;
+    }
+
     const qrSrc = order.qrcode
       ? isMockMode()
         ? ""
         : `/api/v1/payment/qrcode?data=${encodeURIComponent(order.qrcode)}`
       : "";
-    const payurl = (order.payurl || "").trim();
     const canJump = Boolean(payurl);
     const jumpLabel =
       payChannel === "alipay" ? "打开支付宝付款" : payChannel === "wxpay" ? "打开微信支付" : "打开支付链接";
     const hint =
-      payChannel === "alipay" && device !== "pc"
-        ? "手机端可一键唤起支付宝；若未跳转请点下方按钮或扫码"
-        : payChannel === "alipay"
-          ? "请使用支付宝扫一扫；手机也可点下方按钮打开"
-          : "请使用微信扫一扫完成支付";
+      payChannel === "alipay"
+        ? "将跳转支付宝收银台完成付款"
+        : "请使用微信扫一扫完成支付";
     panel.innerHTML = `
       <div class="pay-box">
         <p><strong>${order.plan_label || plan_code}</strong> · ¥${order.amount || ""}</p>
@@ -1071,7 +1191,7 @@ async function startCheckout(drawer, plan_code, channel, skinId, rid) {
       </div>
     `;
 
-    if (canJump && shouldAutoOpenPay(payChannel, device)) {
+    if (canJump && shouldAutoOpenPay(payChannel, device, payMode)) {
       tryOpenPayUrl(payurl);
     }
 
@@ -1079,6 +1199,7 @@ async function startCheckout(drawer, plan_code, channel, skinId, rid) {
     let awaitingRegister = false;
 
     const finishAfterPay = async () => {
+      clearPendingPay();
       await refreshEntitlementsFromProfile();
       const ok = await checkReportAccess(skinId);
       if (ok) {

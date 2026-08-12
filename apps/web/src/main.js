@@ -12,10 +12,12 @@ import {
   renderDuoCompare,
   renderAccount,
   renderActivate,
+  resumePendingPayAfterReturn,
 } from "./pages.js";
 
 useMock();
 bootstrapCardCodeRedirect();
+resumePendingPayAfterReturn().catch(() => {});
 
 initA2hs({
   brand: "心象测",

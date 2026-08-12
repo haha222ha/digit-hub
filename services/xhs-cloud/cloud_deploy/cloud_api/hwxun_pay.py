@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-"""hwxun 易支付 V1（MD5）对接：mapi 下单 + 异步回调验签。
+"""hwxun 易支付 V1（MD5）对接：mapi 扫码 + submit 页面跳转 + 异步回调验签。
 
-微信网关：https://pay.hwxun.cn/mapi.php  type=wxpay
-支付宝网关：https://xapay.hwxun.cn/mapi.php  type=alipay
-  文档：https://xapay.hwxun.cn/doc/epay_mapi （页面跳转见 epay_submit，我们不用）
+微信网关：https://pay.hwxun.cn/mapi.php  type=wxpay（扫码）
+支付宝网关：
+  - 页面跳转（与发卡网一致）：https://xapay.hwxun.cn/submit.php
+  - API 扫码：https://xapay.hwxun.cn/mapi.php  type=alipay
+文档：https://xapay.hwxun.cn/doc/epay_submit 、 /doc/epay_mapi
 商户后台（支付宝云端）：https://xapay.hwxun.cn/user/
 """
 from __future__ import annotations
@@ -12,7 +14,7 @@ import hashlib
 import hmac
 import ipaddress
 from typing import Any
-from urllib.parse import urljoin
+from urllib.parse import urlencode, urljoin
 
 import requests
 
@@ -95,6 +97,41 @@ def channel_merchant_credentials(channel: str) -> tuple[str, str]:
     """返回 (pid, key)，用于回调验签。"""
     _, pid, key = _channel_credentials(channel)
     return pid, key
+
+
+def build_epay_submit_url(
+    *,
+    channel: str,
+    out_trade_no: str,
+    amount: str,
+    name: str,
+    notify_url: str,
+    return_url: str,
+    sitename: str = "心象测",
+) -> str:
+    """页面跳转支付 URL（对齐发卡网 other/submit.php → epay submit.php）。
+
+    浏览器打开此链接后，易支付收银台会继续跳转/唤起支付宝，无需 mapi 返回 payurl。
+    """
+    ch = (channel or "alipay").strip().lower()
+    meta = PAY_CHANNELS.get(ch)
+    if not meta:
+        raise ValueError(f"不支持的支付方式: {channel}")
+    api_url, pid, key = _channel_credentials(ch)
+    params: dict[str, Any] = {
+        "pid": pid,
+        "type": meta["type"],
+        "notify_url": notify_url,
+        "return_url": return_url,
+        "out_trade_no": out_trade_no,
+        "name": (name or "")[:127],
+        "money": f"{float(amount):.2f}",
+        "sitename": (sitename or "心象测")[:64],
+    }
+    params["sign"] = _epay_sign(params, key)
+    params["sign_type"] = "MD5"
+    endpoint = urljoin(api_url.rstrip("/") + "/", "submit.php")
+    return f"{endpoint}?{urlencode(params)}"
 
 
 def create_epay_order(

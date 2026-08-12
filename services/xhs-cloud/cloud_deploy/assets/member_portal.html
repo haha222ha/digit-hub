@@ -1665,28 +1665,33 @@ async function startWxPay() {
     document.getElementById('portalPayCheckout')?.classList.remove('hidden');
     document.getElementById('portalPayMeta').innerHTML =
       `订单号：<strong>${esc(order.order_no)}</strong><br>套餐：${esc(order.plan_label)} · ¥${esc(order.amount)}<br>支付方式：${order.channel === 'alipay' ? '支付宝' : '微信'}<br>请在 30 分钟内完成支付`;
+
+    // 支付宝：发卡网同款整页跳转 submit.php
+    if (order.channel === 'alipay' && order.payurl) {
+      const meta = document.getElementById('portalPayMeta');
+      if (meta) {
+        meta.innerHTML += `<br><a class="btn btn-primary" href="${esc(order.payurl)}">打开支付宝付款</a>`;
+      }
+      showMsg(msgEl, '正在跳转支付宝收银台…', 'ok');
+      payPollTimer = setInterval(() => pollPayOrder(order.order_no), 2500);
+      pollPayOrder(order.order_no);
+      setTimeout(() => { location.href = order.payurl; }, 80);
+      return;
+    }
+
     const qrText = order.qrcode || order.payurl || '';
     const ua = navigator.userAgent || '';
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
     if (/MicroMessenger/i.test(ua) && order.payurl && order.channel !== 'alipay') {
       location.href = order.payurl;
       return;
     }
-    if (order.channel === 'alipay' && order.payurl && (isMobile || /AlipayClient/i.test(ua))) {
-      try {
-        const opened = window.open(order.payurl, '_blank', 'noopener');
-        if (!opened) location.href = order.payurl;
-      } catch (_) {
-        location.href = order.payurl;
-      }
-    }
     if (!renderPayQrcode(qrText)) {
       if (order.payurl) {
         document.getElementById('portalPayCheckout')?.classList.remove('hidden');
-        showMsg(msgEl, '若未自动跳转，请点击下方链接打开支付宝', 'warn');
+        showMsg(msgEl, '若未自动跳转，请点击下方链接打开支付', 'warn');
         const meta = document.getElementById('portalPayMeta');
         if (meta) {
-          meta.innerHTML += `<br><a class="btn btn-primary" href="${esc(order.payurl)}" target="_blank" rel="noopener">打开支付宝付款</a>`;
+          meta.innerHTML += `<br><a class="btn btn-primary" href="${esc(order.payurl)}" target="_blank" rel="noopener">打开支付链接</a>`;
         }
         payPollTimer = setInterval(() => pollPayOrder(order.order_no), 2500);
         pollPayOrder(order.order_no);
