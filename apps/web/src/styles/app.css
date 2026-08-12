@@ -1294,10 +1294,177 @@ button {
   transition: transform 0.28s ease;
   width: min(100%, var(--max));
   margin: 0 auto;
+  max-height: min(92vh, 720px);
+  overflow: auto;
 }
 
 .drawer.open {
   transform: translateY(0);
+}
+
+/* 发卡网式居中支付层 */
+.drawer.pay-sheet-drawer {
+  top: 50%;
+  bottom: auto;
+  left: 50%;
+  right: auto;
+  width: min(calc(100% - 32px), 400px);
+  max-height: min(88vh, 560px);
+  border-radius: 16px;
+  padding: 0;
+  transform: translate(-50%, -40%) scale(0.96);
+  opacity: 0;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+  box-shadow: 0 18px 48px rgba(28, 36, 48, 0.22);
+}
+
+.drawer.pay-sheet-drawer.open {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.pay-sheet {
+  position: relative;
+  padding: 22px 20px 18px;
+  text-align: center;
+}
+
+.pay-sheet-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pay-sheet-kicker {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
+.pay-price {
+  margin: 10px 0 4px;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 10vw, 3rem);
+  font-weight: 650;
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+
+.pay-price strong {
+  font-weight: 700;
+}
+
+.pay-price-sub {
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+}
+
+.pay-plan-mini {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.pay-plan-chip {
+  border: 1px solid var(--line);
+  background: var(--paper-deep);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.pay-plan-chip.on {
+  border-color: var(--seal);
+  background: var(--seal-soft);
+  color: var(--seal);
+  font-weight: 600;
+}
+
+.pay-channel-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 4px 0 12px;
+}
+
+.pay-channel-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 650;
+  font-size: 1.05rem;
+  cursor: pointer;
+  color: #fff;
+}
+
+.pay-channel-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.pay-channel-btn.wx {
+  background: #07c160;
+}
+
+.pay-channel-btn.wx:hover {
+  background: #06ad56;
+}
+
+.pay-channel-btn.ali {
+  background: #1677ff;
+}
+
+.pay-channel-btn.ali:hover {
+  background: #1468df;
+}
+
+.pay-ch-mark {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.pay-wait-box {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+
+.pay-wait-box .btn {
+  margin-top: 8px;
+}
+
+.pay-code-fold {
+  text-align: left;
+  margin-top: 8px;
 }
 
 .share-card {

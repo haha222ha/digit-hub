@@ -1,5 +1,5 @@
 /* Production offline shell only. Localhost does not register this file (see main.js). */
-const CACHE = "xinxiang-v13";
+const CACHE = "xinxiang-v14";
 const PRECACHE = [
   "./",
   "./index.html",

@@ -184,12 +184,14 @@ export async function mockFetch(path, options = {}) {
       plan_label: "单次完整报告",
       amount: "1.99",
       duration_days: 7,
-      qrcode: `mock://pay/${order_no}`,
-      payurl: "",
+      qrcode: "",
+      payurl: `#/account?mock_pay=${order_no}`,
       expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
       status: "pending",
       channel,
       fulfilled: false,
+      pay_mode: "jump",
+      reused: false,
     };
     const all = orders();
     all[order_no] = row;

@@ -118,7 +118,7 @@ def list_public_plans() -> dict:
 
 def list_payment_channels() -> list[dict]:
     """返回已配置凭证的支付方式（微信/支付宝 PID 独立）。"""
-    labels = {"wxpay": "微信扫码", "alipay": "支付宝扫码"}
+    labels = {"wxpay": "微信支付", "alipay": "支付宝"}
     out: list[dict] = []
     for ch in ("wxpay", "alipay"):
         try:
@@ -154,38 +154,8 @@ def create_order(
     pay_device = (device or "pc").strip().lower()
     if pay_device not in ("pc", "mobile", "wechat", "alipay", "jump"):
         pay_device = "pc"
-    # 支付宝走 submit 整页跳转（发卡网同款），不复用 mapi 扫码单
-    alipay_jump = pay_channel == "alipay"
-    want_fresh = alipay_jump or pay_device != "pc"
 
-    # Reuse unpaid QR for same actor / plan / channel (avoids spam + better UX)
-    reusable = (
-        None
-        if want_fresh
-        else db.find_reusable_pending_payment_order(
-            plan_code=plan["plan_code"],
-            channel=pay_channel,
-            client_ip=client_ip or "",
-            user_id=user_id,
-        )
-    )
-    if reusable:
-        out = {
-            "order_no": reusable["order_no"],
-            "plan_code": plan["plan_code"],
-            "plan_label": plan["label"],
-            "amount": plan["amount"],
-            "duration_days": plan["duration_days"],
-            "qrcode": reusable.get("qrcode") or "",
-            "payurl": reusable.get("payurl") or "",
-            "expires_at": reusable.get("expires_at") or "",
-            "status": "pending",
-            "channel": pay_channel,
-            "reused": True,
-            "device": "pc",
-            "pay_mode": "qrcode",
-        }
-        return out
+    # submit 跳转单不复用旧 mapi 扫码单（避免只有二维码没有收银台 URL）
 
     recent = db.count_recent_payment_orders(
         client_ip=client_ip or "",
@@ -204,7 +174,7 @@ def create_order(
         within_minutes=_PAY_PENDING_WINDOW_MIN,
     )
     if pending_n >= _PAY_MAX_PENDING:
-        raise PayRateLimitError("待支付订单过多，请先完成已有扫码或稍后再试")
+        raise PayRateLimitError("待支付订单过多，请先完成已有支付或稍后再试")
 
     order_no = _gen_order_no()
     expires_at = (datetime.now() + timedelta(minutes=30)).strftime("%Y-%m-%d %H:%M:%S")
@@ -225,11 +195,13 @@ def create_order(
     else:
         goods_name = f"AI选品会员-{plan['label']}"
 
-    # 支付宝：发卡网同款页面跳转 submit.php（可唤起支付宝 App）
-    # 微信：继续 mapi 扫码（PC/手机扫一扫）
-    if alipay_jump:
+    # 微信/支付宝一律页面跳转 submit.php（对齐发卡网）
+    qrcode = ""
+    gateway_trade_no = ""
+    pay_mode = "jump"
+    try:
         payurl = build_epay_submit_url(
-            channel="alipay",
+            channel=pay_channel,
             out_trade_no=order_no,
             amount=plan["amount"],
             name=goods_name,
@@ -237,10 +209,8 @@ def create_order(
             return_url=_return_url(order_no),
             sitename="心象测",
         )
-        qrcode = ""
-        gateway_trade_no = ""
-        pay_mode = "jump"
-    else:
+    except Exception:
+        # 降级 mapi（少见）
         gw = create_epay_order(
             channel=pay_channel,
             out_trade_no=order_no,
@@ -248,7 +218,7 @@ def create_order(
             name=goods_name,
             notify_url=_notify_url(),
             clientip=client_ip,
-            device=pay_device,
+            device=pay_device if pay_device != "pc" else "mobile",
         )
         qrcode = str(gw.get("qrcode") or gw.get("code_url") or "").strip()
         payurl = str(
@@ -256,8 +226,8 @@ def create_order(
         ).strip()
         gateway_trade_no = str(gw.get("trade_no") or "").strip()
         if not qrcode and not payurl:
-            raise RuntimeError("支付网关未返回二维码")
-        pay_mode = "qrcode"
+            raise RuntimeError("支付网关未返回支付链接")
+        pay_mode = "qrcode" if qrcode and not payurl else "jump"
 
     db.update_payment_order_gateway(
         order_no,

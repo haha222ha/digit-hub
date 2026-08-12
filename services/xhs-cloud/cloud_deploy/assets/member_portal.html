@@ -1666,13 +1666,14 @@ async function startWxPay() {
     document.getElementById('portalPayMeta').innerHTML =
       `订单号：<strong>${esc(order.order_no)}</strong><br>套餐：${esc(order.plan_label)} · ¥${esc(order.amount)}<br>支付方式：${order.channel === 'alipay' ? '支付宝' : '微信'}<br>请在 30 分钟内完成支付`;
 
-    // 支付宝：发卡网同款整页跳转 submit.php
-    if (order.channel === 'alipay' && order.payurl) {
+    // 微信/支付宝：发卡网同款整页跳转 submit.php
+    if (order.payurl && (order.pay_mode === 'jump' || order.channel === 'alipay' || order.channel === 'wxpay')) {
+      const label = order.channel === 'alipay' ? '打开支付宝付款' : '打开微信支付';
       const meta = document.getElementById('portalPayMeta');
       if (meta) {
-        meta.innerHTML += `<br><a class="btn btn-primary" href="${esc(order.payurl)}">打开支付宝付款</a>`;
+        meta.innerHTML += `<br><a class="btn btn-primary" href="${esc(order.payurl)}">${label}</a>`;
       }
-      showMsg(msgEl, '正在跳转支付宝收银台…', 'ok');
+      showMsg(msgEl, order.channel === 'alipay' ? '正在跳转支付宝收银台…' : '正在跳转微信支付…', 'ok');
       payPollTimer = setInterval(() => pollPayOrder(order.order_no), 2500);
       pollPayOrder(order.order_no);
       setTimeout(() => { location.href = order.payurl; }, 80);
@@ -1680,11 +1681,6 @@ async function startWxPay() {
     }
 
     const qrText = order.qrcode || order.payurl || '';
-    const ua = navigator.userAgent || '';
-    if (/MicroMessenger/i.test(ua) && order.payurl && order.channel !== 'alipay') {
-      location.href = order.payurl;
-      return;
-    }
     if (!renderPayQrcode(qrText)) {
       if (order.payurl) {
         document.getElementById('portalPayCheckout')?.classList.remove('hidden');

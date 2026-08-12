@@ -703,8 +703,10 @@ export async function renderSoftResult(root, skinId, query) {
 
   const openDrawer = () => openPayDrawer(root, skinId, rid);
   const closeDrawer = () => {
+    clearPayPollTimer();
     root.querySelector("#bd").classList.remove("open");
-    root.querySelector("#drawer").classList.remove("open");
+    root.querySelector("#drawer")?.classList.remove("open", "pay-sheet-drawer");
+    document.body.style.overflow = "";
   };
 
   const goUnlock = () => {
@@ -743,6 +745,12 @@ export async function renderSoftResult(root, skinId, query) {
     e.preventDefault();
     navigate("/tests");
   };
+
+  // 支付回跳：展示「我已支付」等待层（不自动宣布成功）
+  const qs = new URLSearchParams(query);
+  if (!unlocked && (qs.get("pay_wait") === "1" || loadPayWait()?.order_no)) {
+    openPayWaitSheet(root, skinId, rid).catch(() => {});
+  }
 }
 
 function filterCheckoutPlans(plans) {
@@ -780,14 +788,7 @@ function resolvePayDevice(channel) {
   return "pc";
 }
 
-function shouldAutoOpenPay(channel, device, payMode) {
-  // 支付宝 submit 跳转：对齐发卡网 dopay → location.href（PC/手机都整页走收银台）
-  if (channel === "alipay" || payMode === "jump") return true;
-  if (device === "pc") return false;
-  return channel === "wxpay" && device === "wechat";
-}
-
-function tryOpenPayUrl(payurl, { hardNavigate = false } = {}) {
+function tryOpenPayUrl(payurl, { hardNavigate = true } = {}) {
   const url = String(payurl || "").trim();
   if (!url) return;
   if (hardNavigate) {
@@ -836,7 +837,62 @@ export function clearPendingPay() {
   }
 }
 
-/** 支付宝 submit 回跳后：查单并回到结果/报告 */
+function loadPayWait() {
+  try {
+    const raw = sessionStorage.getItem("xinxiang_pay_wait");
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data?.order_no) return null;
+    if (Date.now() - (data.at || 0) > 45 * 60 * 1000) {
+      sessionStorage.removeItem("xinxiang_pay_wait");
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+async function openPayWaitSheet(root, skinId, rid) {
+  const wait = loadPayWait() || loadPendingPay();
+  if (!wait?.order_no) return;
+  const drawer = root.querySelector("#drawer");
+  const bd = root.querySelector("#bd");
+  if (!drawer || !bd) return;
+  bd.classList.add("open");
+  drawer.classList.add("open", "pay-sheet-drawer");
+  document.body.style.overflow = "hidden";
+  const channel = wait.channel || "wxpay";
+  const order = { order_no: wait.order_no, amount: "", plan_label: "完整报告" };
+  try {
+    const st = await api(`/api/v1/payment/orders/${wait.order_no}`);
+    Object.assign(order, st);
+  } catch {
+    /* keep minimal */
+  }
+  const payurl = (order.payurl || "").trim();
+  drawer.innerHTML = `
+    <div class="pay-sheet">
+      <button type="button" class="pay-sheet-close" id="close" aria-label="关闭">×</button>
+      <p class="pay-sheet-kicker">支付确认</p>
+      <p class="pay-price-sub muted" style="margin-top:8px">付完回到这里，点下方确认（请勿反复下单）</p>
+      <div id="payPanel">${renderPayWaitPanel(order, channel, payurl)}</div>
+      <button class="btn btn-ghost btn-block" id="close2" style="margin-top:8px">关闭</button>
+    </div>
+  `;
+  const close = () => {
+    clearPayPollTimer();
+    bd.classList.remove("open");
+    drawer.classList.remove("open", "pay-sheet-drawer");
+    document.body.style.overflow = "";
+  };
+  drawer.querySelector("#close").onclick = close;
+  drawer.querySelector("#close2").onclick = close;
+  bd.onclick = close;
+  await wirePayFulfillment(drawer.querySelector("#payPanel"), order, skinId, rid);
+}
+
+/** 支付收银台回跳后：回结果页等待用户点「我已支付」（不自动宣布成功） */
 export async function resumePendingPayAfterReturn() {
   const q = new URLSearchParams(location.search);
   const paidOrder = (q.get("paid_order") || "").trim();
@@ -845,22 +901,21 @@ export async function resumePendingPayAfterReturn() {
   if (!orderNo) return false;
 
   try {
-    const st = await api(`/api/v1/payment/orders/${orderNo}`);
-    if (st.status !== "paid") {
-      if (pending?.skinId && pending?.rid) {
-        navigate(`/t/${pending.skinId}/result?rid=${encodeURIComponent(pending.rid)}`);
-        return true;
-      }
-      return false;
-    }
-    clearPendingPay();
-    await refreshEntitlementsFromProfile();
     if (pending?.skinId && pending?.rid) {
-      const ok = await checkReportAccess(pending.skinId);
-      navigate(ok ? `/report/${pending.rid}` : `/t/${pending.skinId}/result?rid=${encodeURIComponent(pending.rid)}`);
+      sessionStorage.setItem(
+        "xinxiang_pay_wait",
+        JSON.stringify({
+          order_no: orderNo,
+          skinId: pending.skinId,
+          rid: pending.rid,
+          channel: pending.channel || "",
+          at: Date.now(),
+        })
+      );
+      navigate(`/t/${pending.skinId}/result?rid=${encodeURIComponent(pending.rid)}&pay_wait=1`);
       return true;
     }
-    navigate("/account");
+    navigate(`/account?pay_wait=1&order_no=${encodeURIComponent(orderNo)}`);
     return true;
   } catch {
     return false;
@@ -873,13 +928,26 @@ export async function resumePendingPayAfterReturn() {
   }
 }
 
+function channelBtnHtml(code) {
+  if (code === "alipay") {
+    return `<button type="button" class="pay-channel-btn ali" data-ch="alipay">
+      <span class="pay-ch-mark" aria-hidden="true">支</span>
+      <span class="pay-ch-label">支付宝</span>
+    </button>`;
+  }
+  return `<button type="button" class="pay-channel-btn wx" data-ch="wxpay">
+    <span class="pay-ch-mark" aria-hidden="true">微</span>
+    <span class="pay-ch-label">微信支付</span>
+  </button>`;
+}
+
 async function openPayDrawer(root, skinId, rid) {
   const drawer = root.querySelector("#drawer");
   const bd = root.querySelector("#bd");
   bd.classList.add("open");
-  drawer.classList.add("open");
+  drawer.classList.add("open", "pay-sheet-drawer");
   document.body.style.overflow = "hidden";
-  drawer.innerHTML = `<p class="muted">加载支付方案…</p>`;
+  drawer.innerHTML = `<p class="muted" style="text-align:center">加载支付方案…</p>`;
 
   let plans = [];
   let channels = [];
@@ -897,54 +965,52 @@ async function openPayDrawer(root, skinId, rid) {
   } catch {
     plans = [FALLBACK_SINGLE_PLAN];
     channels = [
-      { channel: "wxpay", label: "微信" },
+      { channel: "wxpay", label: "微信支付" },
+      { channel: "alipay", label: "支付宝" },
+    ];
+  }
+  if (!channels.length) {
+    channels = [
+      { channel: "wxpay", label: "微信支付" },
       { channel: "alipay", label: "支付宝" },
     ];
   }
 
-  const channelOpts = channels
-    .map((ch, i) => {
-      const code = typeof ch === "string" ? ch : ch.channel;
-      const label =
-        code === "alipay" ? "支付宝" : code === "wxpay" ? "微信" : typeof ch === "string" ? ch : ch.label;
-      const sel = i === 0 ? "selected-ch" : "";
-      return `<button class="channel-card ${sel}" type="button" data-ch="${code}" aria-pressed="${
-        i === 0 ? "true" : "false"
-      }">${label}</button>`;
+  const plan = plans[0] || FALLBACK_SINGLE_PLAN;
+  let planCode = plan.plan_code || plan.code || FALLBACK_SINGLE_PLAN.plan_code;
+  const price = plan.price_yuan ?? plan.amount ?? "1.99";
+  const planLabel = plan.label || plan.title || "单次完整报告";
+
+  const channelOrder = ["wxpay", "alipay"];
+  const channelBtns = channelOrder
+    .map((code) => {
+      const hit = channels.find((ch) => (typeof ch === "string" ? ch : ch.channel) === code);
+      return hit ? channelBtnHtml(code) : "";
     })
     .join("");
 
-  const planCards = plans
-    .map((pl, i) => {
-      const code = pl.plan_code || pl.code;
-      const label = pl.label || pl.title;
-      const price = pl.price_yuan ?? pl.amount;
-      const tip = pl.summary || "";
-      const sel = i === 0 ? "selected-plan" : "";
-      return `<button type="button" class="plan-card ${sel}" data-plan="${code}" aria-pressed="${i === 0}">
-        <strong>${label} · ¥${price}</strong>
-        <span class="plan-anchor muted">原价 ¥9.9</span>
-        ${tip ? `<span class="plan-tip">${tip}</span>` : ""}
-      </button>`;
-    })
-    .join("");
+  const multiPlan =
+    plans.length > 1
+      ? `<div class="pay-plan-mini">${plans
+          .map((pl, i) => {
+            const code = pl.plan_code || pl.code;
+            const label = pl.label || pl.title;
+            const p = pl.price_yuan ?? pl.amount;
+            return `<button type="button" class="pay-plan-chip ${i === 0 ? "on" : ""}" data-plan="${code}" data-price="${p}">${label} · ¥${p}</button>`;
+          })
+          .join("")}</div>`
+      : "";
 
   drawer.innerHTML = `
-    <h3 style="font-family:var(--font-display);margin:0 0 8px">解锁完整报告</h3>
-    <p class="muted">${
-      isMockMode()
-        ? "本地验收：选渠道后自动模拟出码，或使用演示授权码"
-        : "点微信/支付宝即可出码 · 小红书/闲鱼买家可用授权码"
-    }</p>
-    <p class="pay-anchor muted">原价 <s>¥9.9</s> · 体验价 <strong class="price-now">¥1.99</strong></p>
-    <p class="pay-digital-note muted">数字内容说明：支付成功即解锁本机可读的完整报告（含场景解读与 7 日微实验）。属一次性数字内容，成功履约后不支持退款；授权码同样按已购权益核销。</p>
-    <div class="stack" style="margin-top:14px">
-      <p class="group-label">套餐</p>
-      <div class="plan-cards">${planCards}</div>
-      <p class="group-label">支付渠道 · 点选即出二维码</p>
-      <div class="channel-row channel-row-stack">${channelOpts}</div>
+    <div class="pay-sheet" id="paySheet">
+      <button type="button" class="pay-sheet-close" id="close" aria-label="关闭">×</button>
+      <p class="pay-sheet-kicker">解锁完整报告</p>
+      <p class="pay-price">¥<strong id="payPriceNum">${price}</strong></p>
+      <p class="pay-price-sub muted"><s>原价 ¥9.9</s> · ${planLabel} · 一次数字内容</p>
+      ${multiPlan}
+      <div class="pay-channel-stack" id="payChannels">${channelBtns}</div>
       <div id="payPanel"></div>
-      <details class="code-fold">
+      <details class="code-fold pay-code-fold">
         <summary>已有购买码？点此输入授权码</summary>
         <input class="field" id="code" placeholder="${isMockMode() ? DEMO_AUTH_CODE : "输入授权码"}" value="${
           isMockMode() ? DEMO_AUTH_CODE : ""
@@ -956,13 +1022,10 @@ async function openPayDrawer(root, skinId, rid) {
         }
         <button class="btn btn-primary btn-block" id="codeBtn">使用授权码登录解锁</button>
       </details>
-      <button class="btn btn-ghost btn-block" id="close">取消</button>
+      <p class="pay-digital-note muted">支付成功即解锁本机完整报告；一次性数字内容，履约后不退款。</p>
     </div>
   `;
 
-  let channel = (channels[0] && (channels[0].channel || channels[0])) || "wxpay";
-  let planCode =
-    (plans[0] && (plans[0].plan_code || plans[0].code)) || FALLBACK_SINGLE_PLAN.plan_code;
   let checkoutBusy = false;
   let lastCheckoutAt = 0;
   const CLIENT_COOLDOWN_MS = 2500;
@@ -976,50 +1039,46 @@ async function openPayDrawer(root, skinId, rid) {
   drawer.querySelectorAll("[data-plan]").forEach((b) => {
     b.onclick = () => {
       planCode = b.dataset.plan;
-      drawer.querySelectorAll("[data-plan]").forEach((x) => {
-        x.classList.toggle("selected-plan", x === b);
-        x.setAttribute("aria-pressed", x === b ? "true" : "false");
-      });
-    };
-  });
-
-  drawer.querySelectorAll("[data-ch]").forEach((b) => {
-    b.onclick = async () => {
-      channel = b.dataset.ch;
-      drawer.querySelectorAll("[data-ch]").forEach((x) => {
-        x.classList.toggle("selected-ch", x === b);
-        x.setAttribute("aria-pressed", x === b ? "true" : "false");
-      });
-      if (checkoutBusy) return;
-      const now = Date.now();
-      if (now - lastCheckoutAt < CLIENT_COOLDOWN_MS) {
-        const panel = drawer.querySelector("#payPanel");
-        if (panel && !panel.querySelector(".pay-box")) {
-          panel.innerHTML = `<p class="muted">操作太快，请稍候再试</p>`;
-        }
-        return;
-      }
-      checkoutBusy = true;
-      lastCheckoutAt = now;
-      setChannelsEnabled(false);
-      try {
-        await startCheckout(drawer, planCode, channel, skinId, rid);
-      } finally {
-        checkoutBusy = false;
-        setChannelsEnabled(true);
-      }
+      const priceEl = drawer.querySelector("#payPriceNum");
+      if (priceEl && b.dataset.price) priceEl.textContent = b.dataset.price;
+      drawer.querySelectorAll("[data-plan]").forEach((x) => x.classList.toggle("on", x === b));
     };
   });
 
   const closeDrawer = () => {
     clearPayPollTimer();
     bd.classList.remove("open");
-    drawer.classList.remove("open");
+    drawer.classList.remove("open", "pay-sheet-drawer");
     document.body.style.overflow = "";
   };
 
   drawer.querySelector("#close").onclick = closeDrawer;
   bd.onclick = closeDrawer;
+
+  drawer.querySelectorAll("[data-ch]").forEach((b) => {
+    b.onclick = async () => {
+      if (checkoutBusy) return;
+      const now = Date.now();
+      if (now - lastCheckoutAt < CLIENT_COOLDOWN_MS) {
+        const panel = drawer.querySelector("#payPanel");
+        if (panel) panel.innerHTML = `<p class="muted" style="text-align:center">操作太快，请稍候</p>`;
+        return;
+      }
+      checkoutBusy = true;
+      lastCheckoutAt = now;
+      const label = b.querySelector(".pay-ch-label");
+      const prev = label?.textContent || "";
+      if (label) label.textContent = "正在打开…";
+      setChannelsEnabled(false);
+      try {
+        await startCheckout(drawer, planCode, b.dataset.ch, skinId, rid);
+      } finally {
+        checkoutBusy = false;
+        setChannelsEnabled(true);
+        if (label) label.textContent = prev;
+      }
+    };
+  });
 
   drawer.querySelector("#codeBtn").onclick = async () => {
     const code = drawer.querySelector("#code").value.trim();
@@ -1038,7 +1097,7 @@ async function openPayDrawer(root, skinId, rid) {
 async function completeAccountRegisterForm(panel, orderNo) {
   return new Promise((resolve, reject) => {
     panel.innerHTML = `
-      <div class="pay-box">
+      <div class="pay-wait-box">
         <p><strong>支付成功</strong></p>
         <p class="muted">设置账号以绑定本次购买的权益</p>
         <div class="stack" id="registerForm">
@@ -1090,10 +1149,118 @@ async function completeAccountRegisterForm(panel, orderNo) {
   });
 }
 
+function renderPayWaitPanel(order, payChannel, payurl) {
+  const jumpLabel = payChannel === "alipay" ? "打开支付宝付款" : "打开微信支付";
+  const hint =
+    payChannel === "alipay"
+      ? "正在跳转支付宝收银台…若未跳转请点下方按钮"
+      : "正在跳转微信支付…若未跳转请点下方按钮";
+  return `
+    <div class="pay-wait-box">
+      <p class="muted pay-channel-hint">${hint}</p>
+      <p class="muted" style="font-size:0.82rem;margin:0">订单 ${order.order_no}</p>
+      ${
+        payurl
+          ? `<a class="btn btn-ember btn-block" id="payJump" href="${payurl}">${jumpLabel}</a>`
+          : ""
+      }
+      <button class="btn btn-primary btn-block" id="poll">我已支付 · 查询订单</button>
+      ${
+        isMockMode()
+          ? `<button class="btn btn-ghost btn-block" id="mockPay">模拟支付成功</button>`
+          : ""
+      }
+      <div id="payStatus" class="muted" style="text-align:center"></div>
+    </div>
+  `;
+}
+
+async function wirePayFulfillment(panel, order, skinId, rid) {
+  let settled = false;
+  let awaitingRegister = false;
+
+  const finishAfterPay = async () => {
+    clearPendingPay();
+    try {
+      sessionStorage.removeItem("xinxiang_pay_wait");
+    } catch {
+      /* ignore */
+    }
+    await refreshEntitlementsFromProfile();
+    const ok = await checkReportAccess(skinId);
+    if (ok) {
+      navigate(`/report/${rid}`);
+      return true;
+    }
+    const statusEl = panel.querySelector("#payStatus");
+    if (statusEl) statusEl.textContent = "已支付但权益未生效，请刷新或联系客服";
+    return false;
+  };
+
+  const fulfill = async () => {
+    if (settled) return true;
+    if (awaitingRegister) return false;
+    const st = await api(`/api/v1/payment/orders/${order.order_no}`);
+    const statusEl = panel.querySelector("#payStatus");
+    if (statusEl) statusEl.textContent = `状态：${st.status}`;
+    if (st.status !== "paid") return false;
+
+    clearPayPollTimer();
+
+    if (isMockMode()) {
+      await api(`/api/v1/payment/orders/${order.order_no}/complete`, {
+        method: "POST",
+        body: JSON.stringify({
+          mode: "register",
+          username: "mock_" + Date.now().toString(36),
+          password: "mockpass123",
+          device_id: deviceId(),
+          device_label: "browser",
+        }),
+      });
+    } else if (st.next_action === "complete_account") {
+      awaitingRegister = true;
+      try {
+        await completeAccountRegisterForm(panel, order.order_no);
+      } catch {
+        awaitingRegister = false;
+        return false;
+      }
+    } else if (localStorage.getItem("xinxiang_token")) {
+      await api(`/api/v1/payment/orders/${order.order_no}/claim`, { method: "POST", body: "{}" });
+    }
+
+    settled = true;
+    return finishAfterPay();
+  };
+
+  panel.querySelector("#poll")?.addEventListener("click", () => {
+    fulfill().catch((e) => {
+      const el = panel.querySelector("#payStatus");
+      if (el) el.textContent = e.message || "处理失败";
+    });
+  });
+  panel.querySelector("#mockPay")?.addEventListener("click", async () => {
+    await api("/api/v1/payment/mock-pay", {
+      method: "POST",
+      body: JSON.stringify({ order_no: order.order_no }),
+    });
+    await fulfill();
+  });
+
+  let n = 0;
+  payPollTimer = setInterval(async () => {
+    n += 1;
+    const done = await fulfill().catch(() => false);
+    if (done || n > 40) clearPayPollTimer();
+  }, 3000);
+}
+
 async function startCheckout(drawer, plan_code, channel, skinId, rid) {
   clearPayPollTimer();
   const panel = drawer.querySelector("#payPanel");
-  panel.innerHTML = `<p class="muted pay-loading"><span class="spinner" aria-hidden="true"></span>创建订单中…</p>`;
+  const channelsEl = drawer.querySelector("#payChannels");
+  panel.innerHTML = `<p class="muted pay-loading" style="text-align:center"><span class="spinner" aria-hidden="true"></span> 创建订单中…</p>`;
   try {
     const payChannel = channel === "wechat" ? "wxpay" : channel;
     const device = resolvePayDevice(payChannel);
@@ -1101,175 +1268,23 @@ async function startCheckout(drawer, plan_code, channel, skinId, rid) {
       method: "POST",
       body: JSON.stringify({ plan_code, channel: payChannel, device }),
     });
-    const payMode = order.pay_mode || (payChannel === "alipay" ? "jump" : "qrcode");
     const payurl = (order.payurl || "").trim();
+    savePendingPay({ order_no: order.order_no, skinId, rid, plan_code, channel: payChannel });
 
-    // 支付宝：发卡网同款整页跳转 submit.php（最稳，可唤起 App）
-    if (payChannel === "alipay" && payurl) {
-      savePendingPay({ order_no: order.order_no, skinId, rid, plan_code });
-      panel.innerHTML = `
-        <div class="pay-box">
-          <p><strong>${order.plan_label || plan_code}</strong> · ¥${order.amount || ""}</p>
-          <p class="muted">订单 ${order.order_no}</p>
-          <p class="muted pay-channel-hint">正在跳转支付宝收银台…若未跳转请点下方按钮</p>
-          <a class="btn btn-ember btn-block" id="payJump" href="${payurl}">打开支付宝付款</a>
-          <button class="btn btn-primary btn-block" id="poll">我已支付 · 查询订单</button>
-          <div id="payStatus" class="muted"></div>
-        </div>
-      `;
-      // 先画好兜底按钮，再硬跳（对齐发卡网 location.href）
+    if (channelsEl) channelsEl.hidden = true;
+    panel.innerHTML = renderPayWaitPanel(order, payChannel, payurl);
+    await wirePayFulfillment(panel, order, skinId, rid);
+
+    if (payurl) {
       setTimeout(() => tryOpenPayUrl(payurl, { hardNavigate: true }), 80);
-      // 若用户拦截了跳转，仍可点按钮 / 轮询
-      let settled = false;
-      let awaitingRegister = false;
-      const finishAfterPay = async () => {
-        clearPendingPay();
-        await refreshEntitlementsFromProfile();
-        const ok = await checkReportAccess(skinId);
-        if (ok) {
-          navigate(`/report/${rid}`);
-          return true;
-        }
-        const statusEl = panel.querySelector("#payStatus");
-        if (statusEl) statusEl.textContent = "已支付但权益未生效，请刷新或联系客服";
-        return false;
-      };
-      const fulfill = async () => {
-        if (settled) return true;
-        if (awaitingRegister) return false;
-        const st = await api(`/api/v1/payment/orders/${order.order_no}`);
-        const statusEl = panel.querySelector("#payStatus");
-        if (statusEl) statusEl.textContent = `状态：${st.status}`;
-        if (st.status !== "paid") return false;
-        clearPayPollTimer();
-        settled = true;
-        return finishAfterPay();
-      };
-      panel.querySelector("#poll").onclick = () => fulfill().catch((e) => alert(e.message || "查询失败"));
-      payPollTimer = setInterval(() => {
-        fulfill().catch(() => {});
-      }, 2500);
-      return;
+    } else if (isMockMode()) {
+      panel.querySelector("#payStatus").textContent = "本地 mock：请点模拟支付成功";
+    } else {
+      panel.querySelector("#payStatus").textContent = "未获取到支付链接，请重试";
     }
-
-    const qrSrc = order.qrcode
-      ? isMockMode()
-        ? ""
-        : `/api/v1/payment/qrcode?data=${encodeURIComponent(order.qrcode)}`
-      : "";
-    const canJump = Boolean(payurl);
-    const jumpLabel =
-      payChannel === "alipay" ? "打开支付宝付款" : payChannel === "wxpay" ? "打开微信支付" : "打开支付链接";
-    const hint =
-      payChannel === "alipay"
-        ? "将跳转支付宝收银台完成付款"
-        : "请使用微信扫一扫完成支付";
-    panel.innerHTML = `
-      <div class="pay-box">
-        <p><strong>${order.plan_label || plan_code}</strong> · ¥${order.amount || ""}</p>
-        <p class="muted">订单 ${order.order_no}</p>
-        <p class="muted pay-channel-hint">${hint}</p>
-        ${
-          qrSrc
-            ? `<img class="pay-qr" src="${qrSrc}" alt="支付二维码" />`
-            : order.qrcode || !payurl
-              ? `<div class="pay-qr mock-qr">MOCK QR<br/>${order.order_no.slice(-8)}</div>`
-              : ""
-        }
-        ${
-          canJump
-            ? `<a class="btn btn-ember btn-block" id="payJump" href="${payurl}" target="_blank" rel="noopener">${jumpLabel}</a>`
-            : ""
-        }
-        <button class="btn btn-primary btn-block" id="poll">我已支付 · 查询订单</button>
-        ${
-          isMockMode()
-            ? `<button class="btn btn-ember btn-block" id="mockPay">模拟支付成功</button>`
-            : ""
-        }
-        <div id="payStatus" class="muted"></div>
-      </div>
-    `;
-
-    if (canJump && shouldAutoOpenPay(payChannel, device, payMode)) {
-      tryOpenPayUrl(payurl);
-    }
-
-    let settled = false;
-    let awaitingRegister = false;
-
-    const finishAfterPay = async () => {
-      clearPendingPay();
-      await refreshEntitlementsFromProfile();
-      const ok = await checkReportAccess(skinId);
-      if (ok) {
-        navigate(`/report/${rid}`);
-        return true;
-      }
-      const statusEl = panel.querySelector("#payStatus");
-      if (statusEl) statusEl.textContent = "已支付但权益未生效，请刷新或联系客服";
-      return false;
-    };
-
-    const fulfill = async () => {
-      if (settled) return true;
-      if (awaitingRegister) return false;
-      const st = await api(`/api/v1/payment/orders/${order.order_no}`);
-      const statusEl = panel.querySelector("#payStatus");
-      if (statusEl) statusEl.textContent = `状态：${st.status}`;
-      if (st.status !== "paid") return false;
-
-      clearPayPollTimer();
-
-      if (isMockMode()) {
-        await api(`/api/v1/payment/orders/${order.order_no}/complete`, {
-          method: "POST",
-          body: JSON.stringify({
-            mode: "register",
-            username: "mock_" + Date.now().toString(36),
-            password: "mockpass123",
-            device_id: deviceId(),
-            device_label: "browser",
-          }),
-        });
-      } else if (st.next_action === "complete_account") {
-        awaitingRegister = true;
-        try {
-          await completeAccountRegisterForm(panel, order.order_no);
-        } catch {
-          awaitingRegister = false;
-          return false;
-        }
-      } else if (localStorage.getItem("xinxiang_token")) {
-        await api(`/api/v1/payment/orders/${order.order_no}/claim`, { method: "POST", body: "{}" });
-      }
-
-      settled = true;
-      return finishAfterPay();
-    };
-
-    panel.querySelector("#poll").onclick = () => {
-      fulfill().catch((e) => {
-        const el = panel.querySelector("#payStatus");
-        if (el) el.textContent = e.message || "处理失败";
-      });
-    };
-    panel.querySelector("#mockPay")?.addEventListener("click", async () => {
-      await api("/api/v1/payment/mock-pay", {
-        method: "POST",
-        body: JSON.stringify({ order_no: order.order_no }),
-      });
-      await fulfill();
-    });
-
-    let n = 0;
-    payPollTimer = setInterval(async () => {
-      n += 1;
-      const done = await fulfill().catch(() => false);
-      if (done || n > 40) clearPayPollTimer();
-    }, 3000);
   } catch (e) {
-    panel.innerHTML = `<p class="muted">下单失败：${e.message}</p>`;
+    if (channelsEl) channelsEl.hidden = false;
+    panel.innerHTML = `<p class="muted" style="text-align:center">下单失败：${e.message}</p>`;
   }
 }
 
