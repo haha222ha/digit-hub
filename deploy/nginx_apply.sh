@@ -141,6 +141,9 @@ ${GZIP_DIRECTIVES}
     }
     location /images/ {
         try_files \$uri =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header CDN-Cache-Control "no-store";
+        add_header Cloudflare-CDN-Cache-Control "no-store";
     }
     location /uploads/ {
         try_files \$uri =404;
@@ -156,7 +159,9 @@ ${GZIP_DIRECTIVES}
 
     location / {
         try_files \$uri \$uri/ /index.html;
-        add_header Cache-Control "no-cache, must-revalidate";
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        # 强制丢掉本站旧 JS 缓存（曾把「灵博」卡在浏览器里）
+        add_header Clear-Site-Data "\"cache\"";
     }
 
 ${PSY_API_LOCATIONS}

@@ -1,1 +1,1 @@
-import{p as t,b8 as o}from"./index-xx2.js";function a(){return t("/api/quota/info")}function n(e){return o("/api/quota/redeem",e)}function i(e){return t("/api/quota/redeem-history",{params:e})}export{i as a,a as g,n as r};
+import{p as t,b8 as o}from"./index-r3.js";function a(){return t("/api/quota/info")}function n(e){return o("/api/quota/redeem",e)}function i(e){return t("/api/quota/redeem-history",{params:e})}export{i as a,a as g,n as r};

@@ -1,1 +1,1 @@
-import{p as n,br as t}from"./index-xx2.js";function i(){return n("/api/admin/payment/purchase-methods")}function p(){return n("/api/super-admin/payment-config")}function r(a){return t("/api/super-admin/payment-config",a)}export{p as a,i as g,r as u};
+import{p as n,br as t}from"./index-r3.js";function i(){return n("/api/admin/payment/purchase-methods")}function p(){return n("/api/super-admin/payment-config")}function r(a){return t("/api/super-admin/payment-config",a)}export{p as a,i as g,r as u};
