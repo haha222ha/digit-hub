@@ -122,6 +122,7 @@ def create_order(
     user_id: int | None,
     client_ip: str,
     channel: str = "wxpay",
+    device: str = "pc",
 ) -> dict:
     from cloud_deploy.cloud_api.payment_plans import is_addon_plan, is_assess_plan
 
@@ -137,13 +138,22 @@ def create_order(
     pay_channel = (channel or "wxpay").strip().lower()
     if pay_channel not in ("wxpay", "alipay"):
         raise ValueError("支付方式仅支持 wxpay 或 alipay")
+    pay_device = (device or "pc").strip().lower()
+    if pay_device not in ("pc", "mobile", "wechat", "alipay", "jump"):
+        pay_device = "pc"
+    # 手机跳转单不要复用 PC 扫码单（否则可能只有二维码、没有可唤起的 payurl）
+    want_jump = pay_device != "pc"
 
     # Reuse unpaid QR for same actor / plan / channel (avoids spam + better UX)
-    reusable = db.find_reusable_pending_payment_order(
-        plan_code=plan["plan_code"],
-        channel=pay_channel,
-        client_ip=client_ip or "",
-        user_id=user_id,
+    reusable = (
+        None
+        if want_jump
+        else db.find_reusable_pending_payment_order(
+            plan_code=plan["plan_code"],
+            channel=pay_channel,
+            client_ip=client_ip or "",
+            user_id=user_id,
+        )
     )
     if reusable:
         return {
@@ -158,6 +168,7 @@ def create_order(
             "status": "pending",
             "channel": pay_channel,
             "reused": True,
+            "device": "pc",
         }
 
     recent = db.count_recent_payment_orders(
@@ -204,9 +215,12 @@ def create_order(
         name=goods_name,
         notify_url=_notify_url(),
         clientip=client_ip,
+        device=pay_device,
     )
     qrcode = str(gw.get("qrcode") or gw.get("code_url") or "").strip()
-    payurl = str(gw.get("payurl") or gw.get("url") or "").strip()
+    payurl = str(
+        gw.get("payurl") or gw.get("urlscheme") or gw.get("url") or ""
+    ).strip()
     gateway_trade_no = str(gw.get("trade_no") or "").strip()
     if not qrcode and not payurl:
         raise RuntimeError("支付网关未返回二维码")
@@ -227,6 +241,8 @@ def create_order(
         "expires_at": expires_at,
         "status": "pending",
         "channel": pay_channel,
+        "reused": False,
+        "device": pay_device,
     }
 
 

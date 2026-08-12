@@ -1546,8 +1546,34 @@ button {
   flex-direction: column;
 }
 
-.channel-row .selected-ch {
+.channel-card {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
   font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+
+.channel-card.selected-ch {
+  border-color: var(--seal);
+  background: var(--seal);
+  color: #f7f3ec;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--seal) 40%, transparent);
+}
+
+.channel-row .selected-ch {
+  font-weight: 700;
+}
+
+.pay-channel-hint {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
 }
 
 .plan-cards {
@@ -1631,8 +1657,8 @@ button {
 }
 
 .selected-ch {
-  border-color: var(--seal) !important;
-  color: var(--seal) !important;
+  /* channel-card 选中态样式见 .channel-card.selected-ch；此处保留兼容旧 markup */
+  border-color: var(--seal);
 }
 
 /* —— 主屏安装 / A2HS：样式见 ../../base/a2hs.css（基座） —— */

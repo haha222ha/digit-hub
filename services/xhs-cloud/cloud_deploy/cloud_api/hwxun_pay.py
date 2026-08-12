@@ -105,12 +105,16 @@ def create_epay_order(
     name: str,
     notify_url: str,
     clientip: str,
+    device: str = "pc",
 ) -> dict[str, Any]:
     ch = (channel or "wxpay").strip().lower()
     meta = PAY_CHANNELS.get(ch)
     if not meta:
         raise ValueError(f"不支持的支付方式: {channel}")
     api_url, pid, key = _channel_credentials(ch)
+    dev = (device or "pc").strip().lower()
+    if dev not in ("pc", "mobile", "wechat", "alipay", "jump"):
+        dev = "pc"
     params = {
         "pid": pid,
         "type": meta["type"],
@@ -119,7 +123,7 @@ def create_epay_order(
         "name": name[:127],
         "money": f"{float(amount):.2f}",
         "clientip": _sanitize_clientip(clientip),
-        "device": "pc",
+        "device": dev,
     }
     params["sign"] = _epay_sign(params, key)
     params["sign_type"] = "MD5"

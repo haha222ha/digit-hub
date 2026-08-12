@@ -113,6 +113,8 @@ class RenewWithCodeBody(DeviceAuthBody):
 class PaymentCreateBody(BaseModel):
     plan_code: str = Field(..., min_length=3, max_length=32)
     channel: str = Field(default="wxpay", pattern="^(wxpay|alipay)$")
+    # 易支付 device：pc=扫码；mobile/alipay/wechat/jump=优先返回可跳转 payurl
+    device: str = Field(default="pc", pattern="^(pc|mobile|wechat|alipay|jump)$")
 
 
 class PaymentCompleteBody(DeviceAuthBody):
@@ -498,6 +500,7 @@ def payment_create_order(
             # hwxun 拒收 IPv6 / 内网 / 空 IP →「用户IP地址不合法」
             client_ip=public_ipv4_for_pay(request),
             channel=body.channel,
+            device=body.device,
         )
     except pay.PayRateLimitError as e:
         raise HTTPException(status_code=429, detail=str(e)) from e

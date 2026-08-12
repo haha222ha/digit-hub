@@ -772,6 +772,35 @@ function clearPayPollTimer() {
   }
 }
 
+function resolvePayDevice(channel) {
+  const ua = navigator.userAgent || "";
+  if (/AlipayClient/i.test(ua)) return "alipay";
+  if (/MicroMessenger/i.test(ua)) return "wechat";
+  if (/Android|iPhone|iPad|iPod|Mobile/i.test(ua)) {
+    // 支付宝手机端优先拿可跳转 payurl；微信仍多用扫码
+    return channel === "alipay" ? "mobile" : "mobile";
+  }
+  return "pc";
+}
+
+function shouldAutoOpenPay(channel, device) {
+  if (device === "pc") return false;
+  if (channel === "alipay") return true;
+  // 微信内打开且有 payurl 时跟会员站一致：直接跳转
+  return channel === "wxpay" && device === "wechat";
+}
+
+function tryOpenPayUrl(payurl) {
+  const url = String(payurl || "").trim();
+  if (!url) return;
+  try {
+    const opened = window.open(url, "_blank", "noopener");
+    if (!opened) location.href = url;
+  } catch {
+    location.href = url;
+  }
+}
+
 async function openPayDrawer(root, skinId, rid) {
   const drawer = root.querySelector("#drawer");
   const bd = root.querySelector("#bd");
@@ -804,9 +833,12 @@ async function openPayDrawer(root, skinId, rid) {
   const channelOpts = channels
     .map((ch, i) => {
       const code = typeof ch === "string" ? ch : ch.channel;
-      const label = typeof ch === "string" ? ch : ch.label;
-      const primary = i === 0 ? "btn-primary" : "btn-ghost";
-      return `<button class="btn ${primary} btn-block channel-pay" type="button" data-ch="${code}">${label}</button>`;
+      const label =
+        code === "alipay" ? "支付宝" : code === "wxpay" ? "微信" : typeof ch === "string" ? ch : ch.label;
+      const sel = i === 0 ? "selected-ch" : "";
+      return `<button class="channel-card ${sel}" type="button" data-ch="${code}" aria-pressed="${
+        i === 0 ? "true" : "false"
+      }">${label}</button>`;
     })
     .join("");
 
@@ -884,8 +916,7 @@ async function openPayDrawer(root, skinId, rid) {
       channel = b.dataset.ch;
       drawer.querySelectorAll("[data-ch]").forEach((x) => {
         x.classList.toggle("selected-ch", x === b);
-        x.classList.toggle("btn-primary", x === b);
-        x.classList.toggle("btn-ghost", x !== b);
+        x.setAttribute("aria-pressed", x === b ? "true" : "false");
       });
       if (checkoutBusy) return;
       const now = Date.now();
@@ -907,7 +938,6 @@ async function openPayDrawer(root, skinId, rid) {
       }
     };
   });
-  drawer.querySelector("[data-ch]")?.classList.add("selected-ch");
 
   const closeDrawer = () => {
     clearPayPollTimer();
@@ -993,25 +1023,44 @@ async function startCheckout(drawer, plan_code, channel, skinId, rid) {
   const panel = drawer.querySelector("#payPanel");
   panel.innerHTML = `<p class="muted pay-loading"><span class="spinner" aria-hidden="true"></span>创建订单中…</p>`;
   try {
+    const payChannel = channel === "wechat" ? "wxpay" : channel;
+    const device = resolvePayDevice(payChannel);
     const order = await api("/api/v1/payment/orders", {
       method: "POST",
-      body: JSON.stringify({ plan_code, channel: channel === "wechat" ? "wxpay" : channel }),
+      body: JSON.stringify({ plan_code, channel: payChannel, device }),
     });
     const qrSrc = order.qrcode
       ? isMockMode()
         ? ""
         : `/api/v1/payment/qrcode?data=${encodeURIComponent(order.qrcode)}`
       : "";
+    const payurl = (order.payurl || "").trim();
+    const canJump = Boolean(payurl);
+    const jumpLabel =
+      payChannel === "alipay" ? "打开支付宝付款" : payChannel === "wxpay" ? "打开微信支付" : "打开支付链接";
+    const hint =
+      payChannel === "alipay" && device !== "pc"
+        ? "手机端可一键唤起支付宝；若未跳转请点下方按钮或扫码"
+        : payChannel === "alipay"
+          ? "请使用支付宝扫一扫；手机也可点下方按钮打开"
+          : "请使用微信扫一扫完成支付";
     panel.innerHTML = `
       <div class="pay-box">
         <p><strong>${order.plan_label || plan_code}</strong> · ¥${order.amount || ""}</p>
         <p class="muted">订单 ${order.order_no}</p>
+        <p class="muted pay-channel-hint">${hint}</p>
         ${
           qrSrc
             ? `<img class="pay-qr" src="${qrSrc}" alt="支付二维码" />`
-            : `<div class="pay-qr mock-qr">MOCK QR<br/>${order.order_no.slice(-8)}</div>`
+            : order.qrcode || !payurl
+              ? `<div class="pay-qr mock-qr">MOCK QR<br/>${order.order_no.slice(-8)}</div>`
+              : ""
         }
-        ${order.payurl ? `<a href="${order.payurl}" target="_blank" rel="noopener">打开支付链接</a>` : ""}
+        ${
+          canJump
+            ? `<a class="btn btn-ember btn-block" id="payJump" href="${payurl}" target="_blank" rel="noopener">${jumpLabel}</a>`
+            : ""
+        }
         <button class="btn btn-primary btn-block" id="poll">我已支付 · 查询订单</button>
         ${
           isMockMode()
@@ -1021,6 +1070,10 @@ async function startCheckout(drawer, plan_code, channel, skinId, rid) {
         <div id="payStatus" class="muted"></div>
       </div>
     `;
+
+    if (canJump && shouldAutoOpenPay(payChannel, device)) {
+      tryOpenPayUrl(payurl);
+    }
 
     let settled = false;
     let awaitingRegister = false;
