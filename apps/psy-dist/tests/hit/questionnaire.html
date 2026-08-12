@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="霍兰德职业兴趣测试 - 专业的职业规划测试">
+    <meta name="keywords" content="霍兰德,职业兴趣测试,RIASEC,职业规划,心理测评">
+    <title>霍兰德职业兴趣测试 - 问卷</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="questionnaire-container" id="app">
+        <!-- 问卷信息卡片 -->
+        <div class="info-card" id="infoCard">
+            <h1 class="test-title">霍兰德职业兴趣测试</h1>
+            <p class="test-description">基于科学的霍兰德职业兴趣理论(RIASEC)，通过90道题目评估您的职业兴趣类型，帮助您找到最适合的职业方向。</p>
+            
+            <!-- 进度条区域 -->
+            <div class="progress-container">
+                <div class="progress-text" id="progressText">
+                    第 <span id="currentNum">1</span> 题 / 共 <span id="totalNum">90</span> 题 
+                    （已完成 <span id="answeredCount">0</span> 题）
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 题目卡片 -->
+        <div class="question-card" id="questionCard">
+            <div class="question-title" id="questionTitle">
+                <span class="question-number" id="questionNumber">1</span>.
+                <span class="question-text" id="questionText">加载中...</span>
+            </div>
+            
+            <div class="question-options" id="questionOptions">
+                <!-- 选项将通过JavaScript动态生成 -->
+            </div>
+
+            <!-- 导航按钮 -->
+            <div class="question-nav">
+                <button class="nav-button prev-button" id="prevButton" disabled>
+                    <span>←</span> 上一题
+                </button>
+                
+                <div class="nav-status" id="navStatus">
+                    <span id="statusText">请选择答案</span>
+                    <span class="check-icon" id="checkIcon" style="display: none;">✓</span>
+                </div>
+                
+                <button class="nav-button next-button" id="nextButton">
+                    下一题 <span>→</span>
+                </button>
+                
+                <button class="nav-button submit-button" id="submitButton" style="display: none;">
+                    提交答案
+                </button>
+            </div>
+        </div>
+
+        <!-- 温馨提示 -->
+        <div class="alert-info" id="alertInfo">
+            <div class="alert-icon">💡</div>
+            <div class="alert-content">
+                <strong>答题提示：</strong>请根据您的真实感受选择"喜欢/感兴趣"或"不喜欢/不感兴趣"，选择答案后将自动跳转到下一题
+                <div id="progressAlert" style="margin-top: 8px;">
+                    📝 <strong>进度提醒：</strong>请完成所有 90 题后再提交答案
+                </div>
+            </div>
+        </div>
+
+        <!-- 题目导航 -->
+        <div class="navigation-card" id="navigationCard">
+            <div class="navigation-header">
+                <span>📋 题目导航 (<span id="navAnsweredCount">0</span>/<span id="navTotalCount">90</span>)</span>
+                <button class="nav-toggle" id="navToggle">▼</button>
+            </div>
+            <div class="navigation-grid" id="navigationGrid">
+                <!-- 题目导航按钮将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载提示 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">加载中...</div>
+    </div>
+
+    <!-- 恢复进度确认对话框 -->
+    <div class="modal-overlay" id="restoreModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>发现未完成的答题</h3>
+            </div>
+            <div class="modal-body">
+                <p>检测到您之前有未完成的答题记录：</p>
+                <ul>
+                    <li>保存时间：<span id="restoreTime"></span></li>
+                    <li>已完成：<span id="restoreProgress"></span> 题</li>
+                    <li>当前进度：第 <span id="restoreCurrent"></span> 题</li>
+                </ul>
+                <p>是否继续之前的答题？</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button cancel-button" id="restoreCancel">重新开始</button>
+                <button class="modal-button confirm-button" id="restoreConfirm">继续答题</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提交确认对话框 -->
+    <div class="modal-overlay" id="submitModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>确认提交</h3>
+            </div>
+            <div class="modal-body">
+                <p>确定要提交答案吗？提交后将无法修改。</p>
+                <p id="submitProgress" style="margin-top: 10px; color: #666; font-size: 14px;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button cancel-button" id="submitCancel">取消</button>
+                <button class="modal-button confirm-button" id="submitConfirm">确认提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init(null, {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (validatorInstance) {
+                            window.linkValidator = validatorInstance;
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+    
+    <!-- 导入数据模块 -->
+    <script type="module" src="js/questionnaire.js"></script>
+</body>
+</html>
+

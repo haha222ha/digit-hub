@@ -1,0 +1,1503 @@
+/* ==================== 基础样式 ==================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* 温暖橙色系配色方案 - 适合动物主题，温暖友好 */
+  --primary-pink: #FF6B35;
+  --primary-pink-light: #F7931E;
+  --primary-pink-soft: #FFB366;
+  --bg-gradient-start: #FFF5EB;
+  --bg-gradient-end: #FFE8D1;
+  --card-bg: #FFFBF7;
+  --text-dark: #333333;
+  --text-pink: #FF6B35;
+  --text-light: #666666;
+  --border-color: rgba(255, 107, 53, 0.2);
+  --white: #ffffff;
+  
+  /* 柔和的阴影 */
+  --shadow-soft: 0 4px 20px rgba(255, 107, 53, 0.15);
+  --shadow-card: 0 8px 30px rgba(255, 107, 53, 0.12);
+  --shadow-hover: 0 12px 40px rgba(255, 107, 53, 0.2);
+  
+  /* 过渡时间 */
+  --transition: 0.3s ease;
+  --transition-fast: 0.15s ease;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  background-attachment: fixed;
+  color: var(--text-dark);
+  line-height: 1.8;
+  min-height: 100vh;
+  padding: 30px 20px;
+  font-size: 16px;
+}
+
+/* 页面容器 */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px;
+}
+
+/* ==================== 隐藏类 ==================== */
+.hidden {
+  display: none !important;
+}
+
+/* ==================== 页面切换动画 ==================== */
+#start-screen,
+#quiz-screen,
+#result-screen {
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== 开始页面样式 ==================== */
+#start-screen {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Logo区域 */
+.logo-section {
+  text-align: center;
+  margin-bottom: 50px;
+  padding: 40px 20px;
+}
+
+.logo-icon {
+  width: 100px;
+  height: 100px;
+  background: var(--primary-pink);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  margin: 0 auto 25px;
+  box-shadow: var(--shadow-card);
+}
+
+.logo-title {
+  margin-bottom: 15px;
+}
+
+.logo-en {
+  display: block;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+
+.logo-cn {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary-pink) 0%, var(--primary-pink-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logo-subtitle {
+  font-size: 1rem;
+  color: var(--text-light);
+  font-weight: 400;
+}
+
+/* 测试标题卡片 */
+.title-card {
+  background: var(--card-bg);
+  border-radius: 25px;
+  padding: 50px 40px;
+  margin-bottom: 40px;
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+.title-card h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary-pink);
+  margin-bottom: 25px;
+}
+
+.title-card p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--text-dark);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* 介绍卡片 */
+.intro-card {
+  background: var(--white);
+  border-radius: 25px;
+  padding: 50px 40px;
+  margin-bottom: 40px;
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+.intro-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.intro-card h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 20px;
+}
+
+.intro-card p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--text-light);
+  margin-bottom: 35px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.intro-start-btn {
+  font-size: 1.3rem;
+  padding: 20px 60px;
+}
+
+/* 测试信息卡片组 */
+.info-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.info-card {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 30px 20px;
+  text-align: center;
+  box-shadow: var(--shadow-soft);
+  transition: all var(--transition);
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-card);
+}
+
+.info-icon {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+.info-number {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-pink);
+  margin-bottom: 8px;
+}
+
+.info-label {
+  font-size: 0.95rem;
+  color: var(--text-light);
+}
+
+/* 科学基础说明卡片 */
+.science-card {
+  background: var(--card-bg);
+  border-radius: 25px;
+  padding: 50px 40px;
+  margin-bottom: 40px;
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+.science-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.science-card h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 15px;
+}
+
+.science-card > p {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  margin-bottom: 40px;
+}
+
+.dimensions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  text-align: left;
+}
+
+.dimension-item {
+  background: var(--white);
+  border-radius: 15px;
+  padding: 25px;
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  box-shadow: var(--shadow-soft);
+  transition: all var(--transition);
+}
+
+.dimension-item:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+}
+
+.dimension-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.dimension-content {
+  flex: 1;
+}
+
+.dimension-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-pink);
+  margin-bottom: 8px;
+}
+
+.dimension-desc {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  line-height: 1.6;
+}
+
+/* 底部CTA卡片 */
+.cta-card {
+  background: linear-gradient(135deg, var(--primary-pink) 0%, var(--primary-pink-light) 100%);
+  border-radius: 25px;
+  padding: 60px 40px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  color: var(--white);
+}
+
+.cta-card h3 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.cta-card p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 35px;
+  opacity: 0.95;
+}
+
+.cta-btn {
+  background: var(--white);
+  color: var(--primary-pink);
+  font-size: 1.3rem;
+  padding: 20px 60px;
+  border-radius: 25px;
+  font-weight: 700;
+  box-shadow: var(--shadow-lg);
+}
+
+.cta-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* ==================== 测试页面样式 ==================== */
+#quiz-screen {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+/* 顶部进度区域 */
+.progress-section {
+  margin-bottom: 40px;
+}
+
+.progress-bar-container {
+  margin-bottom: 15px;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 12px;
+  background: rgba(255, 107, 53, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-pink) 0%, var(--primary-pink-light) 100%);
+  border-radius: 10px;
+  transition: width 0.4s ease;
+  box-shadow: 0 0 10px rgba(255, 107, 53, 0.4);
+  width: 0%;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  color: var(--text-dark);
+}
+
+.progress-text {
+  font-weight: 600;
+  color: var(--primary-pink);
+}
+
+.progress-percent {
+  font-weight: 700;
+  color: var(--primary-pink);
+  font-size: 1.1rem;
+}
+
+/* 题目卡片 */
+.question-card {
+  background: var(--white);
+  border-radius: 30px;
+  padding: 50px 40px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 30px;
+  text-align: center;
+  position: relative;
+}
+
+.question-badge {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, var(--primary-pink) 0%, var(--primary-pink-light) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-size: 1.3rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-card);
+}
+
+.question-text {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  line-height: 1.6;
+  margin: 0;
+  padding-top: 20px;
+}
+
+/* 选项容器 */
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+/* 选项卡片 */
+.option-card {
+  background: var(--white);
+  border: 2px solid var(--border-color);
+  border-radius: 20px;
+  padding: 25px 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+.option-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255, 107, 53, 0.1), transparent);
+  transition: width 0.3s ease;
+}
+
+.option-card:hover {
+  border-color: var(--primary-pink);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
+}
+
+.option-card:hover::before {
+  width: 100%;
+}
+
+.option-card:active {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 147, 30, 0.1) 100%);
+}
+
+.option-card.selected {
+  border-color: var(--primary-pink);
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 147, 30, 0.1) 100%);
+  box-shadow: var(--shadow-hover);
+}
+
+.option-card.selected .option-badge {
+  background: linear-gradient(135deg, var(--primary-pink) 0%, var(--primary-pink-light) 100%);
+  color: var(--white);
+}
+
+.option-card:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.option-card:disabled:hover {
+  transform: none;
+  box-shadow: var(--shadow-soft);
+}
+
+/* 选项徽章（左侧圆形） */
+.option-badge {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary-pink);
+  transition: all var(--transition);
+}
+
+.option-card:hover .option-badge {
+  border-color: var(--primary-pink);
+  background: rgba(255, 107, 53, 0.1);
+}
+
+/* 选项文字（右侧） */
+.option-text {
+  flex: 1;
+  font-size: 1.1rem;
+  color: var(--text-dark);
+  line-height: 1.7;
+  font-weight: 500;
+}
+
+.option-card.selected .option-text {
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+/* 提交按钮容器 */
+.submit-container {
+  margin: 40px 0;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, var(--primary-pink) 0%, var(--primary-pink-light) 100%);
+  color: var(--white);
+  font-size: 1.3rem;
+  padding: 20px 60px;
+  box-shadow: var(--shadow-card);
+  border-radius: 25px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.submit-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-soft);
+}
+
+/* ==================== 结果页面样式 ==================== */
+#result-screen {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.result-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* 结果标题 */
+.result-title {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 20px;
+}
+
+/* 动物展示卡片 */
+.animal-showcase-card {
+  background: var(--white);
+  border-radius: 30px;
+  padding: 60px 50px;
+  box-shadow: var(--shadow-card);
+  text-align: center;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.animal-emoji {
+  font-size: 6rem;
+  margin-bottom: 25px;
+  line-height: 1;
+}
+
+.animal-name {
+  font-size: 3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary-pink) 0%, var(--primary-pink-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 30px;
+}
+
+.animal-description {
+  font-size: 1.2rem;
+  line-height: 2;
+  color: var(--text-dark);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.animal-description p {
+  margin: 0;
+}
+
+/* 性格维度分析卡片 */
+.dimensions-analysis-card {
+  background: var(--card-bg);
+  border-radius: 30px;
+  padding: 50px 40px;
+  box-shadow: var(--shadow-card);
+  animation: fadeIn 0.7s ease-in-out;
+}
+
+.dimensions-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.dimensions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.dimension-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.dimension-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 140px;
+  font-weight: 600;
+}
+
+.dimension-icon {
+  font-size: 1.5rem;
+  width: 30px;
+  text-align: center;
+}
+
+.dimension-name {
+  font-size: 1.1rem;
+  color: var(--text-dark);
+}
+
+.dimension-progress-bar {
+  flex: 1;
+  height: 25px;
+  background: rgba(255, 107, 53, 0.1);
+  border-radius: 15px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dimension-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-pink) 0%, var(--primary-pink-light) 100%);
+  border-radius: 15px;
+  transition: width 0.8s ease;
+  box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
+}
+
+.dimension-score {
+  min-width: 50px;
+  text-align: right;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-pink);
+}
+
+/* 详细分析卡片 */
+.detailed-analysis-card {
+  background: var(--white);
+  border-radius: 30px;
+  padding: 50px 40px;
+  box-shadow: var(--shadow-card);
+  animation: fadeIn 0.7s ease-in-out;
+  margin-bottom: 30px;
+}
+
+.analysis-section {
+  margin-bottom: 40px;
+}
+
+.analysis-section:last-child {
+  margin-bottom: 0;
+}
+
+.analysis-section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(255, 107, 53, 0.2);
+}
+
+.analysis-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.analysis-list li {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--text-dark);
+  padding: 12px 0;
+  padding-left: 30px;
+  position: relative;
+}
+
+.analysis-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--primary-pink);
+  font-weight: bold;
+  font-size: 1.5rem;
+  line-height: 1.4;
+}
+
+.analysis-list li:last-child {
+  border-bottom: none;
+}
+
+/* 相似度显示卡片 */
+.similarity-card {
+  background: linear-gradient(135deg, var(--primary-pink) 0%, var(--primary-pink-light) 100%);
+  border-radius: 25px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.similarity-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+/* 重新测试按钮容器 */
+.restart-container {
+  text-align: center;
+  margin-top: 30px;
+  padding: 20px 0;
+}
+
+.restart-btn {
+  background: linear-gradient(135deg, var(--primary-pink) 0%, var(--primary-pink-light) 100%);
+  color: var(--white);
+  font-size: 1.2rem;
+  padding: 18px 45px;
+  box-shadow: var(--shadow-card);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-weight: 600;
+}
+
+.restart-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+.restart-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-soft);
+}
+
+/* ==================== 按钮样式 ==================== */
+button {
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 18px 40px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+  line-height: 1.5;
+}
+
+/* 点击动画效果 - 使用单独的伪元素 */
+button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+  pointer-events: none;
+}
+
+button:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+#start-btn,
+#restart-btn {
+  background: linear-gradient(135deg, var(--primary-pink) 0%, var(--primary-pink-light) 100%);
+  color: var(--white);
+  font-size: 1.2rem;
+  padding: 20px 50px;
+  box-shadow: var(--shadow-card);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#start-btn:hover,
+#restart-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+#start-btn:active,
+#restart-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-soft);
+}
+
+/* ==================== 响应式设计 ==================== */
+/* 平板端：768px - 1024px */
+@media (min-width: 768px) and (max-width: 1024px) {
+  body {
+    padding: 20px 15px;
+    font-size: 15px;
+  }
+  
+  .page-container {
+    padding: 20px;
+  }
+  
+  #start-screen {
+    padding: 60px 30px;
+  }
+  
+  .logo-cn {
+    font-size: 2rem;
+  }
+  
+  .title-card h2 {
+    font-size: 2rem;
+  }
+  
+  .info-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  .dimension-bar-item {
+    gap: 15px;
+  }
+  
+  .dimension-label {
+    min-width: 130px;
+  }
+  
+  .dimensions-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+  
+  .dimension-item {
+    padding: 22px;
+  }
+  
+  .title-card,
+  .intro-card,
+  .science-card,
+  .cta-card {
+    padding: 45px 35px;
+  }
+  
+  .animal-showcase-card {
+    padding: 50px 40px;
+  }
+  
+  .dimensions-analysis-card {
+    padding: 45px 35px;
+  }
+  
+  .question-card {
+    padding: 40px 30px;
+    border-radius: 25px;
+  }
+  
+  .question-text {
+    font-size: 1.5rem;
+  }
+  
+  .option-card {
+    padding: 20px 25px;
+  }
+  
+  .option-text {
+    font-size: 1rem;
+  }
+  
+  .option-badge {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    font-size: 1.2rem;
+  }
+  
+  .animal-showcase-card {
+    padding: 40px 30px;
+    border-radius: 25px;
+  }
+  
+  .animal-emoji {
+    font-size: 4.5rem;
+  }
+  
+  .animal-name {
+    font-size: 2.2rem;
+  }
+  
+  .animal-description {
+    font-size: 1.1rem;
+  }
+  
+  .dimensions-analysis-card {
+    padding: 40px 30px;
+    border-radius: 25px;
+  }
+  
+  .dimensions-title {
+    font-size: 1.6rem;
+  }
+  
+  .dimension-bar-item {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .dimension-label {
+    min-width: 120px;
+  }
+  
+  .dimension-progress-bar {
+    width: 100%;
+    order: 3;
+  }
+  
+  .dimension-score {
+    order: 2;
+  }
+  
+  .restart-container {
+    margin-top: 25px;
+    padding: 15px 0;
+  }
+  
+  .restart-btn {
+    width: 100%;
+    max-width: 400px;
+  }
+}
+
+/* 手机端：< 768px */
+@media (max-width: 767px) {
+  body {
+    padding: 10px 8px;
+    font-size: 14px;
+  }
+  
+  .page-container {
+    padding: 10px;
+  }
+  
+  #start-screen {
+    padding: 30px 15px;
+  }
+  
+  #quiz-screen {
+    padding: 20px 10px;
+  }
+  
+  #result-screen {
+    padding: 20px 10px;
+  }
+  
+  .logo-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 2.5rem;
+  }
+  
+  .logo-en {
+    font-size: 1.5rem;
+  }
+  
+  .logo-cn {
+    font-size: 1.8rem;
+  }
+  
+  .title-card h2 {
+    font-size: 1.8rem;
+  }
+  
+  .intro-card h3 {
+    font-size: 1.6rem;
+  }
+  
+  .info-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .dimensions-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .title-card,
+  .intro-card,
+  .science-card,
+  .cta-card {
+    padding: 30px 20px;
+    margin-bottom: 25px;
+  }
+  
+  .logo-section {
+    padding: 30px 15px;
+    margin-bottom: 30px;
+  }
+  
+  .logo-icon {
+    width: 70px;
+    height: 70px;
+    font-size: 2.2rem;
+  }
+  
+  .logo-en {
+    font-size: 1.3rem;
+  }
+  
+  .logo-cn {
+    font-size: 1.6rem;
+  }
+  
+  .logo-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .title-card h2 {
+    font-size: 1.6rem;
+  }
+  
+  .title-card p {
+    font-size: 1rem;
+  }
+  
+  .intro-card h3 {
+    font-size: 1.4rem;
+  }
+  
+  .intro-card p {
+    font-size: 1rem;
+  }
+  
+  .info-card {
+    padding: 25px 15px;
+  }
+  
+  .info-icon {
+    font-size: 2rem;
+  }
+  
+  .info-number {
+    font-size: 1.5rem;
+  }
+  
+  .info-label {
+    font-size: 0.85rem;
+  }
+  
+  .science-card h3 {
+    font-size: 1.4rem;
+  }
+  
+  .science-card > p {
+    font-size: 1rem;
+  }
+  
+  .dimension-item {
+    padding: 20px;
+  }
+  
+  .dimension-title {
+    font-size: 1rem;
+  }
+  
+  .dimension-desc {
+    font-size: 0.85rem;
+  }
+  
+  .cta-card {
+    padding: 40px 25px;
+  }
+  
+  .cta-card h3 {
+    font-size: 1.6rem;
+  }
+  
+  .cta-card p {
+    font-size: 1rem;
+  }
+  
+  .progress-section {
+    margin-bottom: 25px;
+  }
+  
+  .question-card {
+    padding: 30px 18px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .question-badge {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+    top: -15px;
+  }
+  
+  .question-text {
+    font-size: 1.2rem;
+    padding-top: 15px;
+    line-height: 1.5;
+  }
+  
+  .options-container {
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .option-card {
+    padding: 22px 18px;
+    border-radius: 15px;
+    gap: 15px;
+    min-height: 60px;
+  }
+  
+  .option-badge {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    font-size: 1.2rem;
+  }
+  
+  .option-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  
+  .submit-container {
+    margin: 30px 0;
+  }
+  
+  .submit-btn {
+    font-size: 1.2rem;
+    padding: 18px 40px;
+    min-height: 56px;
+  }
+  
+  .progress-info {
+    font-size: 0.9rem;
+  }
+  
+  .progress-percent {
+    font-size: 1rem;
+  }
+  
+  .result-title {
+    font-size: 1.6rem;
+  }
+  
+  .result-container {
+    gap: 20px;
+  }
+  
+  .result-title {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+  }
+  
+  .animal-showcase-card {
+    padding: 30px 18px;
+    border-radius: 20px;
+  }
+  
+  .animal-emoji {
+    font-size: 4rem;
+    margin-bottom: 18px;
+  }
+  
+  .animal-name {
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+  }
+  
+  .animal-description {
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  
+  .detailed-analysis-card {
+    padding: 30px 20px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .analysis-section {
+    margin-bottom: 30px;
+  }
+  
+  .analysis-section-title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+  }
+  
+  .analysis-list li {
+    font-size: 0.95rem;
+    padding: 10px 0;
+    padding-left: 25px;
+    line-height: 1.6;
+  }
+  
+  .dimensions-analysis-card {
+    padding: 25px 18px;
+    border-radius: 20px;
+  }
+  
+  .dimensions-title {
+    font-size: 1.3rem;
+    margin-bottom: 25px;
+  }
+  
+  .dimensions-list {
+    gap: 18px;
+  }
+  
+  .dimension-bar-item {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .dimension-label {
+    min-width: 100px;
+    font-size: 0.9rem;
+  }
+  
+  .dimension-icon {
+    font-size: 1.2rem;
+    width: 24px;
+  }
+  
+  .dimension-name {
+    font-size: 0.95rem;
+  }
+  
+  .dimension-progress-bar {
+    width: 100%;
+    height: 22px;
+    order: 3;
+  }
+  
+  .dimension-score {
+    order: 2;
+    font-size: 0.95rem;
+    min-width: 42px;
+  }
+  
+  .similarity-card {
+    padding: 25px 18px;
+    border-radius: 20px;
+  }
+  
+  .similarity-value {
+    font-size: 1.5rem;
+  }
+  
+  .restart-container {
+    margin-top: 20px;
+    padding: 15px 0;
+  }
+  
+  .restart-btn {
+    width: 100%;
+    max-width: 100%;
+    font-size: 1.1rem;
+    padding: 18px 35px;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  button {
+    padding: 18px 30px;
+    font-size: 1rem;
+    min-height: 48px;
+  }
+  
+  .intro-start-btn,
+  .cta-btn {
+    font-size: 1.2rem;
+    padding: 18px 50px;
+    min-height: 56px;
+  }
+  
+  #start-btn,
+  #restart-btn {
+    padding: 18px 40px;
+    font-size: 1.1rem;
+  }
+}
+
+/* ==================== 加载动画 ==================== */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ==================== 滚动条样式 ==================== */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 179, 102, 0.2);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--primary-pink) 0%, var(--primary-pink-light) 100%);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-pink);
+}
+
+/* ==================== 额外装饰效果 ==================== */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.floating {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ==================== 页脚样式 ==================== */
+.site-footer {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  margin-top: 60px;
+  padding: 40px 20px;
+  text-align: center;
+  box-shadow: 0 -4px 20px rgba(255, 107, 53, 0.1);
+  border-top: 1px solid rgba(255, 107, 53, 0.1);
+}
+
+/* 页脚默认显示，通过JavaScript控制 */
+.site-footer.hidden {
+  display: none;
+}
+
+.footer-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.footer-emoji {
+  font-size: 1.5rem;
+}
+
+.footer-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary-pink);
+  letter-spacing: 0.5px;
+}
+
+.footer-description {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  line-height: 1.8;
+  margin-bottom: 20px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.footer-copyright {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  opacity: 0.8;
+  margin: 0;
+}
+
+/* 页脚响应式 */
+@media (max-width: 767px) {
+  .site-footer {
+    margin-top: 40px;
+    padding: 30px 15px;
+  }
+  
+  .footer-logo {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .footer-emoji {
+    font-size: 1.3rem;
+  }
+  
+  .footer-name {
+    font-size: 1.1rem;
+  }
+  
+  .footer-description {
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+  }
+  
+  .footer-copyright {
+    font-size: 0.8rem;
+  }
+}
+

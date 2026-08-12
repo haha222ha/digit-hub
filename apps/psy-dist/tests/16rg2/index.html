@@ -1,0 +1,6943 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>16人格·心智阶段测试</title>
+<meta name="description" content="新16人格·心智阶位测评：64道情境题，诊断你的心智觉醒阶段与成长路径。">
+<link rel="icon" href="/tests/common/favicon.svg">
+<script src="/static/js/test-security.js"></script>
+<script>
+  if (typeof TestSecurity !== 'undefined') {
+    TestSecurity.enable();
+  }
+</script>
+<style>
+:root {
+  --bg1: #faf5ff;
+  --bg2: #f3e8ff;
+  --bg3: #e9d5ff;
+  --primary: #a855f7;
+  --primary-light: #c084fc;
+  --primary-dark: #9333ea;
+  --shadow: rgba(168, 85, 247, 0.35);
+}
+[data-theme="green"] {
+  --bg1: #f0fdf4;
+  --bg2: #dcfce7;
+  --bg3: #d1fae5;
+  --primary: #10b981;
+  --primary-light: #34d399;
+  --primary-dark: #059669;
+  --shadow: rgba(52, 211, 153, 0.35);
+}
+[data-theme="pink"] {
+  --bg1: #fdf2f8;
+  --bg2: #fce7f3;
+  --bg3: #fbcfe8;
+  --primary: #ec4899;
+  --primary-light: #f472b6;
+  --primary-dark: #db2777;
+  --shadow: rgba(236, 72, 153, 0.35);
+}
+[data-theme="purple"] {
+  --bg1: #faf5ff;
+  --bg2: #f3e8ff;
+  --bg3: #e9d5ff;
+  --primary: #a855f7;
+  --primary-light: #c084fc;
+  --primary-dark: #9333ea;
+  --shadow: rgba(168, 85, 247, 0.35);
+}
+[data-theme="blue"] {
+  --bg1: #f0f9ff;
+  --bg2: #e0f2fe;
+  --bg3: #bae6fd;
+  --primary: #0ea5e9;
+  --primary-light: #38bdf8;
+  --primary-dark: #0284c7;
+  --shadow: rgba(14, 165, 233, 0.35);
+}
+[data-theme="orange"] {
+  --bg1: #fff7ed;
+  --bg2: #ffedd5;
+  --bg3: #fed7aa;
+  --primary: #f97316;
+  --primary-light: #fb923c;
+  --primary-dark: #ea580c;
+  --shadow: rgba(249, 115, 22, 0.35);
+}
+[data-theme="analyst"] {
+  --bg1: #faf5ff;
+  --bg2: #f3e8ff;
+  --bg3: #e9d5ff;
+  --primary: #8b5cf6;
+  --primary-light: #a78bfa;
+  --primary-dark: #7c3aed;
+  --shadow: rgba(139, 92, 246, 0.35);
+}
+[data-theme="diplomat"] {
+  --bg1: #f0fdf4;
+  --bg2: #dcfce7;
+  --bg3: #d1fae5;
+  --primary: #10b981;
+  --primary-light: #34d399;
+  --primary-dark: #059669;
+  --shadow: rgba(16, 185, 129, 0.35);
+}
+[data-theme="sentinel"] {
+  --bg1: #eff6ff;
+  --bg2: #dbeafe;
+  --bg3: #bfdbfe;
+  --primary: #3b82f6;
+  --primary-light: #60a5fa;
+  --primary-dark: #2563eb;
+  --shadow: rgba(59, 130, 246, 0.35);
+}
+[data-theme="explorer"] {
+  --bg1: #fefce8;
+  --bg2: #fef9c3;
+  --bg3: #fef08a;
+  --primary: #eab308;
+  --primary-light: #facc15;
+  --primary-dark: #ca8a04;
+  --shadow: rgba(234, 179, 8, 0.35);
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+}
+body {
+  background: linear-gradient(
+    160deg,
+    var(--bg1) 0%,
+    var(--bg2) 50%,
+    var(--bg3) 100%
+  );
+  min-height: 100vh;
+  color: #374151;
+  transition: background 0.3s;
+}
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  overflow-x: hidden;
+}
+.page {
+  display: none;
+  animation: fadeIn 0.4s ease;
+}
+.page.active {
+  display: block;
+}
+#select-page.active {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 90vh;
+}
+#test-page.active {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 85vh;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.theme-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--shadow);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  opacity: 0;
+  pointer-events: none;
+}
+.theme-btn.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.theme-btn:hover {
+  transform: scale(1.1);
+}
+.theme-trigger {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 60px;
+  z-index: 998;
+  cursor: pointer;
+}
+.theme-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: #fff;
+  stroke-width: 2;
+  fill: none;
+}
+.theme-panel {
+  position: fixed;
+  top: 60px;
+  right: 16px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  display: none;
+}
+.theme-panel.open {
+  display: block;
+}
+.theme-options {
+  display: flex;
+  gap: 8px;
+}
+.theme-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+.theme-dot:hover {
+  transform: scale(1.15);
+}
+.theme-dot.active {
+  border: 2px solid #374151;
+}
+.logo {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(
+    135deg,
+    var(--primary-light) 0%,
+    var(--primary) 100%
+  );
+  border-radius: 18px;
+  margin: 32px auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 32px var(--shadow);
+  transition: all 0.3s;
+}
+.logo svg {
+  width: 40px;
+  height: 40px;
+  stroke: #fff;
+  stroke-width: 2;
+  fill: none;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary-dark);
+  font-size: 0.7rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  margin: 0 auto 12px;
+  font-weight: 500;
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+}
+.badge svg {
+  width: 14px;
+  height: 14px;
+  stroke: #059669;
+  stroke-width: 2;
+  fill: none;
+}
+h1 {
+  text-align: center;
+  font-size: 1.6rem;
+  background: linear-gradient(
+    135deg,
+    var(--primary-dark) 0%,
+    var(--primary) 50%,
+    var(--primary-light) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+.subtitle {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+}
+.stage-tags {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.stage-tag {
+  font-size: 0.7rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+.card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.icon {
+  width: 36px;
+  height: 36px;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--primary);
+  stroke-width: 2;
+  fill: none;
+}
+.card h3 {
+  font-size: 0.9rem;
+  color: var(--primary-dark);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.card p {
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #f0f0f0;
+}
+.card-tag {
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+.btn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 16px;
+}
+.btn-primary {
+  background: linear-gradient(
+    135deg,
+    var(--primary-light) 0%,
+    var(--primary) 50%,
+    var(--primary-dark) 100%
+  );
+  color: #fff;
+  box-shadow: 0 8px 24px var(--shadow);
+  transition: all 0.3s;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.note {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.6;
+}
+.note p.hl {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+.disclaimer {
+  margin-top: 24px;
+  padding: 20px 22px;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border-radius: 14px;
+  text-align: left;
+  font-size: 0.78rem;
+  color: var(--primary-dark);
+  line-height: 1.9;
+  border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent);
+}
+.disclaimer .disc-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 14px;
+  line-height: 1.6;
+  text-align: left;
+}
+.disclaimer .disc-title em {
+  font-style: normal;
+  font-family: "Georgia", serif;
+  letter-spacing: 0.3px;
+}
+.disclaimer .disc-item {
+  margin-bottom: 12px;
+  padding-left: 0;
+  color: color-mix(in srgb, var(--primary-dark) 85%, #333);
+  font-size: 0.77rem;
+  line-height: 1.75;
+}
+.disclaimer .disc-item strong {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+.disclaimer .disc-num {
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-right: 2px;
+}
+.disclaimer .disc-tip {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed color-mix(in srgb, var(--primary) 25%, transparent);
+  text-align: center;
+  font-size: 0.72rem;
+  color: color-mix(in srgb, var(--primary) 60%, #888);
+  letter-spacing: 0.5px;
+}
+.select-title {
+  text-align: center;
+  font-size: 1.4rem;
+  color: var(--primary-dark);
+  margin: 40px 0 24px;
+}
+
+.guide {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+.type-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.type-group {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  padding: 12px;
+  border: 2px solid transparent;
+}
+@media (hover: hover) {
+  .type-group:hover {
+    border-color: var(--group-color);
+  }
+}
+.type-group.active {
+  border-color: var(--group-color);
+}
+.type-group-header {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--group-color);
+  margin-bottom: 8px;
+  text-align: center;
+}
+.type-group-types {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.type-chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 6px 0;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.type-hint-bar {
+  margin-top: 8px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(255, 255, 255, 0.85)
+  );
+  border-radius: 10px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #6b7280;
+  min-height: 20px;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.type-hint-bar .hint-type {
+  font-weight: 700;
+  color: var(--primary);
+}
+.type-hint-bar .hint-name {
+  color: #374151;
+}
+.type-hint-bar .hint-desc {
+  opacity: 0.8;
+}
+@media (hover: hover) {
+  .type-chip:hover {
+    background: var(--group-color);
+    color: #fff;
+  }
+}
+.type-chip.selected {
+  background: var(--group-color);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.progress-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.progress-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+.progress-title span {
+  font-weight: 400;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+.progress-divider {
+  width: 1px;
+  height: 16px;
+  background: #e5e7eb;
+}
+.progress-dim {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+.progress-percent {
+  margin-left: auto;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--primary);
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+.progress {
+  height: 6px;
+  background: #f3e8ff;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.q-box {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+.q-text {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #1f2937;
+}
+.opts {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 32px;
+  padding: 0 8px;
+}
+.opts-track {
+  position: relative;
+  height: 8px;
+  background: linear-gradient(90deg, #fca5a5, #fde68a, #86efac);
+  border-radius: 4px;
+  margin: 20px 0 12px;
+}
+.opts-row {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+.opt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  flex: 1;
+  padding: 8px 0;
+}
+.opt-num {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #e5e7eb;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #9ca3af;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.opt:hover .opt-num {
+  border-color: #d1d5db;
+  transform: scale(1.05);
+}
+.opt.selected .opt-num {
+  color: #fff;
+  transform: scale(1.1);
+}
+.opt[data-val="1"].selected .opt-num {
+  background: #ef4444;
+  border-color: #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+.opt[data-val="2"].selected .opt-num {
+  background: #f97316;
+  border-color: #f97316;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+.opt[data-val="3"].selected .opt-num {
+  background: #eab308;
+  border-color: #eab308;
+  box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);
+}
+.opt[data-val="4"].selected .opt-num {
+  background: #84cc16;
+  border-color: #84cc16;
+  box-shadow: 0 4px 12px rgba(132, 204, 22, 0.3);
+}
+.opt[data-val="5"].selected .opt-num {
+  background: #22c55e;
+  border-color: #22c55e;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+.opt-label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 6px;
+  transition: all 0.2s;
+}
+.opt.selected .opt-label {
+  color: var(--primary);
+  font-weight: 600;
+}
+.opts-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 4px;
+}
+.opts-ends span:first-child {
+  color: #ef4444;
+}
+.opts-ends span:last-child {
+  color: #22c55e;
+}
+.auto-jump-tip {
+  text-align: center;
+  font-size: 0.72rem;
+  color: #9ca3af;
+  margin-top: 10px;
+  letter-spacing: 0.5px;
+}
+.disc-footer {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed color-mix(in srgb, var(--primary) 25%, transparent);
+  text-align: center;
+  font-size: clamp(0.58rem, 2.8vw, 0.72rem);
+  color: color-mix(in srgb, var(--primary) 55%, #888);
+  line-height: 1.9;
+}
+.disc-footer p {
+  margin: 0 0 4px;
+  white-space: nowrap;
+}
+.disc-footer p:last-child {
+  margin: 0;
+}
+.disc-footer .footer-title {
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin-bottom: 8px;
+  font-size: clamp(0.6rem, 3vw, 0.75rem);
+}
+.nav {
+  display: flex;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+}
+.nav-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.nav-prev {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
+}
+.nav-next {
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  border: none;
+  color: #fff;
+}
+.nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.type-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.type-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+.type-code {
+  font-weight: 700;
+  font-size: 1rem;
+}
+.type-name {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+.change-type-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, #e5e7eb);
+  background: #fff;
+  color: var(--primary-dark);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+.change-type-btn:hover {
+  background: color-mix(in srgb, var(--primary) 5%, #fff);
+  border-color: var(--primary);
+}
+.change-type-btn:active {
+  opacity: 0.8;
+}
+.back-home-btn {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.8);
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+.back-home-btn:hover {
+  background: #fff;
+  border-color: #d1d5db;
+}
+.back-home-btn:active {
+  opacity: 0.8;
+}
+#loading-page.active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+.loader {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 24px;
+}
+.loader-c {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--primary-light);
+  animation: pulse 1.5s infinite ease-in-out;
+}
+.loader-c:nth-child(1) {
+  width: 80px;
+  height: 80px;
+  opacity: 0.3;
+}
+.loader-c:nth-child(2) {
+  width: 50px;
+  height: 50px;
+  top: 15px;
+  left: 15px;
+  opacity: 0.5;
+  animation-delay: 0.2s;
+}
+.loader-c:nth-child(3) {
+  width: 30px;
+  height: 30px;
+  top: 25px;
+  left: 25px;
+  background: var(--primary);
+}
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.1;
+  }
+}
+.loading-text {
+  font-size: 1.1rem;
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+#result-page {
+  padding-bottom: 20px;
+  max-width: 100%;
+  margin: 0;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+.result-card {
+  border-radius: 20px;
+  padding: 28px 20px 20px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.result-card::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -30%;
+  width: 100%;
+  height: 150%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 70%
+  );
+  transform: rotate(20deg);
+  pointer-events: none;
+}
+.result-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 16px;
+  padding: 10px 0;
+}
+.score-ring-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+.score-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.score-ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 8;
+}
+.score-ring-fill {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 264;
+  stroke-dashoffset: 264;
+  transition: stroke-dashoffset 1s ease;
+}
+.score-ring-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.score-num {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.score-label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+.stage-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.stage-info .stage-slot {
+  font-size: 2.2rem;
+  font-weight: 700;
+  height: 1.3em;
+  min-width: 90px;
+}
+.stage-info .stage-slot-item {
+  height: 1.3em;
+  line-height: 1.3em;
+  white-space: nowrap;
+}
+.stage-dots {
+  display: flex;
+  gap: 8px;
+}
+.stage-dots span {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: all 0.3s;
+}
+.stage-dots span.active {
+  background: #fff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+}
+.result-type-row {
+  font-size: 1.3rem;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 8px;
+}
+
+.result-divider {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  margin: 0 auto 10px;
+  width: 60%;
+  position: relative;
+  z-index: 1;
+}
+.result-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath fill='rgba(255,255,255,0.1)' d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C57.1,118.92,150.76,69.51,321.39,56.44Z'/%3E%3C/svg%3E")
+    no-repeat bottom;
+  background-size: cover;
+  pointer-events: none;
+}
+
+.stage-slot {
+  height: 1.2em;
+  overflow: hidden;
+  display: inline-block;
+  position: relative;
+  margin-right: -4px;
+}
+.stage-slot-inner {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.1s linear;
+}
+.stage-slot-item {
+  height: 1.2em;
+  line-height: 1.2em;
+  white-space: nowrap;
+}
+.result-tags {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+.result-tag {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(4px);
+}
+.result-quote {
+  font-style: italic;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  border-top: none;
+  padding-top: 8px;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+.content-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.content-card h3 {
+  font-size: 1rem;
+  color: #1f2937;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(90deg, #f8fafc 0%, #fff 100%);
+  margin: -16px -16px 12px -16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.content-card h3 i[class^="ri-"] {
+  font-size: 1.25rem;
+  color: #374151;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-shadow: none;
+}
+.section-icon {
+  width: 20px;
+  height: 20px;
+  stroke: var(--primary);
+  stroke-width: 2;
+  fill: none;
+  flex-shrink: 0;
+}
+.sub-icon {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.btn-icon {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  vertical-align: middle;
+}
+.cognitive-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cog-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+.cog-pos {
+  font-weight: 700;
+  color: var(--primary);
+  min-width: 20px;
+}
+.cog-name {
+  color: #374151;
+}
+.cog-desc {
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+.radar-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+  margin-top: -10px;
+}
+.dim-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding: 8px 10px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+.dim-name {
+  width: 80px;
+  font-size: 0.8rem;
+  color: #374151;
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.dim-bar {
+  flex: 1;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.dim-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s ease;
+}
+.dim-fill.high {
+  background: linear-gradient(90deg, #86efac, #22c55e);
+}
+.dim-fill.medium {
+  background: linear-gradient(90deg, #fde68a, #f59e0b);
+}
+.dim-fill.low {
+  background: linear-gradient(90deg, #fecaca, #ef4444);
+}
+.dim-score {
+  width: 30px;
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.dim-score.high {
+  color: #16a34a;
+}
+.dim-score.medium {
+  color: #d97706;
+}
+.dim-score.low {
+  color: #dc2626;
+}
+.career-tags {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin-top: 8px;
+  overflow-x: auto;
+}
+.career-tag {
+  background: #fff;
+  padding: 5px 10px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.career-tag.hot {
+  background: #fef3c7;
+  border-color: #fcd34d;
+  color: #92400e;
+}
+.career-tag.hot::before {
+  content: "荐";
+  font-size: 0.6rem;
+  background: #f59e0b;
+  color: #fff;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.partner-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  background: #fffbeb;
+  border-radius: 10px;
+}
+.partner-type {
+  width: 50px;
+  font-weight: 700;
+  color: #d97706;
+  font-size: 0.9rem;
+}
+.partner-bar {
+  flex: 1;
+  height: 6px;
+  background: #fef3c7;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.partner-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  border-radius: 3px;
+}
+.partner-score {
+  width: 40px;
+  text-align: right;
+  font-weight: 700;
+  color: #d97706;
+  font-size: 0.85rem;
+}
+
+.bottom-btn {
+  flex: 1;
+  max-width: 180px;
+  padding: 14px;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.bottom-btn:active {
+  transform: scale(0.95);
+}
+.btn-restart {
+  background: color-mix(in srgb, var(--primary) 12%, #fff);
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+  color: var(--primary-dark);
+}
+.section-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+.result-bottom-bar {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 10px;
+  padding: 8px 0;
+}
+.result-bottom-bar .bottom-btn {
+  flex: 1;
+  max-width: 160px;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.modal-overlay.show {
+  display: flex;
+}
+.modal-box {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 360px;
+  overflow: hidden;
+  animation: modalIn 0.3s;
+}
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.modal-header {
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  color: #fff;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+.modal-icon {
+  width: 24px;
+  height: 24px;
+  stroke: #fff;
+  stroke-width: 2;
+  fill: none;
+}
+.modal-header span {
+  font-size: 1.1rem;
+  font-weight: 700;
+  flex: 1;
+}
+.modal-close {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0.8;
+}
+.modal-body {
+  padding: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.rule-num {
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.rule-item p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #374151;
+  line-height: 1.5;
+}
+.rule-item em {
+  color: var(--primary);
+  font-style: normal;
+  font-weight: 600;
+}
+.modal-footer {
+  background: linear-gradient(135deg, var(--bg2), var(--bg3));
+  padding: 16px 20px;
+  text-align: center;
+}
+.footer-main {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.footer-sub {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+/* === UI升级样式 === */
+.power-blind-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.power-card {
+  background: #f0fdf4;
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid #bbf7d0;
+}
+.power-card h4 {
+  color: #16a34a;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.power-card p {
+  color: #166534;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+.power-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.power-keyword {
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+.blind-card {
+  background: #fef2f2;
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid #fecaca;
+}
+.blind-card h4 {
+  color: #dc2626;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.blind-card p {
+  color: #991b1b;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+.blind-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.blind-keyword {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+.awakening-stage {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #e2e8f0;
+}
+.awakening-stage-label {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+.awakening-stage-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  padding: 6px 16px;
+  background: var(--primary);
+  border-radius: 20px;
+  box-shadow: 0 2px 8px var(--primary-light);
+}
+.awakening-insight {
+  padding: 14px;
+  background: #fff;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.awakening-insight-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.awakening-insight-title svg {
+  color: var(--primary);
+}
+.awakening-insight-text {
+  font-size: 0.85rem;
+  color: #4b5563;
+  line-height: 1.7;
+}
+.awakening-guide {
+  padding: 14px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.awakening-guide-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.awakening-guide-title svg {
+  color: #22c55e;
+}
+.awakening-guide-text {
+  font-size: 0.85rem;
+  color: #4b5563;
+  line-height: 1.7;
+}
+.awakening-advice {
+  padding: 14px;
+  background: #fffbeb;
+  border-radius: 12px;
+  margin-top: 10px;
+  border: 1px solid #fde68a;
+}
+.awakening-advice-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.awakening-advice-text {
+  font-size: 0.85rem;
+  color: #78350f;
+  line-height: 1.7;
+  padding-left: 12px;
+  border-left: 3px solid #f59e0b;
+}
+.deep-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.deep-tabs::-webkit-scrollbar {
+  display: none;
+}
+.deep-tab {
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  color: #64748b;
+  background: #f1f5f9;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+.deep-tab:hover {
+  background: #e2e8f0;
+}
+.deep-tab.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.deep-content {
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 10px;
+  min-height: 80px;
+}
+.deep-content-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.deep-content-text {
+  font-size: 0.85rem;
+  color: #4b5563;
+  line-height: 1.7;
+}
+.deep-content-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+}
+.deep-content-list li {
+  padding: 6px 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.85rem;
+  color: #4b5563;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.cog-stack-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 12px 0;
+}
+.cog-fn-item {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cog-fn-pos {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+.cog-fn-code {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+.cog-fn-desc {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+.cog-loop-warning {
+  display: flex;
+  gap: 10px;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+}
+.cog-loop-warning i {
+  font-size: 1.2rem;
+  color: #d97706;
+  flex-shrink: 0;
+}
+.cog-loop-warning strong {
+  font-size: 0.85rem;
+  color: #92400e;
+  display: block;
+  margin-bottom: 4px;
+}
+.cog-loop-warning p {
+  font-size: 0.8rem;
+  color: #78350f;
+  line-height: 1.5;
+  margin: 0;
+}
+.cog-stage-status {
+  display: flex;
+  gap: 10px;
+  background: #e0f2fe;
+  border: 1px solid #7dd3fc;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+}
+.cog-stage-status i {
+  font-size: 1.2rem;
+  color: #0284c7;
+  flex-shrink: 0;
+}
+.cog-stage-status strong {
+  font-size: 0.85rem;
+  color: #0369a1;
+  display: block;
+  margin-bottom: 4px;
+}
+.cog-stage-status p {
+  font-size: 0.8rem;
+  color: #075985;
+  line-height: 1.5;
+  margin: 0;
+}
+.stage-progress-path {
+  margin-top: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border-radius: 12px;
+  border: 1px solid #bbf7d0;
+}
+.stage-path-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #166534;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.stage-path-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.stage-path-item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+.stage-path-item.current {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.stage-path-item.next {
+  background: #fff;
+  color: #059669;
+  border: 2px dashed #10b981;
+}
+.stage-path-item.done {
+  background: #d1fae5;
+  color: #065f46;
+}
+.stage-path-item.future {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+.stage-path-arrow {
+  color: #10b981;
+  font-size: 1.2rem;
+}
+.stage-path-diff {
+  font-size: 0.8rem;
+  color: #047857;
+  line-height: 1.6;
+  padding: 10px 12px;
+  background: #fff;
+  border-radius: 8px;
+  border-left: 3px solid #10b981;
+}
+.deep-content-list li:last-child {
+  border-bottom: none;
+}
+.deep-content-list li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--primary);
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+.action-numbered {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid var(--primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.action-num {
+  width: 28px;
+  height: 28px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.action-numbered .action-text {
+  font-size: 0.88rem;
+  color: #374151;
+  line-height: 1.7;
+  padding-top: 3px;
+}
+
+/* === 内嵌图标 (替代CDN) === */
+[class^="ri-"],
+[class*=" ri-"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  font-style: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+[class^="ri-"]::before,
+[class*=" ri-"]::before {
+  content: "";
+  display: block;
+  width: 1em;
+  height: 1em;
+  background: currentColor;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+.ri-arrow-right-s-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M13.1717 12.0007L8.22192 7.05093L9.63614 5.63672L16.0001 12.0007L9.63614 18.3646L8.22192 16.9504L13.1717 12.0007Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M13.1717 12.0007L8.22192 7.05093L9.63614 5.63672L16.0001 12.0007L9.63614 18.3646L8.22192 16.9504L13.1717 12.0007Z'/%3E%3C/svg%3E");
+}
+.ri-bar-chart-box-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM4 5V19H20V5H4ZM7 13H9V17H7V13ZM11 7H13V17H11V7ZM15 10H17V17H15V10Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM4 5V19H20V5H4ZM7 13H9V17H7V13ZM11 7H13V17H11V7ZM15 10H17V17H15V10Z'/%3E%3C/svg%3E");
+}
+.ri-bar-chart-grouped-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 12H4V21H2V12ZM5 14H7V21H5V14ZM16 8H18V21H16V8ZM19 10H21V21H19V10ZM9 2H11V21H9V2ZM12 4H14V21H12V4Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 12H4V21H2V12ZM5 14H7V21H5V14ZM16 8H18V21H16V8ZM19 10H21V21H19V10ZM9 2H11V21H9V2ZM12 4H14V21H12V4Z'/%3E%3C/svg%3E");
+}
+.ri-focus-3-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M13 1L13.001 4.06201C16.6192 4.51365 19.4869 7.38163 19.9381 11L23 11V13L19.938 13.001C19.4864 16.6189 16.6189 19.4864 13.001 19.938L13 23H11L11 19.9381C7.38163 19.4869 4.51365 16.6192 4.06201 13.001L1 13V11L4.06189 11C4.51312 7.38129 7.38129 4.51312 11 4.06189L11 1H13ZM12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6ZM12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12C10 10.8954 10.8954 10 12 10Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M13 1L13.001 4.06201C16.6192 4.51365 19.4869 7.38163 19.9381 11L23 11V13L19.938 13.001C19.4864 16.6189 16.6189 19.4864 13.001 19.938L13 23H11L11 19.9381C7.38163 19.4869 4.51365 16.6192 4.06201 13.001L1 13V11L4.06189 11C4.51312 7.38129 7.38129 4.51312 11 4.06189L11 1H13ZM12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6ZM12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12C10 10.8954 10.8954 10 12 10Z'/%3E%3C/svg%3E");
+}
+.ri-pencil-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15.7279 9.57627L14.3137 8.16206L5 17.4758V18.89H6.41421L15.7279 9.57627ZM17.1421 8.16206L18.5563 6.74785L17.1421 5.33363L15.7279 6.74785L17.1421 8.16206ZM7.24264 20.89H3V16.6473L16.435 3.21231C16.8256 2.82179 17.4587 2.82179 17.8492 3.21231L20.6777 6.04074C21.0682 6.43126 21.0682 7.06443 20.6777 7.45495L7.24264 20.89Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15.7279 9.57627L14.3137 8.16206L5 17.4758V18.89H6.41421L15.7279 9.57627ZM17.1421 8.16206L18.5563 6.74785L17.1421 5.33363L15.7279 6.74785L17.1421 8.16206ZM7.24264 20.89H3V16.6473L16.435 3.21231C16.8256 2.82179 17.4587 2.82179 17.8492 3.21231L20.6777 6.04074C21.0682 6.43126 21.0682 7.06443 20.6777 7.45495L7.24264 20.89Z'/%3E%3C/svg%3E");
+}
+.ri-vip-crown-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2.00488 19H22.0049V21H2.00488V19ZM2.00488 5L7.00488 8.5L12.0049 2L17.0049 8.5L22.0049 5V17H2.00488V5ZM4.00488 8.84131V15H20.0049V8.84131L16.5854 11.2349L12.0049 5.28024L7.42435 11.2349L4.00488 8.84131Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2.00488 19H22.0049V21H2.00488V19ZM2.00488 5L7.00488 8.5L12.0049 2L17.0049 8.5L22.0049 5V17H2.00488V5ZM4.00488 8.84131V15H20.0049V8.84131L16.5854 11.2349L12.0049 5.28024L7.42435 11.2349L4.00488 8.84131Z'/%3E%3C/svg%3E");
+}
+.ri-brain-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 4C10.1046 4 11 4.89543 11 6V12.8271C10.1058 12.1373 8.96602 11.7305 7.6644 11.5136L7.3356 13.4864C8.71622 13.7165 9.59743 14.1528 10.1402 14.7408C10.67 15.3147 11 16.167 11 17.5C11 18.8807 9.88071 20 8.5 20C7.11929 20 6 18.8807 6 17.5V17.1493C6.43007 17.2926 6.87634 17.4099 7.3356 17.4864L7.6644 15.5136C6.92149 15.3898 6.1752 15.1144 5.42909 14.7599C4.58157 14.3573 4 13.499 4 12.5C4 11.6653 4.20761 11.0085 4.55874 10.5257C4.90441 10.0504 5.4419 9.6703 6.24254 9.47014L7 9.28078V6C7 4.89543 7.89543 4 9 4ZM12 3.35418C11.2671 2.52376 10.1947 2 9 2C6.79086 2 5 3.79086 5 6V7.77422C4.14895 8.11644 3.45143 8.64785 2.94126 9.34933C2.29239 10.2415 2 11.3347 2 12.5C2 14.0652 2.79565 15.4367 4 16.2422V17.5C4 19.9853 6.01472 22 8.5 22C9.91363 22 11.175 21.3482 12 20.3287C12.825 21.3482 14.0864 22 15.5 22C17.9853 22 20 19.9853 20 17.5V16.2422C21.2044 15.4367 22 14.0652 22 12.5C22 11.3347 21.7076 10.2415 21.0587 9.34933C20.5486 8.64785 19.8511 8.11644 19 7.77422V6C19 3.79086 17.2091 2 15 2C13.8053 2 12.7329 2.52376 12 3.35418ZM18 17.1493V17.5C18 18.8807 16.8807 20 15.5 20C14.1193 20 13 18.8807 13 17.5C13 16.167 13.33 15.3147 13.8598 14.7408C14.4026 14.1528 15.2838 13.7165 16.6644 13.4864L16.3356 11.5136C15.034 11.7305 13.8942 12.1373 13 12.8271V6C13 4.89543 13.8954 4 15 4C16.1046 4 17 4.89543 17 6V9.28078L17.7575 9.47014C18.5581 9.6703 19.0956 10.0504 19.4413 10.5257C19.7924 11.0085 20 11.6653 20 12.5C20 13.499 19.4184 14.3573 18.5709 14.7599C17.8248 15.1144 17.0785 15.3898 16.3356 15.5136L16.6644 17.4864C17.1237 17.4099 17.5699 17.2926 18 17.1493Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 4C10.1046 4 11 4.89543 11 6V12.8271C10.1058 12.1373 8.96602 11.7305 7.6644 11.5136L7.3356 13.4864C8.71622 13.7165 9.59743 14.1528 10.1402 14.7408C10.67 15.3147 11 16.167 11 17.5C11 18.8807 9.88071 20 8.5 20C7.11929 20 6 18.8807 6 17.5V17.1493C6.43007 17.2926 6.87634 17.4099 7.3356 17.4864L7.6644 15.5136C6.92149 15.3898 6.1752 15.1144 5.42909 14.7599C4.58157 14.3573 4 13.499 4 12.5C4 11.6653 4.20761 11.0085 4.55874 10.5257C4.90441 10.0504 5.4419 9.6703 6.24254 9.47014L7 9.28078V6C7 4.89543 7.89543 4 9 4ZM12 3.35418C11.2671 2.52376 10.1947 2 9 2C6.79086 2 5 3.79086 5 6V7.77422C4.14895 8.11644 3.45143 8.64785 2.94126 9.34933C2.29239 10.2415 2 11.3347 2 12.5C2 14.0652 2.79565 15.4367 4 16.2422V17.5C4 19.9853 6.01472 22 8.5 22C9.91363 22 11.175 21.3482 12 20.3287C12.825 21.3482 14.0864 22 15.5 22C17.9853 22 20 19.9853 20 17.5V16.2422C21.2044 15.4367 22 14.0652 22 12.5C22 11.3347 21.7076 10.2415 21.0587 9.34933C20.5486 8.64785 19.8511 8.11644 19 7.77422V6C19 3.79086 17.2091 2 15 2C13.8053 2 12.7329 2.52376 12 3.35418ZM18 17.1493V17.5C18 18.8807 16.8807 20 15.5 20C14.1193 20 13 18.8807 13 17.5C13 16.167 13.33 15.3147 13.8598 14.7408C14.4026 14.1528 15.2838 13.7165 16.6644 13.4864L16.3356 11.5136C15.034 11.7305 13.8942 12.1373 13 12.8271V6C13 4.89543 13.8954 4 15 4C16.1046 4 17 4.89543 17 6V9.28078L17.7575 9.47014C18.5581 9.6703 19.0956 10.0504 19.4413 10.5257C19.7924 11.0085 20 11.6653 20 12.5C20 13.499 19.4184 14.3573 18.5709 14.7599C17.8248 15.1144 17.0785 15.3898 16.3356 15.5136L16.6644 17.4864C17.1237 17.4099 17.5699 17.2926 18 17.1493Z'/%3E%3C/svg%3E");
+}
+.ri-pulse-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 7.53861L15 21.5386L18.6594 13H23V11H17.3406L15 16.4614L9 2.46143L5.3406 11H1V13H6.6594L9 7.53861Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 7.53861L15 21.5386L18.6594 13H23V11H17.3406L15 16.4614L9 2.46143L5.3406 11H1V13H6.6594L9 7.53861Z'/%3E%3C/svg%3E");
+}
+.ri-route-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 15V8.5C4 6.01472 6.01472 4 8.5 4C10.9853 4 13 6.01472 13 8.5V15.5C13 16.8807 14.1193 18 15.5 18C16.8807 18 18 16.8807 18 15.5V8.82929C16.8348 8.41746 16 7.30622 16 6C16 4.34315 17.3431 3 19 3C20.6569 3 22 4.34315 22 6C22 7.30622 21.1652 8.41746 20 8.82929V15.5C20 17.9853 17.9853 20 15.5 20C13.0147 20 11 17.9853 11 15.5V8.5C11 7.11929 9.88071 6 8.5 6C7.11929 6 6 7.11929 6 8.5V15H9L5 20L1 15H4ZM19 7C19.5523 7 20 6.55228 20 6C20 5.44772 19.5523 5 19 5C18.4477 5 18 5.44772 18 6C18 6.55228 18.4477 7 19 7Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 15V8.5C4 6.01472 6.01472 4 8.5 4C10.9853 4 13 6.01472 13 8.5V15.5C13 16.8807 14.1193 18 15.5 18C16.8807 18 18 16.8807 18 15.5V8.82929C16.8348 8.41746 16 7.30622 16 6C16 4.34315 17.3431 3 19 3C20.6569 3 22 4.34315 22 6C22 7.30622 21.1652 8.41746 20 8.82929V15.5C20 17.9853 17.9853 20 15.5 20C13.0147 20 11 17.9853 11 15.5V8.5C11 7.11929 9.88071 6 8.5 6C7.11929 6 6 7.11929 6 8.5V15H9L5 20L1 15H4ZM19 7C19.5523 7 20 6.55228 20 6C20 5.44772 19.5523 5 19 5C18.4477 5 18 5.44772 18 6C18 6.55228 18.4477 7 19 7Z'/%3E%3C/svg%3E");
+}
+.ri-shuffle-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M18 17.8832V16L23 19L18 22V19.9095C14.9224 19.4698 12.2513 17.4584 11.0029 14.5453L11 14.5386L10.9971 14.5453C9.57893 17.8544 6.32508 20 2.72483 20H2V18H2.72483C5.52503 18 8.05579 16.3312 9.15885 13.7574L9.91203 12L9.15885 10.2426C8.05579 7.66878 5.52503 6 2.72483 6H2V4H2.72483C6.32508 4 9.57893 6.14557 10.9971 9.45473L11 9.46141L11.0029 9.45473C12.2513 6.5416 14.9224 4.53022 18 4.09051V2L23 5L18 8V6.11684C15.7266 6.53763 13.7737 8.0667 12.8412 10.2426L12.088 12L12.8412 13.7574C13.7737 15.9333 15.7266 17.4624 18 17.8832Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M18 17.8832V16L23 19L18 22V19.9095C14.9224 19.4698 12.2513 17.4584 11.0029 14.5453L11 14.5386L10.9971 14.5453C9.57893 17.8544 6.32508 20 2.72483 20H2V18H2.72483C5.52503 18 8.05579 16.3312 9.15885 13.7574L9.91203 12L9.15885 10.2426C8.05579 7.66878 5.52503 6 2.72483 6H2V4H2.72483C6.32508 4 9.57893 6.14557 10.9971 9.45473L11 9.46141L11.0029 9.45473C12.2513 6.5416 14.9224 4.53022 18 4.09051V2L23 5L18 8V6.11684C15.7266 6.53763 13.7737 8.0667 12.8412 10.2426L12.088 12L12.8412 13.7574C13.7737 15.9333 15.7266 17.4624 18 17.8832Z'/%3E%3C/svg%3E");
+}
+.ri-lightbulb-flash-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.97308 18H14.0269C14.1589 16.7984 14.7721 15.8065 15.7676 14.7226C15.8797 14.6006 16.5988 13.8564 16.6841 13.7501C17.5318 12.6931 18 11.385 18 10C18 6.68629 15.3137 4 12 4C8.68629 4 6 6.68629 6 10C6 11.3843 6.46774 12.6917 7.31462 13.7484C7.40004 13.855 8.12081 14.6012 8.23154 14.7218C9.22766 15.8064 9.84103 16.7984 9.97308 18ZM14 20H10V21H14V20ZM5.75395 14.9992C4.65645 13.6297 4 11.8915 4 10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10C20 11.8925 19.3428 13.6315 18.2443 15.0014C17.624 15.7748 16 17 16 18.5V21C16 22.1046 15.1046 23 14 23H10C8.89543 23 8 22.1046 8 21V18.5C8 17 6.37458 15.7736 5.75395 14.9992ZM13 10.0048H15.5L11 16.0048V12.0048H8.5L13 6V10.0048Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.97308 18H14.0269C14.1589 16.7984 14.7721 15.8065 15.7676 14.7226C15.8797 14.6006 16.5988 13.8564 16.6841 13.7501C17.5318 12.6931 18 11.385 18 10C18 6.68629 15.3137 4 12 4C8.68629 4 6 6.68629 6 10C6 11.3843 6.46774 12.6917 7.31462 13.7484C7.40004 13.855 8.12081 14.6012 8.23154 14.7218C9.22766 15.8064 9.84103 16.7984 9.97308 18ZM14 20H10V21H14V20ZM5.75395 14.9992C4.65645 13.6297 4 11.8915 4 10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10C20 11.8925 19.3428 13.6315 18.2443 15.0014C17.624 15.7748 16 17 16 18.5V21C16 22.1046 15.1046 23 14 23H10C8.89543 23 8 22.1046 8 21V18.5C8 17 6.37458 15.7736 5.75395 14.9992ZM13 10.0048H15.5L11 16.0048V12.0048H8.5L13 6V10.0048Z'/%3E%3C/svg%3E");
+}
+.ri-checkbox-circle-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11.0026 16L6.75999 11.7574L8.17421 10.3431L11.0026 13.1716L16.6595 7.51472L18.0737 8.92893L11.0026 16Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11.0026 16L6.75999 11.7574L8.17421 10.3431L11.0026 13.1716L16.6595 7.51472L18.0737 8.92893L11.0026 16Z'/%3E%3C/svg%3E");
+}
+.ri-error-warning-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 15H13V17H11V15ZM11 7H13V13H11V7Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 15H13V17H11V15ZM11 7H13V13H11V7Z'/%3E%3C/svg%3E");
+}
+.ri-eye-off-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M17.8827 19.2968C16.1814 20.3755 14.1638 21.0002 12.0003 21.0002C6.60812 21.0002 2.12215 17.1204 1.18164 12.0002C1.61832 9.62282 2.81932 7.5129 4.52047 5.93457L1.39366 2.80777L2.80788 1.39355L22.6069 21.1925L21.1927 22.6068L17.8827 19.2968ZM5.9356 7.3497C4.60673 8.56015 3.6378 10.1672 3.22278 12.0002C4.14022 16.0521 7.7646 19.0002 12.0003 19.0002C13.5997 19.0002 15.112 18.5798 16.4243 17.8384L14.396 15.8101C13.7023 16.2472 12.8808 16.5002 12.0003 16.5002C9.51498 16.5002 7.50026 14.4854 7.50026 12.0002C7.50026 11.1196 7.75317 10.2981 8.19031 9.60442L5.9356 7.3497ZM12.9139 14.328L9.67246 11.0866C9.5613 11.3696 9.50026 11.6777 9.50026 12.0002C9.50026 13.3809 10.6196 14.5002 12.0003 14.5002C12.3227 14.5002 12.6309 14.4391 12.9139 14.328ZM20.8068 16.5925L19.376 15.1617C20.0319 14.2268 20.5154 13.1586 20.7777 12.0002C19.8603 7.94818 16.2359 5.00016 12.0003 5.00016C11.1544 5.00016 10.3329 5.11773 9.55249 5.33818L7.97446 3.76015C9.22127 3.26959 10.5793 3.00016 12.0003 3.00016C17.3924 3.00016 21.8784 6.87992 22.8189 12.0002C22.5067 13.6998 21.8038 15.2628 20.8068 16.5925ZM11.7229 7.50857C11.8146 7.50299 11.9071 7.50016 12.0003 7.50016C14.4855 7.50016 16.5003 9.51488 16.5003 12.0002C16.5003 12.0933 16.4974 12.1858 16.4919 12.2775L11.7229 7.50857Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M17.8827 19.2968C16.1814 20.3755 14.1638 21.0002 12.0003 21.0002C6.60812 21.0002 2.12215 17.1204 1.18164 12.0002C1.61832 9.62282 2.81932 7.5129 4.52047 5.93457L1.39366 2.80777L2.80788 1.39355L22.6069 21.1925L21.1927 22.6068L17.8827 19.2968ZM5.9356 7.3497C4.60673 8.56015 3.6378 10.1672 3.22278 12.0002C4.14022 16.0521 7.7646 19.0002 12.0003 19.0002C13.5997 19.0002 15.112 18.5798 16.4243 17.8384L14.396 15.8101C13.7023 16.2472 12.8808 16.5002 12.0003 16.5002C9.51498 16.5002 7.50026 14.4854 7.50026 12.0002C7.50026 11.1196 7.75317 10.2981 8.19031 9.60442L5.9356 7.3497ZM12.9139 14.328L9.67246 11.0866C9.5613 11.3696 9.50026 11.6777 9.50026 12.0002C9.50026 13.3809 10.6196 14.5002 12.0003 14.5002C12.3227 14.5002 12.6309 14.4391 12.9139 14.328ZM20.8068 16.5925L19.376 15.1617C20.0319 14.2268 20.5154 13.1586 20.7777 12.0002C19.8603 7.94818 16.2359 5.00016 12.0003 5.00016C11.1544 5.00016 10.3329 5.11773 9.55249 5.33818L7.97446 3.76015C9.22127 3.26959 10.5793 3.00016 12.0003 3.00016C17.3924 3.00016 21.8784 6.87992 22.8189 12.0002C22.5067 13.6998 21.8038 15.2628 20.8068 16.5925ZM11.7229 7.50857C11.8146 7.50299 11.9071 7.50016 12.0003 7.50016C14.4855 7.50016 16.5003 9.51488 16.5003 12.0002C16.5003 12.0933 16.4974 12.1858 16.4919 12.2775L11.7229 7.50857Z'/%3E%3C/svg%3E");
+}
+.ri-information-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z'/%3E%3C/svg%3E");
+}
+.ri-lock-unlock-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10H20C20.5523 10 21 10.4477 21 11V21C21 21.5523 20.5523 22 20 22H4C3.44772 22 3 21.5523 3 21V11C3 10.4477 3.44772 10 4 10H5V9C5 5.13401 8.13401 2 12 2C14.7405 2 17.1131 3.5748 18.2624 5.86882L16.4731 6.76344C15.6522 5.12486 13.9575 4 12 4C9.23858 4 7 6.23858 7 9V10ZM5 12V20H19V12H5ZM10 15H14V17H10V15Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10H20C20.5523 10 21 10.4477 21 11V21C21 21.5523 20.5523 22 20 22H4C3.44772 22 3 21.5523 3 21V11C3 10.4477 3.44772 10 4 10H5V9C5 5.13401 8.13401 2 12 2C14.7405 2 17.1131 3.5748 18.2624 5.86882L16.4731 6.76344C15.6522 5.12486 13.9575 4 12 4C9.23858 4 7 6.23858 7 9V10ZM5 12V20H19V12H5ZM10 15H14V17H10V15Z'/%3E%3C/svg%3E");
+}
+.ri-refresh-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.46257 4.43262C7.21556 2.91688 9.5007 2 12 2C17.5228 2 22 6.47715 22 12C22 14.1361 21.3302 16.1158 20.1892 17.7406L17 12H20C20 7.58172 16.4183 4 12 4C9.84982 4 7.89777 4.84827 6.46023 6.22842L5.46257 4.43262ZM18.5374 19.5674C16.7844 21.0831 14.4993 22 12 22C6.47715 22 2 17.5228 2 12C2 9.86386 2.66979 7.88416 3.8108 6.25944L7 12H4C4 16.4183 7.58172 20 12 20C14.1502 20 16.1022 19.1517 17.5398 17.7716L18.5374 19.5674Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.46257 4.43262C7.21556 2.91688 9.5007 2 12 2C17.5228 2 22 6.47715 22 12C22 14.1361 21.3302 16.1158 20.1892 17.7406L17 12H20C20 7.58172 16.4183 4 12 4C9.84982 4 7.89777 4.84827 6.46023 6.22842L5.46257 4.43262ZM18.5374 19.5674C16.7844 21.0831 14.4993 22 12 22C6.47715 22 2 17.5228 2 12C2 9.86386 2.66979 7.88416 3.8108 6.25944L7 12H4C4 16.4183 7.58172 20 12 20C14.1502 20 16.1022 19.1517 17.5398 17.7716L18.5374 19.5674Z'/%3E%3C/svg%3E");
+}
+.ri-search-eye-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M18.031 16.6168L22.3137 20.8995L20.8995 22.3137L16.6168 18.031C15.0769 19.263 13.124 20 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20 13.124 19.263 15.0769 18.031 16.6168ZM16.0247 15.8748C17.2475 14.6146 18 12.8956 18 11C18 7.1325 14.8675 4 11 4C7.1325 4 4 7.1325 4 11C4 14.8675 7.1325 18 11 18C12.8956 18 14.6146 17.2475 15.8748 16.0247L16.0247 15.8748ZM12.1779 7.17624C11.4834 7.48982 11 8.18846 11 9C11 10.1046 11.8954 11 13 11C13.8115 11 14.5102 10.5166 14.8238 9.82212C14.9383 10.1945 15 10.59 15 11C15 13.2091 13.2091 15 11 15C8.79086 15 7 13.2091 7 11C7 8.79086 8.79086 7 11 7C11.41 7 11.8055 7.06167 12.1779 7.17624Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M18.031 16.6168L22.3137 20.8995L20.8995 22.3137L16.6168 18.031C15.0769 19.263 13.124 20 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20 13.124 19.263 15.0769 18.031 16.6168ZM16.0247 15.8748C17.2475 14.6146 18 12.8956 18 11C18 7.1325 14.8675 4 11 4C7.1325 4 4 7.1325 4 11C4 14.8675 7.1325 18 11 18C12.8956 18 14.6146 17.2475 15.8748 16.0247L16.0247 15.8748ZM12.1779 7.17624C11.4834 7.48982 11 8.18846 11 9C11 10.1046 11.8954 11 13 11C13.8115 11 14.5102 10.5166 14.8238 9.82212C14.9383 10.1945 15 10.59 15 11C15 13.2091 13.2091 15 11 15C8.79086 15 7 13.2091 7 11C7 8.79086 8.79086 7 11 7C11.41 7 11.8055 7.06167 12.1779 7.17624Z'/%3E%3C/svg%3E");
+}
+.ri-star-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26ZM12.0006 15.968L16.2473 18.3451L15.2988 13.5717L18.8719 10.2674L14.039 9.69434L12.0006 5.27502L9.96214 9.69434L5.12921 10.2674L8.70231 13.5717L7.75383 18.3451L12.0006 15.968Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26ZM12.0006 15.968L16.2473 18.3451L15.2988 13.5717L18.8719 10.2674L14.039 9.69434L12.0006 5.27502L9.96214 9.69434L5.12921 10.2674L8.70231 13.5717L7.75383 18.3451L12.0006 15.968Z'/%3E%3C/svg%3E");
+}
+.ri-user-star-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 14V16C8.68629 16 6 18.6863 6 22H4C4 17.5817 7.58172 14 12 14ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13ZM12 11C14.21 11 16 9.21 16 7C16 4.79 14.21 3 12 3C9.79 3 8 4.79 8 7C8 9.21 9.79 11 12 11ZM18 21.5L15.0611 23.0451L15.6224 19.7725L13.2447 17.4549L16.5305 16.9775L18 14L19.4695 16.9775L22.7553 17.4549L20.3776 19.7725L20.9389 23.0451L18 21.5Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 14V16C8.68629 16 6 18.6863 6 22H4C4 17.5817 7.58172 14 12 14ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13ZM12 11C14.21 11 16 9.21 16 7C16 4.79 14.21 3 12 3C9.79 3 8 4.79 8 7C8 9.21 9.79 11 12 11ZM18 21.5L15.0611 23.0451L15.6224 19.7725L13.2447 17.4549L16.5305 16.9775L18 14L19.4695 16.9775L22.7553 17.4549L20.3776 19.7725L20.9389 23.0451L18 21.5Z'/%3E%3C/svg%3E");
+}
+.ri-fire-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 23C16.1421 23 19.5 19.6421 19.5 15.5C19.5 14.6345 19.2697 13.8032 19 13.0296C17.3333 14.6765 16.0667 15.5 15.2 15.5C19.1954 8.5 17 5.5 11 1.5C11.5 6.49951 8.20403 8.77375 6.86179 10.0366C5.40786 11.4045 4.5 13.3462 4.5 15.5C4.5 19.6421 7.85786 23 12 23ZM12.7094 5.23498C15.9511 7.98528 15.9666 10.1223 13.463 14.5086C12.702 15.8419 13.6648 17.5 15.2 17.5C15.8884 17.5 16.5841 17.2992 17.3189 16.9051C16.6979 19.262 14.5519 21 12 21C8.96243 21 6.5 18.5376 6.5 15.5C6.5 13.9608 7.13279 12.5276 8.23225 11.4932C8.35826 11.3747 8.99749 10.8081 9.02477 10.7836C9.44862 10.4021 9.7978 10.0663 10.1429 9.69677C11.3733 8.37932 12.2571 6.91631 12.7094 5.23498Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 23C16.1421 23 19.5 19.6421 19.5 15.5C19.5 14.6345 19.2697 13.8032 19 13.0296C17.3333 14.6765 16.0667 15.5 15.2 15.5C19.1954 8.5 17 5.5 11 1.5C11.5 6.49951 8.20403 8.77375 6.86179 10.0366C5.40786 11.4045 4.5 13.3462 4.5 15.5C4.5 19.6421 7.85786 23 12 23ZM12.7094 5.23498C15.9511 7.98528 15.9666 10.1223 13.463 14.5086C12.702 15.8419 13.6648 17.5 15.2 17.5C15.8884 17.5 16.5841 17.2992 17.3189 16.9051C16.6979 19.262 14.5519 21 12 21C8.96243 21 6.5 18.5376 6.5 15.5C6.5 13.9608 7.13279 12.5276 8.23225 11.4932C8.35826 11.3747 8.99749 10.8081 9.02477 10.7836C9.44862 10.4021 9.7978 10.0663 10.1429 9.69677C11.3733 8.37932 12.2571 6.91631 12.7094 5.23498Z'/%3E%3C/svg%3E");
+}
+.ri-flashlight-line::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M13 9H21L11 24V15H4L13 0V9ZM11 11V7.22063L7.53238 13H13V17.3944L17.263 11H11Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M13 9H21L11 24V15H4L13 0V9ZM11 11V7.22063L7.53238 13H13V17.3944L17.263 11H11Z'/%3E%3C/svg%3E");
+}
+
+body.page-disabled {
+  pointer-events: none;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.welcome-footer {
+  display: block !important;
+  visibility: visible !important;
+}
+.welcome-footer #link-validator-promotion-link {
+  width: 100%;
+  text-align: center;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  box-sizing: border-box;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+.report-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.report-footer #link-validator-promotion-link {
+  width: 100%;
+  text-align: center;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  box-sizing: border-box;
+}
+</style>
+</head>
+<body class="page-disabled">
+<div id="dim-modal" class="modal-overlay" onclick="closeDimModal(event)">
+  <div
+    class="modal-box"
+    onclick="event.stopPropagation()"
+    style="max-width: 400px"
+  >
+    <div
+      class="modal-header"
+      style="background: linear-gradient(135deg, #10b981, #059669)"
+    >
+      <span>八维能量介绍</span
+      ><button class="modal-close" onclick="closeDimModal()">×</button>
+    </div>
+    <div class="modal-body" style="padding: 16px">
+      <div
+        style="
+          margin-bottom: 12px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #f0f0f0;
+        "
+      >
+        <b style="color: #10b981">脑力在线</b>
+        <p style="font-size: 0.85rem; color: #6b7280; margin: 4px 0 0">
+          理性思维能力，遇事能否冷静分析
+        </p>
+      </div>
+      <div
+        style="
+          margin-bottom: 12px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #f0f0f0;
+        "
+      >
+        <b style="color: #8b5cf6">自洽指数</b>
+        <p style="font-size: 0.85rem; color: #6b7280; margin: 4px 0 0">
+          自我接纳程度，能否与自己和平相处
+        </p>
+      </div>
+      <div
+        style="
+          margin-bottom: 12px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #f0f0f0;
+        "
+      >
+        <b style="color: #f59e0b">情绪免疫力</b>
+        <p style="font-size: 0.85rem; color: #6b7280; margin: 4px 0 0">
+          情绪稳定性，压力下的心理韧性
+        </p>
+      </div>
+      <div
+        style="
+          margin-bottom: 12px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #f0f0f0;
+        "
+      >
+        <b style="color: #3b82f6">社交电量</b>
+        <p style="font-size: 0.85rem; color: #6b7280; margin: 4px 0 0">
+          人际交往能量，社交场合的舒适度
+        </p>
+      </div>
+      <div
+        style="
+          margin-bottom: 12px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #f0f0f0;
+        "
+      >
+        <b style="color: #ec4899">格局视野</b>
+        <p style="font-size: 0.85rem; color: #6b7280; margin: 4px 0 0">
+          眼界格局，看问题的长远程度
+        </p>
+      </div>
+      <div
+        style="
+          margin-bottom: 12px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #f0f0f0;
+        "
+      >
+        <b style="color: #ef4444">行动燃料</b>
+        <p style="font-size: 0.85rem; color: #6b7280; margin: 4px 0 0">
+          执行力水平，想法能否落地
+        </p>
+      </div>
+      <div
+        style="
+          margin-bottom: 12px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #f0f0f0;
+        "
+      >
+        <b style="color: #14b8a6">心灵富足</b>
+        <p style="font-size: 0.85rem; color: #6b7280; margin: 4px 0 0">
+          内心世界丰富度，独处时的充实感
+        </p>
+      </div>
+      <div>
+        <b style="color: #6366f1">边界清晰度</b>
+        <p style="font-size: 0.85rem; color: #6b7280; margin: 4px 0 0">
+          自我边界感，说"不"的能力
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 维度介绍弹窗 -->
+
+<div class="container">
+  <!-- 欢迎页 -->
+  <div id="welcome-page" class="page active">
+    <div class="logo">
+      <i
+        class="ri-brain-line"
+        style="
+          font-size: 2.5rem;
+          color: #fff;
+          -webkit-font-smoothing: antialiased;
+        "
+      ></i>
+    </div>
+    <h1>16人格·心智阶段测试</h1>
+    <p class="subtitle">发现你的人格当前处于哪个进化阶段</p>
+    <div class="stage-tags">
+      <span class="stage-tag" style="background: #f3f4f6; color: #6b7280"
+        >未觉醒</span
+      >
+      <span class="stage-tag" style="background: #dbeafe; color: #2563eb"
+        >低阶</span
+      >
+      <span class="stage-tag" style="background: #d1fae5; color: #059669"
+        >中阶</span
+      >
+      <span class="stage-tag" style="background: #fef3c7; color: #d97706"
+        >高阶</span
+      >
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="icon"><i class="ri-vip-crown-line"></i></div>
+        <div>
+          <h3>16人格 + 心智觉醒</h3>
+          <p>精准匹配人格类型，诊断你的心智觉醒阶段</p>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="card-tag" style="background: #ecfdf5; color: #059669"
+          >类型简介</span
+        ><span class="card-tag" style="background: #fef3c7; color: #d97706"
+          >觉醒诊断</span
+        ><span class="card-tag" style="background: #ede9fe; color: #7c3aed"
+          >能量状态</span
+        ><span class="card-tag" style="background: #fce7f3; color: #db2777"
+          >进阶路径</span
+        >
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="icon"><i class="ri-bar-chart-box-line"></i></div>
+        <div>
+          <h3>八维雷达 + 能量扫描</h3>
+          <p>八大维度立体扫描，可视化你的心智能量图谱</p>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="card-tag" style="background: #dbeafe; color: #2563eb"
+          >脑力在线</span
+        ><span class="card-tag" style="background: #fce7f3; color: #db2777"
+          >情绪免疫</span
+        ><span class="card-tag" style="background: #fef3c7; color: #d97706"
+          >边界清晰</span
+        ><span class="card-tag" style="background: #ecfdf5; color: #059669"
+          >心灵富足</span
+        >
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="icon"><i class="ri-fire-line"></i></div>
+        <div>
+          <h3>天赋图谱 + 原力暗面</h3>
+          <p>挖掘天赋职业方向与灵魂CP，解锁你的原力与盲区</p>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="card-tag" style="background: #ecfdf5; color: #059669"
+          >职业推荐</span
+        ><span class="card-tag" style="background: #fce7f3; color: #db2777"
+          >灵魂伴侣</span
+        ><span class="card-tag" style="background: #ede9fe; color: #7c3aed"
+          >天赋原力</span
+        ><span class="card-tag" style="background: #fef3c7; color: #d97706"
+          >暗面盲区</span
+        >
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="icon"><i class="ri-search-eye-line"></i></div>
+        <div>
+          <h3>深度解析 + 成长行动</h3>
+          <p>五维深度画像，定制你的专属成长计划</p>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="card-tag" style="background: #ede9fe; color: #7c3aed"
+          >认知功能</span
+        ><span class="card-tag" style="background: #fce7f3; color: #db2777"
+          >恋爱模式</span
+        ><span class="card-tag" style="background: #dbeafe; color: #2563eb"
+          >沟通风格</span
+        ><span class="card-tag" style="background: #ecfdf5; color: #059669"
+          >成长行动</span
+        >
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="goToSelect()">开始阶段测试</button>
+    <div class="disclaimer welcome-footer">
+      <div class="disc-title">
+        基于 <em>Carl Jung</em> 认知功能理论的心智阶段诊断
+      </div>
+      <div class="disc-item">
+        <span class="disc-num">1.</span
+        ><strong>64道原创情境题，</strong>针对八大心智维度分别测量，结果更精准。
+      </div>
+      <div class="disc-item">
+        <span class="disc-num">2.</span
+        ><strong>看清认知架构与觉醒阶段，</strong>不只是贴标签式的娱乐测试。
+      </div>
+      <div class="disc-item">
+        <span class="disc-num">3.</span
+        ><strong>16人格精准匹配，</strong>生成天赋、成长路径与深度解析报告。
+      </div>
+      <div class="disc-item">
+        <span class="disc-num">4.</span
+        ><strong>附带可落地成长方案，</strong>帮你把潜在天赋变成核心能力。
+      </div>
+      <div class="disc-footer">
+        <p class="footer-title">Disclaimer · 温馨提示</p>
+        <p>本测试仅供娱乐参考，不构成任何心理、医疗或职业专业建议。</p>
+        <p>测试结果基于 Carl Jung 心理学理论框架，不代表严格的科学结论。</p>
+        <p>人格是流动的，结果反映的是当下状态，请结合实际理性看待。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 类型选择页 -->
+  <div id="select-page" class="page">
+    <h2 class="select-title">请确认你的16人格类型</h2>
+    <div class="type-grid">
+      <div class="type-group" style="--group-color: #8b5cf6">
+        <div class="type-group-header">分析家</div>
+        <div class="type-group-types">
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('INTJ');
+              selectType('INTJ');
+            "
+            >INTJ</span
+          >
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('INTP');
+              selectType('INTP');
+            "
+            >INTP</span
+          >
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('ENTJ');
+              selectType('ENTJ');
+            "
+            >ENTJ</span
+          >
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('ENTP');
+              selectType('ENTP');
+            "
+            >ENTP</span
+          >
+        </div>
+      </div>
+      <div class="type-group" style="--group-color: #10b981">
+        <div class="type-group-header">外交家</div>
+        <div class="type-group-types">
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('INFJ');
+              selectType('INFJ');
+            "
+            >INFJ</span
+          >
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('INFP');
+              selectType('INFP');
+            "
+            >INFP</span
+          >
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('ENFJ');
+              selectType('ENFJ');
+            "
+            >ENFJ</span
+          >
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('ENFP');
+              selectType('ENFP');
+            "
+            >ENFP</span
+          >
+        </div>
+      </div>
+      <div class="type-group" style="--group-color: #3b82f6">
+        <div class="type-group-header">守卫者</div>
+        <div class="type-group-types">
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('ISTJ');
+              selectType('ISTJ');
+            "
+            >ISTJ</span
+          >
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('ISFJ');
+              selectType('ISFJ');
+            "
+            >ISFJ</span
+          >
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('ESTJ');
+              selectType('ESTJ');
+            "
+            >ESTJ</span
+          >
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('ESFJ');
+              selectType('ESFJ');
+            "
+            >ESFJ</span
+          >
+        </div>
+      </div>
+      <div class="type-group" style="--group-color: #eab308">
+        <div class="type-group-header">探险家</div>
+        <div class="type-group-types">
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('ISTP');
+              selectType('ISTP');
+            "
+            >ISTP</span
+          >
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('ISFP');
+              selectType('ISFP');
+            "
+            >ISFP</span
+          >
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('ESTP');
+              selectType('ESTP');
+            "
+            >ESTP</span
+          >
+          <span
+            class="type-chip"
+            onclick="
+              showTypeHint('ESFP');
+              selectType('ESFP');
+            "
+            >ESFP</span
+          >
+        </div>
+      </div>
+    </div>
+    <div class="type-hint-bar" id="type-hint-bar">点击人格类型查看介绍</div>
+
+    <p class="guide">不知道自己的类型？建议先测一下再进行深度测试</p>
+    <p
+      class="guide"
+      style="color: #64748b; font-size: 0.75rem; margin-top: 6px"
+    >
+      <i class="ri-user-star-line" style="margin-right: 4px"></i
+      >根据类型定制专属题库，深度挖掘您的阶段
+    </p>
+    <p
+      class="guide"
+      style="color: #64748b; font-size: 0.75rem; margin-top: 4px"
+    >
+      <i class="ri-shuffle-line" style="margin-right: 4px"></i
+      >题目顺序随机排列，每次测试体验不同
+    </p>
+    <button
+      id="confirm-btn"
+      class="btn btn-primary"
+      onclick="startTest()"
+      disabled=""
+    >
+      确认并开始
+    </button>
+    <button
+      style="
+        width: 100%;
+        padding: 12px;
+        border: none;
+        background: transparent;
+        color: #9ca3af;
+        font-size: 0.85rem;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: color 0.2s;
+      "
+      onclick="showPage('welcome-page')"
+      onmouseover="this.style.color = '#6b7280'"
+      onmouseout="this.style.color = '#9ca3af'"
+    >
+      返回首页
+    </button>
+  </div>
+
+  <!-- 测试页 -->
+  <div id="test-page" class="page">
+    <div class="type-header">
+      <div class="type-badge" id="current-type-badge">
+        <span class="type-code">INTJ</span>
+      </div>
+      <button class="change-type-btn" onclick="changeType()">
+        <i class="ri-refresh-line"></i> 更换
+      </button>
+    </div>
+    <div class="progress-header">
+      <div class="progress-title">
+        第<span id="q-current">1</span>题 <span>共64题</span>
+      </div>
+      <div class="progress-divider"></div>
+      <div class="progress-dim" id="dimension-name">脑力在线</div>
+      <div class="progress-percent" id="progress-percent">2%</div>
+    </div>
+    <div class="progress">
+      <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+    </div>
+    <div class="q-box"><p id="question-text" class="q-text">加载中...</p></div>
+    <div class="opts">
+      <div class="opts-row">
+        <div class="opt" data-val="1" onclick="selectOption(1)">
+          <div class="opt-num">1</div>
+          <div class="opt-label">不符合</div>
+        </div>
+        <div class="opt" data-val="2" onclick="selectOption(2)">
+          <div class="opt-num">2</div>
+          <div class="opt-label">较少</div>
+        </div>
+        <div class="opt" data-val="3" onclick="selectOption(3)">
+          <div class="opt-num">3</div>
+          <div class="opt-label">一般</div>
+        </div>
+        <div class="opt" data-val="4" onclick="selectOption(4)">
+          <div class="opt-num">4</div>
+          <div class="opt-label">较多</div>
+        </div>
+        <div class="opt" data-val="5" onclick="selectOption(5)">
+          <div class="opt-num">5</div>
+          <div class="opt-label">非常符合</div>
+        </div>
+      </div>
+      <div class="opts-track"></div>
+      <div class="opts-ends"><span>不符合</span><span>非常符合</span></div>
+      <div class="auto-jump-tip">选择后自动跳转下一题</div>
+    </div>
+    <div class="nav">
+      <button
+        id="prev-btn"
+        class="nav-btn nav-prev"
+        onclick="prevQuestion()"
+        disabled=""
+      >
+        上一题
+      </button>
+      <button id="next-btn" class="nav-btn nav-next" onclick="nextQuestion()">
+        下一题
+      </button>
+    </div>
+    <button class="back-home-btn" onclick="restart()">返回首页</button>
+  </div>
+
+  <!-- 加载页 -->
+  <div id="loading-page" class="page">
+    <div class="loader">
+      <div class="loader-c"></div>
+      <div class="loader-c"></div>
+      <div class="loader-c"></div>
+    </div>
+    <p id="loading-text" class="loading-text">正在分析维度数据...</p>
+  </div>
+
+  <!-- 结果页 -->
+  <div id="result-page" class="page">
+    <div id="result-card" class="result-card">
+      <div class="result-top">
+        <div class="score-ring-wrap">
+          <svg class="score-ring" viewBox="0 0 100 100">
+            <circle class="score-ring-bg" cx="50" cy="50" r="42"></circle>
+            <circle
+              class="score-ring-fill"
+              id="score-ring-fill"
+              cx="50"
+              cy="50"
+              r="42"
+            ></circle>
+          </svg>
+          <div class="score-ring-text">
+            <span id="total-score" class="score-num">0</span>
+            <span class="score-label">总分</span>
+          </div>
+        </div>
+        <div class="stage-info">
+          <div class="stage-slot">
+            <div class="stage-slot-inner" id="stage-slot-inner">
+              <div class="stage-slot-item">未觉醒</div>
+              <div class="stage-slot-item">低阶</div>
+              <div class="stage-slot-item">中阶</div>
+              <div class="stage-slot-item">高阶</div>
+            </div>
+          </div>
+          <div class="stage-dots" id="stage-dots">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+      <div class="result-type-row"><span id="result-type">--</span></div>
+      <div class="result-divider"></div>
+      <div id="result-tags" class="result-tags"></div>
+      <p id="result-quote" class="result-quote">--</p>
+      <div class="result-wave"></div>
+    </div>
+    <div class="content-card">
+      <h3
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        "
+      >
+        <span><i class="ri-bar-chart-grouped-line"></i> 属性面板</span
+        ><button
+          onclick="showDimModal()"
+          style="
+            padding: 4px 10px;
+            background: color-mix(in srgb, var(--primary) 10%, transparent);
+            border: 1px solid
+              color-mix(in srgb, var(--primary) 20%, transparent);
+            border-radius: 12px;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            transition: all 0.2s;
+          "
+          title="维度介绍"
+        >
+          <i class="ri-information-line" style="font-size: 0.75rem"></i>维度说明
+        </button>
+      </h3>
+      <div class="radar-wrap">
+        <canvas id="radar-chart" width="280" height="280"></canvas>
+      </div>
+      <div id="dimension-list"></div>
+    </div>
+    <div class="content-card">
+      <h3><i class="ri-lightbulb-flash-line"></i> 心智觉醒度</h3>
+      <div id="awakening-stage" class="awakening-stage"></div>
+      <div id="awakening-insight" class="awakening-insight"></div>
+      <div id="awakening-guide" class="awakening-guide"></div>
+      <div id="awakening-advice" class="awakening-advice"></div>
+      <div id="stage-progress-path" class="stage-progress-path"></div>
+    </div>
+    <div class="content-card">
+      <h3><i class="ri-focus-3-line"></i> 天赋图谱</h3>
+      <div class="section-title">适合你的职业方向</div>
+      <div id="career-list2" class="career-tags"></div>
+      <div class="section-title" style="margin-top: 16px">
+        最佳灵魂伴侣 TOP3
+      </div>
+      <div id="partner-list2"></div>
+    </div>
+    <div class="content-card">
+      <h3><i class="ri-search-eye-line"></i> 深度解析</h3>
+      <div class="deep-tabs">
+        <div class="deep-tab active" data-tab="cognitive">认知功能</div>
+        <div class="deep-tab" data-tab="communication">沟通风格</div>
+        <div class="deep-tab" data-tab="learning">学习风格</div>
+        <div class="deep-tab" data-tab="love">恋爱模式</div>
+        <div class="deep-tab" data-tab="decision">决策模式</div>
+      </div>
+      <p
+        style="
+          text-align: center;
+          font-size: 0.7rem;
+          color: #c0c4cc;
+          margin: -4px 0 8px;
+          letter-spacing: 0.5px;
+        "
+      >
+        <i
+          class="ri-arrow-right-s-line"
+          style="
+            font-size: 0.65rem;
+            transform: rotate(180deg);
+            vertical-align: -1px;
+            margin-right: 1px;
+          "
+        ></i>
+        轻滑切换 探索更多维度
+        <i
+          class="ri-arrow-right-s-line"
+          style="font-size: 0.65rem; vertical-align: -1px; margin-left: 1px"
+        ></i>
+      </p>
+      <div id="deep-content" class="deep-content"></div>
+    </div>
+    <div class="content-card">
+      <h3><i class="ri-flashlight-line"></i> 原力与暗面</h3>
+      <div class="power-blind-grid">
+        <div id="powers-card" class="power-card"></div>
+        <div id="blindspots-card" class="blind-card"></div>
+      </div>
+    </div>
+    <div class="content-card">
+      <h3><i class="ri-checkbox-circle-line"></i> 成长行动卡</h3>
+      <div id="actions-list"></div>
+    </div>
+    <div class="report-footer">
+      <div class="result-bottom-bar">
+        <button class="bottom-btn btn-restart" onclick="restart()">
+          <i class="ri-refresh-line"></i> 重新测试
+        </button>
+      </div>
+    </div>
+    <div class="disclaimer">
+      <div class="disc-footer" style="margin-top: 0; padding-top: 0; border-top: none">
+        <p class="footer-title">Disclaimer · 温馨提示</p>
+        <p>本测试仅供娱乐参考，不构成任何心理、医疗或职业专业建议。</p>
+        <p>测试结果基于 Carl Jung 心理学理论框架，不代表严格的科学结论。</p>
+        <p>人格是流动的，结果反映的是当下状态，请结合实际理性看待。</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="theme-panel" id="theme-panel">
+  <div class="theme-options">
+    <div
+      class="theme-dot"
+      style="background: linear-gradient(135deg, #34d399, #10b981)"
+      onclick="setTheme('green')"
+      title="薄荷绿"
+    ></div>
+    <div
+      class="theme-dot"
+      style="background: linear-gradient(135deg, #f472b6, #ec4899)"
+      onclick="setTheme('pink')"
+      title="珊瑚粉"
+    ></div>
+    <div
+      class="theme-dot active"
+      style="background: linear-gradient(135deg, #c084fc, #a855f7)"
+      onclick="setTheme('')"
+      title="薰衣草紫"
+    ></div>
+    <div
+      class="theme-dot"
+      style="background: linear-gradient(135deg, #38bdf8, #0ea5e9)"
+      onclick="setTheme('blue')"
+      title="雾霾蓝"
+    ></div>
+    <div
+      class="theme-dot"
+      style="background: linear-gradient(135deg, #fb923c, #f97316)"
+      onclick="setTheme('orange')"
+      title="奶茶橘"
+    ></div>
+  </div>
+</div>
+<button class="theme-btn" id="theme-btn" onclick="toggleThemePanel()">
+  <svg viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="5"></circle>
+    <path
+      d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+    ></path>
+  </svg>
+</button>
+<!-- 主题切换按钮 -->
+<div class="theme-trigger" onclick="showThemeBtn()"></div>
+<!-- 隐藏触发区域 -->
+
+<script>
+// 人格数据和逻辑
+var PERSONALITY_TYPES = {
+  INTJ: {
+    name: "建筑师",
+    category: "分析家",
+    quote: "我不是在预测未来，我是在创造它。",
+    careers: ["战略顾问", "系统架构师", "科研人员", "投资分析师"],
+    soulmates: [
+      { type: "ENFP", score: 95 },
+      { type: "ENTP", score: 88 },
+      { type: "INFJ", score: 82 },
+    ],
+    powers:
+      "你是战略大师，拥有敏锐的洞察力和严密的逻辑分析能力。你能看穿事物本质，制定长远规划。你的独立思考能力让你不受群体思维影响，你天生就能识别系统中的漏洞并设计解决方案。你的远见让你能预见趋势，提前布局。",
+    blindSpots:
+      "你可能过于追求完美和效率，忽视他人的情感需求。在人际关系中可能显得冷漠和疏离。你可能低估情感因素的重要性，导致团队合作中的摩擦。过度自信可能让你忽视他人的有价值意见。",
+    actions: [
+      "每周进行一次深度社交活动，练习情感连接",
+      "主动询问他人感受，练习倾听而非分析",
+      '接受"足够好"的解决方案，避免完美主义陷阱',
+      "每天花10分钟反思人际互动中的情感因素",
+      "学习表达感谢和欣赏，而不只是提出改进建议",
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Ni", desc: "内倾直觉" },
+      { pos: "辅助", fn: "Te", desc: "外倾思维" },
+      { pos: "第三", fn: "Fi", desc: "内倾情感" },
+      { pos: "劣势", fn: "Se", desc: "外倾感觉" },
+    ],
+    loopWarning:
+      "Ni-Fi Loop：当你陷入这种循环时，会过度依赖内在直觉和个人价值观，忽视外部现实反馈，导致决策脱离实际。建议多与他人交流想法，接受外部验证。",
+  },
+  INTP: {
+    name: "逻辑学家",
+    category: "分析家",
+    quote: "我思故我在，我问故我知。",
+    careers: ["软件工程师", "数据科学家", "哲学家", "理论物理学家"],
+    soulmates: [
+      { type: "ENTJ", score: 92 },
+      { type: "ENFJ", score: 85 },
+      { type: "INTJ", score: 80 },
+    ],
+    powers:
+      "你是思维的炼金术士，拥有强大的内在逻辑和无限的可能性探索能力。你能在混乱中发现隐藏的规律，将复杂概念分解为可理解的模型。你的求知欲让你成为终身学习者，你能提出别人想不到的创新解决方案。",
+    blindSpots:
+      "你可能陷入过度思考而不行动，对情感表达感到困难和不自在。你可能忽视日常生活的基本需求，如规律作息和社交。你可能因为追求完美的理论而拖延实际执行。",
+    actions: [
+      "每天设定一个具体可执行的小目标并完成它",
+      '练习用"我感觉..."开头表达情绪，而非只说"我认为..."',
+      "建立固定的生活作息，包括规律的睡眠和用餐时间",
+      "每周与朋友进行一次非工作性质的交流",
+      '学习接受"80%完成"就开始行动的心态',
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Ti", desc: "内倾思维" },
+      { pos: "辅助", fn: "Ne", desc: "外倾直觉" },
+      { pos: "第三", fn: "Si", desc: "内倾感觉" },
+      { pos: "劣势", fn: "Fe", desc: "外倾情感" },
+    ],
+    loopWarning:
+      "Ti-Si Loop：当你陷入这种循环时，会过度分析过去的经验和细节，难以接受新观点，导致思维僵化。建议主动探索新领域，与他人分享想法。",
+  },
+  ENTJ: {
+    name: "指挥官",
+    category: "分析家",
+    quote: "不是我想当领导，是这里需要一个领导。",
+    careers: ["企业高管", "创业者", "律师", "管理顾问"],
+    soulmates: [
+      { type: "INTP", score: 92 },
+      { type: "INFP", score: 86 },
+      { type: "ENFP", score: 80 },
+    ],
+    powers:
+      "你是天生的领袖，拥有远见卓识和强大的执行力。你能够激励团队，将愿景转化为现实。你的决断力让你在危机时刻成为可靠的舵手，你能快速评估局势并采取行动。你善于识别和培养人才，构建高效团队。",
+    blindSpots:
+      "你可能过于强势和直接，忽视他人的感受和节奏。你可能把效率置于人际和谐之上，造成团队紧张。你可能难以接受失败或承认错误，这会阻碍你的成长。",
+    actions: [
+      "在做重大决策前，主动询问至少3个人的意见",
+      "每天花10分钟反思：今天我的决定对他人有什么影响？",
+      '练习说"你说得对"和"我不确定"',
+      "学会欣赏过程中的小进步，而非只关注最终结果",
+      "每周给团队成员真诚的认可和感谢",
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Te", desc: "外倾思维" },
+      { pos: "辅助", fn: "Ni", desc: "内倾直觉" },
+      { pos: "第三", fn: "Se", desc: "外倾感觉" },
+      { pos: "劣势", fn: "Fi", desc: "内倾情感" },
+    ],
+    loopWarning:
+      "Te-Se Loop：当你陷入这种循环时，会过度追求效率和即时结果，忽视长远规划和他人感受，导致急功近利。建议放慢脚步，倾听内心声音。",
+  },
+  ENTP: {
+    name: "辩论家",
+    category: "分析家",
+    quote: "规则是用来打破的，至少是用来质疑的。",
+    careers: ["企业家", "律师", "创意总监", "风险投资人"],
+    soulmates: [
+      { type: "INFJ", score: 95 },
+      { type: "INTJ", score: 88 },
+      { type: "ENFJ", score: 82 },
+    ],
+    powers:
+      "你是创新的催化剂，拥有无穷的创意和敏锐的分析能力。你能从多角度看问题，发现他人忽略的可能性。你的机智和口才让你成为出色的沟通者，你善于挑战既有假设，推动创新。你的适应力让你在变化中游刃有余。",
+    blindSpots:
+      "你可能难以坚持完成项目，新想法总是让你分心。辩论欲望可能伤害人际关系，让人感觉被攻击。你可能忽视细节和执行层面，导致好想法无法落地。",
+    actions: [
+      "选择一个核心项目，承诺在完成前不开始新项目",
+      '辩论前先说"我理解你的观点是..."再表达不同意见',
+      "建立每日固定的工作流程，减少决策疲劳",
+      '学习区分"挑战想法"和"攻击个人"的界限',
+      "每周回顾：哪些想法值得深入，哪些只是一时兴起",
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Ne", desc: "外倾直觉" },
+      { pos: "辅助", fn: "Ti", desc: "内倾思维" },
+      { pos: "第三", fn: "Fe", desc: "外倾情感" },
+      { pos: "劣势", fn: "Si", desc: "内倾感觉" },
+    ],
+    loopWarning:
+      "Ne-Fe Loop：当你陷入这种循环时，会不断追求新想法同时过度在意他人反应，导致注意力分散且情绪波动。建议定期独处整理思路。",
+  },
+  INFJ: {
+    name: "提倡者",
+    category: "外交家",
+    quote: "我不只是想改变世界，我想治愈它。",
+    careers: ["心理咨询师", "作家", "人力资源", "社会工作者"],
+    soulmates: [
+      { type: "ENTP", score: 95 },
+      { type: "ENFP", score: 90 },
+      { type: "INTJ", score: 84 },
+    ],
+    powers:
+      "你是灵魂的向导，拥有深刻的洞察力和对他人情感的敏锐感知。你能看穿表象直达本质，理解他人未说出口的需求。你的远见和理想主义能够激励他人成长，你天生就能感知群体的情感氛围并做出恰当回应。",
+    blindSpots:
+      '你可能过度理想化，难以接受现实的不完美。容易承担他人的情绪负担，导致身心疲惫。你可能会陷入"拯救者"角色，忽视自己的真实需求。过度追求深层意义可能让你错过简单的快乐。',
+    actions: [
+      '学会设立健康的边界，练习说"这不是我的责任"',
+      "每天进行15分钟身体锻炼或感官体验，保持与现实的连接",
+      '接受"足够好"的现实，不必一切都完美',
+      "每周安排独处时间，整理自己的情绪和想法",
+      '学习区分"共情"和"过度承担"的界限',
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Ni", desc: "内倾直觉" },
+      { pos: "辅助", fn: "Fe", desc: "外倾情感" },
+      { pos: "第三", fn: "Ti", desc: "内倾思维" },
+      { pos: "劣势", fn: "Se", desc: "外倾感觉" },
+    ],
+    loopWarning:
+      "Ni-Ti Loop：当你陷入这种循环时，会过度沉浸在内在洞察和分析中，脱离现实和人际联系，导致孤立和偏执。建议多参与社交活动，获取外部反馈。",
+  },
+  INFP: {
+    name: "调停者",
+    category: "外交家",
+    quote: "在这个世界上，我想成为一束温柔的光。",
+    careers: ["作家", "艺术家", "心理治疗师", "非营利组织工作者"],
+    soulmates: [
+      { type: "ENTJ", score: 86 },
+      { type: "ENFJ", score: 92 },
+      { type: "INTP", score: 78 },
+    ],
+    powers:
+      "你是价值观的守护者，拥有深厚的内在情感和丰富的想象力。你能感知他人的真实情感，提供真诚的理解和支持。你的创造力让你能用独特方式表达复杂情感，你的理想主义能激励他人追求更美好的可能性。",
+    blindSpots:
+      "你可能过于敏感和理想主义，难以处理冲突和批评。你可能逃避现实问题，沉浸在内心世界中。你可能设定过高期望，导致反复失望。你可能难以设立边界，容易被他人的负面情绪影响。",
+    actions: [
+      "学习将大目标分解为具体可执行的小步骤",
+      '练习直接表达需求：用"我需要..."开头的句子',
+      "每周完成一项实际任务，体验从想法到行动的成就感",
+      '学习接受"足够好"，不必等到完美才开始',
+      "每天写下3件现实中的好事，平衡理想与现实",
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Fi", desc: "内倾情感" },
+      { pos: "辅助", fn: "Ne", desc: "外倾直觉" },
+      { pos: "第三", fn: "Si", desc: "内倾感觉" },
+      { pos: "劣势", fn: "Te", desc: "外倾思维" },
+    ],
+    loopWarning:
+      "Fi-Si Loop：当你陷入这种循环时，会过度沉浸在过去的情感记忆中，难以接受新观点和可能性，导致抑郁和停滞。建议主动探索新体验，与他人分享想法。",
+  },
+  ENFJ: {
+    name: "主人公",
+    category: "外交家",
+    quote: "我相信每个人都有无限的潜力，让我帮你发现它。",
+    careers: ["教师", "人力资源总监", "公关经理", "生涯教练"],
+    soulmates: [
+      { type: "INFP", score: 92 },
+      { type: "INTP", score: 85 },
+      { type: "ISFP", score: 79 },
+    ],
+    powers:
+      "你是人际关系的大师，拥有强大的共情能力和远见。你能激发他人的潜力，帮助他们成为最好的自己。你的领导力来自于真诚关怀而非权威，你天生就能感知群体动态并促进和谐。你的组织能力让你成为优秀的活动策划者。",
+    blindSpots:
+      "你可能过度关注他人而忽视自己的需求，导致身心疲惫。你可能在讨好他人中迷失自我，难以分辨哪些是自己真正的想法。你可能过于理想化他人，在发现缺点后感到失望。",
+    actions: [
+      '每天花30分钟独处，问自己"我今天真正想要什么？"',
+      '练习说"不"：每周至少拒绝一个不合理的请求',
+      '区分"帮助他人"和"为他人负责"的界限',
+      "每周安排一次只为自己的活动，不需要照顾任何人",
+      "学习接受他人的不完美，降低救世主情结",
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Fe", desc: "外倾情感" },
+      { pos: "辅助", fn: "Ni", desc: "内倾直觉" },
+      { pos: "第三", fn: "Se", desc: "外倾感觉" },
+      { pos: "劣势", fn: "Ti", desc: "内倾思维" },
+    ],
+    loopWarning:
+      "Fe-Se Loop：当你陷入这种循环时，会过度追求他人认可和即时反馈，忽视长远规划和内在需求，导致身心俱疲。建议定期独处，倾听内心声音。",
+  },
+  ENFP: {
+    name: "竞选者",
+    category: "外交家",
+    quote: "生活是一场冒险，而我要尝试每一种可能！",
+    careers: ["市场营销", "记者", "活动策划", "创业者"],
+    soulmates: [
+      { type: "INTJ", score: 95 },
+      { type: "INFJ", score: 90 },
+      { type: "INTP", score: 82 },
+    ],
+    powers:
+      "你是可能性的探索者，拥有无限的热情和深厚的价值观。你的热情具有感染力，能够激励他人跟随你的愿景。你善于发现他人的潜力，并真诚地鼓励他们。你的创造力和适应力让你在任何环境都能找到乐趣和意义。",
+    blindSpots:
+      "你可能难以坚持和专注，新想法总是让你分心。热情消退后容易放弃项目，留下一堆未完成的事。你可能过度承诺，难以拒绝机会，导致精力分散。你可能在深度和广度之间失衡，缺乏专业积累。",
+    actions: [
+      "选择最多3个核心项目，其他新想法先记录但不行动",
+      "建立每日固定作息，包括固定的工作和休息时间",
+      '练习"完成一件事再开始下一件"的习惯',
+      '学习区分"真正的机会"和"一时的兴趣"',
+      "每周回顾：本周完成了什么，而非开始了什么",
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Ne", desc: "外倾直觉" },
+      { pos: "辅助", fn: "Fi", desc: "内倾情感" },
+      { pos: "第三", fn: "Te", desc: "外倾思维" },
+      { pos: "劣势", fn: "Si", desc: "内倾感觉" },
+    ],
+    loopWarning:
+      "Ne-Te Loop：当你陷入这种循环时，会不断产生新想法并急于执行，却缺乏深度思考和情感连接，导致浅尝辄止。建议放慢脚步，深入体验每个项目。",
+  },
+  ISTJ: {
+    name: "物流师",
+    category: "守卫者",
+    quote: '承诺即契约，我的字典里没有"差不多"。',
+    careers: ["会计师", "审计师", "项目经理", "法官"],
+    soulmates: [
+      { type: "ESFP", score: 88 },
+      { type: "ESTP", score: 82 },
+      { type: "ENFP", score: 75 },
+    ],
+    powers:
+      "你是规则的守护者，拥有超强的记忆力和对细节的执着追求。你是团队中最值得信赖的执行者，说到做到，从不食言。你的逻辑思维清晰严密，能把复杂项目分解成可控的步骤。你是传统和秩序的捍卫者，在混乱中保持冷静，用事实和数据说话。",
+    blindSpots:
+      "你可能过于保守和固执，难以接受新方法和变化。你可能过度关注规则和流程，忽视灵活变通的必要性。你可能难以表达情感，让亲近的人感觉疏离。",
+    actions: [
+      "每月尝试一件完全新的事物，走出舒适区",
+      '在坚持己见前，先问"如果我错了呢？"',
+      "学习用言语表达感谢和关心，而非只用行动",
+      "每周花时间思考：哪些规则可以打破？",
+      "练习接受不完美的解决方案，有时候快比完美更重要",
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Si", desc: "内倾感觉" },
+      { pos: "辅助", fn: "Te", desc: "外倾思维" },
+      { pos: "第三", fn: "Fi", desc: "内倾情感" },
+      { pos: "劣势", fn: "Ne", desc: "外倾直觉" },
+    ],
+    loopWarning:
+      "Si-Fi Loop：当你陷入这种循环时，会过度沉浸在过去经验和个人感受中，拒绝新信息和变化，导致固步自封。建议主动接触新事物，听取他人建议。",
+  },
+  ISFJ: {
+    name: "守卫者",
+    category: "守卫者",
+    quote: "润物细无声，我用行动写情书。",
+    careers: ["护士", "教师", "行政助理", "社会工作者"],
+    soulmates: [
+      { type: "ESTP", score: 85 },
+      { type: "ESFP", score: 88 },
+      { type: "ENFJ", score: 76 },
+    ],
+    powers:
+      "你是温暖的守护者，拥有对他人需求的第六感。你能记住每个人的生日、喜好和小习惯，用细腻的关怀温暖身边的人。你是家庭和团队的情感支柱，默默付出却从不邀功。你的耐心和奉献精神让你成为最好的倾听者，你用行动而非言语表达爱。",
+    blindSpots:
+      "你可能过度牺牲自己，难以表达自己的需求和不满。你可能过于在意他人评价，导致焦虑和压力。你可能难以接受变化，固守熟悉的方式即使它们不再有效。",
+    actions: [
+      '每天用一句话表达自己的需求："我希望..."',
+      '设立个人边界：学会说"我需要先考虑一下"',
+      "每周至少为自己做一件事，不需要理由",
+      '练习接受表扬时说"谢谢"而非"没什么"',
+      "每月回顾：我为自己做了什么，而非只为他人做了什么",
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Si", desc: "内倾感觉" },
+      { pos: "辅助", fn: "Fe", desc: "外倾情感" },
+      { pos: "第三", fn: "Ti", desc: "内倾思维" },
+      { pos: "劣势", fn: "Ne", desc: "外倾直觉" },
+    ],
+    loopWarning:
+      "Si-Ti Loop：当你陷入这种循环时，会过度分析过去经验中的细节，忽视他人情感需求，导致社交退缩。建议主动与他人分享感受，接受新观点。",
+  },
+  ESTJ: {
+    name: "总经理",
+    category: "守卫者",
+    quote: "言必行，行必果，这是我的操作系统。",
+    careers: ["企业经理", "军官", "法官", "财务总监"],
+    soulmates: [
+      { type: "ISFP", score: 90 },
+      { type: "ISTP", score: 83 },
+      { type: "INTP", score: 74 },
+    ],
+    powers:
+      "你是效率的化身，拥有将愿景转化为现实的执行力。你天生就是组织者和管理者，能快速建立秩序、分配任务、推动进度。你的决断力在危机时刻尤为突出，敢于承担责任和做出艰难决定。你的直接沟通风格让团队目标清晰、节奏有序。",
+    blindSpots:
+      "你可能过于强势和固执，难以接受新想法和不同意见。你可能过于关注效率而忽视人际关系，造成团队紧张。你可能对自己和他人要求过高，缺乏同理心。",
+    actions: [
+      "在做决定前询问至少两个人的意见，认真考虑",
+      '练习灵活应对变化：问自己"还有什么其他可能？"',
+      "每周主动关心一位团队成员的个人情况",
+      '学习接受"不完美但足够好"的解决方案',
+      "练习表达欣赏而非只指出问题",
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Te", desc: "外倾思维" },
+      { pos: "辅助", fn: "Si", desc: "内倾感觉" },
+      { pos: "第三", fn: "Ne", desc: "外倾直觉" },
+      { pos: "劣势", fn: "Fi", desc: "内倾情感" },
+    ],
+    loopWarning:
+      "Te-Ne Loop：当你陷入这种循环时，会过度追求效率同时不断寻找新方法，却忽视实际经验和他人感受，导致决策混乱。建议回归已验证的方法，倾听内心声音。",
+  },
+  ESFJ: {
+    name: "执政官",
+    category: "守卫者",
+    quote: "我编织关系的网，让每个人都有归属感。",
+    careers: ["人力资源", "销售经理", "护士", "活动策划"],
+    soulmates: [
+      { type: "ISTP", score: 86 },
+      { type: "ISFP", score: 80 },
+      { type: "INFP", score: 75 },
+    ],
+    powers:
+      "你是人际关系的织网者，拥有让每个人都感到被看见的魔力。你是社区的核心，能记住每个人的故事并真诚关心。你的组织能力让聚会和活动总是温馨成功，你善于察言观色，在冲突中扮演调和者。你是传统与人情的守护者，让周围的人感到温暖和归属。",
+    blindSpots:
+      "你可能过度在意他人评价，难以独立思考和表达真实想法。你可能为了维护和谐而压抑冲突，导致问题积累。你可能过于依赖外部认可来确认自我价值。",
+    actions: [
+      "每周独立做一个小决定，不征求他人意见",
+      "学会接受并尊重不同意见，即使感觉不舒服",
+      '每天问自己："我真正想要的是什么？"',
+      '练习表达不同意见时说"我有另一个想法..."',
+      '学习区分"为他人好"和"讨好他人"的界限',
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Fe", desc: "外倾情感" },
+      { pos: "辅助", fn: "Si", desc: "内倾感觉" },
+      { pos: "第三", fn: "Ne", desc: "外倾直觉" },
+      { pos: "劣势", fn: "Ti", desc: "内倾思维" },
+    ],
+    loopWarning:
+      "Fe-Ne Loop：当你陷入这种循环时，会过度关注他人反应同时不断猜测各种可能，导致焦虑和决策困难。建议回归实际经验，独立思考问题。",
+  },
+  ISTP: {
+    name: "鉴赏家",
+    category: "探险家",
+    quote: "万物皆可拆解，包括人生的困境。",
+    careers: ["工程技术", "急诊医生", "刑侦/特警", "飞行员"],
+    soulmates: [
+      { type: "ESTJ", score: 88 },
+      { type: "ESFJ", score: 80 },
+      { type: "ENTJ", score: 73 },
+    ],
+    powers:
+      "你是冷静的工匠，拥有敏锐的思考和对现实的掌控力。你能在危机时刻保持冷静，快速分析并解决问题。你对机械和系统有天然的理解力，你的动手能力让你能将想法变成现实。你的独立性让你在任何环境都能自给自足。",
+    blindSpots:
+      '你容易陷入虚无主义，对"意义"的追问可能让你感到迷茫。你不善于处理复杂的情感纠葛，可能显得冷漠。你可能过于活在当下，缺乏长期规划。',
+    actions: [
+      "通过运动或手工活动打破思维死循环",
+      "每周向一个人表达感谢或欣赏",
+      "制定3-5年的人生愿景，即使模糊也好",
+      "练习用语言描述自己的感受，而非只用行动",
+      "每月与亲近的人进行一次深度对话",
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Ti", desc: "内倾思维" },
+      { pos: "辅助", fn: "Se", desc: "外倾感觉" },
+      { pos: "第三", fn: "Ni", desc: "内倾直觉" },
+      { pos: "劣势", fn: "Fe", desc: "外倾情感" },
+    ],
+    loopWarning:
+      "Ti-Ni Loop：当你陷入这种循环时，会过度分析并产生悲观预测，脱离现实体验，导致消极和孤立。建议通过身体活动回归当下，与他人分享感受。",
+  },
+  ISFP: {
+    name: "探险家",
+    category: "探险家",
+    quote: "真正的艺术，是把每一天都活成一件作品。",
+    careers: ["艺术家", "设计师", "摄影师", "厨师"],
+    soulmates: [
+      { type: "ESTJ", score: 85 },
+      { type: "ENTJ", score: 80 },
+      { type: "ESFJ", score: 76 },
+    ],
+    powers:
+      "你是感性的艺术家，拥有深厚的内在价值观和敏锐的感官体验。你能感知美和和谐，用独特方式表达内心世界。你的真诚和温柔让人感到安全，你用行动而非言语表达关爱。你的灵活性让你能优雅地适应变化。",
+    blindSpots:
+      "你可能过于活在当下，难以规划未来和坚持长期目标。你可能在冲突中选择逃避，让问题积累。你可能难以用言语表达内心感受，导致被误解。",
+    actions: [
+      "设定一个6个月的目标并写下来，每周回顾进度",
+      '学习直接表达不满：用"我感到不舒服因为..."的句式',
+      "每周日花15分钟规划下周的主要任务",
+      '练习在冲突中说"我需要一些时间思考"而非直接逃避',
+      "每月与亲近的人分享你的内心想法和感受",
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Fi", desc: "内倾情感" },
+      { pos: "辅助", fn: "Se", desc: "外倾感觉" },
+      { pos: "第三", fn: "Ni", desc: "内倾直觉" },
+      { pos: "劣势", fn: "Te", desc: "外倾思维" },
+    ],
+    loopWarning:
+      "Fi-Ni Loop：当你陷入这种循环时，会过度沉浸在个人情感和悲观预测中，逃避现实体验，导致抑郁和孤立。建议通过感官活动回归当下，与他人分享感受。",
+  },
+  ESTP: {
+    name: "企业家",
+    category: "探险家",
+    quote: "犹豫的时候，答案往往藏在行动里。",
+    careers: ["销售", "企业家", "运动员", "急救人员"],
+    soulmates: [
+      { type: "ISFJ", score: 85 },
+      { type: "ISTJ", score: 82 },
+      { type: "INTJ", score: 74 },
+    ],
+    powers:
+      "你是行动的先锋，拥有敏锐的现实感知和快速的分析能力。你能在压力下保持冷静并快速行动，你的适应力让你在任何环境都能游刃有余。你的魅力和幽默感让你成为社交焦点，你善于抓住机会并付诸行动。",
+    blindSpots:
+      "你可能过于冲动，忽视长期后果和他人感受。你可能在追求刺激中忽视责任和承诺。你可能伤害他人感情而不自知，因为你更关注事实而非情感。",
+    actions: [
+      '决策前暂停10秒，问自己"这对未来有什么影响？"',
+      "每周练习主动询问他人感受并认真倾听",
+      "制定季度目标并每周回顾进度",
+      '在说话前考虑对方的感受，而非只说"实话"',
+      "每月反思：我的行为对亲近的人产生了什么影响？",
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Se", desc: "外倾感觉" },
+      { pos: "辅助", fn: "Ti", desc: "内倾思维" },
+      { pos: "第三", fn: "Fe", desc: "外倾情感" },
+      { pos: "劣势", fn: "Ni", desc: "内倾直觉" },
+    ],
+    loopWarning:
+      "Se-Fe Loop：当你陷入这种循环时，会过度追求感官刺激和他人认可，忽视逻辑分析，导致冲动决策和寻求关注。建议独处思考，关注长远后果。",
+  },
+  ESFP: {
+    name: "表演者",
+    category: "探险家",
+    quote: "生命的意义不在终点，而在每一个心跳的当下。",
+    careers: ["演员", "销售", "活动主持", "旅游行业"],
+    soulmates: [
+      { type: "ISTJ", score: 88 },
+      { type: "ISFJ", score: 88 },
+      { type: "ENFJ", score: 75 },
+    ],
+    powers:
+      "你是快乐的传播者，拥有强大的现实感知和对他人情感的敏感。你的热情和活力能点亮任何场合，你善于创造欢乐和美好的体验。你的适应力让你在任何环境都能找到乐趣，你能敏锐感知他人的情绪需求并给予支持。",
+    blindSpots:
+      "你可能过于追求即时享乐，难以延迟满足和坚持长期目标。你可能逃避严肃话题和困难对话，让问题积累。你可能在追求新鲜感中忽视深度发展和稳定关系。",
+    actions: [
+      "每天花15分钟规划未来，写下一周内要完成的3件事",
+      "练习面对不舒服的对话，不逃避冲突",
+      "建立储蓄习惯，将收入的10%自动存起来",
+      "每周安排一次安静独处的时间，进行自我反思",
+      "学习在享乐和责任之间找到平衡",
+    ],
+    cogStack: [
+      { pos: "主导", fn: "Se", desc: "外倾感觉" },
+      { pos: "辅助", fn: "Fi", desc: "内倾情感" },
+      { pos: "第三", fn: "Te", desc: "外倾思维" },
+      { pos: "劣势", fn: "Ni", desc: "内倾直觉" },
+    ],
+    loopWarning:
+      "Se-Te Loop：当你陷入这种循环时，会过度追求感官体验和外部成就，忽视内在价值观，导致空虚和迷失方向。建议定期独处反思，连接内心真实需求。",
+  },
+};
+var TYPE_GROUPS = [
+  { label: "分析家 (紫色系)", types: ["INTJ", "INTP", "ENTJ", "ENTP"] },
+  { label: "外交家 (绿色系)", types: ["INFJ", "INFP", "ENFJ", "ENFP"] },
+  { label: "守卫者 (蓝色系)", types: ["ISTJ", "ISFJ", "ESTJ", "ESFJ"] },
+  { label: "探险家 (黄色系)", types: ["ISTP", "ISFP", "ESTP", "ESFP"] },
+];
+// 四大类别专属题目 - 深度升级版（小红书高质量女性风格）
+var QUESTIONS_BY_GROUP = {
+  // 🟣 分析家题目（INTJ/INTP/ENTJ/ENTP）- 系统思维、逻辑拆解、独立判断、策略规划
+  analyst: [
+    {
+      id: 1,
+      text: '我能分清"我不喜欢这个结论"和"这个结论是错的"，情绪不该左右判断。',
+      dimension: "脑力在线",
+    },
+    {
+      id: 2,
+      text: '争论中如果对方说得更有道理，我能当场承认"你是对的"，而不是嘴硬到底。',
+      dimension: "脑力在线",
+    },
+    {
+      id: 3,
+      text: "做重要决定时，我会刻意找一个反对我的人聊聊，而不是只听认同我的声音。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 4,
+      text: "我开始意识到，漂亮的话术和包装背后，往往藏着逻辑漏洞，我不再轻易被带跑。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 5,
+      text: "面对复杂的人际关系，我能跳出情绪看清本质：谁在索取，谁在付出。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 7,
+      text: "“想太多”不是缺点，而是我系统思维的运作方式，这是我的核心竞争力。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 8,
+      text: "冷静分析也是一种关心，我不需要强迫自己变得“更有人情味”来证明我在乎。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 10,
+      text: "我的“冷漠”其实是一种深度思考的方式，用逻辑而非情绪来关心人。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 11,
+      text: "被所有人理解不是我的课题，有几个能深度对话的人，远比100个点赞之交重要。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 12,
+      text: "我的某些“缺点”其实是操作系统特性，改变它们不如用好它们。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 13,
+      text: "感受情绪的存在，但不让它干扰决策，这是理性思维的核心优势。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 14,
+      text: "有人故意激怒我时，我能看穿这是他的问题，不是我的课题。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 16,
+      text: "高压下保持冷静是我的核心竞争力，这让我能在混乱中看清本质。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 17,
+      text: "情绪低落时允许自己暂停，而不是强撑着高效运转，这是系统的自我保护机制。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 18,
+      text: "一次失败不代表判断力失灵，这只是系统迭代过程中的一个数据点。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 19,
+      text: "我宁愿要3个能深度对话的朋友，也不要30个只会寒暄的熟人。",
+      dimension: "社交电量",
+    },
+    {
+      id: 20,
+      text: "面对价值观冲突的人，保持礼貌但不假装认同，这是成熟的边界感。",
+      dimension: "社交电量",
+    },
+    {
+      id: 21,
+      text: "哪些社交是能量消耗，哪些是思维碰撞带来的深度满足，我只为后者腑出时间。",
+      dimension: "社交电量",
+    },
+    {
+      id: 22,
+      text: "为了合群而妥协的代价，往往是失去自我，这个代价我不愿意付。",
+      dimension: "社交电量",
+    },
+    {
+      id: 24,
+      text: '面对"你怎么这么不近人情"的指责，我能坚定地做自己。',
+      dimension: "社交电量",
+    },
+    {
+      id: 25,
+      text: "当别人追热点时，我已在思考热点背后的逻辑和下一个趋势，这是我的策略视角。",
+      dimension: "格局视野",
+    },
+    {
+      id: 26,
+      text: "看到事情的长远影响，而不被眼前得失困住，这是系统思维的长线视角。",
+      dimension: "格局视野",
+    },
+    {
+      id: 27,
+      text: "面对不确定性，我会收集信息、分析概率，而不是焦虑内耗。",
+      dimension: "格局视野",
+    },
+    {
+      id: 28,
+      text: "大多数问题都有解，只是需要拆解复杂度、找到正确的切入点，这是我擅长的。",
+      dimension: "格局视野",
+    },
+    {
+      id: 30,
+      text: "有些事急不来，战略性等待时机成熟，这是系统规划的重要部分。",
+      dimension: "格局视野",
+    },
+    {
+      id: 31,
+      text: '我能把一个复杂想法拆解成可执行的步骤，而不是停留在"好想法"阶段。',
+      dimension: "行动燃料",
+    },
+    {
+      id: 33,
+      text: "用“完成比”而不是“待办数量”来衡量效率，我的系统在运转，而不是在堆积。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 34,
+      text: "什么是“真正的思考”，什么是“用思考逃避行动”，前者创造价值，后者只是拖延。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 35,
+      text: "遇到阻碍时，我会分析原因并调整策略，而不是放弃。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 36,
+      text: "什么时候该继续深挖，什么时候该果断止损，这是策略思维的关键判断。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 37,
+      text: "我有自己的知识体系和精神世界，它的价值不需要外界认可来确认。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 38,
+      text: "独处时大脑在思考各种问题，这是系统思维的享受，不是孤独。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 40,
+      text: "我做的事的价值，不由点赞数定义，我自己的判断系统更可靠。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 41,
+      text: "那些无法向他人解释的追求，它们是我思维系统的核心驱动力。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 42,
+      text: "我不需要热闹来填补空虚，我的内心系统自给自足。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 43,
+      text: "拒绝无效社交和情绪勒索，这不是冷漠，是对时间和能量的理性保护。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 44,
+      text: "面对“你太自我了”的评价，坚持自己的判断，这是独立思考的代价和勋章。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 45,
+      text: "说“不”不需要详细理由或愧疚，这是边界清晰的基本操作。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 46,
+      text: "别人越界时冷静但坚定地划清界限，这是理性边界的具体实践。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 48,
+      text: "时间和精力是稀缺资源，我有权策略性地选择如何分配。",
+      dimension: "边界清晰度",
+    },
+    // === 新增题目（每维度+2道，含反向题）===
+    {
+      id: 49,
+      text: "把复杂观点拆解成清晰逻辑的能力，这是系统思维的核心优势。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 50,
+      text: "遇到突发状况时，我往往大脑一片空白，需要很久才能冷静下来。",
+      dimension: "脑力在线",
+      reverse: true,
+    },
+    {
+      id: 51,
+      text: "我的思维方式和大多数人不同，这是独立判断的源头，不是缺陷。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 52,
+      text: "我常常觉得自己不够好，和别人比起来常常觉得差一截。",
+      dimension: "自洽指数",
+      reverse: true,
+    },
+    {
+      id: 53,
+      text: "让负面情绪像云一样飘过，而不是被它裹挟，这是情绪免疫力的核心。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 54,
+      text: "被批评后我会难受好几天，反复回想那个场景。",
+      dimension: "情绪免疫力",
+      reverse: true,
+    },
+    {
+      id: 55,
+      text: "在社交模式和独处充电之间自如切换，这是管理能量的策略。",
+      dimension: "社交电量",
+    },
+    {
+      id: 56,
+      text: "主动找人聊天对我来说是一件需要鼓起勇气的事。",
+      dimension: "社交电量",
+      reverse: true,
+    },
+    {
+      id: 57,
+      text: "思考当前决定对五年后的影响，这是策略规划的基本功。",
+      dimension: "格局视野",
+    },
+    {
+      id: 58,
+      text: "我更关注眼前的事情，很少思考长远规划。",
+      dimension: "格局视野",
+      reverse: true,
+    },
+    {
+      id: 59,
+      text: "决定后立刻开始第一步，行动力是把系统思维变成现实的桥梁。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 60,
+      text: "我有很多想法，但经常停留在想的阶段，很难付诸行动。",
+      dimension: "行动燃料",
+      reverse: true,
+    },
+    {
+      id: 61,
+      text: "我热爱的事物不需要外界认可，内在价值系统就是最好的评定标准。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 62,
+      text: "独处时我会感到空虚无聊，总想找人说话或刷手机。",
+      dimension: "心灵富足",
+      reverse: true,
+    },
+    {
+      id: 63,
+      text: "温和而坚定地维护边界，这不是冷漠，是对自我空间的理性保护。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 64,
+      text: '别人请求帮忙时，即使很为难我也很难说"不"。',
+      dimension: "边界清晰度",
+      reverse: true,
+    },
+    // === 新增反向题（每维度+1道）===
+    {
+      id: 65,
+      text: "面对复杂问题，我容易陷入细节而忘记整体目标。",
+      dimension: "脑力在线",
+      reverse: true,
+    },
+    {
+      id: 66,
+      text: "当别人不认同我的观点时，我会怀疑自己是不是错了。",
+      dimension: "自洽指数",
+      reverse: true,
+    },
+    {
+      id: 67,
+      text: "工作或学习压力大时，我的情绪容易失控。",
+      dimension: "情绪免疫力",
+      reverse: true,
+    },
+    {
+      id: 68,
+      text: "在陌生环境中，我通常会等别人先开口。",
+      dimension: "社交电量",
+      reverse: true,
+    },
+    {
+      id: 69,
+      text: "我很少思考自己做的事对社会有什么意义。",
+      dimension: "格局视野",
+      reverse: true,
+    },
+    {
+      id: 70,
+      text: "面对困难任务，我倾向于拖延而不是立即行动。",
+      dimension: "行动燃料",
+      reverse: true,
+    },
+    {
+      id: 71,
+      text: "没有外界认可时，我会怀疑自己的价值。",
+      dimension: "心灵富足",
+      reverse: true,
+    },
+    {
+      id: 72,
+      text: "为了避免冲突，我通常会压抑自己的真实想法。",
+      dimension: "边界清晰度",
+      reverse: true,
+    },
+  ],
+  // 🟢 外交家题目（INFJ/INFP/ENFJ/ENFP）- 情感洞察、价值导向、灵魂连接、意义追寻
+  diplomat: [
+    {
+      id: 1,
+      text: "这是我真正的感受，还是我吸收了别人的情绪？，我能分辨。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 2,
+      text: "面对让我心累的人，我学会问自己：我是真的想帮，还是习惯性付出？",
+      dimension: "脑力在线",
+    },
+    {
+      id: 4,
+      text: "“我是为你好”这句话背后，往往藏着情感控制，真正的爱不需要这种前缀。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 5,
+      text: "我的直觉是潜意识对情感信号的整合，而不是“想太多”，我信任它。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 6,
+      text: "谁的关心是真诚的灵魂共鸣，谁只是带着目的的示好，我能感知到。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 7,
+      text: "“想太多”不是缺点，敏感是我感知世界的独特天赋，让我能看见别人忽略的情感波动。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 9,
+      text: "我不需要“变得更好”来证明自己值得被爱，现在的我就已经是完整的灵魂。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 10,
+      text: "和过去的自己和解：那时的我已经尽力了，羞耻感不再定义我的价值。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 11,
+      text: "情绪的起伏不是缺陷，而是内心丰富的证据，阴天也是天气的一种。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 12,
+      text: "我的价值不需要通过付出来证明，我的存在本身就是意义。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 13,
+      text: "我学会了在感受他人情绪的同时，守住自己的内心不被淹没。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 14,
+      text: "难过时允许自己完整地难过，而不是急着“振作”去照顾别人，我的情绪也需要被看见。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 15,
+      text: "有人故意说话刺我，我能画一条线：这是你的情绪，不是我的课题。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 17,
+      text: '深夜emo时，我能抱抱自己说"没关系"，而不是急着找人倾诉填补空虚。',
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 18,
+      text: "情绪是灵魂的信号，不是我的主人，我可以感受它，但选择不被它完全控制。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 19,
+      text: "有些人只是喜欢我的付出，而不是喜欢我这个人，我看得清。",
+      dimension: "社交电量",
+    },
+    {
+      id: 20,
+      text: "关系变淡时坦然放手，而不是一个人默默维系单向的感情，灵魂的连接需要双向流动。",
+      dimension: "社交电量",
+    },
+    {
+      id: 22,
+      text: "在热闹中享受，也能选择安静离场，我的情感能量我自己做主。",
+      dimension: "社交电量",
+    },
+    {
+      id: 23,
+      text: "允许自己“不那么善解人意”，有些忙我可以不帮，这不代表我不善良。",
+      dimension: "社交电量",
+    },
+    {
+      id: 24,
+      text: "不需要所有人都喜欢我，被某些人讨厌，说明我有自己的立场和边界。",
+      dimension: "社交电量",
+    },
+    {
+      id: 25,
+      text: "我改变不了所有人，但能温暖我所触及的角落，这就是我的灵魂使命。",
+      dimension: "格局视野",
+    },
+    {
+      id: 26,
+      text: "放下“被所有人理解”的执念，灵魂的共鸣不需要数量，只需要深度。",
+      dimension: "格局视野",
+    },
+    {
+      id: 27,
+      text: "有些努力不会有回报，但依然选择去做，因为过程本身就是灵魂的滋养。",
+      dimension: "格局视野",
+    },
+    {
+      id: 28,
+      text: "人生没有标准答案，每个灵魂都在书写自己的答卷，这本身就是意义。",
+      dimension: "格局视野",
+    },
+    {
+      id: 29,
+      text: "面对无法改变的事，改变自己看待它的方式，这是灵魂成长的智慧。",
+      dimension: "格局视野",
+    },
+    {
+      id: 31,
+      text: "把理想分解成小步骤，让梦想落地，而不只是活在“有一天”的幻想里。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 32,
+      text: "即使状态不好，也能做一点点，而不是等“感觉对了”才开始行动。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 33,
+      text: "用行动表达价值观，而不只是思考和感受，这是让灵魂理想落地的方式。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 34,
+      text: "完成一件事后先肯定自己，而不是马上挑毛病，这是对灵魂的温柔。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 35,
+      text: "不再等待完美的时机，现在就是让灵魂理想落地的最好时刻。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 37,
+      text: "我有自己的精神花园，即使没有人走进来，它依然繁花似锦。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 39,
+      text: "独处不是孤独，而是灵魂与自己对话的神圣时光。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 40,
+      text: "在日常碎片里发现意义，一杯咖啡的温度、一束光的角度，都是灵魂的滋养。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 41,
+      text: "生活的意义不需要被看见，我内心的丰盈，不需要朋友圈来证明。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 42,
+      text: "我内心有一个安静的角落，无论外界多嘈杂，我都能回到那里。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 43,
+      text: "说“我也需要被照顾”，而不是永远扮演付出者，我的灵魂也需要被滋养。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 44,
+      text: "面对情感绑架，我能温柔但坚定地说：我爱你，但我不能没有自己。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 45,
+      text: "“我不想”就是足够的理由，不需要为拒绝找完美借口，这是灵魂边界的基本操作。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 46,
+      text: "区分“我想要的”和“别人希望我要的”，并选择前者，这是灵魂自主的关键。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 48,
+      text: "有些人不会喜欢真实的我，那恰恰说明我没有扭曲自己的灵魂。",
+      dimension: "边界清晰度",
+    },
+    // === 新增题目（每维度+2道，含反向题）===
+    {
+      id: 49,
+      text: "区分直觉和焦虑，前者是灵魂的指引，后者是恐惧的投射。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 50,
+      text: "我很容易被别人的情绪感染，分不清哪些是自己的感受。",
+      dimension: "脑力在线",
+      reverse: true,
+    },
+    {
+      id: 51,
+      text: "我的敏感是感知世界的独特天赋，它让我能看见别人忽略的美好和痛苦。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 52,
+      text: '我常常觉得自己太情绪化，希望能像别人一样"理性"。',
+      dimension: "自洽指数",
+      reverse: true,
+    },
+    {
+      id: 53,
+      text: "情绪低落时给自己空间，而不是急着振作，这是对灵魂的温柔。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 54,
+      text: "别人一句无心的话，我可能会难过很久。",
+      dimension: "情绪免疫力",
+      reverse: true,
+    },
+    {
+      id: 55,
+      text: "选择性地分享自己，灵魂的深度连接需要安全的边界。",
+      dimension: "社交电量",
+    },
+    {
+      id: 56,
+      text: "我害怕让别人失望，所以经常答应自己不想做的事。",
+      dimension: "社交电量",
+      reverse: true,
+    },
+    {
+      id: 57,
+      text: "每一次低谷都是灵魂成长的肥料，痛苦不是惩罚，是转化的契机。",
+      dimension: "格局视野",
+    },
+    {
+      id: 58,
+      text: "面对不确定的未来，我常常感到焦虑和迷茫。",
+      dimension: "格局视野",
+      reverse: true,
+    },
+    {
+      id: 59,
+      text: "把想法写下来或说出来，让内心的声音有一个落地的出口。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 60,
+      text: "我有很多美好的想法，但往往停留在幻想阶段。",
+      dimension: "行动燃料",
+      reverse: true,
+    },
+    {
+      id: 61,
+      text: "我的内心世界丰富多彩，独处时很少感到无聊。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 62,
+      text: "我需要别人的陪伴和认可来确认自己的价值。",
+      dimension: "心灵富足",
+      reverse: true,
+    },
+    {
+      id: 63,
+      text: "在付出和自我保护之间找到平衡，这是灵魂可持续给予的前提。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 64,
+      text: "拒绝别人后我会内疚很久，觉得自己不够善良。",
+      dimension: "边界清晰度",
+      reverse: true,
+    },
+    // === 新增反向题（每维度+1道）===
+    {
+      id: 65,
+      text: "我经常被自己的想象吓到，分不清现实和担忧。",
+      dimension: "脑力在线",
+      reverse: true,
+    },
+    {
+      id: 66,
+      text: "我总觉得自己应该更坚强，不该有这么多情绪。",
+      dimension: "自洽指数",
+      reverse: true,
+    },
+    {
+      id: 67,
+      text: "负面情绪来的时候，我会被它完全淹没。",
+      dimension: "情绪免疫力",
+      reverse: true,
+    },
+    {
+      id: 68,
+      text: "我很难拒绝别人的请求，哪怕自己已经很累了。",
+      dimension: "社交电量",
+      reverse: true,
+    },
+    {
+      id: 69,
+      text: "我经常纠结于过去的遗憾，难以释怀。",
+      dimension: "格局视野",
+      reverse: true,
+    },
+    {
+      id: 70,
+      text: '我有很多想做的事，但经常等待"合适的时机"。',
+      dimension: "行动燃料",
+      reverse: true,
+    },
+    {
+      id: 71,
+      text: "别人的评价对我影响很大，好评让我飘，差评让我崩。",
+      dimension: "心灵富足",
+      reverse: true,
+    },
+    {
+      id: 72,
+      text: "我经常在照顾别人的情绪，却忽视自己的感受。",
+      dimension: "边界清晰度",
+      reverse: true,
+    },
+  ],
+  // 🔵 守卫者题目（ISTJ/ISFJ/ESTJ/ESFJ）- 责任边界、稳定秩序、实际行动、传统与变革
+  sentinel: [
+    {
+      id: 1,
+      text: "这个规则真的适合现在吗？还是只是“一直以来都这样”？，我会思考。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 2,
+      text: '面对别人的期待，我学会先问：这是我想要的，还是我"应该"想要的？',
+      dimension: "脑力在线",
+    },
+    {
+      id: 3,
+      text: "分辨真正的责任和被强加的负担，这是责任边界的核心能力。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 4,
+      text: "“大家都是这样”这句话背后，往往是用众人的期待来绑架我的选择。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 5,
+      text: "质疑那些“理所当然”的事，看看它们是否真的适合我，而不是只适合“大家”。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 7,
+      text: "“不够有创意/不够有趣”不是缺点，稳定可靠本身就是稀缺的闪光特质。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 8,
+      text: "喜欢确定性和计划不是无聊，这是我给自己的稳定安全感。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 9,
+      text: "我的价值不是用“为别人做了多少”来衡量的，我本身就是稳定的基石。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 10,
+      text: "说“不”不是自私，而是对自己负责任的表现，这同样是稳定的一部分。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 12,
+      text: "我的完整不需要“被需要”来证明，我的存在本身就是安全感的来源。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 13,
+      text: "允许自己表达不满，而不是一直忍耐到爆发，这是保护稳定输出的必要边界。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 14,
+      text: "我的感受和别人的感受一样重要，我不必总是先照顾所有人。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 15,
+      text: "被指责时先分辨这是否公平，而不是自动揽责，这是责任边界的核心。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 16,
+      text: "说“我需要想一想”，而不是立刻承担或答应，这是稳定决策的重要缓冲。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 18,
+      text: "感受自己的情绪，而不是把它压到看不见的地方，这是稳定输出的前提。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 19,
+      text: "有些人只是习惯了我的付出，并不是真的感激，我看得清。",
+      dimension: "社交电量",
+    },
+    {
+      id: 20,
+      text: "不再为了“维持关系”而委屈自己，稳定的关系不应该以委屈为代价。",
+      dimension: "社交电量",
+    },
+    {
+      id: 21,
+      text: "在家人朋友面前表达自己的需求，而不只是照顾他们的，这是责任边界的实践。",
+      dimension: "社交电量",
+    },
+    {
+      id: 22,
+      text: "拒绝那些消耗我的社交，而不是来者不拒，这是保护稳定能量的必要筛选。",
+      dimension: "社交电量",
+    },
+    {
+      id: 23,
+      text: "不再默默做事等着被看到，而是学会为自己发声，这是稳定输出的自我认可。",
+      dimension: "社交电量",
+    },
+    {
+      id: 25,
+      text: "有些改变是必要的，不是所有坚持都值得坚持，这是稳定秩序的迭代智慧。",
+      dimension: "格局视野",
+    },
+    {
+      id: 27,
+      text: "接受生活中的不确定性，而不是事事都要有计划，稳定也需要灵活。",
+      dimension: "格局视野",
+    },
+    {
+      id: 28,
+      text: "规则是服务于秩序的工具，而不是束缚我的牢笼，我可以灵活调整。",
+      dimension: "格局视野",
+    },
+    {
+      id: 29,
+      text: "面对变化调整心态适应，而不是死守原来的方式，稳定的本质是适应而非僵化。",
+      dimension: "格局视野",
+    },
+    {
+      id: 30,
+      text: "为自己想要的生活负责，而不只是符合别人的期待，这是稳定秩序的自主升级。",
+      dimension: "格局视野",
+    },
+    {
+      id: 31,
+      text: "在“做到完美”和“先完成再说”之间找到平衡，这是稳定行动的务实智慧。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 32,
+      text: "不再因为害怕犯错而迟迟不敢开始，稳定的行动也需要尝试的勇气。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 33,
+      text: "把大目标分解成小步骤，一步步踏实推进，这是稳定行动的核心方法。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 35,
+      text: "完成一件事后允许自己休息和庆祝，而不是马上开始下一件，这是稳定输出的可持续策略。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 36,
+      text: "什么是“真正的责任”，什么是“自己揽上身的负担”，这是责任边界的核心辨别。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 37,
+      text: "我的价值不取决于为别人做了多少，我本身就是稳定的基石，这就是价值。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 38,
+      text: "即使没有被需要，我也是完整的，我的存在本身就是稳定的源头。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 40,
+      text: "我开始经营自己的小世界，它是我稳定的根基，不需要围着别人的需求转。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 41,
+      text: "我开始在平凡的日常中发现满足感，稳定的生活不是无聊，而是深度的安全感。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 42,
+      text: "我开始理解：照顾好自己不是自私，而是保护“稳定输出”的核心系统。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 43,
+      text: "我开始学会：说“不”不需要完美理由或愧疚，这是责任边界的基本操作。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 44,
+      text: "我不再默默承担所有责任，开始让别人也负起他们的责任。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 45,
+      text: "我开始理解：面对“你怎么变了”的质疑，坚持做对自己好的选择，这是责任边界的成长。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 46,
+      text: "我开始学会：在家人面前坚持自己的立场，而不是一味妥协，这是责任边界在亲密关系中的实践。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 48,
+      text: "我开始意识到：时间和精力是有限的，我有权选择把它们给谁，这是稳定输出的资源管理。",
+      dimension: "边界清晰度",
+    },
+    // === 新增题目（每维度+2道，含反向题）===
+    {
+      id: 49,
+      text: "我开始掌握：在坚持原则和灵活变通之间找到平衡，这是稳定秩序的智慧。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 50,
+      text: '面对新方法，我本能地会想"原来的方式就很好"。',
+      dimension: "脑力在线",
+      reverse: true,
+    },
+    {
+      id: 51,
+      text: "我开始珍视：踏实可靠是我的核心优势，稳定本身就是一种稀缺的力量。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 52,
+      text: '我常常羡慕那些"有趣"的人，觉得自己太无聊了。',
+      dimension: "自洽指数",
+      reverse: true,
+    },
+    {
+      id: 53,
+      text: "我开始学会：及时表达不满，而不是忍到爆发，这是保护稳定输出的重要边界。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 54,
+      text: "别人批评我时，我会先自责，而不是客观分析。",
+      dimension: "情绪免疫力",
+      reverse: true,
+    },
+    {
+      id: 55,
+      text: "我开始理解：照顾别人和照顾自己不是二选一，稳定的我才能持续给予。",
+      dimension: "社交电量",
+    },
+    {
+      id: 56,
+      text: "我习惯性地把别人的需求放在自己前面。",
+      dimension: "社交电量",
+      reverse: true,
+    },
+    {
+      id: 57,
+      text: "我开始接受：尝试新事物的不舒服是成长的代价，稳定不意味着永不改变。",
+      dimension: "格局视野",
+    },
+    {
+      id: 58,
+      text: "改变让我感到不安，我更喜欢熟悉的环境和方式。",
+      dimension: "格局视野",
+      reverse: true,
+    },
+    {
+      id: 59,
+      text: "我开始学会：在“完美”和“及时”之间做出选择，这是责任感的务实表达。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 60,
+      text: "如果不能做到完美，我宁愿不开始。",
+      dimension: "行动燃料",
+      reverse: true,
+    },
+    {
+      id: 61,
+      text: "我开始意识到：我的价值不需要“被需要”来证明，稳定的存在本身就是价值。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 62,
+      text: "我需要被别人需要，才能感到自己的存在有意义。",
+      dimension: "心灵富足",
+      reverse: true,
+    },
+    {
+      id: 63,
+      text: "我开始学会：为自己的选择负责，不需要别人认可，这是责任边界的核心。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 64,
+      text: "做决定前，我经常想知道别人会怎么看我。",
+      dimension: "边界清晰度",
+      reverse: true,
+    },
+    // === 新增反向题（每维度+1道）===
+    {
+      id: 65,
+      text: "遇到问题时，我习惯用老方法，很少考虑新思路。",
+      dimension: "脑力在线",
+      reverse: true,
+    },
+    {
+      id: 66,
+      text: "我经常觉得自己做得不够好，对自己要求很苛刻。",
+      dimension: "自洽指数",
+      reverse: true,
+    },
+    {
+      id: 67,
+      text: "遇到意外情况时，我容易慌张和焦虑。",
+      dimension: "情绪免疫力",
+      reverse: true,
+    },
+    {
+      id: 68,
+      text: "比起表达自己的想法，我更习惯迎合别人。",
+      dimension: "社交电量",
+      reverse: true,
+    },
+    {
+      id: 69,
+      text: "我倾向于维持现状，即使知道改变可能更好。",
+      dimension: "格局视野",
+      reverse: true,
+    },
+    {
+      id: 70,
+      text: "开始新任务前，我需要做很多准备才敢动手。",
+      dimension: "行动燃料",
+      reverse: true,
+    },
+    {
+      id: 71,
+      text: "如果没人注意到我的努力，我会觉得很失落。",
+      dimension: "心灵富足",
+      reverse: true,
+    },
+    {
+      id: 72,
+      text: '我很难对亲近的人说"不"，即使这让我很为难。',
+      dimension: "边界清晰度",
+      reverse: true,
+    },
+  ],
+  // 🟡 探险家题目（ISTP/ISFP/ESTP/ESFP）- 当下体验、灵活应变、感官敏锐、自由与承诺
+  explorer: [
+    {
+      id: 1,
+      text: "这是真正的自由，还是在逃避不想面对的事？，我能分辨。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 2,
+      text: "我能诚实问自己：热闹过后的空虚感，是不是在提醒我什么？",
+      dimension: "脑力在线",
+    },
+    {
+      id: 3,
+      text: "那些表面精彩的东西，很多只是短暂的刺激，真正的自由需要深度。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 4,
+      text: "什么是真正让我开心的，什么只是暂时的刺激，前者滋养当下，后者只是速食。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 6,
+      text: "什么是真正的冒险，什么只是冲动，前者带来成长，后者只有后悔。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 7,
+      text: "不喜欢被束缚不代表无法承担责任，自由和承诺可以并存。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 8,
+      text: "“不够有规划”不是缺点，活在当下本身就是一种灵活应变的智慧。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 9,
+      text: "我的节奏和大多数人不同，这是感知当下的独特方式，不是需要纠正的缺陷。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 11,
+      text: "享受当下不是“贪玩”，而是感知生命的独特天赋。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 12,
+      text: "有时想要安定，有时想要自由，两者都是真实的我，这是灵活应变的本质。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 13,
+      text: "high完之后也能接住那个低落的自己，这是情绪灵活应变的核心能力。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 14,
+      text: "无聊来袭时和它待一会儿，而不是立刻找刺激填补，这是当下体验的深度。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 15,
+      text: "感受冲动和跟随冲动是两回事，我可以感受它，但选择不行动。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 16,
+      text: "在兴奋和冷静之间自如切换的能力，这是灵活应变的核心优势。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 18,
+      text: "不再用忙碌和热闹逃避需要面对的情绪，真正的自由包括面对自己。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 19,
+      text: "我是真的享受自由，还是害怕深入一段关系？，这个问题我能诚实面对。",
+      dimension: "社交电量",
+    },
+    {
+      id: 20,
+      text: "在热闹的人群中享受，也能选择和一个人深度连接，这是自由与承诺的平衡。",
+      dimension: "社交电量",
+    },
+    {
+      id: 21,
+      text: "不再为了热闹而热闹，开始选择真正滋养我的相处，这是当下体验的质量升级。",
+      dimension: "社交电量",
+    },
+    {
+      id: 22,
+      text: "在朋友需要时稳定地出现，而不只是有趣的时候，这是自由与承诺的平衡。",
+      dimension: "社交电量",
+    },
+    {
+      id: 23,
+      text: "有些关系需要经营和投入，不只是随缘，这是自由的成熟形态。",
+      dimension: "社交电量",
+    },
+    {
+      id: 25,
+      text: "有些快乐需要时间沉淀，不是所有美好都能即时获得，这是当下体验的深度智慧。",
+      dimension: "格局视野",
+    },
+    {
+      id: 26,
+      text: "为未来做一点点准备，而不是觉得“到时候再说”，当下和未来可以共存。",
+      dimension: "格局视野",
+    },
+    {
+      id: 27,
+      text: "享受当下的同时，为重要的事留出时间和精力，这是灵活应变的平衡感。",
+      dimension: "格局视野",
+    },
+    {
+      id: 28,
+      text: "自由是有代价的，愿意为真正的自由负责，这是自由与承诺的核心辨别。",
+      dimension: "格局视野",
+    },
+    {
+      id: 29,
+      text: "什么是对我真正重要的，而不只是有趣的，这是当下体验的深度进化。",
+      dimension: "格局视野",
+    },
+    {
+      id: 31,
+      text: "擅长即兴发挥是我的核心优势，这是灵活应变的实战能力。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 32,
+      text: "把热情转化为坚持，而不只是三分钟热度，这是当下体验的持久升级。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 33,
+      text: "完成一件事再开始下一件，而不是永远在开新坑，这是灵活应变的成熟表达。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 35,
+      text: "有些事情需要重复和练习，愿意为热爱投入时间，这是自由与承诺的具体实践。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 36,
+      text: "在无聊的部分也坚持下去，因为看到了最终的目标，这是当下体验与长期目标的平衡。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 37,
+      text: "在安静中也能找到快乐，而不只是在刺激中，这是当下体验的深度扩展。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 38,
+      text: "即使没有新鲜事发生，也能在日常中发现值得开心的事，这是感官敏锐的日常运用。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 40,
+      text: "独处时的安静不是空虚，而是与自己的感官深度对话。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 41,
+      text: "内心的满足比外界的热闹更持久，这是当下体验的真正深度。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 42,
+      text: "我不需要不断的新鲜感来证明自己活着，当下的每一刻都是鲜活的。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 43,
+      text: "拒绝那些消耗我的热闹，选择真正滋养我的相处，这是自由的质量筛选。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 44,
+      text: "不再为了合群而假装开心，假high比无聊更累，这是对自由的真实守护。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 45,
+      text: "在关系中保持自己的空间，而不是完全融入或完全逃离，这是自由与承诺的平衡。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 46,
+      text: "什么时候该玩，什么时候该认真，我能切换自如，这是灵活应变的边界感。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 48,
+      text: "我的自由我做主，不需要向任何人解释或证明，这是自由的核心边界。",
+      dimension: "边界清晰度",
+    },
+    // === 新增题目（每维度+2道，含反向题）===
+    {
+      id: 49,
+      text: "什么是真正的快乐，什么只是逃避现实的麻木，前者滋养灵魂，后者消耗生命。",
+      dimension: "脑力在线",
+    },
+    {
+      id: 50,
+      text: "无聊的时候，我会立刻找刺激来填补，而不是静下来想想。",
+      dimension: "脑力在线",
+      reverse: true,
+    },
+    {
+      id: 51,
+      text: "对自由和新鲜感的需要是我的能量源泉，这是感知当下的独特方式。",
+      dimension: "自洽指数",
+    },
+    {
+      id: 52,
+      text: '我常常觉得自己不够稳定、不够成熟，应该"更靠谱一点"。',
+      dimension: "自洽指数",
+      reverse: true,
+    },
+    {
+      id: 53,
+      text: "平静地接住兴奋过后的低落，这是情绪灵活应变的核心能力。",
+      dimension: "情绪免疫力",
+    },
+    {
+      id: 54,
+      text: "遇到麻烦事，我会选择逃避或转移注意力，而不是面对。",
+      dimension: "情绪免疫力",
+      reverse: true,
+    },
+    {
+      id: 55,
+      text: "享受当下和为重要的人稳定出现不矛盾，这是自由与承诺的平衡。",
+      dimension: "社交电量",
+    },
+    {
+      id: 56,
+      text: "我更喜欢轻松愉快的相处，深度对话让我感到有压力。",
+      dimension: "社交电量",
+      reverse: true,
+    },
+    {
+      id: 57,
+      text: "为未来做一点规划，当下的自由和未来的方向可以共存。",
+      dimension: "格局视野",
+    },
+    {
+      id: 58,
+      text: "想太远的事让我焦虑，我更愿意活在当下。",
+      dimension: "格局视野",
+      reverse: true,
+    },
+    {
+      id: 59,
+      text: "把热情转化为坚持，这是把当下的火花变成持久光芒的秘诀。",
+      dimension: "行动燃料",
+    },
+    {
+      id: 60,
+      text: "我经常开始新项目，但很难坚持到完成。",
+      dimension: "行动燃料",
+      reverse: true,
+    },
+    {
+      id: 61,
+      text: "安静中也藏着深度的满足，当下的丰富不只在刺激中，也在宁静里。",
+      dimension: "心灵富足",
+    },
+    {
+      id: 62,
+      text: "独处时我会感到无聊，总想找人玩或找事做。",
+      dimension: "心灵富足",
+      reverse: true,
+    },
+    {
+      id: 63,
+      text: "自由和责任不是对立面，真正的自由包含了对承诺的尊重。",
+      dimension: "边界清晰度",
+    },
+    {
+      id: 64,
+      text: "一旦感到被束缚，我就想逃离，不管是关系还是工作。",
+      dimension: "边界清晰度",
+      reverse: true,
+    },
+    // === 新增反向题（每维度+1道）===
+    {
+      id: 65,
+      text: "做决定时，我常常跟着感觉走，事后才发现考虑不周。",
+      dimension: "脑力在线",
+      reverse: true,
+    },
+    {
+      id: 66,
+      text: '我觉得自己应该更"成熟"一点，不该这么爱玩。',
+      dimension: "自洽指数",
+      reverse: true,
+    },
+    {
+      id: 67,
+      text: "心情不好时，我会用购物、刷剧或聚会来逃避。",
+      dimension: "情绪免疫力",
+      reverse: true,
+    },
+    {
+      id: 68,
+      text: "深入的对话让我有压力，我更喜欢轻松的聊天。",
+      dimension: "社交电量",
+      reverse: true,
+    },
+    {
+      id: 69,
+      text: "制定长期计划对我来说很困难，我更喜欢随性。",
+      dimension: "格局视野",
+      reverse: true,
+    },
+    {
+      id: 70,
+      text: "遇到需要耐心的事，我很容易半途而废。",
+      dimension: "行动燃料",
+      reverse: true,
+    },
+    {
+      id: 71,
+      text: "如果生活不够精彩，我就会觉得空虚和迷茫。",
+      dimension: "心灵富足",
+      reverse: true,
+    },
+    {
+      id: 72,
+      text: "别人对我有期待时，我会感到窒息想逃。",
+      dimension: "边界清晰度",
+      reverse: true,
+    },
+  ],
+};
+// 根据人格类型获取对应题目
+var TYPE_TO_GROUP = {
+  INTJ: "analyst",
+  INTP: "analyst",
+  ENTJ: "analyst",
+  ENTP: "analyst",
+  INFJ: "diplomat",
+  INFP: "diplomat",
+  ENFJ: "diplomat",
+  ENFP: "diplomat",
+  ISTJ: "sentinel",
+  ISFJ: "sentinel",
+  ESTJ: "sentinel",
+  ESFJ: "sentinel",
+  ISTP: "explorer",
+  ISFP: "explorer",
+  ESTP: "explorer",
+  ESFP: "explorer",
+};
+var QUESTIONS = []; // 动态赋值
+
+var STAGE_LEVELS = {
+  unawakened: {
+    label: "未觉醒",
+    min: 0,
+    max: 320,
+    color: "#6b7280",
+    tags: ["内耗中", "边界模糊"],
+    insight: "大脑还在装睡，身体已经开始内耗了",
+    desc: "说实话，你现在可能有点迷糊，不太清楚自己想要什么，容易被别人的想法带着跑。没关系，这只是起点，谁还没迷茫过呢？",
+    mechanism:
+      '你的大脑还在"自动驾驶"模式，遇到事情习惯性地反应，事后才想起来：我怎么又这样了？情绪来得快去得也快，决定经常是冲动做的。',
+    advices: [
+      {
+        cat: "思维升级",
+        items: [
+          {
+            main: "每天花5分钟问自己：今天我做了什么决定？",
+            example: "比如睡前回顾：我今天为什么选择点那家外卖？",
+          },
+          {
+            main: "遇事先停3秒再反应",
+            example: "比如被人怼了，先在心里数123再开口",
+          },
+        ],
+      },
+      {
+        cat: "关系修炼",
+        items: [
+          {
+            main: "找一个愿意说真话的朋友",
+            example: "让ta告诉你：你平时有什么让人不舒服的习惯？",
+          },
+          {
+            main: '观察身边"活得明白"的人',
+            example: "看看他们遇到烦心事是怎么处理的",
+          },
+        ],
+      },
+      {
+        cat: "日常练习",
+        items: [
+          {
+            main: "记录情绪波动的时刻",
+            example: "什么事让你突然烦躁？写下来，不用分析",
+          },
+        ],
+      },
+    ],
+  },
+  low: {
+    label: "低阶",
+    min: 320,
+    max: 480,
+    color: "#3b82f6",
+    tags: ["觉醒期", "学会说不"],
+    insight: "刚睡醒的状态，开始知道自己是谁了",
+    desc: '你开始"醒"了！能意识到自己的一些模式，比如"我又开始逃避了"或者"我又太较真了"。虽然还改不太动，但至少看见了，这就是进步。',
+    mechanism:
+      '你脑子里的"主力选手"开始上场了，但"替补队员"还没跟上。所以你可能有时候反应比较极端，事后想想：我当时咋想的？',
+    advices: [
+      {
+        cat: "思维升级",
+        items: [
+          {
+            main: '每周做一次"决策复盘"',
+            example: "这周最满意的决定是什么？最想重来的是哪个？",
+          },
+          {
+            main: '尝试用"如果...那么..."句式思考',
+            example: "如果我当时没发火，那么事情会怎样发展？",
+          },
+        ],
+      },
+      {
+        cat: "关系修炼",
+        items: [
+          {
+            main: '找一个信任的朋友当"镜子"',
+            example: "请ta指出：我有什么自己没意识到的问题？",
+          },
+          {
+            main: "主动请教和你性格相反的人",
+            example: "问问E人朋友：你是怎么做到跟陌生人自来熟的？",
+          },
+        ],
+      },
+      {
+        cat: "日常练习",
+        items: [
+          {
+            main: '每天记录一个"我本可以..."的时刻',
+            example: "我本可以更耐心听完ta说话再回应",
+          },
+        ],
+      },
+    ],
+  },
+  medium: {
+    label: "中阶",
+    min: 480,
+    max: 640,
+    color: "#10b981",
+    tags: ["成长期", "情绪稳定"],
+    insight: "能量在线，开始掌控自己的人生节奏",
+    desc: "你已经找到自己的节奏了！面对问题不再只有一种反应，而是学会了切换视角。你知道自己擅长什么、容易踩什么坑，大多数时候都能稳住。",
+    mechanism:
+      '你大脑里的"主力"和"替补"已经配合默契了，遇到事情能打出稳定的配合。不过遇到特别大的压力时，还是可能会"掉线"。',
+    advices: [
+      {
+        cat: "思维升级",
+        items: [
+          {
+            main: '刻意用"劣势功能"处理小事',
+            example: '如果你是T型，试着在做决定时多问问"这样会让谁不开心？"',
+          },
+          {
+            main: "学会在不同模式间切换",
+            example: "工作用理性脑，回家后切换成感性脑陪家人",
+          },
+        ],
+      },
+      {
+        cat: "关系修炼",
+        items: [
+          {
+            main: "和性格互补的人深度交流",
+            example: "约一个跟你完全相反类型的朋友吃饭，观察ta的思维方式",
+          },
+          {
+            main: '成为别人的"成长伙伴"',
+            example: "找个也在成长路上的朋友，互相分享进步和困惑",
+          },
+        ],
+      },
+      {
+        cat: "日常练习",
+        items: [
+          {
+            main: '每周尝试一件"不像你会做的事"',
+            example: "如果你内向，试试主动跟外卖小哥多聊两句",
+          },
+        ],
+      },
+    ],
+  },
+  high: {
+    label: "高阶",
+    min: 640,
+    max: 800,
+    color: "#f59e0b",
+    tags: ["圆融期", "使命清晰"],
+    insight: "满级大佬，已解锁人格全部技能点",
+    desc: '恭喜你，已经是"满级玩家"了！你能根据不同情况灵活切换状态，既保持真实的自己，又能适应各种场景。你懂自己，也越来越懂别人。',
+    mechanism:
+      '你脑子里的"团队"已经磨合得很好了，主力、替补、甚至"板凳队员"都能在关键时刻派上用场。你基本上能做到随机应变，稳如老狗。',
+    advices: [
+      {
+        cat: "思维升级",
+        items: [
+          {
+            main: "探索更深层的人生意义",
+            example: "问问自己：我的独特天赋可以为这个世界创造什么价值？",
+          },
+          {
+            main: "学习冥想或正念练习",
+            example: "每天10分钟，观察自己的念头，不评判、不干预",
+          },
+        ],
+      },
+      {
+        cat: "关系修炼",
+        items: [
+          {
+            main: '成为别人的"引路人"',
+            example: "分享你的成长经验，帮助还在迷茫中的人",
+          },
+          {
+            main: "建立深度连接的圈子",
+            example: '找几个同样"活明白"的朋友，定期深度交流',
+          },
+        ],
+      },
+      {
+        cat: "日常练习",
+        items: [
+          {
+            main: "保持谦逊和好奇心",
+            example: "每个月学一个全新领域的知识，保持成长心态",
+          },
+          {
+            main: "定期自我迭代",
+            example: "每季度问自己：我现在和三个月前相比，有什么进步？",
+          },
+        ],
+      },
+    ],
+  },
+};
+var DIMENSIONS = [
+  "脑力在线",
+  "自洽指数",
+  "情绪免疫力",
+  "社交电量",
+  "格局视野",
+  "行动燃料",
+  "心灵富足",
+  "边界清晰度",
+];
+var STAGE_QUOTES = {
+  INTJ: {
+    unawakened: "我在预测所有人的未来，却看不清自己的方向。",
+    low: "我开始意识到，最需要被规划的，是我自己的内心。",
+    medium: "我不是在预测未来，我是在创造它。",
+    high: "创造未来的第一步，是先成为自己的建筑师。",
+  },
+  INTP: {
+    unawakened: "我在脑海里构建了无数世界，却忘了活在这一个。",
+    low: "原来最好的想法，是那些能被执行的想法。",
+    medium: "我思故我在，我问故我知。",
+    high: "真正的智慧，是将复杂变简单，让思想照亮现实。",
+  },
+  ENTJ: {
+    unawakened: "我在领导所有人，却忘了先领导自己的内心。",
+    low: "真正的力量，不是控制他人，而是赢得他人的心。",
+    medium: "效率是我的工具，愿景是我的使命。",
+    high: "最高的领导力，是让每个人都成为领导者。",
+  },
+  ENTP: {
+    unawakened: "我质疑一切规则，却从未质疑过自己的逃避。",
+    low: "打破规则之前，我先学会理解规则存在的意义。",
+    medium: "我不是在挑战权威，我是在寻找更好的可能。",
+    high: "真正的叛逆，是在打破规则后建立更好的秩序。",
+  },
+  INFJ: {
+    unawakened: "我想治愈所有人，却常常忘了自己也需要被治愈。",
+    low: "我开始明白，先照顾好自己，才能更好地照顾世界。",
+    medium: "我不只是想改变世界，我想治愈它。",
+    high: "治愈世界的秘密，是先成为自己的光。",
+  },
+  INFP: {
+    unawakened: "我在理想与现实之间迷失，找不到属于自己的位置。",
+    low: "我的敏感不是弱点，而是感知世界的独特方式。",
+    medium: "我用真诚书写生命，用理想照亮道路。",
+    high: "最深的理想主义，是用行动让梦想落地。",
+  },
+  ENFJ: {
+    unawakened: "我照顾了所有人，却唯独忘了自己。",
+    low: "我开始学会在给予之前，先填满自己的杯子。",
+    medium: "我用温暖连接每一个灵魂，用爱点燃希望。",
+    high: "最好的引导，是让每个人都找到自己的光。",
+  },
+  ENFP: {
+    unawakened: "我追逐每一种可能，却从未真正完成过什么。",
+    low: "我开始明白，深度比广度更能带来满足。",
+    medium: "每一种可能都值得探索，但我选择深耕最重要的那一个。",
+    high: "真正的自由，是在无限可能中找到专注的力量。",
+  },
+  ISTJ: {
+    unawakened: "我固守规则和传统，害怕任何改变。",
+    low: "我开始理解，有些规则需要被更新。",
+    medium: "责任是我的信条，可靠是我的名片。",
+    high: "最好的传承，是在坚守中创新。",
+  },
+  ISFJ: {
+    unawakened: "我默默付出，却不知道如何表达自己的需求。",
+    low: "我的付出值得被看见，我的需求也值得被满足。",
+    medium: "我用细腻的心，守护每一份温暖。",
+    high: "最深的关爱，是让被爱的人也学会爱自己。",
+  },
+  ESTJ: {
+    unawakened: "我执行规则，却忘了问为什么要有这个规则。",
+    low: "效率很重要，但人心同样重要。",
+    medium: "我用行动证明，什么叫言出必行。",
+    high: "最好的管理，是让每个人都愿意主动承担。",
+  },
+  ESFJ: {
+    unawakened: "我让每个人都开心，却忽略了自己的感受。",
+    low: "我的感受同样重要，我可以说不。",
+    medium: "我用真心换真心，用温暖创造和谐。",
+    high: "最好的关心，是帮助他人学会自我关心。",
+  },
+  ISTP: {
+    unawakened: "我沉浸在解决问题中，却回避所有情感问题。",
+    low: "逻辑能解决很多事，但有些事需要用心。",
+    medium: "手中有工具，心中有答案。",
+    high: "解决问题的最高境界，是预防问题的发生。",
+  },
+  ISFP: {
+    unawakened: "我活在当下的感受中，却害怕面对未来。",
+    low: "美好的当下，需要一点对未来的规划来保护。",
+    medium: "我用艺术表达灵魂，用行动诠释价值。",
+    high: "最美的艺术，是把生活过成一件作品。",
+  },
+  ESTP: {
+    unawakened: "我追逐刺激，却在平静中感到空虚。",
+    low: "真正的勇敢，不只是冒险，还有面对内心。",
+    medium: "我活在当下，用行动书写传奇。",
+    high: "最大的冒险，是敢于停下来倾听内心的声音。",
+  },
+  ESFP: {
+    unawakened: "我带给所有人快乐，却不知道自己为何空虚。",
+    low: "快乐需要深度，不只是表面的热闹。",
+    medium: "我用热情点燃生命，用欢笑感染世界。",
+    high: "最深的快乐，是帮助他人也找到快乐的源泉。",
+  },
+};
+var STAGE_TIPS = {
+  INTJ: {
+    unawakened: "今天花5分钟写下你的情绪，不分析，只感受。",
+    low: "本周找一个朋友聊天，只倾听不给建议。",
+    medium: "尝试用情感而非逻辑做一个小决定。",
+    high: "帮助一个人发展他们的战略思维能力。",
+  },
+  INTP: {
+    unawakened: "今天完成一件小事，不管它是否完美。",
+    low: "把一个想法讲给朋友听，接受他们的反馈。",
+    medium: "用简单语言向非专业人士解释一个复杂概念。",
+    high: "把你的一个理论应用到实际问题中去。",
+  },
+  ENTJ: {
+    unawakened: "今天问三个人的意见，真正倾听而不是等着反驳。",
+    low: "本周给团队成员一个真诚的赞美。",
+    medium: "让别人做一个决定，你只提供支持不干预。",
+    high: "培养一个接班人，分享你的领导经验。",
+  },
+  ENTP: {
+    unawakened: "选择一个项目，坚持做完再开始新的。",
+    low: "在反驳之前，先说出对方观点的三个优点。",
+    medium: "把一个创意从想法变成可执行的计划。",
+    high: "用你的创新思维解决一个实际的社会问题。",
+  },
+  INFJ: {
+    unawakened: "今天拒绝一个不想做的请求，允许自己说不。",
+    low: "每天留15分钟只属于自己的独处时间。",
+    medium: "先照顾好自己再帮助别人，每天留30分钟给自己。",
+    high: "用你的洞察力帮助一个人找到他们自己的方向。",
+  },
+  INFP: {
+    unawakened: '今天做一件小事，不等到"感觉对了"再行动。',
+    low: "把一个理想分解成三个可执行的小步骤。",
+    medium: "用行动表达你的价值观，而不只是思考。",
+    high: "用你的真诚影响他人，让理想照进现实。",
+  },
+  ENFJ: {
+    unawakened: "今天只关注自己的需求，不主动帮助任何人。",
+    low: "在给予之前，先问问自己需要什么。",
+    medium: '学会说"我现在帮不了你"而不感到内疚。',
+    high: "教会他人如何自我成长，而非直接给予帮助。",
+  },
+  ENFP: {
+    unawakened: "选择一件事深入做下去，抵抗开始新事物的冲动。",
+    low: "本周专注于一个项目，把它推进到下一个阶段。",
+    medium: "在探索新可能之前，先完成手头的承诺。",
+    high: "用你的热情帮助他人找到并坚持他们的热爱。",
+  },
+  ISTJ: {
+    unawakened: "今天尝试一种新的做事方式，不用老方法。",
+    low: "问问自己：这个规则还适合现在的情况吗？",
+    medium: "在坚守原则的同时，对新方法保持开放。",
+    high: "用你的经验帮助他人建立可靠的系统和流程。",
+  },
+  ISFJ: {
+    unawakened: "今天表达一个自己的需求，不等别人来猜。",
+    low: "当别人问你需要什么时，给出真实的答案。",
+    medium: "在照顾他人的同时，把自己也列入关心名单。",
+    high: "教会你关心的人如何关心自己和他人。",
+  },
+  ESTJ: {
+    unawakened: "今天在执行任务前，先问问团队成员的感受。",
+    low: "完成目标很重要，但关注一下过程中人的状态。",
+    medium: "效率和人心都重要，找到两者的平衡点。",
+    high: "用你的组织能力帮助他人实现他们的目标。",
+  },
+  ESFJ: {
+    unawakened: "今天做一件只为自己开心的事，不考虑别人。",
+    low: '练习说"这个我需要想想"而不是立刻答应。',
+    medium: "你的感受和别人的感受一样重要，记住这一点。",
+    high: "帮助他人建立自己的支持系统，而非依赖你。",
+  },
+  ISTP: {
+    unawakened: "今天和一个人分享你的感受，不只是想法。",
+    low: "遇到情感问题时，试着用心而非用脑去回应。",
+    medium: "解决问题很棒，但有时陪伴比解决更重要。",
+    high: "用你的冷静和技能帮助他人解决棘手问题。",
+  },
+  ISFP: {
+    unawakened: "今天为明天做一个小计划，哪怕只有三件事。",
+    low: "美好的当下需要一点对未来的规划来保护。",
+    medium: "在享受当下的同时，为重要的事留出时间。",
+    high: "用你的艺术感染他人，让更多人感受美好。",
+  },
+  ESTP: {
+    unawakened: "今天花10分钟安静地问自己：我真正想要什么？",
+    low: "在追求刺激的同时，关注一下内心的声音。",
+    medium: "真正的勇敢包括面对内心，不只是外部挑战。",
+    high: "用你的行动力帮助他人突破他们的舒适区。",
+  },
+  ESFP: {
+    unawakened: "今天和一个人进行一次深度对话，不只是玩乐。",
+    low: "快乐很棒，但试着了解快乐背后更深的意义。",
+    medium: "在带给他人欢乐的同时，关注自己内心的满足。",
+    high: "帮助他人找到属于他们自己的快乐源泉。",
+  },
+};
+// 认知功能阶段发展状态（16人格×4阶段=64种）
+var COG_STAGE_STATUS = {
+  INTJ: {
+    unawakened: "Ni过度内耗，Te执行力受阻，容易陷入空想而不行动",
+    low: "Ni开始聚焦，Te逐渐激活，但Fi情感仍被压抑",
+    medium: "Ni-Te协同良好，开始关注Fi内在价值，Se体验增加",
+    high: "四功能整合，能灵活运用直觉与逻辑，情感表达自然",
+  },
+  INTP: {
+    unawakened: "Ti过度分析，Ne发散失控，难以落地执行",
+    low: "Ti聚焦核心问题，Ne开始服务于目标，Si习惯建立中",
+    medium: "Ti-Ne高效协作，Si提供稳定基础，Fe社交意识觉醒",
+    high: "逻辑与创意完美结合，能共情他人，理论与实践统一",
+  },
+  ENTJ: {
+    unawakened: "Te过度控制，Ni远见被急躁遮蔽，忽视他人感受",
+    low: "Te效率提升，Ni战略眼光清晰，开始注意Se当下",
+    medium: "Te-Ni强力驱动，Se行动敏捷，Fi开始软化态度",
+    high: "领导力成熟，能平衡效率与人情，刚柔并济",
+  },
+  ENTP: {
+    unawakened: "Ne无限发散，Ti分析浅尝辄止，难以深入坚持",
+    low: "Ne聚焦关键可能，Ti深度分析启动，Fe社交更圆融",
+    medium: "Ne-Ti创新落地，Fe建立真诚连接，Si开始重视细节",
+    high: "创新与执行统一，能深耕领域，关系稳定持久",
+  },
+  INFJ: {
+    unawakened: "Ni过度理想化，Fe过度付出，自我边界模糊",
+    low: "Ni洞察更务实，Fe开始设边界，Ti独立思考增强",
+    medium: "Ni-Fe和谐运作，Ti提供理性支撑，Se关注当下体验",
+    high: "洞察力服务于实际，能照顾自己也能帮助他人",
+  },
+  INFP: {
+    unawakened: "Fi过度内省，Ne逃避现实，行动力严重不足",
+    low: "Fi价值观清晰，Ne开始聚焦，Si建立日常结构",
+    medium: "Fi-Ne创造力绽放，Si稳定输出，Te执行力觉醒",
+    high: "理想与现实统一，能将价值观转化为实际影响力",
+  },
+  ENFJ: {
+    unawakened: "Fe过度取悦，Ni远见被情感淹没，自我迷失",
+    low: "Fe设立边界，Ni开始指引方向，Se关注自身需求",
+    medium: "Fe-Ni协同引领，Se享受当下，Ti理性决策增强",
+    high: "真诚领导力，能激励他人同时保持自我完整",
+  },
+  ENFP: {
+    unawakened: "Ne过度分散，Fi情感波动大，难以坚持完成",
+    low: "Ne开始聚焦，Fi情感稳定，Te执行意识觉醒",
+    medium: "Ne-Fi热情有方向，Te推动落地，Si建立持续性",
+    high: "热情与深度并存，能深耕热爱，影响力持久",
+  },
+  ISTJ: {
+    unawakened: "Si过度依赖经验，Te机械执行，抗拒新变化",
+    low: "Si经验服务目标，Te灵活调整，Fi情感开始表达",
+    medium: "Si-Te高效可靠，Fi内心柔软，Ne开放新可能",
+    high: "可靠中有创新，能坚守也能变通，情感表达自然",
+  },
+  ISFJ: {
+    unawakened: "Si过度牺牲，Fe讨好他人，自我需求被忽视",
+    low: "Si开始关注自己，Fe设立边界，Ti独立判断增强",
+    medium: "Si-Fe温暖有度，Ti理性支撑，Ne接受新观点",
+    high: "付出与自爱平衡，能照顾他人也不委屈自己",
+  },
+  ESTJ: {
+    unawakened: "Te过度强势，Si固守旧法，忽视他人感受",
+    low: "Te效率与人情兼顾，Si开放新方法，Fi开始柔软",
+    medium: "Te-Si高效灵活，Fi关注内心，Ne接受创新",
+    high: "领导力有温度，能坚持原则也能通融变化",
+  },
+  ESFJ: {
+    unawakened: "Fe过度在意评价，Si依赖传统，独立思考弱",
+    low: "Fe真诚表达，Si保留有益传统，Ti独立判断增强",
+    medium: "Fe-Si温暖可靠，Ti理性决策，Ne开放新观点",
+    high: "真心关怀有边界，能独立思考也能维护和谐",
+  },
+  ISTP: {
+    unawakened: "Ti过度冷漠，Se追求刺激逃避情感，关系疏离",
+    low: "Ti分析加入情感考量，Se体验更有意义，Fe开始连接",
+    medium: "Ti-Se冷静行动，Fe建立情感连接，Ni开始规划未来",
+    high: "冷静中有温度，能深度连接他人，行动有远见",
+  },
+  ISFP: {
+    unawakened: "Fi过度敏感，Se沉溺当下，回避未来规划",
+    low: "Fi情感稳定，Se体验有选择，Ni开始思考未来",
+    medium: "Fi-Se艺术表达成熟，Ni提供方向，Te执行力增强",
+    high: "感性与理性平衡，能享受当下也能规划未来",
+  },
+  ESTP: {
+    unawakened: "Se过度冲动，Ti分析短视，忽视长远后果",
+    low: "Se行动前思考，Ti考虑后果，Fe关注他人感受",
+    medium: "Se-Ti敏捷有策略，Fe建立深度关系，Ni规划未来",
+    high: "行动与思考统一，能冒险也能谨慎，关系深厚",
+  },
+  ESFP: {
+    unawakened: "Se过度享乐，Fi情感肤浅，逃避深度话题",
+    low: "Se享乐有节制，Fi探索深层需求，Te开始规划",
+    medium: "Se-Fi快乐有深度，Te执行力增强，Ni思考意义",
+    high: "快乐与深度并存，能带动他人也能独处反思",
+  },
+};
+// 进阶路径个性化建议（16人格×4阶段=64种）
+var STAGE_PATH_ADVICE = {
+  INTJ: {
+    unawakened: '你的Ni直觉需要接地气，每天记录一个"感受"而非"想法"',
+    low: "开始用Te执行小目标，同时练习向一个人表达情感",
+    medium: "平衡战略思维与情感连接，尝试用直觉帮助他人",
+    high: "你的远见可以照亮他人，分享你的洞察但保持谦逊",
+  },
+  INTP: {
+    unawakened: "你的Ti分析需要出口，今天把一个想法变成行动",
+    low: "用Ne探索的同时，建立一个可持续的日常习惯",
+    medium: "将复杂理论翻译成简单语言，与他人分享",
+    high: "你的智慧可以解决实际问题，找到理论与现实的交汇点",
+  },
+  ENTJ: {
+    unawakened: "你的Te效率需要人情味，今天真诚地问一个人的感受",
+    low: "在追求目标的同时，给团队成员真诚的认可",
+    medium: "让Ni远见指引方向，但允许他人参与决策",
+    high: "培养下一代领导者，你的价值在于赋能他人",
+  },
+  ENTP: {
+    unawakened: "你的Ne创意需要落地，选择一个项目坚持到底",
+    low: "辩论之前先建立连接，赢得人心比赢得辩论重要",
+    medium: "用Ti深度分析验证Ne的创意，打造真正可行的方案",
+    high: "你的创新可以改变世界，但需要团队和执行力",
+  },
+  INFJ: {
+    unawakened: "你的Ni洞察需要边界，今天拒绝一个消耗你的请求",
+    low: "先填满自己的杯子，才能持续为他人倒水",
+    medium: "用Fe的共情帮助他人，但记住你不是救世主",
+    high: "你的洞察可以指引方向，但让他人自己走完旅程",
+  },
+  INFP: {
+    unawakened: "你的Fi理想需要行动，今天做一件小事，不等完美时机",
+    low: "把大理想拆成小步骤，每天前进一点点",
+    medium: "用Ne的创意表达Fi的价值观，让世界看到你的光",
+    high: "你的真诚可以感染他人，用行动而非只用言语",
+  },
+  ENFJ: {
+    unawakened: "你的Fe付出需要回收，今天只为自己做一件事",
+    low: "在帮助他人之前，先问问自己需要什么",
+    medium: "用Ni的远见引导他人，但不要替他们走路",
+    high: "教会他人钓鱼，而非只是给他们鱼",
+  },
+  ENFP: {
+    unawakened: "你的Ne热情需要聚焦，选择最重要的一件事深耕",
+    low: "热情消退时坚持下去，深度比广度更有价值",
+    medium: "用Fi的价值观筛选机会，不是每个可能都值得追",
+    high: "你的热情可以点燃他人，帮助他们找到并坚持热爱",
+  },
+  ISTJ: {
+    unawakened: "你的Si经验需要更新，今天尝试一种新的做事方式",
+    low: "保留有效的传统，但对新方法保持开放",
+    medium: "用Te的效率服务更大目标，而非只是完成任务",
+    high: "你的可靠是团队基石，但也要培养他人的责任感",
+  },
+  ISFJ: {
+    unawakened: "你的Si付出需要声音，今天表达一个自己的需求",
+    low: "照顾他人的同时，把自己也列入关心名单",
+    medium: '用Fe的温暖建立边界，说"不"也是一种爱',
+    high: "教会你爱的人如何爱自己，这是更深的关怀",
+  },
+  ESTJ: {
+    unawakened: "你的Te效率需要温度，今天倾听一个人说完再给建议",
+    low: "规则重要，但人心同样重要，找到平衡点",
+    medium: "用Si的经验指导他人，但允许他们犯自己的错",
+    high: "你的组织能力可以成就团队，但领导力在于赋能",
+  },
+  ESFJ: {
+    unawakened: "你的Fe和谐需要真实，今天表达一个真实但不讨喜的想法",
+    low: "他人的评价不定义你，学会认可自己",
+    medium: "用Si的稳定支持他人，但记住自己的感受同样重要",
+    high: "帮助他人建立自己的支持系统，而非依赖你",
+  },
+  ISTP: {
+    unawakened: '你的Ti逻辑需要情感，今天用"我感觉"开头说一句话',
+    low: "解决问题很棒，但有时候陪伴比解决更重要",
+    medium: "用Se的行动力帮助他人，同时表达你的关心",
+    high: "你的冷静是危机中的灯塔，但也要让人感受到你的温度",
+  },
+  ISFP: {
+    unawakened: "你的Fi感受需要表达，今天用语言描述你的内心",
+    low: "享受当下的同时，为明天做一点小规划",
+    medium: "用Se的体验和Fi的价值观创造美好，分享给他人",
+    high: "你的艺术可以治愈心灵，让更多人感受到美",
+  },
+  ESTP: {
+    unawakened: "你的Se行动需要暂停，今天花10分钟安静思考",
+    low: "追求刺激的同时，关注行动的长远影响",
+    medium: "用Ti的分析让Se的行动更有策略，而非只是冲动",
+    high: "你的勇气可以激励他人突破，但也要教会他们思考",
+  },
+  ESFP: {
+    unawakened: "你的Se快乐需要深度，今天和一个人聊聊内心话题",
+    low: "表面的快乐之下，探索什么让你真正满足",
+    medium: "用Fi的价值观筛选体验，不是每种快乐都值得追",
+    high: "你的阳光可以驱散阴霾，帮助他人找到内心的快乐",
+  },
+};
+var BLIND_KEYWORDS = {
+  INTJ: ["过度分析", "情感疏离", "完美主义"],
+  INTP: ["过度思考", "拖延行动", "社交回避"],
+  ENTJ: ["控制欲强", "忽视感受", "急功近利"],
+  ENTP: ["注意力分散", "难以坚持", "辩论成瘾"],
+  INFJ: ["过度理想化", "拯救者情结", "自我消耗"],
+  INFP: ["逃避现实", "过度敏感", "行动力弱"],
+  ENFJ: ["讨好他人", "边界模糊", "自我忽视"],
+  ENFP: ["三分钟热度", "过度承诺", "缺乏深度"],
+  ISTJ: ["抗拒变化", "过度刻板", "情感压抑"],
+  ISFJ: ["过度牺牲", "委曲求全", "害怕冲突"],
+  ESTJ: ["过于强势", "忽视人心", "缺乏弹性"],
+  ESFJ: ["在意评价", "失去自我", "回避冲突"],
+  ISTP: ["情感冷漠", "承诺困难", "缺乏规划"],
+  ISFP: ["逃避冲突", "缺少规划", "表达困难"],
+  ESTP: ["冲动行事", "忽视后果", "缺乏耐心"],
+  ESFP: ["逃避深度", "即时享乐", "缺乏规划"],
+};
+var AWAKENING_DATA = {
+  INTJ: {
+    unawakened: {
+      desc: "你过度依赖逻辑分析，忽视直觉和情感信号。可能陷入Ni-Fi循环，在内心世界中迷失。",
+      guide:
+        '每天花5分钟记录情绪，不要分析，只是感受。尝试问自己"我现在感觉如何"而非"我应该怎么想"。',
+    },
+    low: {
+      desc: "开始意识到Te效率不是唯一答案。你在尝试倾听内心，但还不太习惯。",
+      guide: '每周进行一次不带目的的社交，练习"无用"的闲聊。',
+    },
+    medium: {
+      desc: "能在战略规划和当下体验间切换。你开始理解情感的价值，不再只是分析它。",
+      guide: "尝试用情感而非逻辑做一个小决定。主动表达对他人的欣赏。",
+    },
+    high: {
+      desc: "整合所有认知功能，用洞察力服务于更大意义。独立思考与人际连接达到平衡。",
+      guide: "帮助他人发展战略思维，探索如何用远见造福更多人。",
+    },
+  },
+  INTP: {
+    unawakened: {
+      desc: "沉浸在思维世界里，与现实脱节。可能过度分析而无法行动，陷入Ti-Si循环。",
+      guide: '设定一个小目标，今天就行动，不要等到"想清楚"。',
+    },
+    low: {
+      desc: "开始意识到理论需要实践验证。你在尝试将想法落地，虽然还不太顺利。",
+      guide: "找一个可以讨论想法的伙伴，每周完成一个小项目。",
+    },
+    medium: {
+      desc: "能够平衡思考与行动，知道何时该停止分析。创意开始产生实际价值。",
+      guide: "用简单语言向非专业人士解释复杂概念。关注他人的情感反应。",
+    },
+    high: {
+      desc: "将深度思考转化为创新成果。既能探索抽象理论，也能与他人建立真实连接。",
+      guide: "成为知识的桥梁，用洞察力解决实际问题。",
+    },
+  },
+  ENTJ: {
+    unawakened: {
+      desc: "过度关注目标和效率，忽视过程和人的感受。可能显得专横，难以接受不同意见。",
+      guide: "今天认真倾听一个人说完，不打断、不给建议。",
+    },
+    low: {
+      desc: "开始意识到领导不只是发号施令。你在学习考虑团队成员的感受。",
+      guide: "每周给团队成员一次正向反馈。",
+    },
+    medium: {
+      desc: "能在推动目标和关怀团队间取得平衡。你的领导力更有温度了。",
+      guide: "尝试授权而非亲自执行。关注下属的成长。",
+    },
+    high: {
+      desc: "成为真正激励人心的领导者。远见与同理心让团队自愿追随。",
+      guide: "培养接班人，思考如何创造持久的正面影响。",
+    },
+  },
+  ENTP: {
+    unawakened: {
+      desc: "想法太多，难以专注和坚持。可能为了辩论而辩论，忽视他人感受。",
+      guide: "选择一个项目，承诺完成它再开始新的。",
+    },
+    low: {
+      desc: "开始意识到完成比开始更重要。你在学习专注，虽然新想法的诱惑很大。",
+      guide: '建立"想法停车场"，记录新点子但不立即行动。',
+    },
+    medium: {
+      desc: "能够平衡探索新可能和深耕现有项目。创意开始产生持续价值。",
+      guide: "找一个互补的伙伴帮你执行。注意对方的情感状态。",
+    },
+    high: {
+      desc: "将创新思维转化为实际影响力。既能激发灵感，也能推动落地。",
+      guide: "成为创新的催化剂，用影响力做有意义的事。",
+    },
+  },
+  INFJ: {
+    unawakened: {
+      desc: "过度理想化，难以接受现实的不完美。可能过度牺牲自己去帮助他人。",
+      guide: '今天为自己做一件小事，不考虑对他人的价值。练习说"不"。',
+    },
+    low: {
+      desc: "开始意识到自我照顾的重要性。你在学习设立边界，虽然还会感到内疚。",
+      guide: "每天留30分钟完全属于自己的时间。",
+    },
+    medium: {
+      desc: "能在帮助他人和照顾自己间取得平衡。洞察力服务于健康的关系。",
+      guide: "分享真实想法，即使可能引起不适。信任他人能处理真相。",
+    },
+    high: {
+      desc: "成为有边界的助人者。深刻洞察既服务他人，也滋养自己。",
+      guide: "用洞察力引导他人自助。创造更大范围的积极影响。",
+    },
+  },
+  INFP: {
+    unawakened: {
+      desc: "活在理想世界里，逃避现实的挑战。可能过于敏感，难以接受批评。",
+      guide: "今天完成一件你一直拖延的实际事务。",
+    },
+    low: {
+      desc: "开始尝试将理想与现实连接。你在学习面对不完美的世界。",
+      guide: "找一个信任的人分享想法，接受反馈而非防御。",
+    },
+    medium: {
+      desc: "能够在保持真实的同时适应现实。创意开始找到表达出口。",
+      guide: "勇敢分享作品，即使还不完美。用行动表达价值观。",
+    },
+    high: {
+      desc: "将内心的丰富转化为对世界的贡献。真实性感染并帮助他人。",
+      guide: "成为真实性的榜样，用独特视角创造美好。",
+    },
+  },
+  ENFJ: {
+    unawakened: {
+      desc: '过度关注他人需求，忽视自己。可能以"为你好"的名义干涉他人。',
+      guide: '今天问自己"我想要什么"，不考虑他人期待。',
+    },
+    low: {
+      desc: "开始意识到不是所有人都需要你的帮助。你在学习尊重他人的选择。",
+      guide: '想给建议时，先问"你需要我的意见吗？"',
+    },
+    medium: {
+      desc: "能在激励他人和尊重边界间取得平衡。温暖不再让人感到压力。",
+      guide: "培养他人的独立性，而非依赖性。",
+    },
+    high: {
+      desc: "成为赋能型领导者。帮助他人发现自己的力量，而非依赖你。",
+      guide: "创造让他人绽放的平台。在付出中也收获滋养。",
+    },
+  },
+  ENFP: {
+    unawakened: {
+      desc: "热情来得快去得也快，难以坚持。可能过于在意他人评价，失去自我。",
+      guide: "选择一件事，即使热情消退也继续做。",
+    },
+    low: {
+      desc: "开始意识到热情需要配合行动力。你在学习完成承诺。",
+      guide: "建立简单的日常习惯。每周回顾并庆祝完成的事。",
+    },
+    medium: {
+      desc: "能在保持热情的同时持续行动。创意开始产生实际成果。",
+      guide: "深耕1-2个真正重要的领域。",
+    },
+    high: {
+      desc: "将热情转化为持续的正面影响。阳光照亮他人，也温暖自己。",
+      guide: "成为激励者，在冒险中也建立稳定的根基。",
+    },
+  },
+  ISTJ: {
+    unawakened: {
+      desc: "过度依赖规则和传统，抗拒变化。可能显得刻板，难以适应新情况。",
+      guide: "今天尝试一种新方式做熟悉的事。",
+    },
+    low: {
+      desc: "开始意识到规则需要灵活应用。你在学习适应变化。",
+      guide: '每周尝试一件小小的"打破常规"。',
+    },
+    medium: {
+      desc: "能在保持原则的同时适应变化。可靠性与灵活性达到平衡。",
+      guide: "主动提出改进建议，而非只是执行。",
+    },
+    high: {
+      desc: "成为可靠与创新兼具的中坚力量。稳定给他人安全感。",
+      guide: "传授经验和原则。帮助组织在变化中保持核心价值。",
+    },
+  },
+  ISFJ: {
+    unawakened: {
+      desc: "过度牺牲自己照顾他人，积累怨气。可能用付出来获得认可。",
+      guide: "今天拒绝一个不情愿的请求。",
+    },
+    low: {
+      desc: "开始意识到自我照顾不是自私。你在学习表达自己的需求。",
+      guide: "练习直接说出想法，而非暗示。接受他人的帮助。",
+    },
+    medium: {
+      desc: "能在照顾他人和自我关爱间取得平衡。温暖不再是负担。",
+      guide: "设立清晰的边界，并温和地坚持。",
+    },
+    high: {
+      desc: "成为有边界的温暖守护者。付出源于丰盈，而非匮乏。",
+      guide: "教他人如何照顾自己和他人。",
+    },
+  },
+  ESTJ: {
+    unawakened: {
+      desc: "过度强调效率和规则，忽视人的感受。可能显得专制，难以接受异见。",
+      guide: '今天问一个人"你怎么看"并认真倾听。',
+    },
+    low: {
+      desc: "开始意识到不同的做事方式也可能有效。你在学习尊重多样性。",
+      guide: "每周征求一次他人意见，并真正考虑采纳。",
+    },
+    medium: {
+      desc: "能在推动效率的同时关注团队感受。领导力更有人情味。",
+      guide: "用问题引导而非直接告诉答案。",
+    },
+    high: {
+      desc: "成为高效且有温度的管理者。组织能力服务于更大的目标。",
+      guide: "创造让所有人都能发挥的系统。",
+    },
+  },
+  ESFJ: {
+    unawakened: {
+      desc: "过度在意他人评价，失去自我。可能通过讨好来获得认可。",
+      guide: "今天做一个只因为自己喜欢的决定。",
+    },
+    low: {
+      desc: "开始意识到不可能让所有人满意。你在学习接受差异。",
+      guide: "记录自己的观点，即使与他人不同。",
+    },
+    medium: {
+      desc: "能在保持和谐的同时坚持自我。社交能力服务于真实连接。",
+      guide: "区分真正重要的关系和一般的社交。",
+    },
+    high: {
+      desc: "成为既受欢迎又真实的社交达人。温暖源于自信。",
+      guide: "帮助他人建立健康的人际关系。",
+    },
+  },
+  ISTP: {
+    unawakened: {
+      desc: "过度独立，难以与他人建立深层连接。可能显得冷漠，逃避情感话题。",
+      guide: "今天主动分享一个想法或感受。不需要完美，只需要真实。",
+    },
+    low: {
+      desc: "开始意识到连接的价值。你在尝试表达，虽然还不太习惯。",
+      guide: "每周与一个人进行一次深度对话。",
+    },
+    medium: {
+      desc: "能在保持独立的同时建立有意义的连接。冷静中有了温度。",
+      guide: "在重要关系中主动表达感受。",
+    },
+    high: {
+      desc: "成为既独立又有深度连接的人。行动和言语都能传达关怀。",
+      guide: "用实用技能帮助他人。在冷静中给予温暖的支持。",
+    },
+  },
+  ISFP: {
+    unawakened: {
+      desc: "过度敏感，容易受伤害。可能逃避冲突和困难决定。",
+      guide: "今天直接表达一个意见，即使可能有分歧。",
+    },
+    low: {
+      desc: "开始意识到表达自我的重要性。你在学习勇敢地分享。",
+      guide: "找一个安全的方式表达真实想法。逐步扩大表达范围。",
+    },
+    medium: {
+      desc: "能在保持敏感的同时勇敢表达。独特视角开始被他人欣赏。",
+      guide: "相信你的观点有价值。在冲突中寻找双赢。",
+    },
+    high: {
+      desc: "将敏感转化为独特的创造力。真实和勇气感染他人。",
+      guide: "用艺术和审美影响更多人。帮助他人接纳独特性。",
+    },
+  },
+  ESTP: {
+    unawakened: {
+      desc: "过度追求刺激，忽视长期后果。可能冲动行事，难以安定。",
+      guide: "今天在行动前停3秒思考后果。",
+    },
+    low: {
+      desc: "开始意识到有些事需要时间和规划。你在学习延迟满足。",
+      guide: "设定一个月后的目标，制定步骤并执行。",
+    },
+    medium: {
+      desc: "能在享受当下的同时考虑未来。行动力有了方向。",
+      guide: "将冒险精神用于有意义的挑战。",
+    },
+    high: {
+      desc: "将行动力转化为持续的成就。既能享受当下，也能规划未来。",
+      guide: "用勇气和执行力帮助他人突破。",
+    },
+  },
+  ESFP: {
+    unawakened: {
+      desc: "过度追求快乐，逃避深度和责任。可能难以独处，需要持续刺激。",
+      guide: "今天花20分钟独处，不使用手机。",
+    },
+    low: {
+      desc: "开始意识到快乐需要深度才能持久。你在学习面对不舒服。",
+      guide: "每天安排一段安静时间。记录让你真正满足的事。",
+    },
+    medium: {
+      desc: "能在享受生活的同时找到深度意义。快乐更加持久。",
+      guide: "发展一项需要长期投入的技能。",
+    },
+    high: {
+      desc: "将快乐的能力转化为生活的艺术。阳光既温暖他人，也温暖自己。",
+      guide: "帮助他人找到真正的快乐。用热情服务于有意义的事业。",
+    },
+  },
+};
+var TYPE_THEME_COLORS = {
+  analyst: "#8b5cf6",
+  diplomat: "#10b981",
+  sentinel: "#3b82f6",
+  explorer: "#eab308",
+};
+let selectedType = null,
+  currentQuestionIndex = 0,
+  answers = {},
+  selectedAnswer = null;
+// 调试模式：随机数据直接进入结果页
+function debugTest(type) {
+  const types = [
+    "INTJ",
+    "INTP",
+    "ENTJ",
+    "ENTP",
+    "INFJ",
+    "INFP",
+    "ENFJ",
+    "ENFP",
+    "ISTJ",
+    "ISFJ",
+    "ESTJ",
+    "ESFJ",
+    "ISTP",
+    "ISFP",
+    "ESTP",
+    "ESFP",
+  ];
+  selectedType = type || types[Math.floor(Math.random() * types.length)];
+  QUESTIONS = QUESTIONS_BY_GROUP[TYPE_TO_GROUP[selectedType]];
+  answers = {};
+  for (let i = 1; i <= 72; i++) {
+    answers[i] = Math.floor(Math.random() * 5) + 1;
+  }
+  // 设置主题色
+  document.documentElement.setAttribute(
+    "data-theme",
+    TYPE_TO_GROUP[selectedType],
+  );
+  console.log("调试模式：类型=" + selectedType);
+  showPage("result-page");
+  showResults();
+}
+function init() {
+  // URL参数调试模式：?debug 或 ?debug=INTJ
+  const params = new URLSearchParams(window.location.search);
+  if (params.has("debug")) {
+    debugTest(params.get("debug") || "");
+    return;
+  }
+  // 恢复测试进度或结果
+  const currentPage = sessionStorage.getItem("currentPage");
+
+  if (currentPage === "result") {
+    try {
+      const saved = localStorage.getItem("personality-result");
+      if (saved) {
+        const data = JSON.parse(saved);
+        selectedType = data.selectedType;
+        answers = data.answers;
+        QUESTIONS = QUESTIONS_BY_GROUP[TYPE_TO_GROUP[selectedType]];
+        document.documentElement.setAttribute(
+          "data-theme",
+          TYPE_TO_GROUP[selectedType],
+        );
+        window.__16rg2_test_completed = true;
+        showPage("result-page");
+        showResults({ skipComplete: true });
+      }
+    } catch (e) {
+      localStorage.removeItem("personality-result");
+      sessionStorage.removeItem("currentPage");
+    }
+  } else if (currentPage === "test") {
+    try {
+      const progress = sessionStorage.getItem("testProgress");
+      if (progress) {
+        const data = JSON.parse(progress);
+        selectedType = data.selectedType;
+        currentQuestionIndex = data.currentQuestionIndex;
+        answers = data.answers;
+        QUESTIONS = QUESTIONS_BY_GROUP[TYPE_TO_GROUP[selectedType]];
+        document.documentElement.setAttribute(
+          "data-theme",
+          TYPE_TO_GROUP[selectedType],
+        );
+        document.querySelector("#current-type-badge .type-code").textContent =
+          selectedType + " - " + PERSONALITY_TYPES[selectedType].name;
+        renderQuestion();
+        showPage("test-page");
+      }
+    } catch (e) {
+      sessionStorage.removeItem("testProgress");
+      sessionStorage.removeItem("currentPage");
+    }
+  }
+}
+function showPage(id) {
+  document
+    .querySelectorAll(".page")
+    .forEach((p) => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if (id !== "result-page") {
+    sessionStorage.removeItem("currentPage");
+  }
+  if (id === "welcome-page" || id === "result-page") {
+    addPromotionLinkDelayed();
+  }
+}
+
+function getStorageKey(token) {
+  return (
+    "test_result_" +
+    (token || (window.linkValidator && window.linkValidator.token) || "local")
+  );
+}
+function getCompletionFlagKey() {
+  const token = window.linkValidator && window.linkValidator.token;
+  return "16rg2_test_completed_" + (token || "");
+}
+function addPromotionLinkDelayed() {
+  setTimeout(function () {
+    if (
+      window.PsyTestValidator &&
+      typeof window.PsyTestValidator.addPromotionLink === "function"
+    ) {
+      window.PsyTestValidator.addPromotionLink();
+    }
+  }, 200);
+}
+async function waitForValidator() {
+  let waitCount = 0;
+  while (!window.linkValidator && waitCount < 30) {
+    await new Promise(function (resolve) {
+      setTimeout(resolve, 100);
+    });
+    waitCount++;
+    if (
+      waitCount % 10 === 0 &&
+      window.PsyTestValidator &&
+      typeof window.PsyTestValidator.getInstance === "function"
+    ) {
+      const instance = window.PsyTestValidator.getInstance();
+      if (instance) {
+        window.linkValidator = instance;
+        break;
+      }
+    }
+  }
+  return window.linkValidator;
+}
+async function validateAndStartSdk() {
+  const validator = await waitForValidator();
+  if (!validator) {
+    alert("验证SDK未初始化，无法开始测试。请刷新页面重试。");
+    return false;
+  }
+  let isValid = false;
+  if (typeof validator.validateForUserAction === "function") {
+    try {
+      isValid = await validator.validateForUserAction();
+      if (!isValid || validator.valid === false) return false;
+    } catch (error) {
+      console.error("链接验证失败:", error);
+      validator.valid = false;
+      return false;
+    }
+  } else {
+    if (validator.valid === false) {
+      alert(validator.validationError || "测试链接无效，请检查链接是否正确");
+      return false;
+    }
+    isValid = validator.valid !== false;
+  }
+  if (!isValid || validator.valid === false) return false;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isRestart = urlParams.get("restart") === "true";
+  if (!isRestart && !window.__16rg2_test_started) {
+    try {
+      window.__16rg2_test_started = true;
+      await validator.startTest();
+      console.log("测试开始记录成功");
+    } catch (error) {
+      console.error("记录测试开始失败:", error);
+      window.__16rg2_test_started = false;
+      return false;
+    }
+  } else if (isRestart) {
+    console.log("重新测试模式，跳过startTest()调用，避免重复扣除次数");
+    window.__16rg2_test_started = false;
+    window.__16rg2_test_completed = false;
+  }
+  return true;
+}
+function restoreResultFromStorage() {
+  const token =
+    (window.linkValidator && window.linkValidator.token) ||
+    new URLSearchParams(window.location.search).get("token");
+  if (!token) return false;
+  try {
+    const raw = localStorage.getItem(getStorageKey(token));
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    const result = saved.result || saved;
+    if (!result || !result.selectedType || !result.answers) return false;
+    selectedType = result.selectedType;
+    answers = result.answers;
+    QUESTIONS = QUESTIONS_BY_GROUP[TYPE_TO_GROUP[selectedType]];
+    document.documentElement.setAttribute(
+      "data-theme",
+      TYPE_TO_GROUP[selectedType],
+    );
+    window.__16rg2_test_completed = true;
+    sessionStorage.setItem("currentPage", "result");
+    showPage("result-page");
+    showResults({ skipComplete: true });
+    return true;
+  } catch (error) {
+    console.error("恢复本地结果失败:", error);
+    return false;
+  }
+}
+window.restore16rg2Result = restoreResultFromStorage;
+
+function selectType(t) {
+  selectedType = t;
+  document.getElementById("confirm-btn").disabled = false;
+  document
+    .querySelectorAll(".type-chip")
+    .forEach((c) => c.classList.remove("selected"));
+  document.querySelectorAll(".type-chip").forEach((c) => {
+    if (c.textContent === t) c.classList.add("selected");
+  });
+  document
+    .querySelectorAll(".type-group")
+    .forEach((g) => g.classList.remove("active"));
+  document.querySelectorAll(".type-chip").forEach((c) => {
+    if (c.textContent === t) c.closest(".type-group").classList.add("active");
+  });
+  document.documentElement.setAttribute("data-theme", TYPE_TO_GROUP[t]);
+}
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function startTest() {
+  if (!selectedType) return;
+  currentQuestionIndex = 0;
+  answers = {};
+  selectedAnswer = null;
+  QUESTIONS = shuffleArray(QUESTIONS_BY_GROUP[TYPE_TO_GROUP[selectedType]]);
+  document.documentElement.setAttribute(
+    "data-theme",
+    TYPE_TO_GROUP[selectedType],
+  );
+  document.querySelector("#current-type-badge .type-code").textContent =
+    selectedType + " - " + PERSONALITY_TYPES[selectedType].name;
+  sessionStorage.setItem("currentPage", "test");
+  saveTestProgress();
+  renderQuestion();
+  showPage("test-page");
+}
+function saveTestProgress() {
+  sessionStorage.setItem(
+    "testProgress",
+    JSON.stringify({ selectedType, currentQuestionIndex, answers }),
+  );
+}
+function renderQuestion() {
+  const q = QUESTIONS[currentQuestionIndex];
+  document.getElementById("question-text").textContent = q.text;
+  document.getElementById("q-current").textContent = currentQuestionIndex + 1;
+  document.getElementById("dimension-name").textContent = q.dimension;
+  document.getElementById("progress-percent").textContent =
+    Math.round(((currentQuestionIndex + 1) / QUESTIONS.length) * 100) + "%";
+  document.getElementById("progress-fill").style.width =
+    ((currentQuestionIndex + 1) / QUESTIONS.length) * 100 + "%";
+  document
+    .querySelectorAll(".opt")
+    .forEach((o) => o.classList.remove("selected"));
+  selectedAnswer = answers[q.id] || null;
+  if (selectedAnswer) {
+    document
+      .querySelector(`.opt[data-val="${selectedAnswer}"]`)
+      .classList.add("selected");
+  }
+  document.getElementById("prev-btn").disabled = currentQuestionIndex === 0;
+  document.getElementById("next-btn").textContent =
+    currentQuestionIndex === QUESTIONS.length - 1 ? "查看结果" : "下一题";
+}
+var _jumping = false;
+function selectOption(val) {
+  if (_jumping) return;
+  selectedAnswer = val;
+  document
+    .querySelectorAll(".opt")
+    .forEach((o) => o.classList.remove("selected"));
+  document.querySelector(`.opt[data-val="${val}"]`).classList.add("selected");
+  _jumping = true;
+  setTimeout(() => {
+    _jumping = false;
+    nextQuestion();
+  }, 300);
+}
+function nextQuestion() {
+  if (selectedAnswer === null) return;
+  answers[QUESTIONS[currentQuestionIndex].id] = selectedAnswer;
+  saveTestProgress();
+  if (currentQuestionIndex < QUESTIONS.length - 1) {
+    currentQuestionIndex++;
+    selectedAnswer = null;
+    renderQuestion();
+  } else {
+    sessionStorage.removeItem("testProgress");
+    showPage("result-page");
+    showResults();
+  }
+}
+function prevQuestion() {
+  if (currentQuestionIndex > 0) {
+    currentQuestionIndex--;
+    selectedAnswer = answers[QUESTIONS[currentQuestionIndex].id] || null;
+    saveTestProgress();
+    renderQuestion();
+  }
+}
+function saveResult() {
+  const payload = {
+    selectedType,
+    answers,
+    timestamp: Date.now(),
+    completedAt: new Date().toISOString(),
+  };
+  localStorage.setItem("personality-result", JSON.stringify(payload));
+  let token = window.linkValidator && window.linkValidator.token;
+  if (!token) {
+    token =
+      "local_" +
+      Date.now().toString(36) +
+      Math.random().toString(36).slice(2, 10);
+  }
+  try {
+    localStorage.setItem(
+      getStorageKey(token),
+      JSON.stringify({
+        token,
+        result: payload,
+        timestamp: payload.completedAt,
+      }),
+    );
+  } catch (error) {
+    console.error("保存测试结果失败:", error);
+  }
+  return payload;
+}
+
+async function showResults(opts) {
+  opts = opts || {};
+  if (!selectedType) return;
+  sessionStorage.setItem("currentPage", "result");
+  const typeInfo = PERSONALITY_TYPES[selectedType];
+  // 人格类型维度基础值
+  const TYPE_DIM_BASE = {
+    INTJ: {
+      脑力在线: 8,
+      自洽指数: 2,
+      情绪免疫力: -3,
+      社交电量: -18,
+      格局视野: 7,
+      行动燃料: -3,
+      心灵富足: 2,
+      边界清晰度: 5,
+    },
+    INTP: {
+      脑力在线: 14,
+      自洽指数: 4,
+      情绪免疫力: -4,
+      社交电量: -16,
+      格局视野: 8,
+      行动燃料: -9,
+      心灵富足: 4,
+      边界清晰度: -1,
+    },
+    ENTJ: {
+      脑力在线: 1,
+      自洽指数: 4,
+      情绪免疫力: -3,
+      社交电量: -6,
+      格局视野: 7,
+      行动燃料: 4,
+      心灵富足: -6,
+      边界清晰度: -1,
+    },
+    ENTP: {
+      脑力在线: 7,
+      自洽指数: 2,
+      情绪免疫力: -3,
+      社交电量: 0,
+      格局视野: 7,
+      行动燃料: -3,
+      心灵富足: 0,
+      边界清晰度: -10,
+    },
+    INFJ: {
+      脑力在线: 4,
+      自洽指数: 6,
+      情绪免疫力: -11,
+      社交电量: -11,
+      格局视野: 6,
+      行动燃料: -6,
+      心灵富足: 12,
+      边界清晰度: 0,
+    },
+    INFP: {
+      脑力在线: 6,
+      自洽指数: 3,
+      情绪免疫力: -10,
+      社交电量: -12,
+      格局视野: 8,
+      行动燃料: -10,
+      心灵富足: 18,
+      边界清晰度: -3,
+    },
+    ENFJ: {
+      脑力在线: 0,
+      自洽指数: 2,
+      情绪免疫力: -3,
+      社交电量: 7,
+      格局视野: 2,
+      行动燃料: 2,
+      心灵富足: 4,
+      边界清晰度: -14,
+    },
+    ENFP: {
+      脑力在线: 3,
+      自洽指数: 1,
+      情绪免疫力: -7,
+      社交电量: 11,
+      格局视野: 1,
+      行动燃料: -2,
+      心灵富足: 8,
+      边界清晰度: -15,
+    },
+    ISTJ: {
+      脑力在线: -1,
+      自洽指数: 6,
+      情绪免疫力: 3,
+      社交电量: -17,
+      格局视野: -4,
+      行动燃料: 9,
+      心灵富足: -4,
+      边界清晰度: 8,
+    },
+    ISFJ: {
+      脑力在线: -1,
+      自洽指数: 4,
+      情绪免疫力: 2,
+      社交电量: -6,
+      格局视野: -6,
+      行动燃料: 6,
+      心灵富足: 9,
+      边界清晰度: -8,
+    },
+    ESTJ: {
+      脑力在线: -1,
+      自洽指数: 7,
+      情绪免疫力: -1,
+      社交电量: -3,
+      格局视野: -3,
+      行动燃料: 9,
+      心灵富足: -11,
+      边界清晰度: 3,
+    },
+    ESFJ: {
+      脑力在线: -1,
+      自洽指数: 2,
+      情绪免疫力: -1,
+      社交电量: 12,
+      格局视野: -6,
+      行动燃料: 4,
+      心灵富足: 4,
+      边界清晰度: -14,
+    },
+    ISTP: {
+      脑力在线: 4,
+      自洽指数: 7,
+      情绪免疫力: 7,
+      社交电量: -23,
+      格局视野: -3,
+      行动燃料: 4,
+      心灵富足: -3,
+      边界清晰度: 7,
+    },
+    ISFP: {
+      脑力在线: 0,
+      自洽指数: 3,
+      情绪免疫力: -5,
+      社交电量: -10,
+      格局视野: 0,
+      行动燃料: -5,
+      心灵富足: 13,
+      边界清晰度: 4,
+    },
+    ESTP: {
+      脑力在线: -1,
+      自洽指数: 3,
+      情绪免疫力: 1,
+      社交电量: 6,
+      格局视野: -9,
+      行动燃料: 11,
+      心灵富足: -9,
+      边界清晰度: -2,
+    },
+    ESFP: {
+      脑力在线: -6,
+      自洽指数: -1,
+      情绪免疫力: -1,
+      社交电量: 14,
+      格局视野: -11,
+      行动燃料: 9,
+      心灵富足: 4,
+      边界清晰度: -8,
+    },
+  };
+  const baseScores = TYPE_DIM_BASE[selectedType] || {};
+  // 维度权重配置（核心维度加权）
+  const DIM_WEIGHTS = {
+    脑力在线: 1.2,
+    自洽指数: 1.15,
+    情绪免疫力: 1.1,
+    社交电量: 1.0,
+    格局视野: 1.05,
+    行动燃料: 1.0,
+    心灵富足: 1.1,
+    边界清晰度: 1.15,
+  };
+  // 计算维度分数
+  const ds = {};
+  DIMENSIONS.forEach((d) => {
+    ds[d] = { score: 0, count: 0 };
+  });
+  QUESTIONS.forEach((q) => {
+    if (answers[q.id]) {
+      const score = q.reverse ? 6 - answers[q.id] : answers[q.id];
+      ds[q.dimension].score += score;
+      ds[q.dimension].count++;
+    }
+  });
+  const dims = DIMENSIONS.map((d) => {
+    const rawScore = ds[d].score;
+    const minPossible = ds[d].count * 1;
+    const maxPossible = ds[d].count * 5;
+    let score100 =
+      ds[d].count > 0
+        ? Math.round(
+            ((rawScore - minPossible) / (maxPossible - minPossible)) * 100,
+          )
+        : 50;
+    const baseAdj = Math.round((baseScores[d] || 0) * 0.4);
+    score100 = Math.min(100, Math.max(0, score100 + baseAdj));
+    const weight = DIM_WEIGHTS[d] || 1.0;
+    return {
+      name: d,
+      score: score100,
+      weightedScore: Math.round(score100 * weight),
+    };
+  });
+  const totalScore = dims.reduce((s, d) => s + d.weightedScore, 0);
+  // 阶段判断（加权后阈值：360/540/720，对应约40%/60%/80%）
+  let stageKey = "unawakened";
+  if (totalScore >= 720) stageKey = "high";
+  else if (totalScore >= 540) stageKey = "medium";
+  else if (totalScore >= 360) stageKey = "low";
+  const stageData = STAGE_LEVELS[stageKey];
+  // 更新UI
+  const themeColor =
+    TYPE_THEME_COLORS[TYPE_TO_GROUP[selectedType]] || "#10b981";
+  document.getElementById("result-card").style.background =
+    "linear-gradient(135deg," + themeColor + " 0%," + themeColor + "dd 100%)";
+  document.getElementById("total-score").textContent = totalScore;
+  document.getElementById("result-type").textContent =
+    selectedType + " - " + typeInfo.name;
+  document.getElementById("result-tags").innerHTML =
+    '<span class="result-tag">' +
+    typeInfo.category +
+    "</span>" +
+    stageData.tags
+      .map((t) => '<span class="result-tag">' + t + "</span>")
+      .join("");
+  document.getElementById("result-quote").textContent =
+    STAGE_QUOTES[selectedType][stageKey];
+  // 维度列表
+  document.getElementById("dimension-list").innerHTML = dims
+    .map(
+      (d) =>
+        '<div class="dim-item"><span class="dim-name">' +
+        d.name +
+        '</span><div class="dim-bar"><div class="dim-fill" style="width:' +
+        d.score +
+        "%;background:" +
+        themeColor +
+        '"></div></div><span class="dim-score" style="color:' +
+        themeColor +
+        '">' +
+        d.score +
+        "</span></div>",
+    )
+    .join("");
+  // 觉醒度
+  document.getElementById("awakening-stage").innerHTML =
+    '<span class="awakening-stage-label">你的阶段：</span><span class="awakening-stage-value" style="background:' +
+    themeColor +
+    '">' +
+    stageData.label +
+    "</span>";
+  var _aw =
+    (AWAKENING_DATA[selectedType] && AWAKENING_DATA[selectedType][stageKey]) ||
+    {};
+  document.getElementById("awakening-insight").innerHTML =
+    '<div class="awakening-insight-title"><i class="ri-search-eye-line" style="color:var(--primary)"></i> 内在解读</div><div class="awakening-insight-text">' +
+    (_aw.desc || stageData.desc) +
+    "</div>";
+  document.getElementById("awakening-guide").innerHTML =
+    '<div class="awakening-guide-title"><i class="ri-checkbox-circle-line" style="color:#22c55e"></i> 觉醒指南</div><div class="awakening-guide-text">' +
+    (_aw.guide || stageData.mechanism) +
+    "</div>";
+  document.getElementById("awakening-advice").innerHTML =
+    '<div class="awakening-advice-title"><i class="ri-pencil-line" style="color:#92400e"></i> 进阶锦囊</div><div class="awakening-advice-text">' +
+    STAGE_TIPS[selectedType][stageKey] +
+    "</div>";
+  // 进阶路径
+  const stageOrder = ["unawakened", "low", "medium", "high"];
+  const stageLabels = {
+    unawakened: "未觉醒",
+    low: "低阶",
+    medium: "中阶",
+    high: "高阶",
+  };
+  const stageIdx = stageOrder.indexOf(stageKey);
+  const nextStageKey = stageIdx < 3 ? stageOrder[stageIdx + 1] : null;
+  const pathAdvice = STAGE_PATH_ADVICE[selectedType]
+    ? STAGE_PATH_ADVICE[selectedType][stageKey]
+    : "";
+  let pathHtml =
+    '<div class="stage-path-title"><i class="ri-route-line"></i> 进阶路径</div><div class="stage-path-steps">';
+  stageOrder.forEach((s, i) => {
+    let cls =
+      i < stageIdx
+        ? "done"
+        : i === stageIdx
+          ? "current"
+          : i === stageIdx + 1
+            ? "next"
+            : "future";
+    pathHtml +=
+      '<span class="stage-path-item ' + cls + '">' + stageLabels[s] + "</span>";
+    if (i < 3)
+      pathHtml += '<i class="ri-arrow-right-s-line stage-path-arrow"></i>';
+  });
+  pathHtml += "</div>";
+  if (pathAdvice) {
+    pathHtml +=
+      '<div class="stage-path-diff"><strong>专属进阶建议：</strong>' +
+      pathAdvice +
+      "</div>";
+  }
+  document.getElementById("stage-progress-path").innerHTML = pathHtml;
+  // 原力与盲点
+  const careerTags = (typeInfo.careers || [])
+    .slice(0, 3)
+    .map((c) => '<span class="power-keyword">' + c + "</span>")
+    .join("");
+  const blindTags = (
+    (typeof BLIND_KEYWORDS !== "undefined" && BLIND_KEYWORDS[selectedType]) ||
+    stageData.tags ||
+    []
+  )
+    .map((t) => '<span class="blind-keyword">' + t + "</span>")
+    .join("");
+  document.getElementById("powers-card").innerHTML =
+    '<h4><i class="ri-star-line"></i> 天赋原力</h4><p>' +
+    typeInfo.powers +
+    '</p><div class="power-keywords">' +
+    careerTags +
+    "</div>";
+  document.getElementById("blindspots-card").innerHTML =
+    '<h4><i class="ri-eye-off-line"></i> 潜在盲区</h4><p>' +
+    typeInfo.blindSpots +
+    '</p><div class="blind-keywords">' +
+    blindTags +
+    "</div>";
+  // 成长行动卡
+  if (typeInfo.actions && typeInfo.actions.length) {
+    document.getElementById("actions-list").innerHTML = typeInfo.actions
+      .map(
+        (a, i) =>
+          '<div class="action-numbered"><span class="action-num">' +
+          (i + 1) +
+          '</span><span class="action-text">' +
+          a +
+          "</span></div>",
+      )
+      .join("");
+  }
+  // 环形进度条动画
+  const scorePercent = totalScore / 800;
+  const ringOffset = 264 * (1 - scorePercent);
+  document.getElementById("score-ring-fill").style.strokeDashoffset =
+    ringOffset;
+  // 阶段点
+  const dotIdx = ["unawakened", "low", "medium", "high"].indexOf(stageKey);
+  document
+    .querySelectorAll("#stage-dots span")
+    .forEach((dot, i) => dot.classList.toggle("active", i <= dotIdx));
+  // 先显示页面，再渲染图表（避免Canvas尺寸为0）
+  showPage("result-page");
+  drawRadar(dims, themeColor);
+  renderNewSections();
+  initDeepTabs(stageKey);
+  animateStageSlot(stageKey);
+  const testResult = saveResult();
+  if (!opts.skipComplete) {
+    const alreadyCompleted =
+      window.__16rg2_test_completed ||
+      localStorage.getItem(getCompletionFlagKey()) === "true";
+    if (!alreadyCompleted && window.linkValidator) {
+      try {
+        window.__16rg2_test_completed = true;
+        localStorage.setItem(getCompletionFlagKey(), "true");
+        await window.linkValidator.completeTest(undefined, testResult);
+        console.log("测试完成记录成功");
+      } catch (error) {
+        console.error("记录测试完成失败:", error);
+        window.__16rg2_test_completed = false;
+        localStorage.removeItem(getCompletionFlagKey());
+      }
+    }
+  }
+}
+function restart() {
+  if (
+    window.linkValidator &&
+    typeof window.linkValidator.clearLocalResult === "function"
+  ) {
+    window.linkValidator.clearLocalResult();
+  }
+  const urlParams = new URLSearchParams(window.location.search);
+  let token = urlParams.get("token");
+  if (!token && window.linkValidator && window.linkValidator.token) {
+    token = window.linkValidator.token;
+  }
+  selectedType = null;
+  currentQuestionIndex = 0;
+  answers = {};
+  selectedAnswer = null;
+  document
+    .querySelectorAll(".type-chip")
+    .forEach((c) => c.classList.remove("selected"));
+  document.getElementById("type-hint-bar").textContent = "点击人格类型查看介绍";
+  document.getElementById("confirm-btn").disabled = true;
+  document.documentElement.removeAttribute("data-theme");
+  sessionStorage.removeItem("currentPage");
+  sessionStorage.removeItem("testProgress");
+  localStorage.removeItem("personality-result");
+  if (token) {
+    try {
+      localStorage.removeItem(getStorageKey(token));
+      localStorage.removeItem("16rg2_test_completed_" + token);
+    } catch (e) {}
+    const newUrlParams = new URLSearchParams();
+    newUrlParams.set("token", token);
+    newUrlParams.set("restart", "true");
+    if (
+      urlParams.get("unlimited") === "true" ||
+      (window.linkValidator && window.linkValidator.unlimited)
+    ) {
+      newUrlParams.set("unlimited", "true");
+    }
+    window.location.href =
+      window.location.pathname + "?" + newUrlParams.toString();
+    return;
+  }
+  window.__16rg2_test_started = false;
+  window.__16rg2_test_completed = false;
+  showPage("welcome-page");
+}
+function changeType() {
+  selectedType = null;
+  currentQuestionIndex = 0;
+  answers = {};
+  selectedAnswer = null;
+  document
+    .querySelectorAll(".type-chip")
+    .forEach((c) => c.classList.remove("selected"));
+  document
+    .querySelectorAll(".type-group")
+    .forEach((g) => g.classList.remove("active"));
+  document.getElementById("type-hint-bar").textContent = "点击人格类型查看介绍";
+  document.getElementById("confirm-btn").disabled = true;
+  showPage("select-page");
+}
+async function goToSelect() {
+  const ok = await validateAndStartSdk();
+  if (!ok) return;
+  selectedType = null;
+  document
+    .querySelectorAll(".type-chip")
+    .forEach((c) => c.classList.remove("selected"));
+  document
+    .querySelectorAll(".type-group")
+    .forEach((g) => g.classList.remove("active"));
+  document.getElementById("type-hint-bar").textContent = "点击人格类型查看介绍";
+  document.getElementById("confirm-btn").disabled = true;
+  document.documentElement.removeAttribute("data-theme");
+  showPage("select-page");
+}
+var TYPE_HINTS = {
+  INTJ: "独立思考，善于规划",
+  INTP: "理性分析，追求真理",
+  ENTJ: "果断高效，天生领袖",
+  ENTP: "创新思维，善于辩论",
+  INFJ: "理想主义，洞察人心",
+  INFP: "诗意灵魂，追求意义",
+  ENFJ: "感染力强，激励他人",
+  ENFP: "热情洋溢，充满创意",
+  ISTJ: "可靠务实，恪尽职守",
+  ISFJ: "温暖守护，默默奉献",
+  ESTJ: "组织能力强，注重秩序",
+  ESFJ: "热心助人，维护和谐",
+  ISTP: "冷静理性，动手能力强",
+  ISFP: "艺术气质，活在当下",
+  ESTP: "大胆冒险，行动派",
+  ESFP: "热爱生活，感染力强",
+};
+function showTypeHint(t) {
+  document.getElementById("type-hint-bar").innerHTML =
+    '<span class="hint-type">' +
+    t +
+    '</span> - <span class="hint-name">' +
+    PERSONALITY_TYPES[t].name +
+    "，" +
+    TYPE_HINTS[t] +
+    "</span>";
+}
+function hideTypeHint() {
+  document.getElementById("type-hint-bar").textContent = "点击人格类型查看介绍";
+}
+// 雷达图
+function drawRadar(dims, color) {
+  const canvas = document.getElementById("radar-chart");
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 2;
+  const size = 420;
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + "px";
+  canvas.style.height = size + "px";
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+  const w = size,
+    h = size,
+    cx = w / 2,
+    cy = h / 2,
+    r = 110;
+  ctx.clearRect(0, 0, w, h);
+  const n = dims.length,
+    angleStep = (Math.PI * 2) / n,
+    startAngle = -Math.PI / 2;
+  const primaryColor = color || "#a855f7";
+  for (let level = 4; level >= 1; level--) {
+    ctx.beginPath();
+    const lr = (r * level) / 4;
+    for (let i = 0; i < n; i++) {
+      const angle = startAngle + i * angleStep;
+      const x = cx + lr * Math.cos(angle);
+      const y = cy + lr * Math.sin(angle);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = "#d1d5db";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = level === 4 ? "#f9fafb" : "transparent";
+    ctx.fill();
+  }
+  for (let i = 0; i < n; i++) {
+    const angle = startAngle + i * angleStep;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
+    ctx.strokeStyle = "#d1d5db";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const angle = startAngle + i * angleStep;
+    const val = dims[i].score / 100;
+    const x = cx + r * val * Math.cos(angle);
+    const y = cy + r * val * Math.sin(angle);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = primaryColor + "33";
+  ctx.fill();
+  ctx.strokeStyle = primaryColor;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  for (let i = 0; i < n; i++) {
+    const angle = startAngle + i * angleStep;
+    const val = dims[i].score / 100;
+    const x = cx + r * val * Math.cos(angle);
+    const y = cy + r * val * Math.sin(angle);
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = primaryColor;
+    ctx.fill();
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+  const labelR = r + 35;
+  ctx.font = "600 13px -apple-system,BlinkMacSystemFont,sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  for (let i = 0; i < n; i++) {
+    const angle = startAngle + i * angleStep;
+    const x = cx + labelR * Math.cos(angle);
+    const y = cy + labelR * Math.sin(angle);
+    ctx.fillStyle = "#6b7280";
+    ctx.fillText(dims[i].name, x, y);
+  }
+}
+// 阶段滚动动画
+function animateStageSlot(targetKey) {
+  const stageOrder = ["unawakened", "low", "medium", "high"];
+  const targetIdx = stageOrder.indexOf(targetKey);
+  const slot = document.getElementById("stage-slot-inner");
+  const itemHeight = slot.querySelector(".stage-slot-item").offsetHeight || 48;
+  slot.style.transform = "translateY(0)";
+  let currentIdx = 0;
+  let speed = 50;
+  let rounds = 2;
+  let totalSteps = rounds * 4 + targetIdx;
+  let step = 0;
+  const animate = () => {
+    currentIdx = (currentIdx + 1) % 4;
+    slot.style.transform = `translateY(-${currentIdx * itemHeight}px)`;
+    step++;
+    if (step < totalSteps) {
+      speed = step > totalSteps - 4 ? speed + 30 : speed;
+      setTimeout(animate, speed);
+    }
+  };
+  setTimeout(animate, 300);
+}
+// 主题切换
+let themeBtnTimer = null;
+function showThemeBtn() {
+  const btn = document.getElementById("theme-btn");
+  btn.classList.add("show");
+  if (themeBtnTimer) clearTimeout(themeBtnTimer);
+  themeBtnTimer = setTimeout(() => {
+    btn.classList.remove("show");
+    document.getElementById("theme-panel").classList.remove("open");
+  }, 5000);
+}
+function toggleThemePanel() {
+  document.getElementById("theme-panel").classList.toggle("open");
+  if (themeBtnTimer) clearTimeout(themeBtnTimer);
+  themeBtnTimer = setTimeout(() => {
+    document.getElementById("theme-btn").classList.remove("show");
+    document.getElementById("theme-panel").classList.remove("open");
+  }, 5000);
+}
+function setTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  document
+    .querySelectorAll(".theme-dot")
+    .forEach((d) => d.classList.remove("active"));
+  event.target.classList.add("active");
+  document.getElementById("theme-panel").classList.remove("open");
+  localStorage.setItem("personality-theme", theme);
+}
+function renderNewSections() {
+  if (!selectedType) return;
+  const typeInfo = PERSONALITY_TYPES[selectedType];
+  document.getElementById("career-list2").innerHTML = typeInfo.careers
+    .slice(0, 4)
+    .map(function (c) {
+      return '<span class="career-tag">' + c + "</span>";
+    })
+    .join("");
+  const themeColor =
+    TYPE_THEME_COLORS[TYPE_TO_GROUP[selectedType]] || "#10b981";
+  document.getElementById("partner-list2").innerHTML = typeInfo.soulmates
+    .slice(0, 3)
+    .map(function (p) {
+      return (
+        '<div class="partner-item"><span class="partner-type" style="color:' +
+        themeColor +
+        '">' +
+        p.type +
+        '</span><div class="partner-bar"><div class="partner-fill" style="width:' +
+        p.score +
+        "%;background:" +
+        themeColor +
+        '"></div></div><span class="partner-score" style="color:' +
+        themeColor +
+        '">' +
+        p.score +
+        "%</span></div>"
+      );
+    })
+    .join("");
+}
+// 深度解析标签页
+var DEEP_DATA = {
+  cognitive: {
+    INTJ: {
+      title: "Ni-Te-Fi-Se",
+      desc: "以内倾直觉(Ni)为主导，善于洞察未来趋势和深层模式。外倾思维(Te)帮助你高效执行计划。",
+      list: [
+        "主导功能：内倾直觉(Ni) - 直觉洞察，预见未来",
+        "辅助功能：外倾思维(Te) - 逻辑分析，高效执行",
+        "第三功能：内倾情感(Fi) - 内在价值，个人原则",
+        "劣势功能：外倾感觉(Se) - 当下体验，感官享受",
+      ],
+    },
+    INTP: {
+      title: "Ti-Ne-Si-Fe",
+      desc: "以内倾思维(Ti)为主导，追求逻辑的完美和概念的精确。外倾直觉(Ne)激发无限创意。",
+      list: [
+        "主导功能：内倾思维(Ti) - 逻辑分析，概念精确",
+        "辅助功能：外倾直觉(Ne) - 可能性探索，创意发散",
+        "第三功能：内倾感觉(Si) - 经验积累，细节记忆",
+        "劣势功能：外倾情感(Fe) - 社交和谐，情感表达",
+      ],
+    },
+    ENTJ: {
+      title: "Te-Ni-Se-Fi",
+      desc: "以外倾思维(Te)为主导，天生的领导者和组织者。内倾直觉(Ni)提供战略远见。",
+      list: [
+        "主导功能：外倾思维(Te) - 效率执行，组织领导",
+        "辅助功能：内倾直觉(Ni) - 战略规划，未来洞察",
+        "第三功能：外倾感觉(Se) - 行动力，现实把控",
+        "劣势功能：内倾情感(Fi) - 个人价值，情感深度",
+      ],
+    },
+    ENTP: {
+      title: "Ne-Ti-Fe-Si",
+      desc: "以外倾直觉(Ne)为主导，不断探索新可能性。内倾思维(Ti)确保逻辑严密。",
+      list: [
+        "主导功能：外倾直觉(Ne) - 创新思维，可能性",
+        "辅助功能：内倾思维(Ti) - 逻辑分析，原理探究",
+        "第三功能：外倾情感(Fe) - 社交魅力，说服力",
+        "劣势功能：内倾感觉(Si) - 细节执行，常规维护",
+      ],
+    },
+    INFJ: {
+      title: "Ni-Fe-Ti-Se",
+      desc: "以内倾直觉(Ni)为主导，拥有深刻的洞察力。外倾情感(Fe)让你关怀他人。",
+      list: [
+        "主导功能：内倾直觉(Ni) - 直觉洞察，意义探寻",
+        "辅助功能：外倾情感(Fe) - 共情能力，和谐追求",
+        "第三功能：内倾思维(Ti) - 内在逻辑，独立思考",
+        "劣势功能：外倾感觉(Se) - 当下体验，行动力",
+      ],
+    },
+    INFP: {
+      title: "Fi-Ne-Si-Te",
+      desc: "以内倾情感(Fi)为主导，拥有深刻的个人价值体系。外倾直觉(Ne)激发创意。",
+      list: [
+        "主导功能：内倾情感(Fi) - 价值观，真实性",
+        "辅助功能：外倾直觉(Ne) - 想象力，可能性",
+        "第三功能：内倾感觉(Si) - 记忆，个人体验",
+        "劣势功能：外倾思维(Te) - 执行力，客观分析",
+      ],
+    },
+    ENFJ: {
+      title: "Fe-Ni-Se-Ti",
+      desc: "以外倾情感(Fe)为主导，天生的激励者和引导者。内倾直觉(Ni)提供远见。",
+      list: [
+        "主导功能：外倾情感(Fe) - 共情领导，激励他人",
+        "辅助功能：内倾直觉(Ni) - 愿景规划，洞察力",
+        "第三功能：外倾感觉(Se) - 表现力，行动力",
+        "劣势功能：内倾思维(Ti) - 逻辑分析，批判思考",
+      ],
+    },
+    ENFP: {
+      title: "Ne-Fi-Te-Si",
+      desc: "以外倾直觉(Ne)为主导，充满热情和创意。内倾情感(Fi)确保真实性。",
+      list: [
+        "主导功能：外倾直觉(Ne) - 热情探索，创意无限",
+        "辅助功能：内倾情感(Fi) - 真实自我，价值追求",
+        "第三功能：外倾思维(Te) - 目标达成，组织能力",
+        "劣势功能：内倾感觉(Si) - 细节，常规维护",
+      ],
+    },
+    ISTJ: {
+      title: "Si-Te-Fi-Ne",
+      desc: "以内倾感觉(Si)为主导，注重经验和传统。外倾思维(Te)确保高效执行。",
+      list: [
+        "主导功能：内倾感觉(Si) - 经验积累，细节准确",
+        "辅助功能：外倾思维(Te) - 系统执行，责任担当",
+        "第三功能：内倾情感(Fi) - 内在原则，忠诚度",
+        "劣势功能：外倾直觉(Ne) - 变化适应，新可能性",
+      ],
+    },
+    ISFJ: {
+      title: "Si-Fe-Ti-Ne",
+      desc: "以内倾感觉(Si)为主导，细心周到。外倾情感(Fe)让你温暖地照顾他人。",
+      list: [
+        "主导功能：内倾感觉(Si) - 记忆细节，传统维护",
+        "辅助功能：外倾情感(Fe) - 体贴照顾，和谐追求",
+        "第三功能：内倾思维(Ti) - 内在逻辑，分析能力",
+        "劣势功能：外倾直觉(Ne) - 变化，新事物",
+      ],
+    },
+    ESTJ: {
+      title: "Te-Si-Ne-Fi",
+      desc: "以外倾思维(Te)为主导，高效的组织者和执行者。内倾感觉(Si)注重实际。",
+      list: [
+        "主导功能：外倾思维(Te) - 组织管理，效率执行",
+        "辅助功能：内倾感觉(Si) - 经验依据，细节把控",
+        "第三功能：外倾直觉(Ne) - 问题解决，适应能力",
+        "劣势功能：内倾情感(Fi) - 情感表达，个人价值",
+      ],
+    },
+    ESFJ: {
+      title: "Fe-Si-Ne-Ti",
+      desc: "以外倾情感(Fe)为主导，温暖的社交者和照顾者。内倾感觉(Si)注重细节。",
+      list: [
+        "主导功能：外倾情感(Fe) - 人际和谐，关怀他人",
+        "辅助功能：内倾感觉(Si) - 细节周到，传统维护",
+        "第三功能：外倾直觉(Ne) - 社交灵活，话题丰富",
+        "劣势功能：内倾思维(Ti) - 逻辑分析，批判思考",
+      ],
+    },
+    ISTP: {
+      title: "Ti-Se-Ni-Fe",
+      desc: "以内倾思维(Ti)为主导，冷静的分析者。外倾感觉(Se)让你行动敏捷。",
+      list: [
+        "主导功能：内倾思维(Ti) - 逻辑分析，原理理解",
+        "辅助功能：外倾感觉(Se) - 动手能力，即时反应",
+        "第三功能：内倾直觉(Ni) - 预判能力，直觉",
+        "劣势功能：外倾情感(Fe) - 情感表达，社交互动",
+      ],
+    },
+    ISFP: {
+      title: "Fi-Se-Ni-Te",
+      desc: "以内倾情感(Fi)为主导，拥有独特的审美和价值观。外倾感觉(Se)让你活在当下。",
+      list: [
+        "主导功能：内倾情感(Fi) - 个人价值，真实感受",
+        "辅助功能：外倾感觉(Se) - 美感体验，活在当下",
+        "第三功能：内倾直觉(Ni) - 直觉，未来感知",
+        "劣势功能：外倾思维(Te) - 组织执行，客观分析",
+      ],
+    },
+    ESTP: {
+      title: "Se-Ti-Fe-Ni",
+      desc: "以外倾感觉(Se)为主导，行动派的冒险家。内倾思维(Ti)确保冷静分析。",
+      list: [
+        "主导功能：外倾感觉(Se) - 即时行动，感官敏锐",
+        "辅助功能：内倾思维(Ti) - 冷静分析，问题解决",
+        "第三功能：外倾情感(Fe) - 社交魅力，说服力",
+        "劣势功能：内倾直觉(Ni) - 长期规划，深层洞察",
+      ],
+    },
+    ESFP: {
+      title: "Se-Fi-Te-Ni",
+      desc: "以外倾感觉(Se)为主导，天生的表演者和享乐者。内倾情感(Fi)保持真实。",
+      list: [
+        "主导功能：外倾感觉(Se) - 活力四射，当下体验",
+        "辅助功能：内倾情感(Fi) - 真实自我，情感丰富",
+        "第三功能：外倾思维(Te) - 实际执行，目标达成",
+        "劣势功能：内倾直觉(Ni) - 未来规划，深层意义",
+      ],
+    },
+  },
+  communication: {
+    INTJ: "直接、简洁、逻辑性强。不喜欢闲聊，偏好有深度的讨论。可能显得冷淡但其实很真诚。建议：适当加入情感元素，让交流更有温度。",
+    INTP: "喜欢探讨概念和理论，可能会过于抽象。需要时间思考再回应。建议：练习用简单的语言表达复杂想法。",
+    ENTJ: "自信、果断、有说服力。天生的演讲者，但可能过于强势。建议：多倾听他人观点，给予正向反馈。",
+    ENTP: "机智幽默，喜欢辩论。可能会为了辩论而辩论。建议：注意不要让对方感到被攻击。",
+    INFJ: "温和而深刻，善于倾听。可能会隐藏真实想法。建议：勇敢表达自己的需求和边界。",
+    INFP: "真诚、富有同理心。可能会避免冲突而压抑自己。建议：学会直接表达，不要期待他人读心。",
+    ENFJ: "热情、鼓励性强，善于激励他人。可能过于关注他人而忽视自己。建议：也要表达自己的需求。",
+    ENFP: "热情洋溢、感染力强。思维跳跃可能让人跟不上。建议：说话时注意逻辑顺序。",
+    ISTJ: "稳重、可靠、言简意赅。可能显得过于正式。建议：适当放松，增加互动性。",
+    ISFJ: "温和、体贴、善于倾听。可能过于委婉。建议：直接表达自己的想法。",
+    ESTJ: "直接、高效、有条理。可能过于指令性。建议：多询问他人意见。",
+    ESFJ: "友善、周到、善于社交。可能过于在意他人评价。建议：也要表达真实想法。",
+    ISTP: "简洁、实用、不喜欢废话。可能显得冷淡。建议：在重要关系中多表达关心。",
+    ISFP: "温柔、真诚、不善言辞。更喜欢用行动表达。建议：尝试用语言分享感受。",
+    ESTP: "直接、幽默、有感染力。可能说话太快太直。建议：注意他人的接受程度。",
+    ESFP: "活泼、有趣、善于调节气氛。可能话题跳跃。建议：在正式场合注意逻辑性。",
+  },
+  learning: {
+    INTJ: "自主学习能力强，喜欢系统性掌握知识。偏好理论和概念，能快速抓住核心。最佳方式：制定学习计划，深入研究感兴趣的领域。",
+    INTP: "好奇心驱动，喜欢探索原理。可能会陷入过度分析。最佳方式：允许自由探索，但设定实践目标。",
+    ENTJ: "目标导向，高效学习。喜欢有挑战性的内容。最佳方式：设定明确目标，追求卓越。",
+    ENTP: "快速学习，喜欢新鲜事物。可能难以深入。最佳方式：保持新鲜感的同时建立系统。",
+    INFJ: "深度学习者，寻求意义。喜欢独处时学习。最佳方式：创造安静环境，连接知识与个人价值。",
+    INFP: "创意学习，需要个人意义。容易被情绪影响。最佳方式：找到学习与热情的连接点。",
+    ENFJ: "互动式学习，喜欢讨论。善于从他人身上学习。最佳方式：加入学习小组，教授他人。",
+    ENFP: "体验式学习，需要多样性。容易分心。最佳方式：多感官学习，保持趣味性。",
+    ISTJ: "系统性学习，重视细节。喜欢按部就班。最佳方式：制定详细计划，逐步推进。",
+    ISFJ: "耐心学习，注重实用。喜欢有明确指导。最佳方式：循序渐进，反复练习。",
+    ESTJ: "高效学习，目标明确。喜欢结构化内容。最佳方式：列出清单，追踪进度。",
+    ESFJ: "合作学习，社交驱动。喜欢与人一起学习。最佳方式：组建学习伙伴，互相监督。",
+    ISTP: "实践学习，动手能力强。不喜欢纯理论。最佳方式：边做边学，解决实际问题。",
+    ISFP: "体验式学习，需要灵感。喜欢自己的节奏。最佳方式：创造性学习，自由探索。",
+    ESTP: "行动学习，快速尝试。不喜欢长篇大论。最佳方式：短期目标，即时反馈。",
+    ESFP: "互动学习，需要乐趣。难以长时间集中。最佳方式：游戏化学习，保持活力。",
+  },
+  love: {
+    INTJ: "在爱情中忠诚而深沉。不善表达但行动说明一切。需要独立空间，理性看待关系。理想伴侣：能理解你的深度，给你空间，又能带来情感温暖的人。",
+    INTP: "理性恋爱，需要智力共鸣。可能显得疏离但内心渴望连接。理想伴侣：能进行深度对话，理解你需要空间的人。",
+    ENTJ: "在关系中主动负责，追求共同成长。可能过于关注目标而忽视浪漫。理想伴侣：独立自信，能与你并肩同行的人。",
+    ENTP: "热情而有趣的恋人，喜欢智力火花。可能害怕承诺。理想伴侣：能跟上你思维，给你新鲜感的人。",
+    INFJ: "深情而专一，寻找灵魂伴侣。可能过于理想化关系。理想伴侣：真诚、有深度，能理解你内心世界的人。",
+    INFP: "浪漫主义者，渴望深层连接。可能期望过高。理想伴侣：真诚、有耐心，欣赏你独特性的人。",
+    ENFJ: "全心付出的恋人，善于照顾伴侣。可能忽视自己需求。理想伴侣：懂得回报，能照顾你的人。",
+    ENFP: "热情浪漫，充满惊喜。可能新鲜感消退后失去兴趣。理想伴侣：能持续激发你热情的人。",
+    ISTJ: "稳定可靠的伴侣，用行动表达爱。可能缺乏浪漫表达。理想伴侣：欣赏稳定，价值观一致的人。",
+    ISFJ: "温暖体贴，默默付出。可能过于牺牲自己。理想伴侣：懂得珍惜，能回报你付出的人。",
+    ESTJ: "负责任的伴侣，提供安全感。可能过于控制。理想伴侣：欣赏你的担当，又有独立想法的人。",
+    ESFJ: "热心周到的恋人，重视家庭。可能过于依赖认可。理想伴侣：懂得表达爱，重视关系的人。",
+    ISTP: "独立而忠诚，用行动说话。可能显得冷淡。理想伴侣：尊重你空间，不过度依赖的人。",
+    ISFP: "温柔浪漫，重视当下体验。可能逃避冲突。理想伴侣：温和、有耐心，欣赏你的人。",
+    ESTP: "刺激有趣的恋人，行动派。可能不够细腻。理想伴侣：能与你一起冒险，又能稳定你的人。",
+    ESFP: "热情奔放，享受恋爱。可能需要持续刺激。理想伴侣：有趣、开放，能一起享受生活的人。",
+  },
+  decision: {
+    INTJ: '逻辑分析型决策。收集数据，分析利弊，追求最优解。可能过度分析而延迟行动。建议：设定决策时限，接受"足够好"。',
+    INTP: "理论驱动型决策。寻求逻辑一致性，考虑所有可能。可能陷入分析瘫痪。建议：信任直觉，勇于尝试。",
+    ENTJ: "目标导向型决策。快速果断，注重效率。可能忽视他人感受。建议：在重要决定中征求他人意见。",
+    ENTP: "可能性探索型决策。喜欢保持选项开放。可能难以做出最终选择。建议：权衡后果断行动。",
+    INFJ: "直觉价值型决策。依靠内心指引，考虑长远影响。可能过于理想化。建议：也要考虑现实因素。",
+    INFP: "价值驱动型决策。根据内心价值判断，重视真实性。可能过于情绪化。建议：加入理性分析。",
+    ENFJ: "共识导向型决策。考虑所有人的感受和需求。可能过于迎合。建议：也要坚持自己的立场。",
+    ENFP: "直觉情感型决策。跟随热情和可能性。可能冲动。建议：给自己冷静期再决定。",
+    ISTJ: "经验规则型决策。依据过往经验和既定规则。可能过于保守。建议：开放考虑新方法。",
+    ISFJ: "稳妥周全型决策。考虑对他人的影响，追求稳定。可能犹豫不决。建议：相信自己的判断。",
+    ESTJ: "效率执行型决策。快速、实际、按规则办事。可能过于刻板。建议：考虑灵活变通。",
+    ESFJ: "和谐导向型决策。重视关系和他人感受。可能过于在意评价。建议：也要考虑自己需求。",
+    ISTP: "冷静分析型决策。基于事实和逻辑，快速应变。可能过于冒险。建议：考虑长期后果。",
+    ISFP: "当下感受型决策。跟随内心感觉，重视个人价值。可能逃避困难决定。建议：面对而非回避。",
+    ESTP: "快速行动型决策。相信直觉，边做边调整。可能过于冲动。建议：重大决定多思考。",
+    ESFP: "即兴体验型决策。享受当下，相信感觉。可能忽视后果。建议：考虑长期影响。",
+  },
+};
+function initDeepTabs(stageKey) {
+  document.querySelectorAll(".deep-tab").forEach(function (t) {
+    var n = t.cloneNode(true);
+    t.parentNode.replaceChild(n, t);
+  });
+  const tabs = document.querySelectorAll(".deep-tab");
+  const content = document.getElementById("deep-content");
+  let currentTab = "cognitive";
+  const typeInfo = PERSONALITY_TYPES[selectedType];
+  const cogStageStatus = COG_STAGE_STATUS[selectedType]
+    ? COG_STAGE_STATUS[selectedType][stageKey]
+    : "";
+  function renderContent(tab) {
+    const data = DEEP_DATA[tab][selectedType];
+    if (!data) return;
+    if (tab === "cognitive") {
+      const cogStack = typeInfo.cogStack || [];
+      const loopWarning = typeInfo.loopWarning || "";
+      const stackHtml = cogStack
+        .map(
+          (c, i) =>
+            `<div class="cog-fn-item"><span class="cog-fn-pos">${c.pos}</span><span class="cog-fn-code">${c.fn}</span><span class="cog-fn-desc">${c.desc}</span></div>`,
+        )
+        .join("");
+      content.innerHTML = `<div class="deep-content-title">${data.title}</div><div class="deep-content-text">${data.desc}</div><div class="cog-stack-grid">${stackHtml}</div>${cogStageStatus ? `<div class="cog-stage-status"><i class="ri-pulse-line"></i><div><strong>当前阶段功能状态</strong><p>${cogStageStatus}</p></div></div>` : ""}${loopWarning ? `<div class="cog-loop-warning"><i class="ri-error-warning-line"></i><div><strong>认知循环警告</strong><p>${loopWarning}</p></div></div>` : ""}`;
+    } else {
+      content.innerHTML = `<div class="deep-content-text">${data}</div>`;
+    }
+  }
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", function () {
+      tabs.forEach((t) => t.classList.remove("active"));
+      this.classList.add("active");
+      currentTab = this.dataset.tab;
+      renderContent(currentTab);
+    });
+  });
+  renderContent(currentTab);
+}
+function showDimModal() {
+  document.getElementById("dim-modal").classList.add("show");
+}
+function closeDimModal(e) {
+  if (!e || e.target === e.currentTarget)
+    document.getElementById("dim-modal").classList.remove("show");
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+
+<script src="/static/js/link-validator.js"></script>
+<script>
+(function () {
+  var validatorInstance = null;
+
+  if (typeof PsyTestValidator !== "undefined") {
+    PsyTestValidator.init("16rg2", {
+      onSuccess: function (result, validator) {
+        console.log("SDK初始化成功，链接有效:", result);
+        validatorInstance = validator;
+        window.linkValidator = validator;
+        document.body.classList.remove("page-disabled");
+      },
+      onError: function (error) {
+        console.error("SDK初始化失败，链接无效:", error);
+        if (
+          window.PsyTestValidator &&
+          typeof window.PsyTestValidator.getInstance === "function"
+        ) {
+          validatorInstance = window.PsyTestValidator.getInstance();
+          window.linkValidator = validatorInstance;
+        }
+        document.body.classList.remove("page-disabled");
+      },
+      onLoad: function (data) {
+        console.log("SDK加载完成回调:", data);
+        if (!validatorInstance) {
+          if (
+            window.PsyTestValidator &&
+            typeof window.PsyTestValidator.getInstance === "function"
+          ) {
+            validatorInstance = window.PsyTestValidator.getInstance();
+          }
+          if (validatorInstance) {
+            window.linkValidator = validatorInstance;
+          }
+        }
+
+        setTimeout(function () {
+          if (
+            typeof PsyTestValidator !== "undefined" &&
+            typeof PsyTestValidator.addPromotionLink === "function"
+          ) {
+            PsyTestValidator.addPromotionLink();
+          }
+        }, 100);
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var isRestart = urlParams.get("restart") === "true";
+
+        if (isRestart) {
+          if (validatorInstance && validatorInstance.clearLocalResult) {
+            validatorInstance.clearLocalResult();
+          }
+          var restartToken = validatorInstance && validatorInstance.token;
+          if (restartToken) {
+            try {
+              localStorage.removeItem("test_result_" + restartToken);
+              localStorage.removeItem("16rg2_test_completed_" + restartToken);
+            } catch (e) {}
+          }
+          localStorage.removeItem("personality-result");
+          sessionStorage.removeItem("currentPage");
+          sessionStorage.removeItem("testProgress");
+          window.__16rg2_test_completed = false;
+          window.__16rg2_test_started = true;
+          urlParams.delete("restart");
+          var newUrl =
+            window.location.pathname +
+            (urlParams.toString() ? "?" + urlParams.toString() : "");
+          window.history.replaceState({}, "", newUrl);
+          return;
+        }
+
+        if (data.valid && data.has_local_result) {
+          if (typeof window.restore16rg2Result === "function") {
+            window.restore16rg2Result();
+          }
+        }
+      },
+    });
+  } else {
+    console.error("验证SDK未加载");
+    document.body.classList.remove("page-disabled");
+  }
+})();
+</script>
+</body>
+</html>

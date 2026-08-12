@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你有多容易被人欺负测试结果</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 引入验证SDK -->
+    <script src="/static/js/link-validator.js"></script>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .result-container {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 20px;
+            background: transparent;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn {
+            font-size: 24px;
+            color: #fff;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-icons {
+            display: flex;
+            gap: 15px;
+            font-size: 20px;
+        }
+        
+        .header-icons span {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .shield-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            box-shadow: 0 8px 20px rgba(132, 250, 176, 0.3);
+        }
+        
+        .test-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .score-display {
+            font-size: 60px;
+            font-weight: bold;
+            color: #fff;
+            margin: 10px 0;
+            line-height: 1;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .level-indicator {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 0 auto;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .description {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .description .highlight {
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .progress-container {
+            margin: 20px 0 30px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #84fab0 0%, #8fd3f4 100%);
+            border-radius: 4px;
+            transition: width 0.8s ease;
+            box-shadow: 0 0 10px rgba(132, 250, 176, 0.5);
+        }
+        
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .top-score-module {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin: 30px 0 20px 0;
+            padding-left: 15px;
+            border-left: 4px solid #84fab0;
+        }
+        
+        .dimension-progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(132, 250, 176, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .personality-section, .attachment-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 16px;
+            border: 2px solid rgba(132, 250, 176, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .type-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #667eea;
+            text-align: center;
+            letter-spacing: 2px;
+            margin: 6px 0 8px 0;
+        }
+        
+        .type-desc {
+            color: #555;
+            font-size: 15px;
+            text-align: center;
+            line-height: 1.9;
+            margin: 6px 0 14px 0;
+        }
+        
+        .traits-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 14px;
+            margin: 6px 0 6px 0;
+        }
+        
+        .trait-pill {
+            background: linear-gradient(135deg, #e0f7fa 0%, #e1bee7 100%);
+            color: #4a148c;
+            border: 1px solid rgba(132, 250, 176, 0.3);
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .section-icon-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .section-icon-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .icon-bg-1 {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        .icon-bg-2 {
+            background: linear-gradient(135deg, #84fab0, #8fd3f4);
+        }
+        
+        .section-icon {
+            font-size: 24px;
+        }
+        
+        .personality-type {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .section-subtitle {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 16px;
+            margin: 10px 0 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .section-content {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.9;
+            margin-bottom: 15px;
+        }
+        
+        .advantages-title, .disadvantages-title, .suggestions-title {
+            font-weight: bold;
+            color: #333;
+            margin: 15px 0 10px 0;
+            font-size: 15px;
+        }
+        
+        .list-item {
+            padding: 8px 0;
+            padding-left: 20px;
+            font-size: 14px;
+            color: #666;
+            position: relative;
+        }
+        
+        .list-item:before {
+            content: "•";
+            position: absolute;
+            left: 5px;
+            color: #667eea;
+        }
+        
+        #advantagesList .list-item:before,
+        #attachmentAdvantagesList .list-item:before {
+            content: "✓";
+            color: #84fab0;
+            font-weight: 700;
+        }
+        
+        #disadvantagesList .list-item:before,
+        #attachmentDisadvantagesList .list-item:before {
+            content: "!";
+            color: #ff6b6b;
+            font-weight: 900;
+        }
+        
+        #personalitySuggestionsList .list-item:before,
+        #attachmentSuggestionsList .list-item:before {
+            content: "💡";
+        }
+        
+        .radar-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            border: 2px solid rgba(132, 250, 176, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .radar-chart {
+            width: 320px;
+            height: 320px;
+        }
+
+        .viz-block { margin: 8px 0 22px 0; }
+        
+        .viz-title {
+            text-align: center;
+            font-weight: 800;
+            color: #fff;
+            margin: 8px 0 6px 0;
+            letter-spacing: 1px;
+        }
+        
+        .viz-note {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            margin-top: 6px;
+        }
+        
+        .viz-summary {
+            text-align: center;
+            margin-top: 4px;
+            color: #fff;
+            font-size: 14px;
+        }
+        
+        .lead-text { 
+            color: #84fab0; 
+            font-weight: 800;
+        }
+        
+        .detailed-scores {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 16px;
+            border: 2px solid rgba(132, 250, 176, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .score-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eaf6 100%);
+            border: 1px solid rgba(132, 250, 176, 0.2);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 6px 10px;
+            margin-bottom: 12px;
+        }
+        
+        .score-card:last-child { margin-bottom: 0; }
+        
+        .score-card .title {
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .score-card .subtitle {
+            grid-column: 1 / -1;
+            font-size: 13px;
+            color: #777;
+            line-height: 1.5;
+        }
+        
+        .score-card .score {
+            align-self: start;
+            font-weight: 800;
+            color: #667eea;
+            font-size: 20px;
+        }
+        
+        .score-meta {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 14px;
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .guide-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 16px;
+            border: 2px solid rgba(132, 250, 176, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .guide-subtitle {
+            font-weight: bold;
+            color: #667eea;
+            margin: 15px 0 10px 0;
+            font-size: 15px;
+        }
+        
+        .resource-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 16px;
+            border: 2px solid rgba(132, 250, 176, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .back-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 30px auto;
+            display: block;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        @media (max-width: 600px) {
+            .result-container {
+                padding: 15px;
+            }
+            
+            .score-display {
+                font-size: 48px;
+            }
+            
+            .test-title {
+                font-size: 18px;
+            }
+        }
+        
+        .dimension-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+            transition: width 0.8s ease;
+        }
+        
+        .dimensions-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 16px;
+            border: 2px solid rgba(132, 250, 176, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dimensions-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .dimensions-header .section-title {
+            margin: 0;
+            padding: 0;
+            border: none;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .chart-icon {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+        
+        .dimension-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .dimension-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .dimension-icon {
+            font-size: 24px;
+            margin-right: 12px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        
+        .dimension-info {
+            flex: 1;
+        }
+        
+        .dimension-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .dimension-name {
+            font-weight: bold;
+            font-size: 15px;
+            color: #333;
+        }
+        
+        .dimension-score {
+            font-weight: bold;
+            font-size: 16px;
+            color: #667eea;
+        }
+        
+        .dimension-desc {
+            font-size: 13px;
+            color: #666;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+        
+        .explanation-section, .suggestions-section {
+            margin-top: 25px;
+            text-align: left;
+        }
+        
+        .module-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .module-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #84fab0, #8fd3f4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 14px;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .module-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .explanation-content {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.8;
+            margin-bottom: 0;
+        }
+        
+        .explanation-content p {
+            margin: 0 0 12px 0;
+        }
+        
+        .explanation-content p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .suggestions-content {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.8;
+        }
+        
+        .suggestion-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.95);
+        }
+        
+        .suggestion-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .suggestion-icon {
+            color: #84fab0;
+            margin-right: 8px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <div class="header-top">
+            <a href="index.html" class="back-btn">←</a>
+            <div class="header-icons">
+                <span>🛡️</span>
+                <span>↗</span>
+            </div>
+        </div>
+        
+        <div class="top-score-module">
+            <div class="shield-icon">🛡️</div>
+            
+            <div class="test-title">被欺负指数</div>
+            
+            <div class="score-display" id="possessivenessIndex">--</div>
+            
+            <div style="text-align: center;">
+                <div class="level-indicator" id="levelIndicator">--</div>
+            </div>
+            
+            <div class="description" id="description">加载中...</div>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-labels">
+                    <span>0(人狠话少)</span>
+                    <span>50(表面温和，内心OS)</span>
+                    <span>100(天生老好人)</span>
+                </div>
+            </div>
+            
+            <!-- 结果解释 -->
+            <div class="explanation-section">
+                <div class="module-header">
+                    <div class="module-icon">ℹ</div>
+                    <div class="module-title">结果解释</div>
+                </div>
+                <div class="explanation-content" id="explanationContent">
+                    <p>加载中...</p>
+                </div>
+            </div>
+            
+            <!-- 个性化建议 -->
+            <div class="suggestions-section">
+                <div class="module-header">
+                    <div class="module-icon">📈</div>
+                    <div class="module-title">个性化建议</div>
+                </div>
+                <div class="suggestions-content" id="suggestionsList">
+                    <div class="suggestion-item">
+                        <span class="suggestion-icon">✓</span>
+                        <span>加载中...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 四维度分析 -->
+        <div class="dimensions-container">
+            <div class="dimensions-header">
+                <span class="chart-icon">📊</span>
+                <span class="section-title">四维度分析</span>
+            </div>
+            
+            <div class="dimension-row">
+                <span class="dimension-icon">🚪</span>
+                <div class="dimension-info">
+                    <div class="dimension-header-row">
+                        <span class="dimension-name">边界感与拒绝能力</span>
+                        <span class="dimension-score" id="controlScoreDisplay">--</span>
+                    </div>
+                    <div class="dimension-progress">
+                        <div class="dimension-progress-fill" id="controlProgress"></div>
+                    </div>
+                    <div class="dimension-desc">评估你设立个人边界和拒绝他人不合理要求的能力</div>
+                </div>
+            </div>
+            
+            <div class="dimension-row">
+                <span class="dimension-icon">💬</span>
+                <div class="dimension-info">
+                    <div class="dimension-header-row">
+                        <span class="dimension-name">自我主张与表达能力</span>
+                        <span class="dimension-score" id="jealousyScoreDisplay">--</span>
+                    </div>
+                    <div class="dimension-progress">
+                        <div class="dimension-progress-fill" id="jealousyProgress"></div>
+                    </div>
+                    <div class="dimension-desc">测量你表达真实想法和维护自身权益的能力</div>
+                </div>
+            </div>
+            
+            <div class="dimension-row">
+                <span class="dimension-icon">👥</span>
+                <div class="dimension-info">
+                    <div class="dimension-header-row">
+                        <span class="dimension-name">社交应对与冲突处理</span>
+                        <span class="dimension-score" id="dependenceScoreDisplay">--</span>
+                    </div>
+                    <div class="dimension-progress">
+                        <div class="dimension-progress-fill" id="dependenceProgress"></div>
+                    </div>
+                    <div class="dimension-desc">评估你在人际冲突中的应对策略和处理能力</div>
+                </div>
+            </div>
+            
+            <div class="dimension-row">
+                <span class="dimension-icon">💪</span>
+                <div class="dimension-info">
+                    <div class="dimension-header-row">
+                        <span class="dimension-name">情绪管理与心理韧性</span>
+                        <span class="dimension-score" id="insecurityScoreDisplay">--</span>
+                    </div>
+                    <div class="dimension-progress">
+                        <div class="dimension-progress-fill" id="insecurityProgress"></div>
+                    </div>
+                    <div class="dimension-desc">衡量你的情绪调节能力和心理承受能力</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 可视化分析 -->
+        <div class="section-title">可视化分析</div>
+        <div class="viz-block">
+            <div class="viz-title">受欺负雷达图</div>
+            <div class="radar-container">
+                <canvas class="radar-chart" id="radarChart"></canvas>
+            </div>
+            <div class="viz-note">分数越高表示该维度越薄弱,越容易被欺负</div>
+            
+            <div class="viz-title">社会人格雷达图</div>
+            <div class="radar-container">
+                <canvas class="radar-chart" id="attachRadar"></canvas>
+            </div>
+            <div class="viz-summary">
+                主导类型:<span id="leadAttachment" class="lead-text">--</span>
+            </div>
+            <div class="viz-note">基于你的人际互动模式分析得出的社会人格类型</div>
+        </div>
+        
+        <!-- 被欺负类型 -->
+        <div class="personality-section">
+            <div class="section-icon-header">
+                <div class="section-icon-circle icon-bg-1">
+                    <span class="section-icon">🛡</span>
+                </div>
+                <div>
+                    <div class="personality-type">被欺负易感类型</div>
+                </div>
+            </div>
+            <div class="type-title" id="personalityLevel">—</div>
+            <div class="section-content" id="personalityContent">加载中...</div>
+            <div class="section-subtitle">✨ 核心特征</div>
+            <div class="traits-wrap" id="personalityTraits">
+                <!-- 由 JS 填充特征标签 -->
+            </div>
+            <div class="advantages-title">优势特质</div>
+            <div id="advantagesList"></div>
+            <div class="disadvantages-title">脆弱点</div>
+            <div id="disadvantagesList"></div>
+            <div class="suggestions-title">成长建议</div>
+            <div id="personalitySuggestionsList"></div>
+        </div>
+        
+        <!-- 依恋模式类型 -->
+        <div class="attachment-section">
+            <div class="section-icon-header">
+                <div class="section-icon-circle icon-bg-2">
+                    <span class="section-icon">🤝</span>
+                </div>
+                <div>
+                    <div class="personality-type">人际依恋类型</div>
+                </div>
+            </div>
+            <div class="type-title" id="attachmentLevel">—</div>
+            <div class="section-content" id="attachmentContent">加载中...</div>
+            <div class="section-subtitle">✨ 核心特征</div>
+            <div class="traits-wrap" id="attachmentTraits"></div>
+            <div class="advantages-title">优势特质</div>
+            <div id="attachmentAdvantagesList"></div>
+            <div class="disadvantages-title">脆弱点</div>
+            <div id="attachmentDisadvantagesList"></div>
+            <div class="suggestions-title">改善建议</div>
+            <div id="attachmentSuggestionsList"></div>
+        </div>
+        
+        <!-- 量表详细分数 -->
+        <div class="section-title">量表详细分数</div>
+        <div class="detailed-scores">
+            <div class="score-card" id="controlDetail">
+                <div class="title">边界感与拒绝能力量表(自测版)</div>
+                <div class="score" id="controlDetailScore">--</div>
+                <div class="subtitle">评估你设立个人边界和拒绝他人不合理要求的能力</div>
+                <div class="score-meta">
+                    <span id="controlZ">Z分数:--</span>
+                </div>
+            </div>
+            <div class="score-card" id="jealousyDetail">
+                <div class="title">自我主张与表达能力量表(自测版)</div>
+                <div class="score" id="jealousyDetailScore">--</div>
+                <div class="subtitle">测量你表达真实想法和维护自身权益的能力</div>
+                <div class="score-meta">
+                    <span id="jealousyZ">Z分数:--</span>
+                </div>
+            </div>
+            <div class="score-card" id="dependenceDetail">
+                <div class="title">社交应对与冲突处理量表(自测版)</div>
+                <div class="score" id="dependenceDetailScore">--</div>
+                <div class="subtitle">评估你在人际冲突中的应对策略和处理能力</div>
+                <div class="score-meta">
+                    <span id="dependenceZ">Z分数:--</span>
+                </div>
+            </div>
+            <div class="score-card" id="insecurityDetail">
+                <div class="title">情绪管理与心理韧性量表(自测版)</div>
+                <div class="score" id="insecurityDetailScore">--</div>
+                <div class="subtitle">衡量你的情绪调节能力和心理承受能力</div>
+                <div class="score-meta">
+                    <span id="insecurityZ">Z分数：--</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 自我保护能力提升指南 -->
+        <div class="section-title">自我保护能力提升指南</div>
+        <div class="guide-section">
+            <div class="guide-subtitle">自我成长</div>
+            <div class="list-item">提升自我价值感，建立内在自信</div>
+            <div class="list-item">学习边界设定，明确个人底线</div>
+            <div class="list-item">培养情绪管理能力，增强心理韧性</div>
+            <div class="list-item">练习assertive沟通，学会温和而坚定地表达</div>
+            
+            <div class="guide-subtitle">人际互动</div>
+            <div class="list-item">识别有害关系，及时远离欺凌者</div>
+            <div class="list-item">建立支持系统，寻找可信赖的朋友</div>
+            <div class="list-item">练习说"不"，从小事开始拒绝</div>
+            <div class="list-item">学会应对冲突，将冲突转化为成长机会</div>
+        </div>
+        
+        <!-- 推荐学习资源 -->
+        <div class="section-title">推荐学习资源</div>
+        <div class="resource-section">
+            <div class="list-item">《被讨厌的勇气》- 岸见一郎</div>
+            <div class="list-item">《设立界线》- 亨利·克劳德</div>
+            <div class="list-item">《身体从未忘记》- 贝塞尔·范德考克</div>
+            <div class="list-item">心理咨询与创伤疗愈服务</div>
+            <div class="list-item">边界感与自我保护线上课程</div>
+        </div>
+        
+        <button class="back-button" id="restartButton">重新测试</button>
+        
+        <!-- 推广链接容器（SDK会自动添加，放在最底部） -->
+        <div class="report-footer-promotion"></div>
+    </div>
+
+    <script>
+        // 初始化验证SDK
+        let linkValidator = null;
+        
+        // SDK加载完成后的回调
+        if (typeof PsyTestValidator !== 'undefined') {
+            // SDK已加载，直接初始化
+            initializeSDK();
+        } else {
+            // 等待SDK加载
+            window.addEventListener('load', function() {
+                if (typeof PsyTestValidator !== 'undefined') {
+                    initializeSDK();
+                } else {
+                    console.error('验证SDK未加载');
+                }
+            });
+        }
+        
+        async function initializeSDK() {
+            // 从URL获取token和unlimited参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const unlimited = urlParams.get('unlimited') === 'true';
+            
+            // 初始化SDK（注意：第一个参数是testCode字符串，第二个参数是options对象）
+            linkValidator = await PsyTestValidator.init('vbt', {
+                token: token || undefined,
+                unlimited: unlimited || false,
+                onSuccess: function(data, validator) {
+                    console.log('SDK初始化成功，链接有效:', data);
+                    // 确保window.linkValidator已设置
+                    if (validator) {
+                        window.linkValidator = validator;
+                    }
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败:', error);
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    
+                    // 调用addPromotionLink确保推广链接显示（报告页使用report-footer-promotion容器）
+                    setTimeout(() => {
+                        // 对于报告页，先移除.report-footer中的推广链接（如果SDK已经添加了）
+                        const reportFooter = document.querySelector('.report-footer');
+                        if (reportFooter) {
+                            const existingLinkInFooter = reportFooter.querySelector('#link-validator-promotion-link');
+                            if (existingLinkInFooter) {
+                                existingLinkInFooter.remove();
+                            }
+                        }
+                        
+                        // 检查是否有专门的推广链接容器
+                        const reportPromotionContainer = document.querySelector('.report-footer-promotion');
+                        if (reportPromotionContainer) {
+                            // 手动添加推广链接到指定容器（使用SDK的样式，添加背景以提高可见性）
+                            const existingLink = reportPromotionContainer.querySelector('#link-validator-promotion-link');
+                            if (!existingLink) {
+                                // 创建推广链接容器（使用SDK的样式，添加背景以提高可见性）
+                                const promotionContainer = document.createElement('div');
+                                promotionContainer.id = 'link-validator-promotion-link';
+                                promotionContainer.style.cssText = `
+                                    color: #333;
+                                    font-size: 14px;
+                                    line-height: 1.6;
+                                    margin: 0;
+                                    width: 100%;
+                                    text-align: center;
+                                    padding: 16px 20px;
+                                    margin-top: 16px;
+                                    box-sizing: border-box;
+                                    background: rgba(255, 255, 255, 0.95);
+                                    border-radius: 8px;
+                                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                                `;
+                                
+                                // 创建推广链接文本和链接（使用SDK的样式）
+                                const promotionText = document.createTextNode('如果您也想为他人提供测试服务，');
+                                const promotionLink = document.createElement('a');
+                                promotionLink.href = '/';
+                                promotionLink.target = '_blank';
+                                promotionLink.rel = 'noopener noreferrer';
+                                promotionLink.textContent = '点击这里了解更多';
+                                promotionLink.style.cssText = `
+                                    color: #1890ff;
+                                    text-decoration: none;
+                                    cursor: pointer;
+                                    font-weight: 500;
+                                `;
+                                
+                                // 添加链接悬停效果
+                                promotionLink.addEventListener('mouseenter', function() {
+                                    this.style.textDecoration = 'underline';
+                                });
+                                promotionLink.addEventListener('mouseleave', function() {
+                                    this.style.textDecoration = 'none';
+                                });
+                                
+                                // 组装推广链接
+                                promotionContainer.appendChild(promotionText);
+                                promotionContainer.appendChild(promotionLink);
+                                reportPromotionContainer.appendChild(promotionContainer);
+                            }
+                        } else if (typeof PsyTestValidator.addPromotionLink === 'function') {
+                            PsyTestValidator.addPromotionLink();
+                        }
+                    }, 100);
+                }
+            });
+            
+            // 将linkValidator挂载到window对象，方便其他脚本使用
+            // SDK的init方法已经自动设置了window.linkValidator，但为了确保，这里再设置一次
+            if (linkValidator) {
+                window.linkValidator = linkValidator;
+            }
+        }
+    </script>
+    <script src="result.js"></script>
+</body>
+</html>
+

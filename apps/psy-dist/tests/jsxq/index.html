@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>精神需求测试 - 10个核心维度，揭示你的灵魂驱动力</title>
+    <meta name="description" content="精神需求测试分析你在10个核心精神维度上的占比，帮你直观地了解自己的内心需求和能量构成。">
+    <meta name="keywords" content="性格, 需求, 目标, 爱, 心理测试">
+    <link rel="stylesheet" href="style.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body class="page-disabled">
+    <!-- 首页介绍部分 -->
+    <div class="welcome-container" id="splash">
+        <!-- 标题卡片 -->
+        <div class="welcome-title-card">
+            <div class="welcome-title-icon">🧘‍♂️</div>
+            <h1 class="welcome-main-title">精神需求测试</h1>
+            <p class="welcome-subtitle">10个核心维度，揭示你的灵魂驱动力</p>
+        </div>
+
+        <!-- 介绍卡片 -->
+        <div class="welcome-info-card">
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">🎯</span>
+                    <h3 class="welcome-section-title">测试目的</h3>
+                </div>
+                <p class="welcome-section-text">
+                    精神需求测试旨在探索并量化你的内在驱动力，它评估你在<b><span style="color:#188038">意义、爱、连接、成长、创造、权力、乐趣、安全感、自由、贡献</span></b>这十个核心精神维度上的倾向性。测试结果不是简单的性格标签，而是一张深入你内心的导航图，清晰地揭示了你最渴望什么、最需要什么，从而帮助你做出更符合内心渴望的人生选择。
+                </p>
+            </div>
+
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">📋</span>
+                    <h3 class="welcome-section-title">测试说明</h3>
+                </div>
+                <p class="welcome-section-text">
+                    本测试共有60道题目，分为两个部分：第一部分是自我鉴定（50题），第二部分是情景测试（10题）。请根据你的真实想法和感受作答，没有标准答案。测试大约需要10-15分钟完成。
+                </p>
+            </div>
+
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">💡</span>
+                    <h3 class="welcome-section-title">测试结果</h3>
+                </div>
+                <p class="welcome-section-text">
+                    测试完成后，你将获得一张直观的占比图谱，显示你在十个精神维度上的得分百分比。每个维度都有详细的解释，帮助你更好地理解自己的内心需求。
+                </p>
+            </div>
+
+            <div class="welcome-notice">
+                开始测试即表示您已阅读并同意上述所有说明。
+            </div>
+        </div>
+
+        <!-- 开始测试按钮 -->
+        <div class="welcome-footer">
+            <button class="welcome-start-button" id="start">
+                开始测试
+            </button>
+            <p class="welcome-footer-note">
+                本测试基于心理学理论开发，结果仅供参考和自我了解使用。
+            </p>
+        </div>
+    </div>
+
+    <!-- 题目容器 -->
+    <div id="question-view" style="display: none;">
+        <div class="test-header">
+            <span class="test-title">精神需求测试</span>
+        </div>
+        <div class="test-container">
+            <div class="progress-bar-bg">
+                <div class="progress-bar" id="progress-bg"></div>
+            </div>
+            <div class="question-info" id="questionInfo"></div>
+            <ul class="question_view" id="collection"></ul>
+            <div class="test-btns">
+                <button id="back_button" class="nav-btn">上一题</button>
+                <button id="next_button" class="nav-btn main-btn" style="display: none;">下一题</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果展示容器 -->
+    <div class="main_view" id="result_details" style="display: none;">
+        <div id="snapshot-container">
+            <div id="qe-rslt-title">你的<b>精神需求测试</b>结果是：</div>
+            <div id="barchart"></div>
+        </div>
+        
+        <!-- 结果分析内容 -->
+        <article id="tips_extra" style="margin-top: 30px;">
+            <div class="subtip submain">
+                <h2 class="extra-full">每个维度的详细介绍</h2>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="1">意义</h3>
+                <div class="h3-sub-score"><b id="score-A">0%</b></div>
+                <p>意义感是一种深层的心理需求，它源于对生命目的和价值的探寻。当这种需求得到满足时，个体会感到自己的生活有明确的方向和目标，所做的选择、所从事的活动都被赋予了一种重要性。这种内在的确信感能够提供强大的精神支撑，帮助个体在面对挑战和挫折时保持坚韧和毅力。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="2">爱</h3>
+                <div class="h3-sub-score"><b id="score-B">0%</b></div>
+                <p>爱是人类最基础、最强大的精神需求之一，它关乎深度联结和情感投入。这里的"爱"超越了浪漫关系，涵盖了亲情、友情等所有深刻的羁绊。它满足了我们被看见、被理解、被珍视的核心渴望，提供了情感上的安全港。拥有爱让我们感到自己不是孤独的个体，我们的快乐有人分享，痛苦有人分担。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="3">连接</h3>
+                <div class="h3-sub-score"><b id="score-C">0%</b></div>
+                <p>连接的需求是关于编织一张属于自我的社会地图，它回答"我属于哪里"的问题。与"爱"强调深度双人关系不同，"连接"更侧重于更广泛的网络感和归属感。这可以体现在与志同道合的朋友圈子、文化社群、工作团队、甚至是在线社区的互动中。这种联结让我们感到自己是宏大图景中的一部分，获得了身份认同和支持系统。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="4">成长</h3>
+                <div class="h3-sub-score"><b id="score-D">0%</b></div>
+                <p>成长的需求是人类进步的核心引擎。它基于一个信念：自我不是固定不变的，我们可以通过学习和体验变得更好、更强大、更智慧。这种需求促使我们走出舒适区，迎接挑战，学习新技能，反思旧模式。它不仅仅是职业上的晋升，更是个人性格的成熟、情绪管理能力的提升、世界观的开阔。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="5">创造</h3>
+                <div class="h3-sub-score"><b id="score-E">0%</b></div>
+                <p>创造是人类独有的精神活动，是自我表达和留下印记的根本方式。它远不止于艺术创作，还包括创业、解决问题、设计方案、烹饪、园艺等任何带来新事物的过程。创造的需求源于将内在世界与外在世界连接起来的渴望，是将个人独特性和想象力具象化的过程。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="6">权力</h3>
+                <div class="h3-sub-score"><b id="score-F">0%</b></div>
+                <p>权力的需求是一种对影响力和掌控感的追求。它体现在希望自己的意见被重视、决策被采纳，并能够引导事情朝着自己期望的方向发展。这种需求并非一定是负面的，它同样关乎效能感，即感觉到自己有能力改变现状并产生预期的结果。满足这种需求可以带来自信、威信和强烈的个人效能感。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="7">乐趣</h3>
+                <div class="h3-sub-score"><b id="score-G">0%</b></div>
+                <p>乐趣是人类的天性，是精神健康的润滑剂。它强调行为的本身而非其结果，是自发、轻松、充满趣味的。这种需求提醒我们，生活不全是追求成就、意义和深度，享受当下、体验单纯的快乐本身就极具价值。乐趣能有效释放压力、激发创造力、增强社会连接，并为我们补充继续应对挑战的能量。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="8">安全感</h3>
+                <div class="h3-sub-score"><b id="score-H">0%</b></div>
+                <p>安全感是其他所有更高层次精神需求的基石。根据马斯洛需求层次理论，只有当安全需求得到基本满足后，人们才有余力去追求爱、归属、尊重和自我实现。它包括身体安全、经济安全、健康保障、心理安全（稳定的关系、熟悉的环境）等。强大的安全感让人感到内心安稳，有勇气去探索世界、承担风险。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="9">自由</h3>
+                <div class="h3-sub-score"><b id="score-I">0%</b></div>
+                <p>自由是自我决定的权力，是"做自己"的核心。它意味着我们的行为是出于个人意愿和认同，而不是为了服从、取悦他人或逃避内疚/恐惧。这种需求对于建立真实的自我感和内在动机至关重要。拥有自由感的人会感到自己是生活的"作者"，而非"角色"，从而体验到更强烈的责任感和投入度。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="10">贡献</h3>
+                <div class="h3-sub-score"><b id="score-J">0%</b></div>
+                <p>贡献的需求是一种利他主义的驱动力，希望通过自己的努力使他人受益或让世界变得更好。它体现在关心超越个人利益的更大福祉，并愿意为此付出实际行动。这种给予和服务的行动本身就能带来深刻的满足感、意义感和连接感。它让人们感到自己的存在和努力具有正向的价值和影响力。</p>
+            </div>
+            
+            <div class="subtip submain">
+                <h2 class="extra-full">什么是"精神需求测试"？</h2>
+                <p>"精神需求测试"是一款评估个体对十个核心精神特质的态度和内在需求的心理测量工具。该测试基于现代积极心理学和人本主义心理学的研究，旨在探究个体在这些精神维度上的倾向性，从而揭示其内心深处的驱动力和能量构成。</p>
+            </div>
+            
+            <div class="subtip submain">
+                <h2 class="extra-full">如何解读我的"精神需求测试"结果？</h2>
+                <p>在完成测试后，我们将分析您的答案，并给出每个维度所占的百分比，您将能够清晰地看到自身在<i><span style="color:#188038">意义、爱、连接、成长、创造、权力、乐趣、安全感、自由、贡献</span></i>这十个核心精神需求上的倾向程度。您可以直观地感受自己的结果，并阅读每个维度的详细诠释，从而更好地理解是什么在驱动着您的内心。</p>
+                <p>需要注意的是，测试结果并不代表您的整体人格，而是提供了一种了解您对特定精神需求的内在倾向性。建议您在解读结果时保持客观，结合个人经验和生活背景进行思考，将测试结果作为自我探索和成长的工具。</p>
+            </div>
+        </article>
+        
+        <!-- 底部操作区（用于SDK添加推广链接） -->
+        <div class="report-footer" style="padding: 24px 20px; text-align: center; margin-top: 40px;">
+            <a class="again" href="javascript:void(0);" id="restart-btn" title="精神需求测试 - 10个核心维度，揭示你的灵魂驱动力">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="26">
+                    <g fill="#666" fill-rule="evenodd">
+                        <path d="M15 23a8 8 0 1 0 0-16V4A11 11 0 1 1 4 15h3c0 4 4 8 8 8Z"/>
+                        <path d="M16 0v11L7 6z"/>
+                    </g>
+                </svg>
+                再测一次
+            </a>
+        </div>
+    </div>
+
+    <!-- 错误提示容器 -->
+    <div id="errorOverlay" class="error-overlay" style="display: none;">
+        <p id="errorMessage"></p>
+    </div>
+
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        // 等待DOM加载完成后再启用安全功能
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+    
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init(null, {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    // 页面启用
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    // 尝试获取实例，即使无效
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    // 确保 window.linkValidator 被设置（即使验证失败）
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    // 页面不禁用，允许用户看到页面内容
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    // 确保获取到validator实例
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (!validatorInstance && window.linkValidator) {
+                            validatorInstance = window.linkValidator;
+                        }
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    
+                    // 调用addPromotionLink确保推广链接显示（首页使用welcome-footer容器）
+                    setTimeout(function() {
+                        if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                            PsyTestValidator.addPromotionLink();
+                        }
+                    }, 100);
+                    
+                    // 检查是否是重新测试（通过URL参数判断）
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const isRestart = urlParams.get('restart') === 'true';
+                    
+                    // 如果是重新测试，清除本地结果
+                    if (isRestart) {
+                        console.log('检测到重新测试参数，清除本地结果');
+                        try {
+                            localStorage.removeItem('spiritual_needs_test_result');
+                            localStorage.removeItem('spiritual_needs_test_progress');
+                            // 如果使用了token保存，也清除
+                            if (validatorInstance && validatorInstance.token) {
+                                const token = validatorInstance.token;
+                                localStorage.removeItem('spiritual_needs_test_result_' + token);
+                            }
+                            // 清除SDK的本地结果
+                            if (window.linkValidator && typeof window.linkValidator.clearLocalResult === 'function') {
+                                window.linkValidator.clearLocalResult();
+                            }
+                            // 清除URL中的restart参数
+                            urlParams.delete('restart');
+                            const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                            window.history.replaceState({}, '', newUrl);
+                        } catch (error) {
+                            console.error('清除本地结果失败:', error);
+                        }
+                    }
+                    
+                    // 如果链接有效且有测试结果，显示结果页（SPA场景）
+                    if (data.valid && data.has_local_result && !isRestart) {
+                        try {
+                            // 优先从token对应的key获取结果
+                            let localResult = null;
+                            if (validatorInstance && validatorInstance.token) {
+                                const token = validatorInstance.token;
+                                localResult = localStorage.getItem('spiritual_needs_test_result_' + token);
+                            }
+                            // 如果还是没有，尝试从默认key获取（向后兼容）
+                            if (!localResult) {
+                                localResult = localStorage.getItem('spiritual_needs_test_result');
+                            }
+                            
+                            if (localResult) {
+                                // 对于SPA，直接显示结果页
+                                try {
+                                    const resultData = JSON.parse(localResult);
+                                    ocean = resultData.ocean || {};
+                                    iq_value = JSON.stringify(ocean);
+                                    
+                                    $("#splash").hide();
+                                    $("#question-view").hide();
+                                    $("#result_details").show();
+                                    
+                                    calculateResult();
+                                    
+                                    // 确保tips_extra在柱状图下方
+                                    var $barchart = $("#barchart");
+                                    var $tipsExtra = $("#tips_extra");
+                                    var $snapshotContainer = $("#snapshot-container");
+                                    if ($barchart.length && $tipsExtra.length && $snapshotContainer.length) {
+                                        $snapshotContainer.after($tipsExtra);
+                                    }
+                                    
+                                    // 调用addPromotionLink确保推广链接显示（结果页使用report-footer容器）
+                                    setTimeout(function() {
+                                        if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                                            PsyTestValidator.addPromotionLink();
+                                        }
+                                    }, 500);
+                                    return;
+                                } catch (error) {
+                                    console.error('读取本地结果失败:', error);
+                                }
+                            }
+                        } catch (error) {
+                            console.error('读取本地结果失败:', error);
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+            // SDK未加载时，页面不禁用，允许查看
+            document.body.classList.remove('page-disabled');
+        }
+    </script>
+
+    <!-- JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/combine/npm/highcharts@12.2.0/highcharts.min.js,npm/highcharts@12.2.0/highcharts-more.js"></script>
+    <script src="questions-data.js"></script>
+    <script src="test.js"></script>
+</body>
+</html>
+

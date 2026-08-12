@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>渣女测试</title>
+    <link rel="stylesheet" href="css/theme-elegantrose.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p { margin: 0; line-height: 1.6; }
+
+        /* 答题页专属样式 */
+        .test-page {
+            max-width: 100%;
+        }
+        
+        /* 顶部标题 */
+        .test-header {
+            text-align: center;
+            padding: 16px 0 12px;
+            position: relative;
+        }
+        
+        .test-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 2px;
+            background: var(--rose-gold-gradient);
+        }
+        
+        .test-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 2px;
+        }
+        
+        /* 进度条 */
+        .progress-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            margin: 20px 0 24px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--rose-gold-gradient);
+            border-radius: 2px;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px var(--rose-glow);
+        }
+        
+        /* 题目标题 */
+        .question-info {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        
+        .question-title {
+            font-size: 1.15rem;
+            color: var(--text-primary);
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+        
+        /* 选项列表 */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        /* 选项卡片 - 与 CSS 样式匹配 */
+        .option-card {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--rose-gold-gradient);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .option-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--rose-gold);
+            transform: translateX(4px);
+        }
+        
+        .option-card.selected {
+            background: linear-gradient(90deg, rgba(232, 180, 184, 0.1) 0%, var(--bg-card) 100%);
+            border-color: var(--rose-gold);
+            box-shadow: 0 0 20px var(--rose-glow);
+        }
+        
+        .option-card.selected::before {
+            opacity: 1;
+        }
+        
+        /* 隐藏原生 radio */
+        .option-radio {
+            display: none;
+        }
+        
+        /* 选项字母 */
+        .option-letter {
+            width: 30px;
+            height: 30px;
+            background: var(--bg-secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-right: 14px;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+        
+        .option-card.selected .option-letter {
+            background: var(--rose-gold-gradient);
+            color: var(--bg-primary);
+        }
+        
+        /* 选项文字 */
+        .option-card label {
+            flex: 1;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .option-card.selected label {
+            color: var(--text-primary);
+        }
+        
+        /* 导航按钮 */
+        .test-btns {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+        }
+        
+        .nav-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .nav-btn:first-child {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        .nav-btn:first-child:hover:not(:disabled) {
+            border-color: var(--rose-gold);
+            color: var(--rose-gold);
+        }
+        
+        .nav-btn.main-btn {
+            background: var(--rose-gold-gradient);
+            color: var(--bg-primary);
+            font-weight: 600;
+        }
+        
+        .nav-btn.main-btn:hover:not(:disabled) {
+            box-shadow: 0 4px 20px var(--rose-glow);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        /* 选中动画 */
+        @keyframes selectPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .option-card.selecting {
+            animation: selectPulse 0.3s ease;
+        }
+        
+        /* 入场动画 */
+        .fade-in {
+            animation: fadeSlideIn 0.4s ease forwards;
+        }
+        
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container test-page">
+        <!-- 顶部标题 -->
+        <div class="test-header">
+            <span class="test-title">渣女测试</span>
+        </div>
+        
+        <!-- 答题区域 -->
+        <div class="progress-bar-bg">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="question-info" id="questionInfo"></div>
+        <div class="question-title" id="questionTitle"></div>
+        
+        <div class="options-list" id="optionsList"></div>
+        
+        <div class="test-btns">
+            <button id="prevBtn" class="nav-btn">上一题</button>
+            <button id="nextBtn" class="nav-btn main-btn">下一题</button>
+        </div>
+    </div>
+
+    <!-- 错误提示容器 -->
+    <div id="errorOverlay" class="error-overlay" style="display: none;">
+        <p id="errorMessage"></p>
+    </div>
+
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+
+        if (typeof PsyTestValidator !== 'undefined') {
+            // 明确传入testCode 'znt'
+            PsyTestValidator.init('znt', {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) errorOverlay.style.display = 'none';
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    document.body.classList.add('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        const errorMessage = document.getElementById('errorMessage');
+                        if (errorMessage) errorMessage.textContent = error.message || '测试链接无效，请检查链接是否正确';
+                        errorOverlay.style.display = 'flex';
+                    }
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (!validatorInstance && window.linkValidator) {
+                            validatorInstance = window.linkValidator;
+                        }
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+
+                    // 答题页不需要推广信息，禁用SDK的自动添加推广链接功能
+                    window.__RPI_DISABLE_SDK_PROMOTION = true;
+
+                    // 如果链接有效且有测试结果，跳转到报告页（需要包含token参数）
+                    if (data.valid && data.has_local_result) {
+                        let reportUrl = 'zhanu_result.html';
+                        const urlParams = new URLSearchParams();
+                        const token = validatorInstance && validatorInstance.token;
+                        const isUnlimited = validatorInstance && validatorInstance.unlimited;
+                        if (isUnlimited && token) {
+                            urlParams.set('unlimited', 'true');
+                            urlParams.set('token', token);
+                        } else if (token) {
+                            urlParams.set('token', token);
+                        }
+                        const queryString = urlParams.toString();
+                        if (queryString) {
+                            reportUrl = `${reportUrl}?${queryString}`;
+                        }
+                        window.location.href = reportUrl;
+                        return;
+                    }
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+        }
+    </script>
+
+    <script src="zhanu_test.js"></script>
+</body>
+</html>

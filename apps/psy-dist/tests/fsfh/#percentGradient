@@ -1,0 +1,3473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>分手复合可能性综合评估测试</title>
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+    <style>
+        /* CSS变量定义 - 红色系主题 */
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #ee5a6f;
+            --accent-color: #ff8787;
+            --light-bg: #fff5f0;
+            --text-dark: #333;
+            --text-gray: #555;
+            --text-light: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        /* 全局动画定义 */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+            }
+            50% {
+                transform: scale(1.08);
+                box-shadow: 0 15px 40px rgba(255, 107, 107, 0.6);
+            }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+        
+        @keyframes gradientRotate {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        body {
+            background: linear-gradient(135deg, #fff5f0 0%, #ffe9e0 50%, #fff5f0 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            color: var(--text-dark);
+        }
+        
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* 推广链接区域样式（SDK自动添加到.welcome-footer和.report-footer中） */
+        .welcome-footer #link-validator-promotion-link,
+        .report-footer #link-validator-promotion-link {
+            width: 100%;
+            text-align: center;
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            box-sizing: border-box;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        /* 确保welcome-footer和report-footer可见 */
+        .welcome-footer,
+        .report-footer {
+            display: block !important;
+            visibility: visible !important;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            overflow: visible;
+            position: relative;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* 首页时不显示container的背景和边框 */
+        .container:has(.intro-section.active) {
+            background: transparent;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+        
+        /* 报告页时不显示container的背景和边框 */
+        .container:has(.result-section.active) {
+            background: transparent;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+        
+        /* 非首页且非报告页时显示container的背景和边框 */
+        .container:not(:has(.intro-section.active)):not(:has(.result-section.active)) {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(252, 182, 159, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* 进度条头部（答题页） */
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #ff8787 100%);
+            background-size: 200% 200%;
+            animation: gradientMove 10s ease infinite;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 添加旋转光晕效果 */
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+        
+        /* 隐藏header的h1和p，只在答题页显示进度信息 */
+        .header:has(.progress-bar.active) h1,
+        .header:has(.progress-bar.active) p {
+            display: none;
+        }
+        
+        /* 报告页隐藏整个header */
+        .container:has(.result-section.active) .header {
+            display: none;
+        }
+        
+        /* 显示进度信息 */
+        #progress-info {
+            display: flex !important;
+        }
+        
+        /* 进度信息布局 - 放在进度条上方 */
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .question-number {
+            font-size: 17px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 右侧部分信息 */
+        .section-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        
+        .section-tag {
+            background: rgba(255, 255, 255, 0.95);
+            color: #ff6b6b;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-progress {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 600;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 恢复进度条显示 - 仅在题目页面显示 */
+        .progress-bar {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            margin-top: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            display: none; /* 默认隐藏 */
+            position: relative;
+            z-index: 1;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 调整header布局，让部分信息在进度条上方 */
+        .header {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header-title-area {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .progress-bar.active {
+            display: block; /* 题目页面显示 */
+        }
+        
+        .progress {
+            height: 100%;
+            background: white;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        /* 首页时content不需要padding */
+        .container:has(.intro-section.active) .content {
+            padding: 0;
+        }
+        
+        /* 报告页时content不需要padding，让板块独立显示 */
+        .container:has(.result-section.active) .content {
+            padding: 0;
+        }
+        
+        /* 报告页容器样式 */
+        .result-section {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* 答题页内容区域 */
+        .question-content {
+            padding: 40px;
+        }
+        
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        /* 首页和报告页隐藏header */
+        .container:has(.intro-section.active) .header,
+        .container:has(.result-section.active) .header {
+            display: none;
+        }
+        
+        /* 首页样式 */
+        .intro-section {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            padding: 60px 40px;
+            box-shadow: 0 20px 60px rgba(252, 182, 159, 0.3);
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        /* 心形图标 - 参考优化版设计 */
+        .icon-heart {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #ff8787 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            animation: pulse 2.5s infinite;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        
+        .intro-section h2 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .intro-section .subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        /* 特性列表 */
+        .feature-list {
+            text-align: left;
+            margin: 40px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.05) 0%, rgba(238, 90, 111, 0.05) 100%);
+            border-radius: 20px;
+            border: 2px solid rgba(255, 107, 107, 0.15);
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #555;
+        }
+        
+        .feature-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .feature-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            margin-right: 15px;
+            flex-shrink: 0;
+            box-shadow: 0 3px 10px rgba(255, 107, 107, 0.3);
+        }
+        
+        .intro-section p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: var(--text-gray);
+        }
+        
+        /* 提示文字 */
+        .info-text {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #999;
+        }
+        
+        /* 开始按钮样式 - 参考优化版 */
+        .intro-section .btn-next {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #ff8787 100%);
+            background-size: 200% 200%;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .intro-section .btn-next::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .intro-section .btn-next:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.5);
+            background-position: 100% 0;
+        }
+        
+        .intro-section .btn-next:hover::before {
+            left: 100%;
+        }
+        
+        /* 题目内容区域 */
+        .question-content {
+            padding: 40px;
+        }
+        
+        .question-section h3 {
+            display: none; /* 隐藏题目页面的h3，因为已经在header显示了 */
+        }
+        
+        .question-section p {
+            margin-bottom: 35px;
+            color: #333;
+            font-size: 22px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+        
+        /* 题目文本样式 - 参考优化版 */
+        .question-text {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 35px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .option {
+            padding: 20px 25px;
+            background: linear-gradient(135deg, #fff 0%, #fef9f5 100%);
+            border-radius: 15px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 悬停光泽效果 */
+        .option::before {
+            content: '';
+            position: absolute;
+            left: -100%;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 107, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .option:hover {
+            border-color: #ff6b6b;
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.2);
+        }
+        
+        .option:hover::before {
+            left: 100%;
+        }
+        
+        .option.selected {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(238, 90, 111, 0.08) 100%);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.25);
+        }
+        
+        .option-radio {
+            width: 26px;
+            height: 26px;
+            border: 3px solid #ffb3b7;
+            border-radius: 50%;
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .option.selected .option-radio {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            box-shadow: 0 3px 10px rgba(255, 107, 107, 0.4);
+        }
+        
+        .option.selected .option-radio::after {
+            content: '✓';
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .option-text {
+            font-size: 16px;
+            color: #555;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .option.selected .option-text {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        /* 选项中的span默认应用option-text样式 */
+        .option span {
+            font-size: 16px;
+            color: #555;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .option.selected span {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        /* 移除选项分数显示 */
+        .option-score {
+            display: none; /* 移除选项分数显示 */
+        }
+        
+        /* 底部导航区域 */
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            border-top: 1px solid rgba(255, 107, 107, 0.15);
+            background: linear-gradient(135deg, #fff 0%, #fef9f5 100%);
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            border-top: 1px solid rgba(255, 107, 107, 0.15);
+            background: linear-gradient(135deg, #fff 0%, #fef9f5 100%);
+        }
+        
+        .nav-btn {
+            padding: 14px 35px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        /* 开始测试按钮 */
+        #start-test {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #ff8787 100%);
+            background-size: 200% 200%;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        #start-test::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        #start-test:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.5);
+            background-position: 100% 0;
+        }
+        
+        #start-test:hover::before {
+            left: 100%;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-prev {
+            background: white;
+            color: #ff6b6b;
+            border: 2px solid #ff6b6b;
+        }
+        
+        .btn-prev:hover {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .btn-next {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #ff8787 100%);
+            background-size: 200% 200%;
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-next::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.5);
+            background-position: 100% 0;
+        }
+        
+        .btn-next:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-section {
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .result-section {
+                padding-top: 13px;
+                padding-bottom: 40px;
+                padding-left: 7px;
+                padding-right: 7px;
+            }
+            
+            /* 只针对报告页缩小顶部间距 */
+            body:has(.result-section.active) {
+                padding-top: 7px;
+            }
+        }
+        
+        /* 报告头部 */
+        .report-header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 25%, #ff8787 50%, #ee5a6f 75%, #ff6b6b 100%);
+            background-size: 200% 200%;
+            animation: gradientMove 10s ease infinite;
+            padding: 50px 40px;
+            border-radius: 25px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(255, 107, 107, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .report-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        .report-main-title {
+            font-size: 42px;
+            margin-bottom: 12px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            line-height: 1.3;
+            white-space: nowrap;
+        }
+        
+        .report-title {
+            font-size: 22px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+        
+        .report-subtitle {
+            font-size: 16px;
+            position: relative;
+            z-index: 1;
+            color: #fff;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+        
+        .result-header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 25%, #ff8787 50%, #ee5a6f 75%, #ff6b6b 100%);
+            background-size: 200% 200%;
+            animation: gradientMove 10s ease infinite;
+            padding: 50px 40px;
+            border-radius: 25px;
+            text-align: center;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 40px rgba(255, 107, 107, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @media (max-width: 600px) {
+            .result-header {
+                padding: 20px 15px;
+                margin-bottom: 15px;
+            }
+        }
+        
+        .result-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        .result-header h2 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .result-header p {
+            color: #fff;
+            font-size: 16px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* 分数卡片 - 参考优化版 */
+        .score-card {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.15);
+        }
+        
+        @media (max-width: 600px) {
+            .score-card {
+                padding: 30px 15px;
+                margin-bottom: 15px;
+            }
+        }
+        
+        .score-card-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .score-main {
+            text-align: center;
+            padding: 30px 0;
+        }
+        
+        /* 复合可能性圆圈 - 参考优化版（实心圆） */
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 25%, #ff8787 50%, #ee5a6f 75%, #ff6b6b 100%);
+            background-size: 200% 200%;
+            animation: scaleIn 0.8s ease, gradientRotate 8s ease infinite;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.35);
+            position: relative;
+        }
+        
+        /* 外发光效果 */
+        .score-circle::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffb3b7 0%, #ffd9e8 50%, #ffe5ec 100%);
+            z-index: -1;
+            opacity: 0.6;
+            filter: blur(10px);
+        }
+        
+        .score-number {
+            font-size: 64px;
+            font-weight: 800;
+            color: white;
+            line-height: 1;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .score-label {
+            font-size: 18px;
+            color: white;
+            margin-top: 12px;
+            font-weight: 700;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 可能性等级 */
+        .score-level {
+            font-size: 26px;
+            color: #ff6b6b;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        /* 分数描述 */
+        .score-description {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+        
+        /* 兼容旧样式 */
+        /* 圆环进度条容器 */
+        .compatibility-percent-container {
+            margin: 30px auto;
+            text-align: center;
+            position: relative;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* SVG圆环 */
+        .percent-ring {
+            width: 200px;
+            height: 200px;
+            transform: rotate(-90deg);
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%) rotate(-90deg);
+        }
+        
+        .percent-ring-bg {
+            fill: none;
+            stroke: rgba(255, 107, 107, 0.2);
+            stroke-width: 12;
+        }
+        
+        .percent-ring-fill {
+            fill: none;
+            stroke: url(#percentGradient);
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 565.48;
+            stroke-dashoffset: 565.48;
+            transition: stroke-dashoffset 1.5s ease;
+        }
+        
+        /* SVG渐变定义 */
+        .percent-gradient {
+            stop-color: #ff6b6b;
+        }
+        
+        .percent-gradient-stop {
+            stop-color: #ee5a6f;
+        }
+        
+        /* 百分比文字 */
+        .compatibility-percent {
+            font-size: 64px;
+            font-weight: 800;
+            color: var(--primary-color);
+            line-height: 1;
+            text-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .compatibility-percent-label {
+            font-size: 18px;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-top: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 可能性等级 */
+        .score-level {
+            font-size: 26px;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .score-description {
+            font-size: 16px;
+            color: var(--text-light);
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* 新增：复合可能性进度条 */
+        .compatibility-progress-container {
+            width: 100%;
+            margin: 30px auto 15px;
+            position: relative;
+        }
+        
+        .compatibility-progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* 修改：填充颜色使用红色渐变 */
+        .compatibility-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b 0%, #ee5a6f 50%, #ff8787 100%);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 1.5s ease;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
+            position: relative;
+        }
+        
+        /* 流光动画 */
+        .compatibility-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        .compatibility-progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            position: relative;
+            padding: 0 5px;
+        }
+        
+        /* 修改为三个刻度：低可能性、中等可能性、高可能性 */
+        .progress-label {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            position: relative;
+            flex: 1;
+        }
+        
+        .progress-label:nth-child(1) {
+            text-align: left;
+        }
+        
+        .progress-label:nth-child(2) {
+            text-align: center;
+        }
+        
+        .progress-label:nth-child(3) {
+            text-align: right;
+        }
+        
+        /* 修改：移除刻度线显示 */
+        .progress-label::before {
+            display: none; /* 移除刻度线 */
+        }
+        
+        .compatibility-range {
+            font-size: 14px;
+            color: #888;
+            margin-top: 10px;
+            text-align: center;
+            font-style: italic;
+        }
+        
+        .compatibility-text {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        
+        /* 建议区块 - 参考优化版 */
+        .advice-section {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.08) 0%, rgba(238, 90, 111, 0.06) 100%);
+            border-left: 4px solid #ff6b6b;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .advice-title {
+            font-size: 18px;
+            color: #ff6b6b;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .advice-text {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.8;
+            text-align: left;
+        }
+        
+        /* 免责声明 - 参考优化版 */
+        .disclaimer-card {
+            background: linear-gradient(135deg, #fff9f5 0%, #fff5f0 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 15px;
+            border: 2px solid rgba(255, 107, 107, 0.2);
+            box-shadow: 0 3px 15px rgba(255, 107, 107, 0.1);
+        }
+        
+        @media (max-width: 600px) {
+            .disclaimer-card {
+                padding: 20px 15px;
+                margin-bottom: 15px;
+            }
+        }
+        
+        .disclaimer-title {
+            font-size: 20px;
+            color: #ff6b6b;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .disclaimer-title::before {
+            content: '⚠️';
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        .disclaimer-content {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.8;
+            text-align: left;
+        }
+        
+        .disclaimer-item {
+            margin-bottom: 12px;
+            padding-left: 20px;
+            position: relative;
+            text-align: left;
+        }
+        
+        .disclaimer-item::before {
+            content: '•';
+            position: absolute;
+            left: 5px;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        
+        .disclaimer-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .disclaimer-highlight {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+        
+        .compatibility-levels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #888;
+        }
+        
+        /* 新增样式：指数备注信息 */
+        .result-explanation {
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .result-explanation-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #6a89cc;
+            margin-bottom: 15px;
+            text-align: left;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .calculation-note {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.6;
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        
+        /* 新增样式：核心建议小点换行 */
+        .calculation-note.core-advice {
+            line-height: 1.8;
+        }
+        
+        /* 新增样式：结果解析子标题 */
+        .result-subtitle {
+            font-size: 16px;
+            font-weight: bold;
+            color: #6a89cc;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+        
+        .chart-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 40px; /* 增加底部间距 */
+        }
+        
+        .chart-explanation {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px; /* 增加与雷达图的间距 */
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+        
+        /* 分析卡片 - 参考优化版 */
+        .analysis-card {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.15);
+        }
+        
+        @media (max-width: 600px) {
+            .analysis-card {
+                padding: 30px 15px;
+                margin-bottom: 15px;
+            }
+        }
+        
+        .card-title {
+            font-size: 24px;
+            color: #ff6b6b;
+            margin-bottom: 30px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        /* 修改：analysis模块左右padding改为15px */
+        .analysis {
+            text-align: left;
+            background: white;
+            padding: 25px 15px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.15);
+        }
+        
+        .analysis h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 22px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .dimension-analysis {
+            margin-bottom: 35px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .dimension-analysis:last-child {
+            margin-bottom: 0;
+        }
+        
+        .dimension-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        /* 修改：维度名左对齐，移除前面的圆点 */
+        .dimension-analysis h4 {
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            font-size: 18px;
+            text-align: left;
+            font-weight: 600;
+            display: block;
+        }
+        
+        .dimension-name {
+            font-size: 18px;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+        
+        .dimension-score {
+            font-size: 16px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        
+        /* 移除维度名前面的圆点 */
+        .dimension-analysis h4::before {
+            display: none; /* 移除圆点 */
+        }
+        
+        .dimension-score-container {
+            margin-bottom: 15px;
+        }
+        
+        /* 修改：进度条变细，两端文字在下方 */
+        .dimension-score-bar {
+            width: 100%;
+            height: 12px;
+            background: linear-gradient(90deg, #ffe9e0 0%, #ffd9d9 100%);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 0 15px 0;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .dimension-bar {
+            height: 12px;
+            background: linear-gradient(90deg, #ffe9e0 0%, #ffd9d9 100%);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .dimension-score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b 0%, #ee5a6f 50%, #ff8787 100%);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 1s ease;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
+            position: relative;
+        }
+        
+        .dimension-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b 0%, #ee5a6f 50%, #ff8787 100%);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 1s ease;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
+            position: relative;
+        }
+        
+        /* 流光动画 */
+        .dimension-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        .dimension-text {
+            font-size: 15px;
+            color: var(--text-gray);
+            line-height: 1.7;
+            text-align: left;
+        }
+        
+        /* 新增：进度条两端文字容器 - 放在进度条下方 */
+        .dimension-score-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0;
+            font-size: 12px;
+            color: #888;
+            padding: 0 2px;
+        }
+        
+        .dimension-label-left, .dimension-label-right {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .dimension-label-left {
+            text-align: left;
+        }
+        
+        .dimension-label-right {
+            text-align: right;
+        }
+
+        .professional-explanation {
+            font-style: italic;
+            background-color: rgba(106, 137, 204, 0.05);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 3px solid #6a89cc;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .restart-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #ff8787 100%);
+            background-size: 200% 200%;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .restart-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .restart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.5);
+            background-position: 100% 0;
+        }
+        
+        .restart-btn:hover::before {
+            left: 100%;
+        }
+        
+        .loading-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+        
+        /* 新增样式：总分得分范围介绍 - PC端每行显示两个区间 */
+        .score-range-intro {
+            background-color: rgba(255, 107, 107, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--primary-color);
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-gray);
+            text-align: center;
+        }
+        
+        .score-range-items {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px 20px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .score-range-item {
+            white-space: nowrap;
+        }
+        
+        /* 新增样式：维度进度条说明 */
+        .dimension-note {
+            font-size: 13px;
+            color: #888;
+            text-align: center;
+            margin-top: 15px;
+            font-style: italic;
+            border-top: 1px dashed #e9ecef;
+            padding-top: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* 未完成题目警告 */
+        .incomplete-warning {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            text-align: center;
+            max-width: 400px;
+            display: none;
+        }
+        
+        .incomplete-warning h3 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .incomplete-warning p {
+            margin-bottom: 20px;
+            line-height: 1.5;
+            color: #666;
+        }
+        
+        .incomplete-warning .btn-close {
+            background-color: #6a89cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .incomplete-warning .btn-close:hover {
+            background-color: #5a79bc;
+            transform: translateY(-2px);
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        @media (max-width: 600px) {
+            /* 答题页进度信息 */
+            .progress-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .section-info {
+                align-items: flex-start;
+                width: 100%;
+            }
+            
+            .section-tag {
+                font-size: 13px;
+                padding: 5px 12px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            /* 容器内边距调整 */
+            .intro-section,
+            .question-content,
+            .score-card,
+            .analysis-card {
+                padding: 30px 20px;
+            }
+            
+            .score-card-title {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            /* 导航按钮 */
+            .buttons,
+            .navigation {
+                padding: 20px;
+            }
+            
+            .nav-btn {
+                padding: 12px 25px;
+                font-size: 15px;
+            }
+            
+            /* 首页样式调整 */
+            .intro-section h2 {
+                font-size: 26px;
+            }
+            
+            .icon-heart {
+                width: 70px;
+                height: 70px;
+                font-size: 35px;
+            }
+            
+            .feature-list {
+                padding: 20px;
+            }
+            
+            /* 报告页样式调整 */
+            .report-header {
+                padding: 30px 20px;
+            }
+            
+            .report-main-title {
+                font-size: 22px;
+                line-height: 1.4;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .report-title {
+                font-size: 18px;
+            }
+            
+            .score-card-title {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .score-circle {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .score-number {
+                font-size: 48px;
+            }
+            
+            .compatibility-text {
+                font-size: 20px;
+            }
+            
+            .compatibility-percent {
+                font-size: 42px;
+            }
+            
+            .compatibility-percent-label {
+                font-size: 16px;
+            }
+            
+            .compatibility-range {
+                font-size: 13px;
+            }
+            
+            .progress-label {
+                font-size: 10px;
+            }
+            
+            /* 移动端：进度条稍微加粗一点，但比之前细 */
+            .dimension-score-bar,
+            .dimension-bar {
+                height: 10px; /* 移动端稍微粗一点，但比之前细 */
+            }
+            
+            .compatibility-note, .calculation-note {
+                font-size: 15px;
+            }
+            
+            .score-range-intro {
+                font-size: 13px;
+                padding: 12px;
+            }
+            
+            /* 移动端：总分范围每行显示一个区间 */
+            .score-range-items {
+                flex-direction: column;
+                gap: 8px;
+                align-items: center;
+            }
+            
+            .score-range-item {
+                white-space: normal;
+                text-align: center;
+                width: 100%;
+            }
+            
+            .dimension-note {
+                font-size: 12px;
+            }
+            
+            .option-score {
+                font-size: 10px;
+                padding: 1px 6px;
+            }
+            
+            /* 免责声明移动端 */
+            .disclaimer-card {
+                padding: 20px;
+            }
+            
+            .disclaimer-title {
+                font-size: 18px;
+            }
+            
+            .disclaimer-content {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>分手复合可能性综合评估测试</h1>
+            <p>专业评估感情现状与复合可能性</p>
+            <!-- 进度信息 - 仅在题目页面显示 -->
+            <div class="progress-info" id="progress-info" style="display: none;">
+                <div class="question-number" id="question-number">第1题/共50题</div>
+                <div class="section-info">
+                    <div class="section-tag" id="section-tag">第一部分:当前状态与互动模式</div>
+                    <div class="section-progress" id="section-progress">本部分:第1题/共15题</div>
+                </div>
+            </div>
+            <!-- 进度条 - 默认隐藏，题目页面显示 -->
+            <div class="progress-bar" id="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- 介绍页面 -->
+            <div class="section intro-section active" id="intro">
+                <div class="icon-heart">💕</div>
+                <h2>分手复合可能性评估</h2>
+                <p class="subtitle">科学分析感情现状，为你的爱情指引方向</p>
+                
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>四大维度专业分析:互动模式、矛盾解决、情感基础、个人状态</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>50道精心设计的测试题目,全面评估你的感情状况</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>个性化建议方案,帮助你做出最佳决策</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>约10-15分钟完成,获得详细分析报告</span>
+                    </div>
+                </div>
+                
+                <button class="btn btn-next" id="start-test">开始测试</button>
+                <p class="info-text">测试结果仅供参考,不能替代专业心理咨询</p>
+                <!-- 底部说明区域（用于SDK添加推广链接） -->
+                <div class="welcome-footer" style="padding: 24px 20px; text-align: center; margin-top: 40px;">
+                    <p style="color: #718096; font-size: 14px; margin: 0;">
+                        本测试由灵博心理测试平台提供
+                    </p>
+                </div>
+            </div>
+            
+            <!-- 测试题目页面 -->
+            <div class="section question-section" id="question-1">
+                <h3>第一部分：当前状态与互动模式（1-15题）</h3>
+                <div class="question-text">1. 你们目前的联系频率是？</div>
+                <div class="options">
+                    <div class="option" data-value="5">
+                        <div class="option-radio"></div>
+                        <span class="option-text">A. 每天交流，如同伴侣</span>
+                    </div>
+                    <div class="option" data-value="4">
+                        <div class="option-radio"></div>
+                        <span class="option-text">B. 每周数次，像好朋友</span>
+                    </div>
+                    <div class="option" data-value="3">
+                        <div class="option-radio"></div>
+                        <span class="option-text">C. 偶尔联系，气氛微妙</span>
+                    </div>
+                    <div class="option" data-value="2">
+                        <div class="option-radio"></div>
+                        <span class="option-text">D. 仅在必要时沟通</span>
+                    </div>
+                    <div class="option" data-value="1">
+                        <div class="option-radio"></div>
+                        <span class="option-text">E. 完全断联</span>
+                    </div>
+                </div>
+                <div class="buttons">
+                    <button class="nav-btn btn-prev" id="prev-1" disabled>上一题</button>
+                    <button class="nav-btn btn-next" id="next-1">下一题</button>
+                </div>
+            </div>
+            
+            <!-- 加载页面 -->
+            <div class="section loading-container" id="loading">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">正在分析您的测试结果...</div>
+            </div>
+            
+            <!-- 结果页面 -->
+            <div class="section result-section" id="result">
+                <div class="result-header">
+                    <h1 class="report-main-title">分手复合可能性综合评估</h1>
+                    <p class="report-subtitle">基于您的回答，以下是详细的感情分析报告</p>
+                </div>
+                
+                <!-- 分数卡片 -->
+                <div class="score-card">
+                    <h2 class="score-card-title">测试结果分析</h2>
+                    <div class="score-main">
+                        <!-- 实心圆百分比显示 -->
+                        <div class="score-circle">
+                            <div class="score-number" id="compatibility-percent">65%</div>
+                            <div class="score-label" id="compatibility-label">复合可能性</div>
+                        </div>
+                        
+                        <div class="score-level" id="possibility-range-title">中等可能性区间</div>
+                        <p class="score-description" id="status-interpretation">
+                            你们有一定的情感基础和联系，但存在明确需要解决的障碍。可能是矛盾尚未完全化解，或对方仍心存疑虑，或你的个人状态仍需调整。这是最需要策略和耐心的阶段。
+                        </p>
+                    </div>
+                    
+                    <!-- 核心建议区块 -->
+                    <div class="advice-section">
+                        <div class="advice-title">💡 核心建议</div>
+                        <div class="advice-text" id="core-advice">
+                            聚焦核心问题，重建信任与吸引力。仔细查看四个部分中得分最低的部分，那就是你的主攻方向。接受当前的身份，以朋友的方式相处，但展示出超越朋友的成熟、理解和吸引力。
+                        </div>
+                        </div>
+                    </div>
+                    
+                <!-- 四维度详细分析卡片 -->
+                <div class="analysis-card">
+                    <h2 class="card-title">
+                        <div class="card-icon">📊</div>
+                        四维度详细分析
+                    </h2>
+                    
+                    <!-- 雷达图 -->
+                    <div class="chart-container">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                    <p class="chart-explanation">
+                        雷达图显示您在四个维度上的得分情况(1-5分)。分数越高表示该维度表现越好。
+                    </p>
+                    
+                    <div class="dimension-item">
+                        <div class="dimension-header">
+                            <span class="dimension-name">当前状态与互动模式</span>
+                            <span class="dimension-score" id="interaction-score-text">3.8 / 5.0</span>
+                        </div>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" id="interaction-score-bar"></div>
+                        </div>
+                        <p class="dimension-text" id="interaction-analysis">当前互动情况分析将显示在这里。</p>
+                </div>
+                
+                    <div class="dimension-item">
+                        <div class="dimension-header">
+                            <span class="dimension-name">矛盾性质与解决前景</span>
+                            <span class="dimension-score" id="conflict-score-text">3.2 / 5.0</span>
+                    </div>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" id="conflict-score-bar"></div>
+                </div>
+                        <p class="dimension-text" id="conflict-analysis">矛盾解决前景分析将显示在这里。</p>
+                    </div>
+                    
+                    <div class="dimension-item">
+                        <div class="dimension-header">
+                            <span class="dimension-name">情感基础与历史回溯</span>
+                            <span class="dimension-score" id="foundation-score-text">4.1 / 5.0</span>
+                            </div>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" id="foundation-score-bar"></div>
+                            </div>
+                        <p class="dimension-text" id="foundation-analysis">情感基础分析将显示在这里。</p>
+                    </div>
+                    
+                    <div class="dimension-item">
+                        <div class="dimension-header">
+                            <span class="dimension-name">个人状态与复合动机</span>
+                            <span class="dimension-score" id="personal-score-text">3.5 / 5.0</span>
+                            </div>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" id="personal-score-bar"></div>
+                            </div>
+                        <p class="dimension-text" id="personal-analysis">个人状态与动机分析将显示在这里。</p>
+                        </div>
+                    </div>
+                    
+                <!-- 综合复合建议卡片 -->
+                <div class="analysis-card">
+                    <h2 class="card-title">
+                        <div class="card-icon">💝</div>
+                        综合复合建议
+                    </h2>
+                    <p class="dimension-text" id="overall-advice">根据您的得分情况，复合建议将显示在这里。</p>
+                            </div>
+                
+                <!-- 免责声明 -->
+                <div class="disclaimer-card">
+                    <div class="disclaimer-title">免责声明</div>
+                    <div class="disclaimer-content">
+                        <div class="disclaimer-item">
+                            本测试结果<span class="disclaimer-highlight">仅供参考和娱乐</span>，不构成任何专业的心理咨询、情感咨询或法律建议。
+                            </div>
+                        <div class="disclaimer-item">
+                            测试结果基于您提供的信息和标准化算法生成，<span class="disclaimer-highlight">不能完全反映复杂的现实情况</span>，每段感情都有其独特性。
+                        </div>
+                        <div class="disclaimer-item">
+                            如果您正在经历严重的情感困扰、心理问题或需要专业指导，<span class="disclaimer-highlight">请寻求专业心理咨询师或情感专家的帮助</span>。
+                    </div>
+                        <div class="disclaimer-item">
+                            任何基于本测试结果做出的决定，<span class="disclaimer-highlight">责任由您自行承担</span>，本平台不对因使用测试结果而产生的任何后果负责。
+                            </div>
+                        <div class="disclaimer-item">
+                            感情问题涉及双方意愿，<span class="disclaimer-highlight">请尊重对方的选择和感受</span>，避免过度纠缠或做出伤害他人的行为。
+                            </div>
+                        <div class="disclaimer-item">
+                            本测试内容受版权保护，未经授权<span class="disclaimer-highlight">不得用于商业用途</span>。
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 底部操作区（用于SDK添加推广链接） -->
+                <div class="report-footer" style="padding: 24px 20px; text-align: center; margin-top: 40px;">
+                <button class="restart-btn" id="restart">重新测试</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 错误提示容器 -->
+    <div id="errorOverlay" class="error-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.9); z-index: 10000; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 18px; color: #f56c6c; font-weight: bold; padding: 20px; box-sizing: border-box;">
+        <p id="errorMessage" style="margin: 0; line-height: 1.6;"></p>
+    </div>
+
+    <!-- 未完成题目警告 -->
+    <div class="overlay" id="overlay"></div>
+    <div class="incomplete-warning" id="incomplete-warning">
+        <h3>请完成所有题目</h3>
+        <p>您还有 <span id="unanswered-count">0</span> 道题目没有完成，请完成所有题目后再提交答案。</p>
+        <button class="btn-close" id="close-warning">确定</button>
+    </div>
+
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        // 等待DOM加载完成后再启用安全功能
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+    
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init(null, {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    // 页面启用
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    // 尝试获取实例，即使无效
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    // 确保 window.linkValidator 被设置（即使验证失败）
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    // 页面不禁用，允许用户看到页面内容
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    // 确保获取到validator实例
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (!validatorInstance && window.linkValidator) {
+                            validatorInstance = window.linkValidator;
+                        }
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    
+                    // 调用addPromotionLink确保推广链接显示（首页使用welcome-footer容器）
+                    setTimeout(function() {
+                        if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                            PsyTestValidator.addPromotionLink();
+                        }
+                    }, 100);
+                    
+                    // 检查是否是重新测试（通过URL参数判断）
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const isRestart = urlParams.get('restart') === 'true';
+                    
+                    // 如果是重新测试，清除本地结果
+                    if (isRestart) {
+                        console.log('检测到重新测试参数，清除本地结果');
+                        try {
+                            localStorage.removeItem('testAnswers');
+                            localStorage.removeItem('testCompleted');
+                            // 如果使用了token保存，也清除
+                            if (validatorInstance && validatorInstance.token) {
+                                const token = validatorInstance.token;
+                                localStorage.removeItem('fsfh_test_result_' + token);
+                            }
+                            // 清除SDK的本地结果
+                            if (window.linkValidator && typeof window.linkValidator.clearLocalResult === 'function') {
+                                window.linkValidator.clearLocalResult();
+                            }
+                            // 清除URL中的restart参数
+                            urlParams.delete('restart');
+                            const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                            window.history.replaceState({}, '', newUrl);
+                        } catch (error) {
+                            console.error('清除本地结果失败:', error);
+                        }
+                    }
+                    
+                    // 如果链接有效且有测试结果，显示结果页（SPA场景）
+                    if (data.valid && data.has_local_result && !isRestart) {
+                        try {
+                            // 优先从token对应的key获取结果
+                            let localResult = null;
+                            if (validatorInstance && validatorInstance.token) {
+                                const token = validatorInstance.token;
+                                localResult = localStorage.getItem('fsfh_test_result_' + token);
+                            }
+                            // 如果还是没有，尝试从默认key获取（向后兼容）
+                            if (!localResult) {
+                                const savedAnswers = localStorage.getItem('testAnswers');
+                                const hasCompletedTest = localStorage.getItem('testCompleted') === 'true';
+                                if (savedAnswers && hasCompletedTest) {
+                                    localResult = savedAnswers;
+                                }
+                            }
+                            
+                            if (localResult) {
+                                // 对于SPA，直接显示结果页
+                                try {
+                                    const userAnswers = JSON.parse(localResult);
+                                    if (userAnswers && userAnswers.length === questions.length) {
+                                        introSection.classList.remove('active');
+                                        loadingSection.classList.remove('active');
+                                        resultSection.classList.add('active');
+                                        
+                                        // 隐藏header
+                                        const headerEl = document.querySelector('.header');
+                                        if (headerEl) {
+                                            headerEl.style.display = 'none';
+                                        }
+                                        
+                                        // 显示结果
+                                        showResults().catch(error => {
+                                            console.error('显示结果失败:', error);
+                                        });
+                                        
+                                        // 调用addPromotionLink确保推广链接显示（结果页使用report-footer容器）
+                                        setTimeout(function() {
+                                            if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                                                PsyTestValidator.addPromotionLink();
+                                            }
+                                        }, 500);
+                                        return;
+                                    }
+                                } catch (error) {
+                                    console.error('读取本地结果失败:', error);
+                                }
+                            }
+                        } catch (error) {
+                            console.error('读取本地结果失败:', error);
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+            // SDK未加载时，页面不禁用，允许查看
+            document.body.classList.remove('page-disabled');
+        }
+    </script>
+
+    <script>
+        // 测试题目数据 - 使用PDF中的50道题（修复引号问题）
+        const questions = [
+            // 第一部分：当前状态与互动模式（1-15题）
+            { section: "第一部分：当前状态与互动模式", text: "1. 你们目前的联系频率是？", dimension: "interaction", options: [
+                { text: "A. 每天交流，如同伴侣", score: 5 },
+                { text: "B. 每周数次，像好朋友", score: 4 },
+                { text: "C. 偶尔联系，气氛微妙", score: 3 },
+                { text: "D. 仅在必要时沟通", score: 2 },
+                { text: "E. 完全断联", score: 1 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "2. 沟通的发起方通常是？", dimension: "interaction", options: [
+                { text: "A. 对方主动居多", score: 5 },
+                { text: "B. 双方比例均衡", score: 4 },
+                { text: "C. 我主动居多", score: 2 },
+                { text: "D. 无人主动", score: 1 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "3. 对方回复消息的速度和态度是？", dimension: "interaction", options: [
+                { text: "A. 迅速且热情，乐于延伸话题", score: 5 },
+                { text: "B. 速度一般，但回复认真", score: 4 },
+                { text: "C. 回复迟缓，内容简短", score: 2 },
+                { text: "D. 经常不回复或态度恶劣", score: 1 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "4. 近期见面（如有）的气氛如何？", dimension: "interaction", options: [
+                { text: "A. 轻松愉快，有亲密感", score: 5 },
+                { text: "B. 友好但略有距离", score: 4 },
+                { text: "C. 尴尬、紧张或悲伤", score: 2 },
+                { text: "D. 充满争吵或完全回避见面", score: 1 },
+                { text: "E. 没有见面", score: 3 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "5. 交谈中，对方是否会提及你们的 inside joke（内部玩笑）或专属回忆？", dimension: "interaction", options: [
+                { text: "A. 经常，且双方都感到开心", score: 5 },
+                { text: "B. 偶尔，反应平淡", score: 3 },
+                { text: "C. 刻意避免提及", score: 1 },
+                { text: "D. 明确表示不想回忆过去", score: 1 },
+                { text: "E. 没有交谈（包括断联）", score: 2 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "6. 客观判断，当你遇到困难求助时，对方的反应会是？", dimension: "interaction", options: [
+                { text: "A. 像以前一样尽力帮助", score: 5 },
+                { text: "B. 提供有限帮助，但划清界限", score: 3 },
+                { text: "C. 口头安慰，无实际行动", score: 2 },
+                { text: "D. 漠不关心", score: 1 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "7. 对方是否在社交平台（朋友圈、微博等）上与你互动（点赞、评论）？", dimension: "interaction", options: [
+                { text: "A. 频繁互动", score: 5 },
+                { text: "B. 偶尔互动", score: 3 },
+                { text: "C. 不再互动", score: 1 },
+                { text: "D. 已取消关注或屏蔽", score: 1 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "8. 对方是否通过社交平台发布一些暗示性内容（如伤感、怀念的歌文）？", dimension: "interaction", options: [
+                { text: "A. 频繁，内容明显相关", score: 5 },
+                { text: "B. 偶尔，有联想空间", score: 3 },
+                { text: "C. 没有，或内容积极向上", score: 1 },
+                { text: "D. 发布负面内容指责过去", score: 1 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "9. 对方是否向共同朋友打听你的近况？", dimension: "interaction", options: [
+                { text: "A. 经常打听", score: 5 },
+                { text: "B. 偶尔问起", score: 3 },
+                { text: "C. 从不打听", score: 1 },
+                { text: "D. 朋友反馈对方拒绝谈论你", score: 1 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "10. 在重要的日子（生日、纪念日），对方是否有表示？", dimension: "interaction", options: [
+                { text: "A. 有祝福或礼物", score: 5 },
+                { text: "B. 简单的线上祝福", score: 3 },
+                { text: "C. 没有任何表示", score: 1 },
+                { text: "D. 在那个日子发布负面情绪", score: 1 },
+                { text: "E. 没有重要的日子或没有一起过过纪念日", score: 1 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "11. 你感觉对方对你现在的生活是否还有好奇心？", dimension: "interaction", options: [
+                { text: "A. 充满好奇，主动询问", score: 5 },
+                { text: "B. 在我分享时会倾听", score: 3 },
+                { text: "C. 显得不感兴趣", score: 1 },
+                { text: "D. 没有交流，无法判断", score: 2 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "12. 对方是否保留着与你相关的物品（礼物、照片）或社交联系？", dimension: "interaction", options: [
+                { text: "A. 大部分都保留着", score: 5 },
+                { text: "B. 保留了一部分", score: 3 },
+                { text: "C. 已全部清理", score: 1 },
+                { text: "D. 不清楚", score: 2 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "13. 客观判断，当你提及潜在的新恋情时，对方的反应会是？", dimension: "interaction", options: [
+                { text: "A. 表现出明显的嫉妒或紧张", score: 5 },
+                { text: "B. 祝福，但能感到一丝失落", score: 3 },
+                { text: "C. 完全无所谓", score: 1 },
+                { text: "D. 鼓励你开始新感情", score: 1 },
+                { text: "E. 没有提及过此类话题", score: 2 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "14. 你们能否进行轻松的、不涉及感情的日常交流？", dimension: "interaction", options: [
+                { text: "A. 能，且氛围很好", score: 5 },
+                { text: "B. 能，但有些僵硬", score: 3 },
+                { text: "C. 不能，一说话就容易吵架或冷场", score: 1 },
+                { text: "D. 没有交流", score: 2 }
+            ]},
+            { section: "第一部分：当前状态与互动模式", text: "15. 整体评估，当前互动的主要情绪基调是？", dimension: "interaction", options: [
+                { text: "A. 温暖、怀念", score: 5 },
+                { text: "B. 平静、友好", score: 4 },
+                { text: "C. 悲伤、痛苦", score: 2 },
+                { text: "D. 愤怒、怨恨", score: 1 },
+                { text: "E. 没有互动，无法判断", score: 2 }
+            ]},
+            
+            // 第二部分：矛盾性质与解决前景（16-30题）
+            { section: "第二部分：矛盾性质与解决前景", text: "16. 导致分手的核心矛盾类型是？", dimension: "conflict", options: [
+                { text: "A. 一次性误会或外部压力", score: 5 },
+                { text: "B. 沟通不畅或性格摩擦", score: 4 },
+                { text: "C. 长期忽视积累的怨气", score: 3 },
+                { text: "D. 人生目标/价值观的重大分歧", score: 2 },
+                { text: "E. 原则性问题（如背叛、欺骗）", score: 1 }
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "17. 分手是'积累性爆发'还是'单次事件导致'？", dimension: "conflict", options: [
+                { text: "A. 纯粹的单次事件", score: 5 },
+                { text: "B. 单次事件为主，但有一定积累背景", score: 4 },
+                { text: "C. 典型的长期矛盾积累爆发", score: 2 },
+                { text: "D. 混合型，既有长期问题也有导火索", score: 3 }
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "18. 分手时，对方指出的你的主要问题，你认同吗？", dimension: "conflict", options: [
+                { text: "A. 完全认同，确实是我的责任", score: 5 },
+                { text: "B. 部分认同，双方都有责任", score: 4 },
+                { text: "C. 不太认同，主要是对方的问题", score: 2 },
+                { text: "D. 完全不认同，是对方的借口", score: 1 }
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "19. 分手后，你对自身问题的认知深度是？", dimension: "conflict", options: [
+                { text: "A. 深刻洞察了自身模式并知道如何改变", score: 5 },
+                { text: "B. 知道问题在哪，正在努力改变", score: 4 },
+                { text: "C. 知道问题，但改变困难", score: 2 },
+                { text: "D. 不认为自己有太大问题", score: 1 }
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "20. 那个核心矛盾，目前有多大程度的改善？", dimension: "conflict", options: [
+                { text: "A. 问题已基本解决", score: 5 },
+                { text: "B. 我正在积极改变且效果显著", score: 4 },
+                { text: "C. 意识到了，但改变缓慢", score: 2 },
+                { text: "D. 问题依然如故", score: 1 }
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "21. 对方是否知晓或认可你的这些改变？", dimension: "conflict", options: [
+                { text: "A. 明确表示看到了并认可我的改变", score: 5 },
+                { text: "B. 应该有所察觉，但未明确表态", score: 3 },
+                { text: "C. 完全不知道我的改变", score: 1 },
+                { text: "D. 知道但不相信会持久", score: 2 }
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "22. 对方是否承认过他/她在关系中的问题？", dimension: "conflict", options: [
+                { text: "A. 真诚地承认并道歉过", score: 5 },
+                { text: "B. 泛泛地承认'也有责任'", score: 3 },
+                { text: "C. 从未承认，全部归咎于我", score: 1 }
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "23. 如果复合，你认为这个旧问题重现的可能性是？", dimension: "conflict", options: [
+                { text: "A. 极低，因为我们已经找到解决方法", score: 5 },
+                { text: "B. 有可能，但我们有信心处理好", score: 4 },
+                { text: "C. 很高，除非一方完全妥协", score: 2 },
+                { text: "D. 必然重现，且无法解决", score: 1 }
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "24. 你们是否曾就'如何避免重蹈覆辙'进行过深入交流？", dimension: "conflict", options: [
+                { text: "A. 有过深入且建设性的讨论", score: 5 },
+                { text: "B. 浅尝辄止地提到过", score: 3 },
+                { text: "C. 从未讨论过", score: 1 }
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "25. 导致分手的现实因素（如异地、经济、家庭反对），现在状况是？", dimension: "conflict", options: [
+                { text: "A. 障碍已完全消失", score: 5 },
+                { text: "B. 障碍依然存在，但找到了解决方案", score: 4 },
+                { text: "C. 障碍存在，需要一方做出牺牲", score: 2 },
+                { text: "D. 障碍巨大且无法解决", score: 1 },
+                { text: "E. 没有现实因素障碍", score: 5 }
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "26. 分手过程中，是否有过严重的互相伤害（如公开诋毁、纠缠骚扰）？", dimension: "conflict", options: [
+                { text: "A. 完全没有，和平分手", score: 5 },
+                { text: "B. 有轻微的情绪化言行，已平息", score: 3 },
+                { text: "C. 有较为严重的伤害行为", score: 1 },
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "27. 对方目前对'谈论关系本身'的态度是？", dimension: "conflict", options: [
+                { text: "A. 愿意开放地沟通", score: 5 },
+                { text: "B. 可以谈，但很谨慎", score: 3 },
+                { text: "C. 回避和抗拒", score: 1 },
+                { text: "D. 没有交流，无法判断", score: 2 }
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "28. 你是否有信心在未来关系中满足对方的核心需求？", dimension: "conflict", options: [
+                { text: "A. 非常有信心", score: 5 },
+                { text: "B. 有一定信心", score: 3 },
+                { text: "C. 没有信心/不清楚对方的核心需求", score: 1 }
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "29. 对方是否相信你有能力满足他/她的核心需求？", dimension: "conflict", options: [
+                { text: "A. 我相信他/她认为我有能力", score: 5 },
+                { text: "B. 他/她可能持怀疑态度", score: 2 },
+                { text: "C. 他/她认为我没有这个能力", score: 1 },
+                { text: "D. 不清楚对方的核心需求", score: 1 }
+            ]},
+            { section: "第二部分：矛盾性质与解决前景", text: "30. 关于矛盾的解决，你更倾向于哪种描述？", dimension: "conflict", options: [
+                { text: "A. 我们找到了共同的敌人（问题本身），而非彼此对立", score: 5 },
+                { text: "B. 主要是其中一方在做出改变和妥协", score: 2 },
+                { text: "C. 我们都坚持自己是对的，无法妥协", score: 1 }
+            ]},
+            
+            // 第三部分：情感基础与历史回溯（31-40题）
+            { section: "第三部分：情感基础与历史回溯", text: "31. 你们恋爱关系的持续时间是？", dimension: "foundation", options: [
+                { text: "A. 3年以上", score: 5 },
+                { text: "B. 1-3年", score: 4 },
+                { text: "C. 6个月-1年", score: 3 },
+                { text: "D. 6个月以下", score: 2 }
+            ]},
+            { section: "第三部分：情感基础与历史回溯", text: "32. 回顾整段关系，幸福与痛苦的比例大约是？", dimension: "foundation", options: [
+                { text: "A. 幸福远多于痛苦（≥7:3）", score: 5 },
+                { text: "B. 幸福略多于痛苦（6:4）", score: 4 },
+                { text: "C. 差不多各半（5:5）", score: 3 },
+                { text: "D. 痛苦多于幸福（≤4:6）", score: 1 }
+            ]},
+            { section: "第三部分：情感基础与历史回溯", text: "33. 你们是否曾共同经历过重大的正面考验（如共渡难关、共同奋斗）？", dimension: "foundation", options: [
+                { text: "A. 经历过多次，感情因此加深", score: 5 },
+                { text: "B. 经历过一两次", score: 4 },
+                { text: "C. 几乎没有，多为顺境", score: 2 }
+            ]},
+            { section: "第三部分：情感基础与历史回溯", text: "34. 在关系中，你们的'爱的语言'是否匹配（即表达和接收爱的方式）？", dimension: "foundation", options: [
+                { text: "A. 非常匹配，能互相理解", score: 5 },
+                { text: "B. 比较匹配，经过磨合后更好", score: 4 },
+                { text: "C. 不太匹配，常感觉爱意无法传达", score: 2 },
+                { text: "D. 严重不匹配，感觉不到被爱", score: 1 }
+            ]},
+            { section: "第三部分：情感基础与历史回溯", text: "35. 你们拥有多少共同的兴趣爱好和朋友圈子？", dimension: "foundation", options: [
+                { text: "A. 大量共同兴趣和高度重合的社交圈", score: 5 },
+                { text: "B. 有一些共同兴趣，朋友圈部分重合", score: 4 },
+                { text: "C. 兴趣迥异，朋友圈基本独立", score: 2 }
+            ]},
+            { section: "第三部分：情感基础与历史回溯", text: "36. 分手是第几次提出来？", dimension: "foundation", options: [
+                { text: "A. 第一次", score: 5 },
+                { text: "B. 2-3次", score: 3 },
+                { text: "C. 多次反复", score: 1 }
+            ]},
+            { section: "第三部分：情感基础与历史回溯", text: "37. 过去提出分手后，通常是怎样和好的？", dimension: "foundation", options: [
+                { text: "A. 深入沟通，解决问题后和好", score: 5 },
+                { text: "B. 一方哄哄，问题被搁置", score: 2 },
+                { text: "C. 自然淡忘，假装没发生过", score: 1 },
+                { text: "D. 没有和好过/这是第一次分手", score: 3 }
+            ]},
+            { section: "第三部分：情感基础与历史回溯", text: "38. 你如何评价你们曾经的亲密关系（包括身体和情感）质量？", dimension: "foundation", options: [
+                { text: "A. 一直非常亲密和满意", score: 5 },
+                { text: "B. 前期很好，后期下降", score: 3 },
+                { text: "C. 始终一般存在障碍", score: 2 },
+                { text: "D. 非常糟糕", score: 1 }
+            ]},
+            { section: "第三部分：情感基础与历史回溯", text: "39. 对方是否曾多次、明确地表达过你是他/她'理想的伴侣'？", dimension: "foundation", options: [
+                { text: "A. 经常表达", score: 5 },
+                { text: "B. 偶尔表达", score: 3 },
+                { text: "C. 从未表达", score: 1 }
+            ]},
+            { section: "第三部分：情感基础与历史回溯", text: "40. 在你看来，你在对方生命中扮演了怎样独特的、难以被替代的角色？", dimension: "foundation", options: [
+                { text: "A. 灵魂伴侣、最佳战友", score: 5 },
+                { text: "B. 深爱的恋人", score: 4 },
+                { text: "C. 重要的伴侣，但并非不可替代", score: 3 },
+                { text: "D. 一个陪伴者", score: 2 },
+                { text: "E. 可能只是人生过客", score: 1 }
+            ]},
+            
+            // 第四部分：个人状态与复合动机（41-50题）
+            { section: "第四部分：个人状态与复合动机", text: "41. 分手后，你的整体状态（情绪、生活、事业）趋势是？", dimension: "personal", options: [
+                { text: "A. 变得更好，更积极", score: 5 },
+                { text: "B. 逐渐从谷底回升", score: 3 },
+                { text: "C. 持续在痛苦中", score: 1 },
+                { text: "D. 变得更差", score: 1 }
+            ]},
+            { section: "第四部分：个人状态与复合动机", text: "42. 你是否建立了独立于对方的生活目标和快乐来源？", dimension: "personal", options: [
+                { text: "A. 是的，我的生活很充实", score: 5 },
+                { text: "B. 正在建立中", score: 3 },
+                { text: "C. 没有，依然围绕对方", score: 1 }
+            ]},
+            { section: "第四部分：个人状态与复合动机", text: "43. 你想复合的最核心动机是？", dimension: "personal", options: [
+                { text: "A. 理性的爱；欣赏、深爱，并相信能创造更好未来", score: 5 },
+                { text: "B. 现实考量（经济、年龄、社会压力）", score: 3 },
+                { text: "C. 深度的情感依赖和习惯", score: 2 },
+                { text: "D. 不甘心、占有欲或害怕'输'", score: 1 }
+            ]},
+            { section: "第四部分：个人状态与复合动机", text: "44. 如果对方开始了新恋情，你的最终反应会是？", dimension: "personal", options: [
+                { text: "A. 非常痛苦，但最终会接受并祝福", score: 4 },
+                { text: "B. 会嫉妒，但更激励自己过好生活", score: 3 },
+                { text: "C. 无所谓，说明我们不会适", score: 2 },
+                { text: "D. 无法接受，可能会做出不理智行为", score: 1 }
+            ]},
+            { section: "第四部分：个人状态与复合动机", text: "45. 对于复合，你愿意付出努力并耐心等待的时限是？", dimension: "personal", options: [
+                { text: "A. 我已经在努力，不计时间，顺其自然", score: 5 },
+                { text: "B. 我愿意花几个月到一年时间努力", score: 3 },
+                { text: "C. 我希望立刻有结果，否则就想放弃", score: 1 }
+            ]},
+            { section: "第四部分：个人状态与复合动机", text: "46. 你能否客观地看待对方，既看到优点也接纳缺点？", dimension: "personal", options: [
+                { text: "A. 能，我爱的就是完整的他/她", score: 5 },
+                { text: "B. 更多看到优点，对缺点包容度下降", score: 3 },
+                { text: "C. 更多看到缺点，觉得难以忍受", score: 1 }
+            ]},
+            { section: "第四部分：个人状态与复合动机", text: "47. 如果复合后需要经历一段艰难的磨合期，你的态度是？", dimension: "personal", options: [
+                { text: "A. 有心理准备，并愿意共同面对", score: 5 },
+                { text: "B. 希望磨合期越短越好", score: 2 },
+                { text: "C. 没想过，觉得和好就应该像以前一样", score: 1 }
+            ]},
+            { section: "第四部分：个人状态与复合动机", text: "48. 你挽回对方的方式更倾向于？", dimension: "personal", options: [
+                { text: "A. 聚焦自我提升，间接吸引", score: 5 },
+                { text: "B. 真诚沟通，表达改变和爱意", score: 4 },
+                { text: "C. 不断承诺、保证、乞求", score: 1 },
+                { text: "D. 通过朋友施压或频繁联系", score: 1 }
+            ]},
+            { section: "第四部分：个人状态与复合动机", text: "49. 你对于'破镜重圆'最终结果的预判是？", dimension: "personal", options: [
+                { text: "A. 有信心能建立一段更健康的关系", score: 5 },
+                { text: "B. 不确定，但愿意试试", score: 3 },
+                { text: "C. 觉得很可能还会因为同样问题分开", score: 1 }
+            ]},
+            { section: "第四部分：个人状态与复合动机", text: "50. 整体而言，你当前的心境是？", dimension: "personal", options: [
+                { text: "A. 平静、充满希望，无论结果如何都能接受", score: 5 },
+                { text: "B. 焦虑、渴望，非常想要一个结果", score: 2 },
+                { text: "C. 绝望、痛苦，感觉无法走出来", score: 1 }
+            ]}
+        ];
+        
+        // 应用状态
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+
+        // 页面加载时立即检查localStorage（在DOM元素获取之前）
+        // 这样可以确保即使页面刷新也能正确显示报告页
+        (function() {
+            const savedAnswers = localStorage.getItem('testAnswers');
+            const hasCompletedTest = localStorage.getItem('testCompleted') === 'true';
+            
+            if (savedAnswers && hasCompletedTest) {
+                // 如果测试已完成，立即设置body样式，避免闪烁
+                if (document.body) {
+                    document.body.style.display = 'flex';
+                    document.body.style.justifyContent = 'center';
+                    document.body.style.alignItems = 'flex-start';
+                }
+            }
+        })();
+        
+        // DOM元素
+        const introSection = document.getElementById('intro');
+        const loadingSection = document.getElementById('loading');
+        const resultSection = document.getElementById('result');
+        const progressBar = document.getElementById('progress');
+        const progressBarContainer = document.getElementById('progress-bar'); // 新增：进度条容器
+        const startTestBtn = document.getElementById('start-test');
+        const restartBtn = document.getElementById('restart');
+        const compatibilityPercent = document.getElementById('compatibility-percent');
+        const compatibilityLabel = document.getElementById('compatibility-label');
+        const compatibilityProgressFill = document.getElementById('compatibility-progress-fill');
+        const totalScoreDisplay = document.getElementById('total-score-display');
+        const possibilityRangeTitle = document.getElementById('possibility-range-title');
+        const statusInterpretation = document.getElementById('status-interpretation');
+        const coreAdvice = document.getElementById('core-advice');
+        
+        // 未完成题目警告相关DOM元素
+        const incompleteWarning = document.getElementById('incomplete-warning');
+        const overlay = document.getElementById('overlay');
+        const unansweredCount = document.getElementById('unanswered-count');
+        const closeWarning = document.getElementById('close-warning');
+        
+        // 初始化
+        function initTest() {
+            // 检查是否有保存的测试结果
+            const savedAnswers = localStorage.getItem('testAnswers');
+            const hasCompletedTest = localStorage.getItem('testCompleted') === 'true';
+            
+            if (savedAnswers && hasCompletedTest) {
+                // 如果有保存的结果，直接显示报告页
+                try {
+                    userAnswers = JSON.parse(savedAnswers);
+                    if (userAnswers && userAnswers.length === questions.length) {
+                        // 隐藏首页和加载页，显示报告页
+                        introSection.classList.remove('active');
+                        loadingSection.classList.remove('active');
+                        resultSection.classList.add('active');
+                        
+                        // 隐藏header
+                        const headerEl = document.querySelector('.header');
+                        if (headerEl) {
+                            headerEl.style.display = 'none';
+                        }
+                        
+                        // 隐藏进度条
+                        progressBarContainer.classList.remove('active');
+                        const progressInfo = document.getElementById('progress-info');
+                        if (progressInfo) {
+                            progressInfo.style.display = 'none';
+                        }
+                        
+                        // 显示结果（使用setTimeout确保DOM已完全加载）
+                        setTimeout(async () => {
+                            await showResults();
+                        }, 300);
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Failed to load saved test results:', e);
+                    // 如果加载失败，清除localStorage并显示首页
+                    localStorage.removeItem('testAnswers');
+                    localStorage.removeItem('testCompleted');
+                }
+            }
+            
+            // 如果没有保存的结果，显示首页
+            introSection.classList.add('active');
+            loadingSection.classList.remove('active');
+            resultSection.classList.remove('active');
+            incompleteWarning.style.display = 'none';
+            overlay.style.display = 'none';
+            
+            // 重置测试状态
+            currentQuestionIndex = 0;
+            userAnswers = [];
+            
+            // 隐藏进度条和header（首页不显示）
+            progressBarContainer.classList.remove('active');
+            const progressInfo = document.getElementById('progress-info');
+            if (progressInfo) {
+                progressInfo.style.display = 'none';
+            }
+            const headerEl = document.querySelector('.header');
+            if (headerEl) {
+                headerEl.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化测试
+            initTest();
+            
+            // 创建题目页面
+            createQuestionPages();
+            
+            // 事件监听
+            startTestBtn.addEventListener('click', startTest);
+            restartBtn.addEventListener('click', restartTest);
+            
+            // 初始化结果图表（只在元素存在时初始化）
+            const radarChartEl = document.getElementById('radarChart');
+            if (radarChartEl) {
+                initResultChart();
+            }
+            
+            // 关闭警告
+            closeWarning.addEventListener('click', closeWarningHandler);
+            overlay.addEventListener('click', closeWarningHandler);
+        });
+        
+        // 关闭警告
+        function closeWarningHandler() {
+            incompleteWarning.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+        
+        // 开始测试
+        async function startTest() {
+            // 等待SDK初始化完成（最多等待3秒）
+            let waitCount = 0;
+            while (!window.linkValidator && waitCount < 30) {
+                await new Promise(function(resolve) {
+                    setTimeout(resolve, 100);
+                });
+                waitCount++;
+            }
+            
+            // 检查SDK是否初始化
+            if (!window.linkValidator) {
+                console.error('SDK未初始化，无法开始测试');
+                alert('验证SDK未初始化，无法开始测试。请刷新页面重试。');
+                return;
+            }
+            
+            // 先验证链接有效性（如果无效会显示弹窗）
+            let isValid = false;
+            if (typeof window.linkValidator.validateForUserAction === 'function') {
+                try {
+                    isValid = await window.linkValidator.validateForUserAction();
+                    console.log('验证结果:', { isValid: isValid, valid: window.linkValidator.valid, error: window.linkValidator.validationError });
+                    
+                    // 检查验证结果和验证状态（双重检查）
+                    if (!isValid || window.linkValidator.valid === false) {
+                        // 链接无效，已显示弹窗，不进入答题页面
+                        console.warn('链接验证失败，无法开始测试', {
+                            isValid: isValid,
+                            valid: window.linkValidator.valid,
+                            error: window.linkValidator.validationError
+                        });
+                        return; // 重要：验证失败时return，阻止进入答题页
+                    }
+                } catch (error) {
+                    // 验证失败，已显示弹窗，不进入答题页面
+                    console.error('链接验证失败:', error);
+                    if (window.linkValidator) {
+                        window.linkValidator.valid = false;
+                    }
+                    return; // 重要：验证失败时return，阻止进入答题页
+                }
+            } else {
+                // 如果validateForUserAction不存在，检查valid状态
+                if (window.linkValidator.valid === false) {
+                    alert(window.linkValidator.validationError || '测试链接无效，请检查链接是否正确');
+                    return;
+                }
+                isValid = window.linkValidator.valid !== false;
+            }
+            
+            // 最终检查：确保验证通过才进入答题页面
+            if (!isValid || (window.linkValidator && window.linkValidator.valid === false)) {
+                console.warn('最终验证检查失败，无法开始测试');
+                return;
+            }
+            
+            // 调用测试开始API（单视角测试）
+            if (window.linkValidator) {
+                try {
+                    await window.linkValidator.startTest();
+                    console.log('测试开始记录成功');
+                } catch (error) {
+                    console.error('记录测试开始失败:', error);
+                    // 测试开始失败，不进入答题页面
+                    return; // 重要：startTest失败时也要return
+                }
+            }
+            
+            // 检查是否有保存的测试结果
+            const savedAnswers = localStorage.getItem('testAnswers');
+            const hasCompletedTest = localStorage.getItem('testCompleted') === 'true';
+            
+            if (savedAnswers && hasCompletedTest) {
+                // 如果有保存的结果，直接显示报告页
+                try {
+                    userAnswers = JSON.parse(savedAnswers);
+                    if (userAnswers && userAnswers.length === questions.length) {
+                        introSection.classList.remove('active');
+                        loadingSection.classList.remove('active');
+                        resultSection.classList.add('active');
+                        
+                        // 隐藏header
+                        const headerEl = document.querySelector('.header');
+                        if (headerEl) {
+                            headerEl.style.display = 'none';
+                        }
+                        
+                        // 显示结果
+                        showResults().catch(error => {
+                            console.error('显示结果失败:', error);
+                        });
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Failed to load saved test results:', e);
+                }
+            }
+            
+            // 如果没有保存的结果，开始新测试
+            introSection.classList.remove('active');
+            document.getElementById('question-1').classList.add('active');
+            
+            // 显示header和进度条（题目页面显示）
+            const headerEl = document.querySelector('.header');
+            if (headerEl) {
+                headerEl.style.display = 'block';
+            }
+            progressBarContainer.classList.add('active');
+            const progressInfo = document.getElementById('progress-info');
+            if (progressInfo) {
+                progressInfo.style.display = 'flex';
+            }
+            updateProgressBar();
+            
+            // 为第一题添加事件监听
+            const options = document.querySelectorAll('#question-1 .option');
+            const nextBtn = document.getElementById('next-1');
+            
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    userAnswers[0] = parseInt(this.getAttribute('data-value'));
+                    
+                    // 启用下一题按钮
+                    nextBtn.disabled = false;
+                    
+                    // 自动跳转到下一题
+                    setTimeout(() => {
+                        navigateToQuestion(2);
+                    }, 500);
+                });
+            });
+            
+            nextBtn.addEventListener('click', () => navigateToQuestion(2));
+        }
+        
+        // 创建题目页面
+        function createQuestionPages() {
+            const content = document.querySelector('.content');
+            
+            questions.forEach((question, index) => {
+                // 跳过第一个问题，因为它已经在HTML中
+                if (index === 0) return;
+                
+                const questionSection = document.createElement('div');
+                questionSection.className = 'section question-section';
+                questionSection.id = `question-${index + 1}`;
+                
+                // 构建选项HTML - 移除分数显示
+                let optionsHTML = '';
+                question.options.forEach((option, optIndex) => {
+                    optionsHTML += `
+                    <div class="option" data-value="${option.score}">
+                        <div class="option-radio"></div>
+                        <span class="option-text">${option.text}</span>
+                    </div>
+                    `;
+                });
+                
+                questionSection.innerHTML = `
+                    <h3>${question.section}</h3>
+                    <div class="question-text">${question.text}</div>
+                    <div class="options">
+                        ${optionsHTML}
+                    </div>
+                    <div class="buttons">
+                        <button class="nav-btn btn-prev" id="prev-${index + 1}">上一题</button>
+                        <button class="nav-btn btn-next" id="next-${index + 1}">${index === questions.length - 1 ? '提交测试' : '下一题'}</button>
+                    </div>
+                `;
+                
+                content.appendChild(questionSection);
+                
+                // 添加事件监听
+                setTimeout(() => {
+                    const prevBtn = document.getElementById(`prev-${index + 1}`);
+                    const nextBtn = document.getElementById(`next-${index + 1}`);
+                    const options = questionSection.querySelectorAll('.option');
+                    
+                    prevBtn.addEventListener('click', () => navigateToQuestion(index));
+                    
+                    if (index === questions.length - 1) {
+                        nextBtn.addEventListener('click', submitTest);
+                    } else {
+                        nextBtn.addEventListener('click', () => navigateToQuestion(index + 2));
+                    }
+                    
+                    options.forEach(option => {
+                        option.addEventListener('click', function() {
+                            options.forEach(opt => opt.classList.remove('selected'));
+                            this.classList.add('selected');
+                            userAnswers[index] = parseInt(this.getAttribute('data-value'));
+                            
+                            // 启用下一题按钮
+                            nextBtn.disabled = false;
+                            
+                            // 自动跳转到下一题（如果不是最后一题）
+                            if (index < questions.length - 1) {
+                                setTimeout(() => {
+                                    navigateToQuestion(index + 2);
+                                }, 500);
+                            }
+                        });
+                    });
+                    
+                    // 初始禁用下一题按钮
+                    nextBtn.disabled = true;
+                }, 100);
+            });
+        }
+        
+        // 导航到指定题目
+        function navigateToQuestion(questionNumber) {
+            document.querySelector('.section.active').classList.remove('active');
+            document.getElementById(`question-${questionNumber}`).classList.add('active');
+            currentQuestionIndex = questionNumber - 1;
+            updateProgressBar();
+        }
+        
+        // 更新进度条和进度信息
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            // 更新题目编号
+            const questionNumberEl = document.getElementById('question-number');
+            if (questionNumberEl) {
+                questionNumberEl.textContent = `第${currentQuestionIndex + 1}题/共${questions.length}题`;
+            }
+            
+            // 更新部分信息
+            const currentQuestion = questions[currentQuestionIndex];
+            if (currentQuestion) {
+                const sectionTagEl = document.getElementById('section-tag');
+                const sectionProgressEl = document.getElementById('section-progress');
+                
+                if (sectionTagEl) {
+                    sectionTagEl.textContent = currentQuestion.section;
+                }
+                
+                if (sectionProgressEl) {
+                    // 计算当前部分的范围
+                    let sectionStart = 0;
+                    let sectionEnd = 0;
+                    const currentSection = currentQuestion.section;
+                    
+                    questions.forEach((q, idx) => {
+                        if (q.section === currentSection) {
+                            if (sectionStart === 0) sectionStart = idx + 1;
+                            sectionEnd = idx + 1;
+                        }
+                    });
+                    
+                    const sectionTotal = sectionEnd - sectionStart + 1;
+                    const sectionCurrent = currentQuestionIndex + 1 - sectionStart + 1;
+                    sectionProgressEl.textContent = `本部分:第${sectionCurrent}题/共${sectionTotal}题`;
+                }
+            }
+        }
+        
+        // 提交测试
+        function submitTest() {
+            // 检查是否所有题目都已回答
+            const allAnswered = userAnswers.length === questions.length && userAnswers.every(answer => answer !== undefined && answer !== -1);
+            
+            if (!allAnswered) {
+                // 显示未完成警告
+                const unanswered = questions.length - userAnswers.filter(answer => answer !== undefined && answer !== -1).length;
+                unansweredCount.textContent = unanswered;
+                incompleteWarning.style.display = 'block';
+                overlay.style.display = 'block';
+                return;
+            }
+            
+            document.querySelector('.section.active').classList.remove('active');
+            loadingSection.classList.add('active');
+            
+            // 隐藏进度条和header（结果页不显示）
+            progressBarContainer.classList.remove('active');
+            const progressInfo = document.getElementById('progress-info');
+            if (progressInfo) {
+                progressInfo.style.display = 'none';
+            }
+            const headerEl = document.querySelector('.header');
+            if (headerEl) {
+                headerEl.style.display = 'none';
+            }
+            
+            // 模拟分析过程
+            setTimeout(async () => {
+                loadingSection.classList.remove('active');
+                resultSection.classList.add('active');
+                await showResults();
+            }, 2000);
+        }
+        
+        // 显示结果
+        async function showResults() {
+            // 计算各维度得分
+            const dimensionScores = {
+                interaction: 0, // 当前状态与互动模式
+                conflict: 0,    // 矛盾性质与解决前景
+                foundation: 0,  // 情感基础与历史回溯
+                personal: 0     // 个人状态与复合动机
+            };
+            
+            const dimensionCounts = {
+                interaction: 0,
+                conflict: 0,
+                foundation: 0,
+                personal: 0
+            };
+            
+            // 计算每个维度的总分和题目数量
+            questions.forEach((question, index) => {
+                const answer = userAnswers[index];
+                if (answer !== undefined && answer !== -1) {
+                    dimensionScores[question.dimension] += answer;
+                    dimensionCounts[question.dimension]++;
+                }
+            });
+            
+            // 计算每个维度的平均分（1-5分）
+            const dimensionAverages = {};
+            for (const dimension in dimensionScores) {
+                dimensionAverages[dimension] = dimensionScores[dimension] / dimensionCounts[dimension];
+            }
+            
+            // 计算总分（50-250分）
+            let totalScore = 0;
+            for (const answer of userAnswers) {
+                if (answer !== undefined && answer !== -1) {
+                    totalScore += answer;
+                }
+            }
+            
+            // 计算复合可能性百分比（根据新的规则）
+            let compositePercentage;
+            if (totalScore >= 150) {
+                // 150-250分对应41%-100%
+                compositePercentage = 41 + ((totalScore - 150) / (250 - 150)) * 59;
+            } else {
+                // 50-149分对应0%-40%
+                compositePercentage = ((totalScore - 50) / (149 - 50)) * 40;
+            }
+            
+            // 确保百分比在合理范围内
+            compositePercentage = Math.max(0, Math.min(100, compositePercentage));
+            const roundedCompositePercentage = Math.round(compositePercentage);
+            
+            // 确定复合可能性级别 - 根据原始得分（50-250分）区分
+            let compatibilityLevel, compatibilityTextStr, possibilityRangeTitleStr;
+            if (totalScore >= 200) {
+                compatibilityLevel = "高可能性区间";
+                compatibilityTextStr = "高可能性";
+                possibilityRangeTitleStr = "【高可能性区间 - 契机与窗口期】";
+            } else if (totalScore >= 150) {
+                compatibilityLevel = "中等可能性区间";
+                compatibilityTextStr = "中等可能性";
+                possibilityRangeTitleStr = "【中等可能性区间 - 关键耕耘期】";
+            } else if (totalScore >= 100) {
+                compatibilityLevel = "较低可能性区间";
+                compatibilityTextStr = "较低可能性";
+                possibilityRangeTitleStr = "【较低可能性区间 - 自我提升与关系破冰期】";
+            } else {
+                compatibilityLevel = "低可能性区间";
+                compatibilityTextStr = "低可能性";
+                possibilityRangeTitleStr = "【低可能性区间 - 过度纠缠与抽离期】";
+            }
+            
+            // 更新UI
+            if (compatibilityPercent) compatibilityPercent.textContent = `${roundedCompositePercentage}%`;
+            if (compatibilityLabel) compatibilityLabel.textContent = '复合可能性';
+            
+            // 实心圆不需要更新圆环进度条
+            
+            // 更新复合可能性进度条（填充程度和复合可能性百分比保持一致）
+            // 注意：compatibility-progress-fill 元素可能不存在，需要检查
+            if (compatibilityProgressFill) {
+                setTimeout(() => {
+                    compatibilityProgressFill.style.width = `${compositePercentage}%`;
+                }, 500);
+            }
+            
+            // 更新可能性区间小标题
+            possibilityRangeTitle.textContent = possibilityRangeTitleStr;
+            
+            // **重要：先保存测试结果到 localStorage，避免后续错误导致数据丢失**
+            // 优先使用SDK的token保存结果，如果没有则使用默认key
+            let token = null;
+            if (window.linkValidator && window.linkValidator.token) {
+                token = window.linkValidator.token;
+                // 使用token作为key的一部分
+                try {
+                    const storageKey = 'fsfh_test_result_' + token;
+                    const resultData = {
+                        answers: userAnswers,
+                        dimensionAverages: dimensionAverages,
+                        totalScore: totalScore,
+                        compositePercentage: roundedCompositePercentage,
+                        compatibilityLevel: compatibilityLevel,
+                        timestamp: new Date().getTime()
+                    };
+                    localStorage.setItem(storageKey, JSON.stringify(resultData));
+                    // 同时保存到默认key（向后兼容）
+                localStorage.setItem('testAnswers', JSON.stringify(userAnswers));
+                localStorage.setItem('testCompleted', 'true');
+            } catch (e) {
+                console.error('Failed to save test results:', e);
+                }
+            } else {
+                // 向后兼容：使用默认key
+                try {
+                    localStorage.setItem('testAnswers', JSON.stringify(userAnswers));
+                    localStorage.setItem('testCompleted', 'true');
+                } catch (e) {
+                    console.error('Failed to save test results:', e);
+                }
+            }
+            
+            // 调用测试完成API（单视角测试）
+            if (window.linkValidator) {
+                try {
+                    const resultData = {
+                        dimensionAverages: dimensionAverages,
+                        totalScore: totalScore,
+                        compositePercentage: roundedCompositePercentage,
+                        compatibilityLevel: compatibilityLevel,
+                        timestamp: new Date().getTime()
+                    };
+                    await window.linkValidator.completeTest(undefined, resultData);
+                    console.log('测试完成记录成功');
+                } catch (error) {
+                    console.error('记录测试完成失败:', error);
+                    // 测试完成失败，不影响显示结果，只记录错误
+                }
+            }
+            
+            // 更新详细分析
+            updateAnalysis(dimensionAverages, totalScore, compatibilityLevel, roundedCompositePercentage);
+            
+            // 更新图表（添加错误处理）
+            try {
+                if (window.radarChart) {
+                    updateChart(dimensionAverages);
+                } else {
+                    // 如果图表未初始化，尝试初始化
+                    const radarChartEl = document.getElementById('radarChart');
+                    if (radarChartEl) {
+                        initResultChart();
+                        updateChart(dimensionAverages);
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to update chart:', e);
+            }
+            
+            // 更新维度得分进度条 - 修改为使用维度总得分百分比
+            updateDimensionScoreBars(dimensionScores, dimensionCounts);
+            
+            // 更新结果解析中的状态解读和核心建议
+            updateResultExplanation(totalScore, compatibilityLevel);
+            
+            // 调用addPromotionLink确保推广链接显示（结果页使用report-footer容器）
+            setTimeout(function() {
+                if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                    PsyTestValidator.addPromotionLink();
+                }
+            }, 500);
+        }
+        
+        // 更新结果解析中的状态解读和核心建议
+        function updateResultExplanation(totalScore, compatibilityLevel) {
+            // 根据原始得分设置状态解读和核心建议
+            let statusText = "";
+            let adviceText = "";
+            
+            if (totalScore >= 200) {
+                // 高可能性区间
+                statusText = "你们目前处于一个非常有利的状态。情感基础深厚，核心矛盾已得到显著改善或本身就不严重，当前互动积极，且你个人状态良好。对方很可能也处于怀念和观望期，复合的窗口已经打开。";
+                adviceText = "抓住时机，自然升级关系。<br>1. 创造舒适感：维持当前轻松、积极的互动模式，不要施加压力。多进行愉快的线下见面或线上沟通，在自然氛围中重新点燃火花。<br>2. 展示改变：不经意地让对方看到你的成长和积极变化，尤其是针对导致分手问题的那些改变。行动远胜于语言。<br>3. 进行未来导向的沟通：在时机成熟时（例如一次非常愉快的约会后），可以坦诚地、不带指责地聊聊对感情的新的认知，以及对未来关系的设想。例如：'经过这段时间，我好像更懂得如何经营一段关系了。'观察对方的反应。<br>4. 谨慎推进：可以尝试进行一些轻微的肢体接触（如过马路时轻扶一下），或发出更明确的信号，观察对方的接受程度。避免立刻要求'我们和好吧'，而是让关系水到渠成。";
+            } 
+            else if (totalScore >= 150) {
+                // 中等可能性区间
+                statusText = "你们有一定的情感基础和联系，但存在明确需要解决的障碍。可能是矛盾尚未完全化解，或对方仍心存疑虑，或你的个人状态仍需调整。这是最需要策略和耐心的阶段。";
+                adviceText = "聚焦核心问题，重建信任与吸引力。<br>1. 分析短板：仔细查看四个部分中得分最低的部分，那就是你的主攻方向。<br>2. '朋友以上，恋人未满'策略：接受当前的身份，以朋友的方式相处，但展示出超越朋友的成熟、理解和吸引力。不要提感情，只分享积极的生活状态。<br>3. 耐心与一致性：你的改变和努力需要时间来被对方看到和相信。保持行为的稳定性，不要今天热情明天冷漠。让对方感觉到你是一个稳定、可靠、且变得更有魅力的人。<br>4. 避免'朋友区'陷阱：如果长时间停留在纯朋友状态，可能需要适度引入'嫉妒'或'稀缺性'（例如，偶尔展示自己社交生活的丰富，但不要伪造新恋情），以激发对方的危机感和重新审视。";
+            }
+            else if (totalScore >= 100) {
+                // 较低可能性区间
+                statusText = "复合面临较大挑战。可能是分手时的伤害较深、矛盾难以解决，或对方目前抵触情绪强烈。直接谈复合为时过早，强行推进只会推远对方。";
+                adviceText = "战略性后撤，以自我重建为核心。<br>1. 接受断联或极低频联系：如果对方需要空间，请给予尊重。断联（No Contact）不是惩罚对方，而是给你自己时间成长，并让负面情绪消退。<br>2. 全力自我提升：这是此阶段唯一且最重要的任务。聚焦于你的生活、事业、健康、情绪管理和兴趣爱好。你的改变必须是真实且深刻的。这不仅是为了复合，更是为了你自己。<br>3. 间接展示：通过社交平台（不发消极内容）或共同朋友，间接地让对方感知到你的积极变化。'他/她好像真的和以前不一样了'是此阶段你最希望对方产生的想法。<br>4. 破冰测试：在经过一段时间的自我提升和冷静期后（例如1-2个月），可以尝试进行一次轻松、低需求的破冰联系（例如，分享一个与感情无关的、对方可能感兴趣的信息或链接）。根据对方的反应决定下一步。";
+            }
+            else {
+                // 低可能性区间
+                statusText = "关系中存在严重问题（如原则性伤害、价值观根本对立）、或积怨已深、或对方已彻底放下。当前状态下，复合的可能性较低，大多数挽回行为都可能被视为纠缠。";
+                adviceText = "停止非理性操作，重建复合价值观。<br>1. 立即停止所有联系：这是对你自己的保护。持续的错误操作只会带来更多痛苦和失望。<br>2. 寻求专业帮助：如果感到极度痛苦、抑郁，无法正常生活，请务必寻求心理咨询师等专业人士的帮助。<br>3. 反思与学习：将这段关系视为人生的重要一课。分析哪里出了问题，自己在未来的关系中需要注意什么。在之前的行为中有哪些为双方造成了伤害。<br>4. 以新的视角出发：承认这段关系的结束，允许自己悲伤，最终的目的是建立自己有随时抽离的勇气，把自己的生活放在第一位，重建自我价值与吸引力。";
+            }
+            
+            statusInterpretation.textContent = statusText;
+            coreAdvice.innerHTML = adviceText; // 使用innerHTML以支持<br>标签
+        }
+        
+        // 更新维度得分进度条和分数文本 - 修改为使用维度平均分
+        function updateDimensionScoreBars(dimensionScores, dimensionCounts) {
+            // 计算每个维度的平均分（1-5分）
+            const interactionAverage = dimensionCounts.interaction > 0 ? (dimensionScores.interaction / dimensionCounts.interaction).toFixed(1) : 0;
+            const conflictAverage = dimensionCounts.conflict > 0 ? (dimensionScores.conflict / dimensionCounts.conflict).toFixed(1) : 0;
+            const foundationAverage = dimensionCounts.foundation > 0 ? (dimensionScores.foundation / dimensionCounts.foundation).toFixed(1) : 0;
+            const personalAverage = dimensionCounts.personal > 0 ? (dimensionScores.personal / dimensionCounts.personal).toFixed(1) : 0;
+            
+            // 更新分数文本显示
+            const interactionScoreText = document.getElementById('interaction-score-text');
+            const conflictScoreText = document.getElementById('conflict-score-text');
+            const foundationScoreText = document.getElementById('foundation-score-text');
+            const personalScoreText = document.getElementById('personal-score-text');
+            
+            if (interactionScoreText) interactionScoreText.textContent = `${interactionAverage} / 5.0`;
+            if (conflictScoreText) conflictScoreText.textContent = `${conflictAverage} / 5.0`;
+            if (foundationScoreText) foundationScoreText.textContent = `${foundationAverage} / 5.0`;
+            if (personalScoreText) personalScoreText.textContent = `${personalAverage} / 5.0`;
+            
+            // 计算每个维度的得分百分比（基于平均分，1-5分对应0-100%）
+            const interactionPercentValue = (parseFloat(interactionAverage) / 5) * 100;
+            const conflictPercentValue = (parseFloat(conflictAverage) / 5) * 100;
+            const foundationPercentValue = (parseFloat(foundationAverage) / 5) * 100;
+            const personalPercentValue = (parseFloat(personalAverage) / 5) * 100;
+            
+            // 获取进度条元素
+            const interactionBar = document.getElementById('interaction-score-bar');
+            const conflictBar = document.getElementById('conflict-score-bar');
+            const foundationBar = document.getElementById('foundation-score-bar');
+            const personalBar = document.getElementById('personal-score-bar');
+            
+            // 确保进度条元素存在
+            if (!interactionBar || !conflictBar || !foundationBar || !personalBar) {
+                console.error('Progress bars not found');
+                return;
+            }
+            
+            // 先重置为0，确保动画效果
+            interactionBar.style.width = '0%';
+            interactionBar.style.transition = 'none';
+            conflictBar.style.width = '0%';
+            conflictBar.style.transition = 'none';
+            foundationBar.style.width = '0%';
+            foundationBar.style.transition = 'none';
+            personalBar.style.width = '0%';
+            personalBar.style.transition = 'none';
+            
+            // 强制重绘
+            void interactionBar.offsetWidth;
+            void conflictBar.offsetWidth;
+            void foundationBar.offsetWidth;
+            void personalBar.offsetWidth;
+            
+            // 然后动画到目标值
+            setTimeout(() => {
+                interactionBar.style.transition = 'width 1s ease';
+                interactionBar.style.width = `${interactionPercentValue}%`;
+                
+                conflictBar.style.transition = 'width 1s ease';
+                conflictBar.style.width = `${conflictPercentValue}%`;
+                
+                foundationBar.style.transition = 'width 1s ease';
+                foundationBar.style.width = `${foundationPercentValue}%`;
+                
+                personalBar.style.transition = 'width 1s ease';
+                personalBar.style.width = `${personalPercentValue}%`;
+            }, 100);
+        }
+        
+        // 更新详细分析
+        function updateAnalysis(dimensionAverages, totalScore, compatibilityLevel, compositeScore) {
+            // 互动模式分析
+            let interactionAnalysis = "";
+            if (dimensionAverages.interaction >= 4) {
+                interactionAnalysis = "当前互动非常积极，对方对您仍有较强的好感和关注。你们的联系频率高，沟通质量好，对方在多种场合表现出对您的关心和好奇。这是一个非常有利的信号。";
+            } else if (dimensionAverages.interaction >= 3) {
+                interactionAnalysis = "当前互动处于中等水平。你们保持一定的联系，但可能不够深入或自然。对方对您仍有兴趣，但可能有所保留。需要创造更多积极、舒适的互动机会。";
+            } else {
+                interactionAnalysis = "当前互动较弱。可能存在断联或联系频率很低的情况。对方可能处于回避或抵触状态。此时不宜急于推进关系，而应先重建基本的舒适感和信任。";
+            }
+            document.getElementById('interaction-analysis').textContent = interactionAnalysis;
+            
+            // 矛盾解决分析
+            let conflictAnalysis = "";
+            if (dimensionAverages.conflict >= 4) {
+                conflictAnalysis = "矛盾性质较为温和，解决前景良好。分手原因可能是误会或外部压力，而非根本性冲突。双方对问题有共识，且已经在积极改变。复合后问题重现的可能性较低。";
+            } else if (dimensionAverages.conflict >= 3) {
+                conflictAnalysis = "矛盾性质中等，解决需要一定努力。可能存在沟通或性格摩擦问题，但并非不可调和。双方对问题有一定认知，但解决进展可能不够显著。需要更系统性地解决问题。";
+            } else {
+                conflictAnalysis = "矛盾性质较为严重，解决难度较大。可能存在原则性问题或长期积累的怨气。复合后问题重现的风险较高。需要深刻反思和实质性改变。";
+            }
+            document.getElementById('conflict-analysis').textContent = conflictAnalysis;
+            
+            // 情感基础分析
+            let foundationAnalysis = "";
+            if (dimensionAverages.foundation >= 4) {
+                foundationAnalysis = "情感基础非常深厚。你们有长期的积极关系历史，共同的珍贵回忆，以及良好的匹配度。这种深厚的情感连接是复合的重要基础，也是你们关系中的宝贵财富。";
+            } else if (dimensionAverages.foundation >= 3) {
+                foundationAnalysis = "情感基础中等。你们有一定积极的关系历史，但可能存在一些问题或不够深厚的部分。如果考虑复合，需要加强情感连接和共同建设。";
+            } else {
+                foundationAnalysis = "情感基础较弱。关系历史中可能存在较多问题或不够积极的部分。需要认真思考这种基础是否足以支撑未来的关系。";
+            }
+            document.getElementById('foundation-analysis').textContent = foundationAnalysis;
+            
+            // 个人状态分析
+            let personalAnalysis = "";
+            if (dimensionAverages.personal >= 4) {
+                personalAnalysis = "个人状态良好，复合动机健康。您已经建立了独立的生活，情绪稳定，且复合动机基于理性的爱而非依赖或占有。这是复合成功的重要保障。";
+            } else if (dimensionAverages.personal >= 3) {
+                personalAnalysis = "个人状态处于调整期，复合动机混合。您正在从分手中恢复，但可能仍有情感依赖。需要进一步明确复合动机，并加强自我建设。";
+            } else {
+                personalAnalysis = "个人状态需要关注，复合动机可能不够健康。您可能仍在深度痛苦中，或复合动机基于不甘心或依赖。建议先专注于自我疗愈和成长。";
+            }
+            document.getElementById('personal-analysis').textContent = personalAnalysis;
+            
+            // 综合建议
+            let overallAdvice = "";
+            if (totalScore >= 200) {
+                overallAdvice = "抓住时机，自然升级关系。维持当前轻松、积极的互动模式，不要施加压力。多进行愉快的线下见面或线上沟通，在自然氛围中重新点燃火花。不经意地让对方看到你的成长和积极变化，尤其是针对导致分手问题的那些改变。行动远胜于语言。在时机成熟时，可以坦诚地、不带指责地聊聊对感情的新的认知，以及对未来关系的设想。";
+            } else if (totalScore >= 150) {
+                overallAdvice = "聚焦核心问题，重建信任与吸引力。仔细查看四个部分中得分最低的部分，那就是你的主攻方向。接受当前的身份，以朋友的方式相处，但展示出超越朋友的成熟、理解和吸引力。不要提感情，只分享积极的生活状态。你的改变和努力需要时间来被对方看到和相信。保持行为的稳定性，不要今天热情明天冷漠。";
+            } else if (totalScore >= 100) {
+                overallAdvice = "战略性后撤，以自我重建为核心。如果对方需要空间，请给予尊重。断联不是惩罚对方，而是给你自己时间成长，并让负面情绪消退。全力自我提升，聚焦于你的生活、事业、健康、情绪管理和兴趣爱好。你的改变必须是真实且深刻的。这不仅是为了复合，更是为了你自己。";
+            } else {
+                overallAdvice = "停止非理性操作，重建复合价值观。立即停止所有联系，这是对你自己的保护。持续的错误操作只会带来更多痛苦和失望。如果感到极度痛苦、抑郁，无法正常生活，请务必寻求心理咨询师等专业人士的帮助。将这段关系视为人生的重要一课，分析哪里出了问题，自己在未来的关系中需要注意什么。";
+            }
+            document.getElementById('overall-advice').textContent = overallAdvice;
+        }
+        
+        // 初始化结果图表
+        function initResultChart() {
+            const radarChartEl = document.getElementById('radarChart');
+            if (!radarChartEl) {
+                return; // 元素不存在，直接返回
+            }
+            const ctx = radarChartEl.getContext('2d');
+            
+            window.radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['互动模式', '矛盾解决', '情感基础', '个人状态'],
+                    datasets: [{
+                        label: '您的得分',
+                        data: [0, 0, 0, 0],
+                        backgroundColor: 'rgba(135, 206, 250, 0.3)',
+                        borderColor: 'rgba(70, 130, 180, 0.8)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(70, 130, 180, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(70, 130, 180, 1)',
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 1,
+                            suggestedMax: 5,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 更新图表数据
+        function updateChart(dimensionAverages) {
+            if (!window.radarChart) {
+                return; // 图表未初始化，直接返回
+            }
+            window.radarChart.data.datasets[0].data = [
+                dimensionAverages.interaction,
+                dimensionAverages.conflict,
+                dimensionAverages.foundation,
+                dimensionAverages.personal
+            ];
+            
+            window.radarChart.update();
+        }
+        
+        // 重新测试
+        function restartTest() {
+            // 清除本地测试结果（用于重新测试）
+            if (window.linkValidator && typeof window.linkValidator.clearLocalResult === 'function') {
+                window.linkValidator.clearLocalResult();
+                console.log('已清除SDK本地测试结果');
+            }
+            
+            // 清除localStorage中的测试结果
+            try {
+                localStorage.removeItem('testAnswers');
+                localStorage.removeItem('testCompleted');
+                
+                // 如果使用了token保存，也清除
+                if (window.linkValidator && window.linkValidator.token) {
+                    const token = window.linkValidator.token;
+                    localStorage.removeItem('fsfh_test_result_' + token);
+                }
+                
+                console.log('已清除localStorage中的测试结果');
+            } catch (e) {
+                console.error('Failed to clear saved test results:', e);
+            }
+            
+            // 构建首页URL（需要包含token以便SDK验证）
+            const indexUrl = window.location.pathname;
+            const urlParams = new URLSearchParams();
+            
+            // 获取token和测试模式
+            const currentUrlParams = new URLSearchParams(window.location.search);
+            let token = currentUrlParams.get('token');
+            let isUnlimited = currentUrlParams.get('unlimited') === 'true';
+            
+            // 如果URL中没有token，尝试从SDK实例获取
+            if (!token && window.linkValidator && window.linkValidator.token) {
+                token = window.linkValidator.token;
+                isUnlimited = window.linkValidator.unlimited || false;
+            }
+            
+            // 如果有token，添加到URL参数
+            if (token) {
+                if (isUnlimited) {
+                    urlParams.set('unlimited', 'true');
+                }
+                urlParams.set('token', token);
+                // 添加restart参数，告诉首页这是重新测试
+                urlParams.set('restart', 'true');
+            }
+            
+            // 构建完整的URL
+            const queryString = urlParams.toString();
+            if (queryString) {
+                // 跳转到首页（带restart参数）
+                window.location.href = indexUrl + '?' + queryString;
+            } else {
+                // 如果没有token，使用原来的逻辑（向后兼容）
+            resultSection.classList.remove('active');
+            introSection.classList.add('active');
+            
+            // 隐藏header（首页不显示）
+            const headerEl = document.querySelector('.header');
+            if (headerEl) {
+                headerEl.style.display = 'none';
+            }
+            
+            // 重置数据
+            currentQuestionIndex = 0;
+            userAnswers.length = 0;
+            progressBar.style.width = '0%';
+            
+            // 隐藏进度条（首页不显示）
+            progressBarContainer.classList.remove('active');
+            
+            // 清除所有选项
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // 只禁用题目中的下一题按钮，不包括开始测试按钮
+            document.querySelectorAll('.question-section .btn-next').forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            // 重置维度得分进度条
+            document.querySelectorAll('.dimension-score-fill').forEach(bar => {
+                bar.style.width = '0%';
+            });
+            document.querySelectorAll('.dimension-fill').forEach(bar => {
+                bar.style.width = '0%';
+            });
+            
+            // 重置复合可能性进度条
+            if (compatibilityProgressFill) {
+            compatibilityProgressFill.style.width = '0%';
+            }
+            
+            // 确保开始测试按钮是可点击的
+            startTestBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

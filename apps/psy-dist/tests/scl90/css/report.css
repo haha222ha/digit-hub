@@ -1,0 +1,620 @@
+/**
+ * SCL-90 报告页面样式
+ * 完全独立的样式，不依赖任何外部框架
+ */
+
+/* 报告容器 */
+.report-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+  background: #f0f2f5;
+}
+
+/* 报告头部 */
+.report-header {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 24px;
+  margin-bottom: 24px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  margin-bottom: 16px;
+}
+
+.icon-heart {
+  font-size: 28px;
+  color: white;
+}
+
+.report-title {
+  font-size: 32px;
+  font-weight: 300;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.report-date {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* 总体评估结果 */
+.overall-result {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 400;
+  color: #1f2937;
+  text-align: center;
+  margin: 0 0 32px 0;
+}
+
+.overall-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 18px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.stat-value {
+  font-size: 64px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.stat-subtitle {
+  font-size: 16px;
+  color: #9ca3af;
+}
+
+.severity-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 80px;
+  color: white;
+  border-radius: 16px;
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.overall-interpretation {
+  text-align: center;
+  padding: 20px;
+  border-radius: 12px;
+  line-height: 1.6;
+}
+
+.overall-interpretation p {
+  margin: 0;
+  font-size: 16px;
+  color: #374151;
+}
+
+/* 健康综述 */
+.health-summary {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.health-summary-card {
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.health-summary-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.health-summary-icon {
+  width: 32px;
+  height: 32px;
+  background: #f59e0b;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  font-size: 16px;
+}
+
+.health-summary-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.health-summary-text {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #4b5563;
+}
+
+.health-summary-text p {
+  margin: 0 0 16px 0;
+}
+
+.health-summary-quote {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  font-style: italic;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.health-summary-info {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.health-summary-hotline {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.health-summary-hotline strong {
+  color: #374151;
+}
+
+.health-summary-footer {
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+  margin: 0;
+}
+
+/* 底部说明 */
+.report-footer-note {
+  text-align: center;
+  padding: 20px;
+  color: #6b7280;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+}
+
+.footer-note-time {
+  margin-bottom: 8px;
+}
+
+.footer-note-disclaimer {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #9ca3af;
+}
+
+/* 分析底部说明 */
+.analysis-footer-note {
+  margin-top: 24px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.overall-interpretation p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #374151;
+  margin: 0;
+}
+
+/* 因子维度详情 */
+.factors-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.factors-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.factor-card {
+  border: 2px solid;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.factor-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.factor-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  flex: 1;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+}
+
+.factor-score {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 16px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.factor-level {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: bold;
+  color: white;
+  white-space: nowrap;
+  min-width: 70px;
+  text-align: center;
+}
+
+/* 雷达图 */
+.radar-chart-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.radar-chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  overflow: auto;
+  min-height: 600px;
+}
+
+#radarChart {
+  max-width: 100%;
+  height: auto;
+  min-width: 600px;
+}
+
+@media (max-width: 768px) {
+  .radar-chart-container {
+    min-height: 550px;
+    padding: 10px 5px; /* 减少左右padding */
+  }
+  
+  #radarChart {
+    min-width: 0; /* 移除最小宽度限制 */
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+/* 详细因子分析 */
+.detailed-analysis {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.factor-details {
+  /* 详细分析内容样式 */
+}
+
+.factor-detail-card {
+  margin-bottom: 32px;
+  border: 1px solid;
+  border-radius: 16px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.01));
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.factor-detail-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.factor-detail-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.factor-detail-card p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* 特征和建议卡片 */
+.factor-detail-card > div > div {
+  min-height: 120px;
+}
+
+/* 底部操作区 */
+.report-footer {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.footer-button {
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.footer-button:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.footer-button.primary {
+  background: #1890ff;
+  border-color: #1890ff;
+  color: #fff;
+}
+
+.footer-button.primary:hover {
+  background: #40a9ff;
+  border-color: #40a9ff;
+}
+
+/* 加载提示 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1890ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .report-container {
+    padding: 12px;
+  }
+  
+  .report-header {
+    padding: 24px 16px;
+  }
+  
+  .report-title {
+    font-size: 24px;
+  }
+  
+  .header-icon {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .icon-heart {
+    font-size: 24px;
+  }
+  
+  .overall-stats {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .stat-value {
+    font-size: 56px;
+  }
+  
+  .severity-badge {
+    width: 140px;
+    height: 70px;
+    font-size: 28px;
+  }
+  
+  .factors-grid {
+    gap: 10px;
+  }
+  
+  .factor-card {
+    padding: 14px 16px;
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .factor-name {
+    font-size: 14px;
+    min-width: 100px;
+  }
+  
+  .factor-score {
+    font-size: 18px;
+    margin: 0 12px;
+    min-width: 50px;
+  }
+  
+  .factor-level {
+    font-size: 12px;
+    padding: 5px 12px;
+    min-width: 60px;
+  }
+  
+  .factor-detail-card {
+    padding: 16px;
+  }
+  
+  .factor-detail-card > div > div {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .detailed-analysis {
+    padding: 24px 16px;
+  }
+  
+  .report-footer {
+    flex-direction: column;
+  }
+  
+  .footer-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .report-title {
+    font-size: 20px;
+  }
+  
+  .section-title {
+    font-size: 20px;
+  }
+  
+  .factors-grid {
+    gap: 8px;
+  }
+  
+  .factor-card {
+    padding: 12px 14px;
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .factor-name {
+    font-size: 13px;
+    min-width: 80px;
+    flex: 1;
+  }
+  
+  .factor-score {
+    font-size: 16px;
+    margin: 0 8px;
+    min-width: 45px;
+  }
+  
+  .factor-level {
+    font-size: 11px;
+    padding: 4px 10px;
+    min-width: 55px;
+  }
+  
+  .radar-chart-section {
+    padding: 20px 12px; /* 减少section的padding */
+  }
+  
+  .radar-chart-container {
+    padding: 5px 2px; /* 进一步减少容器padding */
+    min-height: 500px;
+  }
+  
+  #radarChart {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0; /* 移除最小宽度限制 */
+    height: auto;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .report-container {
+    background: #fff;
+    padding: 0;
+  }
+  
+  .report-footer {
+    display: none;
+  }
+  
+  .loading-overlay {
+    display: none !important;
+  }
+}
+

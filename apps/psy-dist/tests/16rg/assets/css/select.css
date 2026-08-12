@@ -1,0 +1,314 @@
+/* 类型选择页专用样式 */
+
+/* 主容器 */
+.mbti16stage-questionnaire {
+    min-height: 100vh;
+    padding: 80px 20px 40px;
+    background: linear-gradient(135deg, #f5f7fa, #e8eaf0);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 背景光效 */
+.mbti16stage-questionnaire .glow-orbs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.mbti16stage-questionnaire .glow-orbs .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.25;
+    animation: float-orb 20s ease-in-out infinite;
+}
+
+.mbti16stage-questionnaire .glow-orbs .orb-1 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, #9b59b6 0%, transparent 70%);
+    top: -150px;
+    left: -150px;
+}
+
+.mbti16stage-questionnaire .glow-orbs .orb-2 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, #b07cc6 0%, transparent 70%);
+    bottom: -100px;
+    right: -100px;
+    animation-delay: 10s;
+}
+
+/* 类型选择容器 */
+.mbti16stage-questionnaire .type-selector-container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* 头部样式 */
+.mbti16stage-questionnaire .selector-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.mbti16stage-questionnaire .selector-header .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 100px;
+    color: #667eea;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.mbti16stage-questionnaire .selector-header .header-badge svg {
+    width: 16px;
+    height: 16px;
+}
+
+.mbti16stage-questionnaire .selector-header .header-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 12px;
+}
+
+.mbti16stage-questionnaire .selector-header .header-subtitle {
+    font-size: 16px;
+    color: #606266;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* 类型组网格 */
+.mbti16stage-questionnaire .type-groups-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+/* 类型组卡片 */
+.mbti16stage-questionnaire .type-group-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease-out;
+}
+
+.mbti16stage-questionnaire .type-group-card:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* 卡片头部 */
+.mbti16stage-questionnaire .type-group-card .group-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--group-color-light);
+}
+
+.mbti16stage-questionnaire .type-group-card .group-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: var(--group-color-light);
+    border-radius: 12px;
+}
+
+.mbti16stage-questionnaire .type-group-card .group-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--group-color);
+}
+
+.mbti16stage-questionnaire .type-group-card .group-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mbti16stage-questionnaire .type-group-card .group-info .group-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--group-color);
+}
+
+.mbti16stage-questionnaire .type-group-card .group-info .group-label {
+    font-size: 12px;
+    color: #909399;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 类型按钮列表 */
+.mbti16stage-questionnaire .type-group-card .group-types-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* 类型按钮 */
+.mbti16stage-questionnaire .type-group-card .type-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #f8f9fa;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+    text-align: left;
+    width: 100%;
+    font-family: inherit;
+}
+
+.mbti16stage-questionnaire .type-group-card .type-button .type-code {
+    font-size: 16px;
+    font-weight: 700;
+    color: #303133;
+    min-width: 52px;
+}
+
+.mbti16stage-questionnaire .type-group-card .type-button .type-archetype {
+    flex: 1;
+    font-size: 14px;
+    color: #606266;
+}
+
+.mbti16stage-questionnaire .type-group-card .type-button .type-arrow {
+    width: 18px;
+    height: 18px;
+    stroke: #c0c4cc;
+    transition: all 0.2s ease-out;
+    opacity: 0;
+    transform: translate(-4px);
+}
+
+.mbti16stage-questionnaire .type-group-card .type-button:hover {
+    background: var(--group-color-light);
+    border-color: var(--group-color);
+}
+
+.mbti16stage-questionnaire .type-group-card .type-button:hover .type-code {
+    color: var(--group-color);
+}
+
+.mbti16stage-questionnaire .type-group-card .type-button:hover .type-archetype {
+    color: #303133;
+}
+
+.mbti16stage-questionnaire .type-group-card .type-button:hover .type-arrow {
+    opacity: 1;
+    transform: translate(0);
+    stroke: var(--group-color);
+}
+
+.mbti16stage-questionnaire .type-group-card .type-button:active {
+    transform: scale(0.98);
+}
+
+/* 响应式设计 - 移动端 */
+@media (max-width: 768px) {
+    .mbti16stage-questionnaire {
+        padding: 16px 12px 100px;
+    }
+
+    .mbti16stage-questionnaire .selector-header {
+        margin-bottom: 28px;
+    }
+
+    .mbti16stage-questionnaire .selector-header .header-badge {
+        padding: 8px 16px;
+        font-size: 12px;
+        margin-bottom: 16px;
+    }
+
+    .mbti16stage-questionnaire .selector-header .header-title {
+        font-size: 24px;
+    }
+
+    .mbti16stage-questionnaire .selector-header .header-subtitle {
+        font-size: 14px;
+    }
+
+    .mbti16stage-questionnaire .type-groups-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .mbti16stage-questionnaire .type-group-card {
+        padding: 20px;
+    }
+
+    .mbti16stage-questionnaire .type-group-card .group-card-header {
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+    }
+
+    .mbti16stage-questionnaire .type-group-card .group-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .mbti16stage-questionnaire .type-group-card .group-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .mbti16stage-questionnaire .type-group-card .group-info .group-name {
+        font-size: 16px;
+    }
+
+    .mbti16stage-questionnaire .type-group-card .type-button {
+        padding: 12px 14px;
+    }
+
+    .mbti16stage-questionnaire .type-group-card .type-button .type-code {
+        font-size: 15px;
+        min-width: 48px;
+    }
+
+    .mbti16stage-questionnaire .type-group-card .type-button .type-archetype {
+        font-size: 13px;
+    }
+
+    .mbti16stage-questionnaire .type-group-card .type-button .type-arrow {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+/* 减少动画（无障碍） */
+@media (prefers-reduced-motion: reduce) {
+    .mbti16stage-questionnaire .glow-orbs .orb {
+        animation: none;
+    }
+
+    .mbti16stage-questionnaire .type-group-card .type-button .type-arrow {
+        transition: none;
+    }
+}
+

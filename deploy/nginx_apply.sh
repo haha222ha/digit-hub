@@ -3,6 +3,8 @@
 # Usage: sudo bash /opt/digit-hub/deploy/nginx_apply.sh
 set -euo pipefail
 
+PSY_DIST_ROOT="${PSY_DIST_ROOT:-/opt/digit-hub/apps/psy-dist}"
+PSY_DOMAIN="${PSY_DOMAIN:-psy.xhs365.cn}"
 WEB_ROOT="${WEB_ROOT:-/opt/digit-hub/apps/web}"
 ADMIN_DIR="${ADMIN_DIR:-/opt/digit-hub/apps/admin}"
 # 防止误设 ADMIN_DIR=.../index.html 导致 index.htmlindex.html
@@ -73,6 +75,39 @@ ADMIN_LOCATIONS='    location = /admin {
         default_type text/html;
         add_header Cache-Control "no-cache, must-revalidate";
     }'
+
+write_psy_dist_server() {
+  local outfile="${CONF_D}/psy.xhs365.cn.conf"
+  echo "==> write ${outfile} (psy-dist SPA + tests)"
+  cat > "${outfile}" <<NGX
+server {
+    listen 80;
+    server_name ${PSY_DOMAIN};
+
+    ${MARKER}
+
+${GZIP_DIRECTIVES}
+
+    root ${PSY_DIST_ROOT};
+    index index.html;
+
+    location / {
+        try_files \$uri \$uri/ /index.html;
+        add_header Cache-Control "no-cache, must-revalidate";
+    }
+
+    location ~ ^/test/([^/]+)/([^/]+)$ {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+${API_ASSETS_LOCATIONS}
+}
+NGX
+}
 
 write_web_server() {
   local outfile="$1"
@@ -234,6 +269,12 @@ write_rate_limit_zone
 
 echo "==> write ${CONF_D}/assess.xinxiang.conf (default_server :80)"
 write_web_server "${CONF_D}/assess.xinxiang.conf" "80 default_server" "_"
+
+if [[ -d "${PSY_DIST_ROOT}" && -f "${PSY_DIST_ROOT}/index.html" ]]; then
+  write_psy_dist_server
+else
+  echo "WARN: skip psy-dist nginx — missing ${PSY_DIST_ROOT}/index.html"
+fi
 
 SSL_CERT="/etc/letsencrypt/live/${MONITOR_DOMAIN}/fullchain.pem"
 SSL_KEY="/etc/letsencrypt/live/${MONITOR_DOMAIN}/privkey.pem"

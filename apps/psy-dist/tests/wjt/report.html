@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>我的工作性价比报告</title>
+
+  <!-- 引入安全工具库（必须在head中尽早加载） -->
+  <script src="/static/js/test-security.js"></script>
+
+  <style>
+    /* 页面禁用样式 */
+    body.page-disabled {
+      pointer-events: none;
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .error-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none; align-items: center; justify-content: center;
+      z-index: 10000; text-align: center; font-size: 16px;
+      color: #fff; padding: 20px; box-sizing: border-box;
+    }
+    .error-overlay p { margin: 0; line-height: 1.6; }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+      background: #f0eeea;
+      color: #1a1a1a;
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    nav {
+      padding: 18px 18px 14px;
+      background: #f0eeea;
+      position: sticky; top: 0; z-index: 50;
+      border-bottom: 1px solid #e4e1db;
+    }
+    .nav-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #1a1a1a;
+      letter-spacing: -0.01em;
+    }
+
+    .hero-card {
+      margin: 14px 14px 0;
+      border-radius: 24px;
+      background: linear-gradient(150deg, #ede9ff 0%, #fce7f3 55%, #fff3e0 100%);
+      padding: 24px 20px 22px;
+      position: relative; overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+      box-shadow: 0 2px 16px rgba(124,58,237,0.08), 0 0 0 1px rgba(124,58,237,0.06);
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute; top: -40px; right: -40px;
+      width: 180px; height: 180px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(167,139,250,0.2) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .hero-card::after {
+      content: '';
+      position: absolute; bottom: -30px; left: -20px;
+      width: 150px; height: 150px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(251,191,36,0.15) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 22px; position: relative; z-index: 1;
+    }
+    .hero-report-id {
+      font-size: 11px; color: #a78bfa;
+      font-family: 'Courier New', monospace; letter-spacing: 0.08em; font-weight: 700;
+    }
+    .hero-date { font-size: 11px; color: #bbb; }
+
+    .hero-icon-wrap {
+      display: flex; justify-content: center;
+      margin-bottom: 20px; position: relative; z-index: 1;
+    }
+    .hero-icon-bg {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: rgba(255,255,255,0.7);
+      border: 1.5px solid rgba(124,58,237,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 46px;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.1), 0 0 0 12px rgba(255,255,255,0.35);
+    }
+
+    .hero-grade-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 14px; margin-bottom: 16px; position: relative; z-index: 1;
+    }
+    .hero-level {
+      font-size: 18px; font-weight: 700;
+      color: #9ca3af;
+      letter-spacing: 0.02em;
+    }
+    .hero-divider {
+      width: 1.5px; height: 22px;
+      background: #d1d5db; border-radius: 1px;
+    }
+    .hero-name {
+      font-size: 32px; font-weight: 900; color: #1a1a1a;
+      letter-spacing: -0.01em;
+    }
+
+    .hero-tags {
+      display: flex; justify-content: center; gap: 8px;
+      flex-wrap: wrap; margin-bottom: 22px;
+      position: relative; z-index: 1;
+    }
+    .hero-tag {
+      font-size: 13px; font-weight: 600;
+      color: #7c3aed;
+      background: rgba(255,255,255,0.75);
+      border: 1px solid rgba(124,58,237,0.15);
+      padding: 6px 16px; border-radius: 50px;
+    }
+
+    .hero-progress { margin-bottom: 20px; position: relative; z-index: 1; }
+    .hero-progress-label {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 10px;
+    }
+    .hero-progress-key { font-size: 13px; color: #999; font-weight: 500; }
+    .hero-progress-val { font-size: 22px; font-weight: 900; color: #1a1a1a; }
+    .hero-progress-val span { font-size: 14px; color: #bbb; font-weight: 400; margin-left: 2px; }
+    .hero-bar-track {
+      height: 8px;
+      background: rgba(124,58,237,0.1);
+      border-radius: 4px; overflow: hidden;
+    }
+    .hero-bar-fill {
+      height: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, #7c3aed, #db2777, #f97316);
+      transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+    }
+    .hero-bar-ticks {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: #bbb; margin-top: 6px;
+    }
+
+    .hero-quote {
+      text-align: center;
+      font-size: 14px; color: #888;
+      font-style: italic; line-height: 1.6;
+      padding: 16px 4px 0;
+      position: relative; z-index: 1;
+      border-top: 1px solid rgba(124,58,237,0.1);
+    }
+
+    .quick-card {
+      margin: 12px 14px 0;
+      background: #fff; border-radius: 18px;
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+      overflow: hidden;
+      animation: fadeUp 0.5s ease 0.08s both;
+    }
+    .qr-item {
+      padding: 18px 10px; text-align: center;
+      border-right: 1px solid #f0ede8;
+    }
+    .qr-item:last-child { border-right: none; }
+    .qr-icon { font-size: 20px; margin-bottom: 6px; }
+    .qr-val { font-size: 18px; font-weight: 900; color: #1a1a1a; margin-bottom: 4px; }
+    .qr-key { font-size: 12px; color: #aaa; }
+
+    .dim-card {
+      margin: 12px 14px 0;
+      background: #fff; border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+      animation: fadeUp 0.5s ease 0.14s both;
+    }
+    .sec-title {
+      padding: 16px 18px 12px;
+      font-size: 12px; font-weight: 800; color: #bbb;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sec-title::after { content: ''; flex: 1; height: 1px; background: #f0ede8; }
+
+    .dim-row {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 16px 18px;
+      border-top: 1px solid #f5f2ee;
+    }
+    .dim-row-icon {
+      font-size: 22px; width: 48px; height: 48px;
+      background: #f5f4f0; border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .dim-row-body { flex: 1; min-width: 0; }
+    .dim-row-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .dim-row-name { font-size: 15px; font-weight: 800; color: #1a1a1a; }
+    .dim-chip {
+      font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+    }
+    .chip-green  { background: #f0fdf4; color: #16a34a; }
+    .chip-orange { background: #fff7ed; color: #ea580c; }
+    .chip-red    { background: #fef2f2; color: #dc2626; }
+    .chip-purple { background: #f3f0ff; color: #7c3aed; }
+    .chip-blue   { background: #eff6ff; color: #2563eb; }
+    .chip-yellow { background: #fefce8; color: #ca8a04; }
+    .dim-row-comment {
+      font-size: 13px; color: #777; line-height: 1.65; margin-bottom: 10px;
+    }
+    .dim-mini-bar { height: 4px; background: #f0ede8; border-radius: 2px; overflow: hidden; }
+    .dim-mini-fill { height: 100%; border-radius: 2px; }
+    .fill-green  { background: linear-gradient(90deg,#22c55e,#4ade80); }
+    .fill-orange { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+    .fill-red    { background: linear-gradient(90deg,#ef4444,#f87171); }
+    .fill-purple { background: linear-gradient(90deg,#7c3aed,#a78bfa); }
+    .fill-blue   { background: linear-gradient(90deg,#3b82f6,#60a5fa); }
+    .fill-yellow { background: linear-gradient(90deg,#eab308,#facc15); }
+
+    .advice-card {
+      margin: 12px 14px 0;
+      background: #fff; border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+      animation: fadeUp 0.5s ease 0.2s both;
+    }
+    .advice-head {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+    }
+    .advice-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: linear-gradient(135deg, #f3f0ff, #fce7f3);
+      display: flex; align-items: center; justify-content: center; font-size: 15px;
+    }
+    .advice-title { font-size: 15px; font-weight: 800; color: #7c3aed; }
+    .advice-body {
+      font-size: 14px; color: #555; line-height: 1.9;
+      background: #faf9f7; border-radius: 12px; padding: 14px 16px;
+      border-left: 3px solid #a78bfa;
+    }
+    .advice-body strong { color: #1a1a1a; }
+
+    .report-footer-card {
+      margin: 12px 14px 0;
+      background: #fff; border-radius: 18px;
+      padding: 16px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+      animation: fadeUp 0.5s ease 0.24s both;
+    }
+    .rf-title { font-size: 13px; font-weight: 800; color: #1a1a1a; }
+    .stamp {
+      width: 54px; height: 54px; border-radius: 50%;
+      border: 2px solid #16a34a;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transform: rotate(-12deg); flex-shrink: 0;
+    }
+    .stamp-emoji { font-size: 18px; line-height: 1; }
+    .stamp-text  { font-size: 8px; font-weight: 800; color: #16a34a; letter-spacing: 0.04em; margin-top: 2px; }
+
+    .action-wrap {
+      padding: 14px 14px 44px;
+      animation: fadeUp 0.5s ease 0.28s both;
+    }
+    .btn-retry {
+      width: 100%; background: #1a1a1a; color: #fff;
+      border: none; font-size: 17px; font-weight: 700;
+      padding: 18px; border-radius: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.14); transition: all 0.2s;
+      margin-bottom: 12px;
+    }
+    .btn-retry:active { transform: scale(0.98); }
+    .disclaimer {
+      text-align: center;
+      font-size: 11px;
+      color: #bbb;
+      line-height: 1.6;
+      padding: 0 8px;
+    }
+
+    /* 底部推广链接区域（SDK自动添加） */
+    .report-footer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-top: 32px;
+      padding: 24px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .report-footer #link-validator-promotion-link {
+      width: 100%;
+      text-align: center;
+      padding-top: 16px;
+      margin-top: 16px;
+      border-top: 1px solid #e5e7eb;
+      box-sizing: border-box;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="page-disabled">
+
+  <nav>
+    <div class="nav-title">我的工作性价比报告</div>
+  </nav>
+
+  <!-- 错误提示容器 -->
+  <div id="errorOverlay" class="error-overlay" style="display: none;">
+    <p id="errorMessage"></p>
+  </div>
+
+  <div id="reportContent"></div>
+
+  <div class="action-wrap">
+    <button class="btn-retry" id="btn-retry">🔄 重新测算</button>
+    <div class="disclaimer">
+      本报告仅供娱乐参考，不构成任何职业建议。<br>冲动是魔鬼，请理性对待测算结果。
+    </div>
+  </div>
+
+  <!-- 底部推广链接容器（SDK自动添加） -->
+  <footer class="report-footer"></footer>
+
+  <!-- 启用安全功能 -->
+  <script>
+    (function() {
+      function enableSecurity() {
+        if (typeof TestSecurity !== 'undefined') {
+          TestSecurity.enable();
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', enableSecurity);
+      } else {
+        enableSecurity();
+      }
+    })();
+  </script>
+
+  <!-- 引入验证SDK（必需） -->
+  <script src="/static/js/link-validator.js"></script>
+  <script>
+    // ====== 配置数据 ======
+    const PPP_TABLE = {
+      'CN': 4.19, 'US': 1.00, 'JP': 102.84, 'GB': 0.70, 'DE': 0.75,
+      'SG': 0.84, 'HK': 6.07, 'TW': 13.85, 'KR': 861.82, 'AU': 1.45,
+      'OTHER': 4.19
+    };
+
+    const COUNTRY_NAMES = {
+      'CN': '中国', 'US': '美国', 'JP': '日本', 'GB': '英国', 'DE': '德国',
+      'SG': '新加坡', 'HK': '香港', 'TW': '台湾', 'KR': '韩国', 'AU': '澳大利亚',
+      'OTHER': '其他地区'
+    };
+
+    const CITY_NAMES = {
+      '0.70': '一线城市', '0.80': '新一线城市', '1.00': '二线城市',
+      '1.10': '三线城市', '1.25': '四线城市', '1.40': '县城', '1.50': '乡镇'
+    };
+
+    const ENV_NAMES = {
+      '0.8': '偏僻工厂/户外', '0.9': '工厂/工地/户外', '1.0': '普通办公室', '1.1': 'CBD写字楼'
+    };
+
+    const INTENSITY_NAMES = {
+      '0.7': '非常轻松', '0.85': '较为轻松', '1.0': '正常强度',
+      '1.2': '较为繁忙', '1.5': '高压内卷'
+    };
+
+    const LEADERSHIP_NAMES = {
+      '0.7': '对我不爽', '0.9': '管理严格', '1.0': '中规中矩',
+      '1.1': '善解人意', '1.3': '我是嫡系'
+    };
+
+    const TEAMWORK_NAMES = {
+      '0.9': '都是傻逼', '1.0': '萍水相逢', '1.1': '和和睦睦', '1.2': '私交甚好'
+    };
+
+    const ATTRACTIVENESS_NAMES = {
+      '0.9': '几乎没有好看异性', '1.0': '不多不少', '1.1': '很多好看异性'
+    };
+
+    const SHUTTLE_NAMES = {
+      'none': '无班车', '0.9': '班车不便', '0.7': '便利班车', '0.5': '班车直达'
+    };
+
+    const CANTEEN_NAMES = {
+      'none': '无食堂', '0.95': '很难吃', '1.00': '食堂一般', '1.05': '食堂不错', '1.15': '食堂超赞'
+    };
+
+    const JOB_NAMES = {
+      'government': '政府/事业单位', 'state': '国企/大型企业', 'foreign': '外企/守法企业',
+      'private': '私企/狼性文化', 'dispatch': '劳务派遣/OD', 'freelance': '自由职业'
+    };
+
+    const DEGREE_NAMES = {
+      '0.8': '专科及以下', '1.0': '普通本科', '1.2': '重点本科', '1.4': '普通硕士',
+      '1.6': '重点硕士', '1.8': '普通博士', '2.0': '重点博士'
+    };
+
+    const YEARS_NAMES = {
+      '0': '应届生', '1': '1-3年', '2': '3-5年', '4': '5-8年',
+      '6': '8-10年', '10': '10-12年', '15': '12年以上'
+    };
+
+    const RATINGS = [
+      { max: 0.6, label: '惨绝人寰', color: '#dc2626', icon: '😱', quote: '每一天都是艰难的挑战。' },
+      { max: 1.0, label: '略惨', color: '#ea580c', icon: '😓', quote: '或许是通往更好未来的必经之路。' },
+      { max: 1.8, label: '一般', color: '#f97316', icon: '😐', quote: '平平淡淡，没有太多惊喜。' },
+      { max: 2.5, label: '还不错', color: '#3b82f6', icon: '😊', quote: '是一份令人满意的选择。' },
+      { max: 3.2, label: '很爽', color: '#16a34a', icon: '😄', quote: '几乎满足所有期望。' },
+      { max: 4.0, label: '爽到爆炸', color: '#7c3aed', icon: '🤩', quote: '既有挑战又有回报。' },
+      { max: Infinity, label: '人生巅峰', color: '#eab308', icon: '👑', quote: '这样的机会可遇而不可求！' }
+    ];
+
+    const COMMENTS = {
+      hometown: {
+        yes: '在家乡工作，让你既能追求事业，又能照顾家人，平衡感满满。家的温暖和熟悉的环境给你带来额外的安全感和幸福感。',
+        no: '要照顾好自己，按时吃饭休息，你一个人去得那么远。'
+      },
+      city: {
+        tier1: '虽然生活成本较高，但丰富的机会和广阔的平台能够助你更快成长。',
+        tier2: '生活节奏虽然没有一线城市那么快，但依然提供了不错的发展空间。这里的生活压力适中，让你能找到工作与生活之间的平衡。',
+        tier4: '你享受着低成本高质量的生活。虽然机会相对较少，但悠闲的生活节奏和较低的压力让你能更从容地面对人生。'
+      },
+      commute: {
+        short: '你的通勤时间很短，让你每天都能多出宝贵的时间用于自我提升或休息。',
+        medium: '你的通勤时间适中，不会让你感到太大压力，也可以利用这段时间听书或补觉。',
+        long: '你长时间的通勤占用了大量宝贵时间，会对身心健康造成一定影响，建议考虑搬家或换工作以改善。'
+      },
+      wfh: {
+        high: '你有大量居家办公的机会，大幅减轻了通勤负担，工作与生活的边界更加灵活自由。',
+        medium: '你的部分居家办公安排为你节省了不少通勤时间，是一个不错的平衡。'
+      },
+      shuttle: '公司提供的便利班车服务是一个不小的福利，让你的通勤更轻松愉快，有效节省了每日的时间成本。',
+      env: {
+        cbd: '在CBD的办公环境既专业又现代化，提供了良好的职业形象和便利的工作条件。',
+        factory: '在工厂/户外环境工作确实有些挑战，但也培养了你的坚韧品质和适应能力。',
+        normal: '你的工作环境舒适适中，能满足基本需求，为高效工作提供了足够的保障。'
+      },
+      leadership: {
+        excellent: '你享受着作为嫡系的优越待遇和发展机会，但也面临着更高的期望和责任。',
+        good: '你的领导能够理解你的工作状态并提供必要的支持，这在职场中非常难得。',
+        normal: '你和领导各司其职，这种关系虽然普通但稳定可靠。',
+        strict: '你领导的管理风格较为严格，这种严格虽然有时让人压力大，但也能促使你更加专业和自律。',
+        bad: '你与领导之间的关系有些紧张，这种情况下要学会保持情绪稳定，专注于工作本身，同时提升自己的沟通技巧。'
+      },
+      teamwork: {
+        excellent: '你与同事们建立了深厚的私人友谊，工作之余还能互相支持和陪伴，这种关系让职场生活更加充实和有意义。',
+        good: '团队氛围和谐友善，同事之间相互尊重和支持，这种积极的人际环境让工作过程更加愉快和高效。',
+        normal: '与同事们相处和平但不过分亲近，这种关系模式适合专注于工作的职场人士。',
+        bad: '同事关系略显紧张，这种环境虽然不太舒适，但也锻炼了你的独立工作能力和心理承受力。'
+      },
+      attractiveness: {
+        high: '赏心悦目的工作环境让每天上班都多了一份期待，心情愉悦自然效率也高。',
+        normal: '职场异性环境适中，不会分心也不会单调，刚刚好。',
+        low: '颜值资源匮乏，上班的动力少了一分，但也少了不少分心的机会。'
+      },
+      intensity: {
+        veryLow: '工作任务极少，节奏悠闲，你有大量时间可以自由支配，但长期如此也要注意保持成长动力。',
+        low: '工作节奏舒缓，压力不大，能够在完成任务的同时保持良好的生活状态。',
+        normal: '工作强度适中，任务量合理，是较为理想的工作节奏。',
+        high: '工作任务持续饱满，压力较大，注意合理安排休息，避免长期透支。',
+        veryHigh: '长期处于高强度工作状态，身心消耗极大。在拼搏的同时，务必关注自己的健康状况。'
+      },
+      hours: {
+        short: '你的工作时长适中，有足够的时间照顾个人生活，保持着良好的工作生活平衡。',
+        medium: '你的工作时间略长，但仍在可接受范围内。注意合理安排休息时间，避免长期疲劳。',
+        long: '你的每日工作时长过长，长期如此可能影响健康和生活质量。建议寻找方法提高效率或与上级商量调整工作安排。'
+      },
+      rest: {
+        good: '你有充足的休息和午休时间，这有助于恢复精力，提高下午的工作效率。',
+        bad: '你的休息时间较少，记得定期起身活动，防止久坐带来的健康问题。'
+      },
+      leave: {
+        good: '丰富的年假让你有充分的时间休整和旅行，这对维持长期工作动力非常重要。',
+        bad: '你的年假较少，可以考虑更有效地规划和利用这些宝贵的休假时间。'
+      },
+      degree: {
+        elitePhd: '顶尖院校博士学历是你职场最硬的底牌，为你打开了高端研究与核心岗位的大门。',
+        phd: '博士学历证明了你深厚的专业积累和研究能力，是许多高端岗位的敲门砖。',
+        eliteMaster: '名校硕士背景在就业市场具有明显优势，学历与平台的双重加持让你起点更高。',
+        master: '硕士学历在当今就业市场仍有一定优势，证明了你的学习能力和专业素养。',
+        eliteBachelor: '名校本科背景为你的职业发展奠定了良好基础，结合持续学习，发展空间广阔。',
+        bachelor: '本科学历为你的职业生涯奠定了坚实基础，结合实际经验，你能在各个领域找到发展机会。',
+        below: '学历虽然在某些领域可能面临挑战，但扎实的实践经验和专业技能同样能帮你赢得认可。'
+      },
+      years: {
+        fresh: '作为应届生，你充满朝气和学习热情，有无限的可能性去探索和成长。',
+        mid: '几年的工作经验让你更加了解行业和自己的优势，职业发展正处于上升期。',
+        senior: '多年的工作经验是你最宝贵的财富，让你在职场中更加从容和自信。'
+      },
+      job: {
+        government: '体制内的工作稳定性高，让你无需过多担忧失业风险，可以更从容地规划未来。',
+        private: '私企的工作虽然有一定风险，但也提供了更多成长和收入提升的机会。',
+        dispatch: '劳务派遣的工作灵活度高，但稳定性较低。在享受短期便利的同时，应积极规划长远职业发展路径。',
+        freelance: '自由职业提供了极高的灵活性和自主性，但也伴随着收入不稳定和福利缺失的风险。需要具备较强的自我管理和市场开拓能力。'
+      },
+      salary: {
+        high: '你的日薪处于较高水平，财务状况良好，能够满足日常生活和一定的休闲娱乐需求。',
+        medium: '你的日薪处于中等水平，足以应对基本生活需求，但可能需要更细致的预算规划。',
+        low: '你的日薪较低，可能需要精打细算来管理财务，同时积极寻找提升收入的机会。'
+      }
+    };
+
+    // ====== 计算逻辑 ======
+    function calculateResult(answers) {
+      const {
+        salary, country, workDaysPerWeek, workHours, commuteHours, restTime,
+        wfhDaysPerWeek, annualLeave, cityFactor, workEnvironment,
+        workIntensity, leadership, teamwork, attractiveness, homeTown,
+        hasShuttle, hasCanteen, jobStability, degreeType, workYears
+      } = answers;
+
+      const salaryNum = parseFloat(salary) * 10000;
+      const ppp = PPP_TABLE[country] || 4.19;
+      const paidSickLeave = 3;
+
+      const workDaysPerYear = Math.max(
+        52 * parseFloat(workDaysPerWeek) - (parseFloat(annualLeave) + 13 + 0.6 * paidSickLeave),
+        0
+      );
+
+      const dailySalaryPPP = (salaryNum * 4.19 / ppp) / workDaysPerYear;
+
+      const wfhRatio = parseFloat(workDaysPerWeek) > 0 ? parseFloat(wfhDaysPerWeek) / parseFloat(workDaysPerWeek) : 0;
+      const officeRatio = 1 - wfhRatio;
+      const shuttleFactor = hasShuttle === 'none' ? 1.0 : (parseFloat(hasShuttle) || 1.0);
+      const effectiveCommute = parseFloat(commuteHours) * officeRatio * shuttleFactor;
+
+      const canteenFactor = hasCanteen === 'none' ? 1.0 : (parseFloat(hasCanteen) || 1.0);
+      const comfortFactor = parseFloat(workEnvironment) * parseFloat(leadership) *
+                           parseFloat(teamwork) * parseFloat(cityFactor) *
+                           parseFloat(attractiveness) * canteenFactor;
+
+      let stabilityFactor;
+      const years = parseInt(workYears);
+      if (years === 0) {
+        const freshFactors = { government: 0.8, state: 0.9, foreign: 0.95, private: 1.0, dispatch: 1.1, freelance: 1.1 };
+        stabilityFactor = freshFactors[jobStability] || 1.0;
+      } else {
+        const expBonus = { 1: 1.5, 2: 2.2, 4: 2.7, 6: 3.2, 10: 3.6, 15: 3.9 };
+        const expFactors = { government: 0.2, state: 0.4, foreign: 0.8, private: 1.0, dispatch: 1.2, freelance: 1.2 };
+        const bonus = expBonus[years] || 1.5;
+        const mod = expFactors[jobStability] || 1.0;
+        stabilityFactor = 1 + (bonus - 1) * mod;
+      }
+
+      const actualDailyHours = parseFloat(workHours) + effectiveCommute - 0.5 * parseFloat(restTime);
+
+      const valueIndex = (dailySalaryPPP * comfortFactor) /
+                        (35 * actualDailyHours * parseFloat(degreeType) * stabilityFactor * parseFloat(workIntensity));
+
+      let rating = RATINGS[0];
+      for (const r of RATINGS) {
+        if (valueIndex < r.max) {
+          rating = r;
+          break;
+        }
+      }
+
+      const tags = [];
+      if (valueIndex >= 2.5) tags.push('💰 薪资给力');
+      if (parseFloat(leadership) >= 1.1) tags.push('👔 领导好');
+      if (parseFloat(teamwork) >= 1.1) tags.push('👥 氛围融洽');
+      if (parseFloat(workIntensity) <= 1.0) tags.push('🔥 强度适中');
+      if (effectiveCommute <= 0.5) tags.push('🚌 通勤轻松');
+      if (wfhRatio >= 0.4) tags.push('🏠 居家办公');
+
+      const barWidth = Math.min(valueIndex / 5 * 100, 100);
+
+      return {
+        valueIndex,
+        dailySalaryPPP,
+        workDaysPerYear,
+        actualDailyHours,
+        barWidth,
+        rating,
+        tags,
+        comments: generateComments(answers, valueIndex, dailySalaryPPP, effectiveCommute)
+      };
+    }
+
+    function generateComments(answers, valueIndex, dailySalary, commute) {
+      const comments = [];
+      const {
+        homeTown, cityFactor, commuteHours, wfhDaysPerWeek, hasShuttle, workEnvironment,
+        leadership, teamwork, attractiveness, workIntensity, workHours, restTime,
+        annualLeave, degreeType, workYears, jobStability, hasCanteen
+      } = answers;
+
+      comments.push({
+        icon: '🏠',
+        name: '家乡状态',
+        value: homeTown === 'yes' ? '在家乡' : '不在家乡',
+        comment: COMMENTS.hometown[homeTown === 'yes' ? 'yes' : 'no'],
+        type: homeTown === 'yes' ? 'green' : 'orange',
+        fill: homeTown === 'yes' ? 75 : 40
+      });
+
+      const cityLevel = parseFloat(cityFactor);
+      let cityComment = '', cityFill = 50, cityType = 'orange';
+      if (cityLevel <= 0.8) { cityComment = COMMENTS.city.tier1; cityFill = 30; cityType = 'orange'; }
+      else if (cityLevel <= 1.0) { cityComment = COMMENTS.city.tier2; cityFill = 55; cityType = 'green'; }
+      else { cityComment = COMMENTS.city.tier4; cityFill = 75; cityType = 'green'; }
+      comments.push({ icon: '🏙️', name: '城市系数', value: CITY_NAMES[cityFactor] || cityFactor, comment: cityComment, type: cityType, fill: cityFill });
+
+      const commuteNum = parseFloat(commuteHours);
+      let commuteType = 'green', commuteFill = 70;
+      if (commuteNum <= 0.5) { commuteType = 'green'; commuteFill = 80; }
+      else if (commuteNum <= 1.5) { commuteType = 'orange'; commuteFill = 55; }
+      else { commuteType = 'red'; commuteFill = 30; }
+      comments.push({ icon: '🚇', name: '通勤成本', value: `${commuteNum}小时`, comment: commuteComments(commuteNum, answers.wfhDaysPerWeek, answers.hasShuttle), type: commuteType, fill: commuteFill });
+
+      const wfhRatio = parseInt(wfhDaysPerWeek) / 5;
+      if (wfhRatio >= 0.4) {
+        comments.push({ icon: '🏠', name: '居家办公', value: `${wfhDaysPerWeek}天/周`, comment: COMMENTS.wfh.high, type: 'green', fill: 85 });
+      } else if (wfhRatio > 0) {
+        comments.push({ icon: '🏠', name: '居家办公', value: `${wfhDaysPerWeek}天/周`, comment: COMMENTS.wfh.medium, type: 'orange', fill: 50 });
+      }
+
+      const envNum = parseFloat(workEnvironment);
+      let envType = 'orange', envFill = 50;
+      if (envNum >= 1.0) { envType = 'green'; envFill = 75; }
+      else if (envNum >= 0.9) { envType = 'orange'; envFill = 55; }
+      else { envType = 'red'; envFill = 35; }
+      let envComment = COMMENTS.env.normal;
+      if (envNum >= 1.1) envComment = COMMENTS.env.cbd;
+      else if (envNum < 1.0) envComment = COMMENTS.env.factory;
+      comments.push({ icon: '🏢', name: '办公环境', value: ENV_NAMES[workEnvironment] || workEnvironment, comment: envComment, type: envType, fill: envFill });
+
+      const intNum = parseFloat(workIntensity);
+      let intComment = COMMENTS.intensity.normal;
+      let intType = 'green', intFill = 60;
+      if (intNum <= 0.7) { intComment = COMMENTS.intensity.veryLow; intFill = 90; }
+      else if (intNum <= 0.85) { intComment = COMMENTS.intensity.low; intFill = 75; }
+      else if (intNum >= 1.2) { intComment = intNum >= 1.5 ? COMMENTS.intensity.veryHigh : COMMENTS.intensity.high; intType = 'red'; intFill = 35; }
+      comments.push({ icon: '🔥', name: '工作强度', value: INTENSITY_NAMES[workIntensity] || workIntensity, comment: intComment, type: intType, fill: intFill });
+
+      const leadNum = parseFloat(leadership);
+      let leadComment = COMMENTS.leadership.normal;
+      let leadType = 'orange', leadFill = 50;
+      if (leadNum >= 1.1) { leadComment = leadNum >= 1.3 ? COMMENTS.leadership.excellent : COMMENTS.leadership.good; leadType = 'green'; leadFill = 80; }
+      else if (leadNum <= 0.7) { leadComment = COMMENTS.leadership.bad; leadType = 'red'; leadFill = 30; }
+      comments.push({ icon: '👔', name: '领导关系', value: LEADERSHIP_NAMES[leadership] || leadership, comment: leadComment, type: leadType, fill: leadFill });
+
+      const teamNum = parseFloat(teamwork);
+      let teamComment = COMMENTS.teamwork.normal;
+      let teamType = 'orange', teamFill = 55;
+      if (teamNum >= 1.1) { teamComment = teamNum >= 1.2 ? COMMENTS.teamwork.excellent : COMMENTS.teamwork.good; teamType = 'green'; teamFill = 80; }
+      else if (teamNum <= 0.9) { teamComment = COMMENTS.teamwork.bad; teamType = 'red'; teamFill = 35; }
+      comments.push({ icon: '👥', name: '同事关系', value: TEAMWORK_NAMES[teamwork] || teamwork, comment: teamComment, type: teamType, fill: teamFill });
+
+      comments.push({ icon: '💕', name: '异性环境', value: ATTRACTIVENESS_NAMES[attractiveness] || attractiveness, comment: COMMENTS.attractiveness[attractiveness] || '', type: parseFloat(attractiveness) >= 1.1 ? 'green' : 'orange', fill: parseFloat(attractiveness) >= 1.1 ? 75 : 50 });
+
+      const degNum = parseFloat(degreeType);
+      let degComment = COMMENTS.degree.bachelor;
+      let degType = 'purple', degFill = 50;
+      if (degNum >= 2.0) { degComment = COMMENTS.degree.elitePhd; degFill = 95; }
+      else if (degNum >= 1.8) { degComment = COMMENTS.degree.phd; degFill = 85; }
+      else if (degNum >= 1.6) { degComment = COMMENTS.degree.eliteMaster; degFill = 75; }
+      else if (degNum >= 1.4) { degComment = COMMENTS.degree.master; degFill = 65; }
+      else if (degNum >= 1.2) { degComment = COMMENTS.degree.eliteBachelor; degFill = 55; }
+      else if (degNum < 1.0) { degComment = COMMENTS.degree.below; degFill = 40; }
+      comments.push({ icon: '🎓', name: '学历背景', value: DEGREE_NAMES[degreeType] || degreeType, comment: degComment, type: degType, fill: degFill });
+
+      const years = parseInt(workYears);
+      let yearsComment = COMMENTS.years.fresh;
+      let yearsType = 'blue', yearsFill = 40;
+      if (years >= 5) { yearsComment = COMMENTS.years.senior; yearsFill = 85; }
+      else if (years >= 1) { yearsComment = COMMENTS.years.mid; yearsFill = 60; }
+      comments.push({ icon: '📈', name: '工作经验', value: YEARS_NAMES[workYears] || workYears, comment: yearsComment, type: yearsType, fill: yearsFill });
+
+      let advice = '';
+      if (valueIndex < 1.0) advice = `虽然目前的工作性价比较低，但这可能是积累经验的必经阶段。记住每份工作都有其价值，努力汲取经验，为下一步发展打好基础。`;
+      else if (valueIndex < 2.5) advice = `你的工作性价比处于中等水平，有优点也有不足。可以专注于现有优势，同时寻找提升不足方面的方法，让工作体验更加全面。`;
+      else advice = `恭喜你拥有高性价比的工作！这样的机会难得，要珍惜现在的环境，继续发挥自己的优势，享受工作带来的成就感和满足感。`;
+
+      return { details: comments, advice };
+    }
+
+    function commuteComments(hours, wfh, hasShuttle) {
+      let base = '';
+      if (hours <= 0.5) base = COMMENTS.commute.short;
+      else if (hours <= 1.5) base = COMMENTS.commute.medium;
+      else base = COMMENTS.commute.long;
+
+      const wfhRatio = parseInt(wfh) / 5;
+      if (wfhRatio >= 0.4) return base + ' ' + COMMENTS.wfh.high;
+      if (wfhRatio > 0) return base + ' ' + COMMENTS.wfh.medium;
+      if (hasShuttle && hasShuttle !== 'none' && parseFloat(hasShuttle) <= 0.7) return base + ' ' + COMMENTS.shuttle;
+      return base;
+    }
+
+    // ====== 渲染报告 ======
+    function renderReport(result, answers) {
+      const { valueIndex, dailySalaryPPP, workDaysPerYear, actualDailyHours, barWidth, rating, tags, comments } = result;
+
+      const today = new Date();
+      const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+      const reportId = `WJ-${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}-${Math.random().toString(36).substr(2,6).toUpperCase()}`;
+
+      let html = `
+        <div class="hero-card">
+          <div class="hero-meta">
+            <div class="hero-report-id">${reportId}</div>
+            <div class="hero-date">${dateStr}</div>
+          </div>
+          <div class="hero-icon-wrap">
+            <div class="hero-icon-bg">${rating.icon}</div>
+          </div>
+          <div class="hero-grade-row">
+            <div class="hero-level">${valueIndex < 1 ? '低性价比' : valueIndex < 2.5 ? '中等性价比' : '高性价比'}</div>
+            <div class="hero-divider"></div>
+            <div class="hero-name">${rating.label}</div>
+          </div>
+          <div class="hero-tags">
+            ${tags.length > 0 ? tags.map(t => `<div class="hero-tag">${t}</div>`).join('') : '<div class="hero-tag">继续努力</div>'}
+          </div>
+          <div class="hero-progress">
+            <div class="hero-progress-label">
+              <div class="hero-progress-key">性价比指数</div>
+              <div class="hero-progress-val">${valueIndex.toFixed(2)} <span>/ 5.0</span></div>
+            </div>
+            <div class="hero-bar-track">
+              <div class="hero-bar-fill" style="width:${barWidth}%"></div>
+            </div>
+            <div class="hero-bar-ticks">
+              <span>惨绝人寰</span><span>一般般</span><span>很爽</span><span>人生巅峰</span>
+            </div>
+          </div>
+          <div class="hero-quote">"${rating.quote}"</div>
+        </div>
+
+        <div class="quick-card">
+          <div class="qr-item">
+            <div class="qr-icon">💰</div>
+            <div class="qr-val">¥${Math.round(dailySalaryPPP)}</div>
+            <div class="qr-key">PPP日薪</div>
+          </div>
+          <div class="qr-item">
+            <div class="qr-icon">⏰</div>
+            <div class="qr-val">${actualDailyHours.toFixed(1)}h</div>
+            <div class="qr-key">每日消耗</div>
+          </div>
+          <div class="qr-item">
+            <div class="qr-icon">📅</div>
+            <div class="qr-val">${workDaysPerYear.toFixed(0)}天</div>
+            <div class="qr-key">年工作天数</div>
+          </div>
+        </div>
+
+        <div class="dim-card">
+          <div class="sec-title">维度详情</div>
+          ${comments.details.map(c => `
+            <div class="dim-row">
+              <div class="dim-row-icon">${c.icon}</div>
+              <div class="dim-row-body">
+                <div class="dim-row-top">
+                  <div class="dim-row-name">${c.name}</div>
+                  <div class="dim-chip chip-${c.type}">${c.value}</div>
+                </div>
+                <div class="dim-row-comment">${c.comment}</div>
+                <div class="dim-mini-bar"><div class="dim-mini-fill fill-${c.type}" style="width:${c.fill}%"></div></div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="advice-card">
+          <div class="advice-head">
+            <div class="advice-icon">✦</div>
+            <div class="advice-title">综合建议</div>
+          </div>
+          <div class="advice-body">
+            ${comments.advice}
+          </div>
+        </div>
+
+        <div class="report-footer-card">
+          <div>
+            <div class="rf-title">WORTHJOB · 工作性价比报告</div>
+          </div>
+          <div class="stamp">
+            <div class="stamp-emoji">✓</div>
+            <div class="stamp-text">VERIFIED</div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('reportContent').innerHTML = html;
+    }
+
+    // ====== 从多来源获取token ======
+    function getToken() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let token = urlParams.get('token');
+      if (!token && window.linkValidator && window.linkValidator.token) {
+        token = window.linkValidator.token;
+      }
+      if (!token) {
+        try {
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('wjt_result_')) {
+              token = key.replace('wjt_result_', '');
+              break;
+            }
+          }
+        } catch(e) {}
+      }
+      return token;
+    }
+
+    // ====== 获取测试结果 ======
+    function getTestResult() {
+      const token = getToken();
+      if (token) {
+        const storageKey = `wjt_result_${token}`;
+        const resultJson = localStorage.getItem(storageKey);
+        if (resultJson) {
+          try { return JSON.parse(resultJson); } catch(e) {}
+        }
+      }
+      // 兼容旧key
+      const oldJson = localStorage.getItem('worthjob_answers');
+      if (oldJson) {
+        try {
+          const answers = JSON.parse(oldJson);
+          return { answers };
+        } catch(e) {}
+      }
+      return null;
+    }
+
+    // ====== 重新测试 ======
+    document.getElementById('btn-retry').addEventListener('click', function() {
+      // 清除SDK本地结果
+      if (window.linkValidator && typeof window.linkValidator.clearLocalResult === 'function') {
+        window.linkValidator.clearLocalResult();
+      }
+      // 清除localStorage中的测试结果
+      const token = getToken();
+      if (token) {
+        localStorage.removeItem(`wjt_result_${token}`);
+      }
+      localStorage.removeItem('worthjob_answers');
+      // 清除答题进度
+      localStorage.removeItem('wjt_quiz_answers');
+      localStorage.removeItem('wjt_quiz_index');
+
+      // 构建index.html URL（带restart参数）
+      const urlParams = new URLSearchParams();
+      const currentUrlParams = new URLSearchParams(window.location.search);
+      let currentToken = currentUrlParams.get('token');
+      let isUnlimited = currentUrlParams.get('unlimited') === 'true';
+      if (!currentToken && window.linkValidator && window.linkValidator.token) {
+        currentToken = window.linkValidator.token;
+        isUnlimited = window.linkValidator.unlimited || false;
+      }
+      if (currentToken) {
+        if (isUnlimited) urlParams.set('unlimited', 'true');
+        urlParams.set('token', currentToken);
+        urlParams.set('restart', 'true');
+      }
+      const queryString = urlParams.toString();
+      const indexUrl = queryString ? `index.html?${queryString}` : 'index.html';
+      window.location.href = indexUrl;
+    });
+
+    // ====== SDK初始化 ======
+    let validatorInstance = null;
+
+    if (typeof PsyTestValidator !== 'undefined') {
+      PsyTestValidator.init('wjt', {
+        onSuccess: function(result, validator) {
+          console.log('SDK初始化成功:', result);
+          validatorInstance = validator;
+          window.linkValidator = validator;
+          document.body.classList.remove('page-disabled');
+          const errorOverlay = document.getElementById('errorOverlay');
+          if (errorOverlay) errorOverlay.style.display = 'none';
+
+          // 显示推广链接
+          setTimeout(() => {
+            if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+              PsyTestValidator.addPromotionLink();
+            }
+          }, 200);
+        },
+        onError: function(error) {
+          console.error('SDK初始化失败:', error);
+          if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+            validatorInstance = window.PsyTestValidator.getInstance();
+          }
+          if (validatorInstance) window.linkValidator = validatorInstance;
+          document.body.classList.remove('page-disabled');
+          const errorOverlay = document.getElementById('errorOverlay');
+          if (errorOverlay) errorOverlay.style.display = 'none';
+        },
+        onLoad: function(data) {
+          console.log('SDK加载完成:', data);
+          if (!validatorInstance) {
+            if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+              validatorInstance = window.PsyTestValidator.getInstance();
+            }
+            if (!validatorInstance && window.linkValidator) validatorInstance = window.linkValidator;
+          }
+          if (validatorInstance) window.linkValidator = validatorInstance;
+
+          // 显示推广链接
+          setTimeout(() => {
+            if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+              PsyTestValidator.addPromotionLink();
+            }
+          }, 200);
+
+          // 初始化报告
+          init();
+        }
+      });
+    } else {
+      console.error('验证SDK未加载');
+      document.body.classList.remove('page-disabled');
+      init();
+    }
+
+    // ====== 初始化 ======
+    function init() {
+      const savedResult = getTestResult();
+      if (!savedResult || !savedResult.answers) {
+        document.getElementById('reportContent').innerHTML = `
+          <div style="padding:40px 20px;text-align:center;">
+            <div style="font-size:48px;margin-bottom:16px;">🔍</div>
+            <div style="font-size:18px;font-weight:700;margin-bottom:8px;">暂无测试数据</div>
+            <div style="color:#aaa;font-size:14px;">请先完成测试</div>
+            <button onclick="window.location.href='quiz.html'" style="
+              margin-top:24px;
+              background:#1a1a1a;color:#fff;
+              border:none;padding:16px 32px;border-radius:12px;
+              font-size:16px;font-weight:700;cursor:pointer;
+            ">开始测试</button>
+          </div>
+        `;
+        return;
+      }
+
+      const answers = savedResult.answers;
+      const result = calculateResult(answers);
+      renderReport(result, answers);
+    }
+  </script>
+</body>
+</html>

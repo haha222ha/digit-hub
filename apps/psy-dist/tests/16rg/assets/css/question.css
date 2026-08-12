@@ -1,0 +1,838 @@
+/* ============================================
+   答题页专用样式
+   ============================================ */
+
+/* CSS变量 - 页面特定的光效颜色（主题颜色已在common.css中定义） */
+.mbti16stage-questionnaire {
+    --glow-color-1: #88619a;
+    --glow-color-2: #bca0ca;
+}
+
+/* 主容器 */
+.mbti16stage-questionnaire {
+    min-height: 100vh;
+    padding: 80px 20px 40px;
+    background: linear-gradient(135deg, #f5f7fa, #e8eaf0);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 背景光效 */
+.mbti16stage-questionnaire .glow-orbs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.mbti16stage-questionnaire .glow-orbs .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.25;
+    animation: float-orb 20s ease-in-out infinite;
+}
+
+.mbti16stage-questionnaire .glow-orbs .orb-1 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, var(--glow-color-1, #9b59b6) 0%, transparent 70%);
+    top: -150px;
+    left: -150px;
+}
+
+.mbti16stage-questionnaire .glow-orbs .orb-2 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, var(--glow-color-2, #b07cc6) 0%, transparent 70%);
+    bottom: -100px;
+    right: -100px;
+    animation-delay: 10s;
+}
+
+/* ============================================
+   第二步：答题容器和问题卡片基础样式
+   ============================================ */
+
+/* 答题容器 */
+.mbti16stage-questionnaire .questionnaire-container {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.mbti16stage-questionnaire .question-wrapper {
+    position: relative;
+}
+
+/* 问题卡片 */
+.mbti16stage-questionnaire .question-card {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+/* ============================================
+   第三步：卡片头部样式（类型徽章、更换按钮）
+   ============================================ */
+
+.mbti16stage-questionnaire .question-card .card-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 20px 28px;
+    background: linear-gradient(135deg, #fafbfc, #fff);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* 类型徽章 */
+.mbti16stage-questionnaire .question-card .card-header .type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--theme-primary, #88619a) 0%, var(--theme-light, #bca0ca) 100%);
+    color: #ffffff;
+}
+
+.mbti16stage-questionnaire .question-card .card-header .type-badge .badge-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.9;
+}
+
+.mbti16stage-questionnaire .question-card .card-header .type-badge .badge-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mbti16stage-questionnaire .question-card .card-header .type-badge .badge-info .type-code {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    line-height: 1;
+}
+
+.mbti16stage-questionnaire .question-card .card-header .type-badge .badge-info .type-name {
+    font-size: 12px;
+    opacity: 0.85;
+    line-height: 1;
+}
+
+/* 更换按钮 */
+.mbti16stage-questionnaire .question-card .card-header .change-type-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: #909399;
+    background: transparent;
+    border: 1px solid #e4e7ed;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+}
+
+.mbti16stage-questionnaire .question-card .card-header .change-type-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.mbti16stage-questionnaire .question-card .card-header .change-type-btn:hover {
+    background: #f5f7fa;
+    border-color: #c0c4cc;
+    color: #606266;
+}
+
+/* ============================================
+   第四步：进度部分样式（进度条、统计信息）
+   ============================================ */
+
+.mbti16stage-questionnaire .question-card .progress-section {
+    padding: 16px 28px 20px;
+    background: #fafbfc;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.mbti16stage-questionnaire .question-card .progress-section .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.mbti16stage-questionnaire .question-card .progress-section .progress-info .progress-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #606266;
+}
+
+.mbti16stage-questionnaire .question-card .progress-section .progress-info .progress-text svg {
+    width: 16px;
+    height: 16px;
+    stroke: #909399;
+}
+
+.mbti16stage-questionnaire .question-card .progress-section .progress-info .progress-text strong {
+    font-weight: 600;
+    color: var(--theme-primary, #88619a);
+}
+
+.mbti16stage-questionnaire .question-card .progress-section .progress-info .progress-stats {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    font-size: 14px;
+}
+
+.mbti16stage-questionnaire .question-card .progress-section .progress-info .progress-stats .stat-answered {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--theme-primary, #88619a);
+}
+
+.mbti16stage-questionnaire .question-card .progress-section .progress-info .progress-stats .stat-divider {
+    color: #c0c4cc;
+    margin: 0 2px;
+}
+
+.mbti16stage-questionnaire .question-card .progress-section .progress-info .progress-stats .stat-total {
+    color: #909399;
+}
+
+/* 进度条 */
+.mbti16stage-questionnaire .question-card .progress-section .progress-bar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mbti16stage-questionnaire .question-card .progress-section .progress-bar-wrapper .progress-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.mbti16stage-questionnaire .question-card .progress-section .progress-bar-wrapper .progress-bar-bg .progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease-out;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--theme-primary, #88619a) 0%, var(--theme-light, #bca0ca) 100%);
+}
+
+.mbti16stage-questionnaire .question-card .progress-section .progress-bar-wrapper .progress-percentage {
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: right;
+    color: var(--theme-primary, #88619a);
+}
+
+/* ============================================
+   第五步：卡片主体样式（题目内容、选项容器）
+   ============================================ */
+
+.mbti16stage-questionnaire .question-card .card-body {
+    padding: 32px 28px;
+}
+
+/* 题目内容 */
+.mbti16stage-questionnaire .question-card .card-body .question-content {
+    margin-bottom: 28px;
+    animation: fadeIn 0.25s ease-out;
+}
+
+.mbti16stage-questionnaire .question-card .card-body .question-content .question-number {
+    display: inline-block;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    background: rgba(136, 97, 154, 0.15);
+    color: var(--theme-primary, #88619a);
+}
+
+.mbti16stage-questionnaire .question-card .card-body .question-content .question-text {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.7;
+    color: #1a1a2e;
+    margin: 0;
+}
+
+/* 选项容器 */
+.mbti16stage-questionnaire .question-card .card-body .options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ============================================
+   第六步：选项卡片样式（选中状态、悬停效果）
+   ============================================ */
+
+.mbti16stage-questionnaire .question-card .card-body .option-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 16px 20px;
+    background: #f8f9fb;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+    text-align: left;
+}
+
+.mbti16stage-questionnaire .question-card .card-body .option-card .option-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #d0d5dd;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.2s ease-out;
+}
+
+.mbti16stage-questionnaire .question-card .card-body .option-card .option-indicator svg {
+    width: 14px;
+    height: 14px;
+    stroke: #fff;
+    display: none;
+}
+
+.mbti16stage-questionnaire .question-card .card-body .option-card .option-indicator .indicator-dot {
+    width: 8px;
+    height: 8px;
+    background: transparent;
+    border-radius: 50%;
+    transition: all 0.2s ease-out;
+}
+
+.mbti16stage-questionnaire .question-card .card-body .option-card .option-text {
+    font-size: 15px;
+    color: #303133;
+    flex: 1;
+}
+
+/* 悬停效果 */
+.mbti16stage-questionnaire .question-card .card-body .option-card:hover:not(.is-selected) {
+    background: #f0f2f5;
+    border-color: #e0e3e8;
+}
+
+.mbti16stage-questionnaire .question-card .card-body .option-card:hover:not(.is-selected) .option-indicator {
+    border-color: #a0a5ad;
+}
+
+.mbti16stage-questionnaire .question-card .card-body .option-card:hover:not(.is-selected) .option-indicator .indicator-dot {
+    background: #c0c4cc;
+}
+
+/* 选中状态 */
+.mbti16stage-questionnaire .question-card .card-body .option-card.is-selected {
+    background: linear-gradient(135deg, rgba(136, 97, 154, 0.15) 0%, rgba(188, 160, 202, 0.2) 100%);
+    border-color: var(--theme-primary, #88619a);
+}
+
+.mbti16stage-questionnaire .question-card .card-body .option-card.is-selected .option-indicator {
+    border-color: transparent;
+    background: var(--theme-primary, #88619a);
+}
+
+.mbti16stage-questionnaire .question-card .card-body .option-card.is-selected .option-indicator svg {
+    display: block;
+    animation: checkIn 0.2s ease-out;
+}
+
+.mbti16stage-questionnaire .question-card .card-body .option-card.is-selected .option-indicator .indicator-dot {
+    display: none;
+}
+
+.mbti16stage-questionnaire .question-card .card-body .option-card.is-selected .option-text {
+    font-weight: 500;
+}
+
+/* ============================================
+   第七步：卡片底部样式（导航按钮）
+   ============================================ */
+
+.mbti16stage-questionnaire .question-card .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 28px;
+    background: #fafbfc;
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.mbti16stage-questionnaire .question-card .card-footer .btn-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+    outline: none;
+}
+
+.mbti16stage-questionnaire .question-card .card-footer .btn-nav svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.mbti16stage-questionnaire .question-card .card-footer .btn-nav:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* 上一题按钮 */
+.mbti16stage-questionnaire .question-card .card-footer .btn-nav.btn-back {
+    background: #fff;
+    color: #606266;
+    border: 1px solid #e4e7ed;
+}
+
+.mbti16stage-questionnaire .question-card .card-footer .btn-nav.btn-back:not(:disabled):hover {
+    background: #f5f7fa;
+    border-color: #c0c4cc;
+    color: #303133;
+}
+
+/* 下一题和提交按钮 */
+.mbti16stage-questionnaire .question-card .card-footer .btn-nav.btn-next,
+.mbti16stage-questionnaire .question-card .card-footer .btn-nav.btn-submit {
+    color: #fff;
+    min-width: 120px;
+    background: linear-gradient(135deg, var(--theme-primary, #88619a) 0%, var(--theme-light, #bca0ca) 100%);
+    box-shadow: 0 2px 8px rgba(136, 97, 154, 0.4);
+}
+
+.mbti16stage-questionnaire .question-card .card-footer .btn-nav.btn-next:not(:disabled):hover,
+.mbti16stage-questionnaire .question-card .card-footer .btn-nav.btn-submit:not(:disabled):hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mbti16stage-questionnaire .question-card .card-footer .btn-nav.btn-next:not(:disabled):hover svg:not(.spin),
+.mbti16stage-questionnaire .question-card .card-footer .btn-nav.btn-submit:not(:disabled):hover svg:not(.spin) {
+    transform: translate(2px);
+}
+
+.mbti16stage-questionnaire .question-card .card-footer .btn-nav .spin {
+    animation: spin 1s linear infinite;
+}
+
+/* ============================================
+   第八步：未完成提示和题目导航网格样式
+   ============================================ */
+
+/* 未完成提示 */
+.mbti16stage-questionnaire .incomplete-alert {
+    margin-top: 20px;
+}
+
+.mbti16stage-questionnaire .incomplete-alert .alert-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 20px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 14px;
+}
+
+.mbti16stage-questionnaire .incomplete-alert .alert-content .alert-icon {
+    width: 20px;
+    height: 20px;
+    stroke: #f59e0b;
+    flex-shrink: 0;
+}
+
+.mbti16stage-questionnaire .incomplete-alert .alert-content .alert-text {
+    font-size: 14px;
+    color: #b45309;
+}
+
+.mbti16stage-questionnaire .incomplete-alert .alert-content .alert-text strong {
+    font-weight: 600;
+    color: #d97706;
+}
+
+/* 题目导航网格 */
+.mbti16stage-questionnaire .question-grid {
+    margin: 20px auto 0;
+    padding: 20px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.mbti16stage-questionnaire .question-grid .grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.mbti16stage-questionnaire .question-grid .grid-header .grid-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #303133;
+}
+
+.mbti16stage-questionnaire .question-grid .grid-header .grid-title svg {
+    width: 18px;
+    height: 18px;
+    stroke: #909399;
+}
+
+.mbti16stage-questionnaire .question-grid .grid-header .grid-legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.mbti16stage-questionnaire .question-grid .grid-header .grid-legend .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #909399;
+}
+
+.mbti16stage-questionnaire .question-grid .grid-header .grid-legend .legend-item .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.mbti16stage-questionnaire .question-grid .grid-header .grid-legend .legend-item .dot.answered {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.mbti16stage-questionnaire .question-grid .grid-header .grid-legend .legend-item .dot.current {
+    background: #303133;
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #303133;
+}
+
+.mbti16stage-questionnaire .question-grid .grid-header .grid-legend .legend-item .dot.unanswered {
+    background: #e4e7ed;
+}
+
+/* 网格内容 */
+.mbti16stage-questionnaire .question-grid .grid-content {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+}
+
+.mbti16stage-questionnaire .question-grid .grid-item {
+    position: relative;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e4e7ed;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    color: #909399;
+    transition: all 0.2s ease-out;
+    background: #fff;
+}
+
+.mbti16stage-questionnaire .question-grid .grid-item .grid-number {
+    position: relative;
+    z-index: 1;
+}
+
+.mbti16stage-questionnaire .question-grid .grid-item .check-icon {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 10px;
+    height: 10px;
+    stroke: currentColor;
+    opacity: 0.8;
+}
+
+.mbti16stage-questionnaire .question-grid .grid-item:hover:not(.active) {
+    border-color: #c0c4cc;
+    background: #f5f7fa;
+    color: #606266;
+}
+
+.mbti16stage-questionnaire .question-grid .grid-item.answered:not(.active) {
+    color: #fff;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.2) 100%);
+    border-color: rgba(102, 126, 234, 0.6);
+}
+
+.mbti16stage-questionnaire .question-grid .grid-item.active {
+    color: #fff;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--theme-primary, #88619a) 0%, var(--theme-light, #bca0ca) 100%);
+    border-color: var(--theme-primary, #88619a);
+}
+
+/* ============================================
+   第九步：响应式设计和动画效果
+   ============================================ */
+
+/* 响应式设计 - 移动端 */
+@media (max-width: 768px) {
+    .mbti16stage-questionnaire {
+        padding: 16px 12px 100px;
+    }
+
+    .mbti16stage-questionnaire .question-card {
+        border-radius: 18px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-header {
+        padding: 14px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-header .type-badge {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-header .type-badge .badge-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-header .type-badge .badge-info .type-code {
+        font-size: 14px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-header .type-badge .badge-info .type-name {
+        font-size: 11px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-header .change-type-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-header .change-type-btn svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    .mbti16stage-questionnaire .question-card .progress-section {
+        padding: 12px 16px 14px;
+    }
+
+    .mbti16stage-questionnaire .question-card .progress-section .progress-info {
+        margin-bottom: 10px;
+    }
+
+    .mbti16stage-questionnaire .question-card .progress-section .progress-info .progress-text {
+        font-size: 13px;
+    }
+
+    .mbti16stage-questionnaire .question-card .progress-section .progress-info .progress-text svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .mbti16stage-questionnaire .question-card .progress-section .progress-info .progress-stats .stat-answered {
+        font-size: 16px;
+    }
+
+    .mbti16stage-questionnaire .question-card .progress-section .progress-bar-wrapper {
+        gap: 10px;
+    }
+
+    .mbti16stage-questionnaire .question-card .progress-section .progress-bar-wrapper .progress-bar-bg {
+        height: 6px;
+    }
+
+    .mbti16stage-questionnaire .question-card .progress-section .progress-bar-wrapper .progress-percentage {
+        font-size: 12px;
+        min-width: 36px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-body {
+        padding: 20px 16px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-body .question-content {
+        margin-bottom: 20px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-body .question-content .question-number {
+        padding: 5px 12px;
+        font-size: 12px;
+        margin-bottom: 12px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-body .question-content .question-text {
+        font-size: 16px;
+        line-height: 1.65;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-body .options-container {
+        gap: 8px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-body .option-card {
+        padding: 14px 16px;
+        gap: 12px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-body .option-card .option-indicator {
+        width: 22px;
+        height: 22px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-body .option-card .option-indicator svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-body .option-card .option-text {
+        font-size: 14px;
+    }
+
+    /* 移动端底部按钮固定 */
+    .mbti16stage-questionnaire .question-card .card-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 12px 16px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 0;
+        z-index: 100;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-footer .btn-nav {
+        flex: 1;
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-footer .btn-nav svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .mbti16stage-questionnaire .question-card .card-footer .btn-nav.btn-next,
+    .mbti16stage-questionnaire .question-card .card-footer .btn-nav.btn-submit {
+        min-width: auto;
+        flex: 1;
+    }
+
+    .mbti16stage-questionnaire .incomplete-alert {
+        margin: 12px 16px 0;
+        position: fixed;
+        bottom: calc(60px + env(safe-area-inset-bottom));
+        left: 0;
+        right: 0;
+        z-index: 99;
+    }
+
+    .mbti16stage-questionnaire .incomplete-alert .alert-content {
+        padding: 12px 16px;
+        border-radius: 12px;
+    }
+
+    .mbti16stage-questionnaire .incomplete-alert .alert-content .alert-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .mbti16stage-questionnaire .incomplete-alert .alert-content .alert-text {
+        font-size: 13px;
+    }
+
+    .mbti16stage-questionnaire .question-grid {
+        margin-bottom: 80px;
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .mbti16stage-questionnaire .question-grid .grid-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .mbti16stage-questionnaire .question-grid .grid-header .grid-legend {
+        gap: 12px;
+    }
+
+    .mbti16stage-questionnaire .question-grid .grid-header .grid-legend .legend-item {
+        font-size: 11px;
+    }
+
+    .mbti16stage-questionnaire .question-grid .grid-content {
+        grid-template-columns: repeat(8, 1fr);
+        gap: 6px;
+    }
+
+    .mbti16stage-questionnaire .question-grid .grid-item {
+        font-size: 11px;
+        border-radius: 8px;
+    }
+
+    .mbti16stage-questionnaire .question-grid .grid-item .check-icon {
+        width: 8px;
+        height: 8px;
+        top: 2px;
+        right: 2px;
+    }
+}
+
+/* 无障碍支持 - 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+    .mbti16stage-questionnaire .question-content,
+    .mbti16stage-questionnaire .option-card .option-indicator svg {
+        animation: none;
+    }
+
+    .mbti16stage-questionnaire .btn-nav svg {
+        transition: none;
+    }
+}
+

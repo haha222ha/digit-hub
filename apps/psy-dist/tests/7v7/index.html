@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="七宗罪VS七美德测试：从14个维度观察欲望与美德倾向，生成人格光谱解读。">
+<title>七宗罪VS七美德测试 - 灵博测评</title>
+
+<!-- 安全工具库（本地开发环境自动禁用） -->
+<script src="/static/js/test-security.js"></script>
+<script>
+    if (typeof TestSecurity !== 'undefined') {
+        TestSecurity.enable();
+    }
+</script>
+
+<style>
+/* ===== 自托管子集字体（原 Google Fonts 同源字体，按页面用字裁切） ===== */
+@font-face{
+  font-family:"Noto Sans SC";
+  font-style:normal;
+  font-weight:100 900;
+  font-display:swap;
+  src:url(fonts/NotoSansSC-subset.woff2) format("woff2");
+}
+@font-face{
+  font-family:"Noto Serif SC";
+  font-style:normal;
+  font-weight:200 900;
+  font-display:swap;
+  src:url(fonts/NotoSerifSC-subset.woff2) format("woff2");
+}
+@font-face{
+  font-family:"ZCOOL XiaoWei";
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+  src:url(fonts/ZCOOLXiaoWei-subset.woff2) format("woff2");
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{
+  font-family:"Noto Sans SC",sans-serif;
+  min-height:100vh;color:#1c1416;
+  background:linear-gradient(165deg,#fff5f7 0%,#ffe8ee 45%,#f5d0d8 100%);
+}
+.page{display:none}
+.page.active{display:block}
+.container{max-width:390px;margin:0 auto;padding:0 20px 44px;position:relative}
+
+/* ===== 首页 ===== */
+.intro-page.active{
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -10%,#ffb3c1 0%,transparent 55%),
+    radial-gradient(ellipse 80% 50% at 100% 100%,#2a181c 0%,transparent 50%),
+    linear-gradient(165deg,#fff5f7 0%,#ffe8ee 45%,#f5d0d8 100%);
+  position:relative;
+}
+.intro-page.active::before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.35;z-index:0;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+}
+.intro-page .container{padding-top:28px;padding-bottom:40px;z-index:1}
+.brand{font-family:"ZCOOL XiaoWei","Noto Serif SC",serif;font-size:12px;letter-spacing:.22em;color:#9a4a56;text-align:center;margin-top:4px;opacity:.85}
+.hero{margin-top:32px;text-align:center}
+.hero h1{font-family:"Noto Serif SC",serif;font-size:36px;font-weight:900;line-height:1.25;letter-spacing:.04em}
+.hero h1 span{display:block;font-size:15px;font-weight:500;letter-spacing:.2em;color:#9a4a56;margin-bottom:12px;font-family:"Noto Sans SC",sans-serif}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:36px 0 10px;position:relative}
+.split::after{content:"";position:absolute;left:50%;top:8%;bottom:8%;width:1px;background:linear-gradient(180deg,transparent,#1c1416,transparent)}
+.half{padding:20px 10px;text-align:center}
+.half .k{font-size:12px;letter-spacing:.16em;opacity:.55;margin-bottom:6px}
+.half .v{font-family:"Noto Serif SC",serif;font-size:22px;font-weight:700}
+.half.sin .v{color:#1c1416}
+.half.vir .v{color:#c04558}
+.metas{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:24px 0 16px}
+.mcard{background:rgba(255,255,255,.7);padding:14px 6px;text-align:center;border:1px solid rgba(28,20,22,.06)}
+.mcard .lab{font-size:11px;color:#9a6a72;letter-spacing:.04em;margin-bottom:5px}
+.mcard .val{font-size:14px;font-weight:700;color:#1c1416;line-height:1.3}
+.copy{font-size:15px;line-height:1.85;color:#5a4048;text-align:justify;background:rgba(255,255,255,.55);padding:16px;border:1px solid rgba(28,20,22,.06)}
+.cta-wrap{margin-top:24px}
+.cta{
+  display:block;width:100%;padding:18px;border:none;border-radius:2px;
+  background:#1c1416;color:#fff5f7;font-size:17px;font-weight:700;letter-spacing:.16em;cursor:pointer;
+}
+.more{margin-top:20px;text-align:center}
+.more-label{color:#9a4a56;font-size:14px;font-weight:600;letter-spacing:.08em;padding:8px 12px}
+.more-label::after{content:" ∨";font-size:12px}
+.more-body{
+  margin-top:10px;text-align:left;font-size:14px;line-height:1.8;color:#5a4048;
+  background:rgba(255,255,255,.55);padding:16px;border:1px solid rgba(28,20,22,.06);
+}
+.notice{background:rgba(192,69,88,.07);padding:14px 16px;margin-top:20px;font-size:13px;line-height:1.75;color:#8a5a62}
+.notice b{color:#c04558;font-weight:700}
+
+/* ===== 答题页 ===== */
+.quiz-page.active{
+  min-height:100vh;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#fff8fa 0%,#ffeef2 100%);
+}
+.quiz-page .container{flex:1;padding-top:28px;width:100%}
+.prog{height:3px;background:rgba(28,20,22,.08);margin-bottom:10px}
+.prog i{display:block;height:100%;background:#c04558;transition:width .3s ease;width:0}
+.qmeta{display:flex;justify-content:space-between;font-size:12px;color:#9a6a72;margin-bottom:28px;letter-spacing:.08em}
+.qtext{font-family:"Noto Serif SC",serif;font-size:21px;font-weight:700;line-height:1.55;margin-bottom:32px;color:#1c1416}
+.scale-wrap{margin:12px 0}
+.scale-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 2px 12px;position:relative;
+}
+.scale-row::before{
+  content:"";position:absolute;left:10%;right:10%;top:50%;height:1px;
+  background:linear-gradient(90deg,rgba(28,20,22,.06),rgba(192,69,88,.25),rgba(28,20,22,.06));
+  transform:translateY(-50%);z-index:0;
+}
+.scale-circle{
+  position:relative;z-index:1;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border:none;background:transparent;padding:0;
+}
+.scale-circle .ring{
+  border-radius:50%;border:2px solid rgba(28,20,22,.22);background:rgba(255,255,255,.85);
+  transition:all .2s ease;box-shadow:0 2px 8px rgba(28,20,22,.04);
+}
+.scale-circle:nth-child(1) .ring,.scale-circle:nth-child(5) .ring{width:52px;height:52px}
+.scale-circle:nth-child(2) .ring,.scale-circle:nth-child(4) .ring{width:38px;height:38px}
+.scale-circle:nth-child(3) .ring{width:26px;height:26px}
+.scale-circle.on .ring{
+  border-color:#c04558;background:#c04558;
+  box-shadow:0 0 0 4px rgba(192,69,88,.16),0 4px 12px rgba(192,69,88,.25);
+}
+.scale-circle.option-locked{pointer-events:none}
+.scale-ends{display:flex;justify-content:space-between;font-size:12px;color:#9a6a72;padding:0 2px;letter-spacing:.04em}
+.scale-ends span:last-child{color:#c04558;font-weight:600}
+.choice-options{display:flex;flex-direction:column;gap:14px;margin-bottom:8px}
+.choice-btn{
+  padding:18px 18px;border:1.5px solid rgba(28,20,22,.1);background:rgba(255,255,255,.75);
+  font-size:16px;color:#1c1416;text-align:left;cursor:pointer;line-height:1.55;transition:all .2s;
+}
+.choice-btn.on{border-color:#c04558;background:rgba(192,69,88,.1);color:#c04558;font-weight:600}
+.choice-btn.option-locked{pointer-events:none}
+.nav{display:flex;gap:10px;margin-top:28px;padding-bottom:28px}
+.nav button{flex:1;padding:15px;border:none;font-size:15px;font-weight:600;cursor:pointer}
+.nav .back{background:transparent;border:1.5px solid rgba(28,20,22,.15)!important;color:#5a4048}
+.nav .next,.nav .submit{background:#1c1416;color:#fff}
+.nav .submit:disabled{opacity:.45;cursor:not-allowed}
+
+/* ===== 报告页 ===== */
+.result-page.active{
+  min-height:100vh;
+  background:#1c1416;color:#fff5f7;
+}
+.result-page .container{padding-top:32px;padding-bottom:52px}
+.result-page .brand{color:#e8a0ab}
+.rtitle{font-family:"Noto Serif SC",serif;font-size:16px;text-align:center;margin:24px 0 10px;letter-spacing:.12em;color:#e8a0ab}
+.rhero{text-align:center;margin-bottom:12px}
+.rhero h2{font-family:"Noto Serif SC",serif;font-size:28px;font-weight:900;line-height:1.35}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0}
+.card{padding:22px 12px;text-align:center;border:1px solid rgba(255,245,247,.18)}
+.card .lab{font-size:11px;letter-spacing:.14em;opacity:.55;margin-bottom:8px}
+.card .name{font-family:"Noto Serif SC",serif;font-size:28px;font-weight:900}
+.card .sc{font-size:14px;margin-top:6px;opacity:.65}
+.card.sin{background:rgba(255,255,255,.04)}
+.card.vir{background:rgba(192,69,88,.25);border-color:rgba(232,160,171,.35)}
+.card.vir .name{color:#ffb3c1}
+.easter{color:#ffb3c1;font-size:17px;font-weight:800;line-height:1.45;margin:16px auto 0;text-align:center}
+.bal{text-align:center;font-size:13px;letter-spacing:.08em;opacity:.65;margin:20px 0 28px}
+.sec{margin-top:8px;padding-top:22px;border-top:1px solid rgba(255,245,247,.12)}
+.sec h3{font-size:14px;letter-spacing:.14em;margin-bottom:6px;color:#e8a0ab}
+.sec .sub{font-size:13px;opacity:.45;margin-bottom:14px}
+.chart-wrap{width:100%;height:380px;margin:10px 0 8px}
+.chart-wrap canvas{width:100%!important;height:100%!important}
+.dim-group{font-size:15px;font-weight:800;letter-spacing:.08em;padding:14px 16px;margin-top:22px}
+.dim-group.sin{background:rgba(255,255,255,.05);color:#d4cfc8}
+.dim-group.vir{background:rgba(192,69,88,.18);color:#ffb3c1;margin-top:28px}
+.dim-row{padding:18px 0;border-bottom:1px solid rgba(255,245,247,.08)}
+.dim-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dim-name{font-size:17px;font-weight:700}
+.dim-score{font-size:22px;font-weight:800}
+.dim-row.sin .dim-score{color:#d4cfc8}
+.dim-row.vir .dim-score{color:#ffb3c1}
+.dim-bar{height:5px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-bottom:12px}
+.dim-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.dim-row.sin .dim-fill{background:#8a8680}
+.dim-row.vir .dim-fill{background:#c04558}
+.dim-desc{font-size:14px;color:rgba(255,245,247,.55);line-height:1.75}
+.note-text{font-size:14px;color:rgba(255,245,247,.55);line-height:1.85;margin-bottom:14px}
+.rbtns{display:flex;gap:10px;margin-top:28px}
+.rbtns button{flex:1;padding:16px;border:none;font-size:14px;font-weight:700;letter-spacing:.1em;cursor:pointer;background:#c04558;color:#fff}
+.notice-dark{
+  background:rgba(192,69,88,.14);padding:14px 16px;margin-top:24px;
+  font-size:13px;line-height:1.75;color:rgba(255,183,193,.85);
+}
+.notice-dark b{color:#ffb3c1;font-weight:700}
+
+body.page-disabled{
+  pointer-events:none;
+  opacity:.6;
+  cursor:not-allowed;
+}
+.welcome-footer{
+  display:block!important;
+  visibility:visible!important;
+  width:100%;
+  margin-top:20px;
+  text-align:center;
+}
+.welcome-footer #link-validator-promotion-link{
+  width:100%;
+  text-align:center;
+  padding-top:16px;
+  margin-top:16px;
+  border-top:1px solid rgba(28,20,22,.08);
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  box-sizing:border-box;
+}
+.report-footer{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:16px;
+  margin-top:28px;
+  width:100%;
+  box-sizing:border-box;
+}
+.report-footer button{
+  width:100%;
+  padding:16px;
+  border:none;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:.1em;
+  cursor:pointer;
+  background:#c04558;
+  color:#fff;
+}
+.report-footer .notice-dark{
+  width:100%;
+  margin-top:0;
+  box-sizing:border-box;
+}
+.report-footer #link-validator-promotion-link{
+  width:100%;
+  text-align:center;
+  padding-top:16px;
+  margin-top:0;
+  border-top:1px solid rgba(255,245,247,.12);
+  box-sizing:border-box;
+}
+
+@media(max-width:360px){
+  .hero h1{font-size:32px}
+  .chart-wrap{height:320px}
+}
+</style>
+</head>
+<body class="page-disabled">
+
+<!-- 首页 -->
+<div id="introPage" class="page intro-page active">
+  <div class="container">
+    <div class="brand">灵博测评</div>
+    <div class="hero">
+      <h1><span>SEVEN SINS × VIRTUES</span>七宗罪<br>VS<br>七美德</h1>
+    </div>
+    <div class="split">
+      <div class="half sin"><div class="k">欲望之侧</div><div class="v">七宗罪</div></div>
+      <div class="half vir"><div class="k">选择之侧</div><div class="v">七美德</div></div>
+    </div>
+    <div class="metas">
+      <div class="mcard"><div class="lab">测试题量</div><div class="val">35 题</div></div>
+      <div class="mcard"><div class="lab">完成时间</div><div class="val">约 5–7 分钟</div></div>
+      <div class="mcard"><div class="lab">结果展示</div><div class="val">14维光谱/解析</div></div>
+    </div>
+    <div class="copy">每个人心里都有两股力量：一股追逐欲望、保护自我，一股克制冲动、选择更长远的价值。它们并非简单的好与坏，而是你在不同处境下最容易调用的反应。</div>
+    <div class="cta-wrap">
+      <button class="cta" onclick="startTest()">开始测试</button>
+    </div>
+    <div class="more">
+      <div class="more-label">了解更多</div>
+      <div class="more-body">本测试从傲慢、嫉妒、暴怒、懒惰、贪婪、暴食、色欲，以及谦卑、仁爱、耐心、勤勉、慷慨、节制、贞洁 14 个维度出发，观察你的七宗罪与七美德倾向，并生成七对七人格光谱。</div>
+    </div>
+    <div class="notice welcome-footer"><b>说明：</b>结果用于自我探索，不作道德评判或心理诊断。</div>
+  </div>
+</div>
+
+<!-- 答题页 -->
+<div id="quizPage" class="page quiz-page">
+  <div class="container">
+    <div class="prog"><i id="progressFill"></i></div>
+    <div class="qmeta"><span id="qMetaLeft">QUESTION 1</span><span id="progressText">1 / 35</span></div>
+    <div class="qtext" id="questionText"></div>
+    <div id="optionsArea"></div>
+    <div class="nav">
+      <button class="back" id="prevBtn" onclick="prevQuestion()" style="display:none;">上一题</button>
+      <button class="submit" id="submitBtn" onclick="submitTest()" style="display:none;">查看结果</button>
+      <button class="next" id="nextBtn" onclick="nextQuestion()">下一题</button>
+    </div>
+  </div>
+</div>
+
+<!-- 报告页 -->
+<div id="resultPage" class="page result-page">
+  <div class="container">
+    <div class="brand">灵博测评</div>
+    <div class="rtitle">YOUR SPECTRUM</div>
+    <div class="rhero"><h2>你的七宗罪<br>VS 七美德结果</h2></div>
+
+    <div class="pair">
+      <div class="card sin">
+        <div class="lab">七宗罪之首</div>
+        <div class="name" id="topSinName">-</div>
+        <div class="sc" id="topSinScore"></div>
+      </div>
+      <div class="card vir">
+        <div class="lab">七美德之首</div>
+        <div class="name" id="topVirtueName">-</div>
+        <div class="sc" id="topVirtueScore"></div>
+      </div>
+    </div>
+
+    <div class="easter" id="easterEgg" style="display:none;">你已经解锁彩蛋，第八宗罪：虚伪。</div>
+    <div class="bal" id="balanceScoreText">美德—罪性平均分差值：0</div>
+
+    <div class="sec">
+      <h3>十四维人格雷达</h3>
+      <div class="sub">左侧七宗罪，右侧七美德。</div>
+      <div class="chart-wrap"><canvas id="radarCanvas"></canvas></div>
+    </div>
+
+    <div class="sec">
+      <h3>14维明细</h3>
+      <div id="dimensionList"></div>
+    </div>
+
+    <div class="sec">
+      <h3>结果怎么看</h3>
+      <div class="note-text">"七宗罪"是理解欲望与冲动的文化原型，不是临床人格标签。分数高，表示这类反应在相关处境中更容易被触发，不等于对人的定性。</div>
+      <div class="note-text">"七美德"也不是道德奖章。它更像一组可以调用的内在资源；真正重要的，是你能否看见冲动，并在需要时把选择权拿回来。</div>
+    </div>
+
+    <div class="report-footer">
+      <button type="button" onclick="restartTest()">重新测试</button>
+      <div class="notice-dark"><b>说明：</b>结果用于自我探索，不作道德评判或心理诊断。</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== 数据定义 ====================
+const RESULT_KEY = "sevenSinsVirtuesResultRoseV1";
+
+const sins = ["傲慢", "嫉妒", "暴怒", "懒惰", "贪婪", "暴食", "色欲"];
+const virtues = ["谦卑", "仁爱", "耐心", "勤勉", "慷慨", "节制", "贞洁"];
+const allDimensions = [...sins, ...virtues];
+
+// 雷达图维度顺序（从顶部顺时针）
+const radarOrder = ["色欲", "嫉妒", "暴怒", "懒惰", "贪婪", "暴食", "傲慢", "谦卑", "仁爱", "耐心", "勤勉", "慷慨", "节制", "贞洁"];
+
+// 七宗罪找"之首"的排序（取最高分）
+const sinRankOrder = ["色欲", "嫉妒", "暴怒", "懒惰", "贪婪", "暴食", "傲慢"];
+// 七美德找"之首"的排序
+const virtueRankOrder = ["贞洁", "节制", "慷慨", "勤勉", "耐心", "仁爱", "谦卑"];
+
+// 颜色
+const SIN_COLOR = "#8a8680";
+const VIRTUE_COLOR = "#c04558";
+
+// 14维描述
+const descriptions = {
+    "傲慢": "傲慢以自我评价为中心，倾向于维护能力、地位与正确感。它能支撑自信，也会缩小接纳质疑和修正判断的空间。",
+    "嫉妒": "嫉妒源于比较造成的失衡，别人的优势容易被看成自身的不足。失落与竞争会随之放大，也会暴露内心真正渴望的目标。",
+    "暴怒": "暴怒是在边界受侵犯、计划受阻或尊严受损时迅速升高的攻击性反应。它推动反击，却容易让语气和行动跑在判断前面。",
+    "懒惰": "懒惰更接近对耗力、枯燥和不确定感的回避。拖延、搁置和维持现状，常被用来节省当下的心理能量。",
+    "贪婪": "贪婪把安全感寄托在更多资源、收益或选择上。满足感停留得很短，拥有之后仍会担心不够。",
+    "暴食": "暴食指享受越过满足点后仍难停下，范围包括食物、消费和娱乐。继续索取常用于填补无聊、压力或情绪空缺。",
+    "色欲": "色欲由身体吸引与暧昧张力驱动，关注靠近、占有和即时体验。吸引越强，关系边界与长期后果越容易被放到后面。",
+    "谦卑": "谦卑建立在准确的自我认识上，既承认能力，也承认局限。它为倾听、请教和改正留下位置，不靠贬低自己换取认可。",
+    "仁爱": "仁爱把关心从亲疏和比较中分离出来，愿意理解、照顾并成全他人。善意不以回报为前提，也不会把帮助变成控制。",
+    "耐心": "耐心让情绪和行动之间保留一段距离。等待、受阻或反复沟通时，仍能维持节奏，给事实和关系更多展开时间。",
+    "勤勉": "勤勉依靠稳定投入，而非一时兴致。面对重复、难点和漫长过程，重点落在持续推进与完成收尾。",
+    "慷慨": "慷慨愿意分享时间、资源、经验和机会，不把每次付出都换算成回报。给予源于充足感，同时保留合理边界。",
+    "节制": "节制辨认欲望的满足点，并在冲动与行动之间保留选择。它管理分量、频率和时机，让眼前享受不透支之后的生活。",
+    "贞洁": "贞洁关注亲密关系中的边界、承诺和自主。欲望可以存在，但靠近的方式要与双方意愿和关系责任相符。"
+};
+
+// 量表题选项
+const scaleOptions = [
+    { text: "完全不像我", score: 0 },
+    { text: "有点不像我", score: 1 },
+    { text: "说不准", score: 2 },
+    { text: "有点像我", score: 3 },
+    { text: "非常像我", score: 4 }
+];
+
+// ==================== 35道题目 ====================
+function makeScale(id, text, dimension) {
+    return { id, type: "scale", text, dimension, options: scaleOptions, maxScore: 4 };
+}
+function makeChoice(id, text, options) {
+    return { id, type: "choice", text, options: options.map(o => ({ text: o.text, scores: o.scores || {} })) };
+}
+
+const questions = [
+    makeScale(1, "聊到我擅长的事时，我会希望大家知道我比多数人更懂。", "傲慢"),
+    makeScale(2, "刷到同龄人过着我向往的生活，我会暂时不想看 Ta 的动态。", "嫉妒"),
+    makeScale(3, "别人当众拿我开过分的玩笑，我会马上反击回去。", "暴怒"),
+    makeScale(4, "没有明确截止时间的事，我通常要拖到有人催才开始。", "懒惰"),
+    makeScale(5, "买到很喜欢的东西后，我很快又会想要下一个。", "贪婪"),
+    makeScale(6, "情绪低落时，我会用一顿大餐让自己好受一点。", "暴食"),
+    makeScale(7, "只要一个人足够吸引我，合不合适可以以后再想。", "色欲"),
+    makeScale(8, "遇到完全不懂的话题，我可以坦然说自己不知道。", "谦卑"),
+    makeScale(9, "一个平时不算亲近的人被孤立时，我愿意主动和 Ta 说话。", "仁爱"),
+    makeScale(10, "喜欢的人迟迟不给答案，我能忍住不反复试探。", "耐心"),
+    makeScale(11, "遇到难点时，我会先拆成小步骤，不会直接搁置。", "勤勉"),
+    makeScale(12, "我愿意把真正有用的经验告诉可能超过我的人。", "慷慨"),
+    makeScale(13, "手头宽裕时，我也不会因为喜欢就一次买很多。", "节制"),
+    makeScale(14, "很心动时，我仍会先确认对方是否单身。", "贞洁"),
+    makeScale(15, "聚会里同龄人成了焦点，我会想找机会把注意力拉回自己。", "嫉妒"),
+    makeScale(16, "哪怕不喜欢对方，我也能承认 Ta 说得有道理。", "谦卑"),
+    makeScale(17, "房间或桌面已经很乱，只要还能用，我会继续放着。", "懒惰"),
+    makeScale(18, "朋友反复问我已经解释过的事，我仍能慢慢再说一遍。", "耐心"),
+    makeScale(19, "一件东西已经不用了，只要以后可能有价值，我仍不愿送人。", "贪婪"),
+    makeScale(20, "朋友说了一个我不理解的梦想，我也愿意认真听完。", "仁爱"),
+    makeScale(21, "聚餐已经吃得很撑，喜欢的菜上来时，我还会继续吃。", "暴食"),
+    makeScale(22, "没人检查的长期计划，我也能持续做下去。", "勤勉"),
+    makeScale(23, "被一个很有魅力的人主动示好时，即使没有长期打算，我也会享受暧昧。", "色欲"),
+    makeScale(24, "朋友为一件麻烦事来找我帮忙时，我愿意腾出自己的时间。", "慷慨"),
+    makeScale(25, "计划突然被人打乱时，我的语气会一下变冲。", "暴怒"),
+    makeScale(26, "突然很想做一个重大决定时，我会给自己一天冷静。", "节制"),
+    makeScale(27, "比我年纪小的人用教训的口吻说话，我会立刻不想听。", "傲慢"),
+    makeScale(28, "关系没有说清楚前，我不会用亲密换取确定感。", "贞洁"),
+    makeChoice(29, "你和几个人一起完成一件事，最后大家只夸了你：", [
+        { text: "先收下这份认可。", scores: { "傲慢": 3 } },
+        { text: "会说明还有别人出了力。", scores: { "谦卑": 2, "慷慨": 1 } }
+    ]),
+    makeChoice(30, "一个和你暗自较量很久的人突然陷入低谷：", [
+        { text: "我会有点轻松，不主动靠近。", scores: { "嫉妒": 2, "傲慢": 1 } },
+        { text: "比较归比较，还是会关心 Ta。", scores: { "仁爱": 2, "谦卑": 1 } }
+    ]),
+    makeChoice(31, "排队很久，有人直接插到你前面：", [
+        { text: "当场拦住，起冲突也没关系。", scores: { "暴怒": 3 } },
+        { text: "先提醒，不听再找工作人员。", scores: { "耐心": 2, "节制": 1 } }
+    ]),
+    makeChoice(32, "你学一项新技能，练习开始变得枯燥：", [
+        { text: "先停一阵，等兴趣回来。", scores: { "懒惰": 3 } },
+        { text: "降低目标，每天仍练一点。", scores: { "勤勉": 2, "耐心": 1 } }
+    ]),
+    makeChoice(33, "抽奖多得到一份限量周边，旁边有人一直没抽到：", [
+        { text: "先留着，以后可能更值钱。", scores: { "贪婪": 2, "嫉妒": 1 } },
+        { text: "按原价让给一直想要的人。", scores: { "慷慨": 2, "仁爱": 1 } }
+    ]),
+    makeChoice(34, "朋友临时约你通宵玩，但你明天已经有安排：", [
+        { text: "难得尽兴，明天的安排再调整。", scores: { "暴食": 2, "懒惰": 1 } },
+        { text: "玩一会儿，按原定时间离开。", scores: { "节制": 2, "勤勉": 1 } }
+    ]),
+    makeChoice(35, "已经有稳定关系，又遇到一个更让你心动的人：", [
+        { text: "先保持联系，看心动能持续多久。", scores: { "色欲": 3 } },
+        { text: "先拉开距离，不让关系继续升温。", scores: { "贞洁": 2, "耐心": 1 } }
+    ])
+];
+
+// ==================== 页面状态 ====================
+let currentIndex = 0;
+let answers = {};
+let optionLocked = false;
+let advanceTimer = null;
+
+// ==================== SDK helpers ====================
+function getStorageKey(token) {
+    return 'test_result_' + (token || (window.linkValidator && window.linkValidator.token) || 'local');
+}
+
+function addPromotionLinkDelayed() {
+    setTimeout(function () {
+        if (
+            window.PsyTestValidator &&
+            typeof window.PsyTestValidator.addPromotionLink === 'function'
+        ) {
+            window.PsyTestValidator.addPromotionLink();
+        }
+    }, 200);
+}
+
+async function waitForValidator() {
+    let waitCount = 0;
+    while (!window.linkValidator && waitCount < 30) {
+        await new Promise(function (resolve) {
+            setTimeout(resolve, 100);
+        });
+        waitCount++;
+        if (
+            waitCount % 10 === 0 &&
+            window.PsyTestValidator &&
+            typeof window.PsyTestValidator.getInstance === 'function'
+        ) {
+            const instance = window.PsyTestValidator.getInstance();
+            if (instance) {
+                window.linkValidator = instance;
+                break;
+            }
+        }
+    }
+    return window.linkValidator;
+}
+
+async function validateAndStartSdk() {
+    const validator = await waitForValidator();
+    if (!validator) {
+        alert('验证SDK未初始化，无法开始测试。请刷新页面重试。');
+        return false;
+    }
+
+    let isValid = false;
+    if (typeof validator.validateForUserAction === 'function') {
+        try {
+            isValid = await validator.validateForUserAction();
+            if (!isValid || validator.valid === false) {
+                return false;
+            }
+        } catch (error) {
+            console.error('链接验证失败:', error);
+            validator.valid = false;
+            return false;
+        }
+    } else {
+        if (validator.valid === false) {
+            alert(validator.validationError || '测试链接无效，请检查链接是否正确');
+            return false;
+        }
+        isValid = validator.valid !== false;
+    }
+
+    if (!isValid || validator.valid === false) {
+        return false;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isRestart = urlParams.get('restart') === 'true';
+    if (!isRestart && !window.__7v7_test_started) {
+        try {
+            window.__7v7_test_started = true;
+            await validator.startTest();
+            console.log('测试开始记录成功');
+        } catch (error) {
+            console.error('记录测试开始失败:', error);
+            window.__7v7_test_started = false;
+            return false;
+        }
+    } else if (isRestart) {
+        console.log('重新测试模式，跳过startTest()调用，避免重复扣除次数');
+        window.__7v7_test_started = false;
+        window.__7v7_test_completed = false;
+    }
+
+    return true;
+}
+
+function buildResultPayload(result) {
+    return {
+        version: 1,
+        dimensionScores: result.dimensionScores,
+        virtueAvg: result.virtueAvg,
+        sinAvg: result.sinAvg,
+        balanceScore: result.balanceScore,
+        topVirtue: result.topVirtue,
+        topSin: result.topSin,
+        isEasterEgg: result.isEasterEgg,
+        scoringVersion: result.scoringVersion,
+        answers: result.answers || {}
+    };
+}
+
+function restoreResultFromStorage() {
+    const token =
+        (window.linkValidator && window.linkValidator.token) ||
+        new URLSearchParams(window.location.search).get('token');
+    if (!token) {
+        return false;
+    }
+    try {
+        const raw = localStorage.getItem(getStorageKey(token));
+        if (!raw) {
+            return false;
+        }
+        const saved = JSON.parse(raw);
+        const result = saved.result || saved;
+        if (!result || !result.dimensionScores) {
+            return false;
+        }
+        window.__7v7_test_completed = true;
+        showPage('resultPage');
+        prepareResult(result);
+        return true;
+    } catch (error) {
+        console.error('恢复本地结果失败:', error);
+        return false;
+    }
+}
+window.restore7v7Result = restoreResultFromStorage;
+
+async function persistAndComplete(payload) {
+    let token = null;
+    if (window.linkValidator && window.linkValidator.token) {
+        token = window.linkValidator.token;
+    } else {
+        token = new URLSearchParams(window.location.search).get('token') || ('local_' + Date.now());
+    }
+
+    try {
+        localStorage.setItem(getStorageKey(token), JSON.stringify({
+            token: token,
+            result: payload,
+            timestamp: new Date().toISOString()
+        }));
+        localStorage.setItem(RESULT_KEY, JSON.stringify(payload));
+    } catch (error) {
+        console.error('保存到localStorage失败:', error);
+    }
+
+    if (window.linkValidator && !window.__7v7_test_completed) {
+        try {
+            window.__7v7_test_completed = true;
+            const completeResult = await window.linkValidator.completeTest(undefined, payload);
+            console.log('测试完成记录成功', completeResult);
+            if (completeResult && completeResult.success !== false) {
+                window.linkValidator.valid = true;
+            }
+        } catch (error) {
+            console.error('记录测试完成失败:', error);
+            if (window.linkValidator) {
+                window.linkValidator.valid = true;
+            }
+            window.__7v7_test_completed = false;
+        }
+    }
+}
+
+// ==================== 页面切换 ====================
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    if (pageId === 'introPage' || pageId === 'resultPage') {
+        addPromotionLinkDelayed();
+    }
+    window.scrollTo(0, 0);
+}
+
+// ==================== 介绍页逻辑 ====================
+function resetQuizState() {
+    clearAdvanceTimer();
+    currentIndex = 0;
+    answers = {};
+    optionLocked = false;
+}
+
+async function startTest() {
+    const ok = await validateAndStartSdk();
+    if (!ok) {
+        return;
+    }
+    resetQuizState();
+    showPage('quizPage');
+    renderQuestion();
+}
+
+// ==================== 答题页逻辑 ====================
+function renderQuestion() {
+    const q = questions[currentIndex];
+    const isLast = currentIndex === questions.length - 1;
+
+    // 进度条
+    const pct = Math.round((currentIndex + 1) / questions.length * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    // 题目文本
+    document.getElementById('questionText').textContent = q.text;
+
+    // 进度文字
+    document.getElementById('progressText').textContent = `${currentIndex + 1} / ${questions.length}`;
+    const qMeta = document.getElementById('qMetaLeft');
+    if (qMeta) qMeta.textContent = q.type === 'scale' ? `QUESTION ${currentIndex + 1}` : `CHOICE ${currentIndex + 1}`;
+
+    // 选项
+    const area = document.getElementById('optionsArea');
+    area.innerHTML = '';
+
+    if (q.type === 'scale') {
+        area.className = '';
+        const wrap = document.createElement('div');
+        wrap.className = 'scale-wrap';
+        const row = document.createElement('div');
+        row.className = 'scale-row';
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'scale-circle';
+            if (answers[q.id] && answers[q.id].selectedIndex === idx) btn.classList.add('on');
+            if (optionLocked) btn.classList.add('option-locked');
+            btn.setAttribute('aria-label', opt.text);
+            btn.setAttribute('data-index', idx);
+            btn.innerHTML = '<span class="ring"></span>';
+            btn.onclick = () => selectOption(idx);
+            row.appendChild(btn);
+        });
+        const ends = document.createElement('div');
+        ends.className = 'scale-ends';
+        ends.innerHTML = '<span>完全不像我</span><span>非常像我</span>';
+        wrap.appendChild(row);
+        wrap.appendChild(ends);
+        area.appendChild(wrap);
+    } else {
+        area.className = 'choice-options';
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'choice-btn';
+            if (answers[q.id] && answers[q.id].selectedIndex === idx) btn.classList.add('on');
+            if (optionLocked) btn.classList.add('option-locked');
+            btn.textContent = opt.text;
+            btn.setAttribute('data-index', idx);
+            btn.onclick = () => selectOption(idx);
+            area.appendChild(btn);
+        });
+    }
+
+    // 按钮状态
+    document.getElementById('prevBtn').style.display = currentIndex > 0 ? 'block' : 'none';
+    document.getElementById('nextBtn').style.display = !isLast ? 'block' : 'none';
+    document.getElementById('submitBtn').style.display = isLast ? 'block' : 'none';
+    document.getElementById('submitBtn').disabled = isLast && !answers[q.id];
+}
+
+function selectOption(idx) {
+    if (optionLocked) return;
+    const q = questions[currentIndex];
+    const opt = q.options[idx];
+    const score = q.type === 'scale' ? opt.score :
+        Math.max(...Object.values(opt.scores || {}).map(v => Number(v || 0)), 0);
+
+    answers = { ...answers, [q.id]: { score, selectedIndex: idx, type: q.type } };
+    renderQuestion();
+
+    if (currentIndex === questions.length - 1) {
+        document.getElementById('submitBtn').disabled = false;
+    } else {
+        optionLocked = true;
+        clearAdvanceTimer();
+        const delay = q.type === 'scale' ? 240 : 180;
+        advanceTimer = setTimeout(() => {
+            advanceTimer = null;
+            if (currentIndex === questions.indexOf(q)) {
+                gotoQuestion(currentIndex + 1);
+            } else {
+                optionLocked = false;
+            }
+        }, delay);
+    }
+}
+
+function clearAdvanceTimer() {
+    if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; }
+}
+
+function gotoQuestion(idx) {
+    clearAdvanceTimer();
+    if (idx < 0 || idx >= questions.length) return;
+    currentIndex = idx;
+    optionLocked = false;
+    renderQuestion();
+}
+
+function nextQuestion() {
+    clearAdvanceTimer();
+    const q = questions[currentIndex];
+    if (answers[q.id] != null) {
+        gotoQuestion(currentIndex + 1);
+    } else {
+        showToast('请选择一个选项');
+    }
+}
+
+function prevQuestion() {
+    gotoQuestion(currentIndex - 1);
+}
+
+async function submitTest() {
+    clearAdvanceTimer();
+    const q = questions[currentIndex];
+    if (answers[q.id] == null) {
+        showToast('请选择一个选项');
+        return;
+    }
+    // 检查所有题目是否已答
+    for (let i = 0; i < questions.length; i++) {
+        if (answers[questions[i].id] == null) {
+            showToast(`第 ${i + 1} 题未作答`);
+            gotoQuestion(i);
+            return;
+        }
+    }
+
+    const result = calculateResult();
+    const payload = buildResultPayload(result);
+    await persistAndComplete(payload);
+
+    showPage('resultPage');
+    prepareResult(payload);
+}
+
+// ==================== 评分逻辑（完整还原） ====================
+function clampScore(v) {
+    const n = Number(v);
+    return Number.isNaN(n) ? 0 : Math.max(0, Math.min(100, Math.round(n)));
+}
+
+function calculateResult() {
+    const rawScores = {};
+    const maxScores = {};
+    const counts = {};
+    allDimensions.forEach(d => { rawScores[d] = 0; maxScores[d] = 0; counts[d] = 0; });
+
+    questions.forEach(q => {
+        const r = answers[q.id];
+        if (q.type === 'scale') {
+            maxScores[q.dimension] += q.maxScore;
+            counts[q.dimension] += 1;
+            if (r) rawScores[q.dimension] += Number(r.score || 0);
+            return;
+        }
+        // 二选一：maxScore取该题所有选项在该维度的最高分
+        allDimensions.forEach(dim => {
+            const maxInDim = Math.max(...q.options.map(o => Number(o.scores[dim] || 0)));
+            maxScores[dim] += maxInDim;
+        });
+        const selected = r ? q.options[Number(r.selectedIndex)] : null;
+        if (selected) {
+            Object.keys(selected.scores || {}).forEach(dim => {
+                rawScores[dim] += Number(selected.scores[dim] || 0);
+                counts[dim] += 1;
+            });
+        }
+    });
+
+    // 各维度基础百分比分
+    const baseScores = {};
+    allDimensions.forEach(dim => {
+        const r = maxScores[dim] || 1;
+        baseScores[dim] = Math.round(rawScores[dim] / r * 100);
+    });
+
+    // 一致性校正（同维度量表题回答一致/矛盾时 ±1~2 分）
+    const finalScores = {};
+    allDimensions.forEach(dim => {
+        let adjustment = 0;
+        // 找该维度的量表题
+        const scaleQs = questions.filter(q => q.type === 'scale' && q.dimension === dim);
+        const scaleVals = scaleQs.map(q => {
+            const t = answers[q.id];
+            const opt = t ? q.options[Number(t.selectedIndex)] : null;
+            return opt ? Number(opt.score || 0) : 0;
+        });
+
+        if (scaleVals.length >= 2) {
+            // 是否有二选一也给了该维度正分
+            const choiceBoost = questions.some(q => {
+                if (q.type !== 'choice') return false;
+                const t = answers[q.id];
+                const opt = t ? q.options[Number(t.selectedIndex)] : null;
+                return opt && Number(opt.scores[dim] || 0) > 0;
+            });
+
+            const v0 = scaleVals[0], v1 = scaleVals[1];
+            if (v0 === v1 && v0 !== 2) {
+                const high = v0 > 2;
+                adjustment = (high === choiceBoost) ? (high ? 2 : -2) : (high ? -1 : 1);
+            } else if (Math.abs(v0 - v1) >= 3) {
+                const base = baseScores[dim];
+                if (base > 50) adjustment = -1;
+                else if (base < 50) adjustment = 1;
+            }
+        }
+
+        finalScores[dim] = Math.max(0, Math.min(100, baseScores[dim] + adjustment));
+    });
+
+    // 美德平均分 & 罪孽平均分
+    const virtueAvg = Math.round(virtues.reduce((s, v) => s + finalScores[v], 0) / virtues.length);
+    const sinAvg = Math.round(sins.reduce((s, v) => s + finalScores[v], 0) / sins.length);
+    const balanceScore = virtueAvg - sinAvg;
+
+    // 找七宗罪之首 & 七美德之首
+    const topSin = sinRankOrder.map(d => ({ name: d, score: finalScores[d] }))
+        .sort((a, b) => b.score - a.score)[0];
+    const topVirtue = virtueRankOrder.map(d => ({ name: d, score: finalScores[d] }))
+        .sort((a, b) => b.score - a.score)[0];
+
+    // 彩蛋：5个及以上罪孽维度达到100分
+    const isEasterEgg = sins.filter(d => clampScore(finalScores[d]) === 100).length >= 5;
+
+    return {
+        dimensionScores: finalScores,
+        rawScores,
+        maxScores,
+        counts,
+        virtueAvg,
+        sinAvg,
+        balanceScore,
+        topVirtue: isEasterEgg ? { ...topVirtue, name: "无" } : topVirtue,
+        topSin: isEasterEgg ? { ...topSin, name: "无" } : topSin,
+        isEasterEgg,
+        answers,
+        scoringVersion: "seven_sins_virtues_spectrum_v4",
+        scoringRule: '五点题按0-4分计入对应维度；二选一题按语义将3分分配给主维度或\u201c主维度＋关联维度\u201d。各维度按实际最高分换算后，再根据同维度回答的一致或矛盾程度进行±1至2分校正，最终保持在0-100分。',
+        createdAt: Date.now()
+    };
+}
+
+// ==================== 结果页逻辑 ====================
+function prepareResult(result) {
+    const scores = result.dimensionScores;
+
+    // 七宗罪之首
+    document.getElementById('topSinName').textContent = result.topSin.name;
+    document.getElementById('topSinScore').textContent = result.topSin.name !== "无" ? `${result.topSin.score}分` : '';
+
+    // 七美德之首
+    document.getElementById('topVirtueName').textContent = result.topVirtue.name;
+    document.getElementById('topVirtueScore').textContent = result.topVirtue.name !== "无" ? `${result.topVirtue.score}分` : '';
+
+    // 彩蛋
+    document.getElementById('easterEgg').style.display = result.isEasterEgg ? 'block' : 'none';
+
+    // 美德—罪性平均分差值
+    const b = result.balanceScore;
+    const bText = b > 0 ? `+${b}` : String(b);
+    document.getElementById('balanceScoreText').textContent = `美德—罪性平均分差值：${bText}`;
+
+    // 14维明细
+    const listEl = document.getElementById('dimensionList');
+    listEl.innerHTML = '';
+
+    const displayOrder = [...sins, ...virtues];
+    displayOrder.forEach((dim, idx) => {
+        const isVirtue = virtues.includes(dim);
+        const score = scores[dim];
+
+        // 分组标题
+        if (idx === 0) {
+            const title = document.createElement('div');
+            title.className = 'dim-group sin';
+            title.textContent = '七宗罪';
+            listEl.appendChild(title);
+        }
+        if (idx === sins.length) {
+            const title = document.createElement('div');
+            title.className = 'dim-group vir';
+            title.textContent = '七美德';
+            listEl.appendChild(title);
+        }
+
+        const row = document.createElement('div');
+        row.className = `dim-row ${isVirtue ? 'vir' : 'sin'}`;
+        row.innerHTML = `
+            <div class="dim-head">
+                <div class="dim-name">${dim}</div>
+                <div class="dim-score">${score}</div>
+            </div>
+            <div class="dim-bar"><div class="dim-fill" style="width:${score}%"></div></div>
+            <div class="dim-desc">${descriptions[dim]}</div>
+        `;
+        listEl.appendChild(row);
+    });
+
+    // 绘制雷达图
+    drawRadar(scores);
+}
+
+// ==================== 雷达图（Canvas 绘制） ====================
+function drawRadar(scores) {
+    const canvas = document.getElementById('radarCanvas');
+    const container = canvas.parentElement;
+    const dpr = window.devicePixelRatio || 1;
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const cx = w / 2;
+    const cy = h / 2;
+    const radius = Math.min(w, h) * 0.34;
+    const n = radarOrder.length;
+    const startAngle = (103 * Math.PI) / 180; // 起始角度103度
+
+    // 背景区域
+    ctx.fillStyle = 'rgba(255,245,247,0.04)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius + 40, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 网格线（4层）
+    for (let level = 1; level <= 4; level++) {
+        const r = (radius / 4) * level;
+        ctx.strokeStyle = 'rgba(255,245,247,0.12)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let i = 0; i <= n; i++) {
+            const angle = startAngle + (i / n) * Math.PI * 2;
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+    }
+
+    // 轴线
+    for (let i = 0; i < n; i++) {
+        const angle = startAngle + (i / n) * Math.PI * 2;
+        const x = cx + radius * Math.cos(angle);
+        const y = cy + radius * Math.sin(angle);
+        ctx.strokeStyle = 'rgba(255,245,247,0.18)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
+
+    // 七宗罪多边形
+    const sinValues = radarOrder.map(d => sins.includes(d) ? (scores[d] || 0) : 0);
+    drawRadarShape(ctx, cx, cy, radius, n, startAngle, sinValues, SIN_COLOR, 'rgba(138, 134, 128, 0.18)');
+
+    // 七美德多边形
+    const virtueValues = radarOrder.map(d => virtues.includes(d) ? (scores[d] || 0) : 0);
+    drawRadarShape(ctx, cx, cy, radius, n, startAngle, virtueValues, VIRTUE_COLOR, 'rgba(192, 69, 88, 0.22)');
+
+    // 标签
+    for (let i = 0; i < n; i++) {
+        const angle = startAngle + (i / n) * Math.PI * 2;
+        const labelR = radius + 28;
+        const x = cx + labelR * Math.cos(angle);
+        const y = cy + labelR * Math.sin(angle);
+        const dim = radarOrder[i];
+        const isVirtue = virtues.includes(dim);
+        const score = scores[dim] || 0;
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // 维度名
+        ctx.fillStyle = isVirtue ? '#ffb3c1' : '#d4cfc8';
+        ctx.font = 'bold 15px -apple-system, sans-serif';
+        ctx.fillText(dim, x, y - 10);
+
+        // 分数
+        ctx.font = 'bold 14px -apple-system, sans-serif';
+        ctx.fillText(score, x, y + 10);
+    }
+}
+
+function drawRadarShape(ctx, cx, cy, radius, n, startAngle, values, lineColor, fillColor) {
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 3;
+    ctx.fillStyle = fillColor;
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+        const idx = i % n;
+        const angle = startAngle + (idx / n) * Math.PI * 2;
+        const r = (radius / 100) * values[idx];
+        const x = cx + r * Math.cos(angle);
+        const y = cy + r * Math.sin(angle);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // 数据点
+    for (let i = 0; i < n; i++) {
+        if (values[i] > 0) {
+            const angle = startAngle + (i / n) * Math.PI * 2;
+            const r = (radius / 100) * values[i];
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+            ctx.fillStyle = lineColor;
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+}
+
+// ==================== 工具函数 ====================
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:white;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;pointer-events:none;';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 1500);
+}
+
+function restartTest() {
+    if (
+        window.linkValidator &&
+        typeof window.linkValidator.clearLocalResult === 'function'
+    ) {
+        window.linkValidator.clearLocalResult();
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let token = urlParams.get('token');
+    if (!token && window.linkValidator && window.linkValidator.token) {
+        token = window.linkValidator.token;
+    }
+
+    if (token) {
+        try {
+            localStorage.removeItem(getStorageKey(token));
+            localStorage.removeItem(RESULT_KEY);
+        } catch (e) {}
+
+        const newUrlParams = new URLSearchParams();
+        newUrlParams.set('token', token);
+        newUrlParams.set('restart', 'true');
+        if (
+            urlParams.get('unlimited') === 'true' ||
+            (window.linkValidator && window.linkValidator.unlimited)
+        ) {
+            newUrlParams.set('unlimited', 'true');
+        }
+        window.location.href = window.location.pathname + '?' + newUrlParams.toString();
+        return;
+    }
+
+    window.__7v7_test_started = false;
+    window.__7v7_test_completed = false;
+    resetQuizState();
+    showPage('introPage');
+}
+
+window.addEventListener('resize', () => {
+    if (document.getElementById('resultPage').classList.contains('active')) {
+        const token =
+            (window.linkValidator && window.linkValidator.token) ||
+            new URLSearchParams(window.location.search).get('token');
+        let result = null;
+        try {
+            if (token) {
+                const raw = localStorage.getItem(getStorageKey(token));
+                if (raw) {
+                    const saved = JSON.parse(raw);
+                    result = saved.result || saved;
+                }
+            }
+            if (!result) {
+                result = JSON.parse(localStorage.getItem(RESULT_KEY));
+            }
+        } catch (e) {}
+        if (result && result.dimensionScores) drawRadar(result.dimensionScores);
+    }
+});
+
+</script>
+
+<!-- 验证SDK -->
+<script src="/static/js/link-validator.js"></script>
+<script>
+(function () {
+    var validatorInstance = null;
+
+    if (typeof PsyTestValidator !== 'undefined') {
+        PsyTestValidator.init('7v7', {
+            onSuccess: function (result, validator) {
+                console.log('SDK初始化成功，链接有效:', result);
+                validatorInstance = validator;
+                window.linkValidator = validator;
+                document.body.classList.remove('page-disabled');
+            },
+            onError: function (error) {
+                console.error('SDK初始化失败，链接无效:', error);
+                if (
+                    window.PsyTestValidator &&
+                    typeof window.PsyTestValidator.getInstance === 'function'
+                ) {
+                    validatorInstance = window.PsyTestValidator.getInstance();
+                    window.linkValidator = validatorInstance;
+                }
+                document.body.classList.remove('page-disabled');
+            },
+            onLoad: function (data) {
+                console.log('SDK加载完成回调:', data);
+                if (!validatorInstance) {
+                    if (
+                        window.PsyTestValidator &&
+                        typeof window.PsyTestValidator.getInstance === 'function'
+                    ) {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                }
+
+                setTimeout(function () {
+                    if (
+                        typeof PsyTestValidator !== 'undefined' &&
+                        typeof PsyTestValidator.addPromotionLink === 'function'
+                    ) {
+                        PsyTestValidator.addPromotionLink();
+                    }
+                }, 100);
+
+                var urlParams = new URLSearchParams(window.location.search);
+                var isRestart = urlParams.get('restart') === 'true';
+
+                if (isRestart) {
+                    if (validatorInstance && validatorInstance.clearLocalResult) {
+                        validatorInstance.clearLocalResult();
+                    }
+                    var restartToken = validatorInstance && validatorInstance.token;
+                    if (restartToken) {
+                        try {
+                            localStorage.removeItem('test_result_' + restartToken);
+                            localStorage.removeItem('sevenSinsVirtuesResultRoseV1');
+                        } catch (e) {}
+                    }
+                    window.__7v7_test_completed = false;
+                    window.__7v7_test_started = true;
+                    urlParams.delete('restart');
+                    var newUrl =
+                        window.location.pathname +
+                        (urlParams.toString() ? '?' + urlParams.toString() : '');
+                    window.history.replaceState({}, '', newUrl);
+                    return;
+                }
+
+                if (data.valid && data.has_local_result) {
+                    if (typeof window.restore7v7Result === 'function') {
+                        window.restore7v7Result();
+                    }
+                }
+            }
+        });
+    } else {
+        console.error('验证SDK未加载');
+        document.body.classList.remove('page-disabled');
+    }
+})();
+</script>
+</body>
+</html>

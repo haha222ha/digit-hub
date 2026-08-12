@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="MBTI迈尔斯-布里格斯类型指标 - 性格测试报告">
+    <meta name="keywords" content="MBTI,性格测试,迈尔斯-布里格斯,人格类型,心理测评报告">
+    <title>MBTI 性格测试报告</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/report.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 错误提示容器 -->
+    <div id="errorOverlay" class="error-overlay" style="display: none;">
+        <p id="errorMessage"></p>
+    </div>
+    <div class="report-container" id="app">
+        <!-- 加载提示 -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">正在生成报告...</div>
+        </div>
+
+        <!-- 个性类型展示区 -->
+        <div class="type-hero" id="typeHero">
+            <div class="type-hero-badge">您的MBTI人格类型</div>
+            <div class="type-code" id="typeCode">----</div>
+            <h1 class="type-name" id="typeName">加载中...</h1>
+            <p class="type-slogan" id="typeSlogan">加载中...</p>
+            <div class="report-date" id="reportDate">加载中...</div>
+        </div>
+
+        <!-- 维度得分详情 -->
+        <div class="dimensions-section" id="dimensionsSection">
+            <h2 class="section-title">四维度分析</h2>
+            <p class="section-subtitle">了解您在MBTI四个核心维度上的偏好倾向</p>
+            <div class="dimensions-grid" id="dimensionsGrid">
+                <!-- 维度卡片将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 类型详细描述 -->
+        <div class="description-section" id="descriptionSection">
+            <h2 class="section-title" id="descriptionTitle">了解您的性格特征</h2>
+            <p class="section-subtitle" id="descriptionSubtitle">深入了解您的个性特征和行为偏好</p>
+            <div class="description-content" id="descriptionContent">
+                <!-- 描述内容将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 核心特质与行为模式 -->
+        <div class="core-traits-section" id="coreTraitsSection">
+            <h2 class="section-title">您的核心特质</h2>
+            <div class="core-traits-collapse" id="coreTraitsCollapse">
+                <!-- 可折叠的核心特质内容将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 优势与成长空间 -->
+        <div class="strengths-weaknesses-section" id="strengthsWeaknessesSection">
+            <div class="strengths-card" id="strengthsCard">
+                <h3 class="card-title">天赋优势</h3>
+                <p class="card-subtitle">发挥这些优势，让您在各个领域都能脱颖而出</p>
+                <ul class="list-content" id="strengthsList">
+                    <!-- 优势列表将通过JavaScript生成 -->
+                </ul>
+            </div>
+            <div class="weaknesses-card" id="weaknessesCard">
+                <h3 class="card-title">成长空间</h3>
+                <p class="card-subtitle">关注这些领域，让您的发展更加全面均衡</p>
+                <ul class="list-content" id="weaknessesList">
+                    <!-- 劣势列表将通过JavaScript生成 -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- 生活工作场景建议 -->
+        <div class="lifestyle-section" id="lifestyleSection">
+            <div class="lifestyle-grid" id="lifestyleGrid">
+                <!-- 工作环境偏好、人际交往风格、学习发展建议将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 压力应对与成长路径 -->
+        <div class="stress-growth-section" id="stressGrowthSection">
+            <h2 class="section-title">压力应对与成长路径</h2>
+            <p class="section-subtitle">了解您在压力下的反应模式和最佳成长方向</p>
+            <div class="stress-growth-content" id="stressGrowthContent">
+                <!-- 压力应对与成长路径内容将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 个性化发展建议 -->
+        <div class="recommendations-section" id="recommendationsSection">
+            <h2 class="section-title">个性化发展建议</h2>
+            <p class="section-subtitle">基于您的性格类型，为您提供针对性的成长建议</p>
+            <div class="recommendations-list" id="recommendationsList">
+                <!-- 建议列表将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 理解与应用 -->
+        <div class="understanding-section" id="understandingSection">
+            <h2 class="section-title">理解您的MBTI类型</h2>
+            <div class="understanding-content" id="understandingContent">
+                <!-- 理解与应用内容将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 底部操作区 -->
+        <div class="report-footer">
+            <button class="footer-button primary" id="restartButton">重新测试</button>
+        </div>
+    </div>
+
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+    
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 检查URL中是否有token，如果没有，尝试从localStorage获取并重定向
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let token = urlParams.get('token');
+            
+            // 如果URL中没有token，尝试从localStorage获取
+            if (!token) {
+                try {
+                    // 从localStorage中查找token（遍历所有test_result_开头的key）
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key && key.startsWith('test_result_')) {
+                            const foundToken = key.replace('test_result_', '');
+                            // 验证token格式（通常是长字符串）
+                            if (foundToken && foundToken.length > 10) {
+                                token = foundToken;
+                                break;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('从localStorage获取token失败:', e);
+                }
+                
+                // 如果找到了token，重定向到带token的URL
+                if (token) {
+                    const newUrlParams = new URLSearchParams();
+                    newUrlParams.set('token', token);
+                    const isUnlimited = urlParams.get('unlimited') === 'true';
+                    if (isUnlimited) {
+                        newUrlParams.set('unlimited', 'true');
+                    }
+                    const newUrl = window.location.pathname + '?' + newUrlParams.toString();
+                    window.location.replace(newUrl);
+                    return; // 阻止后续SDK初始化，等待重定向
+                }
+            }
+        })();
+
+        // 初始化验证SDK（报告页面也需要验证链接有效性）
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init(null, {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    window.linkValidator = validator;
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        window.linkValidator = window.PsyTestValidator.getInstance();
+                    }
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    if (!window.linkValidator) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            window.linkValidator = window.PsyTestValidator.getInstance();
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+        }
+    </script>
+
+    <!-- 导入数据模块 -->
+    <script type="module" src="js/report.js"></script>
+</body>
+</html>
+

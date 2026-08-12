@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="RPI恋爱占有欲指数测试 - 深入了解你的恋爱占有欲程度">
+    <meta name="keywords" content="RPI,恋爱占有欲,占有欲测试,恋爱测试,心理测评">
+    <title>RPI恋爱占有欲指数测试</title>
+    <link rel="stylesheet" href="css/intro.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none; /* 禁用所有鼠标事件 */
+            opacity: 0.6; /* 变灰 */
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="rpi-intro-container" id="app">
+        <!-- 加载提示 -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">加载中...</div>
+        </div>
+
+        <!-- 顶部导航栏 -->
+        <header class="rpi-header">
+            <div class="rpi-header-content">
+                <div class="rpi-logo">
+                    <div class="rpi-logo-icon">💕</div>
+                    <div class="rpi-logo-text">
+                        <div class="rpi-logo-title">RPI Calculator</div>
+                        <div class="rpi-logo-subtitle">恋爱占有欲指数计算器</div>
+                    </div>
+                </div>
+                <nav class="rpi-nav">
+                    <a href="#guide" class="rpi-nav-link" id="guideLink">
+                        <span class="rpi-nav-icon">📖</span>
+                        使用指南
+                    </a>
+                    <a href="#scientific" class="rpi-nav-link" id="scienceLink">
+                        <span class="rpi-nav-icon">🔬</span>
+                        科学依据
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- 背景装饰 -->
+        <div class="rpi-background-decorations">
+            <div class="rpi-heart-decoration rpi-heart-1">💕</div>
+            <div class="rpi-heart-decoration rpi-heart-2">💖</div>
+            <div class="rpi-heart-decoration rpi-heart-3">💗</div>
+            <div class="rpi-heart-decoration rpi-heart-4">💓</div>
+            <div class="rpi-heart-decoration rpi-heart-5">💝</div>
+        </div>
+
+        <!-- 主内容区域 -->
+        <div class="rpi-intro-content">
+        <!-- 顶部英雄区 -->
+        <div class="rpi-hero-section">
+                <div class="rpi-hero-badge">
+                    <span class="rpi-badge-icon">💕</span>
+                    基于心理学研究的专业测评工具
+                </div>
+                
+                <h1 class="rpi-main-title">恋爱占有欲指数计算器</h1>
+                <p class="rpi-main-description">
+                    专业的恋爱心理评估工具，基于多个经过验证的心理测量量表，
+                    帮助您科学地了解自己或恋人的占有欲程度，促进健康和谐的亲密关系发展。
+                </p>
+
+                <!-- 双视角智能评估卡片 -->
+                <div class="rpi-feature-card">
+                    <div class="rpi-feature-content-wrapper">
+                        <div class="rpi-feature-icon-bg">
+                            <svg class="rpi-feature-icon" viewBox="64 64 896 896" focusable="false" data-icon="team" width="24px" height="24px" fill="currentColor" aria-hidden="true" style="color: var(--rpi-primary);">
+                                <path d="M729.6 160H294.4C245 160 205 200 205 249.6V844.8c0 49.6 40 89.6 89.6 89.6h435.2c49.6 0 89.6-40 89.6-89.6V249.6c0-49.6-40-89.6-89.6-89.6zm-367.9 132.8h51.6c25.8 0 46.8 21 46.8 46.8s-21 46.8-46.8 46.8h-51.6c-25.8 0-46.8-21-46.8-46.8s21-46.8 46.8-46.8zm215.4 0h51.6c25.8 0 46.8 21 46.8 46.8s-21 46.8-46.8 46.8h-51.6c-25.8 0-46.8-21-46.8-46.8s21-46.8 46.8-46.8zM742.8 752H281.2V577.6h461.6V752zm0-174.4H281.2V401.6h461.6v176z"></path>
+                            </svg>
+                        </div>
+                        <div class="rpi-feature-content">
+                            <h4 class="rpi-feature-title">双视角智能评估</h4>
+                            <p class="rpi-feature-text">
+                                提供"给自己测"和"为恋人测"两种视角，系统会根据您的年龄、星座、恋爱状态等因素，
+                                提供个性化的分析结果和建议，帮助您更全面地认识恋爱关系中的占有欲特点。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主要行动按钮 -->
+                <div class="rpi-main-actions">
+                    <button class="rpi-btn-primary" id="mainSelfTestButton">
+                        <span class="rpi-btn-icon">💖</span>
+                        给自己测
+                        <span class="rpi-btn-arrow">→</span>
+                    </button>
+                    <button class="rpi-btn-secondary" id="mainPartnerTestButton">
+                        <span class="rpi-btn-icon">💞</span>
+                        为恋人测
+                        <span class="rpi-btn-arrow">→</span>
+                    </button>
+                </div>
+
+                <!-- 特点展示 -->
+                <div class="rpi-stats-row">
+                    <div class="rpi-stat-item">
+                        <svg class="rpi-stat-icon" viewBox="64 64 896 896" focusable="false" data-icon="clock-circle" width="32px" height="32px" fill="currentColor" aria-hidden="true">
+                            <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"></path>
+                            <path d="M686.7 638.6L544.1 535.5V288c0-4.4-3.6-8-8-8H488c-4.4 0-8 3.6-8 8v275.4c0 2.6 1.2 5 3.3 6.5l165.4 120.6c3.6 2.6 8.6 1.8 11.2-1.7l28.6-39c2.6-3.7 1.8-8.7-1.8-11.2z"></path>
+                        </svg>
+                        <div class="rpi-stat-number">10-15</div>
+                        <div class="rpi-stat-label">分钟完成</div>
+                    </div>
+                    <div class="rpi-stat-item">
+                        <svg class="rpi-stat-icon" viewBox="64 64 896 896" focusable="false" data-icon="safety" width="32px" height="32px" fill="currentColor" aria-hidden="true">
+                            <path d="M866.9 169.9L527.1 54.1C523 52.7 517.5 52 512 52s-11 .7-15.1 2.1L157.1 169.9c-8.3 2.8-15.1 12.4-15.1 21.2v482.4c0 8.8 5.7 20.4 12.6 25.9L499.3 968c3.5 2.7 8 4.1 12.6 4.1s9.2-1.4 12.6-4.1l344.7-268.6c6.9-5.4 12.6-17 12.6-25.9V191.1c0.2-8.8-6.6-18.3-14.9-21.2zM810 654.3L512 886.5 214 654.3V226.7l298-101.6 298 101.6v427.6z"></path>
+                            <path d="M418.6 418.6l-60 60 168.4 168.4 240-240-60-60-180 180z"></path>
+                        </svg>
+                        <div class="rpi-stat-number">4</div>
+                        <div class="rpi-stat-label">核心维度</div>
+                    </div>
+                    <div class="rpi-stat-item">
+                        <svg class="rpi-stat-icon" viewBox="64 64 896 896" focusable="false" data-icon="check-circle" width="32px" height="32px" fill="currentColor" aria-hidden="true">
+                            <path d="M699 353h-46.9c-10.2 0-19.9 4.9-25.9 13.3L469 584.3l-71.2-98.8c-6-8.3-15.6-13.3-25.9-13.3H325c-6.5 0-10.3 7.4-6.5 12.7l124.6 172.8a31.8 31.8 0 0051.7 0l210.6-292c3.9-5.3.1-12.7-6.4-12.7z"></path>
+                            <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"></path>
+                        </svg>
+                        <div class="rpi-stat-number">100%</div>
+                        <div class="rpi-stat-label">隐私保护</div>
+                    </div>
+                    <div class="rpi-stat-item">
+                        <svg class="rpi-stat-icon" viewBox="64 64 896 896" focusable="false" data-icon="team" width="32px" height="32px" fill="currentColor" aria-hidden="true">
+                            <path d="M729.6 160H294.4C245 160 205 200 205 249.6V844.8c0 49.6 40 89.6 89.6 89.6h435.2c49.6 0 89.6-40 89.6-89.6V249.6c0-49.6-40-89.6-89.6-89.6zm-367.9 132.8h51.6c25.8 0 46.8 21 46.8 46.8s-21 46.8-46.8 46.8h-51.6c-25.8 0-46.8-21-46.8-46.8s21-46.8 46.8-46.8zm215.4 0h51.6c25.8 0 46.8 21 46.8 46.8s-21 46.8-46.8 46.8h-51.6c-25.8 0-46.8-21-46.8-46.8s21-46.8 46.8-46.8zM742.8 752H281.2V577.6h461.6V752zm0-174.4H281.2V401.6h461.6v176z"></path>
+                        </svg>
+                        <div class="rpi-stat-number">双视角</div>
+                        <div class="rpi-stat-label">深度分析</div>
+                    </div>
+                </div>
+        </div>
+
+        <!-- 选择测评视角 Section -->
+        <div id="test-selection" class="rpi-section rpi-test-selection">
+            <div class="rpi-section-header">
+                <h2 class="rpi-section-title">选择测评视角</h2>
+                <p class="rpi-section-subtitle">提供两种测评视角，您可以评估自己或帮助了解恋人的占有欲特点</p>
+            </div>
+
+            <div class="rpi-test-cards">
+                <!-- 给自己测 -->
+                <div class="rpi-test-card" id="selfTestCard">
+                    <div class="rpi-test-card-body">
+                        <div class="rpi-test-card-badge">
+                            <span class="rpi-badge-sparkle">✨</span>
+                            推荐
+                        </div>
+
+                        <div class="rpi-test-card-header">
+                        <div class="rpi-test-icon-wrapper">
+                            <svg class="rpi-test-icon" viewBox="64 64 896 896" focusable="false" data-icon="user" width="32px" height="32px" fill="currentColor" aria-hidden="true">
+                                <path d="M858.5 763.6c-18.9-44.8-46.1-85-80.6-119.5a353.84 353.84 0 00-120.2-80.6c-.4-.2-.8-.3-1.2-.5C719.5 518 760 444.7 760 362c0-137-111-248-248-248S264 225 264 362c0 82.7 40.5 156 102.8 201.1-.4.2-.8.3-1.2.5-44.8 18.9-85 46-119.5 80.6a353.84 353.84 0 00-80.6 120.2c-4.5 10.8-6.9 22.3-7 33.9v.5c0 4.4 3.6 8 8 8h712c4.4 0 8-3.6 8-8v-.5c-.1-11.6-2.5-23.1-7-33.9zM512 534c-45.9 0-89.1-17.9-121.6-50.4S340 407.9 340 362c0-45.9 17.9-89.1 50.4-121.6S466.1 190 512 190s89.1 17.9 121.6 50.4S684 316.1 684 362c0 45.9-17.9 89.1-50.4 121.6S557.9 534 512 534zm188 220H324c-4.4 0-8 3.6-8 8v27.2c0 69.4 56.5 125.8 126 125.8h140c69.4 0 126-56.4 126-125.8V762c0-4.4-3.6-8-8-8z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="rpi-test-card-title">给自己测</h3>
+                            <p class="rpi-test-card-desc">深入了解自己的占有欲程度</p>
+                        </div>
+                    </div>
+
+                    <div class="rpi-test-dimensions">
+                        <div class="rpi-dimension-item">
+                            <svg viewBox="64 64 896 896" focusable="false" data-icon="check-circle" width="16px" height="16px" fill="currentColor" aria-hidden="true" style="color: #22C55E;">
+                                <path d="M699 353h-46.9c-10.2 0-19.9 4.9-25.9 13.3L469 584.3l-71.2-98.8c-6-8.3-15.6-13.3-25.9-13.3H325c-6.5 0-10.3 7.4-6.5 12.7l124.6 172.8a31.8 31.8 0 0051.7 0l210.6-292c3.9-5.3.1-12.7-6.4-12.7z"></path>
+                                <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"></path>
+                            </svg>
+                            <span>控制欲望量表</span>
+                        </div>
+                        <div class="rpi-dimension-item">
+                            <svg viewBox="64 64 896 896" focusable="false" data-icon="check-circle" width="16px" height="16px" fill="currentColor" aria-hidden="true" style="color: #22C55E;">
+                                <path d="M699 353h-46.9c-10.2 0-19.9 4.9-25.9 13.3L469 584.3l-71.2-98.8c-6-8.3-15.6-13.3-25.9-13.3H325c-6.5 0-10.3 7.4-6.5 12.7l124.6 172.8a31.8 31.8 0 0051.7 0l210.6-292c3.9-5.3.1-12.7-6.4-12.7z"></path>
+                                <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"></path>
+                            </svg>
+                            <span>嫉妒强度量表</span>
+                        </div>
+                        <div class="rpi-dimension-item">
+                            <svg viewBox="64 64 896 896" focusable="false" data-icon="check-circle" width="16px" height="16px" fill="currentColor" aria-hidden="true" style="color: #22C55E;">
+                                <path d="M699 353h-46.9c-10.2 0-19.9 4.9-25.9 13.3L469 584.3l-71.2-98.8c-6-8.3-15.6-13.3-25.9-13.3H325c-6.5 0-10.3 7.4-6.5 12.7l124.6 172.8a31.8 31.8 0 0051.7 0l210.6-292c3.9-5.3.1-12.7-6.4-12.7z"></path>
+                                <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"></path>
+                            </svg>
+                            <span>情感依赖量表</span>
+                        </div>
+                        <div class="rpi-dimension-item">
+                            <svg viewBox="64 64 896 896" focusable="false" data-icon="check-circle" width="16px" height="16px" fill="currentColor" aria-hidden="true" style="color: #22C55E;">
+                                <path d="M699 353h-46.9c-10.2 0-19.9 4.9-25.9 13.3L469 584.3l-71.2-98.8c-6-8.3-15.6-13.3-25.9-13.3H325c-6.5 0-10.3 7.4-6.5 12.7l124.6 172.8a31.8 31.8 0 0051.7 0l210.6-292c3.9-5.3.1-12.7-6.4-12.7z"></path>
+                                <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"></path>
+                            </svg>
+                            <span>关系不安全感量表</span>
+                        </div>
+                    </div>
+
+                    <div class="rpi-test-info">
+                        <div class="rpi-test-info-item">
+                            <span class="rpi-test-info-label">预计用时</span>
+                            <span class="rpi-test-info-value rpi-time-highlight">10-15 分钟</span>
+                        </div>
+                        <div class="rpi-test-info-item">
+                            <span class="rpi-test-info-label">题目数量</span>
+                            <span class="rpi-test-info-value">40 题</span>
+                        </div>
+                    </div>
+
+                        <button class="rpi-test-button rpi-test-start-btn-secondary" id="selfTestButton">
+                            <span>💖 给自己测</span>
+                            <span class="anticon anticon-arrow-right">
+                                <svg viewBox="64 64 896 896" focusable="false" data-icon="arrow-right" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M869 487.8L491.2 159.9c-2.9-2.5-6.6-3.9-10.5-3.9h-88.5c-7.4 0-10.8 9.2-5.2 14l350.2 304H152c-4.4 0-8 3.6-8 8v60c0 4.4 3.6 8 8 8h585.1L386.9 854c-5.6 4.9-2.2 14 5.2 14h91.5c1.9 0 3.8-.7 5.2-2L869 536.2a32.07 32.07 0 000-48.4z"></path></svg>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 为恋人测 -->
+                <div class="rpi-test-card" id="partnerTestCard">
+                    <div class="rpi-test-card-body">
+                        <div class="rpi-test-card-header">
+                        <div class="rpi-test-icon-wrapper rpi-test-icon-partner">
+                            <svg class="rpi-test-icon" viewBox="64 64 896 896" focusable="false" data-icon="heart" width="32px" height="32px" fill="currentColor" aria-hidden="true">
+                                <path d="M923 283.6a260.04 260.04 0 00-56.9-82.8 264.4 264.4 0 00-84-55.5A265.34 265.34 0 00680.1 125c-49.3 0-97.4 13.5-139.2 39-10 6.1-19.5 12.8-28.5 20.1-9-7.3-18.5-14-28.5-20.1-41.8-25.5-89.9-39-139.2-39-35.5 0-69.9 6.8-102.4 20.3-31.4 13-59.7 31.7-84 55.5a258.44 258.44 0 00-56.9 82.8c-13.9 32.3-21 66.6-21 101.9 0 33.3 6.8 68 20.3 103.3 11.3 29.5 27.5 60.1 48.2 91 32.8 48.9 77.9 99.9 133.9 151.6 92.8 85.7 184.7 144.9 188.6 147.3l23.7 15.2c10.5 6.7 24 6.7 34.5 0l23.7-15.2c3.9-2.5 95.7-61.6 188.6-147.3 56-51.7 101.1-102.7 133.9-151.6 20.7-30.9 37-61.5 48.2-91 13.5-35.3 20.3-70 20.3-103.3.1-35.3-7-69.6-20.9-101.9zM512 814.8S156 586.7 156 385.5C156 283.6 240.3 201 344.3 201c73.1 0 136.5 40.8 167.7 100.4C543.2 241.8 606.6 201 679.7 201c104 0 188.3 82.6 188.3 184.5 0 201.2-356 429.3-356 429.3z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="rpi-test-card-title">为恋人测</h3>
+                            <p class="rpi-test-card-desc">了解恋人对您的占有欲程度</p>
+                        </div>
+                    </div>
+
+                    <div class="rpi-test-dimensions">
+                        <div class="rpi-dimension-item">
+                            <span>✓</span>
+                            <span>恋人控制欲望量表</span>
+                        </div>
+                        <div class="rpi-dimension-item">
+                            <span>✓</span>
+                            <span>恋人嫉妒强度量表</span>
+                        </div>
+                        <div class="rpi-dimension-item">
+                            <span>✓</span>
+                            <span>恋人情感依赖量表</span>
+                        </div>
+                        <div class="rpi-dimension-item">
+                            <span>✓</span>
+                            <span>恋人关系不安全感量表</span>
+                        </div>
+                    </div>
+
+                    <div class="rpi-test-info">
+                        <div class="rpi-test-info-item">
+                            <span class="rpi-test-info-label">预计用时</span>
+                            <span class="rpi-test-info-value rpi-time-highlight">10-15 分钟</span>
+                        </div>
+                        <div class="rpi-test-info-item">
+                            <span class="rpi-test-info-label">题目数量</span>
+                            <span class="rpi-test-info-value">40 题</span>
+                        </div>
+                    </div>
+
+                        <button class="rpi-test-button rpi-test-start-btn-secondary" id="partnerTestButton">
+                            <span>💞 为恋人测</span>
+                            <span class="anticon anticon-arrow-right">
+                                <svg viewBox="64 64 896 896" focusable="false" data-icon="arrow-right" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M869 487.8L491.2 159.9c-2.9-2.5-6.6-3.9-10.5-3.9h-88.5c-7.4 0-10.8 9.2-5.2 14l350.2 304H152c-4.4 0-8 3.6-8 8v60c0 4.4 3.6 8 8 8h585.1L386.9 854c-5.6 4.9-2.2 14 5.2 14h91.5c1.9 0 3.8-.7 5.2-2L869 536.2a32.07 32.07 0 000-48.4z"></path></svg>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 科学可靠的评估基础 Section -->
+        <div class="rpi-section rpi-scientific-basis">
+            <div class="rpi-section-header">
+                <h2 class="rpi-section-title">科学可靠的评估基础</h2>
+                <p class="rpi-section-subtitle">
+                    基于心理学研究的专业量表，全面评估恋爱占有欲的四个核心维度
+                </p>
+            </div>
+
+            <div class="rpi-dimension-cards">
+                <div class="rpi-dimension-card">
+                    <div class="rpi-dimension-icon">
+                        <svg viewBox="64 64 896 896" focusable="false" data-icon="user" width="32px" height="32px" fill="currentColor" aria-hidden="true">
+                            <path d="M858.5 763.6c-18.9-44.8-46.1-85-80.6-119.5a353.84 353.84 0 00-120.2-80.6c-.4-.2-.8-.3-1.2-.5C719.5 518 760 444.7 760 362c0-137-111-248-248-248S264 225 264 362c0 82.7 40.5 156 102.8 201.1-.4.2-.8.3-1.2.5-44.8 18.9-85 46-119.5 80.6a353.84 353.84 0 00-80.6 120.2c-4.5 10.8-6.9 22.3-7 33.9v.5c0 4.4 3.6 8 8 8h712c4.4 0 8-3.6 8-8v-.5c-.1-11.6-2.5-23.1-7-33.9zM512 534c-45.9 0-89.1-17.9-121.6-50.4S340 407.9 340 362c0-45.9 17.9-89.1 50.4-121.6S466.1 190 512 190s89.1 17.9 121.6 50.4S684 316.1 684 362c0 45.9-17.9 89.1-50.4 121.6S557.9 534 512 534zm188 220H324c-4.4 0-8 3.6-8 8v27.2c0 69.4 56.5 125.8 126 125.8h140c69.4 0 126-56.4 126-125.8V762c0-4.4-3.6-8-8-8z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="rpi-dimension-card-title">控制欲望</h4>
+                    <p class="rpi-dimension-card-desc">评估在恋爱关系中对伴侣的控制倾向和监控行为</p>
+                </div>
+                <div class="rpi-dimension-card">
+                    <div class="rpi-dimension-icon">
+                        <svg viewBox="64 64 896 896" focusable="false" data-icon="heart" width="32px" height="32px" fill="currentColor" aria-hidden="true">
+                            <path d="M923 283.6a260.04 260.04 0 00-56.9-82.8 264.4 264.4 0 00-84-55.5A265.34 265.34 0 00680.1 125c-49.3 0-97.4 13.5-139.2 39-10 6.1-19.5 12.8-28.5 20.1-9-7.3-18.5-14-28.5-20.1-41.8-25.5-89.9-39-139.2-39-35.5 0-69.9 6.8-102.4 20.3-31.4 13-59.7 31.7-84 55.5a258.44 258.44 0 00-56.9 82.8c-13.9 32.3-21 66.6-21 101.9 0 33.3 6.8 68 20.3 103.3 11.3 29.5 27.5 60.1 48.2 91 32.8 48.9 77.9 99.9 133.9 151.6 92.8 85.7 184.7 144.9 188.6 147.3l23.7 15.2c10.5 6.7 24 6.7 34.5 0l23.7-15.2c3.9-2.5 95.7-61.6 188.6-147.3 56-51.7 101.1-102.7 133.9-151.6 20.7-30.9 37-61.5 48.2-91 13.5-35.3 20.3-70 20.3-103.3.1-35.3-7-69.6-20.9-101.9zM512 814.8S156 586.7 156 385.5C156 283.6 240.3 201 344.3 201c73.1 0 136.5 40.8 167.7 100.4C543.2 241.8 606.6 201 679.7 201c104 0 188.3 82.6 188.3 184.5 0 201.2-356 429.3-356 429.3z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="rpi-dimension-card-title">嫉妒强度</h4>
+                    <p class="rpi-dimension-card-desc">测量在恋爱关系中的嫉妒情绪和排他性倾向</p>
+                </div>
+                <div class="rpi-dimension-card">
+                    <div class="rpi-dimension-icon">
+                        <svg viewBox="64 64 896 896" focusable="false" data-icon="team" width="32px" height="32px" fill="currentColor" aria-hidden="true">
+                            <path d="M729.6 160H294.4C245 160 205 200 205 249.6V844.8c0 49.6 40 89.6 89.6 89.6h435.2c49.6 0 89.6-40 89.6-89.6V249.6c0-49.6-40-89.6-89.6-89.6zm-367.9 132.8h51.6c25.8 0 46.8 21 46.8 46.8s-21 46.8-46.8 46.8h-51.6c-25.8 0-46.8-21-46.8-46.8s21-46.8 46.8-46.8zm215.4 0h51.6c25.8 0 46.8 21 46.8 46.8s-21 46.8-46.8 46.8h-51.6c-25.8 0-46.8-21-46.8-46.8s21-46.8 46.8-46.8zM742.8 752H281.2V577.6h461.6V752zm0-174.4H281.2V401.6h461.6v176z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="rpi-dimension-card-title">情感依赖</h4>
+                    <p class="rpi-dimension-card-desc">评估对伴侣的情感依赖程度和独立性水平</p>
+                </div>
+                <div class="rpi-dimension-card">
+                    <div class="rpi-dimension-icon">
+                        <svg viewBox="64 64 896 896" focusable="false" data-icon="safety" width="32px" height="32px" fill="currentColor" aria-hidden="true">
+                            <path d="M866.9 169.9L527.1 54.1C523 52.7 517.5 52 512 52s-11 .7-15.1 2.1L157.1 169.9c-8.3 2.8-15.1 12.4-15.1 21.2v482.4c0 8.8 5.7 20.4 12.6 25.9L499.3 968c3.5 2.7 8 4.1 12.6 4.1s9.2-1.4 12.6-4.1l344.7-268.6c6.9-5.4 12.6-17 12.6-25.9V191.1c0.2-8.8-6.6-18.3-14.9-21.2zM810 654.3L512 886.5 214 654.3V226.7l298-101.6 298 101.6v427.6z"></path>
+                            <path d="M418.6 418.6l-60 60 168.4 168.4 240-240-60-60-180 180z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="rpi-dimension-card-title">关系不安</h4>
+                    <p class="rpi-dimension-card-desc">测量在亲密关系中的不安全感和焦虑程度</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 隐私保护 Section -->
+        <div class="rpi-section rpi-privacy-section">
+            <div class="rpi-privacy-card">
+                <div class="rpi-privacy-icon">
+                    <svg viewBox="64 64 896 896" focusable="false" data-icon="safety" width="48px" height="48px" fill="currentColor" aria-hidden="true">
+                        <path d="M866.9 169.9L527.1 54.1C523 52.7 517.5 52 512 52s-11 .7-15.1 2.1L157.1 169.9c-8.3 2.8-15.1 12.4-15.1 21.2v482.4c0 8.8 5.7 20.4 12.6 25.9L499.3 968c3.5 2.7 8 4.1 12.6 4.1s9.2-1.4 12.6-4.1l344.7-268.6c6.9-5.4 12.6-17 12.6-25.9V191.1c0.2-8.8-6.6-18.3-14.9-21.2zM810 654.3L512 886.5 214 654.3V226.7l298-101.6 298 101.6v427.6z"></path>
+                        <path d="M418.6 418.6l-60 60 168.4 168.4 240-240-60-60-180 180z"></path>
+                    </svg>
+                </div>
+                <h2 class="rpi-privacy-title">您的隐私是我们的首要关注</h2>
+                <p class="rpi-privacy-description">
+                    所有评估数据仅在您的设备本地处理和存储，不会上传到任何服务器。
+                    您拥有完全的数据控制权，可以随时删除或导出您的评估历史。
+                </p>
+                <div class="rpi-privacy-features">
+                    <span class="rpi-privacy-feature">
+                        <svg class="rpi-privacy-feature-icon" viewBox="64 64 896 896" focusable="false" data-icon="check-circle" width="16px" height="16px" fill="currentColor" aria-hidden="true">
+                            <path d="M699 353h-46.9c-10.2 0-19.9 4.9-25.9 13.3L469 584.3l-71.2-98.8c-6-8.3-15.6-13.3-25.9-13.3H325c-6.5 0-10.3 7.4-6.5 12.7l124.6 172.8a31.8 31.8 0 0051.7 0l210.6-292c3.9-5.3.1-12.7-6.4-12.7z"></path>
+                            <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"></path>
+                        </svg>
+                        本地数据存储
+                    </span>
+                    <span class="rpi-privacy-feature">
+                        <svg class="rpi-privacy-feature-icon" viewBox="64 64 896 896" focusable="false" data-icon="check-circle" width="16px" height="16px" fill="currentColor" aria-hidden="true">
+                            <path d="M699 353h-46.9c-10.2 0-19.9 4.9-25.9 13.3L469 584.3l-71.2-98.8c-6-8.3-15.6-13.3-25.9-13.3H325c-6.5 0-10.3 7.4-6.5 12.7l124.6 172.8a31.8 31.8 0 0051.7 0l210.6-292c3.9-5.3.1-12.7-6.4-12.7z"></path>
+                            <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"></path>
+                        </svg>
+                        完全匿名化
+                    </span>
+                    <span class="rpi-privacy-feature">
+                        <svg class="rpi-privacy-feature-icon" viewBox="64 64 896 896" focusable="false" data-icon="check-circle" width="16px" height="16px" fill="currentColor" aria-hidden="true">
+                            <path d="M699 353h-46.9c-10.2 0-19.9 4.9-25.9 13.3L469 584.3l-71.2-98.8c-6-8.3-15.6-13.3-25.9-13.3H325c-6.5 0-10.3 7.4-6.5 12.7l124.6 172.8a31.8 31.8 0 0051.7 0l210.6-292c3.9-5.3.1-12.7-6.4-12.7z"></path>
+                            <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"></path>
+                        </svg>
+                        可随时删除
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="rpi-section rpi-cta-section">
+            <h2 class="rpi-cta-title">准备好探索恋爱关系的真相了吗？</h2>
+            <p class="rpi-cta-description">
+                通过科学的评估工具，深入了解恋爱中的占有欲特点，促进更健康和谐的亲密关系。
+            </p>
+            <div class="rpi-cta-actions">
+                <button class="rpi-cta-btn-primary" id="ctaButton">
+                    <span class="rpi-btn-icon">🚀</span>
+                    立即开始测评
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="rpi-footer">
+            <div class="rpi-footer-content">
+                <div class="rpi-footer-simple">
+                    <div class="rpi-footer-logo">
+                        <div class="rpi-footer-logo-icon">💕</div>
+                        <div class="rpi-footer-logo-text">RPI Calculator</div>
+                    </div>
+                    <p class="rpi-footer-description">
+                        基于心理学研究的恋爱占有欲指数计算器，帮助您更好地了解恋爱关系中的占有欲特点。
+                    </p>
+                </div>
+                <div class="rpi-footer-bottom">
+                    <div class="rpi-footer-copyright">
+                        <span class="rpi-copyright-icon">💝</span>
+                        <span class="rpi-footer-copyright-text">
+                            © 2025 恋爱占有欲指数计算器. 仅供教育和自我了解使用，不能替代专业心理健康服务。
+                        </span>
+                    </div>
+                    <!-- 推广信息 -->
+                    <div class="rpi-promotion-info">
+                        <span class="rpi-promotion-text">如果您也想为他人提供测试服务，</span>
+                        <a href="/" class="rpi-promotion-link" target="_blank" rel="noopener noreferrer">点击这里了解更多</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        </div>
+        <!-- 主内容区域结束 -->
+
+        <!-- 使用指南弹窗 -->
+        <div class="rpi-modal-overlay" id="guideModal" style="display: none;">
+            <div class="rpi-modal-content rpi-guide-modal-content">
+                <div class="rpi-modal-header">
+                    <h3 class="rpi-modal-title">📖 使用指南</h3>
+                    <button class="rpi-modal-close" id="guideModalClose">×</button>
+                </div>
+                <div class="rpi-modal-body" id="guideModalBody">
+                    <div class="rpi-guide-modal-content">
+                        <!-- Hero Section -->
+                        <div class="rpi-guide-hero">
+                            <div class="rpi-guide-hero-icon-wrapper">
+                                <div class="rpi-guide-hero-icon">📖</div>
+                            </div>
+                            <h1 class="rpi-guide-hero-title">使用指南</h1>
+                            <p class="rpi-guide-hero-subtitle">
+                                详细了解如何正确使用恋爱占有欲指数(RPI)评估工具，获得准确可靠的测评结果
+                            </p>
+                        </div>
+
+                        <!-- 快速开始 -->
+                        <section class="rpi-guide-section">
+                            <div class="rpi-guide-section-header">
+                                <div class="rpi-guide-section-icon-wrapper">
+                                    <div class="rpi-guide-section-icon" style="background: linear-gradient(135deg, rgba(233, 32, 99, 0.1), rgba(233, 32, 99, 0.05));">🎯</div>
+                                </div>
+                                <div class="rpi-guide-section-title-group">
+                                    <h2>快速开始</h2>
+                                    <p class="rpi-guide-section-desc">选择适合您的测评视角</p>
+                                </div>
+                            </div>
+                            <div class="rpi-guide-quick-cards">
+                                <div class="rpi-guide-quick-card rpi-guide-quick-card-recommended">
+                                    <div class="rpi-guide-quick-card-glow"></div>
+                                    <div class="rpi-guide-quick-card-header">
+                                        <div class="rpi-guide-quick-card-icon">💖</div>
+                                        <div class="rpi-guide-quick-card-title-group">
+                                            <span class="rpi-guide-quick-card-title">给自己测</span>
+                                            <span class="rpi-guide-quick-card-subtitle">自我认知评估</span>
+                                        </div>
+                                        <span class="rpi-guide-quick-card-badge">
+                                            <span class="rpi-guide-badge-sparkle">✨</span>
+                                            推荐
+                                        </span>
+                                    </div>
+                                    <div class="rpi-guide-quick-card-stats">
+                                        <div class="rpi-guide-quick-stat">
+                                            <div class="rpi-guide-stat-icon">⏰</div>
+                                            <div class="rpi-guide-stat-text">
+                                                <span class="rpi-guide-stat-label">预计用时</span>
+                                                <span class="rpi-guide-stat-value">10-15 分钟</span>
+                                            </div>
+                                        </div>
+                                        <div class="rpi-guide-quick-stat">
+                                            <div class="rpi-guide-stat-icon">📝</div>
+                                            <div class="rpi-guide-stat-text">
+                                                <span class="rpi-guide-stat-label">题目数量</span>
+                                                <span class="rpi-guide-stat-value">40 道题目</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="rpi-guide-quick-card-benefit">
+                                        <span class="rpi-guide-benefit-icon">✓</span>
+                                        <span>深入了解自己的占有欲特点和心理状态</span>
+                                    </div>
+                                </div>
+                                <div class="rpi-guide-quick-card">
+                                    <div class="rpi-guide-quick-card-header">
+                                        <div class="rpi-guide-quick-card-icon rpi-guide-quick-card-icon-secondary">💞</div>
+                                        <div class="rpi-guide-quick-card-title-group">
+                                            <span class="rpi-guide-quick-card-title">为恋人测</span>
+                                            <span class="rpi-guide-quick-card-subtitle">观察者视角</span>
+                                        </div>
+                                        <span class="rpi-guide-quick-card-badge rpi-guide-quick-card-badge-secondary">
+                                            观察视角
+                                        </span>
+                                    </div>
+                                    <div class="rpi-guide-quick-card-stats">
+                                        <div class="rpi-guide-quick-stat">
+                                            <div class="rpi-guide-stat-icon">⏰</div>
+                                            <div class="rpi-guide-stat-text">
+                                                <span class="rpi-guide-stat-label">预计用时</span>
+                                                <span class="rpi-guide-stat-value">10-15 分钟</span>
+                                            </div>
+                                        </div>
+                                        <div class="rpi-guide-quick-stat">
+                                            <div class="rpi-guide-stat-icon">📝</div>
+                                            <div class="rpi-guide-stat-text">
+                                                <span class="rpi-guide-stat-label">题目数量</span>
+                                                <span class="rpi-guide-stat-value">40 道题目</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="rpi-guide-quick-card-benefit">
+                                        <span class="rpi-guide-benefit-icon">✓</span>
+                                        <span>客观评估恋人的占有欲表现和行为模式</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 测评流程 -->
+                        <section class="rpi-guide-section">
+                            <div class="rpi-guide-section-header">
+                                <div class="rpi-guide-section-icon-wrapper">
+                                    <div class="rpi-guide-section-icon" style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 107, 53, 0.05)); color: #FF6B35;">➡️</div>
+                                </div>
+                                <div class="rpi-guide-section-title-group">
+                                    <h2>测评流程</h2>
+                                    <p class="rpi-guide-section-desc">简单四步，轻松完成测评</p>
+                                </div>
+                            </div>
+                            <div class="rpi-guide-steps-wrapper">
+                                <div class="rpi-guide-steps">
+                                    <div class="rpi-guide-step">
+                                        <div class="rpi-guide-step-number-wrapper">
+                                            <div class="rpi-guide-step-number">1</div>
+                                            <div class="rpi-guide-step-line"></div>
+                                        </div>
+                                        <div class="rpi-guide-step-content">
+                                            <div class="rpi-guide-step-icon">📋</div>
+                                            <h4>知情同意</h4>
+                                            <p>阅读并同意参与测评的条款，了解测评目的和隐私保护政策</p>
+                                        </div>
+                                    </div>
+                                    <div class="rpi-guide-step">
+                                        <div class="rpi-guide-step-number-wrapper">
+                                            <div class="rpi-guide-step-number">2</div>
+                                            <div class="rpi-guide-step-line"></div>
+                                        </div>
+                                        <div class="rpi-guide-step-content">
+                                            <div class="rpi-guide-step-icon">👤</div>
+                                            <h4>基本信息</h4>
+                                            <p>填写年龄、性别、星座、恋爱状态等基本信息，用于个性化分析</p>
+                                        </div>
+                                    </div>
+                                    <div class="rpi-guide-step">
+                                        <div class="rpi-guide-step-number-wrapper">
+                                            <div class="rpi-guide-step-number">3</div>
+                                            <div class="rpi-guide-step-line"></div>
+                                        </div>
+                                        <div class="rpi-guide-step-content">
+                                            <div class="rpi-guide-step-icon">✍️</div>
+                                            <h4>问卷作答</h4>
+                                            <p>根据实际情况诚实回答40道题目，相信第一直觉</p>
+                                        </div>
+                                    </div>
+                                    <div class="rpi-guide-step">
+                                        <div class="rpi-guide-step-number-wrapper">
+                                            <div class="rpi-guide-step-number">4</div>
+                                        </div>
+                                        <div class="rpi-guide-step-content">
+                                            <div class="rpi-guide-step-icon">💖</div>
+                                            <h4>查看结果</h4>
+                                            <p>获得详细的RPI指数和四维度分析，了解自己的情感特点</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 答题建议 -->
+                        <section class="rpi-guide-section">
+                            <div class="rpi-guide-section-header">
+                                <div class="rpi-guide-section-icon-wrapper">
+                                    <div class="rpi-guide-section-icon" style="background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05)); color: #FFC107;">💡</div>
+                                </div>
+                                <div class="rpi-guide-section-title-group">
+                                    <h2>答题建议</h2>
+                                    <p class="rpi-guide-section-desc">掌握这些技巧，让测评结果更准确</p>
+                                </div>
+                            </div>
+                            <div class="rpi-guide-tips">
+                                <div class="rpi-guide-tip">
+                                    <div class="rpi-guide-tip-icon-wrapper">
+                                        <div class="rpi-guide-tip-icon">✅</div>
+                                    </div>
+                                    <div class="rpi-guide-tip-content">
+                                        <h4>诚实作答</h4>
+                                        <p>根据真实感受作答，没有对错之分，不要美化或贬低自己的真实想法</p>
+                                    </div>
+                                </div>
+                                <div class="rpi-guide-tip">
+                                    <div class="rpi-guide-tip-icon-wrapper">
+                                        <div class="rpi-guide-tip-icon">⚡</div>
+                                    </div>
+                                    <div class="rpi-guide-tip-content">
+                                        <h4>第一直觉</h4>
+                                        <p>相信第一直觉，不要过度思考，快速选择最符合当下感受的选项</p>
+                                    </div>
+                                </div>
+                                <div class="rpi-guide-tip">
+                                    <div class="rpi-guide-tip-icon-wrapper">
+                                        <div class="rpi-guide-tip-icon">✓</div>
+                                    </div>
+                                    <div class="rpi-guide-tip-content">
+                                        <h4>完整作答</h4>
+                                        <p>尽量完成所有问题，跳过太多题目会影响结果的准确性和可靠性</p>
+                                    </div>
+                                </div>
+                                <div class="rpi-guide-tip">
+                                    <div class="rpi-guide-tip-icon-wrapper">
+                                        <div class="rpi-guide-tip-icon">🔒</div>
+                                    </div>
+                                    <div class="rpi-guide-tip-content">
+                                        <h4>隐私环境</h4>
+                                        <p>在私密、不被打扰的环境中完成，确保可以专注思考和真实表达</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 重要提示 -->
+                        <section class="rpi-guide-section rpi-guide-section-last">
+                            <div class="rpi-guide-section-header">
+                                <div class="rpi-guide-section-icon-wrapper">
+                                    <div class="rpi-guide-section-icon" style="background: linear-gradient(135deg, rgba(60, 131, 246, 0.1), rgba(60, 131, 246, 0.05)); color: #3C83F6;">ℹ️</div>
+                                </div>
+                                <div class="rpi-guide-section-title-group">
+                                    <h2>重要提示</h2>
+                                    <p class="rpi-guide-section-desc">测评前请务必了解以下内容</p>
+                                </div>
+                            </div>
+                            <div class="rpi-guide-info-box">
+                                <div class="rpi-guide-info-item">
+                                    <div class="rpi-guide-info-icon" style="background: rgba(255, 193, 7, 0.1);">⚠️</div>
+                                    <div class="rpi-guide-info-content">
+                                        <h4>非诊断工具</h4>
+                                        <p>RPI指数仅供自我了解和关系反思，不能替代专业心理咨询或情感咨询</p>
+                                    </div>
+                                </div>
+                                <div class="rpi-guide-info-item">
+                                    <div class="rpi-guide-info-icon" style="background: rgba(34, 197, 94, 0.1);">🔐</div>
+                                    <div class="rpi-guide-info-content">
+                                        <h4>隐私保护</h4>
+                                        <p>所有数据仅在您的设备本地存储，不会上传到任何服务器，确保隐私安全</p>
+                                    </div>
+                                </div>
+                                <div class="rpi-guide-info-item">
+                                    <div class="rpi-guide-info-icon" style="background: rgba(233, 32, 99, 0.1);">👥</div>
+                                    <div class="rpi-guide-info-content">
+                                        <h4>双视角测评</h4>
+                                        <p>可选择"给自己测"（第一人称）或"为恋人测"（观察者视角），获得不同维度的分析结果</p>
+                                    </div>
+                                </div>
+                                <div class="rpi-guide-info-item">
+                                    <div class="rpi-guide-info-icon" style="background: rgba(60, 131, 246, 0.1);">💭</div>
+                                    <div class="rpi-guide-info-content">
+                                        <h4>理性看待</h4>
+                                        <p>占有欲是复杂的情感现象，过高或过低都可能影响关系质量，需要辩证理解</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 底部操作按钮 -->
+                        <div class="rpi-guide-modal-actions">
+                            <button class="rpi-guide-btn-primary" onclick="hideGuideModal(); setTimeout(() => handleStartTest('self'), 200);">
+                                <span class="rpi-guide-btn-text">💖 给自己测</span>
+                            </button>
+                            <button class="rpi-guide-btn-secondary" onclick="hideGuideModal(); setTimeout(() => handleStartTest('partner'), 200);">
+                                <span class="rpi-guide-btn-text">💞 为恋人测</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 科学依据弹窗 -->
+        <div class="rpi-modal-overlay" id="scienceModal" style="display: none;">
+            <div class="rpi-modal-content rpi-science-modal-content">
+                <div class="rpi-modal-header">
+                    <h3 class="rpi-modal-title">🔬 科学依据</h3>
+                    <button class="rpi-modal-close" id="scienceModalClose">×</button>
+                </div>
+                <div class="rpi-modal-body" id="scienceModalBody">
+                    <div class="rpi-science-modal-content">
+                        <!-- Hero Section -->
+                        <div class="rpi-science-hero">
+                            <div class="rpi-science-hero-icon-wrapper">
+                                <div class="rpi-science-hero-icon">🔬</div>
+                            </div>
+                            <h1 class="rpi-science-hero-title">科学依据</h1>
+                            <p class="rpi-science-hero-subtitle">
+                                基于心理学研究的专业评估工具，融合多个经典量表，提供科学可靠的测评结果
+                            </p>
+                        </div>
+
+                        <!-- 理论基础 -->
+                        <section class="rpi-science-section">
+                            <div class="rpi-science-section-header">
+                                <div class="rpi-science-section-icon-wrapper">
+                                    <div class="rpi-science-section-icon" style="background: linear-gradient(135deg, rgba(233, 32, 99, 0.1), rgba(233, 32, 99, 0.05));">📚</div>
+                                </div>
+                                <div class="rpi-science-section-title-group">
+                                    <h2>理论基础</h2>
+                                    <p class="rpi-science-section-desc">依托成熟的心理学理论框架</p>
+                                </div>
+                            </div>
+                            <div class="rpi-science-theory-box">
+                                <div class="rpi-science-theory-item">
+                                    <div class="rpi-science-theory-icon">💡</div>
+                                    <div class="rpi-science-theory-content">
+                                        <h4>依恋理论 (Attachment Theory)</h4>
+                                        <p>由John Bowlby提出，解释了人类在亲密关系中的情感纽带和依赖模式。占有欲与不安全型依恋密切相关。</p>
+                                    </div>
+                                </div>
+                                <div class="rpi-science-theory-item">
+                                    <div class="rpi-science-theory-icon">🧠</div>
+                                    <div class="rpi-science-theory-content">
+                                        <h4>嫉妒心理学 (Psychology of Jealousy)</h4>
+                                        <p>研究表明，嫉妒是占有欲的核心表现之一，涉及对关系威胁的认知评估和情绪反应。</p>
+                                    </div>
+                                </div>
+                                <div class="rpi-science-theory-item">
+                                    <div class="rpi-science-theory-icon">💭</div>
+                                    <div class="rpi-science-theory-content">
+                                        <h4>控制需求理论 (Need for Control)</h4>
+                                        <p>个体对环境和关系的控制需求影响着占有欲的强度，过度控制可能源于不安全感。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 测评维度 -->
+                        <section class="rpi-science-section">
+                            <div class="rpi-science-section-header">
+                                <div class="rpi-science-section-icon-wrapper">
+                                    <div class="rpi-science-section-icon" style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 107, 53, 0.05)); color: #FF6B35;">📊</div>
+                                </div>
+                                <div class="rpi-science-section-title-group">
+                                    <h2>测评维度</h2>
+                                    <p class="rpi-science-section-desc">四个核心维度全面评估占有欲</p>
+                                </div>
+                            </div>
+                            <div class="rpi-science-dimensions-grid">
+                                <div class="rpi-science-dimension-card">
+                                    <div class="rpi-science-dimension-header">
+                                        <div class="rpi-science-dimension-icon" style="background: rgba(233, 32, 99, 0.1);">👤</div>
+                                        <h3>控制欲望</h3>
+                                    </div>
+                                    <div class="rpi-science-dimension-content">
+                                        <p class="rpi-science-dimension-desc">评估在恋爱关系中对伴侣的控制倾向和监控行为</p>
+                                        <div class="rpi-science-dimension-details">
+                                            <div class="rpi-science-detail-item">
+                                                <span class="rpi-science-check-icon">✓</span>
+                                                <span>行为控制</span>
+                                            </div>
+                                            <div class="rpi-science-detail-item">
+                                                <span class="rpi-science-check-icon">✓</span>
+                                                <span>社交监控</span>
+                                            </div>
+                                            <div class="rpi-science-detail-item">
+                                                <span class="rpi-science-check-icon">✓</span>
+                                                <span>决策主导</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="rpi-science-dimension-card">
+                                    <div class="rpi-science-dimension-header">
+                                        <div class="rpi-science-dimension-icon" style="background: rgba(230, 77, 102, 0.1);">💖</div>
+                                        <h3>嫉妒强度</h3>
+                                    </div>
+                                    <div class="rpi-science-dimension-content">
+                                        <p class="rpi-science-dimension-desc">测量在恋爱关系中的嫉妒情绪和排他性倾向</p>
+                                        <div class="rpi-science-dimension-details">
+                                            <div class="rpi-science-detail-item">
+                                                <span class="rpi-science-check-icon">✓</span>
+                                                <span>情绪反应</span>
+                                            </div>
+                                            <div class="rpi-science-detail-item">
+                                                <span class="rpi-science-check-icon">✓</span>
+                                                <span>认知评估</span>
+                                            </div>
+                                            <div class="rpi-science-detail-item">
+                                                <span class="rpi-science-check-icon">✓</span>
+                                                <span>行为表现</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="rpi-science-dimension-card">
+                                    <div class="rpi-science-dimension-header">
+                                        <div class="rpi-science-dimension-icon" style="background: rgba(217, 38, 128, 0.1);">👥</div>
+                                        <h3>情感依赖</h3>
+                                    </div>
+                                    <div class="rpi-science-dimension-content">
+                                        <p class="rpi-science-dimension-desc">评估对伴侣的情感依赖程度和独立性水平</p>
+                                        <div class="rpi-science-dimension-details">
+                                            <div class="rpi-science-detail-item">
+                                                <span class="rpi-science-check-icon">✓</span>
+                                                <span>情感需求</span>
+                                            </div>
+                                            <div class="rpi-science-detail-item">
+                                                <span class="rpi-science-check-icon">✓</span>
+                                                <span>分离焦虑</span>
+                                            </div>
+                                            <div class="rpi-science-detail-item">
+                                                <span class="rpi-science-check-icon">✓</span>
+                                                <span>自我价值</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="rpi-science-dimension-card">
+                                    <div class="rpi-science-dimension-header">
+                                        <div class="rpi-science-dimension-icon" style="background: rgba(60, 131, 246, 0.1);">🛡️</div>
+                                        <h3>关系不安</h3>
+                                    </div>
+                                    <div class="rpi-science-dimension-content">
+                                        <p class="rpi-science-dimension-desc">测量在亲密关系中的不安全感和焦虑程度</p>
+                                        <div class="rpi-science-dimension-details">
+                                            <div class="rpi-science-detail-item">
+                                                <span class="rpi-science-check-icon">✓</span>
+                                                <span>信任水平</span>
+                                            </div>
+                                            <div class="rpi-science-detail-item">
+                                                <span class="rpi-science-check-icon">✓</span>
+                                                <span>焦虑程度</span>
+                                            </div>
+                                            <div class="rpi-science-detail-item">
+                                                <span class="rpi-science-check-icon">✓</span>
+                                                <span>被抛弃感</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 量表依据 -->
+                        <section class="rpi-science-section">
+                            <div class="rpi-science-section-header">
+                                <div class="rpi-science-section-icon-wrapper">
+                                    <div class="rpi-science-section-icon" style="background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05)); color: #FFC107;">📋</div>
+                                </div>
+                                <div class="rpi-science-section-title-group">
+                                    <h2>量表依据</h2>
+                                    <p class="rpi-science-section-desc">参考多个经典心理学量表</p>
+                                </div>
+                            </div>
+                            <div class="rpi-science-scales-box">
+                                <div class="rpi-science-scale-item">
+                                    <div class="rpi-science-scale-header">
+                                        <div class="rpi-science-scale-number">1</div>
+                                        <h4>亲密关系体验量表 (ECR)</h4>
+                                    </div>
+                                    <p>Experiences in Close Relationships Scale，用于评估成人依恋风格，包括焦虑和回避两个维度。</p>
+                                </div>
+                                <div class="rpi-science-scale-item">
+                                    <div class="rpi-science-scale-header">
+                                        <div class="rpi-science-scale-number">2</div>
+                                        <h4>多维度嫉妒量表 (MJS)</h4>
+                                    </div>
+                                    <p>Multidimensional Jealousy Scale，测量认知、情绪和行为三个维度的嫉妒表现。</p>
+                                </div>
+                                <div class="rpi-science-scale-item">
+                                    <div class="rpi-science-scale-header">
+                                        <div class="rpi-science-scale-number">3</div>
+                                        <h4>关系控制量表 (RCS)</h4>
+                                    </div>
+                                    <p>Relationship Control Scale，评估亲密关系中的控制行为和态度。</p>
+                                </div>
+                                <div class="rpi-science-scale-item">
+                                    <div class="rpi-science-scale-header">
+                                        <div class="rpi-science-scale-number">4</div>
+                                        <h4>依赖量表 (DS)</h4>
+                                    </div>
+                                    <p>Dependency Scale，测量个体在关系中的依赖程度和独立性水平。</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 研究支持 -->
+                        <section class="rpi-science-section rpi-science-section-last">
+                            <div class="rpi-science-section-header">
+                                <div class="rpi-science-section-icon-wrapper">
+                                    <div class="rpi-science-section-icon" style="background: linear-gradient(135deg, rgba(60, 131, 246, 0.1), rgba(60, 131, 246, 0.05)); color: #3C83F6;">🔍</div>
+                                </div>
+                                <div class="rpi-science-section-title-group">
+                                    <h2>研究支持</h2>
+                                    <p class="rpi-science-section-desc">丰富的学术研究作为支撑</p>
+                                </div>
+                            </div>
+                            <div class="rpi-science-research-box">
+                                <div class="rpi-science-research-item">
+                                    <div class="rpi-science-research-icon">📖</div>
+                                    <div class="rpi-science-research-content">
+                                        <h4>学术文献支持</h4>
+                                        <p>基于大量发表在国际权威期刊的研究成果，包括《人格与社会心理学杂志》《亲密关系研究》等。</p>
+                                    </div>
+                                </div>
+                                <div class="rpi-science-research-item">
+                                    <div class="rpi-science-research-icon">🔬</div>
+                                    <div class="rpi-science-research-content">
+                                        <h4>实证研究验证</h4>
+                                        <p>多项大样本实证研究证实了量表的信度和效度，确保测评结果的科学性和准确性。</p>
+                                    </div>
+                                </div>
+                                <div class="rpi-science-research-item">
+                                    <div class="rpi-science-research-icon">🌍</div>
+                                    <div class="rpi-science-research-content">
+                                        <h4>跨文化适用</h4>
+                                        <p>量表经过多个国家和文化背景的验证，具有良好的跨文化适用性和普适性。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 底部说明 -->
+                        <div class="rpi-science-disclaimer">
+                            <div class="rpi-science-disclaimer-icon">ℹ️</div>
+                            <div class="rpi-science-disclaimer-content">
+                                <h4>专业声明</h4>
+                                <p>本测评工具仅供个人自我了解和参考使用，不能替代专业的心理咨询或治疗。如需专业帮助，请咨询有资质的心理健康专业人士。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 引入验证SDK（用于无限测试token验证） -->
+        <script src="/static/js/link-validator.js"></script>
+        <script>
+            // 禁用SDK的推广链接（RPI测试已在HTML中添加推广信息，避免重复）
+            window.__RPI_DISABLE_SDK_PROMOTION = true;
+            
+            // 初始化验证SDK（用于无限测试token验证，确保失效的token无法使用）
+            if (typeof PsyTestValidator !== 'undefined') {
+                PsyTestValidator.init(null, {
+                    // 如果无法从URL提取参数（如次数用完跳转回首页），静默处理，不显示错误弹窗
+                    suppressErrors: false, // 先尝试通过onError处理
+                    onSuccess: function(result, validator) {
+                        console.log('RPI测试 SDK初始化成功，链接有效:', result);
+                        // 设置window.linkValidator供其他脚本使用
+                        if (validator) {
+                            window.linkValidator = validator;
+                        }
+                    },
+                    onError: function(error) {
+                        console.warn('RPI测试 SDK初始化失败:', error);
+                        
+                        // 如果是"无法从URL中提取参数"的错误，返回true表示已处理，不显示错误弹窗
+                        // 这种情况可能发生在：次数用完跳转回首页时，URL格式可能不被SDK识别
+                        if (error && error.message && error.message.includes('无法从URL中提取')) {
+                            console.log('RPI测试：无法从URL提取参数（可能是正常情况，如次数用完跳转回首页），静默处理');
+                            // 返回true，告诉SDK不要显示错误弹窗
+                            return true;
+                        }
+                        
+                        // 其他错误（如无限测试模式初始化失败），尝试获取validator实例
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            window.linkValidator = window.PsyTestValidator.getInstance();
+                        }
+                        
+                        // 返回false，表示未处理，SDK会显示错误弹窗（如果suppressErrors为false）
+                        return false;
+                    },
+                    onLoad: function(data) {
+                        console.log('RPI测试 SDK加载完成:', data);
+                        // 确保window.linkValidator被设置
+                        if (!window.linkValidator && window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            window.linkValidator = window.PsyTestValidator.getInstance();
+                        }
+                        
+                        // 检查验证结果，如果验证失败（token失效），阻止页面使用
+                        if (!data.valid && window.linkValidator) {
+                            console.error('RPI测试 token验证失败:', data.error || '测试链接无效');
+                            
+                            // 如果是无限测试但验证失败，检查token是否为无限测试token
+                            // 如果是，可能是URL参数问题（缺少unlimited=true），不显示错误弹窗
+                            const token = window.linkValidator ? window.linkValidator.token : null;
+                            const isUnlimitedToken = token && token.startsWith('unlimited_');
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const hasUnlimitedParam = urlParams.get('unlimited') === 'true';
+                            
+                            // 如果是无限测试token但URL中没有unlimited=true参数，静默处理（这种情况应该已经通过buildUrlWithToken修复）
+                            if (isUnlimitedToken && !hasUnlimitedParam) {
+                                console.log('RPI测试：无限测试token但URL中缺少unlimited参数，已通过buildUrlWithToken修复，不显示错误');
+                                return;
+                            }
+                            
+                            // token失效时，显示错误提示
+                            if (data.error && (data.error.includes('已失效') || data.error.includes('无效') || data.error.includes('过期'))) {
+                                alert('测试链接已失效，请重新打开测试。\n\n' + (data.error || ''));
+                                // 可以选择关闭页面或跳转到首页
+                                // window.location.href = '/';
+                            }
+                        }
+                    }
+                });
+            }
+        </script>
+
+        <!-- 导入数据模块 -->
+        <script type="module" src="js/intro.js"></script>
+        
+        <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+        <script>
+            // 等待DOM加载完成后再启用安全功能
+            (function() {
+                function enableSecurity() {
+                    if (typeof TestSecurity !== 'undefined') {
+                        TestSecurity.enable();
+                    } else {
+                        console.error('[TestSecurity] 安全工具库未加载');
+                    }
+                }
+                
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', enableSecurity);
+                } else {
+                    enableSecurity();
+                }
+            })();
+        </script>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,504 @@
+/**
+ * SRI 报告页面样式
+ * 完全独立的样式，不依赖任何外部框架
+ */
+
+/* 报告容器 */
+.report-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+/* 加载提示 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* 报告头部 */
+.report-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24px;
+  padding: 40px 24px;
+  margin-bottom: 32px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  color: white;
+}
+
+.header-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+.report-title {
+  font-size: 36px;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 12px 0;
+  line-height: 1.2;
+}
+
+.report-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 8px 0;
+}
+
+.report-date {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+/* 章节标题 */
+.section-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+  margin: 0 0 32px 0;
+}
+
+/* 整体评估结果 */
+.overall-result {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.overall-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.stat-value {
+  font-size: 64px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.stat-subtitle {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-bottom: 16px;
+}
+
+.stat-progress {
+  margin-top: 16px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.overall-level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+  height: 80px;
+  color: white;
+  border-radius: 16px;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.overall-interpretation {
+  text-align: center;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid;
+  margin-top: 32px;
+}
+
+.overall-interpretation p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #374151;
+  margin: 0;
+}
+
+/* 详细分数分析 */
+.detailed-analysis {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.analysis-content {
+  margin-top: 24px;
+}
+
+/* 维度得分详情 */
+.dimensions-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.dimensions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.dimension-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dimension-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* 分数区间参考标准 */
+.score-reference-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, #fef3c7, #ffffff);
+}
+
+.score-reference-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+/* 详细维度解读 */
+.dimension-details-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.dimension-detail-panel {
+  margin-bottom: 16px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.dimension-detail-header {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dimension-detail-header:hover {
+  background: rgba(0, 0, 0, 0.02) !important;
+}
+
+.dimension-detail-content {
+  padding: 16px 24px;
+}
+
+/* 个性化改善建议 */
+.recommendations-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.recommendations-list {
+  margin-top: 24px;
+}
+
+/* 亲密关系相处指南 */
+.relationship-guide-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.relationship-guide-content {
+  margin-top: 24px;
+}
+
+/* 性态度类型特点总结 */
+.type-summary-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.type-summary-content {
+  margin-top: 24px;
+}
+
+/* 人口学个性化分析 */
+.demographic-insights-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.demographic-insights-content {
+  margin-top: 24px;
+}
+
+/* 温馨提示 */
+.warm-tips-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.warm-tips-content {
+  margin-top: 24px;
+}
+
+/* 底部说明 */
+.report-footer-info {
+  margin-bottom: 24px;
+}
+
+/* 底部操作区 */
+.report-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+  padding: 24px;
+  width: 100%;
+}
+
+.footer-button {
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.footer-button:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.footer-button.primary {
+  background: #1890ff;
+  border-color: #1890ff;
+  color: #fff;
+}
+
+.footer-button.primary:hover {
+  background: #40a9ff;
+  border-color: #40a9ff;
+}
+
+/* 推广链接区域样式（SDK自动添加到.report-footer中） */
+.report-footer #link-validator-promotion-link {
+  width: 100%;
+  text-align: center;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .report-container {
+    padding: 12px;
+  }
+  
+  .report-header {
+    padding: 32px 16px;
+  }
+  
+  .report-title {
+    font-size: 28px;
+  }
+  
+  .header-icon {
+    font-size: 48px;
+  }
+  
+  .overall-stats {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .stat-value {
+    font-size: 56px;
+  }
+  
+  .overall-level-badge {
+    width: 140px;
+    height: 70px;
+    font-size: 24px;
+  }
+  
+  .section-title {
+    font-size: 24px;
+  }
+  
+  .dimensions-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .dimension-card {
+    padding: 20px;
+  }
+  
+  .detailed-analysis,
+  .dimensions-section,
+  .overall-result,
+  .score-reference-section,
+  .dimension-details-section,
+  .recommendations-section,
+  .relationship-guide-section,
+  .type-summary-section,
+  .demographic-insights-section,
+  .warm-tips-section {
+    padding: 24px 16px;
+  }
+  
+  .score-reference-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+  
+  .relationship-guide-content > div {
+    grid-template-columns: 1fr;
+  }
+  
+  .type-summary-content > div {
+    grid-template-columns: 1fr;
+  }
+  
+  .footer-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .report-title {
+    font-size: 24px;
+  }
+  
+  .section-title {
+    font-size: 20px;
+  }
+  
+  .stat-value {
+    font-size: 48px;
+  }
+  
+  .overall-level-badge {
+    font-size: 20px;
+    min-width: 120px;
+    height: 60px;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .report-container {
+    background: #fff;
+    padding: 0;
+  }
+  
+  .report-footer {
+    display: none;
+  }
+  
+  .loading-overlay {
+    display: none;
+  }
+  
+  .report-header {
+    break-inside: avoid;
+  }
+  
+  .dimension-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+

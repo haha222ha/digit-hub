@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渣女测试 - 30道题看清你的感情人格</title>
+    <meta name="description" content="专业心理测试，通过30道精选题目，深入分析你的感情人格类型。暖女、宝妈女、凤凰女、渣女、捞女、家暴女，你是哪一种？">
+    <link rel="stylesheet" href="css/theme-elegantrose.css">
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p { margin: 0; line-height: 1.6; }
+
+        /* 首页专属样式 */
+        .home-hero {
+            text-align: center;
+            padding: 40px 24px 32px;
+            position: relative;
+        }
+        
+        .home-badge {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 24px;
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+            border: 2px solid var(--border-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            box-shadow: 0 0 40px var(--rose-glow);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 30px var(--rose-glow); }
+            50% { box-shadow: 0 0 50px var(--rose-glow), 0 0 80px rgba(232, 180, 184, 0.1); }
+        }
+        
+        .home-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 8px;
+            letter-spacing: 2px;
+        }
+        
+        .home-subtitle {
+            color: var(--rose-gold);
+            font-size: 1rem;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+        }
+        
+        .home-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.9;
+            max-width: 340px;
+            margin: 0 auto 28px;
+        }
+        
+        /* 类型预览 */
+        .types-preview {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+        
+        .type-chip {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 10px 6px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+        
+        .type-chip:hover {
+            border-color: var(--rose-gold);
+            color: var(--rose-gold);
+            transform: translateY(-2px);
+        }
+        
+        .type-chip .emoji {
+            display: block;
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+        }
+        
+        /* 统计信息 */
+        .stats-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 28px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--rose-gold);
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        /* 特性列表 */
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 28px;
+        }
+        
+        .features-list li {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .features-list li::before {
+            content: '✦';
+            color: var(--rose-gold);
+            margin-right: 12px;
+            font-size: 0.7rem;
+        }
+        
+        /* 开始按钮 */
+        .start-btn {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            padding: 18px 24px;
+            background: var(--rose-gold-gradient);
+            color: var(--bg-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            letter-spacing: 2px;
+            box-shadow: 0 6px 30px var(--rose-glow);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px var(--rose-glow);
+        }
+        
+        .start-btn:hover::before {
+            left: 100%;
+        }
+        
+        /* 底部提示 */
+        .footer-tip {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        
+        /* 分割线 */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 24px 0;
+            color: var(--rose-gold);
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+        
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            width: 50px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--rose-gold), transparent);
+        }
+        
+        /* 引言 */
+        .quote-box {
+            background: linear-gradient(180deg, rgba(232, 180, 184, 0.05) 0%, transparent 100%);
+            border-left: 3px solid var(--rose-gold);
+            padding: 16px 18px;
+            margin: 0 0 24px;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+        
+        .quote-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.8;
+            font-style: italic;
+            margin: 0;
+        }
+        
+        /* 动画入场 */
+        .animate-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .animate-in:nth-child(1) { animation-delay: 0.1s; }
+        .animate-in:nth-child(2) { animation-delay: 0.2s; }
+        .animate-in:nth-child(3) { animation-delay: 0.3s; }
+        .animate-in:nth-child(4) { animation-delay: 0.4s; }
+        .animate-in:nth-child(5) { animation-delay: 0.5s; }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 响应式优化 */
+        @media (max-width: 400px) {
+            .home-title {
+                font-size: 1.7rem;
+            }
+            
+            .types-preview {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stats-box {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- 顶部标题区 -->
+        <div class="home-hero animate-in">
+            <div class="home-badge">🔮</div>
+            <h1 class="home-title">渣女测试</h1>
+            <p class="home-subtitle">感情人格深度分析</p>
+        </div>
+        
+        <!-- 类型预览 -->
+        <div class="types-preview animate-in">
+            <div class="type-chip">
+                <span class="emoji">🌸</span>
+                暖女
+            </div>
+            <div class="type-chip">
+                <span class="emoji">👶</span>
+                宝妈女
+            </div>
+            <div class="type-chip">
+                <span class="emoji">🦋</span>
+                凤凰女
+            </div>
+            <div class="type-chip">
+                <span class="emoji">🔥</span>
+                渣女
+            </div>
+            <div class="type-chip">
+                <span class="emoji">💰</span>
+                捞女
+            </div>
+            <div class="type-chip">
+                <span class="emoji">⚠️</span>
+                家暴女
+            </div>
+        </div>
+        
+        <!-- 统计信息 -->
+        <div class="stats-box animate-in">
+            <div class="stat-item">
+                <div class="stat-value">30</div>
+                <div class="stat-label">精选题目</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">6</div>
+                <div class="stat-label">人格类型</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">3</div>
+                <div class="stat-label">分钟完成</div>
+            </div>
+        </div>
+        
+        <!-- 介绍卡片 -->
+        <div class="card animate-in">
+            <h2 style="font-size: 1.1rem; margin: 0 0 16px; color: var(--text-primary);">
+                关于这个测试
+            </h2>
+            
+            <div class="quote-box">
+                <p class="quote-text">
+                    "没有人是完美的，每个人都有自己的感情弱点。
+                    <br>30道专业心理题目，带你看清自己在感情中的真实模样。"
+                </p>
+            </div>
+            
+            <ul class="features-list">
+                <li>基于心理学人格理论设计</li>
+                <li>涵盖感情、金钱、责任等多个维度</li>
+                <li>生成详细的性格分析报告</li>
+                <li>包含暖女/独立/情感投入三大指数</li>
+            </ul>
+        </div>
+        
+        <!-- 分割线 -->
+        <div class="section-divider">✦</div>
+        
+        <!-- 开始测试按钮 -->
+        <button id="start-test-btn" class="start-btn animate-in">
+            开始测试 →
+        </button>
+        
+        <!-- 底部提示 -->
+        <p class="footer-tip">
+            测试结果仅供参考，请理性对待
+        </p>
+
+        <!-- 底部说明区域（用于SDK添加推广链接） -->
+        <footer class="welcome-footer" style="padding: 16px 20px; text-align: center; margin-top: 20px;">
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;"></p>
+        </footer>
+    </div>
+
+    <!-- 错误提示容器 -->
+    <div id="errorOverlay" class="error-overlay" style="display: none;">
+        <p id="errorMessage"></p>
+    </div>
+
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+
+        if (typeof PsyTestValidator !== 'undefined') {
+            // 明确传入testCode 'znt'，因为znt测试使用非标准文件名
+            PsyTestValidator.init('znt', {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) errorOverlay.style.display = 'none';
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) errorOverlay.style.display = 'none';
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (!validatorInstance && window.linkValidator) {
+                            validatorInstance = window.linkValidator;
+                        }
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+
+                    // 调用addPromotionLink确保推广链接显示（首页使用welcome-footer容器）
+                    setTimeout(() => {
+                        if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                            PsyTestValidator.addPromotionLink();
+                        }
+                    }, 100);
+
+                    // 检查是否是重新测试（通过URL参数判断）
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const isRestart = urlParams.get('restart') === 'true';
+
+                    // 如果是重新测试，不清除本地结果，也不自动跳转
+                    if (isRestart) {
+                        console.log('检测到重新测试参数，允许重新测试，不自动跳转到报告页');
+                        urlParams.delete('restart');
+                        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                        window.history.replaceState({}, '', newUrl);
+                        return;
+                    }
+
+                    // 如果链接有效且有测试结果，跳转到报告页（需要包含token参数）
+                    if (data.valid && data.has_local_result) {
+                        let reportUrl = 'zhanu_result.html';
+                        const reportUrlParams = new URLSearchParams();
+                        const token = validatorInstance && validatorInstance.token;
+                        const isUnlimited = validatorInstance && validatorInstance.unlimited;
+                        if (isUnlimited && token) {
+                            reportUrlParams.set('unlimited', 'true');
+                            reportUrlParams.set('token', token);
+                        } else if (token) {
+                            reportUrlParams.set('token', token);
+                        }
+                        const queryString = reportUrlParams.toString();
+                        if (queryString) {
+                            reportUrl = `${reportUrl}?${queryString}`;
+                        }
+                        window.location.href = reportUrl;
+                        return;
+                    }
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+        }
+    </script>
+    <script>
+        // 欢迎页开始测试按钮点击事件
+        document.addEventListener('DOMContentLoaded', function() {
+            const startBtn = document.getElementById('start-test-btn');
+            if (!startBtn) return;
+
+            startBtn.addEventListener('click', async function() {
+                // 等待SDK初始化完成（最多等待3秒）
+                let waitCount = 0;
+                while (!window.linkValidator && waitCount < 30) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    waitCount++;
+                }
+
+                // 检查SDK是否初始化
+                if (!window.linkValidator) {
+                    console.error('SDK未初始化，无法开始测试');
+                    alert('验证SDK未初始化，无法开始测试。请刷新页面重试。');
+                    return;
+                }
+
+                // 先验证链接有效性（如果无效会显示弹窗）
+                let isValid = false;
+                if (typeof window.linkValidator.validateForUserAction === 'function') {
+                    try {
+                        isValid = await window.linkValidator.validateForUserAction();
+                        console.log('验证结果:', { isValid, valid: window.linkValidator.valid, error: window.linkValidator.validationError });
+
+                        if (!isValid || window.linkValidator.valid === false) {
+                            console.warn('链接验证失败，无法开始测试', {
+                                isValid,
+                                valid: window.linkValidator.valid,
+                                error: window.linkValidator.validationError
+                            });
+                            return;
+                        }
+                    } catch (error) {
+                        console.error('链接验证失败:', error);
+                        if (window.linkValidator) {
+                            window.linkValidator.valid = false;
+                        }
+                        return;
+                    }
+                } else {
+                    if (window.linkValidator.valid === false) {
+                        alert(window.linkValidator.validationError || '测试链接无效，请检查链接是否正确');
+                        return;
+                    }
+                    isValid = window.linkValidator.valid !== false;
+                }
+
+                // 最终检查
+                if (!isValid || (window.linkValidator && window.linkValidator.valid === false)) {
+                    console.warn('最终验证检查失败，无法开始测试');
+                    return;
+                }
+
+                // 链接验证通过，调用测试开始API
+                if (window.linkValidator) {
+                    try {
+                        await window.linkValidator.startTest();
+                        console.log('测试开始记录成功');
+                    } catch (error) {
+                        console.error('记录测试开始失败:', error);
+                        return;
+                    }
+                }
+
+                // 构建答题页URL（需要包含token参数）
+                let testUrl = 'zhanu_test.html';
+                const urlParams = new URLSearchParams();
+                const token = window.linkValidator && window.linkValidator.token;
+                const isUnlimited = window.linkValidator && window.linkValidator.unlimited;
+                if (isUnlimited && token) {
+                    urlParams.set('unlimited', 'true');
+                    urlParams.set('token', token);
+                } else if (token) {
+                    urlParams.set('token', token);
+                }
+                const queryString = urlParams.toString();
+                if (queryString) {
+                    testUrl = `${testUrl}?${queryString}`;
+                }
+
+                // 跳转到答题页
+                window.location.href = testUrl;
+            });
+        });
+    </script>
+</body>
+</html>

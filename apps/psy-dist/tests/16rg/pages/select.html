@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>16人格·心智阶位测评 - 选择你的人格类型</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/select.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+</head>
+<body>
+    <div class="mbti16stage-questionnaire page-container">
+        <!-- 背景光效 -->
+        <div class="glow-orbs">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+        </div>
+
+        <!-- 类型选择容器 -->
+        <div class="type-selector-container">
+            <!-- 头部 -->
+            <div class="selector-header">
+                <div class="header-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                        <path d="M2 17l10 5 10-5"></path>
+                        <path d="M2 12l10 5 10-5"></path>
+                    </svg>
+                    <span>16人格·心智阶位测评</span>
+                </div>
+                <h1 class="header-title">选择你的人格类型</h1>
+                <p class="header-subtitle">请选择你的MBTI人格类型，我们将为你匹配专属的心智阶位评估题目</p>
+            </div>
+
+            <!-- 类型组网格 -->
+            <div class="type-groups-grid">
+                <!-- 分析家 -->
+                <div class="type-group-card" style="--group-color: #88619a; --group-color-light: #88619a20;">
+                    <div class="group-card-header">
+                        <div class="group-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                <polyline points="2 17 12 22 22 17"></polyline>
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="group-info">
+                            <span class="group-name">分析家</span>
+                            <span class="group-label">Analysts</span>
+                        </div>
+                    </div>
+                    <div class="group-types-list">
+                        <button class="type-button">
+                            <span class="type-code">INTJ</span>
+                            <span class="type-archetype">战略策划者</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                        <button class="type-button">
+                            <span class="type-code">INTP</span>
+                            <span class="type-archetype">逻辑构建者</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                        <button class="type-button">
+                            <span class="type-code">ENTJ</span>
+                            <span class="type-archetype">统帅</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                        <button class="type-button">
+                            <span class="type-code">ENTP</span>
+                            <span class="type-archetype">发明家</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 外交家 -->
+                <div class="type-group-card" style="--group-color: #33a474; --group-color-light: #33a47420;">
+                    <div class="group-card-header">
+                        <div class="group-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+                            </svg>
+                        </div>
+                        <div class="group-info">
+                            <span class="group-name">外交家</span>
+                            <span class="group-label">Diplomats</span>
+                        </div>
+                    </div>
+                    <div class="group-types-list">
+                        <button class="type-button">
+                            <span class="type-code">INFJ</span>
+                            <span class="type-archetype">引路人</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                        <button class="type-button">
+                            <span class="type-code">INFP</span>
+                            <span class="type-archetype">治愈者</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                        <button class="type-button">
+                            <span class="type-code">ENFJ</span>
+                            <span class="type-archetype">主人公</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                        <button class="type-button">
+                            <span class="type-code">ENFP</span>
+                            <span class="type-archetype">竞选者</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 守护者 -->
+                <div class="type-group-card" style="--group-color: #4298b4; --group-color-light: #4298b420;">
+                    <div class="group-card-header">
+                        <div class="group-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </div>
+                        <div class="group-info">
+                            <span class="group-name">守护者</span>
+                            <span class="group-label">Sentinels</span>
+                        </div>
+                    </div>
+                    <div class="group-types-list">
+                        <button class="type-button">
+                            <span class="type-code">ISTJ</span>
+                            <span class="type-archetype">物流师</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                        <button class="type-button">
+                            <span class="type-code">ISFJ</span>
+                            <span class="type-archetype">守卫者</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                        <button class="type-button">
+                            <span class="type-code">ESTJ</span>
+                            <span class="type-archetype">总经理</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                        <button class="type-button">
+                            <span class="type-code">ESFJ</span>
+                            <span class="type-archetype">执政官</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 探险家 -->
+                <div class="type-group-card" style="--group-color: #e2a03f; --group-color-light: #e2a03f20;">
+                    <div class="group-card-header">
+                        <div class="group-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                            </svg>
+                        </div>
+                        <div class="group-info">
+                            <span class="group-name">探险家</span>
+                            <span class="group-label">Explorers</span>
+                        </div>
+                    </div>
+                    <div class="group-types-list">
+                        <button class="type-button">
+                            <span class="type-code">ISTP</span>
+                            <span class="type-archetype">鉴赏家</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                        <button class="type-button">
+                            <span class="type-code">ISFP</span>
+                            <span class="type-archetype">探险家</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                        <button class="type-button">
+                            <span class="type-code">ESTP</span>
+                            <span class="type-archetype">企业家</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                        <button class="type-button">
+                            <span class="type-code">ESFP</span>
+                            <span class="type-archetype">表演者</span>
+                            <svg class="type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        if (typeof TestSecurity !== 'undefined') {
+            TestSecurity.enable();
+        }
+    </script>
+    
+    <script src="../assets/js/common.js"></script>
+    <script src="../assets/js/error-handler.js"></script>
+    <script src="../assets/js/select.js"></script>
+</body>
+</html>
+

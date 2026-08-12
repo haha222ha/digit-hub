@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <meta name="description" content="原生家庭伤痛疗愈测试：觉察原生家庭影响，获取个性化深度解读与疗愈资源。"/>
+    <title>原生家庭伤痛疗愈测试</title>
+
+    <!-- 安全工具库（本地开发环境自动禁用） -->
+    <script src="/static/js/test-security.js"></script>
+    <script>
+        if (typeof TestSecurity !== 'undefined') {
+            TestSecurity.enable();
+        }
+    </script>
+
+    <script src="./assets/tailwind.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50:'#f5f3ff',100:'#ede9fe',200:'#ddd6fe',300:'#c4b5fd',400:'#a78bfa',500:'#8b5cf6',600:'#7c3aed',700:'#6d28d9',800:'#5b21b6',900:'#4c1d95' },
+                        accent: { yellow:'#fbbf24',pink:'#ec4899',warm:'#f59e0b' },
+                    },
+                    fontFamily: { sans: ['"PingFang SC"','"Microsoft YaHei"','system-ui','sans-serif'] },
+                },
+            },
+        }
+    </script>
+    <script src="./assets/chart.umd.min.js"></script>
+    <script src="./assets/lucide.min.js"></script>
+    <style>
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{background:#faf9ff}
+        .screen{display:none}
+        .screen.active{display:flex}
+        .fade-in{animation:fadeIn .5s ease forwards;opacity:0}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes breathe{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.1);opacity:1}}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+        .breathe{animation:breathe 3s infinite}
+        .breathe-d1{animation:breathe 3s infinite .5s}
+        .breathe-d2{animation:breathe 3s infinite 1s}
+        .float{animation:float 3s ease-in-out infinite}
+        .opt-btn{transition:all .2s ease}
+        .opt-btn:hover{transform:translateX(4px)}
+        ::-webkit-scrollbar{width:6px}
+        ::-webkit-scrollbar-track{background:#f5f3ff}
+        ::-webkit-scrollbar-thumb{background:#c4b5fd;border-radius:3px}
+        ::-webkit-scrollbar-thumb:hover{background:#a78bfa}
+
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .welcome-footer {
+            display: block !important;
+            visibility: visible !important;
+            width: 100%;
+            max-width: 28rem;
+            margin: 2rem auto 0;
+            text-align: center;
+        }
+        .welcome-footer #link-validator-promotion-link {
+            width: 100%;
+            text-align: center;
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid #ede9fe;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            box-sizing: border-box;
+        }
+        .report-footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-top: 32px;
+            padding: 24px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .report-footer #link-validator-promotion-link {
+            width: 100%;
+            text-align: center;
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid #ede9fe;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body class="page-disabled font-sans text-gray-900 min-h-screen flex flex-col">
+
+<!-- ========== WELCOME ========== -->
+<div id="screen-welcome" class="screen active flex-col items-center justify-center min-h-screen px-5 py-10 text-center relative overflow-hidden">
+    <div class="absolute -top-20 -right-20 w-64 h-64 bg-primary-200/30 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-16 -left-16 w-48 h-48 bg-accent-yellow/10 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/3 left-1/4 w-32 h-32 bg-accent-pink/5 rounded-full blur-2xl"></div>
+
+    <div class="relative z-10 max-w-lg mx-auto w-full">
+        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center mx-auto mb-7 shadow-lg shadow-primary-500/25 float">
+            <span class="text-4xl">🌙</span>
+        </div>
+
+        <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 mb-3 leading-snug">原生家庭伤痛疗愈测试</h1>
+        <p class="text-sm md:text-base text-gray-500 leading-relaxed mb-8">
+            我们无法选择出身，但可以选择如何面对过去。<br/>
+            这个测试将帮助您觉察原生家庭对您性格与关系模式的影响，<br/>
+            并结合 <strong class="text-primary-600">专业心理学模型</strong>，为您提供个性化的深度解读与疗愈资源。
+        </p>
+
+        <div class="flex flex-wrap justify-center gap-3 mb-8">
+            <span class="px-4 py-2 rounded-full text-xs font-semibold bg-primary-100 text-primary-700">✨ 深度觉察</span>
+            <span class="px-4 py-2 rounded-full text-xs font-semibold bg-accent-yellow/15 text-amber-700">🛡️ 科学评估</span>
+            <span class="px-4 py-2 rounded-full text-xs font-semibold bg-accent-pink/10 text-pink-700">💜 专业建议</span>
+        </div>
+
+        <button id="btn-start" class="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-12 py-4 rounded-full text-base font-bold shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all hover:-translate-y-0.5 active:translate-y-0">
+            开始探索 →
+        </button>
+
+        <div class="welcome-footer">
+            <p class="mt-8 text-xs text-gray-400">免责声明：本测试仅供自我探索参考，不构成专业医疗诊断。</p>
+        </div>
+    </div>
+</div>
+
+<!-- ========== QUIZ ========== -->
+<div id="screen-quiz" class="screen flex-col items-center min-h-screen px-5 py-6 relative">
+    <div class="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-primary-50 to-transparent pointer-events-none"></div>
+    <div class="relative z-10 w-full max-w-lg mx-auto flex flex-col flex-1">
+        <!-- Progress -->
+        <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold text-primary-600 bg-primary-100 px-3 py-1 rounded-full" id="q-num">第 1 题</span>
+            <span class="text-xs text-gray-400" id="q-count">1 / 50</span>
+        </div>
+        <div class="w-full h-1.5 bg-primary-100 rounded-full mb-6 overflow-hidden">
+            <div id="q-bar" class="h-full bg-gradient-to-r from-primary-500 to-primary-400 rounded-full transition-all duration-300" style="width:2%"></div>
+        </div>
+
+        <!-- Question Card -->
+        <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm shadow-primary-500/5 flex-1 flex flex-col border border-primary-50">
+            <h2 id="q-text" class="text-lg md:text-xl font-bold text-gray-900 leading-relaxed mb-6 fade-in">题目加载中...</h2>
+            <div id="q-options" class="flex flex-col gap-2.5 flex-1 fade-in"></div>
+        </div>
+
+        <!-- Nav -->
+        <div class="flex justify-between items-center mt-4 px-1">
+            <button id="btn-prev" class="text-sm text-gray-400 hover:text-primary-500 transition-colors flex items-center gap-1 invisible">
+                ← 上一题
+            </button>
+            <span class="text-xs text-gray-300">选完自动跳转</span>
+        </div>
+    </div>
+</div>
+
+<!-- ========== TRANSITION ========== -->
+<div id="screen-transition" class="screen flex-col items-center justify-center min-h-screen px-5 py-10 text-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-primary-50 via-white to-primary-50/50"></div>
+    <div class="relative z-10 max-w-sm mx-auto">
+        <div class="relative w-28 h-28 mx-auto mb-8">
+            <div class="absolute inset-0 rounded-full bg-gradient-to-br from-primary-200/40 to-accent-yellow/20 breathe"></div>
+            <div class="absolute top-3.5 left-3.5 w-20 h-20 rounded-full bg-gradient-to-br from-primary-300/50 to-primary-200/30 breathe-d1"></div>
+            <div class="absolute top-7 left-7 w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-400 breathe-d2 shadow-lg shadow-primary-500/30"></div>
+        </div>
+        <h3 class="text-xl font-extrabold text-gray-900 mb-2">深度解析中</h3>
+        <p class="text-sm text-gray-500 leading-relaxed mb-6">正在为您分析 10 个心理维度<br/>生成个性化疗愈报告...</p>
+        <div class="flex justify-center gap-1.5 mb-6">
+            <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+            <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+            <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+            <div class="w-2 h-2 rounded-full bg-primary-200"></div>
+            <div class="w-2 h-2 rounded-full bg-primary-200"></div>
+        </div>
+        <div class="bg-white/80 backdrop-blur rounded-2xl px-5 py-4 text-sm text-primary-600 leading-relaxed max-w-xs mx-auto shadow-sm">
+            💡 疗愈不是遗忘，而是当你想起过去时，不再被它控制。
+        </div>
+    </div>
+</div>
+
+<!-- ========== RESULT ========== -->
+<div id="screen-result" class="screen flex-col items-start min-h-screen px-5 py-8 pb-20 relative">
+    <div class="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-primary-50 to-transparent pointer-events-none"></div>
+    <div class="relative z-10 w-full max-w-3xl mx-auto">
+
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-extrabold text-gray-900 mb-1">测试报告分析</h2>
+            <span class="inline-block text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full" id="r-date"></span>
+        </div>
+
+        <!-- Score + Radar -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-primary-50 flex flex-col items-center justify-center">
+                <div class="relative w-32 h-32 mb-4">
+                    <svg class="w-full h-full" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="#ede9fe" stroke-width="7"/>
+                        <circle id="score-ring" cx="50" cy="50" r="42" fill="none" stroke="#8b5cf6" stroke-width="7" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264" transform="rotate(-90 50 50)" style="transition:stroke-dashoffset 1.2s ease"/>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="r-score" class="text-3xl font-extrabold text-primary-600">0</span>
+                        <span class="text-[10px] text-gray-400">总分 / 250</span>
+                    </div>
+                </div>
+                <h3 id="r-level" class="text-lg font-bold mb-1">分析中...</h3>
+                <p id="r-desc" class="text-sm text-gray-500 text-center leading-relaxed mt-1">描述加载中...</p>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-primary-50 min-h-[280px] flex flex-col items-center justify-center">
+                <h3 class="text-sm font-bold text-gray-700 w-full pl-2 mb-3 flex items-center gap-1.5">
+                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-primary-500"></i>影响维度分布
+                </h3>
+                <div class="w-full h-[250px] relative"><canvas id="radarChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="mb-8">
+            <h3 class="text-lg font-extrabold text-gray-900 mb-5 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center text-base">💡</span>各维度解读
+            </h3>
+            <div id="r-insights" class="flex flex-col gap-4"></div>
+        </div>
+
+        <!-- Resources -->
+        <div class="mb-8">
+            <h3 class="text-lg font-extrabold text-gray-900 mb-5 flex items-center gap-2 flex-wrap">
+                <span class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center text-base">📖</span>专属疗愈资源
+                <span id="r-top-dim" class="text-xs font-normal text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full"></span>
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white rounded-xl p-5 shadow-sm border border-primary-50">
+                    <h4 class="font-bold text-sm text-gray-800 mb-3 flex items-center gap-1.5">📚 推荐书籍</h4>
+                    <ul id="r-books" class="text-sm text-gray-500 space-y-2"></ul>
+                </div>
+                <div class="bg-white rounded-xl p-5 shadow-sm border border-primary-50">
+                    <h4 class="font-bold text-sm text-gray-800 mb-3 flex items-center gap-1.5">🎬 推荐电影</h4>
+                    <ul id="r-movies" class="text-sm text-gray-500 space-y-2"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercises & Myths -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
+            <div>
+                <h3 class="text-lg font-extrabold text-gray-900 mb-5 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center text-base">💜</span>自助疗愈小练习
+                </h3>
+                <div id="r-exercises" class="flex flex-col gap-3"></div>
+            </div>
+            <div>
+                <h3 class="text-lg font-extrabold text-gray-900 mb-5 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-primary-50 flex items-center justify-center text-base">❓</span>常见误区解答
+                </h3>
+                <div id="r-myths" class="flex flex-col gap-3"></div>
+            </div>
+        </div>
+
+        <div class="report-footer">
+            <button id="btn-restart" type="button" class="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-10 py-3.5 rounded-full font-bold shadow-lg shadow-primary-500/25 hover:shadow-xl transition-all hover:-translate-y-0.5 flex items-center gap-2">
+                🔄 重新测试
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== DATA =====
+const CATEGORY_LABELS={emotional_neglect:'情感忽视',controlling:'过度控制',criticism:'指责打压',perfectionism:'苛求完美',role_reversal:'角色倒置',conditional_love:'有条件的爱',boundary_invasion:'边界侵犯',invalidation:'感受否认',instability:'环境不稳定',shaming:'羞耻灌输'};
+const OPTIONS=[{value:1,label:'从不'},{value:2,label:'偶尔'},{value:3,label:'有时'},{value:4,label:'经常'},{value:5,label:'总是'}];
+const DIMENSION_INSIGHTS={
+emotional_neglect:{low:{title:'情感忽视：情感连接良好 (5-11分)',description:'您的情感需求在成长中基本得到了回应。您能够自然地识别和表达情绪，相信自己的感受是重要的，拥有较好的情感安全感。',advice:'继续保持对自我情绪的觉察，这种能力是您建立健康亲密关系的宝贵财富。'},medium:{title:'情感忽视：隐约的空虚 (12-18分)',description:'您可能偶尔会觉得自己"不重要"或需求被忽略。这种感觉可能导致您在人际关系中倾向于自我压抑，不敢麻烦别人，有时会感到莫名的孤独。',advice:'尝试从小事开始表达需求，比如"我今天有点累，想一个人待会儿"。练习确认自己的感受是正当的。'},high:{title:'情感忽视：隐形的真空 (19-25分)',description:'您的情感需求长期被漠视，这可能导致了深刻的内心空虚感。您可能习惯了独自消化痛苦，难以信任他人，甚至对"即使什么都没发生"也感到极度孤单。',advice:'练习"命名情绪"。每天问自己三次"我现在感觉如何？"，并告诉自己"我的感受是真实的，不需要理由"。'}},
+controlling:{low:{title:'过度控制：独立自主 (5-11分)',description:'父母尊重您的个人意志，给予了您探索世界的自由。您在做决定时比较自信，能够为自己的人生负责，边界感清晰。',advice:'保持这种独立性，同时在亲密关系中注意平衡"自我"与"共融"。'},medium:{title:'过度控制：摇摆的意志 (12-18分)',description:'父母可能对您的某些生活领域干涉较多。您可能在顺从和反抗之间摇摆，有时会对自己的判断力产生怀疑，做决定时容易纠结。',advice:'在做决定感到纠结时，问自己："这是我想要的，还是父母希望我选的？" 练习承担小决定的后果来建立自信。'},high:{title:'过度控制：被剥夺的意志 (19-25分)',description:'父母可能主导了您生活的方方面面，导致您缺乏独立自我的边界。您可能对权威感到恐惧或极度叛逆，很难相信自己有能力掌控人生。',advice:'从小事开始练习"自我主张"（如今天穿什么颜色），告诉自己："这是我的人生，我有权犯错。"'}},
+criticism:{low:{title:'指责打压：自我接纳 (5-11分)',description:'您的成长环境以鼓励为主，这帮助您建立了较好的自尊。您能客观地看待自己的优缺点，不会因为小错误而过度攻击自己。',advice:'当遇到挫折时，继续做自己最好的朋友，用鼓励代替指责。'},medium:{title:'指责打压：内在的批判声 (12-18分)',description:'您可能内化了部分父母的批评声音。当事情搞砸时，您倾向于第一时间责怪自己"笨"或"没用"，而不是分析客观原因。',advice:'觉察脑海中的批评声。当那个声音说"你真笨"时，试着反驳："不，我只是犯了个错误，每个人都会犯错。"'},high:{title:'指责打压：严厉的超我 (19-25分)',description:'成长中充满了挑剔和否定，导致您对自己极其苛刻，难以接受赞美。这种内化的严厉声音可能让您长期处于低自尊和自我厌恶中。',advice:'练习"自我慈悲"。想象如果是您最好的朋友犯了这个错，您会怎么安慰Ta？请用同样的温柔对待自己。'}},
+perfectionism:{low:{title:'苛求完美：松弛有度 (5-11分)',description:'您允许自己不完美，明白"尽力而为"就足够了。您享受努力的过程，而不是被结果绑架，拥有较好的抗压能力。',advice:'这种松弛感是幸福的源泉，请继续保持对过程的享受。'},medium:{title:'苛求完美：成就焦虑 (12-18分)',description:'您可能觉得只有表现好才值得被爱。这种有条件的自我价值感让您不敢停歇，对失败有较高的焦虑感，难以真正放松。',advice:'尝试故意做一件只有60分的事，观察结果——世界并没有崩塌。学会区分"我的表现"和"我的价值"。'},high:{title:'苛求完美：优秀的囚徒 (19-25分)',description:'父母的高期望让您觉得容不得半点差错。您可能深陷于"不够好"的恐惧中，通过不断的成就来换取短暂的安全感，身心俱疲。',advice:'练习"足够好"哲学。告诉自己："我的价值不取决于我的成绩或收入。" 允许自己休息，休息不是偷懒，是恢复。'}},
+role_reversal:{low:{title:'角色倒置：界限清晰 (5-11分)',description:'在您的家庭中，父母承担了父母的责任，您只需要做个孩子。这种清晰的代际边界让您能专注于自己的成长。',advice:'在照顾他人时，您能很好地平衡自己和他人的需求，请保持这种健康的界限。'},medium:{title:'角色倒置：懂事的负担 (12-18分)',description:'您可能从小就比较"懂事"，习惯察言观色照顾父母的情绪。这让您容易忽略自己的需求，背负不属于您的责任。',advice:'提醒自己："父母的情绪是他们的责任，不是我的。" 您有权只做个被照顾的孩子（即使现在成年了）。'},high:{title:'角色倒置：被迫早熟 (19-25分)',description:'您可能过早地承担了照顾者（亲职化）的角色，成为了父母的"情绪配偶"或调解员。您习惯了拯救他人，却忘记了自己也需要被照顾。',advice:'放下对他人的过度责任感。默念："我有权把自己的需求放在第一位，这不代表我自私。"'}},
+conditional_love:{low:{title:'有条件的爱：无条件的接纳 (5-11分)',description:'您感受到了父母无条件的爱，明白自己的价值不取决于表现。这为您建立了稳固的安全感，让您在关系中敢于做真实的自己。',advice:'继续在关系中传递这种无条件的接纳，同时也要接纳自己的不完美。'},medium:{title:'有条件的爱：表现与价值 (12-18分)',description:'您可能隐约觉得只有听话或优秀时才会被爱。这让您在关系中倾向于讨好或过度努力，害怕一旦表现不好就会被抛弃。',advice:'练习区分"行为"与"人"。即使您做得不够好，您作为一个人的价值依然是完整的。'},high:{title:'有条件的爱：爱的交易 (19-25分)',description:'爱在您的成长中像是一种需要赚取的奖赏。您可能深信只有满足他人期待才有资格被爱，对拒绝他人感到极度恐惧和内疚。',advice:'学会自我关怀。试着对自己说："即使我什么都不做，我也值得被爱。" 建立不需要讨好的关系。'}},
+boundary_invasion:{low:{title:'边界侵犯：隐私尊重 (5-11分)',description:'您的个人空间和隐私得到了尊重，这帮助您建立了清晰的心理边界。您懂得保护自己，也尊重他人。',advice:'继续维护健康的边界，这是自尊的体现。'},medium:{title:'边界侵犯：模糊的界限 (12-18分)',description:'父母可能偶尔侵入您的隐私或替您做决定。您可能在设立底线时感到内疚或犹豫，容易被他人的情绪裹挟。',advice:'练习说"不"。从小事开始拒绝不合理的要求，观察并接纳随之而来的内疚感，但不要妥协。'},high:{title:'边界侵犯：共生的纠缠 (19-25分)',description:'您可能在毫无隐私的环境中长大，身心边界被严重入侵。您可能很难区分"我的感受"和"他人的感受"，常感到窒息或被吞噬。',advice:'物理和心理空间的隔离是必要的。允许自己拥有秘密，拥有不被打扰的空间是您的基本权利。'}},
+invalidation:{low:{title:'感受否认：真实感 (5-11分)',description:'您的感受通常被确认和理解，这让您相信自己的直觉和判断。您对现实有清晰的认知，不易受他人误导。',advice:'相信您的直觉，它是您内在的指南针。'},medium:{title:'感受否认：自我怀疑 (12-18分)',description:'您的感受有时会被轻视（"这有什么好哭的"）。这可能导致您在情绪激动时怀疑自己是否"反应过度"或"太敏感"。',advice:'寻找能验证您感受的朋友。当别人说"你想多了"时，告诉自己"我的感受对我来说是真实的"。'},high:{title:'感受否认：煤气灯效应 (19-25分)',description:'您的现实认知长期被否定（"你记错了"、"你疯了"）。您可能极度缺乏自信，习惯性向他人寻求确认才敢做判断，甚至怀疑自己神志不清。',advice:'停止向否定您的人寻求认可。记录事实，建立"现实检验"的锚点。重新连接您的身体感觉。'}},
+instability:{low:{title:'环境不稳定：安全基地 (5-11分)',description:'您的家庭环境相对稳定可预测，这为您提供了探索世界的安全基地。您的神经系统处于放松状态，能够安享当下。',advice:'感恩这种稳定性，并尝试为身边的人提供类似的安全感。'},medium:{title:'环境不稳定：警觉 (12-18分)',description:'家庭氛围可能时好时坏，您学会了察言观色以规避风险。这种高觉察力让您敏感，但也容易感到精神疲惫。',advice:'告诉自己"现在我已经安全了"。练习放松紧绷的神经，通过正念回归当下。'},high:{title:'环境不稳定：混乱与恐惧 (19-25分)',description:'成长环境充满冲突、爆发或不可预测性。您可能长期处于"战或逃"的应激状态，难以放松和信任，对声音或情绪变化极度敏感。',advice:'建立生活的规律性（Routine）。稳定的作息和仪式感能帮助神经系统恢复平静。寻找安全的避风港。'}},
+shaming:{low:{title:'羞耻灌输：健康的自尊 (5-11分)',description:'您很少受到羞辱式教育，能够区分"做错事"和"我是个坏孩子"。您拥有较为健康的自我价值感。',advice:'保护好这份自尊，不要让外界的评判轻易动摇您的核心价值。'},medium:{title:'羞耻灌输：隐秘的羞耻 (12-18分)',description:'您可能经历过被当众批评或比较。这让您对尴尬极其敏感，害怕在人前展露真实的自己，担心被嘲笑。',advice:'分享羞耻感是化解它的良药。找到值得信任的人，谈论那些让您感到羞耻的时刻。'},high:{title:'羞耻灌输：毒性羞耻 (19-25分)',description:'羞辱可能被用作管教手段，导致您内心深处觉得自己有缺陷、不配得。这种毒性羞耻感是自我攻击的根源，让您觉得自己不配拥有美好。',advice:'区分"内疚"（我做错了事）和"羞耻"（我是个错误）。练习对自己说："我是不完美的，但我依然值得被爱和归属。"'}}
+};
+const RECOMMENDED_RESOURCES={
+emotional_neglect:{books:['《被忽视的孩子》','《不被父母看见的伤痛》'],movies:['《无人知晓》','《被嫌弃的松子的一生》']},
+controlling:{books:['《情感勒索》','《原生家庭：如何修补自己的性格缺陷》'],movies:['《黑天鹅》','《狗牙》']},
+criticism:{books:['《自我关怀的力量》','《恰如其分的自尊》'],movies:['《爆裂鼓手》','《伯德小姐》']},
+perfectionism:{books:['《不完美，才美》','《少有人走的路》'],movies:['《黑天鹅》','《三傻大闹宝莱坞》']},
+role_reversal:{books:['《主要照顾者的情绪》','《各归其位》'],movies:['《何以为家》','《小偷家族》']},
+conditional_love:{books:['《无条件养育》','《接纳不完美的自己》'],movies:['《心灵捕手》','《阿甘正传》']},
+boundary_invasion:{books:['《建立界限》','《不要用爱控制我》'],movies:['《钢琴教师》','《楚门的世界》']},
+invalidation:{books:['《煤气灯效应》','《相信自己的直觉》'],movies:['《隐形人》','《罗斯玛丽的婴儿》']},
+instability:{books:['《身体从未忘记》','《复杂性创伤后压力综合征》'],movies:['《佛罗里达乐园》','《四百击》']},
+shaming:{books:['《克服羞耻感》','《脆弱的力量》'],movies:['《狩猎》','《赎罪》']}
+};
+const HEALING_EXERCISES=[
+{title:'内在小孩对话',content:'找一个安静的时间，闭上眼睛，想象童年的自己站在面前。温柔地问Ta："你现在感觉怎么样？你需要什么？"倾听Ta的声音，并告诉Ta："现在我已经长大了，我会照顾好你。"'},
+{title:'情绪书写',content:'每天花15分钟，不加评判地写下当下的感受。不要停笔，不要修改语法，让潜意识自由流淌。这有助于释放被压抑的情绪。'},
+{title:'建立安全岛',content:'在脑海中构建一个绝对安全、舒适的地方（可以是现实的或想象的）。当感到焦虑或恐惧时，在心里回到这个安全岛，感受那里的平静与保护。'}
+];
+const COMMON_MYTHS=[
+{q:'原生家庭的伤害是不可逆的吗？',a:'大脑具有神经可塑性。虽然我们无法改变过去，但可以通过建立新的关系体验和自我关怀，重塑大脑回路，改写人生剧本。'},
+{q:'是否一定要原谅父母才能疗愈？',a:'不一定。疗愈的核心是处理自己的创伤，而不是宽恕加害者。原谅是一种选择，而不是义务。你可以选择不原谅，但依然过好自己的一生。'},
+{q:'我和父母断绝关系是不孝吗？',a:'保护自己远离持续的伤害是生存本能。设立边界甚至中断关系，有时是打破代际创伤链条的必要之举。这关乎自我保护，而非道德评判。'}
+];
+const QUESTIONS=[
+{id:1,category:'emotional_neglect',text:'小时候，当我有情绪时，父母会忽视或不予理睬。'},
+{id:2,category:'emotional_neglect',text:'即使和家人在一起，我也常感到孤独或无法融入。'},
+{id:3,category:'emotional_neglect',text:'我不习惯向家人表达我的需求或寻求帮助。'},
+{id:4,category:'emotional_neglect',text:'父母很少关注我的内心感受，只关心我的表现或行为。'},
+{id:5,category:'emotional_neglect',text:'我感觉父母并不真正了解我是个怎样的人。'},
+{id:6,category:'controlling',text:'父母总是替我做决定，即使是我自己能做的事。'},
+{id:7,category:'controlling',text:'如果我不按父母的意愿行事，他们会非常生气或失望。'},
+{id:8,category:'controlling',text:'我觉得自己几乎没有隐私，父母会翻看我的东西。'},
+{id:9,category:'controlling',text:'我很难独立做决定，总想征求父母的许可。'},
+{id:10,category:'controlling',text:'父母试图控制我的交友、穿衣或兴趣爱好。'},
+{id:11,category:'criticism',text:'父母经常挑剔我，即使我做得很好也要找出毛病。'},
+{id:12,category:'criticism',text:'我觉得无论我怎么努力，都无法让父母满意。'},
+{id:13,category:'criticism',text:'做错事时，我会遭到严厉的批评或辱骂。'},
+{id:14,category:'criticism',text:'父母经常拿我和别人家的孩子比较，让我感到自卑。'},
+{id:15,category:'criticism',text:'我现在对自己也很苛刻，脑海里常有一个批评的声音。'},
+{id:16,category:'perfectionism',text:'在这个家里，只有做到最好才是被接受的。'},
+{id:17,category:'perfectionism',text:'犯错在我的家庭里是不可饶恕的。'},
+{id:18,category:'perfectionism',text:'我必须时刻保持优秀，否则就会感到焦虑。'},
+{id:19,category:'perfectionism',text:'父母对我的期望非常高，让我感到喘不过气。'},
+{id:20,category:'perfectionism',text:'我很难享受过程，只在乎结果是否完美。'},
+{id:21,category:'role_reversal',text:'小时候，我经常需要照顾父母的情绪或安慰他们。'},
+{id:22,category:'role_reversal',text:'我觉得我是父母的倾听者，甚至是他们的"心理咨询师"。'},
+{id:23,category:'role_reversal',text:'我常常觉得自己像个大人，而父母像个孩子。'},
+{id:24,category:'role_reversal',text:'我感到对父母的幸福负有沉重的责任。'},
+{id:25,category:'role_reversal',text:'为了不给父母添麻烦，我习惯隐藏自己的需求。'},
+{id:26,category:'conditional_love',text:'我觉得只有当我听话或成绩好时，父母才爱我。'},
+{id:27,category:'conditional_love',text:'如果我表现不好，父母就会冷落我或收回关爱。'},
+{id:28,category:'conditional_love',text:'为了获得父母的认可，我常常委屈自己。'},
+{id:29,category:'conditional_love',text:'我不确定如果我是一个普通平凡的人，父母是否还爱我。'},
+{id:30,category:'conditional_love',text:'我很难相信有人会无条件地爱我。'},
+{id:31,category:'boundary_invasion',text:'父母经常不敲门就进入我的房间。'},
+{id:32,category:'boundary_invasion',text:'父母会阅读我的日记、信件或手机信息。'},
+{id:33,category:'boundary_invasion',text:'我的身体界限常被侵犯（如被迫拥抱亲吻）。'},
+{id:34,category:'boundary_invasion',text:'父母把我的事情告诉亲戚朋友，不顾我的感受。'},
+{id:35,category:'boundary_invasion',text:'我很难对父母说"不"，因为这会引发巨大的冲突。'},
+{id:36,category:'invalidation',text:'当我表达痛苦时，父母会说"这有什么大不了的"或"你想多了"。'},
+{id:37,category:'invalidation',text:'父母经常否认发生过的事情，让我怀疑自己的记忆。'},
+{id:38,category:'invalidation',text:'我觉得自己的情绪在这个家里是不受欢迎的。'},
+{id:39,category:'invalidation',text:'父母经常说我"太敏感"或"不懂事"。'},
+{id:40,category:'invalidation',text:'我经常需要向别人确认我的感受是否正常。'},
+{id:41,category:'instability',text:'家里的气氛经常因为父母的情绪而突然变得紧张。'},
+{id:42,category:'instability',text:'我永远不知道下一刻父母会是高兴还是发怒。'},
+{id:43,category:'instability',text:'我习惯了察言观色，以避免惹怒父母。'},
+{id:44,category:'instability',text:'父母之间经常发生激烈的争吵或冷战。'},
+{id:45,category:'instability',text:'在这个家里，我感到时刻需要保持警惕。'},
+{id:46,category:'shaming',text:'父母经常用羞辱性的语言骂我（如"笨蛋"、"没用"）。'},
+{id:47,category:'shaming',text:'父母会在外人面前揭我的短，让我感到无地自容。'},
+{id:48,category:'shaming',text:'做错事时，我不仅感到内疚，更觉得自己是个糟糕的人。'},
+{id:49,category:'shaming',text:'父母会用"不知羞耻"等话来攻击我。'},
+{id:50,category:'shaming',text:'我经常因为自己的存在而感到莫名的羞耻。'}
+];
+
+// ===== APP STATE =====
+let state = { screen:'welcome', idx:0, answers:{}, result:null };
+let radarChart = null;
+
+// ===== SDK helpers =====
+function getStorageKey(token) {
+    return 'test_result_' + (token || (window.linkValidator && window.linkValidator.token) || 'local');
+}
+
+function addPromotionLinkDelayed() {
+    setTimeout(function () {
+        if (
+            window.PsyTestValidator &&
+            typeof window.PsyTestValidator.addPromotionLink === 'function'
+        ) {
+            window.PsyTestValidator.addPromotionLink();
+        }
+    }, 200);
+}
+
+async function waitForValidator() {
+    let waitCount = 0;
+    while (!window.linkValidator && waitCount < 30) {
+        await new Promise(function (resolve) {
+            setTimeout(resolve, 100);
+        });
+        waitCount++;
+        if (
+            waitCount % 10 === 0 &&
+            window.PsyTestValidator &&
+            typeof window.PsyTestValidator.getInstance === 'function'
+        ) {
+            const instance = window.PsyTestValidator.getInstance();
+            if (instance) {
+                window.linkValidator = instance;
+                break;
+            }
+        }
+    }
+    return window.linkValidator;
+}
+
+async function validateAndStartSdk() {
+    const validator = await waitForValidator();
+    if (!validator) {
+        alert('验证SDK未初始化，无法开始测试。请刷新页面重试。');
+        return false;
+    }
+
+    let isValid = false;
+    if (typeof validator.validateForUserAction === 'function') {
+        try {
+            isValid = await validator.validateForUserAction();
+            if (!isValid || validator.valid === false) {
+                return false;
+            }
+        } catch (error) {
+            console.error('链接验证失败:', error);
+            validator.valid = false;
+            return false;
+        }
+    } else {
+        if (validator.valid === false) {
+            alert(validator.validationError || '测试链接无效，请检查链接是否正确');
+            return false;
+        }
+        isValid = validator.valid !== false;
+    }
+
+    if (!isValid || validator.valid === false) {
+        return false;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isRestart = urlParams.get('restart') === 'true';
+    if (!isRestart && !window.__ysjt_test_started) {
+        try {
+            window.__ysjt_test_started = true;
+            await validator.startTest();
+            console.log('测试开始记录成功');
+        } catch (error) {
+            console.error('记录测试开始失败:', error);
+            window.__ysjt_test_started = false;
+            return false;
+        }
+    } else if (isRestart) {
+        console.log('重新测试模式，跳过startTest()调用，避免重复扣除次数');
+        window.__ysjt_test_started = false;
+        window.__ysjt_test_completed = false;
+    }
+
+    return true;
+}
+
+function buildResultPayload(result, answers) {
+    return {
+        version: 1,
+        totalScore: result.totalScore,
+        maxScore: result.maxScore,
+        catScores: result.catScores,
+        level: result.level,
+        description: result.description,
+        answers: answers || {}
+    };
+}
+
+function restoreResultFromStorage() {
+    const token =
+        (window.linkValidator && window.linkValidator.token) ||
+        new URLSearchParams(window.location.search).get('token');
+    if (!token) {
+        return false;
+    }
+    try {
+        const raw = localStorage.getItem(getStorageKey(token));
+        if (!raw) {
+            return false;
+        }
+        const saved = JSON.parse(raw);
+        const result = saved.result || saved;
+        if (!result || result.totalScore === undefined || !result.catScores) {
+            return false;
+        }
+        window.__ysjt_test_completed = true;
+        state.result = {
+            totalScore: result.totalScore,
+            maxScore: result.maxScore || (QUESTIONS.length * 5),
+            catScores: result.catScores,
+            level: result.level,
+            description: result.description
+        };
+        if (result.answers && typeof result.answers === 'object') {
+            state.answers = result.answers;
+        }
+        renderResult();
+        showScreen('result');
+        return true;
+    } catch (error) {
+        console.error('恢复本地结果失败:', error);
+        return false;
+    }
+}
+window.restoreYsjtResult = restoreResultFromStorage;
+
+async function persistAndComplete(payload) {
+    let token = null;
+    if (window.linkValidator && window.linkValidator.token) {
+        token = window.linkValidator.token;
+    } else {
+        token = new URLSearchParams(window.location.search).get('token') || ('local_' + Date.now());
+    }
+
+    try {
+        localStorage.setItem(getStorageKey(token), JSON.stringify({
+            token: token,
+            result: payload,
+            timestamp: new Date().toISOString()
+        }));
+    } catch (error) {
+        console.error('保存到localStorage失败:', error);
+    }
+
+    if (window.linkValidator && !window.__ysjt_test_completed) {
+        try {
+            window.__ysjt_test_completed = true;
+            const completeResult = await window.linkValidator.completeTest(undefined, payload);
+            console.log('测试完成记录成功', completeResult);
+            if (completeResult && completeResult.success !== false) {
+                window.linkValidator.valid = true;
+            }
+        } catch (error) {
+            console.error('记录测试完成失败:', error);
+            if (window.linkValidator) {
+                window.linkValidator.valid = true;
+            }
+            window.__ysjt_test_completed = false;
+        }
+    }
+}
+
+// ===== SCREEN NAV =====
+function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); });
+    document.getElementById('screen-' + name).classList.add('active');
+    state.screen = name;
+    if (name === 'welcome' || name === 'result') {
+        addPromotionLinkDelayed();
+    }
+    window.scrollTo(0, 0);
+}
+
+// ===== QUIZ =====
+function renderQuestion() {
+    const q = QUESTIONS[state.idx];
+    const pct = ((state.idx + 1) / QUESTIONS.length) * 100;
+    document.getElementById('q-num').textContent = '第 ' + (state.idx + 1) + ' 题';
+    document.getElementById('q-count').textContent = (state.idx + 1) + ' / ' + QUESTIONS.length;
+    document.getElementById('q-bar').style.width = pct + '%';
+
+    const qt = document.getElementById('q-text');
+    qt.textContent = q.text;
+    qt.classList.remove('fade-in'); void qt.offsetWidth; qt.classList.add('fade-in');
+
+    const oc = document.getElementById('q-options');
+    oc.innerHTML = '';
+    oc.classList.remove('fade-in'); void oc.offsetWidth; oc.classList.add('fade-in');
+
+    OPTIONS.forEach(opt => {
+        const sel = state.answers[q.id] === opt.value;
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn w-full text-left px-5 py-3.5 rounded-xl flex items-center justify-between ' +
+            (sel ? 'border-2 border-primary-500 bg-primary-50 text-primary-700' : 'border-2 border-primary-100 hover:border-primary-200 text-gray-500');
+        btn.innerHTML = '<span class="font-medium text-sm">' + opt.label + '</span>' +
+            '<span class="w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center flex-shrink-0 ' +
+            (sel ? 'border-primary-500' : 'border-gray-300') + '">' +
+            (sel ? '<div class="w-2.5 h-2.5 rounded-full bg-primary-500"></div>' : '') + '</span>';
+        btn.onclick = () => selectOption(opt.value);
+        oc.appendChild(btn);
+    });
+
+    const prevBtn = document.getElementById('btn-prev');
+    prevBtn.style.visibility = state.idx === 0 ? 'hidden' : 'visible';
+}
+
+function selectOption(val) {
+    const q = QUESTIONS[state.idx];
+    state.answers[q.id] = val;
+    if (state.idx < QUESTIONS.length - 1) {
+        setTimeout(() => { state.idx++; renderQuestion(); }, 150);
+    } else {
+        calculateResults();
+    }
+}
+
+function prevQuestion() {
+    if (state.idx > 0) { state.idx--; renderQuestion(); }
+}
+
+async function startQuizFlow() {
+    const ok = await validateAndStartSdk();
+    if (!ok) {
+        return;
+    }
+    state.idx = 0;
+    state.answers = {};
+    renderQuestion();
+    showScreen('quiz');
+}
+
+// ===== RESULTS =====
+function calculateResults() {
+    showScreen('transition');
+    let totalScore = 0;
+    const catScores = {};
+    Object.keys(CATEGORY_LABELS).forEach(c => catScores[c] = 0);
+    Object.entries(state.answers).forEach(([qid, sc]) => {
+        totalScore += sc;
+        const q = QUESTIONS.find(q => q.id === parseInt(qid));
+        if (q) catScores[q.category] += sc;
+    });
+    const maxScore = QUESTIONS.length * 5;
+    const { level, description } = getLevel(totalScore, maxScore);
+    state.result = { totalScore, maxScore, catScores, level, description };
+
+    setTimeout(async () => {
+        renderResult();
+        showScreen('result');
+        const payload = buildResultPayload(state.result, state.answers);
+        await persistAndComplete(payload);
+    }, 2800);
+}
+
+function getLevel(score, max) {
+    const pct = (score / max) * 100;
+    if (pct <= 35) return { level: '轻微影响', description: '原生家庭对您的影响相对较小。虽然成长过程中可能存在一些小磕绊，但总体上您建立了较好的心理韧性和自我调节能力。您拥有改写人生故事的主动权。' };
+    if (pct <= 65) return { level: '中度影响', description: '原生家庭在您身上留下了明显的印记。在压力较大或亲密关系中，某些旧有的模式可能会浮现，引发内耗或冲突。觉察是改变的开始，您完全有能力疗愈这些创伤。' };
+    return { level: '深度影响', description: '原生家庭对您的核心人格和关系模式产生了深远影响。您可能经常感到内心空虚、自我怀疑或在关系中挣扎。请记住，这不是您的错，这是您为了在那个环境中生存而发展出的适应策略。现在，您可以寻求专业支持，逐步找回真实的自己。' };
+}
+
+function renderResult() {
+    const r = state.result;
+    document.getElementById('r-date').textContent = new Date().toLocaleDateString();
+    document.getElementById('r-score').textContent = r.totalScore;
+    const offset = 264 - (264 * r.totalScore) / r.maxScore;
+    setTimeout(() => document.getElementById('score-ring').style.strokeDashoffset = offset, 200);
+
+    const lvEl = document.getElementById('r-level');
+    lvEl.textContent = r.level;
+    lvEl.className = 'text-lg font-bold mb-1 ' + (r.level === '深度影响' ? 'text-pink-600' : r.level === '中度影响' ? 'text-primary-600' : 'text-emerald-600');
+    document.getElementById('r-desc').textContent = r.description;
+
+    renderRadar(r.catScores);
+
+    const sorted = Object.entries(r.catScores).sort((a, b) => b[1] - a[1]).map(e => e[0]);
+    const ic = document.getElementById('r-insights');
+    ic.innerHTML = '';
+    sorted.forEach(cat => {
+        const sc = r.catScores[cat];
+        const d = DIMENSION_INSIGHTS[cat];
+        let ins, badge;
+        if (sc <= 11) { ins = d.low; badge = 'bg-emerald-100 text-emerald-700'; }
+        else if (sc <= 18) { ins = d.medium; badge = 'bg-amber-100 text-amber-700'; }
+        else { ins = d.high; badge = 'bg-pink-100 text-pink-700'; }
+        const div = document.createElement('div');
+        div.className = 'bg-white rounded-xl p-5 shadow-sm border border-primary-50';
+        div.innerHTML = '<div class="flex justify-between items-start mb-3"><h4 class="text-base font-bold text-gray-800">' + ins.title + '</h4><span class="px-2.5 py-0.5 text-xs font-bold rounded-full ' + badge + ' flex-shrink-0 ml-2">得分: ' + sc + '/25</span></div>' +
+            '<p class="text-gray-500 text-sm leading-relaxed mb-3">' + ins.description + '</p>' +
+            '<div class="bg-primary-50 p-3.5 rounded-xl border border-primary-100"><p class="text-primary-700 text-sm font-medium mb-1 flex items-center gap-1">💡 疗愈锦囊</p><p class="text-primary-600 text-sm">' + ins.advice + '</p></div>';
+        ic.appendChild(div);
+    });
+
+    const topCat = sorted[0];
+    document.getElementById('r-top-dim').textContent = '基于您的最高分维度：' + CATEGORY_LABELS[topCat];
+    document.getElementById('r-books').innerHTML = RECOMMENDED_RESOURCES[topCat].books.map(b => '<li class="flex items-start"><span class="mr-1.5 text-gray-300">•</span>' + b + '</li>').join('');
+    document.getElementById('r-movies').innerHTML = RECOMMENDED_RESOURCES[topCat].movies.map(m => '<li class="flex items-start"><span class="mr-1.5 text-gray-300">•</span>' + m + '</li>').join('');
+
+    document.getElementById('r-exercises').innerHTML = HEALING_EXERCISES.map(e =>
+        '<div class="bg-white rounded-xl p-4 shadow-sm border border-primary-50"><h4 class="font-bold text-sm text-gray-800 mb-1.5">' + e.title + '</h4><p class="text-gray-500 text-sm leading-relaxed">' + e.content + '</p></div>'
+    ).join('');
+
+    document.getElementById('r-myths').innerHTML = COMMON_MYTHS.map(m =>
+        '<div class="bg-primary-50 rounded-xl p-4 border border-primary-100"><div class="flex items-start mb-2"><span class="flex-shrink-0 w-5 h-5 bg-white text-primary-600 rounded-full flex items-center justify-center font-bold text-[10px] shadow-sm mr-2 mt-0.5">Q</span><h4 class="font-semibold text-gray-800 text-sm">' + m.q + '</h4></div><div class="flex items-start"><span class="flex-shrink-0 w-5 h-5 bg-primary-500 text-white rounded-full flex items-center justify-center font-bold text-[10px] mr-2 mt-0.5">A</span><p class="text-gray-500 text-sm leading-relaxed">' + m.a + '</p></div></div>'
+    ).join('');
+
+    lucide.createIcons();
+}
+
+function renderRadar(scores) {
+    const ctx = document.getElementById('radarChart').getContext('2d');
+    if (radarChart) radarChart.destroy();
+    radarChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: Object.keys(scores).map(k => CATEGORY_LABELS[k]),
+            datasets: [{ label: '我的得分', data: Object.values(scores), backgroundColor: 'rgba(139,92,246,.2)', borderColor: '#8b5cf6', pointBackgroundColor: '#8b5cf6', borderWidth: 2 }]
+        },
+        options: {
+            scales: { r: { min: 0, max: 25, ticks: { display: false, stepSize: 5 }, pointLabels: { font: { size: 11 }, color: '#6b7280' }, grid: { color: '#ede9fe' } } },
+            plugins: { legend: { display: false } },
+            maintainAspectRatio: false
+        }
+    });
+}
+
+function restartApp() {
+    if (
+        window.linkValidator &&
+        typeof window.linkValidator.clearLocalResult === 'function'
+    ) {
+        window.linkValidator.clearLocalResult();
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let token = urlParams.get('token');
+    if (!token && window.linkValidator && window.linkValidator.token) {
+        token = window.linkValidator.token;
+    }
+
+    if (token) {
+        try {
+            localStorage.removeItem(getStorageKey(token));
+        } catch (e) {}
+
+        const newUrlParams = new URLSearchParams();
+        newUrlParams.set('token', token);
+        newUrlParams.set('restart', 'true');
+        if (
+            urlParams.get('unlimited') === 'true' ||
+            (window.linkValidator && window.linkValidator.unlimited)
+        ) {
+            newUrlParams.set('unlimited', 'true');
+        }
+        window.location.href = window.location.pathname + '?' + newUrlParams.toString();
+        return;
+    }
+
+    window.__ysjt_test_started = false;
+    window.__ysjt_test_completed = false;
+    state = { screen: 'welcome', idx: 0, answers: {}, result: null };
+    showScreen('welcome');
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+    document.getElementById('btn-start').addEventListener('click', startQuizFlow);
+    document.getElementById('btn-prev').addEventListener('click', prevQuestion);
+    document.getElementById('btn-restart').addEventListener('click', restartApp);
+});
+</script>
+
+<!-- 验证SDK -->
+<script src="/static/js/link-validator.js"></script>
+<script>
+(function () {
+    var validatorInstance = null;
+
+    if (typeof PsyTestValidator !== 'undefined') {
+        PsyTestValidator.init('ysjt', {
+            onSuccess: function (result, validator) {
+                console.log('SDK初始化成功，链接有效:', result);
+                validatorInstance = validator;
+                window.linkValidator = validator;
+                document.body.classList.remove('page-disabled');
+            },
+            onError: function (error) {
+                console.error('SDK初始化失败，链接无效:', error);
+                if (
+                    window.PsyTestValidator &&
+                    typeof window.PsyTestValidator.getInstance === 'function'
+                ) {
+                    validatorInstance = window.PsyTestValidator.getInstance();
+                    window.linkValidator = validatorInstance;
+                }
+                document.body.classList.remove('page-disabled');
+            },
+            onLoad: function (data) {
+                console.log('SDK加载完成回调:', data);
+                if (!validatorInstance) {
+                    if (
+                        window.PsyTestValidator &&
+                        typeof window.PsyTestValidator.getInstance === 'function'
+                    ) {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                }
+
+                setTimeout(function () {
+                    if (
+                        typeof PsyTestValidator !== 'undefined' &&
+                        typeof PsyTestValidator.addPromotionLink === 'function'
+                    ) {
+                        PsyTestValidator.addPromotionLink();
+                    }
+                }, 100);
+
+                var urlParams = new URLSearchParams(window.location.search);
+                var isRestart = urlParams.get('restart') === 'true';
+
+                if (isRestart) {
+                    if (validatorInstance && validatorInstance.clearLocalResult) {
+                        validatorInstance.clearLocalResult();
+                    }
+                    var restartToken = validatorInstance && validatorInstance.token;
+                    if (restartToken) {
+                        try {
+                            localStorage.removeItem('test_result_' + restartToken);
+                        } catch (e) {}
+                    }
+                    window.__ysjt_test_completed = false;
+                    window.__ysjt_test_started = true;
+                    urlParams.delete('restart');
+                    var newUrl =
+                        window.location.pathname +
+                        (urlParams.toString() ? '?' + urlParams.toString() : '');
+                    window.history.replaceState({}, '', newUrl);
+                    return;
+                }
+
+                if (data.valid && data.has_local_result) {
+                    if (typeof window.restoreYsjtResult === 'function') {
+                        window.restoreYsjtResult();
+                    }
+                }
+            }
+        });
+    } else {
+        console.error('验证SDK未加载');
+        document.body.classList.remove('page-disabled');
+    }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="description" content="心理年龄测试：通过40道深度心理题，探索你潜意识里的真实年龄。" />
+    <title>心理年龄测试</title>
+
+    <!-- 安全工具库（本地开发环境自动禁用） -->
+    <script src="/static/js/test-security.js"></script>
+    <script>
+        if (typeof TestSecurity !== 'undefined') {
+            TestSecurity.enable();
+        }
+    </script>
+
+    <!-- Icons -->
+    <script src="./assets/lucide.min.js"></script>
+
+    <!-- Chart.js for Radar Chart -->
+    <script src="./assets/chart.umd.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --cream: #FFF8F1;
+            --ink: #4A3B31;
+            --ink-soft: #8A7563;
+            --ink-faint: #C0A58D;
+            --coral: #FF7A59;
+            --coral-deep: #E86A3C;
+            --butter: #FFD66B;
+            --mint: #9BDEC3;
+            --blue: #A6CCF7;
+            --pink: #FFC2D9;
+            --peach: #FFB59E;
+            --line: #F6E9DC;
+            --card: #FFFFFF;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--cream);
+            color: var(--ink);
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        ::selection { background: #FFE3C4; color: var(--ink); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #EBD9C4; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #DCC3A6; }
+
+        /* Animations */
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+
+        @keyframes slide-up {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-up { animation: slide-up 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+        @keyframes dot-bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-14px); }
+        }
+
+        @keyframes floaty {
+            0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+            50% { transform: translateY(-12px) rotate(var(--rot, 0deg)); }
+        }
+
+        /* Screens */
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* Background decorations */
+        .bg-decor {
+            position: fixed; inset: 0; overflow: hidden;
+            pointer-events: none; z-index: 0;
+        }
+        .bg-decor .shape { position: absolute; opacity: .5; animation: floaty 8s infinite ease-in-out; }
+
+        /* Nav */
+        .nav-bar {
+            position: sticky; top: 0; z-index: 40;
+            background: rgba(255, 248, 241, 0.88);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #F3E4D3;
+        }
+        .nav-bar.hidden { display: none; }
+        .nav-content {
+            max-width: 1100px; margin: 0 auto; padding: 12px 16px;
+            display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+        .nav-logo {
+            font-weight: 900; color: var(--ink); font-size: 16px;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .nav-logo::before {
+            content: ""; width: 12px; height: 12px; border-radius: 4px;
+            background: linear-gradient(135deg, var(--coral), var(--butter));
+            transform: rotate(12deg);
+        }
+        /* Layout */
+        .page-main {
+            position: relative; z-index: 10;
+            max-width: 1120px; margin: 0 auto; padding: 32px 16px 48px;
+            min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+        }
+        @media (min-width: 768px) { .page-main { padding: 48px 16px; } }
+
+        /* Buttons */
+        .btn-coral {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            background: var(--coral); color: #fff; border: none; cursor: pointer;
+            font-family: inherit; font-size: 17px; font-weight: 900;
+            padding: 15px 40px; border-radius: 999px;
+            box-shadow: 0 12px 24px -8px rgba(255, 122, 89, .55);
+            transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+        }
+        .btn-coral:hover { background: var(--coral-deep); transform: translateY(-2px); box-shadow: 0 16px 28px -8px rgba(255, 122, 89, .6); }
+        .btn-coral svg, .btn-coral i { transition: transform .2s ease; }
+        .btn-coral:hover svg, .btn-coral:hover i { transform: translateX(3px); }
+
+        .btn-choco {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; background: var(--ink); color: #FFF8F1; border: none; cursor: pointer;
+            font-family: inherit; font-size: 17px; font-weight: 900;
+            padding: 15px 40px; border-radius: 18px;
+            transition: transform .2s ease, background .2s ease;
+        }
+        .btn-choco:hover { background: var(--coral); transform: translateY(-2px); }
+
+        .btn-outline {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: #fff; color: var(--ink-soft); cursor: pointer;
+            font-family: inherit; font-size: 15px; font-weight: 700;
+            padding: 10px 24px; border-radius: 999px; border: 2px solid #E5D5C2;
+            transition: all .2s ease;
+        }
+        .btn-outline:hover { border-color: var(--ink); color: var(--ink); }
+
+        /* Cards & chips */
+        .card {
+            background: var(--card); border-radius: 26px;
+            border: 2px solid #FFF0E2;
+            box-shadow: 0 16px 40px -20px rgba(210, 150, 110, .35);
+        }
+
+        .badge-macaron {
+            display: inline-block; padding: 6px 18px; border-radius: 999px;
+            background: #FFF0C9; color: #9A7B1E;
+            font-weight: 700; font-size: 13px; letter-spacing: 2px;
+        }
+
+        .trait-chip {
+            padding: 6px 14px; border-radius: 999px;
+            font-size: 13.5px; font-weight: 700; color: var(--ink);
+        }
+        .trait-chip:nth-child(5n+1) { background: #FFE0D2; }
+        .trait-chip:nth-child(5n+2) { background: #FFF0C9; }
+        .trait-chip:nth-child(5n+3) { background: #DDF3E8; }
+        .trait-chip:nth-child(5n+4) { background: #E2EEFB; }
+        .trait-chip:nth-child(5n+5) { background: #FFE4EF; }
+
+        /* START SCREEN */
+        .start-wrap {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 60vh; text-align: center; gap: 34px;
+        }
+        .brain-circle {
+            position: relative; background: #fff; padding: 26px; border-radius: 50%;
+            box-shadow: 0 18px 40px -14px rgba(255, 122, 89, .4);
+            border: 3px solid #FFE4D6;
+            animation: floaty 5s infinite ease-in-out;
+        }
+        .brain-circle::before {
+            content: ""; position: absolute; inset: -14px; border-radius: 50%;
+            border: 2px dashed #FFD66B; opacity: .8;
+        }
+        .brain-circle i, .brain-circle svg { width: 72px; height: 72px; color: var(--coral); }
+        .start-title {
+            font-size: 40px; font-weight: 900; letter-spacing: 2px; margin: 0 0 16px;
+            position: relative; display: inline-block;
+        }
+        .start-title::after {
+            content: ""; position: absolute; left: 6%; right: 6%; bottom: -8px; height: 10px;
+            background: var(--butter); border-radius: 999px; z-index: -1; opacity: .85;
+        }
+        @media (min-width: 768px) { .start-title { font-size: 52px; } }
+        .start-sub { color: var(--ink-soft); font-size: 16.5px; line-height: 1.9; margin: 0; }
+        @media (min-width: 768px) { .start-sub { font-size: 19px; } }
+        .start-feats { display: flex; gap: 28px; justify-content: center; color: var(--ink-faint); font-size: 14px; font-weight: 600; padding-top: 10px; }
+        .start-feats span { display: inline-flex; align-items: center; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+
+        /* DATE SCREEN */
+        .date-wrap {
+            width: 100%; max-width: 520px; margin: 0 auto;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh;
+        }
+        .date-card { padding: 40px 34px; width: 100%; text-align: center; position: relative; overflow: hidden; }
+        .date-card::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; height: 8px;
+            background: linear-gradient(90deg, var(--coral), var(--butter), var(--mint), var(--blue));
+        }
+        .date-icon {
+            display: inline-flex; padding: 18px; border-radius: 50%;
+            background: #FFE9DC; color: var(--coral); margin-bottom: 26px;
+        }
+        .date-icon i, .date-icon svg { width: 38px; height: 38px; }
+        .date-title { font-size: 24px; font-weight: 900; margin: 0 0 10px; }
+        .date-sub { color: var(--ink-soft); margin: 0 0 32px; font-size: 15px; }
+        .date-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 34px; }
+        .date-field { display: flex; flex-direction: column; text-align: left; }
+        .date-field label {
+            font-size: 11px; font-weight: 900; color: var(--ink-faint);
+            letter-spacing: 2px; margin: 0 0 6px 6px;
+        }
+        .date-select-wrap { position: relative; }
+        .date-select-wrap select {
+            width: 100%; appearance: none; -webkit-appearance: none;
+            background: #FFF6EC; border: 2px solid #F3E2CE; color: var(--ink);
+            padding: 13px 34px 13px 16px; border-radius: 14px;
+            font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+            transition: border-color .2s ease, background .2s ease;
+        }
+        .date-select-wrap select:focus { outline: none; background: #fff; border-color: var(--coral); }
+        .date-select-wrap::after {
+            content: ""; position: absolute; right: 14px; top: 50%;
+            width: 9px; height: 9px; border-right: 2.5px solid var(--ink-soft); border-bottom: 2.5px solid var(--ink-soft);
+            transform: translateY(-70%) rotate(45deg); pointer-events: none;
+        }
+        .date-note { margin-top: 24px; font-size: 13.5px; color: var(--ink-faint); }
+
+        /* QUIZ SCREEN */
+        .quiz-wrap { width: 100%; max-width: 680px; margin: 0 auto; }
+        .quiz-head { margin-bottom: 30px; }
+        .quiz-meta {
+            display: flex; justify-content: space-between;
+            font-size: 13.5px; font-weight: 700; color: var(--ink-soft); margin-bottom: 10px;
+        }
+        .progress-track {
+            height: 13px; width: 100%; background: #FFE9DB; border-radius: 999px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; border-radius: 999px;
+            background: linear-gradient(90deg, var(--peach), var(--coral));
+            transition: width .5s ease-out;
+        }
+        .question-card { padding: 34px 30px; }
+        @media (min-width: 768px) { .question-card { padding: 44px 42px; } }
+        .question-text {
+            font-size: 22px; font-weight: 900; line-height: 1.6; margin: 0 0 28px;
+        }
+        @media (min-width: 768px) { .question-text { font-size: 27px; } }
+        .options-list { display: flex; flex-direction: column; gap: 14px; }
+        .opt-btn {
+            width: 100%; text-align: left; cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between; gap: 14px;
+            background: #fff; border: 2px solid var(--line); border-radius: 18px;
+            padding: 16px 18px; font-family: inherit;
+            transition: border-color .2s ease, background .2s ease, transform .15s ease;
+        }
+        .opt-btn:hover { border-color: var(--coral); background: #FFF6F0; transform: translateY(-1px); }
+        .opt-btn .opt-text { font-size: 16.5px; font-weight: 600; line-height: 1.55; color: #5E4C40; }
+        .opt-btn:hover .opt-text { color: var(--ink); }
+        .opt-btn .opt-check {
+            width: 26px; height: 26px; flex-shrink: 0; color: var(--coral);
+            opacity: 0; transition: opacity .2s ease;
+        }
+        .opt-btn:hover .opt-check { opacity: 1; }
+
+        /* LOADING (TRANSITION) SCREEN */
+        .loading-wrap {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 55vh; text-align: center; gap: 0;
+        }
+        .loading-dots { display: flex; gap: 14px; margin-bottom: 34px; }
+        .loading-dots span {
+            width: 18px; height: 18px; border-radius: 50%;
+            animation: dot-bounce 1.15s infinite ease-in-out;
+        }
+        .loading-dots span:nth-child(1) { background: var(--coral); }
+        .loading-dots span:nth-child(2) { background: var(--butter); animation-delay: .14s; }
+        .loading-dots span:nth-child(3) { background: var(--mint); animation-delay: .28s; }
+        .loading-dots span:nth-child(4) { background: var(--blue); animation-delay: .42s; }
+        .loading-title { font-size: 22px; font-weight: 900; margin: 0 0 12px; }
+        .loading-sub { font-size: 14px; color: var(--ink-soft); margin: 0; }
+
+        /* RESULT SCREEN */
+        .result-wrap { width: 100%; max-width: 900px; margin: 0 auto; padding-bottom: 48px; }
+        .result-head { text-align: center; margin-bottom: 30px; }
+        .result-head h2 { font-size: 30px; font-weight: 900; margin: 16px 0 0; letter-spacing: 1px; }
+        @media (min-width: 768px) { .result-head h2 { font-size: 36px; } }
+        .result-card { overflow: hidden; }
+
+        /* Age comparison —— 保留原版双卡片 */
+        .age-compare { background: #FFF6EC; padding: 28px 24px; border-bottom: 2px solid #FCEEE2; }
+        @media (min-width: 768px) { .age-compare { padding: 38px 40px; } }
+        .age-row { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+        @media (min-width: 768px) { .age-row { flex-direction: row; justify-content: center; gap: 40px; } }
+        .age-card {
+            flex: 1; width: 100%; background: #fff; border-radius: 22px;
+            box-shadow: 0 8px 24px -12px rgba(210, 150, 110, .3);
+            padding: 26px 20px; display: flex; flex-direction: column; align-items: center;
+            position: relative; overflow: hidden;
+        }
+        .age-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; }
+        .age-card--psych { border: 2px solid #FFE0D2; }
+        .age-card--psych::before { background: linear-gradient(90deg, var(--peach), var(--coral)); }
+        .age-card--actual { border: 2px solid #EDE2D4; }
+        .age-card--actual::before { background: #C9B8A8; }
+        .age-label { font-size: 12px; font-weight: 900; letter-spacing: 3px; color: var(--ink-faint); margin-bottom: 8px; }
+        .age-num { font-size: 58px; font-weight: 900; line-height: 1; }
+        .age-card--psych .age-num { color: var(--coral); }
+        .age-card--actual .age-num { color: #8A7563; }
+        .age-sui { font-size: 14px; font-weight: 700; margin-top: 6px; }
+        .age-card--psych .age-sui { color: var(--peach); }
+        .age-card--actual .age-sui { color: #B7A48F; }
+        .age-mid { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #D8C6B2; min-width: 64px; }
+        .diff-pill {
+            display: inline-flex; align-items: center; padding: 9px 20px; border-radius: 999px;
+            font-size: 14px; font-weight: 700;
+        }
+        .diff-pill--older { background: #DDF3E8; color: #2E7D5B; }
+        .diff-pill--younger { background: #FFE4EF; color: #D4517F; }
+        .diff-pill--match { background: #F1EADD; color: #8A7563; }
+        .age-diff-row { margin-top: 24px; text-align: center; }
+
+        /* Banner */
+        .res-banner { padding: 34px 24px; text-align: center; position: relative; overflow: hidden; }
+        @media (min-width: 768px) { .res-banner { padding: 40px; } }
+        .res-banner::before {
+            content: ""; position: absolute; inset: 0; opacity: .18;
+            background: radial-gradient(circle at center, #fff, transparent 70%);
+        }
+        .res-banner-title {
+            position: relative; margin: 0; color: #fff;
+            font-size: 23px; font-weight: 900; letter-spacing: 2px;
+            text-shadow: 0 2px 10px rgba(0,0,0,.12);
+        }
+        @media (min-width: 768px) { .res-banner-title { font-size: 30px; } }
+
+        /* Sections */
+        .res-section { padding: 28px 24px; border-bottom: 2px solid #FCEEE2; }
+        @media (min-width: 768px) { .res-section { padding: 38px 40px; } }
+        .res-grid-2 { display: grid; grid-template-columns: 1fr; gap: 30px; }
+        @media (min-width: 768px) { .res-grid-2 { grid-template-columns: 1fr 1fr; gap: 44px; } }
+        .res-h3 {
+            font-size: 18px; font-weight: 900; margin: 0 0 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .res-h3 i, .res-h3 svg { width: 20px; height: 20px; color: var(--coral); }
+        .res-desc { color: #6B5A4C; line-height: 1.9; text-align: justify; margin: 0 0 26px; font-size: 15px; }
+        .traits-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chart-panel {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: #FFF6EC; border-radius: 22px; padding: 20px;
+        }
+        .chart-panel h3 {
+            font-size: 12px; font-weight: 900; letter-spacing: 3px;
+            color: var(--ink-faint); margin: 0 0 14px;
+        }
+        .chart-box { width: 100%; height: 300px; position: relative; }
+
+        .analysis-grid { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 18px; }
+        @media (min-width: 768px) { .analysis-grid { grid-template-columns: 1fr 1fr; } }
+        .mini-panel { background: #fff; padding: 20px; border-radius: 18px; box-shadow: 0 6px 18px -10px rgba(210,150,110,.25); }
+        .mini-panel--green { border: 2px solid #D5EFE0; }
+        .mini-panel--amber { border: 2px solid #FBEECB; }
+        .mini-panel--peach { border: 2px solid #FFE0D2; }
+        .mini-h4 {
+            display: flex; align-items: center; gap: 8px;
+            font-weight: 900; margin: 0 0 12px; font-size: 15.5px;
+        }
+        .mini-h4 i, .mini-h4 svg { width: 19px; height: 19px; }
+        .mini-panel--green .mini-h4 { color: #2E7D5B; }
+        .mini-panel--amber .mini-h4 { color: #B07D1E; }
+        .mini-panel--peach .mini-h4 { color: var(--coral-deep); font-size: 12.5px; letter-spacing: 2px; }
+        .mini-list { margin: 0; padding: 0; list-style: none; }
+        .mini-list li { display: flex; align-items: flex-start; color: #6B5A4C; font-size: 14px; line-height: 1.7; margin-bottom: 6px; }
+        .mini-list li .bullet { margin-right: 8px; font-weight: 900; }
+        .mini-p { margin: 0; color: #6B5A4C; font-size: 14px; line-height: 1.8; }
+
+        .match-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+        @media (min-width: 768px) { .match-grid { grid-template-columns: repeat(3, 1fr); } }
+        .match-card { padding: 26px 20px; border-radius: 22px; text-align: center; }
+        .match-card--violet { background: #F3EDFF; border: 2px solid #E2D6FF; }
+        .match-card--rose { background: #FFEEF1; border: 2px solid #FFDAE1; }
+        .match-card--gray { background: #F5F1EA; border: 2px solid #EAE2D5; }
+        .match-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 50px; height: 50px; border-radius: 50%; margin-bottom: 16px;
+        }
+        .match-card--violet .match-icon { background: #E2D6FF; color: #7C5CD6; }
+        .match-card--rose .match-icon { background: #FFDAE1; color: #E0587A; }
+        .match-card--gray .match-icon { background: #E7DFD2; color: #8A7B66; }
+        .match-icon i, .match-icon svg { width: 24px; height: 24px; }
+        .match-label { font-size: 11.5px; font-weight: 900; letter-spacing: 2px; color: var(--ink-faint); margin: 0 0 6px; }
+        .match-name { font-size: 17.5px; font-weight: 900; margin: 0 0 8px; }
+        .match-card--violet .match-name { color: #5C43A8; }
+        .match-card--rose .match-name { color: #B03A5C; }
+        .match-card--gray .match-name { color: #5E5344; }
+        .match-reason { font-size: 12.5px; line-height: 1.7; margin: 0; opacity: .75; color: #6B5A4C; }
+
+        .advice-box {
+            margin-top: 26px; background: #FFF6EC; border-radius: 16px; padding: 20px;
+            border-left: 6px solid var(--coral);
+        }
+        .advice-box h4 {
+            font-weight: 900; color: var(--ink); margin: 0 0 8px;
+            font-size: 13px; letter-spacing: 2px;
+        }
+        .advice-box p { margin: 0; color: #6B5A4C; font-size: 14px; line-height: 1.8; }
+
+        .res-footer {
+            background: #FFF6EC; padding: 24px;
+            display: flex; flex-direction: column; align-items: center; gap: 16px;
+        }
+        @media (min-width: 640px) { .res-footer { flex-direction: row; justify-content: space-between; padding: 24px 32px; } }
+        .res-score { color: var(--ink-soft); font-size: 14.5px; }
+        .res-score b { color: var(--ink); font-size: 17px; }
+        .res-actions { display: flex; gap: 14px; }
+        .res-actions i, .res-actions svg { width: 16px; height: 16px; }
+
+        .page-footer {
+            position: relative; z-index: 10; text-align: center;
+            padding: 24px 0; color: var(--ink-faint); font-size: 13.5px;
+        }
+
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* SDK 推广链接（单页应用） */
+        .welcome-footer {
+            display: block !important;
+            visibility: visible !important;
+            width: 100%;
+            max-width: 560px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .welcome-footer #link-validator-promotion-link {
+            width: 100%;
+            text-align: center;
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid #F3E4D3;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            box-sizing: border-box;
+        }
+        .report-footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .report-footer #link-validator-promotion-link {
+            width: 100%;
+            text-align: center;
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid #F3E4D3;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body class="page-disabled">
+
+    <!-- Background Decorative Elements -->
+    <div class="bg-decor">
+        <div class="shape" style="--rot:14deg; width:130px; height:130px; background:#FFD66B; border-radius:34px; top:8%; right:-46px;"></div>
+        <div class="shape" style="width:120px; height:120px; background:#9BDEC3; border-radius:50%; bottom:12%; left:-44px; animation-delay:1.2s;"></div>
+        <div class="shape" style="--rot:-12deg; width:84px; height:84px; background:#A6CCF7; border-radius:24px; top:42%; left:-30px; animation-delay:2s;"></div>
+        <div class="shape" style="width:56px; height:56px; background:#FFB59E; border-radius:50%; top:20%; right:14%; animation-delay:.6s;"></div>
+        <div class="shape" style="--rot:20deg; width:70px; height:70px; background:#FFC2D9; border-radius:20px; bottom:22%; right:8%; animation-delay:1.7s;"></div>
+    </div>
+
+    <div class="nav-bar" id="psycheNav">
+        <div class="nav-content">
+            <div class="nav-logo">PsycheAge 心理年龄测试</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="page-main">
+
+        <!-- 1. START SCREEN -->
+        <div id="start-screen" class="screen active">
+            <div class="start-wrap animate-fade-in-up">
+                <div class="brain-circle">
+                    <i data-lucide="brain"></i>
+                </div>
+
+                <div style="max-width: 560px;">
+                    <h1 class="start-title">心理年龄测试</h1>
+                    <p class="start-sub">
+                        你的身体在成长，但你的灵魂几岁了？<br/>
+                        通过40道深度心理题，探索你潜意识里的真实年龄。
+                    </p>
+                </div>
+
+                <button id="start-btn" class="btn-coral">
+                    <span>开始探索</span>
+                    <i data-lucide="arrow-right" style="width:20px;height:20px;"></i>
+                </button>
+
+                <div class="start-feats">
+                    <span><span class="dot" style="background:#9BDEC3;"></span>无需登录</span>
+                    <span><span class="dot" style="background:#A6CCF7;"></span>即时结果</span>
+                </div>
+
+                <div class="welcome-footer">
+                    <p style="margin:0;color:var(--ink-faint);font-size:13px;">趣味自我探索 · 仅供参考</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. DATE INPUT SCREEN -->
+        <div id="date-input-screen" class="screen">
+            <div class="date-wrap animate-fade-in">
+                <div class="card date-card">
+                    <div class="date-icon">
+                        <i data-lucide="calendar"></i>
+                    </div>
+
+                    <h2 class="date-title">首先，确认你的实际年龄</h2>
+                    <p class="date-sub">我们需要它来计算心理年龄偏差值</p>
+
+                    <div class="date-grid">
+                        <!-- Year -->
+                        <div class="date-field">
+                            <label>年份</label>
+                            <div class="date-select-wrap">
+                                <select id="input-year"></select>
+                            </div>
+                        </div>
+                        <!-- Month -->
+                        <div class="date-field">
+                            <label>月份</label>
+                            <div class="date-select-wrap">
+                                <select id="input-month"></select>
+                            </div>
+                        </div>
+                        <!-- Day -->
+                        <div class="date-field">
+                            <label>日期</label>
+                            <div class="date-select-wrap">
+                                <select id="input-day"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="app.submitDate()" class="btn-choco">
+                        <span>进入测试</span>
+                        <i data-lucide="arrow-right" style="width:20px;height:20px;"></i>
+                    </button>
+                </div>
+                <p class="date-note">你的生日信息仅用于本次测试计算，不会被存储。</p>
+            </div>
+        </div>
+
+        <!-- 3. QUIZ SCREEN -->
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-wrap animate-fade-in">
+                <!-- Progress Header -->
+                <div class="quiz-head">
+                    <div class="quiz-meta">
+                        <span id="question-counter">Question 1</span>
+                        <span id="question-total">40 total</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Question Card -->
+                <div class="card question-card">
+                    <h2 id="question-text" class="question-text">
+                        <!-- Question Text Here -->
+                    </h2>
+
+                    <div id="options-container" class="options-list">
+                        <!-- Options generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3.5 LOADING / TRANSITION SCREEN（新增过渡页） -->
+        <div id="loading-screen" class="screen">
+            <div class="loading-wrap animate-fade-in">
+                <div class="loading-dots">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+                <p class="loading-title">正在分析你的答案…</p>
+                <p class="loading-sub">从 8 个维度计算你的心理年龄</p>
+            </div>
+        </div>
+
+        <!-- 4. RESULT SCREEN -->
+        <div id="result-screen" class="screen">
+            <div class="result-wrap animate-slide-up">
+                <div class="result-head">
+                    <span class="badge-macaron">测试完成</span>
+                    <h2>你的心理画像</h2>
+                </div>
+
+                <div class="card result-card">
+
+                    <!-- 0. Age Comparison（双卡片：心理年龄 / 实际年龄） -->
+                    <div class="age-compare">
+                        <div class="age-row">
+                            <!-- Psych Age -->
+                            <div class="age-card age-card--psych">
+                                <span class="age-label">心理年龄</span>
+                                <span id="res-psych-age" class="age-num">0</span>
+                                <span class="age-sui">岁</span>
+                            </div>
+
+                            <!-- Icon -->
+                            <div id="res-age-icon" class="age-mid">
+                                <!-- Icon populated by JS -->
+                            </div>
+
+                            <!-- Actual Age -->
+                            <div class="age-card age-card--actual">
+                                <span class="age-label">实际年龄</span>
+                                <span id="res-actual-age" class="age-num">0</span>
+                                <span class="age-sui">岁</span>
+                            </div>
+                        </div>
+                        <div class="age-diff-row">
+                            <span id="res-diff-text" class="diff-pill diff-pill--match">
+                                <!-- Text populated by JS -->
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Banner -->
+                    <div id="res-banner" class="res-banner" style="background: linear-gradient(120deg, #FF8F5C, #FFB03A);">
+                        <p id="res-title" class="res-banner-title"></p>
+                    </div>
+
+                    <!-- Core Profile & Chart -->
+                    <div class="res-section">
+                        <div class="res-grid-2">
+                            <div>
+                                <h3 class="res-h3">
+                                    <i data-lucide="quote"></i>
+                                    性格深度解析
+                                </h3>
+                                <p id="res-desc" class="res-desc"></p>
+                                <h3 class="res-h3" style="font-size:16px;">关键词标签</h3>
+                                <div id="res-traits" class="traits-row"></div>
+                            </div>
+
+                            <div class="chart-panel">
+                                <h3>维度分析</h3>
+                                <div class="chart-box">
+                                    <canvas id="radarChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Deep Analysis -->
+                    <div class="res-section" style="background: rgba(255,246,236,.5);">
+                        <h3 class="res-h3" style="font-size:20px;">
+                            <i data-lucide="bar-chart-2"></i>
+                            深度自我分析
+                        </h3>
+                        <div class="analysis-grid">
+                            <div class="mini-panel mini-panel--green">
+                                <h4 class="mini-h4">
+                                    <i data-lucide="thumbs-up"></i> 核心优势
+                                </h4>
+                                <ul id="res-strengths" class="mini-list"></ul>
+                            </div>
+                            <div class="mini-panel mini-panel--amber">
+                                <h4 class="mini-h4">
+                                    <i data-lucide="alert-circle"></i> 潜在盲点
+                                </h4>
+                                <ul id="res-blindspots" class="mini-list"></ul>
+                            </div>
+                        </div>
+                        <div class="mini-panel mini-panel--peach">
+                            <h4 class="mini-h4">维度解读</h4>
+                            <p id="res-dimension" class="mini-p"></p>
+                        </div>
+                    </div>
+
+                    <!-- Social Matches -->
+                    <div class="res-section" style="border-bottom: none;">
+                        <h3 class="res-h3" style="font-size:20px;">
+                            <i data-lucide="users" style="color:#E0587A;"></i>
+                            社交与匹配
+                        </h3>
+                        <div class="match-grid">
+                            <!-- Archetype -->
+                            <div class="match-card match-card--violet">
+                                <div class="match-icon">
+                                    <i data-lucide="user"></i>
+                                </div>
+                                <h4 class="match-label">你的原型角色</h4>
+                                <p id="res-archetype" class="match-name"></p>
+                            </div>
+                            <!-- Partner -->
+                            <div class="match-card match-card--rose">
+                                <div class="match-icon">
+                                    <i data-lucide="users"></i>
+                                </div>
+                                <h4 class="match-label">最佳拍档</h4>
+                                <p id="res-partner" class="match-name"></p>
+                                <p id="res-partner-reason" class="match-reason"></p>
+                            </div>
+                            <!-- Conflict -->
+                            <div class="match-card match-card--gray">
+                                <div class="match-icon">
+                                    <i data-lucide="zap"></i>
+                                </div>
+                                <h4 class="match-label">你的克星</h4>
+                                <p id="res-conflict" class="match-name"></p>
+                                <p id="res-conflict-reason" class="match-reason"></p>
+                            </div>
+                        </div>
+
+                        <div class="advice-box">
+                            <h4>给未来的建议</h4>
+                            <p id="res-advice"></p>
+                        </div>
+                    </div>
+
+                    <!-- Footer Actions（report-footer 供 SDK 挂载推广链接） -->
+                    <div class="res-footer report-footer">
+                        <div class="res-score">
+                            总分: <b id="res-total-score">0</b> / 160
+                        </div>
+                        <div class="res-actions">
+                            <button id="restart-btn" type="button" class="btn-outline">
+                                <i data-lucide="rotate-ccw"></i>
+                                重新测试
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="page-footer">
+        <p>© <span id="year-copy"></span> PsycheAge 心理年龄测试 · 趣味自我探索</p>
+    </footer>
+
+    <!-- SCRIPT -->
+    <script>
+        // --- DATA ---
+        const QUESTIONS = [
+            { id: 1, text: "周末终于到了，你最理想的度过方式是？", options: [{ id: 'a', text: "去游乐园或者热闹的聚会，哪怕通宵也没关系！", score: 1 }, { id: 'b', text: "约三两好友去探店，打卡网红餐厅。", score: 2 }, { id: 'c', text: "在家处理一些积压的家务，或者通过学习提升自己。", score: 3 }, { id: 'd', text: "一个人安静地喝茶、看书，享受独处时光。", score: 4 }] },
+            { id: 2, text: "如果给你一笔意外之财（数额不大），你会？", options: [{ id: 'a', text: "立刻买那个心仪已久的玩具/游戏/潮玩！", score: 1 }, { id: 'b', text: "请朋友们吃顿饭，或者去周边旅游一下。", score: 2 }, { id: 'c', text: "存起来一部分，或者投资理财，以备不时之需。", score: 3 }, { id: 'd', text: "给家人买点实用的东西，或者捐赠一部分。", score: 4 }] },
+            { id: 3, text: "你对当下流行的短视频或网络热梗的态度是？", options: [{ id: 'a', text: "我是冲浪达人，什么梗我都懂，甚至我会去拍！", score: 1 }, { id: 'b', text: "偶尔会看，觉得挺有意思，但不至于沉迷。", score: 2 }, { id: 'c', text: "觉得有些喧闹和浪费时间，更倾向于深度内容。", score: 3 }, { id: 'd', text: "基本不关注，甚至觉得现在的网络世界太浮躁。", score: 4 }] },
+            { id: 4, text: "你最喜欢的电影类型通常是？", options: [{ id: 'a', text: "超级英雄、动作大片、热血动漫。", score: 1 }, { id: 'b', text: "爱情片、青春校园片、悬疑烧脑片。", score: 2 }, { id: 'c', text: "剧情片、传记片、现实题材。", score: 3 }, { id: 'd', text: "纪录片、历史剧、经典老片、文艺片。", score: 4 }] },
+            { id: 5, text: "对于“尝试新事物”（如新发型、新餐厅），你的态度是？", options: [{ id: 'a', text: "毫不犹豫，我就是喜欢新鲜感！", score: 1 }, { id: 'b', text: "看心情，如果有朋友陪我一起就可以。", score: 2 }, { id: 'c', text: "会先看看评价和性价比，再决定是否尝试。", score: 3 }, { id: 'd', text: "比较保守，习惯了现在的样子，不想折腾。", score: 4 }] },
+            { id: 6, text: "如果可以养一只宠物，你会选择？", options: [{ id: 'a', text: "一只精力旺盛、需要陪玩的哈士奇或鹦鹉。", score: 1 }, { id: 'b', text: "一只粘人可爱的布偶猫或泰迪。", score: 2 }, { id: 'c', text: "一只听话懂事、能看家护院的金毛或德牧。", score: 3 }, { id: 'd', text: "一只安静、不需要太多打理的乌龟或观赏鱼。", score: 4 }] },
+            { id: 7, text: "关于“熬夜”，你的真实写照是？", options: [{ id: 'a', text: "经常通宵打游戏/刷剧，第二天照样精神。", score: 1 }, { id: 'b', text: "虽然知道不好，但总是忍不住刷手机到两点。", score: 2 }, { id: 'c', text: "因工作或学习被迫熬夜，会努力补觉。", score: 3 }, { id: 'd', text: "作息非常规律，几乎不熬夜，重视养生。", score: 4 }] },
+            { id: 8, text: "对于时尚潮流，你的看法是？", options: [{ id: 'a', text: "必须追赶！我就是这条街最靓的仔。", score: 1 }, { id: 'b', text: "会关注流行色和搭配，让自己看起来不错。", score: 2 }, { id: 'c', text: "注重质感和得体，适合场合最重要。", score: 3 }, { id: 'd', text: "舒适第一，不在乎别人怎么看。", score: 4 }] },
+            { id: 9, text: "当遇到一件非常不顺心的事情（比如被误解）时，你的第一反应是？", options: [{ id: 'a', text: "立刻炸毛，必须当场解释清楚或者发泄出来。", score: 1 }, { id: 'b', text: "感到委屈，找朋友倾诉，寻求安慰。", score: 2 }, { id: 'c', text: "先压住火气，分析利弊，寻找解决办法。", score: 3 }, { id: 'd', text: "淡然处之，觉得这种事情人生常有，没必要动气。", score: 4 }] },
+            { id: 10, text: "如果你的朋友迟到了半小时，你会？", options: [{ id: 'a', text: "非常生气，甚至想直接走人。", score: 1 }, { id: 'b', text: "有点不高兴，见面后要让他请客赔罪。", score: 2 }, { id: 'c', text: "询问原因，如果是正当理由表示理解。", score: 3 }, { id: 'd', text: "无所谓，正好利用这段时间看看书或发发呆。", score: 4 }] },
+            { id: 11, text: "面对别人的批评，你通常会？", options: [{ id: 'a', text: "本能地反驳，觉得对方在针对我。", score: 1 }, { id: 'b', text: "表面接受，心里很难过，会怀疑自己。", score: 2 }, { id: 'c', text: "理性分析，有则改之无则加勉。", score: 3 }, { id: 'd', text: "一笑置之，清楚自己的价值，不被他人言语左右。", score: 4 }] },
+            { id: 12, text: "遇到堵车或者排长队时，你的状态是？", options: [{ id: 'a', text: "焦躁不安，不停地看表、叹气。", score: 1 }, { id: 'b', text: "掏出手机刷朋友圈，打发时间。", score: 2 }, { id: 'c', text: "思考接下来的行程安排，或者听听新闻。", score: 3 }, { id: 'd', text: "心态平和，正好听完一期播客或者闭目养神。", score: 4 }] },
+            { id: 13, text: "当你在公共场合出丑（比如摔了一跤）时？", options: [{ id: 'a', text: "大叫一声，或者尴尬得想找个地缝钻进去。", score: 1 }, { id: 'b', text: "赶紧看看有没有熟人看到，假装没事。", score: 2 }, { id: 'c', text: "自嘲一下，拍拍土站起来继续走。", score: 3 }, { id: 'd', text: "非常镇定，仿佛什么都没发生过。", score: 4 }] },
+            { id: 14, text: "如果工作/学习任务搞砸了，你会？", options: [{ id: 'a', text: "不知所措，甚至想逃避责任。", score: 1 }, { id: 'b', text: "很自责，担心被领导/老师骂。", score: 2 }, { id: 'c', text: "迅速制定补救方案，将损失降到最低。", score: 3 }, { id: 'd', text: "坦然承认错误，承担后果，并视其为宝贵经验。", score: 4 }] },
+            { id: 15, text: "对于“失恋”或“失去一段关系”，你的看法？", options: [{ id: 'a', text: "感觉世界崩塌了，痛哭流涕，无法接受。", score: 1 }, { id: 'b', text: "通过疯狂购物或旅行来转移注意力，疗愈自己。", score: 2 }, { id: 'c', text: "反思关系中的问题，整理心情重新出发。", score: 3 }, { id: 'd', text: "缘起缘灭终有时，彼此祝福，各自安好。", score: 4 }] },
+            { id: 16, text: "你容易被电影或小说里的情节感动流泪吗？", options: [{ id: 'a', text: "完全不会，那是假的！或者看什么都笑。", score: 1 }, { id: 'b', text: "超级容易，经常哭得稀里哗啦。", score: 2 }, { id: 'c', text: "只有触动到自己经历的点时才会动容。", score: 3 }, { id: 'd', text: "内心有波动，但表面通常波澜不惊。", score: 4 }] },
+            { id: 17, text: "朋友约你出门，但你已经很累了，你会？", options: [{ id: 'a', text: "硬着头皮去！不能错过热闹！", score: 1 }, { id: 'b', text: "看对方是谁，如果是死党就去。", score: 2 }, { id: 'c', text: "礼貌拒绝，说明身体情况，改天再约。", score: 3 }, { id: 'd', text: "直接拒绝，现在的我非常注重养生和休息。", score: 4 }] },
+            { id: 18, text: "在聚会上，你通常扮演什么角色？", options: [{ id: 'a', text: "气氛组组长，最活跃的那个。", score: 1 }, { id: 'b', text: "配合者，跟随大家的话题。", score: 2 }, { id: 'c', text: "组织者或照顾者，确保大家玩得开心。", score: 3 }, { id: 'd', text: "观察者，坐在角落安静地喝酒微笑。", score: 4 }] },
+            { id: 19, text: "听到朋友的八卦时，你的反应是？", options: [{ id: 'a', text: "超级兴奋，立刻去打听更多细节！", score: 1 }, { id: 'b', text: "有点好奇，会和闺蜜私下讨论。", score: 2 }, { id: 'c', text: "听听就好，不信谣不传谣。", score: 3 }, { id: 'd', text: "完全不感兴趣，那是别人的私事。", score: 4 }] },
+            { id: 20, text: "如果有不喜欢的人在场，你会？", options: [{ id: 'a', text: "把“讨厌”写在脸上，完全不理他。", score: 1 }, { id: 'b', text: "尽量避开眼神接触，只和喜欢的人说话。", score: 2 }, { id: 'c', text: "维持基本的社交礼仪，不让场面难看。", score: 3 }, { id: 'd', text: "一视同仁，甚至能和他谈笑风生。", score: 4 }] },
+            { id: 21, text: "关于“讨好别人”，你的状态是？", options: [{ id: 'a', text: "我为什么要讨好别人？我做我自己！", score: 1 }, { id: 'b', text: "很在意别人的看法，经常不自觉地讨好。", score: 2 }, { id: 'c', text: "在职场或必要场合会适当圆滑，但有底线。", score: 3 }, { id: 'd', text: "早已过了需要取悦他人的年纪，舒服最重要。", score: 4 }] },
+            { id: 22, text: "当你看到别人取得巨大成功时？", options: [{ id: 'a', text: "觉得他运气好，或者有点嫉妒。", score: 1 }, { id: 'b', text: "感到焦虑，觉得自己落后了。", score: 2 }, { id: 'c', text: "研究他是怎么做到的，激励自己。", score: 3 }, { id: 'd', text: "由衷为他高兴，并相信每个人有自己的时区。", score: 4 }] },
+            { id: 23, text: "你更倾向于哪种社交模式？", options: [{ id: 'a', text: "广交朋友，五湖四海皆兄弟。", score: 1 }, { id: 'b', text: "有几个小圈子，喜欢抱团取暖。", score: 2 }, { id: 'c', text: "注重人脉的质量和互换价值。", score: 3 }, { id: 'd', text: "极简社交，二三知己足矣。", score: 4 }] },
+            { id: 24, text: "对于比自己年轻很多的人，你的态度？", options: [{ id: 'a', text: "我们是同龄人！没有代沟！", score: 1 }, { id: 'b', text: "羡慕他们的青春和活力。", score: 2 }, { id: 'c', text: "愿意给他们一些建议和指导。", score: 3 }, { id: 'd', text: "慈祥地看着他们，包容他们的幼稚。", score: 4 }] },
+            { id: 25, text: "关于未来的规划，你更倾向于哪种想法？", options: [{ id: 'a', text: "未来太远了，活在当下最重要，开心就好！", score: 1 }, { id: 'b', text: "有很多梦想想去实现，正在努力探索中。", score: 2 }, { id: 'c', text: "有明确的职业规划和家庭计划，正在按部就班执行。", score: 3 }, { id: 'd', text: "顺其自然，不再强求什么，健康平安即是福。", score: 4 }] },
+            { id: 26, text: "你认为“成功”的定义是？", options: [{ id: 'a', text: "成为明星、网红，或者非常有钱！", score: 1 }, { id: 'b', text: "做自己喜欢的事，被大家认可。", score: 2 }, { id: 'c', text: "事业有成，家庭美满，社会地位高。", score: 3 }, { id: 'd', text: "内心富足，身体健康，无愧于心。", score: 4 }] },
+            { id: 27, text: "对于“改变”这件事（如搬家、换工作），你的态度是？", options: [{ id: 'a', text: "超级兴奋！我喜欢新鲜感！", score: 1 }, { id: 'b', text: "有点紧张，但如果是为了更好的发展愿意尝试。", score: 2 }, { id: 'c', text: "比较谨慎，会仔细评估风险后再做决定。", score: 3 }, { id: 'd', text: "不太喜欢变动，更习惯安稳熟悉的环境。", score: 4 }] },
+            { id: 28, text: "你如何看待“规则”？", options: [{ id: 'a', text: "规则就是用来打破的！", score: 1 }, { id: 'b', text: "有时候觉得规则很束缚，想反抗。", score: 2 }, { id: 'c', text: "规则是维持秩序的必要手段，应当遵守。", score: 3 }, { id: 'd', text: "心中有度，随心所欲而不逾矩。", score: 4 }] },
+            { id: 29, text: "如果给你一个回到过去的机会，你会？", options: [{ id: 'a', text: "毫不犹豫地回去，重新玩一遍！", score: 1 }, { id: 'b', text: "想回去弥补某个遗憾，或者对某人表白。", score: 2 }, { id: 'c', text: "可能会回去利用先知优势投资赚钱。", score: 3 }, { id: 'd', text: "拒绝，当下的每一步都算数，无需回头。", score: 4 }] },
+            { id: 30, text: "你对“责任”的看法？", options: [{ id: 'a', text: "好沉重啊，能躲就躲。", score: 1 }, { id: 'b', text: "虽然有点累，但为了证明自己愿意承担。", score: 2 }, { id: 'c', text: "这是成年人的基本修养，责无旁贷。", score: 3 }, { id: 'd', text: "责任已融入血液，不再是负担，而是守护。", score: 4 }] },
+            { id: 31, text: "对于“爱情”，你现在更相信？", options: [{ id: 'a', text: "轰轰烈烈，一见钟情！", score: 1 }, { id: 'b', text: "浪漫唯美，灵魂伴侣。", score: 2 }, { id: 'c', text: "势均力敌，共同进步。", score: 3 }, { id: 'd', text: "相濡以沫，细水长流。", score: 4 }] },
+            { id: 32, text: "看到一群孩子在公园里玩耍，你的感受是？", options: [{ id: 'a', text: "想加入他们一起玩！", score: 1 }, { id: 'b', text: "觉得很可爱，但也觉得很吵。", score: 2 }, { id: 'c', text: "思考教育孩子真是不容易，责任重大。", score: 3 }, { id: 'd', text: "感受到了生命的活力与传承，内心平静。", score: 4 }] },
+            { id: 33, text: "回顾过去，你经常有的想法是？", options: [{ id: 'a', text: "基本不回忆，我只看前面！", score: 1 }, { id: 'b', text: "偶尔会怀念学生时代的无忧无虑。", score: 2 }, { id: 'c', text: "复盘过去的得失，总结经验教训。", score: 3 }, { id: 'd', text: "一切都是最好的安排，无论好坏都已释怀。", score: 4 }] },
+            { id: 34, text: "独处时，你通常会思考什么？", options: [{ id: 'a', text: "好无聊啊，找谁聊聊天呢？", score: 1 }, { id: 'b', text: "胡思乱想，容易陷入情绪内耗。", score: 2 }, { id: 'c', text: "思考工作计划，或者生活琐事。", score: 3 }, { id: 'd', text: "享受内心的宁静，思考生命的本质。", score: 4 }] },
+            { id: 35, text: "你觉得自己了解自己吗？", options: [{ id: 'a', text: "没想过这个问题，开心就好。", score: 1 }, { id: 'b', text: "有时候觉得自己很矛盾，搞不懂自己。", score: 2 }, { id: 'c', text: "比较了解，知道自己的长处和短板。", score: 3 }, { id: 'd', text: "非常了解，并已接纳了自己的一切不完美。", score: 4 }] },
+            { id: 36, text: "对于“衰老”，你的态度是？", options: [{ id: 'a', text: "太可怕了，我不想变老！", score: 1 }, { id: 'b', text: "有点焦虑，开始用各种抗衰老产品。", score: 2 }, { id: 'c', text: "接受这是自然规律，注重锻炼保持状态。", score: 3 }, { id: 'd', text: "优雅地老去，皱纹是岁月的馈赠。", score: 4 }] },
+            { id: 37, text: "如果必须做出一项牺牲，你会优先牺牲？", options: [{ id: 'a', text: "未来的利益（为了现在的快乐）。", score: 1 }, { id: 'b', text: "个人的面子（为了获得实惠）。", score: 2 }, { id: 'c', text: "部分娱乐时间（为了事业发展）。", score: 3 }, { id: 'd', text: "身外之物（为了内心的安宁）。", score: 4 }] },
+            { id: 38, text: "你如何看待“复杂的人际关系”？", options: [{ id: 'a', text: "搞不懂，也不想懂，谁对我好我就对谁好。", score: 1 }, { id: 'b', text: "觉得很累，希望能简单点。", score: 2 }, { id: 'c', text: "游刃有余，知道如何平衡各方利益。", score: 3 }, { id: 'd', text: "看破不说破，超脱其中。", score: 4 }] },
+            { id: 39, text: "你认为人生的意义在于？", options: [{ id: 'a', text: "吃喝玩乐，体验这个世界！", score: 1 }, { id: 'b', text: "爱与被爱，寻找情感的归宿。", score: 2 }, { id: 'c', text: "创造价值，留下自己的痕迹。", score: 3 }, { id: 'd', text: "修行，体验生命的过程，回归本真。", score: 4 }] },
+            { id: 40, text: "测试结束了，你现在的感受是？", options: [{ id: 'a', text: "好玩！快告诉我结果！", score: 1 }, { id: 'b', text: "有点紧张，担心结果不准。", score: 2 }, { id: 'c', text: "回顾了一下自己的选择，挺有意思。", score: 3 }, { id: 'd', text: "平静地等待，结果如何都无所谓。", score: 4 }] }
+        ];
+
+        const RESULTS = [
+            {
+                minScore: 40, maxScore: 69, title: "天真烂漫的孩童", ageRange: "心理年龄：6 - 12 岁",
+                description: "你的内心住着一个永远长不大的彼得·潘。世界在你眼中是彩色的游乐场，你拥有令人羡慕的好奇心和想象力。你直率、真诚，喜怒哀乐都写在脸上。这种纯真在复杂的成人世界里显得尤为珍贵，但也让你容易在人际交往中受挫，或者因为冲动而做出后悔的决定。",
+                traits: ["好奇心强", "情绪外露", "依赖直觉", "爱冒险", "单纯"],
+                advice: "保持你的童心是上天的礼物，但在需要承担责任的时候，试着多想一步。学会保护自己，不要让你的善良成为别人伤害你的工具。",
+                color: "from-pink-400 to-rose-400",
+                matches: { bestPartner: "通透豁达的智者", partnerReason: "智者的包容能呵护你的童心，而你的活力能点亮他们的生活。", conflict: "奋斗进取的青年", conflictReason: "他们的务实和功利可能会让你感到压抑和不被理解。", archetype: "彼得·潘 / 小王子" },
+                analysis: { strengths: ["无与伦比的创造力", "感染他人的快乐能量", "直觉敏锐"], blindSpots: ["缺乏长期规划", "容易情绪化"], dimensionHighlight: "极高的生活热情和好奇心是你最大的天赋，但抗逆力和责任担当是需要后天补足的短板。" },
+                chartData: [{ subject: '好奇心', A: 95 }, { subject: '情绪稳定', A: 40 }, { subject: '社交从容', A: 60 }, { subject: '责任担当', A: 30 }, { subject: '抗逆力', A: 45 }, { subject: '生活热情', A: 95 }, { subject: '包容度', A: 50 }, { subject: '自我接纳', A: 70 }]
+            },
+            {
+                minScore: 70, maxScore: 92, title: "热血探索的少年", ageRange: "心理年龄：13 - 19 岁",
+                description: "你的心理状态正处于充满活力的青春期。你对世界有自己的看法，渴望表达，渴望被认可。你可能时常感到迷茫和纠结，在理想与现实之间反复横跳。你重视朋友情谊，敏感细腻，虽然有时候会表现出一点叛逆，但那正是你独立人格觉醒的标志。",
+                traits: ["理想主义", "敏感", "重视社交", "求知欲", "纠结"],
+                advice: "迷茫是成长的必经之路，不要因为暂时的不确定而焦虑。利用这段充满激情的时光去尝试不同的领域，你的试错成本还很低。",
+                color: "from-orange-400 to-amber-400",
+                matches: { bestPartner: "从容成熟的中坚", partnerReason: "他们能给你提供方向指引，而你唤醒了他们沉睡的热血。", conflict: "天真烂漫的孩童", conflictReason: "你正在努力摆脱幼稚，所以可能会对他们的行为感到不耐烦。", archetype: "霍尔顿 (麦田守望者) / 鸣人" },
+                analysis: { strengths: ["敢于挑战现状", "对朋友仗义", "学习能力强"], blindSpots: ["容易钻牛角尖", "过度在意他人评价"], dimensionHighlight: "好奇心和生活热情维持在较高水平，但情绪稳定性和自我接纳度波动较大，这是成长的阵痛。" },
+                chartData: [{ subject: '好奇心', A: 85 }, { subject: '情绪稳定', A: 55 }, { subject: '社交从容', A: 70 }, { subject: '责任担当', A: 50 }, { subject: '抗逆力', A: 60 }, { subject: '生活热情', A: 90 }, { subject: '包容度', A: 60 }, { subject: '自我接纳', A: 50 }]
+            },
+            {
+                minScore: 93, maxScore: 115, title: "奋斗进取的青年", ageRange: "心理年龄：20 - 35 岁",
+                description: "你处于人生的黄金奋斗期，心理状态成熟且务实。你知道自己想要什么，并愿意为此付出努力。你开始承担起工作和家庭的责任，虽然偶尔会感到压力山大，焦虑感爆棚，但你有足够的韧性和能力去应对挑战。你是现实主义者，注重效率和结果。",
+                traits: ["务实", "野心", "抗压强", "焦虑", "执行力"],
+                advice: "你做得已经很好了，不要把自己逼得太紧。偶尔停下来喘口气并不代表退步，学会平衡工作与生活，照顾好自己的身体和情绪。",
+                color: "from-blue-400 to-cyan-400",
+                matches: { bestPartner: "从容成熟的中坚", partnerReason: "强强联手，他们是你在事业和生活上最可靠的战友。", conflict: "天真烂漫的孩童", conflictReason: "你会觉得他们不切实际，而他们觉得你太功利。", archetype: "钢铁侠 / 盖茨比" },
+                analysis: { strengths: ["超强的执行力", "理性解决问题", "抗压能力"], blindSpots: ["甚至会忽略身体信号", "难以享受当下"], dimensionHighlight: "责任担当和抗逆力是你的强项，但为了成功，你可能压抑了部分生活热情和好奇心。" },
+                chartData: [{ subject: '好奇心', A: 70 }, { subject: '情绪稳定', A: 75 }, { subject: '社交从容', A: 75 }, { subject: '责任担当', A: 90 }, { subject: '抗逆力', A: 85 }, { subject: '生活热情', A: 80 }, { subject: '包容度', A: 65 }, { subject: '自我接纳', A: 75 }]
+            },
+            {
+                minScore: 116, maxScore: 138, title: "从容成熟的中坚", ageRange: "心理年龄：36 - 55 岁",
+                description: "经过岁月的洗礼，你的内心如磐石般稳固。你不再轻易被情绪左右，看问题深刻且全面。你是周围人的依靠，行事稳重，顾全大局。你更看重长远的价值而非眼前的利益，对于复杂的人际关系处理得游刃有余，生活节奏尽在你的掌握之中。",
+                traits: ["稳重", "深思熟虑", "可靠", "城府", "掌控力"],
+                advice: "过于稳重有时会显得缺乏情趣，不妨偶尔打破一下常规，给生活制造一点小惊喜。保持对新事物的好奇心，能让你看起来更年轻。",
+                color: "from-emerald-400 to-teal-400",
+                matches: { bestPartner: "奋斗进取的青年", partnerReason: "你欣赏他们的冲劲，而你的稳重能帮他们规避风险。", conflict: "热血探索的少年", conflictReason: "少年的情绪化和冲动有时会挑战你的掌控欲。", archetype: "教父 / 诸葛亮" },
+                analysis: { strengths: ["情绪管理大师", "极高的可靠性", "全局视野"], blindSpots: ["略显保守", "对他人的高标准要求"], dimensionHighlight: "情绪稳定、社交从容和责任担当都接近满分，唯独好奇心和生活热情有所下降，记得找回一些乐趣。" },
+                chartData: [{ subject: '好奇心', A: 50 }, { subject: '情绪稳定', A: 95 }, { subject: '社交从容', A: 90 }, { subject: '责任担当', A: 95 }, { subject: '抗逆力', A: 90 }, { subject: '生活热情', A: 60 }, { subject: '包容度', A: 80 }, { subject: '自我接纳', A: 85 }]
+            },
+            {
+                minScore: 139, maxScore: 160, title: "通透豁达的智者", ageRange: "心理年龄：60+ 岁",
+                description: "你的心理年龄已经达到了超然的境界。世间万物在你眼中都已回归本质，你很少焦虑，更多的是包容与释怀。你追求内心的宁静，物质对你来说已不再是束缚，精神的自由才是终极追求。你看淡了得失，拥有了大智慧。",
+                traits: ["豁达", "淡泊", "智慧", "慈悲", "宁静"],
+                advice: "你的智慧是宝贵的财富，能够指引很多人。但也要注意不要与时代完全脱节，保持与年轻人的交流会让你的智慧更具活力。",
+                color: "from-violet-400 to-purple-400",
+                matches: { bestPartner: "天真烂漫的孩童", partnerReason: "一老一少，回归本真的快乐，彼此都能在对方身上看到纯粹。", conflict: "奋斗进取的青年", conflictReason: "他们的焦虑和忙碌在你看来是没有必要的自我折磨。", archetype: "邓布利多 / 尤达大师" },
+                analysis: { strengths: ["极高的自我接纳", "看透本质的智慧", "宽广的胸怀"], blindSpots: ["可能显得疏离", "对世俗成功的漠视"], dimensionHighlight: "你的包容度、情绪稳定和自我接纳达到了顶峰，但好奇心和生活热情转为了内向的探索。" },
+                chartData: [{ subject: '好奇心', A: 40 }, { subject: '情绪稳定', A: 100 }, { subject: '社交从容', A: 95 }, { subject: '责任担当', A: 80 }, { subject: '抗逆力', A: 95 }, { subject: '生活热情', A: 50 }, { subject: '包容度', A: 100 }, { subject: '自我接纳', A: 100 }]
+            }
+        ];
+
+        function calculatePsychAge(score) {
+            if (score <= 69) return Math.round(6 + ((score - 40) / (69 - 40)) * (12 - 6));
+            if (score <= 92) return Math.round(13 + ((score - 70) / (92 - 70)) * (19 - 13));
+            if (score <= 115) return Math.round(20 + ((score - 93) / (115 - 93)) * (35 - 20));
+            if (score <= 138) return Math.round(36 + ((score - 116) / (138 - 116)) * (55 - 36));
+            return Math.round(60 + ((score - 139) / (160 - 139)) * (80 - 60));
+        }
+
+        function buildResultPayload(score, result, actualAge) {
+            const psychAge = calculatePsychAge(score);
+            const ageDiff = psychAge - actualAge;
+            let diffMode = 'match';
+            let diffText = '你的身心年龄完美契合，知行合一。';
+
+            if (Math.abs(ageDiff) > 2) {
+                if (ageDiff > 0) {
+                    diffMode = 'older';
+                    diffText = `你的内心比实际年龄成熟 ${Math.abs(ageDiff)} 岁，拥有超龄的稳重。`;
+                } else {
+                    diffMode = 'younger';
+                    diffText = `你的内心比实际年龄年轻 ${Math.abs(ageDiff)} 岁，保留着珍贵的活力。`;
+                }
+            }
+
+            return {
+                version: 1,
+                score,
+                totalScore: score,
+                actualAge,
+                psychAge,
+                ageDiff,
+                diffMode,
+                diffText,
+                title: result.title,
+                description: result.description,
+                traits: Array.isArray(result.traits) ? result.traits.slice(0, 5) : [],
+                advice: result.advice || '',
+                color: result.color || 'from-blue-400 to-cyan-400',
+                matches: result.matches || {},
+                analysis: result.analysis || {},
+                chartData: Array.isArray(result.chartData) ? result.chartData : []
+            };
+        }
+
+        // 马卡龙色系横幅渐变（映射原版结果配色）
+        const BANNER_GRADIENTS = {
+            'from-pink-400 to-rose-400': 'linear-gradient(120deg, #FF8FB0, #FF7E9D)',
+            'from-orange-400 to-amber-400': 'linear-gradient(120deg, #FF8F5C, #FFB03A)',
+            'from-blue-400 to-cyan-400': 'linear-gradient(120deg, #6FA8F0, #4ECCC0)',
+            'from-emerald-400 to-teal-400': 'linear-gradient(120deg, #4FCB8E, #3FBFB4)',
+            'from-violet-400 to-purple-400': 'linear-gradient(120deg, #A98BFF, #BF8CF0)'
+        };
+        const DEFAULT_BANNER = BANNER_GRADIENTS['from-blue-400 to-cyan-400'];
+
+        // --- SDK helpers ---
+        function getStorageKey(token) {
+            return 'test_result_' + (token || (window.linkValidator && window.linkValidator.token) || 'local');
+        }
+
+        function addPromotionLinkDelayed() {
+            setTimeout(function () {
+                if (
+                    window.PsyTestValidator &&
+                    typeof window.PsyTestValidator.addPromotionLink === 'function'
+                ) {
+                    window.PsyTestValidator.addPromotionLink();
+                }
+            }, 200);
+        }
+
+        async function waitForValidator() {
+            let waitCount = 0;
+            while (!window.linkValidator && waitCount < 30) {
+                await new Promise(function (resolve) {
+                    setTimeout(resolve, 100);
+                });
+                waitCount++;
+                if (
+                    waitCount % 10 === 0 &&
+                    window.PsyTestValidator &&
+                    typeof window.PsyTestValidator.getInstance === 'function'
+                ) {
+                    const instance = window.PsyTestValidator.getInstance();
+                    if (instance) {
+                        window.linkValidator = instance;
+                        break;
+                    }
+                }
+            }
+            return window.linkValidator;
+        }
+
+        async function validateAndStartSdk() {
+            const validator = await waitForValidator();
+            if (!validator) {
+                alert('验证SDK未初始化，无法开始测试。请刷新页面重试。');
+                return false;
+            }
+
+            let isValid = false;
+            if (typeof validator.validateForUserAction === 'function') {
+                try {
+                    isValid = await validator.validateForUserAction();
+                    if (!isValid || validator.valid === false) {
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('链接验证失败:', error);
+                    validator.valid = false;
+                    return false;
+                }
+            } else {
+                if (validator.valid === false) {
+                    alert(validator.validationError || '测试链接无效，请检查链接是否正确');
+                    return false;
+                }
+                isValid = validator.valid !== false;
+            }
+
+            if (!isValid || validator.valid === false) {
+                return false;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const isRestart = urlParams.get('restart') === 'true';
+            if (!isRestart && !window.__xlnl2_test_started) {
+                try {
+                    window.__xlnl2_test_started = true;
+                    await validator.startTest();
+                    console.log('测试开始记录成功');
+                } catch (error) {
+                    console.error('记录测试开始失败:', error);
+                    window.__xlnl2_test_started = false;
+                    return false;
+                }
+            } else if (isRestart) {
+                console.log('重新测试模式，跳过startTest()调用，避免重复扣除次数');
+                window.__xlnl2_test_started = false;
+                window.__xlnl2_test_completed = false;
+            }
+
+            return true;
+        }
+
+        function restoreResultFromStorage() {
+            const token =
+                (window.linkValidator && window.linkValidator.token) ||
+                new URLSearchParams(window.location.search).get('token');
+            if (!token) {
+                return false;
+            }
+            try {
+                const raw = localStorage.getItem(getStorageKey(token));
+                if (!raw) {
+                    return false;
+                }
+                const saved = JSON.parse(raw);
+                const result = saved.result || saved;
+                if (!result || (result.psychAge === undefined && result.score === undefined)) {
+                    return false;
+                }
+                window.__xlnl2_test_completed = true;
+                if (typeof app !== 'undefined' && typeof app.applyResultPayload === 'function') {
+                    app.applyResultPayload(result, { skipComplete: true });
+                }
+                return true;
+            } catch (error) {
+                console.error('恢复本地结果失败:', error);
+                return false;
+            }
+        }
+        window.restoreXlnl2Result = restoreResultFromStorage;
+
+        // --- APP LOGIC ---
+        const app = {
+            state: {
+                currentQuestionIndex: 0,
+                score: 0,
+                actualAge: 20,
+                chartInstance: null,
+                latestResultPayload: null
+            },
+
+            init: function() {
+                this.updateYearCopy();
+                lucide.createIcons();
+                this.initDateInputs();
+            },
+
+            updateYearCopy: function() {
+                document.getElementById('year-copy').textContent = new Date().getFullYear();
+            },
+
+            showScreen: function(screenId) {
+                document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+                document.getElementById(screenId).classList.add('active');
+                const nav = document.getElementById('psycheNav');
+                if (nav) {
+                    if (screenId === 'start-screen') {
+                        nav.classList.remove('hidden');
+                    } else {
+                        nav.classList.add('hidden');
+                    }
+                }
+                if (screenId === 'start-screen' || screenId === 'result-screen') {
+                    addPromotionLinkDelayed();
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+
+            // --- DATE INPUT LOGIC ---
+            initDateInputs: function() {
+                const yearSel = document.getElementById('input-year');
+                const monthSel = document.getElementById('input-month');
+                const daySel = document.getElementById('input-day');
+
+                const currentYear = new Date().getFullYear();
+
+                // Populate Years
+                for (let i = 0; i < 80; i++) {
+                    const y = currentYear - i - 5;
+                    const opt = document.createElement('option');
+                    opt.value = y;
+                    opt.text = y;
+                    yearSel.add(opt);
+                }
+                yearSel.value = 2000;
+
+                // Populate Months
+                for (let i = 1; i <= 12; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.text = i + '月';
+                    monthSel.add(opt);
+                }
+
+                // Update Days based on Year/Month
+                const updateDays = () => {
+                    const y = parseInt(yearSel.value);
+                    const m = parseInt(monthSel.value);
+                    const daysInMonth = new Date(y, m, 0).getDate();
+
+                    daySel.innerHTML = '';
+                    for (let i = 1; i <= daysInMonth; i++) {
+                        const opt = document.createElement('option');
+                        opt.value = i;
+                        opt.text = i + '日';
+                        daySel.add(opt);
+                    }
+                };
+
+                yearSel.addEventListener('change', updateDays);
+                monthSel.addEventListener('change', updateDays);
+
+                // Initial call
+                updateDays();
+            },
+
+            startFlow: async function() {
+                const ok = await validateAndStartSdk();
+                if (!ok) {
+                    return;
+                }
+                this.showScreen('date-input-screen');
+            },
+
+            submitDate: function() {
+                const year = parseInt(document.getElementById('input-year').value);
+                const month = parseInt(document.getElementById('input-month').value);
+                const day = parseInt(document.getElementById('input-day').value);
+
+                const today = new Date();
+                let age = today.getFullYear() - year;
+                const m = today.getMonth() + 1 - month;
+                if (m < 0 || (m === 0 && today.getDate() < day)) {
+                    age--;
+                }
+
+                this.state.actualAge = age;
+                this.startQuiz();
+            },
+
+            // --- QUIZ LOGIC ---
+            startQuiz: function() {
+                this.state.score = 0;
+                this.state.currentQuestionIndex = 0;
+                this.showScreen('quiz-screen');
+                this.renderQuestion();
+            },
+
+            renderQuestion: function() {
+                const q = QUESTIONS[this.state.currentQuestionIndex];
+
+                // Update Progress
+                document.getElementById('question-counter').textContent = `Question ${this.state.currentQuestionIndex + 1}`;
+                document.getElementById('question-total').textContent = `${QUESTIONS.length} total`;
+                const progress = ((this.state.currentQuestionIndex + 1) / QUESTIONS.length) * 100;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+
+                // Update Text
+                document.getElementById('question-text').textContent = q.text;
+
+                // Render Options
+                const container = document.getElementById('options-container');
+                container.innerHTML = '';
+
+                q.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "opt-btn";
+                    btn.onclick = () => this.handleAnswer(opt.score);
+
+                    const span = document.createElement('span');
+                    span.className = "opt-text";
+                    span.textContent = opt.text;
+
+                    const icon = document.createElement('i');
+                    icon.setAttribute('data-lucide', 'check-circle-2');
+                    icon.className = "opt-check";
+
+                    btn.appendChild(span);
+                    btn.appendChild(icon);
+                    container.appendChild(btn);
+                });
+                lucide.createIcons();
+            },
+
+            handleAnswer: function(score) {
+                this.state.score += score;
+
+                if (this.state.currentQuestionIndex < QUESTIONS.length - 1) {
+                    this.state.currentQuestionIndex++;
+                    // Small delay for UX
+                    setTimeout(() => this.renderQuestion(), 200);
+                } else {
+                    this.showLoading();
+                }
+            },
+
+            // --- TRANSITION (LOADING) LOGIC ---
+            showLoading: function() {
+                this.showScreen('loading-screen');
+                setTimeout(() => this.showResult(), 1500);
+            },
+
+            // --- RESULT LOGIC ---
+            showResult: function() {
+                const score = this.state.score;
+                const result = RESULTS.find(r => score >= r.minScore && score <= r.maxScore) || RESULTS[RESULTS.length - 1];
+                const payload = buildResultPayload(score, result, this.state.actualAge);
+                this.applyResultPayload(payload);
+            },
+
+            applyResultPayload: async function(payload, options) {
+                if (!payload || typeof payload !== 'object') {
+                    return;
+                }
+
+                const skipComplete = options && options.skipComplete;
+
+                this.state.latestResultPayload = payload;
+                this.state.score = Number(payload.score || payload.totalScore) || 0;
+                this.state.actualAge = Number(payload.actualAge) || this.state.actualAge;
+
+                document.getElementById('res-psych-age').textContent = Number(payload.psychAge) || 0;
+                document.getElementById('res-actual-age').textContent = Number(payload.actualAge) || 0;
+
+                const iconContainer = document.getElementById('res-age-icon');
+                const diffText = document.getElementById('res-diff-text');
+                iconContainer.innerHTML = '';
+                diffText.className = "diff-pill";
+
+                if (payload.diffMode === 'older') {
+                    iconContainer.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;color:#3E8E6B;"><i data-lucide="trending-up" style="width:30px;height:30px;margin-bottom:4px;"></i><span style="font-size:12px;font-weight:900;">成熟</span></div>';
+                    diffText.classList.add('diff-pill--older');
+                } else if (payload.diffMode === 'younger') {
+                    iconContainer.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;color:#E86A3C;"><i data-lucide="trending-down" style="width:30px;height:30px;margin-bottom:4px;"></i><span style="font-size:12px;font-weight:900;">年轻</span></div>';
+                    diffText.classList.add('diff-pill--younger');
+                } else {
+                    iconContainer.innerHTML = '<i data-lucide="minus" style="width:30px;height:30px;"></i>';
+                    diffText.classList.add('diff-pill--match');
+                }
+                diffText.textContent = payload.diffText || '你的身心年龄完美契合，知行合一。';
+
+                document.getElementById('res-banner').style.background = BANNER_GRADIENTS[payload.color] || DEFAULT_BANNER;
+                document.getElementById('res-title').textContent = payload.title || '';
+                document.getElementById('res-desc').textContent = payload.description || '';
+
+                const traitsContainer = document.getElementById('res-traits');
+                traitsContainer.innerHTML = '';
+                (Array.isArray(payload.traits) ? payload.traits : []).forEach((t) => {
+                    const span = document.createElement('span');
+                    span.className = "trait-chip";
+                    span.textContent = `#${t}`;
+                    traitsContainer.appendChild(span);
+                });
+
+                const createList = (id, items, color) => {
+                    const ul = document.getElementById(id);
+                    ul.innerHTML = '';
+                    (Array.isArray(items) ? items : []).forEach((item) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<span class="bullet" style="color:${color};">•</span> <span>${item}</span>`;
+                        ul.appendChild(li);
+                    });
+                };
+
+                const analysis = payload.analysis && typeof payload.analysis === 'object' ? payload.analysis : {};
+                const matches = payload.matches && typeof payload.matches === 'object' ? payload.matches : {};
+                createList('res-strengths', analysis.strengths, '#3E8E6B');
+                createList('res-blindspots', analysis.blindspots || analysis.blindSpots, '#D9A53A');
+                document.getElementById('res-dimension').textContent = analysis.dimensionHighlight || '';
+
+                document.getElementById('res-archetype').textContent = matches.archetype || '';
+                document.getElementById('res-partner').textContent = matches.bestPartner || '';
+                document.getElementById('res-partner-reason').textContent = matches.partnerReason || '';
+                document.getElementById('res-conflict').textContent = matches.conflict || '';
+                document.getElementById('res-conflict-reason').textContent = matches.conflictReason || '';
+                document.getElementById('res-advice').textContent = payload.advice || '';
+                document.getElementById('res-total-score').textContent = Number(payload.score || payload.totalScore) || 0;
+
+                this.showScreen('result-screen');
+                lucide.createIcons();
+                this.renderChart(Array.isArray(payload.chartData) ? payload.chartData : [], payload.title || '心理画像');
+
+                if (!skipComplete) {
+                    await this.persistAndComplete(payload);
+                }
+            },
+
+            persistAndComplete: async function(payload) {
+                let token = null;
+                if (window.linkValidator && window.linkValidator.token) {
+                    token = window.linkValidator.token;
+                } else {
+                    token = new URLSearchParams(window.location.search).get('token') || ('local_' + Date.now());
+                }
+
+                try {
+                    localStorage.setItem(getStorageKey(token), JSON.stringify({
+                        token: token,
+                        result: payload,
+                        timestamp: new Date().toISOString()
+                    }));
+                } catch (error) {
+                    console.error('保存到localStorage失败:', error);
+                }
+
+                if (window.linkValidator && !window.__xlnl2_test_completed) {
+                    try {
+                        window.__xlnl2_test_completed = true;
+                        const completeResult = await window.linkValidator.completeTest(undefined, payload);
+                        console.log('测试完成记录成功', completeResult);
+                        if (completeResult && completeResult.success !== false) {
+                            window.linkValidator.valid = true;
+                        }
+                    } catch (error) {
+                        console.error('记录测试完成失败:', error);
+                        if (window.linkValidator) {
+                            window.linkValidator.valid = true;
+                        }
+                        window.__xlnl2_test_completed = false;
+                    }
+                }
+            },
+
+            renderChart: function(data, label) {
+                const ctx = document.getElementById('radarChart').getContext('2d');
+
+                if (this.state.chartInstance) {
+                    this.state.chartInstance.destroy();
+                }
+
+                const labels = data.map(d => d.subject);
+                const values = data.map(d => d.A);
+
+                this.state.chartInstance = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: values,
+                            backgroundColor: 'rgba(255, 122, 89, 0.22)',
+                            borderColor: '#FF7A59',
+                            borderWidth: 2.5,
+                            pointBackgroundColor: '#FF7A59',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#FF7A59'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: {
+                                    color: '#F3E4D3'
+                                },
+                                grid: {
+                                    color: '#F3E4D3'
+                                },
+                                pointLabels: {
+                                    color: '#8A7563',
+                                    font: {
+                                        size: 11,
+                                        weight: 700
+                                    }
+                                },
+                                ticks: {
+                                    display: false,
+                                    max: 100,
+                                    min: 0,
+                                    stepSize: 20
+                                },
+                                suggestedMin: 0,
+                                suggestedMax: 100
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            },
+
+            restart: function() {
+                if (
+                    window.linkValidator &&
+                    typeof window.linkValidator.clearLocalResult === 'function'
+                ) {
+                    window.linkValidator.clearLocalResult();
+                }
+
+                const urlParams = new URLSearchParams(window.location.search);
+                let token = urlParams.get('token');
+                if (!token && window.linkValidator && window.linkValidator.token) {
+                    token = window.linkValidator.token;
+                }
+
+                if (token) {
+                    try {
+                        localStorage.removeItem(getStorageKey(token));
+                    } catch (e) {}
+
+                    const newUrlParams = new URLSearchParams();
+                    newUrlParams.set('token', token);
+                    newUrlParams.set('restart', 'true');
+                    if (
+                        urlParams.get('unlimited') === 'true' ||
+                        (window.linkValidator && window.linkValidator.unlimited)
+                    ) {
+                        newUrlParams.set('unlimited', 'true');
+                    }
+                    window.location.href = window.location.pathname + '?' + newUrlParams.toString();
+                    return;
+                }
+
+                window.__xlnl2_test_started = false;
+                window.__xlnl2_test_completed = false;
+                this.state.score = 0;
+                this.state.currentQuestionIndex = 0;
+                this.state.latestResultPayload = null;
+                this.showScreen('start-screen');
+            }
+        };
+
+        // Start App
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+            const startButton = document.getElementById('start-btn');
+            if (startButton) {
+                startButton.addEventListener('click', function () {
+                    app.startFlow();
+                });
+            }
+            const restartBtn = document.getElementById('restart-btn');
+            if (restartBtn) {
+                restartBtn.addEventListener('click', function () {
+                    app.restart();
+                });
+            }
+        });
+
+    </script>
+
+    <!-- 验证SDK -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+    (function () {
+        var validatorInstance = null;
+
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init('xlnl2', {
+                onSuccess: function (result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    document.body.classList.remove('page-disabled');
+                },
+                onError: function (error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    if (
+                        window.PsyTestValidator &&
+                        typeof window.PsyTestValidator.getInstance === 'function'
+                    ) {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                        window.linkValidator = validatorInstance;
+                    }
+                    document.body.classList.remove('page-disabled');
+                },
+                onLoad: function (data) {
+                    console.log('SDK加载完成回调:', data);
+                    if (!validatorInstance) {
+                        if (
+                            window.PsyTestValidator &&
+                            typeof window.PsyTestValidator.getInstance === 'function'
+                        ) {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (validatorInstance) {
+                            window.linkValidator = validatorInstance;
+                        }
+                    }
+
+                    setTimeout(function () {
+                        if (
+                            typeof PsyTestValidator !== 'undefined' &&
+                            typeof PsyTestValidator.addPromotionLink === 'function'
+                        ) {
+                            PsyTestValidator.addPromotionLink();
+                        }
+                    }, 100);
+
+                    var urlParams = new URLSearchParams(window.location.search);
+                    var isRestart = urlParams.get('restart') === 'true';
+
+                    if (isRestart) {
+                        if (validatorInstance && validatorInstance.clearLocalResult) {
+                            validatorInstance.clearLocalResult();
+                        }
+                        var restartToken = validatorInstance && validatorInstance.token;
+                        if (restartToken) {
+                            try {
+                                localStorage.removeItem('test_result_' + restartToken);
+                            } catch (e) {}
+                        }
+                        window.__xlnl2_test_completed = false;
+                        window.__xlnl2_test_started = true;
+                        urlParams.delete('restart');
+                        var newUrl =
+                            window.location.pathname +
+                            (urlParams.toString() ? '?' + urlParams.toString() : '');
+                        window.history.replaceState({}, '', newUrl);
+                        return;
+                    }
+
+                    if (data.valid && data.has_local_result) {
+                        if (typeof window.restoreXlnl2Result === 'function') {
+                            window.restoreXlnl2Result();
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+            document.body.classList.remove('page-disabled');
+        }
+    })();
+    </script>
+</body>
+</html>

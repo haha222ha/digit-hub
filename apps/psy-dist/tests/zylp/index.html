@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>职业罗盘 — 发现最适合你的职业方向</title>
+<meta name="description" content="通过25道深度问题，从8个维度精准匹配最契合你的职业方向，覆盖中国大陆60+热门职业。" />
+<script src="/static/js/test-security.js"></script>
+<script>
+  if (typeof TestSecurity !== 'undefined') {
+    TestSecurity.enable();
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FDF3E7; --paper:#FFFFFF; --orange:#E8853D; --orange-d:#C96A28;
+  --sage:#8FA88A; --blue:#7BA3C4; --pink:#E8A5A5; --ink:#3D3325;
+  --sand:#F5EBD9; --dim:#A08A68; --dim-l:#B8A888;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:"Noto Sans SC",-apple-system,"PingFang SC",sans-serif;background:#e4ddd2;color:var(--ink);line-height:1.65}
+#app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--cream);position:relative;box-shadow:0 0 40px rgba(90,70,40,.18)}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.card{background:var(--paper);border-radius:18px;box-shadow:0 6px 18px -10px rgba(90,70,40,.18)}
+.press{transition:transform .15s}
+.press:active{transform:scale(.97)}
+h1,h2,h3,.serif{font-family:"Noto Serif SC",serif}
+
+/* ============ LANDING ============ */
+.land-nav{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:rgba(253,243,231,.92);backdrop-filter:blur(10px)}
+.land-nav .logo{font-family:"Noto Serif SC",serif;font-weight:900;font-size:17px;display:flex;align-items:center;gap:8px}
+.land-nav .logo i{font-style:normal;width:28px;height:28px;background:var(--orange);color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 3px 8px -3px rgba(232,133,61,.5)}
+.land-nav .btn{font-size:12px;background:var(--orange);color:#fff;padding:7px 16px;border-radius:99px;font-weight:600;box-shadow:0 4px 10px -4px rgba(232,133,61,.5)}
+.hero{padding:16px 22px 8px;text-align:center}
+.badge{display:inline-flex;align-items:center;font-size:10.5px;color:var(--orange-d);background:#fff;padding:5px 14px;border-radius:99px;font-weight:600;box-shadow:0 3px 10px -5px rgba(90,70,40,.25);margin-bottom:14px}
+.badge .dot{width:6px;height:6px;border-radius:50%;background:var(--orange);margin-right:6px;animation:blink 1.6s infinite}
+@keyframes blink{50%{opacity:.3}}
+.hero .illu{margin:0 auto 10px;max-width:340px}
+.hero .illu svg{width:100%;display:block}
+.hero h1{font-size:26px;font-weight:900;line-height:1.45;color:#2d2415;margin-bottom:10px}
+.hero h1 em{font-style:normal;color:var(--orange);position:relative}
+.hero h1 em::after{content:"";position:absolute;left:0;right:0;bottom:3px;height:8px;background:rgba(232,133,61,.18);z-index:-1;border-radius:4px}
+.hero .desc{font-size:12px;color:var(--dim);line-height:1.85;margin-bottom:18px;padding:0 4px}
+.cta-row{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;margin-bottom:10px}
+.btn-primary{background:var(--orange);color:#fff;padding:13px 34px;border-radius:99px;font-size:15px;font-weight:700;box-shadow:0 10px 20px -8px rgba(232,133,61,.6)}
+.btn-secondary{font-size:12.5px;color:var(--orange-d);border-bottom:1.5px solid var(--orange);padding-bottom:2px;font-weight:600}
+.hero .hint{font-size:10px;color:var(--dim-l)}
+.hero .hint b{color:var(--orange-d)}
+.feats{display:flex;gap:9px;padding:18px 20px 2px}
+.feat{flex:1;background:#fff;border-radius:16px;padding:13px 9px;text-align:center;box-shadow:0 5px 14px -8px rgba(90,70,40,.18)}
+.feat i{font-style:normal;font-size:20px;display:block;margin-bottom:5px}
+.feat b{font-size:12px;display:block;color:#2d2415;margin-bottom:3px}
+.feat p{font-size:8.5px;color:var(--dim);line-height:1.55}
+.strip-wrap{overflow:hidden;margin:4px 0 14px;background:#fff;border-radius:99px;box-shadow:0 5px 14px -8px rgba(90,70,40,.18);padding:9px 0}
+.strip{display:inline-flex;white-space:nowrap;animation:mq 24s linear infinite}
+.strip span{font-size:11px;color:#8a6f4a;margin-right:18px;display:inline-flex;align-items:center}
+.strip span::before{content:"◆";color:var(--orange);font-size:8px;margin-right:6px}
+@keyframes mq{to{transform:translateX(-50%)}}
+.lsec{margin:14px 20px 0}
+.lsec#why{scroll-margin-top:64px}
+.lsec .card{padding:16px 18px}
+.lsec .st{font-family:"Noto Serif SC",serif;font-weight:700;font-size:15px;color:#2d2415;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.lsec .st i{font-style:normal;width:26px;height:26px;border-radius:9px;background:var(--sand);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.lsec .sp{font-size:11.5px;color:var(--dim);line-height:1.8}
+.lsec .sp b{color:var(--orange-d);font-weight:600}
+.cat-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.cat-grid span{font-size:10.5px;background:var(--sand);color:#8a6f4a;padding:4px 11px;border-radius:99px;font-weight:500}
+.more-txt{font-size:9.5px;color:var(--dim-l);margin-top:7px}
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.dim-grid .d{display:flex;gap:9px;align-items:center;background:var(--sand);border-radius:12px;padding:8px 11px}
+.dim-grid .d i{font-style:normal;font-size:17px;flex-shrink:0}
+.dim-grid .d b{font-size:11px;display:block;color:#2d2415}
+.dim-grid .d span{font-size:8px;color:var(--dim);display:block;line-height:1.45}
+.cta-end{margin:20px 20px 28px;background:#3d3325;border-radius:20px;padding:24px 20px;text-align:center;color:#F5EBD9;position:relative;overflow:hidden}
+.cta-end .deco{position:absolute;font-size:44px;opacity:.12}
+.cta-end .d1{top:6px;left:12px}
+.cta-end .d2{bottom:6px;right:12px}
+.cta-end .t{font-family:"Noto Serif SC",serif;font-weight:900;font-size:20px;margin-bottom:6px;position:relative}
+.cta-end .t em{font-style:normal;color:#E8A55D}
+.cta-end .p{font-size:10.5px;color:var(--dim-l);margin-bottom:16px;position:relative}
+.cta-end .b{display:inline-block;background:var(--orange);color:#fff;padding:12px 36px;border-radius:99px;font-size:14px;font-weight:700;box-shadow:0 8px 18px -6px rgba(232,133,61,.5);position:relative}
+.land-foot{text-align:center;font-size:9px;color:var(--dim-l);padding:18px 20px 26px;line-height:1.8}
+
+/* ============ QUIZ ============ */
+.quiz-top{position:sticky;top:0;z-index:20;background:rgba(253,243,231,.94);backdrop-filter:blur(10px);padding:14px 22px 14px}
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.quiz-meta .cat{font-size:11px;font-weight:600;background:#fff;color:#8a6f4a;padding:5px 13px;border-radius:99px;box-shadow:0 3px 8px -4px rgba(90,70,40,.2)}
+.quiz-meta .num{font-family:"Noto Serif SC",serif;font-size:13px;color:var(--dim)}
+.quiz-meta .num b{color:var(--orange);font-size:18px}
+.path-track{position:relative;height:22px}
+.path-track .line{position:absolute;top:11px;left:0;right:0;border-top:2px dashed #D8C9AE}
+.path-track .fill{position:absolute;top:11px;left:0;border-top:2px solid var(--orange);transition:width .4s ease}
+.path-track .walker{position:absolute;top:0;font-size:16px;transform:translateX(-50%);transition:left .4s ease;filter:drop-shadow(0 2px 2px rgba(0,0,0,.15))}
+.quiz-body{padding:18px 20px 30px}
+.q-card{background:#fff;border-radius:18px;padding:20px 18px;box-shadow:0 6px 18px -10px rgba(90,70,40,.2);margin-bottom:16px;position:relative;overflow:hidden}
+.quiz-body.is-enter .q-card,.quiz-body.is-enter .opt{animation:qin .28s ease both}
+@keyframes qin{from{opacity:0;transform:translateY(10px)}}
+.q-card::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--orange),var(--pink),var(--blue),var(--sage))}
+.q-card .qno{font-family:"Noto Serif SC",serif;font-size:11px;color:var(--orange);letter-spacing:.1em;margin-bottom:6px}
+.q-card .q{font-family:"Noto Serif SC",serif;font-size:17.5px;font-weight:700;line-height:1.6;color:#2d2415}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;align-items:flex-start;gap:11px;background:#fff;border-radius:14px;padding:13px 14px;text-align:left;font-size:12.5px;line-height:1.65;font-weight:500;box-shadow:0 4px 12px -8px rgba(90,70,40,.18);border:2px solid transparent;transition:border-color .15s,background .15s,box-shadow .15s;width:100%}
+.opt .k{width:24px;height:24px;border-radius:50%;background:var(--sand);color:#8a6f4a;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.opt.sel{border-color:var(--orange);background:#FFF9F2;box-shadow:0 6px 16px -8px rgba(232,133,61,.4)}
+.opt.sel .k{background:var(--orange);color:#fff}
+.opt.neutral{border-style:dashed;border-color:#D8C9AE;color:#a89880;box-shadow:none;background:transparent}
+.opt.neutral.sel{border-color:var(--dim);color:var(--ink);background:var(--sand)}
+.quiz-foot{display:flex;justify-content:space-between;align-items:center;margin-top:20px}
+.btn-back{font-size:12.5px;font-weight:600;color:var(--orange-d);background:#fff;padding:9px 20px;border-radius:99px;box-shadow:0 4px 10px -6px rgba(90,70,40,.25)}
+.btn-back:disabled{opacity:.35}
+.quiz-foot .tip{font-size:10px;color:var(--dim-l)}
+
+/* ============ LOADING ============ */
+.load-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px}
+.load-illu{width:220px;height:180px;margin-bottom:26px;position:relative}
+.load-illu svg{width:100%;height:100%}
+.needle{transform-origin:110px 96px;animation:seek 2.4s ease-in-out infinite}
+@keyframes seek{0%{transform:rotate(0)}25%{transform:rotate(50deg)}50%{transform:rotate(-25deg)}75%{transform:rotate(120deg)}100%{transform:rotate(360deg)}}
+.float-c{animation:floatc 3.5s ease-in-out infinite}
+@keyframes floatc{50%{transform:translateY(-6px)}}
+.load-msg{font-family:"Noto Serif SC",serif;font-weight:700;font-size:18px;color:#2d2415;min-height:30px}
+.load-sub{font-size:11px;color:var(--dim);margin-top:6px}
+.load-dots{display:flex;gap:7px;margin-top:20px}
+.load-dots i{width:8px;height:8px;border-radius:50%;background:#E3D5BC}
+.load-dots i.on{background:var(--orange);animation:bounce .8s ease infinite}
+@keyframes bounce{50%{transform:translateY(-5px)}}
+
+/* ============ RESULT ============ */
+.res-head{background:#3d3325;padding:30px 22px 26px;text-align:center;position:relative;overflow:hidden}
+.res-head::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 90% 65% at 50% 0%,rgba(232,165,93,.22) 0%,transparent 65%);pointer-events:none}
+.res-head .mtn{position:absolute;bottom:-4px;left:0;right:0;height:44px;opacity:.16;pointer-events:none}
+.res-head .tag{display:inline-block;font-size:11px;color:#fff;background:var(--sage);padding:5px 16px;border-radius:99px;font-weight:600;margin-bottom:14px;position:relative;z-index:1}
+.res-head h1{font-family:"Noto Serif SC",serif;font-size:26px;font-weight:900;color:#F5EBD9;position:relative;z-index:1;margin-bottom:20px}
+.res-hero{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:15px;margin-bottom:18px}
+.res-hero .icon{width:72px;height:72px;background:#FDF3E7;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:37px;flex-shrink:0;box-shadow:0 10px 22px -8px rgba(0,0,0,.45)}
+.res-hero .dside{text-align:left}
+.res-hero .dtitle{font-family:"Noto Serif SC",serif;font-style:italic;font-weight:900;font-size:24px;color:#F0D9A8;line-height:1.3}
+.res-hero .plabel{display:inline-block;font-size:10px;color:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);padding:3px 11px;border-radius:99px;margin-top:7px;font-weight:500}
+.res-hero .pct{font-size:11.5px;color:rgba(255,255,255,.75);margin-top:7px}
+.res-hero .pct b{font-family:"Noto Serif SC",serif;font-size:25px;color:#E8A55D;font-weight:900;margin-left:4px}
+.res-dims{position:relative;z-index:1;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:20px}
+.res-dims .dp{background:rgba(255,255,255,.14);backdrop-filter:blur(4px);color:#fff;font-size:11px;padding:7px 14px;border-radius:99px;border:1px solid rgba(255,255,255,.18)}
+.res-dims .dp b{font-family:"Noto Serif SC",serif;color:#F0D9A8;margin-right:5px}
+.res-cta{position:relative;z-index:1;display:flex;justify-content:center;gap:11px}
+.res-cta .b{font-size:13.5px;font-weight:700;padding:11px 26px;border-radius:99px}
+.res-cta .b.w{background:#fff;color:#3d3325}
+.res-sec{padding:20px 20px 0}
+.res-sec .st{font-family:"Noto Serif SC",serif;font-weight:700;font-size:16px;color:#2d2415;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.res-sec .st i{font-style:normal;width:26px;height:26px;border-radius:9px;background:var(--sand);display:flex;align-items:center;justify-content:center;font-size:13px}
+.res-sec .ssub{font-size:10.5px;color:var(--dim);margin-bottom:12px;line-height:1.7}
+.radar-card{background:#fff;border-radius:18px;box-shadow:0 6px 18px -10px rgba(90,70,40,.2);padding:14px 6px 6px}
+.dim-bars{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.dim-bars .db{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:8px 12px;box-shadow:0 3px 10px -7px rgba(90,70,40,.18)}
+.dim-bars .db .n{font-size:11px;font-weight:600;width:56px;flex-shrink:0}
+.dim-bars .db .bar{flex:1;height:7px;background:var(--sand);border-radius:99px;overflow:hidden}
+.dim-bars .db .bar i{display:block;height:100%;background:linear-gradient(90deg,#F0A95E,var(--orange));border-radius:99px}
+.dim-bars .db .v{font-family:"Noto Serif SC",serif;font-size:12px;color:var(--orange-d);width:28px;text-align:right;font-weight:700}
+.match-card{background:#fff;border-radius:18px;box-shadow:0 6px 18px -10px rgba(90,70,40,.2);margin-bottom:14px;overflow:hidden;animation:qin .35s ease;position:relative}
+.match-card .priority-badge{
+  position:absolute;top:12px;right:-28px;z-index:2;
+  background:var(--orange);color:#fff;
+  font-size:10px;font-weight:700;letter-spacing:.04em;
+  padding:4px 32px;transform:rotate(45deg);
+  box-shadow:0 2px 8px -2px rgba(232,133,61,.55);
+  pointer-events:none;
+}
+.match-card .mc-top{display:flex;align-items:center;gap:13px;padding:15px 16px 12px}
+.match-card .rank{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:"Noto Serif SC",serif;font-weight:900;font-size:19px;flex-shrink:0}
+.match-card.rank0 .rank{background:var(--orange);color:#fff;box-shadow:0 5px 12px -4px rgba(232,133,61,.55)}
+.match-card.rank0 .mc-top{padding-right:52px}
+.match-card .rank{background:var(--sand);color:#8a6f4a}
+.match-card .micon{font-size:26px;flex-shrink:0}
+.match-card .mtitle{flex:1;min-width:0}
+.match-card .mtitle .tt{font-family:"Noto Serif SC",serif;font-weight:900;font-size:17px;color:#2d2415;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.match-card .mtitle .cat{font-size:9.5px;font-weight:600;color:#fff;padding:2px 9px;border-radius:99px}
+.match-card .mtitle .dir{font-size:10.5px;color:var(--dim);margin-top:3px}
+.match-card .pct{text-align:center;flex-shrink:0}
+.match-card .pct b{font-family:"Noto Serif SC",serif;font-weight:900;font-size:22px;color:var(--orange);line-height:1;display:block}
+.match-card .pct span{font-size:8.5px;color:var(--dim-l);font-weight:600}
+.match-card .mc-body{padding:0 16px 15px}
+.match-card .path{display:inline-block;font-size:10px;font-weight:600;padding:3px 11px;border-radius:99px;margin-bottom:9px}
+.match-card .path.skill{background:#EAF3E8;color:#5d8055}
+.match-card .path.explore{background:#E9F1F8;color:#53779a}
+.match-card .path.experience{background:#FDF0E2;color:#b56f22}
+.match-card .path.professional{background:#FBEAEA;color:#b05757}
+.match-card .desc{font-size:11.5px;color:#77685a;line-height:1.8;margin-bottom:10px}
+.match-card .hint{font-size:10px;color:#8a6f4a;background:var(--sand);border-radius:10px;padding:7px 10px;margin-bottom:11px}
+.match-card .hint b{color:var(--orange-d)}
+.match-card .rows{display:flex;gap:8px;margin-bottom:11px}
+.match-card .row{flex:1;background:var(--sand);border-radius:12px;padding:8px 10px}
+.match-card .row .k{font-size:8.5px;color:var(--dim-l);font-weight:600;margin-bottom:2px}
+.match-card .row .v{font-size:10.5px;font-weight:700;color:#2d2415;line-height:1.5}
+.match-card .traits{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.match-card .traits span{font-size:10px;background:#FFF3E3;color:var(--orange-d);padding:3px 10px;border-radius:99px;font-weight:600}
+.match-card .tags{display:flex;flex-wrap:wrap;gap:5px}
+.match-card .tags span{font-size:9.5px;color:var(--blue);background:#EDF4FA;padding:3px 9px;border-radius:8px;font-weight:500}
+.notice{margin:18px 20px 0;background:#FFF9EC;border:1.5px dashed #E0C896;border-radius:16px;padding:13px 15px}
+.notice b{font-family:"Noto Serif SC",serif;font-size:12.5px;color:#8a6f2a;display:block;margin-bottom:5px}
+.notice p{font-size:10px;color:#9a8a6a;line-height:1.8}
+.res-btns{display:flex;gap:11px;padding:20px}
+.res-btns .rb{flex:1;text-align:center;font-size:14px;font-weight:700;padding:13px;border-radius:99px}
+.res-btns .rb.dark{background:#3d3325;color:#F5EBD9}
+.res-foot{text-align:center;font-size:9px;color:var(--dim-l);padding-bottom:26px}
+.toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(20px);background:#3d3325;color:#F5EBD9;font-size:13px;font-weight:600;padding:11px 24px;border-radius:99px;opacity:0;pointer-events:none;transition:.3s;z-index:99;box-shadow:0 8px 20px -8px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (min-width:480px){body{padding:20px 0}#app{border-radius:28px;overflow:hidden}}
+
+/* SDK 推广链接容器（单页应用） */
+.welcome-footer{
+  text-align:center;font-size:9px;color:var(--dim-l);padding:18px 20px 26px;line-height:1.8;
+  display:block !important;visibility:visible !important;
+}
+.welcome-footer #link-validator-promotion-link{
+  width:100%;text-align:center;padding-top:16px;margin-top:16px;border-top:1px solid #e5e7eb;
+  box-sizing:border-box;display:block !important;visibility:visible !important;opacity:1 !important;
+}
+.report-footer{
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+  margin-top:8px;padding:0 20px 24px;width:100%;box-sizing:border-box;
+}
+.report-footer #link-validator-promotion-link{
+  width:100%;text-align:center;padding-top:16px;margin-top:16px;border-top:1px solid #e5e7eb;box-sizing:border-box;
+}
+body.page-disabled{pointer-events:none;opacity:.6;cursor:not-allowed}
+</style>
+</head>
+<body class="page-disabled">
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA = {"questions": [{"id": 1, "category": "工作方式", "text": "碰到一件还没理清头绪的事时，你通常会先怎么开始？", "options": [{"id": "1a", "text": "先把信息列出来，慢慢找规律", "scores": {"analytical": 3, "detail": 1}}, {"id": "1b", "text": "先想几个不一样的办法，再挑一个试试", "scores": {"creative": 3, "entrepreneurial": 1}}, {"id": "1c", "text": "找人聊一聊，听听不同看法", "scores": {"social": 3, "leadership": 1}}, {"id": "1d", "text": "先动手做个小尝试，再边做边改", "scores": {"technical": 3, "detail": 1}}]}, {"id": 2, "category": "工作方式", "text": "如果一周的安排可以自己选，你更舒服的是哪一种？", "options": [{"id": "2a", "text": "事情比较有规律，知道下一步该做什么", "scores": {"detail": 3, "caregiving": 1}}, {"id": "2b", "text": "留出不少弹性，能根据情况改变安排", "scores": {"creative": 2, "entrepreneurial": 2}}, {"id": "2c", "text": "事情多一点、节奏快一点，会让我更有劲", "scores": {"leadership": 2, "entrepreneurial": 2}}, {"id": "2d", "text": "能安静地把一件事研究得更深、更久", "scores": {"analytical": 2, "technical": 2}}]}, {"id": 3, "category": "工作方式", "text": "下面哪种时刻，更容易让你觉得“这件事做得值”？", "options": [{"id": "3a", "text": "把一个原本很乱的问题理顺了", "scores": {"analytical": 2, "technical": 2}}, {"id": "3b", "text": "做出了新鲜、有个人想法的内容或方案", "scores": {"creative": 3, "entrepreneurial": 1}}, {"id": "3c", "text": "对方因为你的帮助，少走了一段弯路", "scores": {"caregiving": 3, "social": 1}}, {"id": "3d", "text": "大家在你的推动下，把一件事顺利做完了", "scores": {"leadership": 3, "social": 1}}]}, {"id": 4, "category": "兴趣技能", "text": "回想学校或工作中的任务，哪一类你做起来通常没那么费劲？", "options": [{"id": "4a", "text": "弄清规则、找出原因、处理信息", "scores": {"analytical": 3, "technical": 2}}, {"id": "4b", "text": "把想法说清楚、写清楚，让人容易理解", "scores": {"creative": 2, "social": 2}}, {"id": "4c", "text": "调整画面、内容或表达方式，让它更有感觉", "scores": {"creative": 3, "detail": 1}}, {"id": "4d", "text": "安排人和事情，让大家能配合起来", "scores": {"leadership": 3, "social": 1}}]}, {"id": 5, "category": "兴趣技能", "text": "没有必须完成的任务时，你更容易把时间花在哪类事情上？", "options": [{"id": "5a", "text": "查资料、琢磨一个感兴趣的问题或工具", "scores": {"analytical": 2, "technical": 2}}, {"id": "5b", "text": "记录、制作或改造一些内容，让它变成自己的作品", "scores": {"creative": 3, "entrepreneurial": 1}}, {"id": "5c", "text": "约人见面、聊天，或者参与热闹的活动", "scores": {"social": 3, "leadership": 1}}, {"id": "5d", "text": "照顾身边的人，帮他们解决实际的小事", "scores": {"caregiving": 3, "social": 1}}]}, {"id": 6, "category": "兴趣技能", "text": "看到下面这些主题时，哪一个最容易让你好奇，愿意多了解一点？", "options": [{"id": "6a", "text": "工具、系统和信息是怎样运转的", "scores": {"analytical": 3, "technical": 2}}, {"id": "6b", "text": "人为什么会这样想、这样相处", "scores": {"caregiving": 2, "social": 3}}, {"id": "6c", "text": "一件事怎样从想法变成能运转的事情", "scores": {"leadership": 2, "entrepreneurial": 3}}, {"id": "6d", "text": "怎样把一个想法表达得更有吸引力", "scores": {"creative": 3, "detail": 1}}]}, {"id": 7, "category": "兴趣技能", "text": "了解一个新机会时，下面哪一点会最先影响你的决定？", "options": [{"id": "7a", "text": "能不能接触新东西，把一项能力练得更扎实", "scores": {"technical": 2, "analytical": 2}}, {"id": "7b", "text": "发展空间、回报和能不能承担更多事情", "scores": {"leadership": 2, "entrepreneurial": 2}}, {"id": "7c", "text": "这件事能不能真正帮到人、解决实际问题", "scores": {"caregiving": 3, "social": 1}}, {"id": "7d", "text": "有没有空间按自己的方式做出新东西", "scores": {"creative": 3, "entrepreneurial": 1}}]}, {"id": 8, "category": "人际沟通", "text": "多人一起做事时，你比较自然会做哪一类事？", "options": [{"id": "8a", "text": "把问题想清楚，补充方案和细节", "scores": {"analytical": 3, "detail": 1}}, {"id": "8b", "text": "换个角度想，提出大家还没想到的点子", "scores": {"creative": 3, "entrepreneurial": 1}}, {"id": "8c", "text": "关注大家的感受，把沟通接起来", "scores": {"social": 3, "caregiving": 1}}, {"id": "8d", "text": "盯住进度，提醒大家把事情往前推进", "scores": {"leadership": 3, "entrepreneurial": 1}}]}, {"id": 9, "category": "人际沟通", "text": "做事时，你更希望周围是怎样的状态？", "options": [{"id": "9a", "text": "相对安静，能自己沉下心做一段时间", "scores": {"analytical": 2, "technical": 2}}, {"id": "9b", "text": "随时能讨论，互相启发想法", "scores": {"social": 2, "creative": 2}}, {"id": "9c", "text": "常能接触到真实使用者，听到他们的反馈", "scores": {"social": 2, "caregiving": 2}}, {"id": "9d", "text": "自己决定优先级和做事节奏", "scores": {"entrepreneurial": 3, "leadership": 1}}]}, {"id": 10, "category": "人际沟通", "text": "需要让别人理解你的想法时，你更常用哪种方式？", "options": [{"id": "10a", "text": "把依据、步骤和逻辑讲清楚", "scores": {"analytical": 3, "detail": 1}}, {"id": "10b", "text": "用例子、故事或画面感帮助对方理解", "scores": {"social": 2, "creative": 2}}, {"id": "10c", "text": "先做出一个看得见的例子给对方看", "scores": {"technical": 2, "leadership": 2}}, {"id": "10d", "text": "先听对方在意什么，再一起找都能接受的办法", "scores": {"caregiving": 2, "social": 2}}]}, {"id": 11, "category": "价值观", "text": "如果工作状态不错，下面哪种收获会让你最满足？", "options": [{"id": "11a", "text": "承担更有挑战的事情，看见自己的成长", "scores": {"entrepreneurial": 2, "leadership": 2}}, {"id": "11b", "text": "自己的工作能让别人过得更方便一点", "scores": {"caregiving": 3, "social": 1}}, {"id": "11c", "text": "获得更大的自主权，能为自己做更多决定", "scores": {"entrepreneurial": 3, "leadership": 1}}, {"id": "11d", "text": "把一个方向学深、做精，成为可靠的人", "scores": {"analytical": 2, "technical": 2}}]}, {"id": 12, "category": "价值观", "text": "遇到不确定的选择时，你通常更接近哪种处理方式？", "options": [{"id": "12a", "text": "愿意试新路，即使结果不完全确定", "scores": {"entrepreneurial": 3, "leadership": 1}}, {"id": "12b", "text": "先把利弊想明白，再决定要不要试", "scores": {"analytical": 2, "leadership": 2}}, {"id": "12c", "text": "更希望准备充分、变化少一点再行动", "scores": {"detail": 2, "caregiving": 2}}, {"id": "12d", "text": "先看人和具体情况，再调整自己的做法", "scores": {"social": 2, "creative": 2}}]}, {"id": 13, "category": "价值观", "text": "做完一件事后，听到哪种反馈会让你最开心？", "options": [{"id": "13a", "text": "“你做得很专业，考虑得很周到”", "scores": {"analytical": 2, "technical": 2}}, {"id": "13b", "text": "“你真的帮我解决了问题，谢谢你”", "scores": {"caregiving": 2, "social": 2}}, {"id": "13c", "text": "“这个东西很有意思，我愿意分享给别人”", "scores": {"creative": 3, "entrepreneurial": 1}}, {"id": "13d", "text": "“这件事交给你，我们都比较放心”", "scores": {"leadership": 3, "social": 1}}]}, {"id": 14, "category": "价值观", "text": "一件事需要反复做、不断打磨时，你通常是什么感觉？", "options": [{"id": "14a", "text": "不太排斥，愿意把细节一点点做好", "scores": {"detail": 3, "technical": 1}}, {"id": "14b", "text": "可以做，但希望过程中能优化方法或换个做法", "scores": {"creative": 2, "analytical": 2}}, {"id": "14c", "text": "做久了会没劲，更想接触变化和新挑战", "scores": {"entrepreneurial": 2, "leadership": 2}}, {"id": "14d", "text": "如果能帮到具体的人或事情，我会更愿意坚持", "scores": {"caregiving": 2, "social": 2}}]}, {"id": 15, "category": "思维方式", "text": "当事情很多、信息很杂时，你更习惯从哪里下手？", "options": [{"id": "15a", "text": "先看整体目标和各部分之间怎么配合", "scores": {"analytical": 2, "leadership": 2}}, {"id": "15b", "text": "先尽量多想几种可能，不急着定答案", "scores": {"creative": 3, "entrepreneurial": 1}}, {"id": "15c", "text": "先把容易出错的细节一项项确认", "scores": {"detail": 3, "technical": 1}}, {"id": "15d", "text": "先想想不同的人会怎么感受、会在意什么", "scores": {"caregiving": 2, "social": 2}}]}, {"id": 16, "category": "思维方式", "text": "接触一个陌生内容时，哪种学习方式更适合你？", "options": [{"id": "16a", "text": "先把基础资料和步骤从头理一遍", "scores": {"analytical": 2, "detail": 2}}, {"id": "16b", "text": "先试着做起来，遇到问题再补知识", "scores": {"technical": 3, "entrepreneurial": 1}}, {"id": "16c", "text": "和会的人聊一聊，边问边学", "scores": {"social": 3, "caregiving": 1}}, {"id": "16d", "text": "先看几个真实例子，再找其中的规律", "scores": {"analytical": 2, "creative": 2}}]}, {"id": 17, "category": "思维方式", "text": "一件事没有按预期完成时，你通常会先做什么？", "options": [{"id": "17a", "text": "回头看是哪一步出了问题，记下来下次避开", "scores": {"analytical": 3, "detail": 1}}, {"id": "17b", "text": "尽快换一个做法，再往前试一次", "scores": {"entrepreneurial": 3, "creative": 1}}, {"id": "17c", "text": "找人商量，借助别人的经验一起解决", "scores": {"social": 2, "caregiving": 2}}, {"id": "17d", "text": "先缓一缓，想清楚以后再重新开始", "scores": {"detail": 2, "analytical": 2}}]}, {"id": 18, "category": "场景偏好", "text": "如果要向别人介绍一件你熟悉的事，你更愿意怎么做？", "options": [{"id": "18a", "text": "把内容讲得更生动、更容易让人记住", "scores": {"creative": 2, "caregiving": 2}}, {"id": "18b", "text": "根据对方的反应慢慢解释，直到他真的懂了", "scores": {"caregiving": 3, "social": 1}}, {"id": "18c", "text": "整理步骤和方法，让下次讲得更清楚", "scores": {"analytical": 2, "detail": 2}}, {"id": "18d", "text": "先做一个示范，让对方自己跟着试一试", "scores": {"entrepreneurial": 1, "technical": 1}}]}, {"id": 19, "category": "场景偏好", "text": "如果要从零做一个小项目，你最想先负责哪一部分？", "options": [{"id": "19a", "text": "把功能、工具或流程先做出来", "scores": {"technical": 2, "analytical": 2}}, {"id": "19b", "text": "想名字、内容和呈现方式，让人愿意关注", "scores": {"creative": 3, "entrepreneurial": 1}}, {"id": "19c", "text": "了解别人真正需要什么，并把服务安排好", "scores": {"caregiving": 2, "leadership": 2}}, {"id": "19d", "text": "把预算、流程和风险先算清楚，保证能稳稳落地", "scores": {"detail": 2, "caregiving": 1}}]}, {"id": 20, "category": "场景偏好", "text": "一件事情从开始到完成，你更容易在哪个环节投入进去？", "options": [{"id": "20a", "text": "前面收集信息、理清需求、想好方案的时候", "scores": {"analytical": 3, "detail": 1}}, {"id": "20b", "text": "把一个模糊想法变成看得见的雏形的时候", "scores": {"creative": 3, "technical": 1}}, {"id": "20c", "text": "分工协作、解决卡点、把进度推下去的时候", "scores": {"leadership": 2, "social": 2}}, {"id": "20d", "text": "听到使用反馈，再一点点改好的时候", "scores": {"caregiving": 2, "analytical": 2}}]}, {"id": 21, "category": "生活方式", "text": "工作环境里，哪一种安排会让你更放松、更有状态？", "options": [{"id": "21a", "text": "地点和时间比较灵活，按自己的节奏安排", "scores": {"entrepreneurial": 2, "creative": 2}}, {"id": "21b", "text": "身边有人一起做事，随时可以交流", "scores": {"social": 2, "leadership": 2}}, {"id": "21c", "text": "能接触不同地方、不同人和新场景", "scores": {"social": 2, "entrepreneurial": 2}}, {"id": "21d", "text": "地点固定、节奏清楚，生活好安排", "scores": {"detail": 2, "caregiving": 2}}]}, {"id": 22, "category": "生活方式", "text": "如果一份工作做得不错，你最希望它优先带来什么？", "options": [{"id": "22a", "text": "更好的回报和更大的选择空间", "scores": {"entrepreneurial": 2, "leadership": 2}}, {"id": "22b", "text": "做成有影响力的事，也能带动别人", "scores": {"leadership": 2, "caregiving": 2}}, {"id": "22c", "text": "比较确定、可预期的生活安排", "scores": {"detail": 2, "caregiving": 2}}, {"id": "22d", "text": "不断学到新东西，感觉自己在变强", "scores": {"analytical": 2, "technical": 2}}]}, {"id": 23, "category": "能力自评", "text": "需要把一件事讲给别人听时，你更习惯用哪种方式？", "options": [{"id": "23a", "text": "直接说清重点，带着别人一起理解", "scores": {"social": 3, "creative": 1}}, {"id": "23b", "text": "用文字、画面或内容慢慢把感受说出来", "scores": {"creative": 3, "social": 1}}, {"id": "23c", "text": "拿出事实、表格或结果，让它自己说明问题", "scores": {"analytical": 2, "technical": 2}}, {"id": "23d", "text": "少说一点，先把能用的东西做出来", "scores": {"technical": 3, "detail": 1}}]}, {"id": 24, "category": "能力自评", "text": "面对需要判断和选择的事，你更信赖哪一种依据？", "options": [{"id": "24a", "text": "数字、规则和清晰的推理过程", "scores": {"analytical": 3, "technical": 1}}, {"id": "24b", "text": "把信息分门别类后，再一步步比较", "scores": {"analytical": 2, "detail": 2}}, {"id": "24c", "text": "过去的经验和当下的感觉", "scores": {"creative": 2, "social": 2}}, {"id": "24d", "text": "别人的反应、实际感受和新的可能性", "scores": {"social": 2, "creative": 2}}]}, {"id": 25, "category": "能力自评", "text": "当一群人需要一起完成一件事时，你更愿意承担哪种位置？", "options": [{"id": "25a", "text": "负责定方向、分任务，并带着大家往前走", "scores": {"leadership": 3, "social": 1}}, {"id": "25b", "text": "负责其中关键的一块，把自己的部分做好", "scores": {"analytical": 2, "technical": 2}}, {"id": "25c", "text": "负责照顾沟通和配合，让大家合作顺一点", "scores": {"caregiving": 2, "social": 2}}, {"id": "25d", "text": "负责检查细节、补齐遗漏，保证事情不出错", "scores": {"detail": 2, "creative": 2}}]}], "careers": [{"id": "software-engineer", "title": "软件工程师", "category": "科技互联网", "categoryColor": "#3b82f6", "icon": "💻", "description": "设计、开发和维护软件系统，是数字时代的核心职业。涵盖前端、后端、全栈、移动端等方向，需求量长期居高不下。", "traits": ["逻辑思维强", "热爱编程", "善于解决问题", "持续学习"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "15,000 - 60,000 元/月", "requiredDimensions": {"analytical": 8, "technical": 9, "detail": 6, "creative": 3}, "tags": ["高薪", "需求旺盛", "远程友好", "技术成长"]}, {"id": "ai-engineer", "title": "AI/机器学习工程师", "category": "科技互联网", "categoryColor": "#3b82f6", "icon": "🤖", "description": "构建人工智能模型和系统，是当前最热门的技术职位之一。涵盖大模型、计算机视觉、自然语言处理等前沿方向。", "traits": ["数学功底扎实", "编程能力强", "研究思维", "耐心细致"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "25,000 - 100,000 元/月", "requiredDimensions": {"analytical": 10, "technical": 9, "detail": 7, "creative": 4}, "tags": ["顶级高薪", "前沿技术", "学历要求高", "未来趋势"]}, {"id": "product-manager", "title": "产品经理", "category": "科技互联网", "categoryColor": "#3b82f6", "icon": "📱", "description": "负责产品的规划、设计和迭代，是连接技术与用户的桥梁。需要兼具商业思维、用户洞察和项目管理能力。", "traits": ["用户思维", "逻辑清晰", "沟通协调", "数据分析"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "15,000 - 50,000 元/月", "requiredDimensions": {"analytical": 7, "social": 7, "leadership": 6, "creative": 5}, "tags": ["高薪", "跨界能力", "职业天花板高", "互联网核心"]}, {"id": "data-analyst", "title": "数据分析师", "category": "科技互联网", "categoryColor": "#3b82f6", "icon": "📊", "description": "通过数据挖掘和分析为业务决策提供支持，是企业数字化转型的重要角色。", "traits": ["数据敏感", "逻辑严谨", "善用工具", "业务理解"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "12,000 - 40,000 元/月", "requiredDimensions": {"analytical": 9, "detail": 8, "technical": 6, "social": 4}, "tags": ["高薪", "行业通用", "数据驱动", "多行业适用"]}, {"id": "ux-designer", "title": "UI/UX设计师", "category": "科技互联网", "categoryColor": "#3b82f6", "icon": "🎨", "description": "设计数字产品的视觉界面和用户体验，将美学与功能性完美结合，是互联网产品不可或缺的角色。", "traits": ["审美能力强", "用户同理心", "创意思维", "细节控"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "12,000 - 35,000 元/月", "requiredDimensions": {"creative": 9, "detail": 7, "analytical": 5, "social": 5}, "tags": ["创意职业", "视觉美学", "用户研究", "作品集驱动"]}, {"id": "cybersecurity", "title": "网络安全工程师", "category": "科技互联网", "categoryColor": "#3b82f6", "icon": "🔐", "description": "保护企业网络和数据安全，防范黑客攻击和数据泄露，是数字时代不可或缺的守护者。", "traits": ["逆向思维", "技术精深", "责任心强", "持续学习"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "15,000 - 50,000 元/月", "requiredDimensions": {"technical": 9, "analytical": 8, "detail": 8, "creative": 4}, "tags": ["高薪", "国家战略", "技术深度", "稀缺人才"]}, {"id": "investment-banker", "title": "投资银行家", "category": "金融财经", "categoryColor": "#f59e0b", "icon": "🏦", "description": "为企业提供融资、并购、IPO等金融服务，是金融行业的顶端职业，高压高薪，需要极强的综合能力。", "traits": ["数字敏感", "抗压能力强", "商业嗅觉", "精英气质"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "20,000 - 100,000+ 元/月", "requiredDimensions": {"analytical": 9, "leadership": 7, "social": 7, "detail": 8}, "tags": ["顶级高薪", "精英圈层", "高压力", "名校优先"]}, {"id": "fund-manager", "title": "基金经理/投资经理", "category": "金融财经", "categoryColor": "#f59e0b", "icon": "📈", "description": "管理投资组合，为客户创造收益。需要深厚的金融知识、市场洞察力和风险管理能力。", "traits": ["独立判断", "风险意识", "数据分析", "长期思维"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "20,000 - 200,000+ 元/月", "requiredDimensions": {"analytical": 10, "detail": 8, "entrepreneurial": 6, "leadership": 5}, "tags": ["高薪", "绩效导向", "独立决策", "专业壁垒"]}, {"id": "accountant", "title": "注册会计师/财务总监", "category": "金融财经", "categoryColor": "#f59e0b", "icon": "🧾", "description": "负责企业财务管理、审计和税务规划，是企业运营的财务守门人，持证上岗，职业稳定性高。", "traits": ["细心严谨", "数字能力", "职业操守", "系统思维"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "8,000 - 40,000 元/月", "requiredDimensions": {"detail": 10, "analytical": 8, "technical": 5, "social": 3}, "tags": ["稳定", "持证优势", "全行业需求", "晋升路径清晰"]}, {"id": "financial-advisor", "title": "理财顾问/财富管理师", "category": "金融财经", "categoryColor": "#f59e0b", "icon": "💰", "description": "为个人和家庭提供理财规划和财富管理服务，结合金融知识与人际沟通，帮助客户实现财务目标。", "traits": ["亲和力强", "金融知识", "目标导向", "客户服务"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "8,000 - 50,000 元/月", "requiredDimensions": {"social": 8, "analytical": 6, "caregiving": 6, "leadership": 4}, "tags": ["高提成", "人脉积累", "财富管理", "客户关系"]}, {"id": "doctor", "title": "医生（临床医师）", "category": "医疗健康", "categoryColor": "#10b981", "icon": "🩺", "description": "诊断和治疗疾病，守护人民健康，是最受社会尊重的职业之一。需要长期的专业学习和临床实践。", "traits": ["救死扶伤", "终身学习", "抗压能力", "责任心强"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "10,000 - 80,000 元/月", "requiredDimensions": {"caregiving": 9, "analytical": 8, "detail": 9, "social": 6}, "tags": ["社会地位高", "稳定", "学制长", "高技术壁垒"]}, {"id": "nurse", "title": "护士/护理师", "category": "医疗健康", "categoryColor": "#10b981", "icon": "💊", "description": "为患者提供专业护理和照料，是医疗团队不可缺少的重要成员，直接影响患者的康复体验。", "traits": ["爱心耐心", "细心专注", "体力充沛", "应急能力"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "6,000 - 20,000 元/月", "requiredDimensions": {"caregiving": 10, "detail": 8, "social": 7, "technical": 5}, "tags": ["稳定", "需求旺盛", "职业保障", "助人为乐"]}, {"id": "psychologist", "title": "心理咨询师", "category": "医疗健康", "categoryColor": "#10b981", "icon": "🧠", "description": "通过专业心理咨询帮助人们解决心理困扰，促进心理健康，是现代社会需求日益增长的职业。", "traits": ["共情能力强", "倾听技巧", "保密意识", "自我成长"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "8,000 - 50,000 元/月", "requiredDimensions": {"caregiving": 9, "social": 9, "analytical": 6, "detail": 5}, "tags": ["社会需求增长", "助人职业", "持续成长", "执照要求"]}, {"id": "pharmacist", "title": "药剂师", "category": "医疗健康", "categoryColor": "#10b981", "icon": "⚗️", "description": "负责药品调配、用药指导和药学服务，是保障用药安全的专业人员，执照制度保障职业稳定性。", "traits": ["严谨细心", "专业知识", "责任心强", "服务意识"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "6,000 - 20,000 元/月", "requiredDimensions": {"detail": 9, "analytical": 7, "caregiving": 7, "technical": 6}, "tags": ["稳定", "执照保障", "医疗体系", "专业壁垒"]}, {"id": "teacher", "title": "中小学教师", "category": "教育培训", "categoryColor": "#8b5cf6", "icon": "📚", "description": "在中小学校教授知识，培育下一代，是社会基础性职业。编制内教师享有稳定的工作保障和社会福利。", "traits": ["热爱教育", "耐心细致", "表达清晰", "责任心强"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "6,000 - 20,000 元/月", "requiredDimensions": {"caregiving": 8, "social": 8, "detail": 6, "creative": 5}, "tags": ["稳定", "寒暑假", "社会尊重", "编制保障"]}, {"id": "university-professor", "title": "高校教师/研究员", "category": "教育培训", "categoryColor": "#8b5cf6", "icon": "🎓", "description": "在高等院校从事教学和科研工作，是知识的创造者和传播者，享有较高的学术自由度。", "traits": ["学术热情", "研究能力", "表达能力", "终身学习"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "10,000 - 40,000 元/月", "requiredDimensions": {"analytical": 8, "caregiving": 6, "social": 6, "detail": 7}, "tags": ["高学历要求", "学术自由", "稳定", "社会地位"]}, {"id": "training-consultant", "title": "企业培训师/职业规划师", "category": "教育培训", "categoryColor": "#8b5cf6", "icon": "🎤", "description": "为企业员工或个人提供专业培训和职业发展指导，结合教育与商业，是新兴的高价值职业。", "traits": ["表达能力强", "行业经验", "激励技巧", "持续学习"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "10,000 - 60,000 元/月", "requiredDimensions": {"social": 9, "caregiving": 7, "leadership": 6, "creative": 5}, "tags": ["高收入潜力", "自由度高", "影响力", "个人品牌"]}, {"id": "content-creator", "title": "内容创作者/UP主", "category": "创意传媒", "categoryColor": "#ec4899", "icon": "🎬", "description": "在各大平台创作视频、图文等内容，通过粉丝经济和商业合作变现。是互联网时代最具个人特色的职业。", "traits": ["创意无限", "持续输出", "个人魅力", "商业敏感"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "0 - 无上限", "requiredDimensions": {"creative": 9, "entrepreneurial": 7, "social": 6, "detail": 4}, "tags": ["自由职业", "高上限", "个人品牌", "竞争激烈"]}, {"id": "graphic-designer", "title": "平面设计师/视觉设计师", "category": "创意传媒", "categoryColor": "#ec4899", "icon": "🖌️", "description": "为品牌、产品和媒体创作视觉设计，包括Logo、海报、包装、品牌VI等，是创意经济的重要组成部分。", "traits": ["审美敏锐", "软件熟练", "创意思维", "沟通理解"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "8,000 - 30,000 元/月", "requiredDimensions": {"creative": 9, "detail": 8, "technical": 5, "social": 4}, "tags": ["创意职业", "作品集驱动", "自由职业可能", "多行业需求"]}, {"id": "journalist", "title": "记者/媒体人", "category": "创意传媒", "categoryColor": "#ec4899", "icon": "📰", "description": "采访报道新闻事件，传递信息，是社会的观察者和记录者。新媒体时代催生了多元化的媒体职业路径。", "traits": ["好奇心强", "文字功底", "快速学习", "社会责任感"], "outlook": "⭐⭐⭐ 一般", "salary": "6,000 - 25,000 元/月", "requiredDimensions": {"social": 8, "creative": 7, "analytical": 6, "entrepreneurial": 4}, "tags": ["社会影响力", "多元路径", "转型压力", "信息敏感"]}, {"id": "copywriter", "title": "文案策划/品牌策略师", "category": "创意传媒", "categoryColor": "#ec4899", "icon": "✍️", "description": "为品牌创作有感染力的文字内容，制定营销传播策略，是连接品牌与消费者的创意桥梁。", "traits": ["文字功底强", "洞察人心", "创意思维", "商业理解"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "8,000 - 35,000 元/月", "requiredDimensions": {"creative": 9, "social": 7, "analytical": 5, "detail": 5}, "tags": ["创意职业", "品牌价值", "多行业适用", "个人成长"]}, {"id": "game-designer", "title": "游戏设计师", "category": "创意传媒", "categoryColor": "#ec4899", "icon": "🎮", "description": "设计游戏玩法、关卡和系统，创造沉浸式娱乐体验。中国游戏产业规模庞大，职业发展空间广阔。", "traits": ["游戏热情", "系统思维", "创意设计", "玩家思维"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "12,000 - 40,000 元/月", "requiredDimensions": {"creative": 9, "analytical": 7, "technical": 5, "detail": 6}, "tags": ["热门行业", "创意技术结合", "高薪", "竞争激烈"]}, {"id": "marketing-manager", "title": "市场营销经理", "category": "市场营销", "categoryColor": "#f97316", "icon": "📣", "description": "制定和执行市场推广策略，提升品牌知名度和销售业绩，是企业增长的核心驱动力。", "traits": ["创意思维", "数据分析", "沟通能力", "商业嗅觉"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "10,000 - 40,000 元/月", "requiredDimensions": {"creative": 7, "social": 8, "analytical": 6, "leadership": 5}, "tags": ["高薪", "创意与数据结合", "多行业需求", "晋升空间大"]}, {"id": "sales-manager", "title": "销售经理/大客户经理", "category": "市场营销", "categoryColor": "#f97316", "icon": "🤝", "description": "负责开拓和维护客户关系，达成销售目标，是企业营收的直接贡献者，高绩效带来高收入。", "traits": ["沟通能力强", "目标导向", "抗压能力", "客户关系"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "8,000 - 100,000+ 元/月", "requiredDimensions": {"social": 9, "leadership": 6, "entrepreneurial": 6, "caregiving": 4}, "tags": ["高提成", "人脉积累", "全行业需求", "绩效导向"]}, {"id": "operations", "title": "运营总监/增长黑客", "category": "市场营销", "categoryColor": "#f97316", "icon": "🚀", "description": "通过数据驱动的方式优化产品运营和用户增长，是互联网时代的核心岗位，结合创意与分析能力。", "traits": ["数据思维", "用户洞察", "执行力强", "创新精神"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "15,000 - 60,000 元/月", "requiredDimensions": {"analytical": 8, "creative": 6, "social": 6, "leadership": 5}, "tags": ["高薪", "互联网核心", "数据驱动", "快速成长"]}, {"id": "lawyer", "title": "律师", "category": "法律政务", "categoryColor": "#6366f1", "icon": "⚖️", "description": "为当事人提供法律服务，代理诉讼案件，是维护社会公平正义的重要力量。执照制度保障职业门槛。", "traits": ["逻辑严密", "语言表达", "抗压能力", "职业操守"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "10,000 - 100,000+ 元/月", "requiredDimensions": {"analytical": 9, "social": 8, "detail": 9, "leadership": 5}, "tags": ["高收入潜力", "社会地位", "执照保障", "专业壁垒"]}, {"id": "civil-servant", "title": "公务员/事业单位", "category": "法律政务", "categoryColor": "#6366f1", "icon": "🏛️", "description": "在政府机关或事业单位工作，参与公共管理和社会服务，是中国最受追捧的稳定职业之一。", "traits": ["规则意识", "服务意识", "文字能力", "综合素质"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "6,000 - 20,000 元/月", "requiredDimensions": {"detail": 7, "social": 6, "caregiving": 6, "analytical": 5}, "tags": ["最稳定", "福利好", "社会地位", "竞争激烈"]}, {"id": "hr-manager", "title": "人力资源总监/HRBP", "category": "法律政务", "categoryColor": "#6366f1", "icon": "👥", "description": "负责企业人才招募、培训和组织发展，是企业软实力的建设者，需要深度理解人性和组织运作。", "traits": ["人际洞察", "沟通协调", "战略思维", "同理心"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "12,000 - 50,000 元/月", "requiredDimensions": {"social": 9, "caregiving": 7, "leadership": 7, "analytical": 5}, "tags": ["高薪", "全行业需求", "组织影响力", "人才发展"]}, {"id": "mechanical-engineer", "title": "机械/工业工程师", "category": "工程制造", "categoryColor": "#78716c", "icon": "⚙️", "description": "设计和优化机械系统和工业流程，是制造业的技术支柱，在新能源、汽车、航空等领域需求旺盛。", "traits": ["动手能力强", "空间想象", "严谨细致", "解决问题"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "8,000 - 30,000 元/月", "requiredDimensions": {"technical": 9, "analytical": 7, "detail": 8, "creative": 3}, "tags": ["制造业核心", "新能源机遇", "稳定", "技术积累"]}, {"id": "civil-engineer", "title": "土木/建筑工程师", "category": "工程制造", "categoryColor": "#78716c", "icon": "🏗️", "description": "负责建筑和基础设施的设计、施工和管理，是城市建设的核心力量，持证工程师职业保障高。", "traits": ["空间思维", "项目管理", "技术扎实", "责任心强"], "outlook": "⭐⭐⭐ 一般", "salary": "8,000 - 30,000 元/月", "requiredDimensions": {"technical": 8, "analytical": 7, "detail": 8, "leadership": 4}, "tags": ["持证优势", "基建需求", "项目经验", "稳定"]}, {"id": "new-energy-engineer", "title": "新能源工程师", "category": "工程制造", "categoryColor": "#78716c", "icon": "⚡", "description": "在光伏、风电、储能、新能源汽车等领域从事技术研发和工程应用，是当前最热门的工程职业方向。", "traits": ["技术热情", "创新意识", "工程能力", "持续学习"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "12,000 - 40,000 元/月", "requiredDimensions": {"technical": 9, "analytical": 7, "detail": 7, "creative": 4}, "tags": ["国家战略", "高速增长", "高薪", "未来趋势"]}, {"id": "chip-engineer", "title": "芯片/半导体工程师", "category": "工程制造", "categoryColor": "#78716c", "icon": "🔬", "description": "从事集成电路设计、制造和测试，是国家科技战略的核心领域，高薪且具有极强的战略价值。", "traits": ["数理基础强", "极致细心", "长期专注", "技术热情"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "20,000 - 80,000 元/月", "requiredDimensions": {"technical": 10, "analytical": 9, "detail": 10, "creative": 2}, "tags": ["国家战略", "顶级高薪", "高学历要求", "技术壁垒"]}, {"id": "biotech-researcher", "title": "生物医药研究员", "category": "医药生物", "categoryColor": "#14b8a6", "icon": "🧬", "description": "从事新药研发、基因工程等生命科学研究，是推动医学进步的科学家，在创新药领域薪资快速提升。", "traits": ["科学热情", "严谨耐心", "创新思维", "长期主义"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "12,000 - 50,000 元/月", "requiredDimensions": {"analytical": 9, "technical": 8, "detail": 9, "creative": 4}, "tags": ["高薪增长", "科学前沿", "高学历要求", "社会价值"]}, {"id": "management-consultant", "title": "管理咨询顾问", "category": "商业管理", "categoryColor": "#0ea5e9", "icon": "💼", "description": "为企业提供战略、运营和管理改善建议，是商业精英的聚集地，需要极强的分析和沟通能力。", "traits": ["分析能力强", "快速学习", "表达清晰", "商业洞察"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "15,000 - 80,000 元/月", "requiredDimensions": {"analytical": 9, "social": 8, "leadership": 6, "detail": 6}, "tags": ["高薪", "精英圈层", "快速成长", "名校优先"]}, {"id": "entrepreneur", "title": "创业与商业探索方向", "category": "商业管理", "categoryColor": "#0ea5e9", "icon": "🦁", "description": "适合对自主决策、发现机会和把想法落地感兴趣的人。创业需要资源、经验和长期准备，本结果仅代表可进一步了解的方向。", "traits": ["冒险精神", "领导魅力", "抗挫折能力", "商业直觉"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "不定（0 - 无上限）", "requiredDimensions": {"entrepreneurial": 10, "leadership": 9, "social": 7, "analytical": 6}, "tags": ["高风险高回报", "自由", "影响力", "全能型"]}, {"id": "supply-chain", "title": "供应链/物流管理", "category": "商业管理", "categoryColor": "#0ea5e9", "icon": "📦", "description": "管理从原材料到最终产品的整个供应链流程，是制造业和电商的关键职能，需要系统思维和协调能力。", "traits": ["系统思维", "协调能力", "数据分析", "应变能力"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "8,000 - 35,000 元/月", "requiredDimensions": {"analytical": 7, "detail": 8, "leadership": 5, "social": 5}, "tags": ["全行业需求", "稳定", "电商机遇", "系统思维"]}, {"id": "social-worker", "title": "社会工作者", "category": "社会服务", "categoryColor": "#a855f7", "icon": "🤲", "description": "为弱势群体提供社会支持和帮助，是社会公平的守护者，随着社会治理精细化，职业地位逐步提升。", "traits": ["爱心奉献", "沟通能力", "心理素质", "社会责任"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "5,000 - 15,000 元/月", "requiredDimensions": {"caregiving": 10, "social": 9, "detail": 4, "analytical": 4}, "tags": ["社会价值", "稳定增长", "政府支持", "助人职业"]}, {"id": "nutritionist", "title": "营养师/健康管理师", "category": "社会服务", "categoryColor": "#a855f7", "icon": "🥗", "description": "为个人和群体提供营养指导和健康管理方案，随着健康意识提升，市场需求快速增长。", "traits": ["健康意识", "科学知识", "沟通能力", "持续学习"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "6,000 - 30,000 元/月", "requiredDimensions": {"caregiving": 8, "analytical": 6, "social": 7, "detail": 6}, "tags": ["健康产业", "增长市场", "执照优势", "个人品牌"]}, {"id": "fitness-trainer", "title": "健身教练/运动康复师", "category": "社会服务", "categoryColor": "#a855f7", "icon": "💪", "description": "指导客户进行科学健身和运动康复，是健康产业的重要组成部分，个人品牌价值高。", "traits": ["运动热情", "专业知识", "激励能力", "形象管理"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "6,000 - 50,000 元/月", "requiredDimensions": {"caregiving": 7, "social": 8, "technical": 5, "entrepreneurial": 4}, "tags": ["健康产业", "个人品牌", "高提成", "自由度"]}, {"id": "food-engineer", "title": "食品工程师/食品安全专家", "category": "农业食品", "categoryColor": "#84cc16", "icon": "🍎", "description": "从事食品研发、生产工艺优化和食品安全管理，是食品产业的技术支柱，民以食为天的行业永不衰退。", "traits": ["严谨细致", "科学思维", "责任心强", "创新意识"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "7,000 - 25,000 元/月", "requiredDimensions": {"technical": 7, "detail": 9, "analytical": 7, "caregiving": 5}, "tags": ["民生行业", "稳定", "食品安全", "专业壁垒"]}, {"id": "architect", "title": "建筑师", "category": "房地产建筑", "categoryColor": "#f59e0b", "icon": "🏛️", "description": "设计建筑物的外观、功能和空间，将艺术与工程完美结合，是创意与技术的双重职业。", "traits": ["空间想象力", "艺术审美", "技术能力", "沟通协调"], "outlook": "⭐⭐⭐ 一般", "salary": "8,000 - 40,000 元/月", "requiredDimensions": {"creative": 8, "technical": 7, "detail": 8, "analytical": 5}, "tags": ["创意技术结合", "执照优势", "作品积累", "长期成长"]}, {"id": "ecommerce-operator", "title": "电商运营/跨境电商", "category": "跨境电商", "categoryColor": "#f97316", "icon": "🛒", "description": "运营电商平台店铺，负责选品、推广和销售，跨境电商更是连接中国制造与全球市场的重要桥梁。", "traits": ["市场嗅觉", "数据分析", "执行力强", "持续学习"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "8,000 - 50,000 元/月", "requiredDimensions": {"analytical": 6, "entrepreneurial": 7, "social": 5, "detail": 6}, "tags": ["高增长", "全球市场", "创业友好", "数据驱动"]}, {"id": "live-streamer", "title": "直播电商/带货主播", "category": "跨境电商", "categoryColor": "#f97316", "icon": "📡", "description": "通过直播形式销售商品，是中国特色的新兴职业，头部主播年收入可达数亿，入门门槛相对较低。", "traits": ["表达能力强", "亲和力", "商品知识", "抗压能力"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "3,000 - 无上限", "requiredDimensions": {"social": 9, "creative": 6, "entrepreneurial": 7, "caregiving": 4}, "tags": ["高上限", "中国特色", "个人品牌", "竞争激烈"]}, {"id": "aerospace-engineer", "title": "航空航天工程师", "category": "航空航天", "categoryColor": "#6366f1", "icon": "🚀", "description": "从事飞行器设计、制造和测试，是国家战略性产业的核心人才，随着商业航天兴起，职业机遇大幅增加。", "traits": ["数理基础强", "严谨细致", "团队协作", "爱国情怀"], "outlook": "⭐⭐⭐⭐⭐ 极佳", "salary": "15,000 - 60,000 元/月", "requiredDimensions": {"technical": 10, "analytical": 9, "detail": 10, "creative": 3}, "tags": ["国家战略", "高薪", "高学历要求", "商业航天"]}, {"id": "hotel-manager", "title": "酒店/旅游管理", "category": "文旅服务", "categoryColor": "#ec4899", "icon": "🏨", "description": "管理酒店或旅游企业的运营，为客人提供优质服务体验，是文旅产业复苏后需求旺盛的职业。", "traits": ["服务意识", "管理能力", "语言能力", "应变能力"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "6,000 - 30,000 元/月", "requiredDimensions": {"social": 8, "caregiving": 7, "leadership": 6, "detail": 5}, "tags": ["文旅复苏", "国际视野", "服务业", "管理路径"]}, {"id": "chef", "title": "厨师/餐饮创业者", "category": "文旅服务", "categoryColor": "#ec4899", "icon": "👨‍🍳", "description": "烹饪美食，经营餐厅，是中国餐饮市场的重要角色。顶级厨师和餐饮创业者可以创造极高的商业价值。", "traits": ["烹饪热情", "创意思维", "抗压能力", "商业意识"], "outlook": "⭐⭐⭐⭐ 良好", "salary": "5,000 - 无上限", "requiredDimensions": {"creative": 7, "technical": 7, "entrepreneurial": 5, "detail": 7}, "tags": ["永恒行业", "创业机会", "个人品牌", "技艺积累"]}], "directions": {"software-engineer": {"title": "软件与数字技术方向", "pathType": "skill"}, "ai-engineer": {"title": "人工智能与数据研发方向", "pathType": "professional"}, "product-manager": {"title": "产品策划与用户体验方向", "pathType": "experience"}, "data-analyst": {"title": "数据分析与商业洞察方向", "pathType": "skill"}, "ux-designer": {"title": "界面与用户体验设计方向", "pathType": "skill"}, "cybersecurity": {"title": "网络安全与系统防护方向", "pathType": "professional"}, "investment-banker": {"title": "企业投融资与资本市场方向", "pathType": "professional"}, "fund-manager": {"title": "投资研究与资产管理方向", "pathType": "professional"}, "accountant": {"title": "财务分析与会计管理方向", "pathType": "professional"}, "financial-advisor": {"title": "财富管理与客户服务方向", "pathType": "professional"}, "doctor": {"title": "临床医疗方向", "pathType": "professional"}, "nurse": {"title": "临床护理与健康服务方向", "pathType": "professional"}, "psychologist": {"title": "心理健康服务方向", "pathType": "professional"}, "pharmacist": {"title": "药学与用药服务方向", "pathType": "professional"}, "teacher": {"title": "基础教育方向", "pathType": "professional"}, "university-professor": {"title": "高等教育与学术研究方向", "pathType": "professional"}, "training-consultant": {"title": "企业培训与职业发展方向", "pathType": "experience"}, "content-creator": {"title": "内容创作与新媒体方向", "pathType": "skill"}, "graphic-designer": {"title": "视觉设计与品牌表达方向", "pathType": "skill"}, "journalist": {"title": "新闻传播与媒体方向", "pathType": "skill"}, "copywriter": {"title": "文案策划与品牌策略方向", "pathType": "skill"}, "game-designer": {"title": "游戏策划与互动设计方向", "pathType": "skill"}, "marketing-manager": {"title": "市场营销与品牌增长方向", "pathType": "experience"}, "sales-manager": {"title": "销售与客户经营方向", "pathType": "experience"}, "operations": {"title": "运营与增长方向", "pathType": "experience"}, "lawyer": {"title": "法律服务与合规方向", "pathType": "professional"}, "civil-servant": {"title": "公共事务与社会治理方向", "pathType": "professional"}, "hr-manager": {"title": "人力资源与组织发展方向", "pathType": "experience"}, "mechanical-engineer": {"title": "机械制造与工业工程方向", "pathType": "professional"}, "civil-engineer": {"title": "建筑工程与项目管理方向", "pathType": "professional"}, "new-energy-engineer": {"title": "新能源技术与产业方向", "pathType": "professional"}, "chip-engineer": {"title": "芯片与半导体方向", "pathType": "professional"}, "biotech-researcher": {"title": "生物医药研发方向", "pathType": "professional"}, "management-consultant": {"title": "商业分析与管理咨询方向", "pathType": "experience"}, "entrepreneur": {"title": "创业与商业探索方向", "pathType": "experience"}, "supply-chain": {"title": "供应链与物流管理方向", "pathType": "experience"}, "social-worker": {"title": "社会服务与社会工作方向", "pathType": "professional"}, "nutritionist": {"title": "营养与健康管理方向", "pathType": "professional"}, "fitness-trainer": {"title": "运动健康服务方向", "pathType": "professional"}, "food-engineer": {"title": "食品研发与安全方向", "pathType": "professional"}, "architect": {"title": "建筑设计与空间规划方向", "pathType": "professional"}, "ecommerce-operator": {"title": "电商运营与跨境业务方向", "pathType": "skill"}, "live-streamer": {"title": "直播内容与电商运营方向", "pathType": "skill"}, "aerospace-engineer": {"title": "航空航天技术方向", "pathType": "professional"}, "hotel-manager": {"title": "酒店与文旅服务方向", "pathType": "experience"}, "chef": {"title": "餐饮服务与烹饪方向", "pathType": "skill"}}, "pathMeta": {"explore": {"pathLabel": "职业探索方向", "pathHint": "可先通过体验、实习或入门工作进一步了解。"}, "skill": {"pathLabel": "技能积累方向", "pathHint": "可先从基础课程、作品或项目实践开始，逐步验证是否喜欢并擅长。"}, "experience": {"pathLabel": "经验进阶方向", "pathHint": "适合先从相关岗位积累经验，再逐步承担更复杂的工作。"}, "professional": {"pathLabel": "长期专业方向", "pathHint": "通常需要系统专业学习、资格要求或长期训练，适合作为长期规划方向。"}}, "dimLabels": {"analytical": "分析思维", "creative": "创造力", "social": "社交沟通", "technical": "技术动手", "leadership": "领导管理", "caregiving": "助人服务", "detail": "细节严谨", "entrepreneurial": "创业冒险"}, "categoryEmojis": {"工作方式": "🔄", "兴趣技能": "💡", "人际沟通": "🗣️", "价值观": "🌟", "思维方式": "🧩", "场景偏好": "🎭", "生活方式": "🌿", "能力自评": "📊"}};
+const QUESTIONS = DATA.questions;
+const CAREERS = DATA.careers;
+const DIRECTIONS = DATA.directions;
+const PATHMETA = DATA.pathMeta;
+const DIM_LABEL = DATA.dimLabels;
+const DIMS = ["analytical","creative","social","technical","leadership","caregiving","detail","entrepreneurial"];
+const CAT_EMOJI = DATA.categoryEmojis;
+const NEUTRAL_TEXT = "以上都不太符合我 / 暂时不确定";
+
+let phase = "landing";
+let qi = 0;
+let answers = {};
+let dimScores = null;
+let topMatches = [];
+let locking = false;
+
+const app = document.getElementById("app");
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+/* ---------- scoring (same algorithm as original) ---------- */
+function maxScores(){
+  const max = Object.fromEntries(DIMS.map(d => [d, 0]));
+  QUESTIONS.forEach(q => {
+    const qm = Object.fromEntries(DIMS.map(d => [d, 0]));
+    q.options.forEach(o => Object.entries(o.scores).forEach(([k, v]) => { qm[k] = Math.max(qm[k] || 0, v); }));
+    DIMS.forEach(d => { max[d] += qm[d]; });
+  });
+  return max;
+}
+function userScores(){
+  const t = Object.fromEntries(DIMS.map(d => [d, 0]));
+  QUESTIONS.forEach(q => {
+    const oid = answers[q.id];
+    if (!oid) return;
+    const opt = q.options.find(o => o.id === oid);
+    if (opt) Object.entries(opt.scores).forEach(([k, v]) => { t[k] += v; });
+  });
+  return t;
+}
+function computeMatches(scores){
+  const max = maxScores();
+  const norm = DIMS.map(d => (scores[d] || 0) / (max[d] || 1));
+  const mean = norm.reduce((a, b) => a + b, 0) / norm.length;
+  const has = norm.some(v => v > 0);
+  const ds = Object.fromEntries(DIMS.map((d, i) => [d, has ? clamp(5 + (norm[i] - mean) * 20, 0, 10) : 5]));
+  const list = CAREERS.map(c => {
+    const req = c.requiredDimensions;
+    let m = 0, p = 0;
+    Object.entries(req).forEach(([d, S]) => {
+      const x = ds[d] || 0;
+      let sim = clamp(1 - Math.abs(x - S) / 10, 0, 1);
+      if (x < S - 2.5) sim *= 0.72;
+      m += sim * S; p += S;
+    });
+    const g = p > 0 ? m / p : 0;
+    return { career: c, score: g, matchPercent: Math.round(48 + g * 47) };
+  });
+  list.sort((a, b) => b.score - a.score);
+  return { list, dimScores: ds };
+}
+function topDiverse(list, n){
+  const r = [], seen = new Set();
+  list.forEach(it => { if (r.length < n && !seen.has(it.career.category)) { r.push(it); seen.add(it.career.category); } });
+  list.forEach(it => { if (r.length < n && !r.some(x => x.career.id === it.career.id)) r.push(it); });
+  return r;
+}
+
+/* ---------- illustrations ---------- */
+const ILLU_HERO = `<svg viewBox="0 0 340 240" fill="none">
+  <rect width="340" height="240" fill="#FDF3E7"/>
+  <circle cx="284" cy="40" r="20" fill="#FFD9A0"/>
+  <ellipse cx="70" cy="36" rx="26" ry="8" fill="#fff"/>
+  <ellipse cx="185" cy="26" rx="18" ry="6" fill="#fff" opacity=".8"/>
+  <path d="M0 110 L58 62 L106 110 Z" fill="#A8BFA0"/>
+  <path d="M78 110 L148 46 L218 110 Z" fill="#8FA88A"/>
+  <rect x="242" y="76" width="13" height="34" fill="#7BA3C4"/>
+  <rect x="259" y="68" width="15" height="42" fill="#6A92B3"/>
+  <rect x="278" y="82" width="11" height="28" fill="#7BA3C4"/>
+  <rect x="300" y="74" width="12" height="36" fill="#8FB3CE"/>
+  <ellipse cx="170" cy="212" rx="180" ry="28" fill="#F0E2C8"/>
+  <path d="M170 214 L170 146" stroke="#C9A35C" stroke-width="11" stroke-linecap="round"/>
+  <path d="M170 146 Q124 122 88 108" stroke="#C9A35C" stroke-width="11" stroke-linecap="round"/>
+  <path d="M170 146 Q226 120 262 104" stroke="#C9A35C" stroke-width="11" stroke-linecap="round"/>
+  <circle cx="170" cy="108" r="10" fill="#E8A5A5"/>
+  <path d="M160 121 Q170 116 180 121 L177 152 L163 152 Z" fill="#4A6FA5"/>
+  <rect x="164" y="152" width="5.5" height="17" rx="2.5" fill="#3d3325"/>
+  <rect x="171" y="152" width="5.5" height="17" rx="2.5" fill="#3d3325"/>
+  <circle cx="184" cy="128" r="8" fill="#FFD93B" stroke="#3d3325" stroke-width="1.5"/>
+  <path d="M184 122 L185.6 128 L184 134 L182.4 128 Z" fill="#C8402A"/>
+  <rect x="80" y="86" width="4" height="24" fill="#8a6f4a"/>
+  <rect x="64" y="84" width="34" height="11" rx="2.5" fill="#fff" stroke="#8a6f4a"/>
+  <text x="81" y="92" text-anchor="middle" font-size="6.5" fill="#8a6f4a" font-family="Noto Sans SC">方向?</text>
+  <circle cx="262" cy="88" r="3.5" fill="#E8853D"/>
+</svg>`;
+
+const ILLU_LOAD = `<svg viewBox="0 0 220 180" fill="none">
+  <rect width="220" height="180" fill="none"/>
+  <ellipse class="float-c" cx="60" cy="34" rx="24" ry="8" fill="#fff"/>
+  <ellipse class="float-c" cx="160" cy="24" rx="18" ry="6" fill="#fff" opacity=".8" style="animation-delay:.8s"/>
+  <circle cx="110" cy="96" r="62" fill="#fff" stroke="#E8D9BE" stroke-width="2"/>
+  <circle cx="110" cy="96" r="52" fill="none" stroke="#E8853D" stroke-width="1.5" stroke-dasharray="3 5"/>
+  <text x="110" y="46" text-anchor="middle" font-size="10" font-weight="700" fill="#8a6f4a" font-family="Noto Serif SC">N</text>
+  <text x="110" y="152" text-anchor="middle" font-size="8" fill="#B8A888" font-family="Noto Serif SC">S</text>
+  <text x="156" y="100" text-anchor="middle" font-size="8" fill="#B8A888" font-family="Noto Serif SC">E</text>
+  <text x="64" y="100" text-anchor="middle" font-size="8" fill="#B8A888" font-family="Noto Serif SC">W</text>
+  <g class="needle">
+    <polygon points="110,58 105,96 110,101 115,96" fill="#E8853D"/>
+    <polygon points="110,134 105,96 110,91 115,96" fill="#3d3325"/>
+  </g>
+  <circle cx="110" cy="96" r="6" fill="#FFD9A0" stroke="#3d3325" stroke-width="1.5"/>
+  <ellipse cx="110" cy="168" rx="56" ry="7" fill="#F0E2C8"/>
+</svg>`;
+
+/* ---------- landing ---------- */
+const CAREER_STRIP = ["软件工程师","AI工程师","产品经理","医生","律师","心理咨询师","内容创作者","基金经理","建筑师","新能源工程师","管理咨询顾问","教师"];
+function renderLanding(){
+  const strip = CAREER_STRIP.concat(CAREER_STRIP).map(c => `<span>${c}</span>`).join("");
+  app.innerHTML = `
+  <div class="land-nav"><div class="logo"><i>职</i>职业罗盘</div></div>
+  <section class="hero">
+    <div class="badge"><span class="dot"></span>2026年最新职业数据库</div>
+    <div class="illu">${ILLU_HERO}</div>
+    <div class="strip-wrap"><div class="strip">${strip}</div></div>
+    <h1>发现<em>值得探索的</em><br>职业方向</h1>
+    <p class="desc">通过25道日常场景题，从思维方式、兴趣技能、价值观等8个维度，为你梳理可探索的职业方向，帮助你找到值得优先了解的工作类型。</p>
+    <div class="cta-row">
+      <button class="btn-primary press" onclick="startQuiz()">开始测评</button>
+      <button class="btn-secondary press" onclick="document.getElementById('why').scrollIntoView({behavior:'smooth',block:'start'})">了解更多</button>
+    </div>
+    <div class="hint">✓ 约10分钟完成测评　✓ <b>职业图谱</b> 等你解锁</div>
+  </section>
+  <div class="feats">
+    <div class="feat"><i>⏱</i><b>约10分钟</b><p>25道精心设计的问题，快速完成测评</p></div>
+    <div class="feat"><i>🎯</i><b>科学匹配</b><p>8个核心维度分析，精准匹配职业特质</p></div>
+    <div class="feat"><i>🗺</i><b>60+热门职业</b><p>覆盖中国大陆主流行业，提供多个可探索的职业方向</p></div>
+  </div>
+  <section class="lsec" id="why"><div class="card">
+    <div class="st"><i>💛</i>为什么选择</div>
+    <p class="sp">基于<b>职业心理学理论</b>，结合中国大陆就业市场实际情况，为你提供最贴近现实的职业匹配建议</p>
+  </div></section>
+  <section class="lsec"><div class="card">
+    <div class="st"><i>🏙</i>覆盖 · 热门职业</div>
+    <p class="sp">从科技互联网到医疗健康，从金融财经到创意传媒，全面覆盖中国大陆主流职业方向</p>
+    <div class="cat-grid"><span>科技互联网</span><span>金融财经</span><span>医疗健康</span><span>创意传媒</span><span>教育</span><span>法律</span></div>
+    <div class="more-txt">还有更多...</div>
+  </div></section>
+  <section class="lsec"><div class="card">
+    <div class="st"><i>✦</i>8个维度，全面了解你</div>
+    <p class="sp">测评从以下8个核心维度分析你的职业特质</p>
+    <div class="dim-grid">
+      <div class="d"><i>🧠</i><div><b>分析思维</b><span>逻辑推理与数据处理能力</span></div></div>
+      <div class="d"><i>🎨</i><div><b>创造力</b><span>创新思维与艺术表达能力</span></div></div>
+      <div class="d"><i>💬</i><div><b>社交沟通</b><span>人际交往与表达影响力</span></div></div>
+      <div class="d"><i>🔧</i><div><b>技术动手</b><span>实操技能与工程能力</span></div></div>
+      <div class="d"><i>👑</i><div><b>领导管理</b><span>团队管理与决策能力</span></div></div>
+      <div class="d"><i>🤝</i><div><b>助人服务</b><span>关怀他人与服务意识</span></div></div>
+      <div class="d"><i>🔍</i><div><b>细节严谨</b><span>精益求精与规范意识</span></div></div>
+      <div class="d"><i>🚀</i><div><b>创业冒险</b><span>风险承受与创业精神</span></div></div>
+    </div>
+  </div></section>
+  <section class="cta-end">
+    <div class="deco d1">🧭</div><div class="deco d2">✦</div>
+    <div class="t">准备好探索你的<em>职业方向</em>了吗？</div>
+    <div class="p">25道问题，约10分钟，看看哪些职业方向值得优先了解</div>
+    <button class="b press" onclick="startQuiz()">开始我的职业测评</button>
+  </section>
+  <div class="welcome-footer">
+    <p>测评结果仅供自我探索参考，不构成职业建议或专业咨询意见</p>
+  </div>
+  `;
+  addPromotionLinkDelayed();
+}
+
+/* ---------- quiz ---------- */
+function renderQuiz(opts = {}){
+  const { animate = true, scrollTop = true } = opts;
+  const q = QUESTIONS[qi];
+  const optionList = q.options.concat([{ id: "neutral-" + q.id, text: NEUTRAL_TEXT, scores: {} }]);
+  const letters = ["A","B","C","D","—"];
+  const sel = answers[q.id];
+  const pct = (qi / QUESTIONS.length) * 100;
+  app.innerHTML = `
+  <div class="quiz-top">
+    <div class="quiz-meta">
+      <span class="cat">${CAT_EMOJI[q.category] || ""} ${q.category}</span>
+      <span class="num">第 <b>${qi + 1}</b> / ${QUESTIONS.length} 题</span>
+    </div>
+    <div class="path-track">
+      <div class="line"></div>
+      <div class="fill" style="width:${pct}%"></div>
+      <div class="walker" style="left:${Math.max(pct, 3)}%">🚶</div>
+    </div>
+  </div>
+  <div class="quiz-body${animate ? " is-enter" : ""}">
+    <div class="q-card">
+      <div class="qno">Q${String(q.id).padStart(2, "0")} · ${q.category}</div>
+      <div class="q">${q.text}</div>
+    </div>
+    <div class="opts">
+      ${optionList.map((o, i) => {
+        const isNeutral = o.id.startsWith("neutral");
+        const isSel = sel === o.id;
+        const cls = ["opt", isNeutral ? "neutral" : "", isSel ? "sel" : ""].filter(Boolean).join(" ");
+        return `<button type="button" class="${cls}" data-id="${o.id}" onclick="choose('${o.id}')"><span class="k">${letters[i]}</span><span>${o.text}</span></button>`;
+      }).join("")}
+    </div>
+    <div class="quiz-foot">
+      <button class="btn-back press" onclick="goBack()" ${qi === 0 ? "disabled" : ""}>‹ 上一题</button>
+      <span class="tip">选一个最接近你的</span>
+    </div>
+  </div>`;
+  if (scrollTop) window.scrollTo(0, 0);
+}
+function choose(oid){
+  if (locking) return;
+  locking = true;
+  const q = QUESTIONS[qi];
+  answers[q.id] = oid;
+
+  // 只切换选中样式，不整页重绘
+  app.querySelectorAll(".opt").forEach(btn => {
+    btn.classList.toggle("sel", btn.dataset.id === oid);
+  });
+
+  setTimeout(() => {
+    locking = false;
+    if (qi < QUESTIONS.length - 1) {
+      qi++;
+      renderQuiz({ animate: true, scrollTop: true });
+    } else {
+      finishQuiz();
+    }
+  }, 220);
+}
+function goBack(){
+  if (locking) return;
+  if (qi > 0) {
+    qi--;
+    renderQuiz({ animate: true, scrollTop: true });
+  }
+}
+
+/* ---------- loading ---------- */
+const LOAD_MSGS = ["正在分析你的答案...","梳理你的偏好特点...","生成可探索的职业方向...","生成你的职业画像...","即将呈现结果..."];
+function renderLoading(){
+  app.innerHTML = `
+  <div class="load-wrap">
+    <div class="load-illu">${ILLU_LOAD}</div>
+    <div class="load-msg" id="loadMsg">${LOAD_MSGS[0]}</div>
+    <div class="load-sub">罗盘正在为你校准方向</div>
+    <div class="load-dots" id="loadDots"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+  </div>`;
+  let step = 0;
+  const total = LOAD_MSGS.length;
+  const tick = () => {
+    step++;
+    if (step < total) {
+      document.getElementById("loadMsg").textContent = LOAD_MSGS[step];
+      const dots = document.getElementById("loadDots").children;
+      for (let i = 0; i < dots.length; i++) dots[i].className = i <= step ? "on" : "";
+      setTimeout(tick, 620);
+    } else {
+      setTimeout(() => { phase = "result"; renderResult(); }, 420);
+    }
+  };
+  setTimeout(tick, 620);
+}
+function finishQuiz(){
+  const scores = userScores();
+  const { list, dimScores: ds } = computeMatches(scores);
+  dimScores = ds;
+  topMatches = topDiverse(list, 6);
+  phase = "loading";
+  renderLoading();
+}
+
+function buildTestResult(){
+  return {
+    dimScores: dimScores ? { ...dimScores } : null,
+    topMatches: (topMatches || []).map(m => ({
+      careerId: m.career.id,
+      matchPercent: m.matchPercent,
+      score: m.score,
+      title: m.career.title,
+      category: m.career.category
+    })),
+    answers: { ...answers },
+    completedAt: new Date().toISOString()
+  };
+}
+
+function getStorageKey(token){
+  return 'test_result_' + (token || (window.linkValidator && window.linkValidator.token) || 'local');
+}
+
+function getCompletionFlagKey(){
+  const token = window.linkValidator && window.linkValidator.token;
+  return 'zylp_test_completed_' + (token || '');
+}
+
+function saveTestResult(testResult){
+  let token = window.linkValidator && window.linkValidator.token;
+  if (!token) {
+    token = 'local_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  }
+  try {
+    localStorage.setItem(getStorageKey(token), JSON.stringify({
+      token,
+      result: testResult,
+      timestamp: testResult.completedAt
+    }));
+  } catch (error) {
+    console.error('保存测试结果失败:', error);
+  }
+}
+
+function addPromotionLinkDelayed(){
+  setTimeout(() => {
+    if (window.PsyTestValidator && typeof window.PsyTestValidator.addPromotionLink === 'function') {
+      window.PsyTestValidator.addPromotionLink();
+    }
+  }, 200);
+}
+
+async function waitForValidator(){
+  let waitCount = 0;
+  while (!window.linkValidator && waitCount < 30) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    waitCount++;
+    if (waitCount % 10 === 0 && window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+      const instance = window.PsyTestValidator.getInstance();
+      if (instance) {
+        window.linkValidator = instance;
+        break;
+      }
+    }
+  }
+  return window.linkValidator;
+}
+
+async function validateAndStartTest(){
+  const validator = await waitForValidator();
+  if (!validator) {
+    alert('验证SDK未初始化，无法开始测试。请刷新页面重试。');
+    return false;
+  }
+
+  let isValid = false;
+  if (typeof validator.validateForUserAction === 'function') {
+    try {
+      isValid = await validator.validateForUserAction();
+      if (!isValid || validator.valid === false) return false;
+    } catch (error) {
+      console.error('链接验证失败:', error);
+      validator.valid = false;
+      return false;
+    }
+  } else {
+    if (validator.valid === false) {
+      alert(validator.validationError || '测试链接无效，请检查链接是否正确');
+      return false;
+    }
+    isValid = validator.valid !== false;
+  }
+
+  if (!isValid || validator.valid === false) return false;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isRestart = urlParams.get('restart') === 'true';
+  if (!isRestart && !window.__zylp_test_started) {
+    try {
+      window.__zylp_test_started = true;
+      await validator.startTest();
+      console.log('测试开始记录成功');
+    } catch (error) {
+      console.error('记录测试开始失败:', error);
+      window.__zylp_test_started = false;
+      return false;
+    }
+  } else if (isRestart) {
+    console.log('重新测试模式，跳过startTest()调用，避免重复扣除次数');
+    window.__zylp_test_started = false;
+    window.__zylp_test_completed = false;
+  }
+
+  return true;
+}
+
+function restoreResultFromStorage(){
+  const token = (window.linkValidator && window.linkValidator.token)
+    || new URLSearchParams(window.location.search).get('token');
+  if (!token) return false;
+  try {
+    const raw = localStorage.getItem(getStorageKey(token));
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    const result = saved.result || saved;
+    if (!result || !result.dimScores || !Array.isArray(result.topMatches)) return false;
+
+    dimScores = result.dimScores;
+    answers = result.answers || {};
+    const byId = Object.fromEntries(CAREERS.map(c => [c.id, c]));
+    topMatches = result.topMatches
+      .map(m => {
+        const career = byId[m.careerId];
+        if (!career) return null;
+        return { career, matchPercent: m.matchPercent, score: m.score };
+      })
+      .filter(Boolean);
+    if (!topMatches.length) return false;
+
+    phase = 'result';
+    window.__zylp_test_completed = true;
+    renderResult({ skipComplete: true });
+    return true;
+  } catch (error) {
+    console.error('恢复本地结果失败:', error);
+    return false;
+  }
+}
+window.zylpRestoreResult = restoreResultFromStorage;
+
+/* ---------- result ---------- */
+function radarSVG(){
+  const cx = 155, cy = 118, R = 76;
+  const ang = i => -Math.PI / 2 + (i * Math.PI) / 4;
+  const pt = (i, r) => [cx + r * Math.cos(ang(i)), cy + r * Math.sin(ang(i))];
+  const ring = f => DIMS.map((_, i) => pt(i, R * f).map(n => n.toFixed(1)).join(",")).join(" ");
+  const vals = DIMS.map((d, i) => pt(i, R * ((dimScores[d] || 0) / 10)).map(n => n.toFixed(1)).join(",")).join(" ");
+  return `<svg viewBox="0 0 310 236" style="width:100%;display:block">
+    ${[0.33, 0.66, 1].map(f => `<polygon points="${ring(f)}" fill="none" stroke="#E8D9BE" stroke-width="1.2" stroke-dasharray="${f === 1 ? "0" : "3 4"}"/>`).join("")}
+    ${DIMS.map((_, i) => { const [x, y] = pt(i, R); return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#F0E4CC" stroke-width="1.2"/>`; }).join("")}
+    <polygon points="${vals}" fill="rgba(232,133,61,.22)" stroke="#E8853D" stroke-width="2.5" stroke-linejoin="round"/>
+    ${DIMS.map((d, i) => { const [x, y] = pt(i, R * ((dimScores[d] || 0) / 10)); return `<circle cx="${x}" cy="${y}" r="4" fill="#E8853D" stroke="#fff" stroke-width="1.5"/>`; }).join("")}
+    ${DIMS.map((d, i) => { const [x, y] = pt(i, R + 20); const v = Math.round((dimScores[d] || 0) * 10); return `<text x="${x}" y="${y}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3D3325" font-family="Noto Sans SC">${DIM_LABEL[d]}</text><text x="${x}" y="${y + 12}" text-anchor="middle" font-size="9" fill="#B8A888" font-family="Noto Serif SC">${v}</text>`; }).join("")}
+  </svg>`;
+}
+function matchCard(m, rank){
+  const c = m.career;
+  const dir = DIRECTIONS[c.id] || { title: c.title + "方向", pathType: "explore" };
+  const pm = PATHMETA[dir.pathType] || PATHMETA.explore;
+  return `
+  <div class="match-card rank${rank}" style="animation-delay:${rank * 0.08}s">
+    ${rank === 0 ? `<div class="priority-badge">优先探索</div>` : ""}
+    <div class="mc-top">
+      <div class="rank">${rank + 1}</div>
+      <div class="micon">${c.icon}</div>
+      <div class="mtitle">
+        <div class="tt">${c.title} <span class="cat" style="background:${c.categoryColor}">${c.category}</span></div>
+        <div class="dir">${dir.title}</div>
+      </div>
+      <div class="pct"><b>${m.matchPercent}%</b><span>参考度</span></div>
+    </div>
+    <div class="mc-body">
+      <span class="path ${dir.pathType}">${pm.pathLabel}</span>
+      <p class="desc">${c.description}</p>
+      <div class="hint"><b>探索建议</b> · ${pm.pathHint}</div>
+      <div class="rows">
+        <div class="row"><div class="k">就业前景</div><div class="v">${c.outlook}</div></div>
+        <div class="row"><div class="k">薪资范围</div><div class="v">${c.salary}</div></div>
+      </div>
+      <div class="traits">${c.traits.map(t => `<span>${t}</span>`).join("")}</div>
+      <div class="tags">${c.tags.map(t => `<span>#${t}</span>`).join("")}</div>
+    </div>
+  </div>`;
+}
+async function renderResult(opts = {}){
+  const { skipComplete = false } = opts;
+  const bars = DIMS.map(d => {
+    const v = Math.round((dimScores[d] || 0) * 10);
+    return `<div class="db"><span class="n">${DIM_LABEL[d]}</span><div class="bar"><i style="width:${v}%"></i></div><span class="v">${v}</span></div>`;
+  }).join("");
+  const top1 = topMatches[0];
+  const dir1 = top1 ? (DIRECTIONS[top1.career.id] || { title: top1.career.title + "方向", pathType: "explore" }) : null;
+  const pm1 = dir1 ? (PATHMETA[dir1.pathType] || PATHMETA.explore) : null;
+  const top3 = Object.entries(dimScores).sort((a, b) => b[1] - a[1]).slice(0, 3)
+    .map(([k, v]) => ({ name: DIM_LABEL[k] || k, value: Math.round(v * 10) }));
+  app.innerHTML = `
+  <div class="res-head">
+    <svg class="mtn" viewBox="0 0 400 44" preserveAspectRatio="none"><path d="M0 44 L80 12 L150 44 Z" fill="#8FA88A"/><path d="M120 44 L220 4 L320 44 Z" fill="#7BA3C4"/><path d="M280 44 L360 16 L400 44 Z" fill="#8FA88A"/></svg>
+    <div class="tag">✦ 测评完成！</div>
+    <h1>你可优先探索的职业方向</h1>
+    <div class="res-hero">
+      <div class="icon">${top1.career.icon}</div>
+      <div class="dside">
+        <div class="dtitle">${dir1.title}</div>
+        <span class="plabel">${pm1.pathLabel}</span>
+        <div class="pct">参考度<b>${top1.matchPercent}%</b></div>
+      </div>
+    </div>
+    <div class="res-dims">${top3.map(d => `<span class="dp"><b>${d.name}</b>${d.value}分</span>`).join("")}</div>
+    <div class="res-cta">
+      <button class="b w press" onclick="restart()">↻ 重新测评</button>
+    </div>
+  </div>
+  <section class="res-sec">
+    <div class="st"><i>🧭</i>你的能力雷达图</div>
+    <div class="ssub">基于你的答案分析出的8个维度特质</div>
+    <div class="radar-card">${radarSVG()}</div>
+    <div class="dim-bars">${bars}</div>
+  </section>
+  <section class="res-sec">
+    <div class="st"><i>🗺</i>为你推荐的职业方向</div>
+    <div class="ssub">你可优先探索的职业方向 · 这是基于本次选择得出的方向参考，不代表唯一答案；排名越靠前，说明当前特质与该方向更接近。</div>
+    ${topMatches.map((m, i) => matchCard(m, i)).join("")}
+  </section>
+  <div class="notice">
+    <b>温馨提示：</b>
+    <p>本测评只参考你的偏好和工作方式，不评估学历、证书、专业技能或身体条件。结果是可优先了解的方向，不代表你现在就具备从业资格；职业选择还应结合教育背景、个人经历和现实机会判断。</p>
+  </div>
+  <div class="report-footer">
+    <div class="res-btns" style="padding:0;width:100%">
+      <button class="rb dark press" onclick="restart()">重新测评</button>
+    </div>
+  </div>
+  <div class="res-foot">© 2026 职业罗盘 · 仅供参考，不构成职业建议</div>`;
+  window.scrollTo(0, 0);
+
+  if (!skipComplete) {
+    const testResult = buildTestResult();
+    saveTestResult(testResult);
+    const alreadyCompleted = window.__zylp_test_completed || localStorage.getItem(getCompletionFlagKey()) === 'true';
+    if (!alreadyCompleted && window.linkValidator) {
+      try {
+        window.__zylp_test_completed = true;
+        localStorage.setItem(getCompletionFlagKey(), 'true');
+        await window.linkValidator.completeTest(undefined, testResult);
+        console.log('测试完成记录成功');
+      } catch (error) {
+        console.error('记录测试完成失败:', error);
+        window.__zylp_test_completed = false;
+        localStorage.removeItem(getCompletionFlagKey());
+      }
+    }
+  }
+
+  addPromotionLinkDelayed();
+}
+/* ---------- flow ---------- */
+async function startQuiz(){
+  const ok = await validateAndStartTest();
+  if (!ok) return;
+  phase = "quiz"; qi = 0; answers = {}; locking = false;
+  renderQuiz();
+  window.scrollTo(0, 0);
+}
+function restart(){
+  if (window.linkValidator && typeof window.linkValidator.clearLocalResult === 'function') {
+    window.linkValidator.clearLocalResult();
+  }
+  const urlParams = new URLSearchParams(window.location.search);
+  let token = urlParams.get('token');
+  if (!token && window.linkValidator && window.linkValidator.token) {
+    token = window.linkValidator.token;
+  }
+  if (token) {
+    try {
+      localStorage.removeItem(getStorageKey(token));
+      localStorage.removeItem('zylp_test_completed_' + token);
+    } catch (e) {}
+    const newUrlParams = new URLSearchParams();
+    newUrlParams.set('token', token);
+    newUrlParams.set('restart', 'true');
+    if (urlParams.get('unlimited') === 'true' || (window.linkValidator && window.linkValidator.unlimited)) {
+      newUrlParams.set('unlimited', 'true');
+    }
+    window.location.href = window.location.pathname + '?' + newUrlParams.toString();
+    return;
+  }
+  window.__zylp_test_started = false;
+  window.__zylp_test_completed = false;
+  phase = "landing"; qi = 0; answers = {}; dimScores = null; topMatches = []; locking = false;
+  renderLanding();
+  window.scrollTo(0, 0);
+}
+renderLanding();
+</script>
+
+<script src="/static/js/link-validator.js"></script>
+<script>
+(function() {
+  let validatorInstance = null;
+
+  if (typeof PsyTestValidator !== 'undefined') {
+    PsyTestValidator.init('zylp', {
+      onSuccess: function(result, validator) {
+        console.log('SDK初始化成功，链接有效:', result);
+        validatorInstance = validator;
+        window.linkValidator = validator;
+        document.body.classList.remove('page-disabled');
+      },
+      onError: function(error) {
+        console.error('SDK初始化失败，链接无效:', error);
+        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+          validatorInstance = window.PsyTestValidator.getInstance();
+          window.linkValidator = validatorInstance;
+        }
+        document.body.classList.remove('page-disabled');
+      },
+      onLoad: function(data) {
+        console.log('SDK加载完成回调:', data);
+        if (!validatorInstance) {
+          if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+            validatorInstance = window.PsyTestValidator.getInstance();
+          }
+          if (validatorInstance) {
+            window.linkValidator = validatorInstance;
+          }
+        }
+
+        setTimeout(function() {
+          if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+            PsyTestValidator.addPromotionLink();
+          }
+        }, 100);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const isRestart = urlParams.get('restart') === 'true';
+
+        if (isRestart) {
+          if (validatorInstance && validatorInstance.clearLocalResult) {
+            validatorInstance.clearLocalResult();
+          }
+          const restartToken = validatorInstance && validatorInstance.token;
+          if (restartToken) {
+            try {
+              localStorage.removeItem('test_result_' + restartToken);
+              localStorage.removeItem('zylp_test_completed_' + restartToken);
+            } catch (e) {}
+          }
+          window.__zylp_test_completed = false;
+          window.__zylp_test_started = true; // 重新测试已扣过次数，后续 start 跳过
+          urlParams.delete('restart');
+          const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+          window.history.replaceState({}, '', newUrl);
+          return;
+        }
+
+        if (data.valid && data.has_local_result) {
+          if (typeof window.zylpRestoreResult === 'function') {
+            window.zylpRestoreResult();
+          }
+        }
+      }
+    });
+  } else {
+    console.error('验证SDK未加载');
+    document.body.classList.remove('page-disabled');
+  }
+})();
+</script>
+</body>
+</html>

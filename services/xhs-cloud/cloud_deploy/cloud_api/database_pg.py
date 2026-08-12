@@ -2405,3 +2405,63 @@ def ack_member_broadcast(user_id: int, broadcast_id: str) -> bool:
         return ok
     finally:
         conn.close()
+
+
+def register_user_account(username: str, password: str, email: str = "") -> dict:
+    username = (username or "").strip()
+    if len(username) < 3:
+        raise ValueError("用户名至少 3 个字符")
+    if len(password or "") < 6:
+        raise ValueError("密码至少 6 位")
+    conn = _conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as c:
+            c.execute("SET search_path TO xhs_monitor, public")
+            c.execute("SELECT id FROM users WHERE username=%s", (username,))
+            if c.fetchone():
+                raise ValueError("用户名已存在")
+            if email:
+                c.execute("SELECT id FROM users WHERE email=%s", (email.strip(),))
+                if c.fetchone():
+                    raise ValueError("邮箱已被使用")
+            c.execute(
+                """INSERT INTO users (username, password_hash, email, created_at)
+                   VALUES (%s, %s, NULLIF(%s, ''), NOW()) RETURNING id""",
+                (username, _hash_password(password), (email or "").strip()),
+            )
+            uid = int(c.fetchone()["id"])
+        conn.commit()
+    finally:
+        conn.close()
+    return get_member_profile(uid) or {"id": uid, "username": username, "email": email}
+
+
+def get_auth_code_row(code: str) -> dict | None:
+    conn = _conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as c:
+            c.execute("SET search_path TO xhs_monitor, public")
+            row = _fetch_auth_code(c, code)
+            return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def redeem_dist_quota_code(user_id: int, code: str, quota_amount: int) -> None:
+    conn = _conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as c:
+            c.execute("SET search_path TO xhs_monitor, public")
+            row = _validate_auth_code_row(_fetch_auth_code(c, code))
+            c.execute(
+                """INSERT INTO auth_code_activations (auth_code_id, user_id, activated_at)
+                   VALUES (%s, %s, NOW())""",
+                (row["id"], user_id),
+            )
+            c.execute(
+                "UPDATE auth_codes SET current_activations=current_activations+1, status='active' WHERE id=%s",
+                (row["id"],),
+            )
+        conn.commit()
+    finally:
+        conn.close()

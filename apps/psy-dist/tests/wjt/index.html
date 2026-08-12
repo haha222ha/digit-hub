@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>这b班上得值不值</title>
+
+  <!-- 引入安全工具库（必须在head中尽早加载） -->
+  <script src="/static/js/test-security.js"></script>
+
+  <style>
+    /* 页面禁用样式 */
+    body.page-disabled {
+      pointer-events: none;
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .error-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none; align-items: center; justify-content: center;
+      z-index: 10000; text-align: center; font-size: 16px;
+      color: #fff; padding: 20px; box-sizing: border-box;
+    }
+    .error-overlay p { margin: 0; line-height: 1.6; }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+      background: #f5f4f0;
+      color: #1a1a1a;
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow-x: hidden;
+    }
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px 0;
+    }
+    .logo { font-size: 13px; font-weight: 800; color: #999; letter-spacing: 0.1em; }
+    .nav-badge { font-size: 11px; color: #aaa; background: #e8e6e0; padding: 4px 10px; border-radius: 20px; }
+    .hero { padding: 36px 20px 28px; animation: fadeUp 0.5s ease both; }
+    .live-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #fff; border: 1px solid #e8e6e0; color: #666;
+      font-size: 12px; padding: 6px 12px; border-radius: 20px;
+      margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    h1 { font-size: 48px; font-weight: 900; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 16px; }
+    .h1-plain { color: #1a1a1a; }
+    .h1-grad {
+      background: linear-gradient(135deg, #7c3aed 0%, #db2777 60%, #f97316 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-sub { font-size: 15px; color: #777; line-height: 1.7; margin-bottom: 32px; }
+    .btn-start {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; background: #1a1a1a; color: #fff;
+      font-size: 17px; font-weight: 700; padding: 18px; border-radius: 16px;
+      border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      transition: all 0.2s; margin-bottom: 12px;
+    }
+    .btn-start:active { transform: scale(0.98); }
+    .cta-hint { text-align: center; font-size: 12px; color: #bbb; }
+    .dims-section { padding: 8px 20px 28px; animation: fadeUp 0.5s ease 0.1s both; }
+    .dims-label { font-size: 12px; font-weight: 700; color: #bbb; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; }
+    .dims-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .dim-card {
+      background: #fff; border-radius: 14px; padding: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      display: flex; align-items: center; gap: 10px; transition: transform 0.15s;
+    }
+    .dim-card:active { transform: scale(0.97); }
+    .dim-card .d-icon {
+      font-size: 22px; width: 40px; height: 40px; background: #f5f4f0;
+      border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .dim-card .d-text { font-size: 13px; font-weight: 600; color: #333; }
+    .dim-card .d-sub { font-size: 11px; color: #aaa; margin-top: 2px; }
+    .stats-strip {
+      margin: 0 20px 28px; background: #fff; border-radius: 16px; padding: 20px;
+      display: flex; box-shadow: 0 1px 4px rgba(0,0,0,0.05); animation: fadeUp 0.5s ease 0.2s both;
+    }
+    .stat-item { flex: 1; text-align: center; }
+    .stat-item + .stat-item { border-left: 1px solid #f0ede8; }
+    .stat-num { font-size: 24px; font-weight: 900; color: #1a1a1a; margin-bottom: 3px; }
+    .stat-num span {
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-key { font-size: 11px; color: #bbb; }
+    .preview-section { padding: 0 20px 40px; animation: fadeUp 0.5s ease 0.25s both; }
+    .preview-label { font-size: 12px; font-weight: 700; color: #bbb; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; }
+    .result-examples { display: flex; flex-direction: column; gap: 8px; }
+    .result-ex {
+      background: #fff; border-radius: 12px; padding: 12px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .ex-left { display: flex; align-items: center; gap: 10px; }
+    .ex-score { font-size: 20px; font-weight: 900; width: 44px; text-align: center; }
+    .ex-info .ex-name { font-size: 13px; font-weight: 700; color: #333; }
+    .ex-info .ex-desc { font-size: 11px; color: #aaa; margin-top: 1px; }
+    .ex-tag { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+    .tag-purple { background: #f3f0ff; color: #7c3aed; }
+    .tag-green  { background: #f0fdf4; color: #16a34a; }
+    .tag-orange { background: #fff7ed; color: #ea580c; }
+    .tag-red    { background: #fef2f2; color: #dc2626; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    /* 底部推广链接区域（SDK自动添加） */
+    .welcome-footer {
+      display: block !important;
+      visibility: visible !important;
+    }
+    .welcome-footer #link-validator-promotion-link {
+      width: 100%;
+      text-align: center;
+      padding: 16px 0;
+      margin-top: 8px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body class="page-disabled">
+  <nav>
+    <div class="logo">WORTHJOB</div>
+    <div class="nav-badge">V6.3.0</div>
+  </nav>
+  <div class="hero">
+    <div class="live-badge"><div class="live-dot"></div>已有 <span id="userCount">38,291</span> 人完成测试</div>
+    <h1><div class="h1-plain">这b班</div><div class="h1-grad">上得值不值？</div></h1>
+    <p class="hero-sub">输入你的真实情况，我们用一套<br>严肃的算法告诉你答案</p>
+    <button class="btn-start" id="btn-start">开始测算 →</button>
+    <div class="cta-hint">约 3 分钟完成 · 完全免费 · 数据不上传</div>
+  </div>
+  <div class="dims-section">
+    <div class="dims-label">测算维度</div>
+    <div class="dims-grid">
+      <div class="dim-card"><div class="d-icon">💰</div><div><div class="d-text">薪资回报</div><div class="d-sub">PPP标准化</div></div></div>
+      <div class="dim-card"><div class="d-icon">⏰</div><div><div class="d-text">时间成本</div><div class="d-sub">含通勤&摸鱼</div></div></div>
+      <div class="dim-card"><div class="d-icon">🏙️</div><div><div class="d-text">城市系数</div><div class="d-sub">7档城市</div></div></div>
+      <div class="dim-card"><div class="d-icon">🔥</div><div><div class="d-text">工作强度</div><div class="d-sub">5档强度</div></div></div>
+      <div class="dim-card"><div class="d-icon">👔</div><div><div class="d-text">职场环境</div><div class="d-sub">领导&同事</div></div></div>
+      <div class="dim-card"><div class="d-icon">🎓</div><div><div class="d-text">学历背景</div><div class="d-sub">7档学历</div></div></div>
+      <div class="dim-card"><div class="d-icon">💕</div><div><div class="d-text">异性环境</div><div class="d-sub">幸福感加成</div></div></div>
+      <div class="dim-card"><div class="d-icon">🚌</div><div><div class="d-text">通勤&班车</div><div class="d-sub">含居家办公</div></div></div>
+    </div>
+  </div>
+  <div class="stats-strip">
+    <div class="stat-item"><div class="stat-num"><span>12+</span></div><div class="stat-key">评估维度</div></div>
+    <div class="stat-item"><div class="stat-num"><span>7</span>档</div><div class="stat-key">评级结果</div></div>
+    <div class="stat-item"><div class="stat-num"><span>10+</span></div><div class="stat-key">国家/地区</div></div>
+  </div>
+  <div class="preview-section">
+    <div class="preview-label">可能的结果</div>
+    <div class="result-examples">
+      <div class="result-ex"><div class="ex-left"><div class="ex-score" style="color:#7c3aed">4.2</div><div class="ex-info"><div class="ex-name">人生巅峰</div><div class="ex-desc">恭喜，这样的机会可遇而不可求</div></div></div><div class="ex-tag tag-purple">✦ 顶级</div></div>
+      <div class="result-ex"><div class="ex-left"><div class="ex-score" style="color:#16a34a">2.8</div><div class="ex-info"><div class="ex-name">很爽</div><div class="ex-desc">几乎满足所有期望，每天充满干劲</div></div></div><div class="ex-tag tag-green">↑ 优秀</div></div>
+      <div class="result-ex"><div class="ex-left"><div class="ex-score" style="color:#ea580c">1.2</div><div class="ex-info"><div class="ex-name">一般</div><div class="ex-desc">平平淡淡，没惊喜也没失望</div></div></div><div class="ex-tag tag-orange">→ 及格</div></div>
+      <div class="result-ex"><div class="ex-left"><div class="ex-score" style="color:#dc2626">0.4</div><div class="ex-info"><div class="ex-name">惨绝人寰</div><div class="ex-desc">每一天都是艰难的挑战</div></div></div><div class="ex-tag tag-red">↓ 快跑</div></div>
+    </div>
+  </div>
+
+  <!-- 底部推广链接容器（SDK自动添加） -->
+  <footer class="welcome-footer"></footer>
+
+  <!-- 错误提示容器 -->
+  <div id="errorOverlay" class="error-overlay" style="display: none;">
+    <p id="errorMessage"></p>
+  </div>
+
+  <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+  <script>
+    (function() {
+      function enableSecurity() {
+        if (typeof TestSecurity !== 'undefined') {
+          TestSecurity.enable();
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', enableSecurity);
+      } else {
+        enableSecurity();
+      }
+    })();
+  </script>
+
+  <!-- 引入验证SDK（必需） -->
+  <script src="/static/js/link-validator.js"></script>
+  <script>
+    // 初始化验证SDK
+    let validatorInstance = null;
+
+    if (typeof PsyTestValidator !== 'undefined') {
+      // WJT使用非标准文件名（quiz.html），需明确传入testCode
+      PsyTestValidator.init('wjt', {
+        onSuccess: function(result, validator) {
+          console.log('SDK初始化成功，链接有效:', result);
+          validatorInstance = validator;
+          window.linkValidator = validator;
+          document.body.classList.remove('page-disabled');
+          const errorOverlay = document.getElementById('errorOverlay');
+          if (errorOverlay) errorOverlay.style.display = 'none';
+        },
+        onError: function(error) {
+          console.error('SDK初始化失败，链接无效:', error);
+          if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+            validatorInstance = window.PsyTestValidator.getInstance();
+          }
+          if (validatorInstance) {
+            window.linkValidator = validatorInstance;
+          }
+          document.body.classList.remove('page-disabled');
+          const errorOverlay = document.getElementById('errorOverlay');
+          if (errorOverlay) errorOverlay.style.display = 'none';
+        },
+        onLoad: function(data) {
+          console.log('SDK加载完成回调:', data);
+          if (!validatorInstance) {
+            if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+              validatorInstance = window.PsyTestValidator.getInstance();
+            }
+            if (!validatorInstance && window.linkValidator) {
+              validatorInstance = window.linkValidator;
+            }
+          }
+          if (validatorInstance) {
+            window.linkValidator = validatorInstance;
+          }
+
+          // 显示推广链接
+          setTimeout(() => {
+            if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+              PsyTestValidator.addPromotionLink();
+            }
+          }, 100);
+
+          // 如果链接有效且有本地测试结果，跳转到报告页
+          if (data.valid && data.has_local_result) {
+            let reportUrl = 'report.html';
+            const urlParams = new URLSearchParams();
+            const token = validatorInstance && validatorInstance.token;
+            const isUnlimited = validatorInstance && validatorInstance.unlimited;
+            if (isUnlimited && token) {
+              urlParams.set('unlimited', 'true');
+              urlParams.set('token', token);
+            } else if (token) {
+              urlParams.set('token', token);
+            }
+            const queryString = urlParams.toString();
+            if (queryString) reportUrl = `${reportUrl}?${queryString}`;
+            window.location.href = reportUrl;
+            return;
+          }
+        }
+      });
+    } else {
+      console.error('验证SDK未加载');
+      document.body.classList.remove('page-disabled');
+    }
+
+    // 更新用户计数
+    const baseCount = 38291;
+    const today = new Date();
+    const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+    const currentCount = baseCount + dayOfYear * 23 + Math.floor(Math.random() * 50);
+    document.getElementById('userCount').textContent = currentCount.toLocaleString();
+
+    // 开始测试按钮
+    document.getElementById('btn-start').addEventListener('click', async function() {
+      // 先验证链接有效性
+      let isValid = false;
+      if (window.linkValidator) {
+        if (typeof window.linkValidator.validateForUserAction === 'function') {
+          try {
+            isValid = await window.linkValidator.validateForUserAction();
+            if (!isValid || window.linkValidator.valid === false) {
+              console.warn('链接验证失败，无法开始测试');
+              return;
+            }
+          } catch (error) {
+            console.error('链接验证失败:', error);
+            return;
+          }
+        } else {
+          if (window.linkValidator.valid === false) {
+            return;
+          }
+          isValid = window.linkValidator.valid !== false;
+        }
+
+        if (!isValid || (window.linkValidator && window.linkValidator.valid === false)) {
+          return;
+        }
+
+        // 记录测试开始
+        try {
+          await window.linkValidator.startTest();
+        } catch (error) {
+          console.error('记录测试开始失败:', error);
+          return;
+        }
+      }
+
+      // 构建quiz.html URL并跳转
+      const urlParams = new URLSearchParams();
+      const token = window.linkValidator && window.linkValidator.token;
+      const isUnlimited = window.linkValidator && window.linkValidator.unlimited;
+      if (isUnlimited && token) {
+        urlParams.set('unlimited', 'true');
+        urlParams.set('token', token);
+      } else if (token) {
+        urlParams.set('token', token);
+      }
+      const queryString = urlParams.toString();
+      const quizUrl = queryString ? `quiz.html?${queryString}` : 'quiz.html';
+      window.location.href = quizUrl;
+    });
+  </script>
+</body>
+</html>

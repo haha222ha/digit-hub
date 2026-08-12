@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>16人格·心智阶位测评 - 专属报告</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/report.css">
+    <script src="../assets/js/libs/chart.js"></script>
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+</head>
+<body>
+    <!-- 步骤1：基础HTML框架 - report-container主容器 -->
+        <div class="report-container theme-analysts page-container">
+        <!-- 步骤2：hero-screen（英雄屏幕） -->
+        <section class="screen-card hero-screen">
+            <!-- 背景光效和粒子 -->
+            <div class="hero-bg">
+                <div class="aurora-layer aurora-1"></div>
+                <div class="aurora-layer aurora-2"></div>
+                <div class="aurora-layer aurora-3"></div>
+                <div class="particles">
+                    <!-- 20个粒子将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 主要内容 -->
+            <div class="hero-content">
+                <!-- 头部：品牌徽章和总分 -->
+                <div class="hero-header">
+                    <div class="brand-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                        </svg>
+                        <span>16人格·心智阶位</span>
+                    </div>
+                    <div class="score-badge">
+                        <span class="score-value" id="total-score">128</span>
+                        <span class="score-label">分</span>
+                    </div>
+                </div>
+
+                <!-- 身份信息块 -->
+                <div class="identity-block">
+                    <!-- 阶位环 -->
+                    <div class="stage-ring-wrap">
+                        <svg viewBox="0 0 160 160" class="stage-ring-svg">
+                            <defs>
+                                <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color: rgba(255, 255, 255, 0.7)"></stop>
+                                    <stop offset="50%" style="stop-color: rgba(255, 255, 255, 0.65)"></stop>
+                                    <stop offset="100%" style="stop-color: rgba(255, 255, 255, 0.55)"></stop>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="80" cy="80" r="70" class="ring-track"></circle>
+                            <circle cx="80" cy="80" r="70" class="ring-progress" id="stage-ring-progress"></circle>
+                        </svg>
+                        <div class="stage-inner">
+                            <span class="stage-name" id="stage-name">中阶</span>
+                        </div>
+                    </div>
+
+                    <!-- MBTI类型 -->
+                    <div class="type-block">
+                        <div class="type-code" id="mbti-type">INTJ</div>
+                        <div class="type-name" id="archetype">建筑师</div>
+                    </div>
+                </div>
+
+                <!-- 特质标签 -->
+                <div class="trait-tags" id="trait-tags">
+                    <span class="trait-tag">
+                        <span class="tag-dot"></span>
+                        建筑师
+                    </span>
+                    <span class="trait-tag">
+                        <span class="tag-dot"></span>
+                        中阶觉醒
+                    </span>
+                    <span class="trait-tag">
+                        <span class="tag-dot"></span>
+                        独特天赋
+                    </span>
+                </div>
+
+                <!-- 引用文本 -->
+                <div class="hero-quote">
+                    <svg class="quote-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6.5 10c-.223 0-.437.034-.65.065.069-.232.14-.468.254-.68.114-.308.292-.575.469-.844.148-.291.409-.488.601-.737.201-.242.475-.403.692-.604.213-.21.492-.315.714-.463.232-.133.434-.28.65-.35l.539-.222.474-.197-.485-1.938-.597.144c-.191.048-.424.104-.689.171-.271.05-.56.187-.882.312-.318.142-.686.238-1.028.467-.344.218-.741.4-1.091.692-.339.301-.748.562-1.05.945-.33.358-.656.734-.909 1.162-.293.408-.492.856-.702 1.299-.19.443-.343.896-.468 1.336-.237.882-.343 1.72-.384 2.437-.034.718-.014 1.315.028 1.747.015.204.043.402.063.539l.025.168.026-.006A4.5 4.5 0 1 0 6.5 10zm11 0c-.223 0-.437.034-.65.065.069-.232.14-.468.254-.68.114-.308.292-.575.469-.844.148-.291.409-.488.601-.737.201-.242.475-.403.692-.604.213-.21.492-.315.714-.463.232-.133.434-.28.65-.35l.539-.222.474-.197-.485-1.938-.597.144c-.191.048-.424.104-.689.171-.271.05-.56.187-.882.312-.317.143-.686.238-1.028.467-.344.218-.741.4-1.091.692-.339.301-.748.562-1.05.944-.33.358-.656.734-.909 1.162-.293.408-.492.856-.702 1.299-.19.443-.343.896-.468 1.336-.237.882-.343 1.72-.384 2.437-.034.718-.014 1.315.028 1.747.015.204.043.402.063.539l.025.168.026-.006A4.5 4.5 0 1 0 17.5 10z"></path>
+                    </svg>
+                    <p id="stage-quote">你拥有强大的逻辑思维和战略规划能力，能够在复杂的环境中保持清晰的判断力。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 步骤3：radar-screen（雷达图屏幕） -->
+        <section class="screen-card radar-screen">
+            <!-- 章节标题 -->
+            <div class="section-header">
+                <div class="header-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <h2>人生梦盘</h2>
+                    <p>能量图谱分析</p>
+                </div>
+            </div>
+
+            <!-- 雷达图容器 -->
+            <div class="radar-container">
+                <div class="radar-glow"></div>
+                <div class="radar-chart">
+                    <canvas id="radarChart" width="340" height="340"></canvas>
+                </div>
+            </div>
+
+            <!-- 维度列表 -->
+            <div class="dimensions-grid" id="dimensions-grid">
+                <!-- 维度卡片将通过JavaScript动态生成 -->
+            </div>
+        </section>
+
+        <!-- 步骤4：power-screen（核心力量屏幕） -->
+        <section class="screen-card power-screen">
+            <!-- 章节标题 -->
+            <div class="section-header">
+                <div class="header-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <h2>核心力量</h2>
+                    <p>你的天赋超能力</p>
+                </div>
+            </div>
+
+            <!-- 超能力卡片 -->
+            <div class="glass-card power-card">
+                <div class="card-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                    </svg>
+                    超能力
+                </div>
+                <div class="card-content" id="power-content">
+                    <p>你拥有<strong>强大的逻辑思维</strong>和<strong>战略规划能力</strong>，能够在复杂的环境中保持清晰的判断力。你的<strong>创新思维</strong>和<strong>执行力</strong>让你能够将想法转化为现实。</p>
+                </div>
+            </div>
+
+            <!-- 阶位特质卡片 -->
+            <div class="glass-card stage-card">
+                <div class="card-label alt">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+                    </svg>
+                    中阶特质
+                </div>
+                <div class="card-content" id="stage-content">
+                    <p>在中阶阶段，你已经掌握了<strong>系统化思考</strong>的能力，能够从宏观角度分析问题。你的<strong>决策能力</strong>和<strong>执行力</strong>显著提升，能够在压力下保持冷静。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 步骤5：mechanism-screen（能量解析屏幕） -->
+        <section class="screen-card mechanism-screen">
+            <!-- 章节标题 -->
+            <div class="section-header">
+                <div class="header-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <h2>能量解析</h2>
+                    <p>心智运作机制</p>
+                </div>
+            </div>
+
+            <!-- 能量显示 -->
+            <div class="energy-display">
+                <div class="energy-ring">
+                    <svg viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="52" class="energy-track"></circle>
+                        <circle cx="60" cy="60" r="52" class="energy-progress" id="energy-ring-progress"></circle>
+                    </svg>
+                    <div class="energy-center">
+                        <span class="energy-num" id="energy-num">80</span>
+                        <span class="energy-unit">%</span>
+                    </div>
+                </div>
+                <div class="energy-label">心智能量指数</div>
+            </div>
+
+            <!-- 机制说明卡片 -->
+            <div class="glass-card mechanism-card">
+                <div class="card-content" id="mechanism-content">
+                    <p>你的<strong>心智运作机制</strong>以<strong>逻辑分析</strong>为核心，通过<strong>系统性思考</strong>来处理信息。你擅长<strong>长期规划</strong>和<strong>战略决策</strong>，能够在复杂环境中保持清晰的判断力。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 步骤6：action-screen（进化路线屏幕） -->
+        <section class="screen-card action-screen">
+            <!-- 章节标题 -->
+            <div class="section-header">
+                <div class="header-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                        <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <h2>进化路线</h2>
+                    <p>专属成长策略</p>
+                </div>
+            </div>
+
+            <!-- 策略卡片 -->
+            <div class="glass-card advice-card">
+                <div class="card-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4M12 8h.01"></path>
+                    </svg>
+                    中阶策略
+                </div>
+                <div class="card-content" id="stage-advice-content">
+                    <p>在中阶阶段，你需要<strong>深化系统思维</strong>，提升<strong>执行效率</strong>。通过<strong>持续学习</strong>和<strong>实践反思</strong>，逐步完善你的<strong>决策框架</strong>和<strong>行动模式</strong>。</p>
+                </div>
+            </div>
+
+            <!-- 行动清单 -->
+            <div class="action-list" id="action-list">
+                <div class="action-item">
+                    <div class="action-number">
+                        <span>1</span>
+                    </div>
+                    <div class="action-content">建立系统化的知识体系，定期梳理和更新你的认知框架</div>
+                </div>
+                <div class="action-item">
+                    <div class="action-number">
+                        <span>2</span>
+                    </div>
+                    <div class="action-content">培养跨领域思维能力，将不同领域的知识进行整合应用</div>
+                </div>
+                <div class="action-item">
+                    <div class="action-number">
+                        <span>3</span>
+                    </div>
+                    <div class="action-content">提升执行力和行动力，将想法转化为具体的成果</div>
+                </div>
+                <div class="action-item">
+                    <div class="action-number">
+                        <span>4</span>
+                    </div>
+                    <div class="action-content">加强人际沟通和团队协作，学会在合作中发挥优势</div>
+                </div>
+                <div class="action-item">
+                    <div class="action-number">
+                        <span>5</span>
+                    </div>
+                    <div class="action-content">保持持续学习和自我反思，不断优化你的成长路径</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 步骤6：match-screen（命运匹配屏幕） -->
+        <section class="screen-card match-screen">
+            <!-- 章节标题 -->
+            <div class="section-header">
+                <div class="header-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <h2>命运匹配</h2>
+                    <p>灵魂伴侣与职业方向</p>
+                </div>
+            </div>
+
+            <!-- 匹配部分 -->
+            <div class="match-section">
+                <!-- 灵魂伴侣卡片 -->
+                <div class="glass-card partner-card">
+                    <div class="card-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        灵魂伴侣
+                    </div>
+                    <div class="partner-list" id="partner-list">
+                        <div class="partner-item">
+                            <span class="partner-type">ENFP</span>
+                            <div class="partner-bar">
+                                <div class="bar-fill" style="width: 92%"></div>
+                            </div>
+                            <span class="partner-score">92%</span>
+                        </div>
+                        <div class="partner-item">
+                            <span class="partner-type">ENTP</span>
+                            <div class="partner-bar">
+                                <div class="bar-fill" style="width: 88%"></div>
+                            </div>
+                            <span class="partner-score">88%</span>
+                        </div>
+                        <div class="partner-item">
+                            <span class="partner-type">ENFJ</span>
+                            <div class="partner-bar">
+                                <div class="bar-fill" style="width: 85%"></div>
+                            </div>
+                            <span class="partner-score">85%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 职业方向卡片 -->
+                <div class="glass-card career-card">
+                    <div class="card-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                        </svg>
+                        职业赛道
+                    </div>
+                    <div class="career-list" id="career-list">
+                        <span class="career-chip">系统架构师</span>
+                        <span class="career-chip">战略规划师</span>
+                        <span class="career-chip">产品经理</span>
+                        <span class="career-chip">数据分析师</span>
+                        <span class="career-chip">技术顾问</span>
+                        <span class="career-chip">研发总监</span>
+                        <span class="career-chip">创业导师</span>
+                        <span class="career-chip">投资分析师</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 步骤7：final-screen（最终屏幕） -->
+        <section class="screen-card final-screen">
+            <!-- 背景光效 -->
+            <div class="final-bg">
+                <div class="final-aurora final-aurora-1"></div>
+                <div class="final-aurora final-aurora-2"></div>
+                <div class="final-glow"></div>
+            </div>
+
+            <!-- 最终内容 -->
+            <div class="final-content">
+                <!-- 最终标题 -->
+                <div class="final-header">
+                    <div class="final-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="final-title">进化秘方</h2>
+                    <p class="final-subtitle">解锁你的终极形态</p>
+                </div>
+
+                <!-- 最终引用 -->
+                <div class="final-quote">
+                    <div class="quote-content" id="high-advice-content">
+                        <p>真正的成长不是改变自己，而是<strong>成为更好的自己</strong>。通过<strong>持续学习</strong>、<strong>深度思考</strong>和<strong>实践验证</strong>，你将逐步解锁自己的<strong>终极形态</strong>，在人生的道路上<strong>发光发热</strong>。</p>
+                    </div>
+                </div>
+
+                <!-- 最终页脚 -->
+                <div class="final-footer">
+                    <div class="divider"></div>
+                    <p class="brand">16人格·心智阶位测评</p>
+                    <p class="time" id="report-time">2024/01/15 14:30</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 底部按钮（用于SDK添加推广链接） -->
+        <div class="report-bottom-buttons report-footer">
+            <button class="btn-retest" id="btn-retest">重新测试</button>
+        </div>
+    </div>
+
+    <!-- 引入JavaScript文件 -->
+    <script src="../assets/js/libs/chart.js"></script>
+    <script src="../assets/js/common.js"></script>
+    <script src="../assets/js/error-handler.js"></script>
+    <script src="../assets/js/report.js"></script>
+    
+    <script>
+        /* ============================================
+           报告页初始化代码
+           ============================================ */
+
+        /**
+         * 粒子生成函数
+         */
+        function generateParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            if (!particlesContainer) return;
+            
+            // 清空现有粒子
+            particlesContainer.innerHTML = '';
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('span');
+                particle.className = 'particle';
+                const size = 2 + 4 * Math.random();
+                const left = 100 * Math.random();
+                const top = 100 * Math.random();
+                const delay = 5 * Math.random();
+                const duration = 3 + 4 * Math.random();
+                
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = left + '%';
+                particle.style.top = top + '%';
+                particle.style.animationDelay = delay + 's';
+                particle.style.animationDuration = duration + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        /**
+         * 初始化报告页
+         */
+        function initReportPage() {
+            console.log('开始初始化报告页...');
+
+            // 确保ReportDataCalculator已加载
+            if (typeof window.ReportDataCalculator === 'undefined') {
+                console.error('ReportDataCalculator未加载，等待脚本加载...');
+                setTimeout(initReportPage, 100);
+                return;
+            }
+
+            // 1. 检查是否有答案数据
+            const answers = window.ReportDataCalculator.loadAnswers();
+            if (!answers || answers.length === 0) {
+                console.warn('未找到答案数据，跳转到答题页');
+                Navigation.navigateTo('question.html');
+                return;
+            }
+
+            // 验证答案数据格式
+            const invalidAnswers = answers.filter(answer => {
+                return !answer || typeof answer.questionId !== 'number' || 
+                       typeof answer.value !== 'number' || 
+                       answer.value < 1 || answer.value > 5;
+            });
+            if (invalidAnswers.length > 0) {
+                console.error('发现无效答案数据，尝试处理...');
+                // 尝试处理损坏的数据
+                if (ErrorHandler && ErrorHandler.handleCorruptedData) {
+                    ErrorHandler.handleCorruptedData('answers', invalidAnswers);
+                }
+                Navigation.navigateTo('question.html');
+                return;
+            }
+
+            // 2. 检查是否有MBTI类型
+            const mbtiType = window.ReportDataCalculator.loadMBTIType();
+            if (!mbtiType) {
+                console.warn('未找到MBTI类型，跳转到选择页');
+                Navigation.navigateTo('select.html');
+                return;
+            }
+
+            // 验证MBTI类型是否有效
+            if (!MBTITypes[mbtiType]) {
+                console.error('无效的MBTI类型:', mbtiType, '，尝试处理...');
+                // 尝试处理损坏的数据
+                if (ErrorHandler && ErrorHandler.handleCorruptedData) {
+                    ErrorHandler.handleCorruptedData('type', mbtiType);
+                }
+                Navigation.navigateTo('select.html');
+                return;
+            }
+
+            // 3. 应用主题颜色
+            const reportContainer = document.querySelector('.report-container');
+            if (reportContainer) {
+                ThemeManager.setTheme(mbtiType, reportContainer);
+            } else {
+                ThemeManager.setTheme(mbtiType);
+            }
+
+            // 4. 生成报告数据
+            const reportData = window.ReportDataGenerator.generateReportData();
+            if (!reportData) {
+                console.error('报告数据生成失败');
+                return;
+            }
+
+            console.log('报告数据生成成功:', reportData);
+
+            // 5. 渲染hero-screen内容
+            window.ReportRenderer.renderHeroScreen(reportData);
+
+            // 6. 初始化雷达图
+            window.ReportRadarChart.initRadarChart(reportData);
+
+            // 7. 渲染power-screen内容
+            window.ReportRenderer.renderPowerContent(reportData);
+            window.ReportRenderer.renderStageContent(reportData);
+
+            // 8. 渲染mechanism-screen内容
+            window.ReportRenderer.renderEnergyRing(reportData);
+            window.ReportRenderer.renderMechanismContent(reportData);
+
+            // 9. 渲染action-screen内容
+            window.ReportRenderer.renderStageAdviceContent(reportData);
+            window.ReportRenderer.renderActionList(reportData);
+
+            // 10. 渲染match-screen内容
+            window.ReportRenderer.renderSoulmateMatches(reportData);
+            window.ReportRenderer.renderCareerDirections(reportData);
+
+            // 11. 渲染final-screen内容
+            window.ReportRenderer.renderFinalQuote(reportData);
+            window.ReportRenderer.renderReportTime(reportData);
+
+            // 12. 生成粒子效果
+            generateParticles();
+
+            // 13. 初始化底部按钮
+            if (window.ReportRenderer.initBottomButtons) {
+                window.ReportRenderer.initBottomButtons();
+            }
+
+            console.log('报告页初始化完成');
+        }
+
+        // 页面加载完成后初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initReportPage);
+        } else {
+            // DOM已经加载完成
+            initReportPage();
+        }
+    </script>
+    
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK（报告页）
+        let validatorInstance = null;
+        
+        // 检查URL中是否有token（如果有token，说明是从其他页面跳转过来的，应该允许继续）
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get('token');
+        const isUnlimitedFromUrl = urlParams.get('unlimited') === 'true';
+        const hasToken = tokenFromUrl !== null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            // 使用非标准文件名，需要明确传入testCode
+            // 如果URL中有token，使用suppressErrors选项抑制错误弹窗（因为这是中间页面，用户已经通过了首页验证）
+            PsyTestValidator.init('16rg', {
+                suppressErrors: hasToken, // 如果URL中有token，抑制错误弹窗
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    // 如果URL中有token，返回true阻止显示错误弹窗（双重保险）
+                    if (hasToken && tokenFromUrl) {
+                        console.log('URL中有token，手动创建validator实例（报告页）');
+                        // 手动创建一个包含token的validator对象
+                        validatorInstance = {
+                            token: tokenFromUrl,
+                            testCode: '16rg',
+                            unlimited: isUnlimitedFromUrl,
+                            valid: false
+                        };
+                        window.linkValidator = validatorInstance;
+                        console.log('手动创建validator实例成功（报告页）:', validatorInstance);
+                        
+                        // 即使SDK初始化失败，也要添加推广链接
+                        setTimeout(() => {
+                            if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                                PsyTestValidator.addPromotionLink();
+                                console.log('已手动调用addPromotionLink（onError）');
+                            }
+                        }, 200);
+                        
+                        // 返回true阻止显示错误弹窗
+                        return true;
+                    }
+                    // 如果没有token，允许显示错误弹窗
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    
+                    // 即使失败，也尝试添加推广链接
+                    setTimeout(() => {
+                        if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                            PsyTestValidator.addPromotionLink();
+                        }
+                    }, 200);
+                    
+                    // 返回false或undefined，允许显示错误弹窗
+                    return false;
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    // 确保获取到validator实例
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        // 如果仍然没有实例且URL中有token，手动创建
+                        if (!validatorInstance && hasToken && tokenFromUrl) {
+                            validatorInstance = {
+                                token: tokenFromUrl,
+                                testCode: '16rg',
+                                unlimited: isUnlimitedFromUrl,
+                                valid: false
+                            };
+                        }
+                        if (validatorInstance) {
+                            window.linkValidator = validatorInstance;
+                        }
+                    }
+                    
+                    // 调用addPromotionLink确保推广链接显示（延迟调用，确保DOM已渲染）
+                    setTimeout(() => {
+                        if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                            PsyTestValidator.addPromotionLink();
+                            console.log('已调用addPromotionLink（onLoad）');
+                        } else {
+                            console.warn('PsyTestValidator.addPromotionLink 方法不存在');
+                        }
+                    }, 300);
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+        }
+    </script>
+    
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        if (typeof TestSecurity !== 'undefined') {
+            TestSecurity.enable();
+        }
+    </script>
+</body>
+</html>
+

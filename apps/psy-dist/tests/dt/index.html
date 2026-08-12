@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="黑暗三角人格测试 - 专业的心理测评">
+    <meta name="keywords" content="黑暗三角,人格测试,D因子,心理测评">
+    <title>黑暗三角人格测试</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="consent-container" id="app">
+        <!-- 标题卡片 -->
+        <div class="title-card">
+            <div class="title-icon">🎭</div>
+            <h1 class="main-title">黑暗三角人格测试</h1>
+            <p class="subtitle">人格的完整认知包括光明与阴影两面。了解自己的黑暗人格特质，不是为了评判好坏，而是帮助你更全面地认识自我、理解行为动机、提升人际敏感度，从而在生活和工作中做出更明智的选择。</p>
+        </div>
+
+        <!-- D因子理论介绍 -->
+        <div class="theory-card">
+            <div class="theory-content">
+                <div class="theory-icon">📚</div>
+                <div class="theory-text">
+                    <h3 class="theory-title">关于D因子理论（Dark Factor）</h3>
+                    <p class="theory-description">
+                        由德国乌尔姆大学心理学家Moshagen等人于2018年提出。研究发现，所有黑暗人格特质（自恋、马基雅维利主义、精神病质等）背后都有一个共同核心——<strong>D因子（Dark Factor）</strong>，即最大化自身效用而忽视他人利益的倾向。本测评评估10个具体黑暗特质，并计算你的D因子总分。每个人都在一定程度上具有这些特质，这是正常的人格变异，适度水平甚至可能是优势。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测评信息卡片 -->
+        <div class="info-card">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-icon">🧬</span>
+                    <div class="info-content">
+                        <div class="info-label">测评模型</div>
+                        <div class="info-value">D因子理论 + 10个黑暗特质维度</div>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <span class="info-icon">📝</span>
+                    <div class="info-content">
+                        <div class="info-label">题目数量</div>
+                        <div class="info-value">70道题目，全面评估你的人格特质</div>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <span class="info-icon">⏱️</span>
+                    <div class="info-content">
+                        <div class="info-label">预计用时</div>
+                        <div class="info-value">15-20分钟，建议在安静环境下完成</div>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <span class="info-icon">📊</span>
+                    <div class="info-content">
+                        <div class="info-label">你将获得</div>
+                        <div class="info-value">详细的专业测评报告与个性化分析</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 分隔线 -->
+            <div class="info-divider"></div>
+            
+            <!-- 评估的10个维度 -->
+            <div class="dimensions-preview">
+                <div class="preview-title">📊 评估的10个黑暗人格维度</div>
+                <div class="dimensions-tags">
+                    <span class="dim-tag">💰 利己主义</span>
+                    <span class="dim-tag">🎯 马基雅维利主义</span>
+                    <span class="dim-tag">🛡️ 道德推脱</span>
+                    <span class="dim-tag">⭐ 自恋</span>
+                    <span class="dim-tag">👑 心理权力感</span>
+                    <span class="dim-tag">⚡ 精神病质</span>
+                    <span class="dim-tag">😈 施虐倾向</span>
+                    <span class="dim-tag">🔰 自我为中心</span>
+                    <span class="dim-tag">💢 恶毒倾向</span>
+                    <span class="dim-tag">💎 贪婪</span>
+                </div>
+            </div>
+            
+            <!-- 答题提示 -->
+            <div class="tips-preview">
+                <div class="tips-title">💡 答题提示</div>
+                <div class="tips-content">
+                    <p>❤️ 请根据真实想法作答，无需美化自己</p>
+                    <p>✨ 没有对错，诚实作答才能获得准确结果</p>
+                </div>
+            </div>
+            
+            <!-- 准备就绪提示框 -->
+            <div class="ready-notice">
+                点击「开始测试」，发现你的魔丸灵珠体质
+            </div>
+        </div>
+
+        <!-- 开始测试按钮（用于SDK添加推广链接） -->
+        <div class="consent-footer welcome-footer">
+            <button class="start-button" id="startButton">
+                开始测试
+            </button>
+            <p class="footer-note">
+                本测评基于Moshagen et al. (2018) 的D因子理论（Dark Factor of Personality），采用70题Likert量表，评估利己主义、马基雅维利主义、道德推脱、自恋、心理权力感、精神病质、施虐倾向、自我为中心、恶毒倾向、贪婪等10个黑暗人格维度，并计算D因子核心指标。
+            </p>
+        </div>
+
+        <!-- 引入验证SDK（必需） -->
+        <script src="/static/js/link-validator.js"></script>
+        <script>
+            // 初始化验证SDK
+            let validatorInstance = null;
+            
+            if (typeof PsyTestValidator !== 'undefined') {
+                PsyTestValidator.init(null, {
+                    onSuccess: function(result, validator) {
+                        console.log('SDK初始化成功，链接有效:', result);
+                        validatorInstance = validator;
+                        window.linkValidator = validator;
+                    },
+                    onError: function(error) {
+                        console.error('SDK初始化失败，链接无效:', error);
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (validatorInstance) {
+                            window.linkValidator = validatorInstance;
+                        }
+                    },
+                    onLoad: function(data) {
+                        console.log('SDK加载完成回调:', data);
+                        if (!validatorInstance) {
+                            if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                                validatorInstance = window.PsyTestValidator.getInstance();
+                            }
+                            if (validatorInstance) {
+                                window.linkValidator = validatorInstance;
+                            }
+                        }
+                        
+                        // 检查是否是重新测试（通过URL参数判断）
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const isRestart = urlParams.get('restart') === 'true';
+                        
+                        // 如果是重新测试，清除本地测试结果
+                        if (isRestart && validatorInstance && validatorInstance.clearLocalResult) {
+                            validatorInstance.clearLocalResult(); // DT是单视角测试
+                            // 清除restart参数（避免刷新后再次触发）
+                            urlParams.delete('restart');
+                            const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                            window.history.replaceState({}, '', newUrl);
+                            // 重新测试时，保持在首页，不跳转到报告页
+                            return;
+                        }
+                        
+                        // 如果链接有效且有测试结果，跳转到报告页（需要包含token参数）
+                        if (data.valid && data.has_local_result && !isRestart) {
+                            let reportUrl = 'report.html';
+                            const reportUrlParams = new URLSearchParams();
+                            const token = validatorInstance && validatorInstance.token;
+                            const isUnlimited = validatorInstance && validatorInstance.unlimited;
+                            if (isUnlimited && token) {
+                                reportUrlParams.set('unlimited', 'true');
+                                reportUrlParams.set('token', token);
+                            } else if (token) {
+                                reportUrlParams.set('token', token);
+                            }
+                            const queryString = reportUrlParams.toString();
+                            if (queryString) {
+                                reportUrl = `${reportUrl}?${queryString}`;
+                            }
+                            window.location.href = reportUrl;
+                            return;
+                        }
+                    }
+                });
+            }
+        </script>
+        
+        <!-- 导入数据模块 -->
+        <script type="module" src="js/consent.js"></script>
+    </div>
+</body>
+</html>
+

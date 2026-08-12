@@ -36,13 +36,16 @@ from cloud_deploy.cloud_api.auth import (
     verify_agent_access,
     verify_sync_key,
     optional_user,
+    register_dist_user,
+    user_from_token,
 )
 from cloud_deploy.cloud_api.admin_portal_auth import (
     create_admin_portal_token,
     verify_admin_credentials,
     verify_admin_portal,
 )
-from cloud_deploy.cloud_api.config import get_settings
+from cloud_deploy.cloud_api.dist_routes import compat_router as dist_compat_router
+from cloud_deploy.cloud_api.dist_routes import router as dist_router
 from cloud_deploy.cloud_api import payment_service as pay
 from cloud_deploy.cloud_api.request_ip import public_ipv4_for_pay, resolve_client_ip
 from cloud_deploy.cloud_api.email_service import smtp_configured
@@ -61,12 +64,20 @@ app = FastAPI(title="XHS 选品云服务", version="1.1.0")
 app.include_router(insight_router)
 app.include_router(advisor_member_router)
 app.include_router(advisor_internal_router)
+app.include_router(dist_router)
+app.include_router(dist_compat_router)
 
 
 @app.on_event("startup")
 def _startup():
     db.init_db()
     db.ensure_admin()
+    try:
+        from cloud_deploy.cloud_api.dist_db import init_dist_tables
+
+        init_dist_tables()
+    except Exception:
+        pass
     try:
         from cloud_deploy.scripts.insight_llm_runtime import apply_admin_insight_llm
 

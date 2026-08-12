@@ -1,0 +1,377 @@
+/**
+ * DarkTriad 报告页面样式
+ * 完全独立的样式，不依赖任何外部框架
+ * 魔丸灵珠主题
+ */
+
+/* 报告容器 */
+.report-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+  padding-bottom: 120px; /* 为底部按钮留出空间 */
+  min-height: 100vh;
+  background: #f5f5f5;
+  width: 100%;
+}
+
+/* 加载提示 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* D因子展示区 */
+.d-factor-display {
+  margin-bottom: 32px;
+}
+
+.d-factor-card {
+  border-radius: 24px;
+  padding: 48px 40px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  color: white;
+}
+
+.d-factor-badge {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 8px 20px;
+  display: inline-block;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.d-factor-value {
+  font-size: 120px;
+  font-weight: bold;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  margin-bottom: 16px;
+  font-family: Georgia, serif;
+}
+
+.d-factor-level {
+  font-size: 28px;
+  margin-bottom: 16px;
+  font-weight: 500;
+  opacity: 0.95;
+}
+
+.d-factor-percent {
+  font-size: 24px;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+
+.d-factor-date {
+  font-size: 14px;
+  opacity: 0.7;
+  margin-top: 24px;
+}
+
+/* 章节卡片 */
+.section-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-subtitle {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 24px 0;
+  font-weight: normal;
+}
+
+/* 魔丸灵珠判定提示 */
+.mo-ling-alert {
+  margin-bottom: 24px;
+}
+
+/* D因子科学解读 */
+.d-factor-science-content {
+  margin-top: 24px;
+}
+
+/* 雷达图容器 */
+.radar-chart-container {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px; /* 增加padding以容纳标签 */
+  min-height: 550px;
+  overflow: visible; /* 允许标签显示 */
+}
+
+#radarChart {
+  max-width: 700px;
+  width: 100%;
+  height: 550px;
+  display: block;
+  overflow: visible; /* 允许标签超出canvas边界 */
+}
+
+@media (max-width: 768px) {
+  .radar-chart-container {
+    padding: 15px; /* 增加padding以容纳标签 */
+    min-height: 450px;
+    overflow: visible;
+  }
+  
+  #radarChart {
+    max-width: 100%;
+    height: 450px;
+    overflow: visible;
+  }
+}
+
+/* 主导特质 */
+.dominant-traits-content {
+  margin-top: 24px;
+}
+
+/* 人际关系 */
+.interpersonal-content {
+  margin-top: 24px;
+}
+
+/* FAQ */
+.faq-content {
+  margin-top: 24px;
+}
+
+/* 重要提示 */
+.important-alert {
+  margin-bottom: 24px;
+}
+
+/* 底部说明 */
+.report-footer-info {
+  margin-bottom: 16px;
+}
+
+/* 管理员引导 */
+.admin-guide {
+  margin-bottom: 16px;
+}
+
+/* 十维度得分网格 */
+.dimensions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.dimension-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dimension-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* D因子解读 */
+.interpretation-content {
+  margin-top: 24px;
+}
+
+/* 魔丸灵珠体质 */
+.personality-type {
+  margin-top: 24px;
+}
+
+/* 各维度详细分析 */
+.dimension-details-list {
+  margin-top: 24px;
+}
+
+/* 发展建议 */
+.advice-content {
+  margin-top: 24px;
+}
+
+/* 底部操作区 */
+.report-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+  padding: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 推广链接区域样式（SDK自动添加到.report-footer中） */
+.report-footer #link-validator-promotion-link {
+  width: 100%;
+  text-align: center;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  box-sizing: border-box;
+}
+
+.footer-button {
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.footer-button:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.footer-button.primary {
+  background: #667eea;
+  border-color: #667eea;
+  color: #fff;
+}
+
+.footer-button.primary:hover {
+  background: #764ba2;
+  border-color: #764ba2;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .report-container {
+    padding: 16px;
+  }
+  
+  .d-factor-card {
+    padding: 32px 24px !important;
+  }
+  
+  .section-card {
+    padding: 20px 16px;
+  }
+  
+  .section-title {
+    font-size: 16px;
+  }
+  
+  .section-subtitle {
+    font-size: 12px;
+  }
+  
+  .dimensions-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .radar-chart-container {
+    padding: 0 10px !important;
+  }
+  
+  #radarChart {
+    max-width: 100% !important;
+    height: 400px !important;
+  }
+  
+  /* D因子科学解读的3列布局改为1列 */
+  .d-factor-science-content > div[style*="grid-template-columns: repeat(3"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* 主导特质的网格布局 */
+  .dominant-traits-content > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* 人际关系的网格布局 */
+  .interpersonal-content > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .report-footer {
+    flex-direction: column;
+  }
+  
+  .footer-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .d-factor-value {
+    font-size: 60px;
+  }
+  
+  .section-title {
+    font-size: 20px;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .report-container {
+    background: #fff;
+    padding: 0;
+  }
+  
+  .report-footer {
+    display: none;
+  }
+  
+  .loading-overlay {
+    display: none;
+  }
+}
+

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="RPI恋爱占有欲指数测试 - 问卷">
+    <meta name="keywords" content="RPI,恋爱占有欲,占有欲测试,恋爱测试,心理测评">
+    <title>RPI恋爱占有欲指数测试 - 问卷</title>
+    <link rel="stylesheet" href="css/intro.css">
+    <link rel="stylesheet" href="css/questionnaire.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none; /* 禁用所有鼠标事件 */
+            opacity: 0.6; /* 变灰 */
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="rpi-questionnaire-wrapper">
+        <!-- 加载提示 -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">加载中...</div>
+        </div>
+
+        <!-- 顶部导航 -->
+        <header class="rpi-header">
+            <div class="rpi-header-content">
+                <div class="rpi-logo" onclick="window.location.href='index.html'" style="cursor: pointer;">
+                    <div class="rpi-logo-icon">💕</div>
+                    <div class="rpi-logo-text">
+                        <div class="rpi-logo-title">RPI Calculator</div>
+                        <div class="rpi-logo-subtitle">恋爱占有欲指数计算器</div>
+                    </div>
+                </div>
+                <button class="rpi-back-button" id="backButton">
+                    <span class="anticon anticon-arrow-left">
+                        <svg viewBox="64 64 896 896" focusable="false" data-icon="arrow-left" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M872 474H286.9l352.8-328.1c12.4-11.5 13.6-30.3 2.1-42.8L614.8 86.3c-11.5-12.4-30.3-13.6-42.8-2.1L156.9 474.1c-12.5 11.6-12.5 30.3 0 41.9l415.1 415.1c12.5 11.6 31.3 11.6 42.8 0l24.4-24.4c11.5-12.5 10.3-31.3-2.1-42.8L286.9 550H872c17.7 0 32-14.3 32-32v-36c0-17.7-14.3-32-32-32z"></path></svg>
+                    </span>
+                    退出测评
+                </button>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <div class="rpi-questionnaire-container">
+            <!-- 进度条 -->
+            <div class="rpi-questionnaire-progress-section">
+                <div class="rpi-questionnaire-progress-info">
+                    <span class="rpi-questionnaire-progress-text">
+                        第 <span id="currentQuestionNum">1</span> / <span id="totalQuestions">40</span> 题
+                    </span>
+                    <span class="rpi-questionnaire-progress-answered">
+                        已完成 <span id="answeredCount">0</span> 题
+                    </span>
+                </div>
+                <div class="rpi-progress-bar">
+                    <div class="rpi-progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+            <!-- 维度介绍横幅 -->
+            <div class="rpi-questionnaire-dimension-banner" id="dimensionBanner">
+                <div class="rpi-questionnaire-dimension-header">
+                    <h2 class="rpi-questionnaire-dimension-title" id="dimensionTitle">控制欲望量表</h2>
+                    <div class="rpi-questionnaire-dimension-count" id="dimensionCount">第 1 / 10 题</div>
+                </div>
+                <p class="rpi-questionnaire-dimension-desc" id="dimensionDesc">评估您对伴侣行为的控制倾向</p>
+            </div>
+
+            <!-- 题目卡片 -->
+            <div class="rpi-questionnaire-card">
+                <div class="rpi-questionnaire-question">
+                    <span class="rpi-questionnaire-question-number" id="questionNumber">1.</span>
+                    <span class="rpi-questionnaire-question-text" id="questionText">加载中...</span>
+                </div>
+
+                <div class="rpi-questionnaire-options" id="questionOptions">
+                    <!-- 选项将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 导航按钮 -->
+            <div class="rpi-questionnaire-nav">
+                <button class="rpi-questionnaire-btn-prev" id="prevButton" disabled>
+                    <span class="anticon anticon-arrow-left">
+                        <svg viewBox="64 64 896 896" focusable="false" data-icon="arrow-left" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M872 474H286.9l352.8-328.1c12.4-11.5 13.6-30.3 2.1-42.8L614.8 86.3c-11.5-12.4-30.3-13.6-42.8-2.1L156.9 474.1c-12.5 11.6-12.5 30.3 0 41.9l415.1 415.1c12.5 11.6 31.3 11.6 42.8 0l24.4-24.4c11.5-12.5 10.3-31.3-2.1-42.8L286.9 550H872c17.7 0 32-14.3 32-32v-36c0-17.7-14.3-32-32-32z"></path></svg>
+                    </span>
+                    上一题
+                </button>
+                
+                <div class="rpi-questionnaire-nav-status" id="navStatus">
+                    <span class="rpi-questionnaire-unanswered-indicator" id="statusText">请选择答案</span>
+                    <span class="rpi-questionnaire-answered-indicator" id="answeredIndicator" style="display: none;">
+                        <span class="anticon anticon-check">
+                            <svg viewBox="64 64 896 896" focusable="false" data-icon="check" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M912 190h-69.9c-9.8 0-19.1 4.5-25.1 12.2L404.7 724.5 207 474a32 32 0 00-25.1-12.2H112c-6.7 0-10.4 7.7-6.3 12.9l273.9 347c12.8 16.2 37.4 16.2 50.3 0l488.4-618.9c4.1-5.1.4-12.8-6.3-12.8z"></path></svg>
+                        </span>
+                        已回答
+                    </span>
+                </div>
+                
+                <button class="rpi-questionnaire-btn-next" id="nextButton">
+                    下一题
+                    <span class="anticon anticon-arrow-right">
+                        <svg viewBox="64 64 896 896" focusable="false" data-icon="arrow-right" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M869 487.8L491.2 159.9c-2.9-2.5-6.6-3.9-10.5-3.9h-88.5c-7.4 0-10.8 9.2-5.2 14l350.2 304H152c-4.4 0-8 3.6-8 8v60c0 4.4 3.6 8 8 8h585.1L386.9 854c-5.6 4.9-2.2 14 5.2 14h91.5c1.9 0 3.8-.7 5.2-2L869 536.2a32.07 32.07 0 000-48.4z"></path></svg>
+                    </span>
+                </button>
+                
+                <button class="rpi-questionnaire-btn-submit" id="submitButton" style="display: none;">
+                    提交答案
+                </button>
+            </div>
+
+            <!-- 题目跳转网格 -->
+            <div class="rpi-questionnaire-jump-grid" id="jumpGrid">
+                <!-- 题目按钮将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 提交确认对话框 -->
+    <div class="rpi-modal-overlay" id="submitModal" style="display: none;">
+        <div class="rpi-modal-content">
+            <div class="rpi-modal-header">
+                <h3>确认提交</h3>
+                <button class="rpi-modal-close" id="submitModalClose">×</button>
+            </div>
+            <div class="rpi-modal-body">
+                <p>确定要提交答案吗？提交后将无法修改。</p>
+                <p id="submitProgress" style="margin-top: 10px; color: #666; font-size: 14px;"></p>
+            </div>
+            <div class="rpi-modal-footer">
+                <button class="rpi-modal-button rpi-modal-button-cancel" id="submitCancel">取消</button>
+                <button class="rpi-modal-button rpi-modal-button-confirm" id="submitConfirm">确认提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入数据模块 -->
+    <script type="module" src="js/questionnaire.js"></script>
+    
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        // 等待DOM加载完成后再启用安全功能
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+</body>
+</html>
+

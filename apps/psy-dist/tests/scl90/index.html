@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="SCL-90症状自评量表 - 专业的心理健康测试">
+    <meta name="keywords" content="SCL-90,心理健康测试,症状自评量表,心理测评">
+    <title>SCL-90 症状自评量表</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none; /* 禁用所有鼠标事件 */
+            opacity: 0.6; /* 变灰 */
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 欢迎页面 -->
+    <div class="welcome-container" id="welcomePage">
+        <!-- 标题卡片 -->
+        <div class="welcome-title-card">
+            <div class="welcome-title-icon">📊</div>
+            <h1 class="welcome-main-title">SCL-90 症状自评量表</h1>
+            <p class="welcome-subtitle">专业的心理健康评估工具</p>
+        </div>
+
+        <!-- 介绍卡片 -->
+        <div class="welcome-info-card">
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">🎯</span>
+                    <h3 class="welcome-section-title">评估目的</h3>
+                </div>
+                <p class="welcome-section-text">
+                    SCL-90症状自评量表是目前国内外广泛使用的心理健康测试量表之一，是心理咨询门诊中了解精神症状最有效的评估工具。本量表包含90道题目，从9个心理症状维度全面评估您的心理健康状况，帮助您更好地了解自己的心理状态。
+                </p>
+            </div>
+
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">📋</span>
+                    <h3 class="welcome-section-title">测试说明</h3>
+                </div>
+                <p class="welcome-section-text">
+                    本测试共包含90道题目，大约需要15-20分钟完成。请根据您最近一周内的实际情况，认真作答。测试过程中您可以随时保存进度，稍后继续完成。
+                </p>
+            </div>
+
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">⚕️</span>
+                    <h3 class="welcome-section-title">重要提示</h3>
+                </div>
+                <p class="welcome-section-text">
+                    本评估结果仅供参考和心理健康自我了解使用，不能替代专业医学诊断。如有严重心理困扰或精神疾病症状，请及时咨询专业心理医生或精神科医生。
+                </p>
+            </div>
+
+            <div class="welcome-notice">
+                开始测试即表示您已阅读并同意上述所有说明。
+            </div>
+        </div>
+
+        <!-- 开始测试按钮 -->
+        <div class="welcome-footer">
+            <button class="welcome-start-button" id="welcomeStartButton">
+                开始测试
+            </button>
+            <p class="welcome-footer-note">
+                本工具基于SCL-90症状自评量表开发，数据来源经过验证的心理测量工具。
+            </p>
+        </div>
+    </div>
+
+    <!-- 问卷页面 -->
+    <div class="questionnaire-container" id="questionnairePage" style="display: none;">
+        <!-- 问卷信息卡片 -->
+        <div class="info-card" id="infoCard">
+            <h1 class="test-title">SCL-90 症状自评量表</h1>
+            <p class="test-description">SCL-90症状自评量表是目前国内外广泛使用的心理健康测试量表之一，是心理咨询门诊中了解精神症状最有效的评估工具。</p>
+            
+            <!-- 进度条区域 -->
+            <div class="progress-container">
+                <div class="progress-text" id="progressText">
+                    第 <span id="currentNum">1</span> 题 / 共 <span id="totalNum">90</span> 题 
+                    （已完成 <span id="answeredCount">0</span> 题）
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 题目卡片 -->
+        <div class="question-card" id="questionCard">
+            <div class="question-title" id="questionTitle">
+                <span class="question-number" id="questionNumber">1</span>.
+                <span class="question-text" id="questionText">加载中...</span>
+            </div>
+            
+            <div class="question-options" id="questionOptions">
+                <!-- 选项将通过JavaScript动态生成 -->
+            </div>
+
+            <!-- 导航按钮 -->
+            <div class="question-nav">
+                <button class="nav-button prev-button" id="prevButton" disabled>
+                    <span>←</span> 上一题
+                </button>
+                
+                <div class="nav-status" id="navStatus">
+                    <span id="statusText">请选择答案</span>
+                    <span class="check-icon" id="checkIcon" style="display: none;">✓</span>
+                </div>
+                
+                <button class="nav-button next-button" id="nextButton">
+                    下一题 <span>→</span>
+                </button>
+                
+                <button class="nav-button submit-button" id="submitButton" style="display: none;">
+                    提交答案
+                </button>
+            </div>
+        </div>
+
+        <!-- 温馨提示 -->
+        <div class="alert-info" id="alertInfo">
+            <div class="alert-icon">💡</div>
+            <div class="alert-content">
+                <strong>答题提示：</strong>选择答案后将自动跳转到下一题，您也可以使用导航按钮或题目编号进行跳转
+                <div id="progressAlert" style="margin-top: 8px;">
+                    📝 <strong>进度提醒：</strong>请完成所有 90 题后再提交答案
+                </div>
+            </div>
+        </div>
+
+        <!-- 题目导航 -->
+        <div class="navigation-card" id="navigationCard">
+            <div class="navigation-header">
+                <span>📋 题目导航 (<span id="navAnsweredCount">0</span>/<span id="navTotalCount">90</span>)</span>
+                <button class="nav-toggle" id="navToggle">▼</button>
+            </div>
+            <div class="navigation-grid" id="navigationGrid">
+                <!-- 题目导航按钮将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载提示 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">加载中...</div>
+    </div>
+
+    <!-- 恢复进度确认对话框 -->
+    <div class="modal-overlay" id="restoreModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>发现未完成的答题</h3>
+            </div>
+            <div class="modal-body">
+                <p>检测到您之前有未完成的答题记录：</p>
+                <ul>
+                    <li>保存时间：<span id="restoreTime"></span></li>
+                    <li>已完成：<span id="restoreProgress"></span> 题</li>
+                    <li>当前进度：第 <span id="restoreCurrent"></span> 题</li>
+                </ul>
+                <p>是否继续之前的答题？</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button cancel-button" id="restoreCancel">重新开始</button>
+                <button class="modal-button confirm-button" id="restoreConfirm">继续答题</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提交确认对话框 -->
+    <div class="modal-overlay" id="submitModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>确认提交</h3>
+            </div>
+            <div class="modal-body">
+                <p>确定要提交答案吗？提交后将无法修改。</p>
+                <p id="submitProgress" style="margin-top: 10px; color: #666; font-size: 14px;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button cancel-button" id="submitCancel">取消</button>
+                <button class="modal-button confirm-button" id="submitConfirm">确认提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 错误提示容器 -->
+    <div id="errorOverlay" class="error-overlay" style="display: none;">
+        <p id="errorMessage"></p>
+    </div>
+
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        // 等待DOM加载完成后再启用安全功能
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+    
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init(null, {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    // 页面启用
+                    document.body.classList.remove('page-disabled');
+                    document.getElementById('errorOverlay').style.display = 'none';
+                    // 启用"开始测试"按钮
+                    const startButton = document.getElementById('welcomeStartButton');
+                    if (startButton) {
+                        startButton.disabled = false;
+                        startButton.style.opacity = '1';
+                        startButton.style.cursor = 'pointer';
+                    }
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    // 尝试获取实例，即使无效
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    // 确保 window.linkValidator 被设置（即使验证失败）
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    // 页面不禁用，允许用户看到页面内容
+                    // 不显示遮罩，只在用户点击"开始测试"时显示弹窗
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none'; // 不显示遮罩
+                    }
+                    // "开始测试"按钮保持可用，点击时会显示弹窗
+                    const startButton = document.getElementById('welcomeStartButton');
+                    if (startButton) {
+                        startButton.disabled = false;
+                        startButton.style.opacity = '1';
+                        startButton.style.cursor = 'pointer';
+                    }
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    // 确保获取到validator实例
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        // 如果还是获取不到，尝试从window.linkValidator获取
+                        if (!validatorInstance && window.linkValidator) {
+                            validatorInstance = window.linkValidator;
+                        }
+                    }
+                    // 确保 window.linkValidator 被设置
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    
+                    // 检查是否是重新测试（通过URL参数判断）
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const isRestart = urlParams.get('restart') === 'true';
+                    
+                    console.log('检查重新测试参数:', {
+                        url: window.location.href,
+                        search: window.location.search,
+                        isRestart: isRestart,
+                        hasLocalResult: data.has_local_result,
+                        valid: data.valid
+                    });
+                    
+                    // 如果链接有效且有测试结果，且不是重新测试，才跳转到报告页
+                    if (data.valid && data.has_local_result && !isRestart) {
+                        console.log('检测到已有测试结果，跳转到报告页');
+                        
+                        // 检查是否是无限测试模式，如果是则带上unlimited和token参数
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const isUnlimited = urlParams.get('unlimited') === 'true';
+                        const token = urlParams.get('token') || (validatorInstance && validatorInstance.token);
+                        
+                        let reportUrl = 'report.html';
+                        if (isUnlimited && token) {
+                            // 无限测试模式：带上unlimited和token参数
+                            reportUrl = `report.html?unlimited=true&token=${token}`;
+                        }
+                        
+                        window.location.href = reportUrl;
+                        return;
+                    }
+                    
+                    // 如果是重新测试，清除 restart 参数（避免刷新后再次触发）
+                    if (isRestart) {
+                        console.log('检测到重新测试参数，允许重新测试，清除本地结果');
+                        // 清除本地测试结果
+                        if (validatorInstance && validatorInstance.clearLocalResult) {
+                            const perspective = urlParams.get('perspective') || undefined;
+                            validatorInstance.clearLocalResult(perspective);
+                        }
+                        urlParams.delete('restart');
+                        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                        window.history.replaceState({}, '', newUrl);
+                    }
+                    
+                    // 如果SDK加载完成但验证失败，不显示遮罩，允许用户看到页面
+                    // 只在用户点击"开始测试"时显示弹窗
+                    if (!data.valid) {
+                        // 页面不禁用，允许用户看到页面内容
+                        document.body.classList.remove('page-disabled');
+                        const errorOverlay = document.getElementById('errorOverlay');
+                        if (errorOverlay) {
+                            errorOverlay.style.display = 'none'; // 不显示遮罩
+                        }
+                        // "开始测试"按钮保持可用，点击时会显示弹窗
+                        const startButton = document.getElementById('welcomeStartButton');
+                        if (startButton) {
+                            startButton.disabled = false;
+                            startButton.style.opacity = '1';
+                            startButton.style.cursor = 'pointer';
+                        }
+                    } else {
+                        // 链接有效，启用"开始测试"按钮
+                        const startButton = document.getElementById('welcomeStartButton');
+                        if (startButton) {
+                            startButton.disabled = false;
+                            startButton.style.opacity = '1';
+                            startButton.style.cursor = 'pointer';
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+            document.body.classList.add('page-disabled');
+            const errorOverlay = document.getElementById('errorOverlay');
+            const errorMessageEl = document.getElementById('errorMessage');
+            if (errorMessageEl) {
+                errorMessageEl.textContent = '验证SDK未加载，请检查文件路径';
+            }
+            if (errorOverlay) {
+                errorOverlay.style.display = 'flex';
+            }
+            // 禁用"开始测试"按钮
+            const startButton = document.getElementById('welcomeStartButton');
+            if (startButton) {
+                startButton.disabled = true;
+                startButton.style.opacity = '0.5';
+                startButton.style.cursor = 'not-allowed';
+            }
+        }
+    </script>
+    
+    <!-- 导入数据模块 -->
+    <script type="module" src="js/questionnaire.js"></script>
+    <script type="module" src="js/welcome.js"></script>
+</body>
+</html>
+

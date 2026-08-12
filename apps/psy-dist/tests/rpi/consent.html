@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="RPI恋爱占有欲指数测试 - 知情同意书">
+    <meta name="keywords" content="RPI,恋爱占有欲,占有欲测试,恋爱测试,心理测评">
+    <title>RPI恋爱占有欲指数测试 - 知情同意书</title>
+    <link rel="stylesheet" href="css/intro.css">
+    <link rel="stylesheet" href="css/consent.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none; /* 禁用所有鼠标事件 */
+            opacity: 0.6; /* 变灰 */
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="rpi-consent-page-wrapper">
+        <!-- 加载提示 -->
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">加载中...</div>
+        </div>
+
+        <!-- 顶部导航 -->
+        <header class="rpi-header">
+            <div class="rpi-header-content">
+                <div style="display: flex; gap: 24px; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;" onclick="window.location.href='index.html'">
+                        <span class="anticon anticon-home">
+                            <svg viewBox="64 64 896 896" focusable="false" data-icon="home" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="font-size: 18px; color: var(--rpi-muted-foreground);"><path d="M946.5 505L534.6 93.4a31.93 31.93 0 00-45.2 0L77.5 505c-12 12-18.8 28.3-18.8 45.3 0 35.3 28.7 64 64 64h43.4V908c0 17.7 14.3 32 32 32H448V716h112v224h265.9c17.7 0 32-14.3 32-32V614.3H896c35.3 0 64-28.7 64-64 0-17-6.7-33.3-18.5-45.3z"></path></svg>
+                        </span>
+                        <span style="font-size: 14px; color: var(--rpi-muted-foreground);">首页</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;" id="testTypeIndicator">
+                        <span style="font-size: 20px;">💖</span>
+                        <span style="font-size: 15px; font-weight: 600; color: var(--rpi-primary);" id="testTypeText">给自己测</span>
+                    </div>
+                </div>
+                <button class="rpi-back-button" onclick="window.location.href='index.html'">
+                    <span class="anticon anticon-arrow-left">
+                        <svg viewBox="64 64 896 896" focusable="false" data-icon="arrow-left" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M872 474H286.9l352.8-328.1c12.4-11.5 13.6-30.3 2.1-42.8L614.8 86.3c-11.5-12.4-30.3-13.6-42.8-2.1L156.9 474.1c-12.5 11.6-12.5 30.3 0 41.9l415.1 415.1c12.5 11.6 31.3 11.6 42.8 0l24.4-24.4c11.5-12.5 10.3-31.3-2.1-42.8L286.9 550H872c17.7 0 32-14.3 32-32v-36c0-17.7-14.3-32-32-32z"></path></svg>
+                    </span>
+                    返回
+                </button>
+            </div>
+        </header>
+
+        <!-- 主内容 -->
+        <div class="rpi-consent-page">
+            <!-- Hero -->
+            <div class="rpi-consent-page-hero">
+                <h1>恋爱占有欲指数评估</h1>
+                <p>基于心理学研究的专业测评工具</p>
+            </div>
+
+            <!-- 主卡片 -->
+            <div class="rpi-consent-main-card">
+                <div class="rpi-consent-card-header">
+                    <span class="rpi-consent-card-icon">📋</span>
+                    <h2>知情同意书</h2>
+                </div>
+
+                <!-- 评估目的 -->
+                <div class="rpi-consent-item">
+                    <div class="rpi-consent-item-icon" style="background: rgba(239, 68, 68, 0.1);">
+                        <span>🎯</span>
+                    </div>
+                    <div class="rpi-consent-item-content">
+                        <h3>评估目的</h3>
+                        <p>
+                            本评估旨在帮助您了解自己或恋人在恋爱关系中的占有欲征，包括控制倾向、嫉妒强度、情感依赖和关系不安全感等方面。这是一个基于心理学研究的自我探索工具，可以促进您对亲密关系动态的认知和理解，帮助建立更健康和谐的恋爱关系。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 隐私保护 -->
+                <div class="rpi-consent-item">
+                    <div class="rpi-consent-item-icon" style="background: rgba(233, 32, 99, 0.1);">
+                        <span>🔒</span>
+                    </div>
+                    <div class="rpi-consent-item-content">
+                        <h3>隐私保护</h3>
+                        <p>
+                            您的所有答案将<strong>完全匿名</strong>，仅在您的设备本地存储，
+                            <strong>不会上传到任何服务器</strong>。我们不收集任何可识别个人身份的信息。您可以随时删除本地保存的数据，也可以选择导出数据用于个人记录。您的隐私和数据安全是我们的首要关注。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 自愿参与 -->
+                <div class="rpi-consent-item">
+                    <div class="rpi-consent-item-icon" style="background: rgba(34, 197, 94, 0.1);">
+                        <span>👥</span>
+                    </div>
+                    <div class="rpi-consent-item-content">
+                        <h3>自愿参与</h3>
+                        <p>
+                            参与本评估完全基于自愿原则。您可以在任何时候选择退出评估，无需说明理由。对于任何让您感到不适的问题，您都可以选择跳过。评估过程中如果您感到不适，请立即停止并寻求专业心理健康服务的帮助。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 非诊断性质 -->
+                <div class="rpi-consent-item">
+                    <div class="rpi-consent-item-icon" style="background: rgba(255, 193, 7, 0.1);">
+                        <span>⚠️</span>
+                    </div>
+                    <div class="rpi-consent-item-content">
+                        <h3>非诊断性质</h3>
+                        <p>
+                            本评估结果仅供自我了解和关系反思使用，不能替代专业的心理咨询或情感咨询。如果您在恋爱关系中遇到严重困扰（如家庭暴力、严重控制等），建议立即寻求专业帮助。评估结果不应被用于指责伴侣或做出重大关系决策。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 重要提醒 -->
+                <div class="rpi-consent-alert">
+                    <span class="rpi-consent-alert-icon">⚠️</span>
+                    <div class="rpi-consent-alert-content">
+                        <strong>重要提醒：</strong>
+                        如果您目前正在经历严重的关系暴力、极端控制、或有自伤/伤人倾向，请立即寻求专业帮助（拨打紧急热线或就诊）。本评估不适合处于危机关系或心理危机状态的人群。
+                    </div>
+                </div>
+
+                <!-- 总的同意确认 -->
+                <div class="rpi-consent-final-check">
+                    <div class="rpi-consent-radio-large" id="consentRadio" onclick="toggleConsent()">
+                        <span class="rpi-consent-radio-circle">
+                            <span class="rpi-consent-radio-dot" id="consentDot" style="display: none;"></span>
+                        </span>
+                        <span class="rpi-consent-radio-text">
+                            我已仔细阅读并理解上述所有内容，自愿参与本次评估，同意将答案用于生成个人报告，并理解本测评的非诊断性质
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部按钮 -->
+            <div class="rpi-consent-page-actions">
+                <button class="rpi-consent-page-btn-cancel" onclick="handleDisagree()">
+                    我不同意
+                </button>
+                <button class="rpi-consent-page-btn-submit" id="agreeButton" onclick="handleAgree()" disabled>
+                    我同意并开始评估
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入数据模块 -->
+    <script type="module" src="js/consent.js"></script>
+    
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        // 等待DOM加载完成后再启用安全功能
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+</body>
+</html>
+

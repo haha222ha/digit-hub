@@ -1,0 +1,974 @@
+/* 基础样式重置 */
+@charset "UTF-8";
+
+/* 推广链接区域样式（SDK自动添加到.welcome-footer和.report-footer中） */
+.welcome-footer #link-validator-promotion-link,
+.report-footer #link-validator-promotion-link {
+    width: 100%;
+    text-align: center;
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    box-sizing: border-box;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* 确保welcome-footer和report-footer可见 */
+.welcome-footer,
+.report-footer {
+    display: block !important;
+    visibility: visible !important;
+}
+
+body {
+    font-family: 'Microsoft YaHei', Arial, sans-serif;
+    background: #f5f6fa;
+    margin: 0;
+    padding: 0;
+}
+
+/* ========== 欢迎页面样式 ========== */
+.welcome-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    min-height: 100vh;
+    background: #f5f6fa;
+    display: flex;
+    flex-direction: column;
+}
+
+.welcome-title-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px 24px;
+    margin-bottom: 24px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border-left: 6px solid #188038;
+}
+
+.welcome-title-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.welcome-main-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #188038;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+.welcome-subtitle {
+    font-size: 15px;
+    color: #7b8ba3;
+    margin: 0;
+}
+
+.welcome-info-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 32px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.welcome-section {
+    margin-bottom: 24px;
+}
+
+.welcome-section:last-of-type {
+    margin-bottom: 0;
+}
+
+.welcome-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.welcome-section-icon {
+    font-size: 18px;
+}
+
+.welcome-section-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #4e5d78;
+    margin: 0;
+}
+
+.welcome-section-text {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #4e5d78;
+    margin: 0;
+    padding-left: 26px;
+}
+
+.welcome-notice {
+    padding: 20px;
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    border-radius: 12px;
+    border: 2px solid #188038;
+    text-align: center;
+    font-size: 15px;
+    line-height: 1.8;
+    color: #2e7d32;
+    font-weight: 600;
+    margin-top: 24px;
+}
+
+.welcome-footer {
+    text-align: center;
+}
+
+.welcome-start-button {
+    padding: 12px 40px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 24px;
+    border: none;
+    background: #188038;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(24, 128, 56, 0.3);
+    margin-bottom: 16px;
+}
+
+.welcome-start-button:hover {
+    background: #156f2f;
+    box-shadow: 0 6px 16px rgba(24, 128, 56, 0.4);
+    transform: translateY(-2px);
+}
+
+.welcome-start-button:active {
+    transform: translateY(0);
+}
+
+.welcome-footer-note {
+    font-size: 13px;
+    color: #7b8ba3;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ========== 测试页面样式 ========== */
+.test-header {
+    width: 100vw;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    padding: 0 0 8px 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    text-align: center;
+}
+
+.test-title {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #2d3648;
+    letter-spacing: 1px;
+    line-height: 48px;
+}
+
+.test-container {
+    max-width: 480px;
+    margin: 32px auto 0 auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    padding: 32px 18px 24px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 6px;
+    background: #f0f2f8;
+    border-radius: 4px;
+    margin-bottom: 18px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: #188038;
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.3s;
+}
+
+.question-info {
+    color: #4e5d78;
+    font-size: 1em;
+    margin-bottom: 8px;
+}
+
+.question_view {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#collection {
+    display: block;
+    position: relative;
+}
+
+#collection > li {
+    display: none;
+    padding: 0;
+    list-style: none;
+}
+
+.questionWrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.question {
+    font-weight: 700;
+    font-size: 1.15em;
+    margin-bottom: 18px;
+    color: #222;
+}
+
+.answer {
+    background: #f8fafc;
+    border: 2px solid #e3e8f0;
+    border-radius: 10px;
+    padding: 16px 12px;
+    font-size: 1.08em;
+    color: #2d3648;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: border 0.2s, background 0.2s;
+    margin-bottom: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+.answer:hover {
+    border: 2px solid #188038;
+    background: #f1f8f4;
+}
+
+.answer.ans-on {
+    border: 2px solid #188038;
+    background: #f1f8f4;
+    color: #156f2f;
+}
+
+.test-btns {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: 24px;
+}
+
+.nav-btn {
+    flex: 1;
+    padding: 10px 0;
+    border-radius: 6px;
+    border: none;
+    font-size: 1em;
+    background: #f0f2f8;
+    color: #7b8ba3;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.nav-btn:disabled {
+    background: #f5f6fa;
+    color: #c0c6d4;
+    cursor: not-allowed;
+}
+
+.nav-btn.main-btn {
+    background: #188038;
+    color: #fff;
+}
+
+.nav-btn.main-btn:disabled {
+    background: #a5d6a7;
+    color: #fff;
+}
+
+.nav-btn.inactive-button {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ========== 结果页面样式 ========== */
+.main_view {
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f5f6fa;
+}
+
+#result_details {
+    background: #fff;
+    border-radius: 16px;
+    padding: 32px 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    display: none;
+}
+
+#snapshot-container {
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+#qe-rslt-title {
+    color: #4e5d78;
+    font-weight: 700;
+    font-size: 1.1em;
+    margin-bottom: 1em;
+    text-align: center;
+}
+
+#qe-rslt-title b {
+    color: #188038;
+}
+
+#barchart {
+    min-height: 500px;
+    width: 100%;
+    margin: 20px 0;
+    padding: 20px 0;
+    overflow: visible;
+}
+
+/* 提示框样式 */
+.desc-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    margin-bottom: 10px;
+    z-index: 1000;
+    max-width: 250px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.desc-item:hover .desc-tooltip {
+    opacity: 1;
+}
+
+.bar-chart-row {
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin-bottom: 40px;
+}
+
+.bar-chart-row:last-child {
+    margin-bottom: 0;
+}
+
+.bar-chart {
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.bar-chart .bar {
+    display: flex;
+    gap: 10px;
+    justify-content: space-around;
+    flex: 3;
+    align-items: flex-end;
+    background-image: linear-gradient(#d8d8d8 1px, transparent 1px), 
+                      linear-gradient(#d8d8d8 1px, transparent 1px), 
+                      linear-gradient(#d8d8d8 1px, transparent 1px);
+    background-size: 100% 1px, 100% 1px, 100% 1px;
+    background-position: 0 66.66%, 0 33.33%, 0 0;
+    background-repeat: no-repeat;
+    border-bottom: 2px solid #000;
+    padding: 0;
+    height: 67px;
+    min-height: 67px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.bar-chart .bar-item {
+    flex: 1;
+    flex-shrink: 1;
+    position: relative;
+    height: 0;
+    min-height: 0;
+    transition: height 0.6s ease-out;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 0;
+    margin: 0;
+    padding: 0;
+    vertical-align: bottom;
+}
+
+/* 确保JavaScript设置的高度能够覆盖初始值 */
+.bar-chart .bar-item[style*="height"] {
+    height: var(--bar-item-height, 0) !important;
+    min-height: var(--bar-item-height, 0) !important;
+}
+
+.bar-chart .bar-item-inner {
+    width: 50px;
+    height: 100%;
+    position: relative;
+    border-radius: 4px 4px 0 0;
+    min-height: 2px;
+    margin: 0;
+    padding: 0;
+    align-self: flex-end;
+}
+
+.bar-chart .bar-item-text {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    text-align: center;
+    padding: 2px 4px;
+    color: #000;
+    font-size: 0.8em;
+    z-index: 10;
+}
+
+.bar-chart .bar-item-text.in {
+    bottom: auto;
+    top: 0;
+    color: #fff;
+}
+
+.bar-chart .desc {
+    display: flex;
+    gap: 10px;
+    justify-content: space-around;
+    flex: 1;
+    align-items: flex-start;
+    margin-top: 10px;
+}
+
+.bar-chart .desc-item {
+    flex: 1;
+    flex-shrink: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+}
+
+.bar-chart .desc-item-icon {
+    margin-top: 10px;
+    width: 50px;
+    height: 50px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.bar-chart .desc-item-text {
+    margin: 10px 0;
+    word-wrap: break-word;
+    text-align: center;
+    color: #000;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: visible;
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+
+#tips_extra {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    max-width: 100%;
+    margin: 0;
+    text-align: left;
+    color: #555;
+    position: relative;
+    z-index: 1;
+    clear: both;
+}
+
+.subtip {
+    width: 48%;
+    padding: 20px;
+    box-sizing: border-box;
+    background: #f8fafc;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border-left: 4px solid #188038;
+}
+
+.subtip h3 {
+    text-align: center;
+    font-size: 1.2em;
+    color: #2d3648;
+    margin-bottom: 12px;
+}
+
+.h3-sub-score {
+    text-align: center;
+    font-size: 0.9em;
+    color: #7b8ba3;
+    margin-bottom: 12px;
+}
+
+.h3-sub-score b {
+    font-size: 1.8em;
+    color: #188038;
+}
+
+.subtip p {
+    font-size: 0.95em;
+    line-height: 1.8;
+    color: #4e5d78;
+    margin: 0;
+}
+
+.subtip.submain {
+    width: 100%;
+    margin: 0 0 20px 0;
+    background: #fff;
+    border-left: 6px solid #188038;
+}
+
+.subtip.submain h2 {
+    font-size: 1.5em;
+    color: #2d3648;
+    margin-bottom: 12px;
+}
+
+.again {
+    display: block;
+    text-align: center;
+    width: 200px;
+    max-width: 100%;
+    margin: 30px auto 20px;
+    padding: 12px 24px;
+    text-decoration: none;
+    border: 2px solid #188038;
+    color: #188038;
+    border-radius: 24px;
+    background: #fff;
+    font-size: 1em;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.again svg {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: 0.2s ease-out;
+}
+
+.again:hover {
+    background: #188038;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(24, 128, 56, 0.3);
+}
+
+.again:hover svg {
+    transform: translateY(-50%) rotate(-90deg);
+}
+
+.again svg g {
+    fill: currentColor;
+}
+
+/* 特殊题型样式 */
+.cb_group, .ab_group {
+    border: 2px solid #e3e8f0;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    background: #f8fafc;
+    overflow: hidden;
+}
+
+.cb_group div, .ab_group div {
+    font-size: 1em;
+    padding: 16px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #e3e8f0;
+    transition: background 0.2s;
+}
+
+.cb_group div:last-child, .ab_group div:last-child {
+    border-bottom: none;
+}
+
+.cb_group div:hover, .ab_group div:hover {
+    background: #f1f8f4;
+}
+
+.cb_selected, .ab_selected {
+    background: #f1f8f4;
+    border-left: 4px solid #188038 !important;
+    border-right: 2px solid #e3e8f0;
+    border-top: 2px solid #e3e8f0;
+}
+
+.cb_group div:last-child.cb_selected, .ab_group div:last-child.ab_selected {
+    border-bottom: 2px solid #e3e8f0;
+}
+
+.ab_sort_id {
+    position: absolute;
+    color: #fff;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    background: #188038;
+    border-radius: 50%;
+    text-align: center;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    font-size: 0.77em;
+    font-weight: bold;
+}
+
+.ab_item {
+    position: relative;
+    padding-left: 50px !important;
+}
+
+.unclickable {
+    pointer-events: none;
+    color: #888;
+    opacity: 0.5;
+}
+
+.pointer-events-none {
+    pointer-events: none;
+}
+
+/* 倾向性题目样式 */
+.tend-groups {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+    padding: 0 10px;
+}
+
+.tend-dot {
+    cursor: pointer;
+    transition: all 0.1s ease-in-out;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid #188038;
+    box-sizing: border-box;
+    background: none;
+}
+
+.tend-dot:hover {
+    background: #c8e6c9 !important;
+}
+
+.tend-dot-selected {
+    pointer-events: none;
+}
+
+.indicator-groups {
+    display: flex;
+    justify-content: space-between;
+    margin: 9px 0;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 1.2em;
+    color: #4e5d78;
+}
+
+.indicator-groups div {
+    min-width: 50px;
+    text-align: center;
+}
+
+.indicator-groups div:first-child {
+    text-align: left;
+}
+
+.indicator-groups div:last-child {
+    text-align: right;
+}
+
+.indicator-small {
+    font-size: 0.8em;
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+    .welcome-container {
+        padding: 16px 8px;
+    }
+    
+    .welcome-title-card {
+        padding: 32px 20px;
+    }
+    
+    .welcome-main-title {
+        font-size: 20px;
+    }
+    
+    .welcome-info-card {
+        padding: 24px 16px;
+    }
+    
+    .welcome-section-text {
+        padding-left: 20px;
+        font-size: 14px;
+    }
+    
+    .test-container {
+        margin: 10px 0 0 0;
+        padding: 18px 12px 16px 12px;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    
+    .test-header {
+        font-size: 1.1em;
+    }
+    
+    .question {
+        font-size: 1em;
+    }
+    
+    .answer {
+        font-size: 1em;
+        padding: 12px 8px;
+    }
+    
+    .test-btns {
+        gap: 8px;
+    }
+    
+    #barchart {
+        height: auto;
+        padding: 20px 0;
+        margin-bottom: 20px;
+    }
+    
+    .bar-chart {
+    }
+    
+    .bar-chart .bar {
+        height: 60px;
+        min-height: 60px;
+    }
+    
+    .bar-chart .desc {
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+    
+    .subtip {
+        width: 100%;
+    }
+    
+    #tips_extra {
+        flex-direction: column;
+        margin-top: 40px !important;
+        padding-top: 20px;
+    }
+    
+    .tend-dot {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .indicator-groups {
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-title-icon {
+        font-size: 40px;
+    }
+    
+    .welcome-main-title {
+        font-size: 18px;
+    }
+    
+    .welcome-subtitle {
+        font-size: 14px;
+    }
+    
+    .welcome-section-text {
+        padding-left: 16px;
+    }
+    
+    .tend-dot {
+        width: 35px;
+        height: 35px;
+    }
+    
+    #barchart {
+        padding: 15px 0;
+    }
+    
+    .bar-chart {
+    }
+    
+    .bar-chart .bar {
+        height: 53px;
+        min-height: 53px;
+    }
+    
+    /* 已删除负 margin，改用 CSS gap 控制间距 */
+    /* .bar-chart .bar:nth-child(3) { margin-top: -30px !important; } */
+    
+    .bar-chart-row {
+        margin-bottom: 20px !important; /* 减少行间距 */
+    }
+    
+    .bar-chart .desc {
+        margin-top: 2px !important;
+        margin-bottom: 2px !important; /* 使用负margin减少间距 */
+        gap: 0px !important;
+        height: auto !important;
+    }
+    
+    /* 减少desc-item的高度 */
+    .bar-chart .desc-item {
+        min-height: auto !important;
+    }
+    
+    .bar-chart .desc-item-icon {
+        width: 28px !important;
+        height: 28px !important;
+        margin: 0 !important;
+        margin-top: 0px !important;
+    }
+    
+    .bar-chart .desc-item-text {
+        margin: 2px 0 0 0 !important;
+        font-size: 0.6em !important;
+        line-height: 1.1 !important;
+    }
+    
+    /* 已删除负 margin，改用 CSS gap 控制间距 */
+    /* .bar-chart + .bar-chart { margin-top: -100px !important; } */
+    
+    /* 已删除负 margin，改用 CSS gap 控制间距 */
+    /* .bar-chart .bar:nth-child(n+11) { margin-top: -60px !important; } */
+    
+    #tips_extra {
+        margin-top: 50px !important;
+        padding-top: 30px;
+    }
+}
+
+/* 已删除负 margin，改用 CSS gap 控制间距 */
+/* .bar-chart + .bar-chart { margin-top: -80px !important; } */
+/* @media (max-width: 480px) { .bar-chart + .bar-chart { margin-top: -100px !important; } } */
+
+/* 移动端柱状图间距修复 - 必须放在最后 */
+@media (max-width: 480px) {
+    #barchart {
+        padding: 10px 5px !important;
+    }
+    
+    /* 已删除负 margin，改用 CSS gap 控制间距 */
+    /* .bar-chart { margin-bottom: -80px !important; } */
+    
+    .bar-chart:last-child {
+        margin-bottom: 0 !important;
+    }
+    
+    /* 修复移动端柱状图区域空白过大 - 覆盖 min-height */
+    #barchart {
+        min-height: 0 !important;
+        height: auto !important;
+    }
+    
+    .bar-chart {
+        min-height: 0 !important;
+        height: auto !important;
+    }
+}
+
+/* ===== Fix: prevent bar rows overlapping on mobile ===== */
+@media (max-width: 600px) {
+    #barchart,
+    #barchart .bar-chart {
+        min-height: 0 !important;
+        height: auto !important;
+    }
+
+    #barchart .bar-chart {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    #barchart .bar-chart > * {
+        position: relative !important;
+    }
+
+    #barchart .bar-chart .desc {
+        margin: 6px 0 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    #barchart .bar-chart {
+        gap: 8px !important;
+    }
+    #barchart .bar-chart .desc {
+        margin: 4px 0 !important;
+    }
+}
+
+/* Step 3: 强制取消 bars/bar2 的 absolute/top/负 margin */
+@media (max-width: 600px) {
+    #barchart .bar2,
+    #barchart .bars,
+    #barchart .bar-chart .bars,
+    #barchart .bar-chart .bar:nth-child(3),
+    #barchart .bar-chart .bar {
+        position: relative !important;
+        top: auto !important;
+        margin-top: 0 !important;
+    }
+}
+

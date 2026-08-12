@@ -1,0 +1,391 @@
+/**
+ * RPI 知情同意书页面样式
+ * 完全独立的样式，不依赖任何外部框架
+ * 基于原网站精确还原：颜色、字体、间距、动画效果
+ */
+
+/* ========== 返回按钮样式（匹配Ant Design Button）========= */
+.rpi-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 4px 15px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  color: rgba(0, 0, 0, 0.85);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5715;
+  transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
+  font-family: inherit;
+}
+
+.rpi-back-button:hover {
+  border-color: #40a9ff;
+  color: #40a9ff;
+}
+
+.rpi-back-button:active {
+  border-color: #096dd9;
+  color: #096dd9;
+}
+
+.rpi-back-button .anticon {
+  font-size: 14px;
+}
+
+/* ========== 容器 ========== */
+.rpi-consent-page-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FFF5F7 0%, #FFF0F3 100%);
+}
+
+.rpi-consent-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 40px 80px;
+}
+
+/* ========== Hero ========== */
+.rpi-consent-page-hero {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.rpi-consent-page-hero h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--rpi-primary);
+  margin: 0 0 12px 0;
+  line-height: 1.3;
+}
+
+.rpi-consent-page-hero p {
+  font-size: 15px;
+  color: var(--rpi-muted-foreground);
+  margin: 0;
+}
+
+/* ========== 主卡片 ========== */
+.rpi-consent-main-card {
+  background: white;
+  border: 1px solid rgba(235, 229, 231, 0.6);
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* ========== 卡片头部 ========== */
+.rpi-consent-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(235, 229, 231, 0.5);
+}
+
+.rpi-consent-card-icon {
+  font-size: 24px;
+}
+
+.rpi-consent-card-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--rpi-primary);
+  margin: 0;
+}
+
+/* ========== 每个条款项 ========== */
+.rpi-consent-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.rpi-consent-item-icon {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rpi-consent-item-icon span {
+  font-size: 20px;
+}
+
+.rpi-consent-item-content {
+  flex: 1;
+}
+
+.rpi-consent-item-content h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--rpi-foreground);
+  margin: 0 0 8px 0;
+}
+
+.rpi-consent-item-content p {
+  font-size: 14px;
+  color: var(--rpi-foreground);
+  line-height: 1.7;
+  margin: 0 0 12px 0;
+}
+
+.rpi-consent-item-content strong {
+  font-weight: 600;
+}
+
+/* ========== 警告提示 ========== */
+.rpi-consent-alert {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px 20px;
+  margin-top: 24px;
+  background: rgba(245, 245, 245, 0.8);
+  border: 1px solid rgba(220, 220, 220, 0.6);
+  border-radius: 10px;
+}
+
+.rpi-consent-alert-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.rpi-consent-alert-content {
+  font-size: 13px;
+  color: var(--rpi-foreground);
+  line-height: 1.6;
+}
+
+.rpi-consent-alert-content strong {
+  font-weight: 600;
+}
+
+/* ========== 最终同意确认框 ========== */
+.rpi-consent-final-check {
+  margin-top: 32px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, rgba(60, 131, 246, 0.05), rgba(60, 131, 246, 0.08));
+  border: 2px solid rgba(60, 131, 246, 0.25);
+  border-radius: 12px;
+}
+
+.rpi-consent-radio-large {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.rpi-consent-radio-large:hover {
+  opacity: 0.9;
+}
+
+.rpi-consent-radio-large.checked {
+  opacity: 1;
+}
+
+.rpi-consent-radio-circle {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border: 2px solid var(--rpi-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.rpi-consent-radio-large.checked .rpi-consent-radio-circle {
+  border-color: var(--rpi-primary);
+  background: var(--rpi-primary);
+}
+
+.rpi-consent-radio-dot {
+  width: 10px;
+  height: 10px;
+  background: white;
+  border-radius: 50%;
+}
+
+.rpi-consent-radio-text {
+  font-size: 15px;
+  color: var(--rpi-foreground);
+  line-height: 1.7;
+  font-weight: 500;
+}
+
+/* ========== 底部按钮 ========== */
+.rpi-consent-page-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.rpi-consent-page-btn-cancel {
+  height: 48px;
+  padding: 0 28px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 10px;
+  border: 1px solid rgba(235, 229, 231, 0.8);
+  color: var(--rpi-muted-foreground);
+  background: white;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.rpi-consent-page-btn-cancel:hover {
+  border-color: var(--rpi-muted-foreground);
+  color: var(--rpi-foreground);
+}
+
+.rpi-consent-page-btn-submit {
+  height: 48px;
+  padding: 0 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
+  background: var(--rpi-primary);
+  border: none;
+  color: white;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.rpi-consent-page-btn-submit:not(:disabled):hover {
+  background: hsl(340 82% 48%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(233, 32, 99, 0.3);
+}
+
+.rpi-consent-page-btn-submit:disabled {
+  background: rgba(126, 103, 111, 0.3);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 768px) {
+  .rpi-consent-page {
+    padding: 32px 16px 64px;
+  }
+
+  .rpi-consent-page-hero h1 {
+    font-size: 26px;
+  }
+
+  .rpi-consent-page-hero p {
+    font-size: 14px;
+  }
+
+  .rpi-consent-main-card {
+    padding: 24px 20px;
+  }
+
+  .rpi-consent-item {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rpi-consent-page-actions {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+
+  .rpi-consent-page-btn-cancel,
+  .rpi-consent-page-btn-submit {
+    width: 100%;
+  }
+
+  .rpi-consent-item-content h3 {
+    font-size: 15px;
+  }
+
+  .rpi-consent-item-content p {
+    font-size: 13px;
+  }
+
+  .rpi-header {
+    padding: 12px 16px;
+  }
+
+  .rpi-header-content {
+    gap: 8px;
+  }
+
+  .rpi-logo-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .rpi-logo-title {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .rpi-consent-page {
+    padding: 24px 6px 60px;
+  }
+
+  .rpi-consent-page-hero h1 {
+    font-size: 22px;
+  }
+
+  .rpi-consent-page-hero p {
+    font-size: 13px;
+  }
+
+  .rpi-consent-main-card {
+    padding: 20px 6px;
+  }
+
+  .rpi-consent-item-content h3 {
+    font-size: 14px;
+  }
+
+  .rpi-consent-item-content p {
+    font-size: 12px;
+  }
+
+  .rpi-header {
+    padding: 10px 12px;
+  }
+
+  .rpi-logo-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .rpi-logo-title {
+    font-size: 14px;
+  }
+
+  .rpi-consent-page-btn-cancel,
+  .rpi-consent-page-btn-submit {
+    height: 44px;
+    font-size: 15px;
+  }
+}
+

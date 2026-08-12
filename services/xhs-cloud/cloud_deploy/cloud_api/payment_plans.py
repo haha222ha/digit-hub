@@ -213,7 +213,35 @@ def list_active_plans(*, include_addons: bool = False) -> list[dict]:
     return plans
 
 
-PLAN_BY_CODE = {p["plan_code"]: p for p in (*PAYMENT_PLANS, *PAYMENT_ADDON_PLANS, *ASSESS_PAYMENT_PLANS)}
+PSY_DIST_PAYMENT_PLANS: tuple[dict, ...] = (
+    {
+        "plan_code": "psy_quota_100",
+        "label": "分销额度·100次",
+        "duration_days": 365,
+        "amount": "59.00",
+        "price_yuan": 59,
+        "quota_amount": 100,
+        "summary": "100 次测评链接生成额度",
+        "product": "psy_dist",
+    },
+    {
+        "plan_code": "psy_quota_500",
+        "label": "分销额度·500次",
+        "duration_days": 365,
+        "amount": "199.00",
+        "price_yuan": 199,
+        "quota_amount": 500,
+        "summary": "500 次测评链接生成额度",
+        "product": "psy_dist",
+        "recommended": True,
+    },
+)
+
+
+PLAN_BY_CODE = {
+    p["plan_code"]: p
+    for p in (*PAYMENT_PLANS, *PAYMENT_ADDON_PLANS, *ASSESS_PAYMENT_PLANS, *PSY_DIST_PAYMENT_PLANS)
+}
 PLAN_BY_CODE[PAYMENT_TEST_PLAN["plan_code"]] = PAYMENT_TEST_PLAN
 # 第三方发卡专用 plan（不在收银台展示，仅授权码生成）
 PLAN_BY_CODE["assess_code"] = {
@@ -242,6 +270,15 @@ def is_assess_plan(plan_code: str) -> bool:
     return code.startswith("assess")
 
 
+def is_psy_dist_plan(plan_code: str) -> bool:
+    code = str(plan_code or "").strip()
+    return code.startswith("psy_quota") or code.startswith("psy_dist")
+
+
+def list_psy_dist_plans() -> list[dict]:
+    return list(PSY_DIST_PAYMENT_PLANS)
+
+
 def resolve_custom_analysis_plan(*, is_active_member: bool) -> str:
     return "custom_analysis_member" if is_active_member else "custom_analysis_guest"
 
@@ -255,6 +292,9 @@ def entitlements_note_for_payment_plan(plan_code: str) -> str | None:
     plan = PLAN_BY_CODE.get(str(plan_code or "").strip())
     if not plan:
         return None
+    if plan.get("quota_amount"):
+        payload = {"quota_amount": int(plan["quota_amount"]), "product": plan.get("product") or "psy_dist"}
+        return json.dumps(payload, ensure_ascii=False)
     tpl = plan.get("entitlements_template")
     if not tpl:
         return None

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="SRI性压抑指数评估量表 - 心理测评报告">
+    <meta name="keywords" content="SRI,性压抑指数,性心理测试,心理测评报告">
+    <title>SRI 性压抑指数评估量表报告</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/report.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container" id="app">
+        <!-- 加载提示 -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">正在生成报告...</div>
+        </div>
+
+        <!-- 报告头部 -->
+        <div class="report-header" id="reportHeader">
+            <div class="header-icon">💝</div>
+            <h1 class="report-title">SRI 性压抑指数评估量表报告</h1>
+            <p class="report-subtitle">Sexual Repression Index (SRI) Assessment</p>
+            <p class="report-date" id="reportDate">加载中...</p>
+        </div>
+
+        <!-- 整体评估结果 -->
+        <div class="overall-result" id="overallResult">
+            <h2 class="section-title">整体评估结果</h2>
+            <div class="overall-stats">
+                <div class="stat-item">
+                    <div class="stat-label">性压抑综合指数</div>
+                    <div class="stat-value" id="comprehensiveIndex">0</div>
+                    <div class="stat-subtitle">满分 100 分</div>
+                    <div class="stat-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="overallProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">评估水平</div>
+                    <div class="overall-level-badge" id="overallLevelBadge">加载中...</div>
+                    <div class="stat-subtitle" id="overallSubtitle">状态良好</div>
+                </div>
+            </div>
+            <div class="overall-interpretation" id="overallInterpretation">
+                <!-- 解释文本将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 详细分数分析 -->
+        <div class="detailed-analysis" id="detailedAnalysis">
+            <h2 class="section-title">详细分数分析</h2>
+            <div class="analysis-content" id="analysisContent">
+                <!-- 分析内容将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 分数区间参考标准 -->
+        <div class="score-reference-section" id="scoreReferenceSection">
+            <h2 class="section-title">分数区间参考标准</h2>
+            <div class="score-reference-grid" id="scoreReferenceGrid">
+                <!-- 分数区间卡片将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 维度得分详情 -->
+        <div class="dimensions-section" id="dimensionsSection">
+            <h2 class="section-title">维度得分详情</h2>
+            <div class="dimensions-grid" id="dimensionsGrid">
+                <!-- 维度卡片将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 详细维度解读 -->
+        <div class="dimension-details-section" id="dimensionDetailsSection">
+            <h2 class="section-title">详细维度解读</h2>
+            <div class="dimension-details-collapse" id="dimensionDetailsCollapse">
+                <!-- 可折叠的维度详情将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 个性化改善建议 -->
+        <div class="recommendations-section" id="recommendationsSection">
+            <h2 class="section-title">个性化改善建议</h2>
+            <div class="recommendations-list" id="recommendationsList">
+                <!-- 建议列表将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 亲密关系相处指南 -->
+        <div class="relationship-guide-section" id="relationshipGuideSection">
+            <h2 class="section-title" id="relationshipGuideTitle">相处之道</h2>
+            <div class="relationship-guide-content" id="relationshipGuideContent">
+                <!-- 相处指南内容将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 性态度类型特点总结 -->
+        <div class="type-summary-section" id="typeSummarySection">
+            <h2 class="section-title">您的类型特点总结</h2>
+            <div class="type-summary-content" id="typeSummaryContent">
+                <!-- 类型特点总结将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 人口学个性化分析 -->
+        <div class="demographic-insights-section" id="demographicInsightsSection" style="display: none;">
+            <h2 class="section-title">个性化深度分析</h2>
+            <div class="demographic-insights-content" id="demographicInsightsContent">
+                <!-- 人口学分析内容将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 温馨提示 -->
+        <div class="warm-tips-section" id="warmTipsSection">
+            <h2 class="section-title">给您的话</h2>
+            <div class="warm-tips-content" id="warmTipsContent">
+                <!-- 温馨提示内容将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 底部说明 -->
+        <div class="report-footer-info" id="reportFooterInfo">
+            <!-- 底部说明内容将通过JavaScript动态生成 -->
+        </div>
+
+        <!-- 底部操作区 -->
+        <div class="report-footer">
+            <button class="footer-button primary" id="restartButton">重新测试</button>
+        </div>
+    </div>
+
+    <!-- 启用安全功能 -->
+    <script>
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+    
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK（从URL参数获取token）
+        let validatorInstance = null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init(null, {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    document.body.classList.remove('page-disabled');
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    document.body.classList.remove('page-disabled');
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (!validatorInstance && window.linkValidator) {
+                            validatorInstance = window.linkValidator;
+                        }
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+            document.body.classList.add('page-disabled');
+        }
+    </script>
+
+    <!-- 导入数据模块 -->
+    <script type="module" src="js/report.js?v=2.0"></script>
+</body>
+</html>
+

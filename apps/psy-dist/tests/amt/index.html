@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="暗面人格测试 - 60道题测出你最不想承认的那一面，10个暗面维度生成专属雷达图">
+    <title>暗面人格测试</title>
+    <script src="/static/js/test-security.js"></script>
+    <script>
+        if (typeof TestSecurity !== 'undefined') {
+            TestSecurity.enable();
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&display=swap" rel="stylesheet">
+    <script src="data.js"></script>
+    <style>
+        :root {
+            --paper: #f3efe6;
+            --paper2: #ebe5d8;
+            --ink: #1c1a17;
+            --ink2: #4a4540;
+            --ink3: #8a8278;
+            --vermillion: #c23a2b;
+            --seal: #8b1e1e;
+            --serif: 'Noto Serif SC', 'Songti SC', serif;
+            --sans: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+
+        html { font-size: 18px; }
+        @media (max-width: 380px) { html { font-size: 17px; } }
+        @media (min-width: 769px) { html { font-size: 20px; } }
+
+        body {
+            font-family: var(--serif);
+            background: var(--paper);
+            color: var(--ink);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: max(32px, calc(env(safe-area-inset-top, 0px) + 24px)) 18px 36px;
+        }
+
+        .page {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            flex: 1;
+            padding-top: 12px;
+            animation: fadeIn 0.35s ease;
+        }
+        .page.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .scroll-panel {
+            width: 100%;
+            background: var(--paper2);
+            border: 1px solid var(--ink);
+            padding: 32px 22px 36px;
+            position: relative;
+            box-shadow: 4px 4px 0 rgba(28, 26, 23, 0.08);
+        }
+        .scroll-panel::before, .scroll-panel::after {
+            content: '';
+            position: absolute;
+            left: 10%;
+            right: 10%;
+            height: 6px;
+            background: radial-gradient(ellipse, var(--ink3) 20%, transparent 70%);
+            opacity: 0.25;
+        }
+        .scroll-panel::before { top: -3px; }
+        .scroll-panel::after { bottom: -3px; }
+
+        .cover-seal {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--seal);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 900;
+            color: var(--seal);
+            writing-mode: vertical-rl;
+            letter-spacing: 3px;
+            margin: 0 auto 18px;
+            transform: rotate(3deg);
+            background: rgba(194, 58, 43, 0.04);
+        }
+
+        .cover-title {
+            font-size: 1.9rem;
+            font-weight: 900;
+            text-align: center;
+            letter-spacing: 5px;
+            margin-bottom: 6px;
+        }
+        .cover-sub {
+            text-align: center;
+            font-size: 0.92rem;
+            color: var(--ink3);
+            margin-bottom: 18px;
+        }
+        .ink-wash {
+            height: 2px;
+            margin: 16px auto;
+            max-width: 100px;
+            background: linear-gradient(90deg, transparent, var(--ink), transparent);
+            opacity: 0.35;
+        }
+        .intro-verse {
+            font-size: 0.94rem;
+            color: var(--ink2);
+            line-height: 1.95;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .intro-verse i { font-style: normal; color: var(--vermillion); }
+        .intro-verse .small-note { display: block; margin-top: 12px; font-family: var(--sans); font-size: 0.8rem; color: var(--ink3); }
+        .specs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border: 1px solid var(--ink);
+            margin-bottom: 22px;
+        }
+        .spec {
+            padding: 10px 6px;
+            text-align: center;
+            border-right: 1px solid var(--ink);
+        }
+        .spec:last-child { border-right: none; }
+        .spec-num { font-size: 1.3rem; font-weight: 900; display: block; }
+        .spec-label { font-family: var(--sans); font-size: 0.76rem; color: var(--ink3); letter-spacing: 1px; }
+
+        .btn-main {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: var(--ink);
+            color: var(--paper);
+            border: none;
+            font-family: var(--serif);
+            font-size: 1.08rem;
+            font-weight: 700;
+            letter-spacing: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-main:hover { background: var(--vermillion); }
+        .btn-main:active { transform: scale(0.98); }
+
+        /* 开场拷问 · 毛笔书写 */
+        .warmup-badge {
+            text-align: center;
+            font-size: 0.92rem;
+            color: var(--vermillion);
+            letter-spacing: 5px;
+            margin-bottom: 26px;
+            opacity: 0;
+        }
+        #warmupPage.warmup-play .warmup-badge { animation: fadeUp 0.4s ease forwards; }
+
+        .write-line {
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.9;
+            margin-bottom: 28px;
+            min-height: 4em;
+        }
+        .write-char {
+            opacity: 0;
+            display: inline-block;
+        }
+        #warmupPage.warmup-play .write-char { animation: charWrite 0.12s ease forwards; }
+
+        .warmup-opts {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #warmupPage.warmup-play .warmup-opts { animation: optsIn 0.6s ease forwards; pointer-events: auto; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes charWrite {
+            0% { opacity: 0; transform: translateY(6px); filter: blur(3px); }
+            100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+        @keyframes optsIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 过渡页 */
+        .bridge-inner { text-align: center; padding: 32px 10px 12px; }
+        .bridge-icon { font-size: 1.8rem; margin-bottom: 20px; opacity: 0.65; }
+        .bridge-text {
+            font-size: 1.12rem;
+            font-weight: 700;
+            line-height: 1.8;
+            margin-bottom: 32px;
+            padding: 0 6px;
+        }
+
+        /* 答题 */
+        .quiz-header {
+            width: 100%;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            font-family: var(--sans);
+        }
+        .quiz-progress-text { font-size: 1.35rem; font-weight: 900; color: var(--vermillion); font-family: var(--serif); }
+        .quiz-type-badge { font-size: 0.88rem; color: var(--ink3); letter-spacing: 2px; }
+        .quiz-progress-bar { width: 100%; height: 3px; background: rgba(28, 26, 23, 0.1); margin-bottom: 1.8rem; overflow: hidden; }
+        .quiz-progress-fill { height: 100%; background: var(--vermillion); transition: width 0.35s ease; }
+        .quiz-question {
+            width: 100%;
+            font-size: 1.18rem;
+            font-weight: 700;
+            line-height: 1.7;
+            text-align: left;
+            margin-bottom: 1.6rem;
+            min-height: 3rem;
+            padding-left: 14px;
+            border-left: 3px solid var(--vermillion);
+        }
+        .quiz-options { width: 100%; display: flex; flex-direction: column; }
+        .quiz-option {
+            width: 100%;
+            padding: 15px 0;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(28, 26, 23, 0.12);
+            color: var(--ink2);
+            font-family: var(--sans);
+            font-size: 1.05rem;
+            text-align: left;
+            cursor: pointer;
+            transition: color 0.15s, padding-left 0.15s;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .quiz-option:last-child { border-bottom: none; }
+        .quiz-option:hover { color: var(--ink); padding-left: 4px; }
+        .quiz-option.selected, .quiz-option.prev-selected { color: var(--ink); font-weight: 700; }
+        .quiz-option.selected .quiz-option-letter, .quiz-option.prev-selected .quiz-option-letter { color: var(--vermillion); }
+        .quiz-option-letter { font-family: var(--serif); font-weight: 900; color: var(--ink3); flex-shrink: 0; min-width: 28px; font-size: 1.1rem; }
+        .quiz-option-text { flex: 1; line-height: 1.6; }
+
+        .nav-buttons { width: 100%; display: flex; margin-top: 1.4rem; }
+        .nav-btn-back {
+            padding: 12px 18px;
+            background: transparent;
+            border: 1px solid var(--ink);
+            color: var(--ink3);
+            font-family: var(--sans);
+            font-size: 0.95rem;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+        .nav-btn-back:hover { border-color: var(--vermillion); color: var(--vermillion); }
+
+        /* 结果 */
+        .result-brand {
+            text-align: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.9rem;
+            border-bottom: 1px solid rgba(28, 26, 23, 0.1);
+        }
+        .result-seal-mini {
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--seal);
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55rem;
+            font-weight: 900;
+            color: var(--seal);
+            writing-mode: vertical-rl;
+            letter-spacing: 2px;
+            margin: 0 auto 10px;
+            transform: rotate(2deg);
+            background: rgba(194, 58, 43, 0.04);
+        }
+        .result-brand-title {
+            font-size: 1.05rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            color: var(--ink);
+            margin-bottom: 4px;
+        }
+        .result-brand-sub {
+            font-family: var(--sans);
+            font-size: 0.78rem;
+            color: var(--ink3);
+            letter-spacing: 2px;
+        }
+        .result-header { text-align: center; margin-bottom: 0.8rem; width: 100%; padding-top: 4px; }
+        .result-header h2 {
+            font-size: 0.92rem;
+            font-weight: 500;
+            letter-spacing: 3px;
+            color: var(--ink3);
+            margin-bottom: 0.7rem;
+        }
+        .result-header h2 .result-emph {
+            font-weight: 900;
+            color: var(--vermillion);
+            letter-spacing: 4px;
+        }
+        .result-pct {
+            font-size: 4.2rem;
+            font-weight: 900;
+            color: var(--vermillion);
+            line-height: 1.15;
+            letter-spacing: 8px;
+        }
+        .result-pct-sub {
+            font-family: var(--sans);
+            font-size: 0.95rem;
+            color: var(--ink3);
+            margin-top: 0.4rem;
+            letter-spacing: 1px;
+        }
+        .result-level-name { font-size: 1.25rem; font-weight: 700; margin-top: 0.7rem; letter-spacing: 3px; }
+        .result-level-desc { font-family: var(--sans); font-size: 0.98rem; color: var(--ink3); margin-top: 0.6rem; line-height: 1.75; padding: 0 0.5rem; }
+        .section-title {
+            width: 100%;
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: var(--vermillion);
+            letter-spacing: 3px;
+            margin: 1.4rem 0 0.6rem;
+            text-align: center;
+        }
+        .result-type-name {
+            font-size: 1.75rem;
+            font-weight: 900;
+            text-align: center;
+            letter-spacing: 4px;
+            color: var(--ink);
+            margin-bottom: 0.6rem;
+        }
+        .result-secondary {
+            font-family: var(--sans);
+            font-size: 0.98rem;
+            text-align: center;
+            color: var(--ink2);
+            margin-bottom: 0.8rem;
+            line-height: 1.6;
+        }
+        .result-secondary strong { color: var(--vermillion); }
+        .kw-chip {
+            background: transparent;
+            border: 1px solid var(--ink);
+            padding: 0.35rem 0.8rem;
+            font-family: var(--sans);
+            font-size: 0.88rem;
+            color: var(--ink2);
+        }
+
+        .radar-chart-wrap { width: 100%; max-width: 360px; margin: 1rem auto; }
+        .radar-chart-wrap canvas {
+            width: 100%;
+            height: auto;
+            background: var(--paper);
+            border: 1px solid rgba(28, 26, 23, 0.15);
+        }
+
+        .score-table { width: 100%; margin: 1rem 0; padding: 1.1rem 0; border-top: 1px solid rgba(28, 26, 23, 0.12); border-bottom: 1px solid rgba(28, 26, 23, 0.12); }
+        .score-table-title { font-size: 1.02rem; font-weight: 700; color: var(--vermillion); letter-spacing: 3px; margin-bottom: 0.9rem; text-align: center; }
+        .score-row {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.65rem;
+            font-family: var(--sans);
+            font-size: 0.88rem;
+            color: var(--ink2);
+            flex-wrap: nowrap;
+            white-space: nowrap;
+        }
+        .score-row:last-child { margin-bottom: 0; }
+        .score-dim-name {
+            width: 4.2em;
+            flex-shrink: 0;
+            font-weight: 600;
+            color: var(--ink);
+            font-size: 0.82rem;
+            text-align: right;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .score-value {
+            width: 2.6em;
+            flex-shrink: 0;
+            font-weight: 700;
+            color: var(--vermillion);
+            font-size: 0.88rem;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .score-bar-wrap { flex: 1; height: 5px; background: rgba(28, 26, 23, 0.1); overflow: hidden; min-width: 24px; flex-shrink: 1; }
+        .score-bar-fill { height: 100%; background: var(--vermillion); transition: width 0.6s ease; }
+        .score-desc {
+            width: 4.2em;
+            flex-shrink: 0;
+            font-size: 0.72rem;
+            color: var(--ink3);
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: left;
+        }
+
+        .personality-text {
+            font-family: var(--sans);
+            font-size: 1rem;
+            line-height: 1.85;
+            color: var(--ink2);
+            white-space: pre-wrap;
+            word-break: break-word;
+            padding: 0.2rem 0;
+        }
+
+        .footer-copyright {
+            font-family: var(--sans);
+            font-size: 0.78rem;
+            color: var(--ink3);
+            text-align: center;
+            line-height: 1.6;
+            padding: 1rem 0.5rem 0.5rem;
+            width: 100%;
+            margin-top: 0.8rem;
+        }
+        .restart-btn {
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            border: 1px solid var(--ink);
+            color: var(--ink3);
+            font-family: var(--serif);
+            font-size: 1rem;
+            letter-spacing: 3px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        .restart-btn:hover { border-color: var(--vermillion); color: var(--vermillion); }
+
+        @media (max-width: 380px) {
+            .container { padding-left: 14px; padding-right: 14px; }
+            .score-dim-name { width: 3.8em; font-size: 0.78rem; }
+            .score-desc { width: 3.8em; font-size: 0.68rem; }
+            .score-value { width: 2.4em; font-size: 0.82rem; }
+            .cover-title { font-size: 1.75rem; }
+            .result-pct { font-size: 3.6rem; letter-spacing: 6px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .page { animation: none; }
+            #warmupPage.warmup-play .warmup-badge,
+            #warmupPage.warmup-play .write-char,
+            #warmupPage.warmup-play .warmup-opts { animation: none !important; opacity: 1 !important; pointer-events: auto !important; filter: none !important; }
+        }
+
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .report-footer {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 0;
+        }
+
+        .report-footer #link-validator-promotion-link {
+            border-top: none;
+            padding-top: 0;
+            margin-top: 0.5rem;
+        }
+        .welcome-footer #link-validator-promotion-link {
+            width: 100%;
+            text-align: center;
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid rgba(28, 26, 23, 0.12);
+            box-sizing: border-box;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .welcome-footer {
+            display: block !important;
+            visibility: visible !important;
+        }
+    </style>
+</head>
+<body class="page-disabled">
+    <div class="container" id="app">
+
+        <div class="page active" id="coverPage"></div>
+
+        <div class="page" id="warmupPage">
+            <div class="scroll-panel">
+                <p class="warmup-badge" id="warmupBadge"></p>
+                <div class="write-line" id="warmupWriteLine"></div>
+                <div id="warmupOptionsContainer" class="warmup-opts"></div>
+            </div>
+        </div>
+
+        <div class="page" id="bridgePage">
+            <div class="scroll-panel">
+                <div class="bridge-inner">
+                    <div class="bridge-icon">⚡</div>
+                    <p class="bridge-text" id="bridgeText"></p>
+                    <button class="btn-main" id="bridgeStartBtn">开始</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="quizPage">
+            <div class="scroll-panel">
+                <div class="quiz-header">
+                    <span class="quiz-progress-text" id="quizProgressText">1/60</span>
+                    <span class="quiz-type-badge" id="quizBadge">灵魂拷问</span>
+                </div>
+                <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill" style="width:1.67%;"></div></div>
+                <div class="quiz-question" id="quizQuestion"></div>
+                <div id="quizOptionsContainer"></div>
+                <div class="nav-buttons">
+                    <button class="nav-btn-back" id="navBtnBack" style="visibility:hidden;">← 上一题</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="resultPage">
+            <div class="scroll-panel">
+                <div class="result-header">
+                    <div class="result-brand">
+                        <div class="result-seal-mini">暗面</div>
+                        <div class="result-brand-title" id="resultBrandTitle">暗面人格测试</div>
+                        <div class="result-brand-sub" id="resultBrandSub">测出你最不想承认的那一面</div>
+                    </div>
+                    <h2 id="resultTitle">你的<span class="result-emph">暗面</span>指数</h2>
+                    <div id="resultName"></div>
+                    <div class="section-title" id="resultTypeTitle">你的暗面人格：</div>
+                    <div class="result-type-name" id="resultTypeName"></div>
+                    <div class="result-secondary" id="resultSecondaryType" style="display:none;"></div>
+                    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:0.4rem;margin-bottom:0.6rem;" id="resultKeywords"></div>
+                </div>
+                <div class="radar-chart-wrap"><canvas id="radarCanvas" width="800" height="800"></canvas></div>
+                <div class="score-table" id="scoreTable"></div>
+                <div class="section-title" id="resultAnalysisTitle">📜 你心里那个人</div>
+                <div class="personality-text" id="resultPersonality"></div>
+                <button class="restart-btn" id="restartBtn">🔄 再测一次</button>
+                <div class="footer-copyright" id="resultCopyright"></div>
+                <div class="report-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            var D = testData;
+            document.title = D.meta.title;
+
+            var OPT_LETTERS = ['甲', '乙', '丙', '丁'];
+            var QUIZ_LETTERS = ['甲', '乙', '丙', '丁'];
+
+            function toChineseDigits(n) {
+                var map = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+                return String(n).split('').map(function(d) {
+                    return map[parseInt(d, 10)];
+                }).join('');
+            }
+
+            function renderCover() {
+                var cover = document.getElementById('coverPage');
+                var introHtml = '';
+                D.cover.introText.forEach(function(item) {
+                    if (typeof item === 'string') {
+                        if (item === '') return;
+                        var line = item.replace(/\{strong\}/g, '<strong>').replace(/\{\/strong\}/g, '</strong>');
+                        if (line.indexOf('<strong>') >= 0 || line.indexOf('暗面人格') >= 0) {
+                            introHtml += line.replace(/<\/?strong>/g, '') + '<br>';
+                        }
+                    } else if (item.italic) {
+                        introHtml += '<i>' + item.italic + '</i><br>';
+                    } else if (item.small) {
+                        introHtml += '<span class="small-note">' + item.small + '</span>';
+                    }
+                });
+
+                var specsHtml =
+                    '<div class="spec"><span class="spec-num">60</span><span class="spec-label">道题</span></div>' +
+                    '<div class="spec"><span class="spec-num">10</span><span class="spec-label">维度</span></div>' +
+                    '<div class="spec"><span class="spec-num">1</span><span class="spec-label">雷达图</span></div>';
+
+                cover.innerHTML =
+                    '<div class="scroll-panel">' +
+                        '<div class="cover-seal">暗面</div>' +
+                        '<div class="cover-title">' + D.cover.title + '</div>' +
+                        '<div class="cover-sub">' + D.cover.subtitle + '</div>' +
+                        '<div class="ink-wash"></div>' +
+                        '<div class="intro-verse">' + introHtml + '</div>' +
+                        '<div class="specs">' + specsHtml + '</div>' +
+                        '<button class="btn-main" id="startBtn">' + D.cover.startBtn + '</button>' +
+                        '<div class="footer-copyright welcome-footer">' + D.cover.copyright.replace(/\n/g, '<br>') + '</div>' +
+                    '</div>';
+            }
+
+            var coverPage = document.getElementById('coverPage');
+            var warmupPage = document.getElementById('warmupPage');
+            var bridgePage = document.getElementById('bridgePage');
+            var quizPage = document.getElementById('quizPage');
+            var resultPage = document.getElementById('resultPage');
+            var quizQuestion = document.getElementById('quizQuestion');
+            var quizProgressText = document.getElementById('quizProgressText');
+            var quizProgressFill = document.getElementById('quizProgressFill');
+            var quizOptionsContainer = document.getElementById('quizOptionsContainer');
+            var navBtnBack = document.getElementById('navBtnBack');
+
+            document.getElementById('quizBadge').textContent = D.quiz.badge;
+            navBtnBack.textContent = D.quiz.backBtn;
+            document.getElementById('resultTitle').innerHTML = (D.result.title || '你的暗面指数：')
+                .replace(/暗面/g, '<span class="result-emph">暗面</span>')
+                .replace(/：/g, '');
+            document.getElementById('resultBrandTitle').textContent = D.meta.title || D.cover.title;
+            document.getElementById('resultBrandSub').textContent = D.cover.subtitle || '';
+            document.getElementById('resultAnalysisTitle').textContent = D.result.analysisTitle;
+            document.getElementById('restartBtn').textContent = D.result.restartBtn;
+            document.getElementById('resultCopyright').innerHTML = D.result.copyright.replace(/\n/g, '<br>');
+
+            var dimLabels = D.dimensions.labels;
+            var dimDescriptions = D.dimensions.descriptions;
+            var rawQuestions = D.questions;
+
+            function showPage(page) {
+                [coverPage, warmupPage, bridgePage, quizPage, resultPage].forEach(function(p) { p.classList.remove('active'); });
+                page.classList.add('active');
+                window.scrollTo(0, 0);
+            }
+
+            function shuffleArray(arr) {
+                for (var i = arr.length - 1; i > 0; i--) {
+                    var j = Math.floor(Math.random() * (i + 1));
+                    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+                }
+                return arr;
+            }
+
+            var totalQuestions = rawQuestions.length;
+            var questions = [];
+            function shuffleQuestions() {
+                questions = rawQuestions.map(function(q) {
+                    var pairs = q.opts.map(function(opt, i) { return { opt: opt, score: i }; });
+                    pairs = shuffleArray(pairs.slice());
+                    return { dim: q.dim, q: q.q, pairs: pairs };
+                });
+                questions = shuffleArray(questions.slice());
+            }
+
+            var dimensionScores = new Array(10).fill(0);
+            var currentQuestionIndex = 0;
+            var answers = new Array(totalQuestions).fill(null);
+            var openingAnswerIndex = null;
+            var testStarted = false;
+
+            function getStorageKey(token) {
+                return 'test_result_' + (token || (window.linkValidator && window.linkValidator.token) || 'local');
+            }
+
+            function getCompletionFlagKey() {
+                var token = window.linkValidator && window.linkValidator.token;
+                return 'amt_test_completed_' + (token || '');
+            }
+
+            async function waitForValidator() {
+                var waitCount = 0;
+                while (!window.linkValidator && waitCount < 30) {
+                    await new Promise(function(resolve) { setTimeout(resolve, 100); });
+                    waitCount++;
+                    if (waitCount % 10 === 0 && window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        var instance = window.PsyTestValidator.getInstance();
+                        if (instance) {
+                            window.linkValidator = instance;
+                            break;
+                        }
+                    }
+                }
+                return window.linkValidator;
+            }
+
+            async function validateAndStartTest() {
+                var validator = await waitForValidator();
+                if (!validator) {
+                    alert('验证SDK未初始化，无法开始测试。请刷新页面重试。');
+                    return false;
+                }
+
+                var isValid = false;
+                if (typeof validator.validateForUserAction === 'function') {
+                    try {
+                        isValid = await validator.validateForUserAction();
+                        if (!isValid || validator.valid === false) return false;
+                    } catch (error) {
+                        console.error('链接验证失败:', error);
+                        validator.valid = false;
+                        return false;
+                    }
+                } else {
+                    if (validator.valid === false) {
+                        alert(validator.validationError || '测试链接无效，请检查链接是否正确');
+                        return false;
+                    }
+                    isValid = validator.valid !== false;
+                }
+
+                if (!isValid || validator.valid === false) return false;
+
+                var urlParams = new URLSearchParams(window.location.search);
+                var isRestart = urlParams.get('restart') === 'true';
+                if (!isRestart && !testStarted) {
+                    try {
+                        await validator.startTest();
+                        testStarted = true;
+                        console.log('测试开始记录成功');
+                    } catch (error) {
+                        console.error('记录测试开始失败:', error);
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            function buildTestResult(scores, avgPct, levelName, levelDesc, typeResult, typeData, secondaryResult) {
+                return {
+                    dimensionScores: scores.slice(),
+                    openingAnswerIndex: openingAnswerIndex,
+                    darkIndex: avgPct,
+                    levelName: levelName,
+                    levelDesc: levelDesc,
+                    typeKey: typeResult.typeKey,
+                    typeName: (typeData && typeData.name) ? typeData.name : '',
+                    secondaryType: secondaryResult || null,
+                    timestamp: new Date().toISOString()
+                };
+            }
+
+            function saveTestResult(testResult) {
+                var token = window.linkValidator && window.linkValidator.token;
+                if (!token) return;
+                try {
+                    localStorage.setItem(getStorageKey(token), JSON.stringify({
+                        token: token,
+                        result: testResult,
+                        timestamp: testResult.timestamp
+                    }));
+                } catch (error) {
+                    console.error('保存测试结果失败:', error);
+                }
+            }
+
+            function addPromotionLinkDelayed() {
+                setTimeout(function() {
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.addPromotionLink === 'function') {
+                        window.PsyTestValidator.addPromotionLink();
+                    }
+                }, 200);
+            }
+
+            function renderResultContent(scores, avgPct, levelName, levelDesc, typeResult, typeData, secondaryResult) {
+                drawRadarChart(scores);
+                renderScoreTable(scores, D.scoring.maxScorePerDimension || 18);
+
+                document.getElementById('resultName').innerHTML =
+                    '<div class="result-pct">' + toChineseDigits(avgPct) + '</div>' +
+                    '<div class="result-pct-sub">（' + avgPct + '% · ' + levelName + '）</div>' +
+                    '<div class="result-level-desc">' + levelDesc + '</div>';
+
+                document.getElementById('resultTypeTitle').textContent = D.result.typeTitle || '你的暗面人格：';
+                document.getElementById('resultTypeName').textContent = (typeData && typeData.name) ? typeData.name : '';
+
+                var secondaryEl = document.getElementById('resultSecondaryType');
+                if (secondaryResult && secondaryResult.typeData) {
+                    secondaryEl.style.display = 'block';
+                    secondaryEl.innerHTML = (D.result.secondaryTypeTitle || '副人格倾向：') +
+                        '<strong>' + secondaryResult.typeData.name + '</strong>' +
+                        ' <span style="color:var(--ink3);font-size:0.92rem;">（' + dimLabels[secondaryResult.idx] + ' ' + secondaryResult.pct + '%）</span>';
+                } else {
+                    secondaryEl.style.display = 'none';
+                    secondaryEl.innerHTML = '';
+                }
+
+                var kwContainer = document.getElementById('resultKeywords');
+                if (typeData && typeData.keywords) {
+                    kwContainer.innerHTML = typeData.keywords.map(function(kw) {
+                        return '<span class="kw-chip">' + kw + '</span>';
+                    }).join('');
+                } else {
+                    kwContainer.innerHTML = '';
+                }
+
+                var desc = (typeData && typeData.analysis) ? typeData.analysis : '';
+                var maxSingleScore = D.scoring.maxScorePerDimension || 18;
+                var openingEcho = getOpeningEcho(scores, maxSingleScore);
+                if (openingEcho) desc += '\n\n💭 ' + openingEcho;
+                document.getElementById('resultPersonality').textContent = desc;
+            }
+
+            function restoreResultFromStorage() {
+                var token = window.linkValidator && window.linkValidator.token;
+                if (!token) return false;
+                try {
+                    var saved = localStorage.getItem(getStorageKey(token));
+                    if (!saved) return false;
+                    var parsed = JSON.parse(saved);
+                    var result = parsed.result || parsed;
+                    if (!result || !result.dimensionScores) return false;
+
+                    dimensionScores = result.dimensionScores.slice();
+                    openingAnswerIndex = result.openingAnswerIndex;
+                    window.__amt_test_completed = true;
+
+                    showPage(resultPage);
+                    var typeResult = { typeKey: result.typeKey, highIdx: 0, isBalanced: result.typeKey === 'balanced' };
+                    var typeData = D.types[result.typeKey];
+                    renderResultContent(
+                        dimensionScores,
+                        result.darkIndex,
+                        result.levelName || '',
+                        result.levelDesc || '',
+                        typeResult,
+                        typeData,
+                        result.secondaryType
+                    );
+                    addPromotionLinkDelayed();
+                    window.scrollTo(0, 0);
+                    return true;
+                } catch (error) {
+                    console.error('恢复测试结果失败:', error);
+                    return false;
+                }
+            }
+
+            window.amtRestoreResult = restoreResultFromStorage;
+
+            function buildWriteLine(text) {
+                var html = '';
+                var delay = 0.15;
+                for (var i = 0; i < text.length; i++) {
+                    var ch = text.charAt(i);
+                    if (ch === '，' || ch === '？' || ch === '。') {
+                        html += '<br>';
+                    }
+                    html += '<span class="write-char" style="animation-delay:' + delay + 's">' + ch + '</span>';
+                    delay += 0.1;
+                }
+                return { html: html, optsDelay: delay + 0.4 };
+            }
+
+            function playWarmupAnimation(optsDelay) {
+                warmupPage.classList.remove('warmup-play');
+                var optsEl = document.getElementById('warmupOptionsContainer');
+                optsEl.style.animationDelay = optsDelay + 's';
+                void warmupPage.offsetWidth;
+                warmupPage.classList.add('warmup-play');
+            }
+
+            function renderWarmup() {
+                var oq = D.openingQuestion;
+                document.getElementById('warmupBadge').textContent = oq.badge ? ('— ' + oq.badge + ' —') : '';
+                document.getElementById('bridgeText').textContent = '';
+
+                var built = buildWriteLine(oq.q);
+                document.getElementById('warmupWriteLine').innerHTML = built.html;
+
+                var container = document.getElementById('warmupOptionsContainer');
+                container.innerHTML = '';
+                var wrap = document.createElement('div');
+                wrap.className = 'quiz-options';
+                oq.opts.forEach(function(opt, i) {
+                    var btn = document.createElement('button');
+                    btn.className = 'quiz-option';
+                    btn.innerHTML = '<span class="quiz-option-letter">' + OPT_LETTERS[i] + '</span><span class="quiz-option-text">' + opt + '</span>';
+                    btn.addEventListener('click', function() {
+                        openingAnswerIndex = i;
+                        var bridgeTexts = oq.afterTexts;
+                        var bridgeMsg = (bridgeTexts && bridgeTexts[i]) ? bridgeTexts[i] : (oq.afterText || '');
+                        document.getElementById('bridgeText').textContent = bridgeMsg;
+                        btn.classList.add('selected');
+                        setTimeout(function() { showPage(bridgePage); }, 400);
+                    });
+                    wrap.appendChild(btn);
+                });
+                container.appendChild(wrap);
+                playWarmupAnimation(built.optsDelay);
+            }
+
+            document.addEventListener('click', function(e) {
+                if (e.target.id === 'startBtn') {
+                    validateAndStartTest().then(function(canStart) {
+                        if (!canStart) return;
+                        shuffleQuestions();
+                        currentQuestionIndex = 0;
+                        dimensionScores = new Array(10).fill(0);
+                        answers = new Array(totalQuestions).fill(null);
+                        openingAnswerIndex = null;
+                        if (D.openingQuestion && D.openingQuestion.enabled) {
+                            showPage(warmupPage);
+                            renderWarmup();
+                        } else {
+                            showPage(quizPage);
+                            renderQuestion();
+                        }
+                    });
+                }
+                if (e.target.id === 'bridgeStartBtn') {
+                    currentQuestionIndex = 0;
+                    showPage(quizPage);
+                    renderQuestion();
+                }
+            });
+
+            function renderQuestion() {
+                var q = questions[currentQuestionIndex];
+                quizQuestion.textContent = q.q;
+                var progressTpl = D.quiz.progressText || '第 {current} / {total} 题';
+                quizProgressText.textContent = progressTpl
+                    .replace('{current}', currentQuestionIndex + 1)
+                    .replace('{total}', totalQuestions);
+                quizProgressFill.style.width = ((currentQuestionIndex + 1) / totalQuestions * 100) + '%';
+                quizOptionsContainer.innerHTML = '';
+                navBtnBack.style.visibility = currentQuestionIndex === 0 ? 'hidden' : 'visible';
+
+                var container = document.createElement('div');
+                container.className = 'quiz-options';
+                var prevAnswer = answers[currentQuestionIndex];
+                q.pairs.forEach(function(pair, i) {
+                    var btn = document.createElement('button');
+                    btn.className = 'quiz-option';
+                    if (prevAnswer === i) btn.classList.add('prev-selected');
+                    btn.innerHTML = '<span class="quiz-option-letter">' + QUIZ_LETTERS[i] + '</span><span class="quiz-option-text">' + pair.opt + '</span>';
+                    btn.addEventListener('click', function() {
+                        if (answers[currentQuestionIndex] !== null) {
+                            dimensionScores[q.dim] -= q.pairs[answers[currentQuestionIndex]].score;
+                        }
+                        answers[currentQuestionIndex] = i;
+                        dimensionScores[q.dim] += pair.score;
+                        container.querySelectorAll('.quiz-option').forEach(function(b) { b.classList.remove('selected', 'prev-selected'); });
+                        btn.classList.add('selected');
+                        setTimeout(function() { nextQuestion(); }, 200);
+                    });
+                    container.appendChild(btn);
+                });
+                quizOptionsContainer.appendChild(container);
+            }
+
+            function nextQuestion() {
+                currentQuestionIndex++;
+                if (currentQuestionIndex >= totalQuestions) showResult();
+                else { window.scrollTo(0, 0); setTimeout(renderQuestion, 120); }
+            }
+
+            navBtnBack.addEventListener('click', function() {
+                if (currentQuestionIndex > 0) {
+                    var prevQ = questions[currentQuestionIndex - 1];
+                    if (answers[currentQuestionIndex - 1] !== null) {
+                        dimensionScores[prevQ.dim] -= prevQ.pairs[answers[currentQuestionIndex - 1]].score;
+                    }
+                    answers[currentQuestionIndex - 1] = null;
+                    currentQuestionIndex--;
+                    window.scrollTo(0, 0);
+                    renderQuestion();
+                }
+            });
+
+            function determinePrimaryType(rawScores, maxSingleScore) {
+                var dimPcts = rawScores.map(function(s) { return Math.round((s / maxSingleScore) * 100); });
+                var maxRaw = Math.max.apply(null, rawScores);
+                var topIndices = [];
+                for (var i = 0; i < rawScores.length; i++) {
+                    if (rawScores[i] === maxRaw) topIndices.push(i);
+                }
+                if (topIndices.length === rawScores.length) {
+                    return { typeKey: D.dimensions.keys[0], highIdx: 0, isBalanced: false };
+                }
+                if (topIndices.length > 2) {
+                    return { typeKey: 'balanced', highIdx: topIndices[0], isBalanced: true };
+                }
+                var maxPct = dimPcts[topIndices[0]];
+                var closeCount = 0;
+                for (var j = 0; j < dimPcts.length; j++) {
+                    if (topIndices.indexOf(j) === -1 && (maxPct - dimPcts[j]) < 8) closeCount++;
+                }
+                if (closeCount >= 2) {
+                    return { typeKey: 'balanced', highIdx: topIndices[0], isBalanced: true };
+                }
+                return { typeKey: D.dimensions.keys[topIndices[0]], highIdx: topIndices[0], isBalanced: false };
+            }
+
+            function determineSecondaryType(rawScores, maxSingleScore) {
+                var ranked = rawScores.map(function(s, i) { return { score: s, idx: i }; })
+                    .sort(function(a, b) { return b.score - a.score || a.idx - b.idx; });
+                var topScore = ranked[0].score;
+                for (var i = 0; i < ranked.length; i++) {
+                    if (ranked[i].score < topScore) {
+                        var idx = ranked[i].idx;
+                        var key = D.dimensions.keys[idx];
+                        return { idx: idx, typeKey: key, pct: Math.round((ranked[i].score / maxSingleScore) * 100), typeData: D.types[key] };
+                    }
+                }
+                return null;
+            }
+
+            function getOpeningEcho(rawScores, maxSingleScore) {
+                if (openingAnswerIndex === null || !D.openingQuestion || !D.openingQuestion.openingEcho) return '';
+                var echo = D.openingQuestion.openingEcho[openingAnswerIndex] || '';
+                if (openingAnswerIndex === 3 && D.openingQuestion.openingEchoInterest) {
+                    var interestPct = Math.round((rawScores[0] / maxSingleScore) * 100);
+                    echo += interestPct >= 50 ? D.openingQuestion.openingEchoInterest.high : D.openingQuestion.openingEchoInterest.low;
+                }
+                return echo;
+            }
+
+            async function showResult() {
+                showPage(resultPage);
+                var maxSingleScore = D.scoring.maxScorePerDimension || 18;
+                var maxTotalScore = D.scoring.maxTotalScore || (maxSingleScore * 10);
+                var totalScore = dimensionScores.reduce(function(a, b) { return a + b; }, 0);
+                var avgPct = Math.round((totalScore / maxTotalScore) * 100);
+
+                var levelName = '', levelDesc = '';
+                if (D.result.scoreLevels) {
+                    for (var li = 0; li < D.result.scoreLevels.length; li++) {
+                        var lv = D.result.scoreLevels[li];
+                        if (avgPct >= lv.min && avgPct <= lv.max) { levelName = lv.name; levelDesc = lv.desc; break; }
+                    }
+                }
+
+                var typeResult = determinePrimaryType(dimensionScores, maxSingleScore);
+                var typeData = D.types[typeResult.typeKey];
+                var secondaryResult = determineSecondaryType(dimensionScores, maxSingleScore);
+
+                renderResultContent(dimensionScores, avgPct, levelName, levelDesc, typeResult, typeData, secondaryResult);
+
+                var testResult = buildTestResult(dimensionScores, avgPct, levelName, levelDesc, typeResult, typeData, secondaryResult);
+                saveTestResult(testResult);
+
+                var completionFlagKey = getCompletionFlagKey();
+                var alreadyCompleted = window.__amt_test_completed || localStorage.getItem(completionFlagKey) === 'true';
+                if (!alreadyCompleted && window.linkValidator) {
+                    try {
+                        window.__amt_test_completed = true;
+                        localStorage.setItem(completionFlagKey, 'true');
+                        await window.linkValidator.completeTest(undefined, testResult);
+                        console.log('测试完成记录成功');
+                    } catch (error) {
+                        console.error('记录测试完成失败:', error);
+                        window.__amt_test_completed = false;
+                        localStorage.removeItem(completionFlagKey);
+                    }
+                }
+
+                addPromotionLinkDelayed();
+                window.scrollTo(0, 0);
+            }
+
+            function drawRadarChart(rawScores) {
+                var canvas = document.getElementById('radarCanvas');
+                var ctx = canvas.getContext('2d');
+                var w = canvas.width, h = canvas.height, cx = w / 2, cy = h / 2, r = 250, levels = 5, totalAxes = 10;
+                var maxDimScore = 18;
+                var paper = '#f3efe6', ink = '#1c1a17', vermillion = '#c23a2b', ink3 = '#8a8278';
+
+                ctx.clearRect(0, 0, w, h);
+                ctx.fillStyle = paper;
+                ctx.fillRect(0, 0, w, h);
+
+                var level, i, angle, x, y, val;
+                ctx.lineWidth = 1.5;
+                for (level = 1; level <= levels; level++) {
+                    ctx.beginPath();
+                    for (i = 0; i < totalAxes; i++) {
+                        angle = (Math.PI * 2 / totalAxes) * i - Math.PI / 2;
+                        x = cx + r * (level / levels) * Math.cos(angle);
+                        y = cy + r * (level / levels) * Math.sin(angle);
+                        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                    ctx.strokeStyle = 'rgba(28,26,23,0.1)';
+                    ctx.stroke();
+                }
+                for (i = 0; i < totalAxes; i++) {
+                    angle = (Math.PI * 2 / totalAxes) * i - Math.PI / 2;
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
+                    ctx.strokeStyle = 'rgba(28,26,23,0.06)';
+                    ctx.stroke();
+                }
+
+                var refValues = new Array(10).fill(2.5);
+                ctx.beginPath();
+                for (i = 0; i < totalAxes; i++) {
+                    angle = (Math.PI * 2 / totalAxes) * i - Math.PI / 2;
+                    val = refValues[i] / levels;
+                    x = cx + r * val * Math.cos(angle);
+                    y = cy + r * val * Math.sin(angle);
+                    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(138,130,120,0.08)';
+                ctx.fill();
+                ctx.strokeStyle = ink3;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.beginPath();
+                for (i = 0; i < totalAxes; i++) {
+                    angle = (Math.PI * 2 / totalAxes) * i - Math.PI / 2;
+                    val = rawScores[i] / maxDimScore;
+                    x = cx + r * val * Math.cos(angle);
+                    y = cy + r * val * Math.sin(angle);
+                    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(194,58,43,0.12)';
+                ctx.fill();
+                ctx.strokeStyle = vermillion;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                for (i = 0; i < totalAxes; i++) {
+                    angle = (Math.PI * 2 / totalAxes) * i - Math.PI / 2;
+                    val = rawScores[i] / maxDimScore;
+                    x = cx + r * val * Math.cos(angle);
+                    y = cy + r * val * Math.sin(angle);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 8, 0, Math.PI * 2);
+                    ctx.fillStyle = vermillion;
+                    ctx.fill();
+                    ctx.strokeStyle = paper;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                var labelR = r + 52;
+                for (i = 0; i < totalAxes; i++) {
+                    angle = (Math.PI * 2 / totalAxes) * i - Math.PI / 2;
+                    var pct = Math.round((rawScores[i] / maxDimScore) * 100);
+                    ctx.fillStyle = ink;
+                    ctx.font = 'bold 26px Noto Serif SC, PingFang SC, serif';
+                    ctx.fillText(dimLabels[i], cx + labelR * Math.cos(angle), cy + labelR * Math.sin(angle) - 16);
+                    ctx.fillStyle = vermillion;
+                    ctx.font = 'bold 28px Noto Serif SC, PingFang SC, serif';
+                    ctx.fillText(pct + '%', cx + labelR * Math.cos(angle), cy + labelR * Math.sin(angle) + 20);
+                }
+
+                var rl = D.result.radarLabels;
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.fillStyle = vermillion;
+                ctx.fillRect(25, 28, 18, 6);
+                ctx.font = 'bold 20px PingFang SC, sans-serif';
+                ctx.fillStyle = ink;
+                ctx.fillText(rl.you, 48, 24);
+                ctx.fillStyle = ink3;
+                ctx.fillRect(25, 50, 18, 6);
+                ctx.fillText(rl.reference, 48, 46);
+
+                var avgPct2 = Math.round((rawScores.reduce(function(a,b){return a+b;},0) / (maxDimScore * 10)) * 100);
+                ctx.fillStyle = 'rgba(28,26,23,0.05)';
+                ctx.beginPath();
+                ctx.arc(cx, cy, 58, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = ink;
+                ctx.font = 'bold 58px Noto Serif SC, PingFang SC, serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(avgPct2 + '%', cx, cy - 6);
+                ctx.fillStyle = ink3;
+                ctx.font = 'bold 20px PingFang SC, sans-serif';
+                ctx.fillText(rl.score, cx, cy + 40);
+            }
+
+            function renderScoreTable(rawScores, maxSingle) {
+                var html = '<div class="score-table-title">' + D.result.scoreTableTitle + '</div>';
+                for (var i = 0; i < 10; i++) {
+                    var pct = Math.round((rawScores[i] / maxSingle) * 100);
+                    var desc = pct >= 50 ? dimDescriptions[i].high : dimDescriptions[i].low;
+                    html += '<div class="score-row">' +
+                        '<span class="score-dim-name">' + dimLabels[i] + '</span>' +
+                        '<span class="score-value">' + pct + '%</span>' +
+                        '<div class="score-bar-wrap"><div class="score-bar-fill" style="width:0%;" data-width="' + pct + '%"></div></div>' +
+                        '<span class="score-desc">' + desc + '</span></div>';
+                }
+                document.getElementById('scoreTable').innerHTML = html;
+                requestAnimationFrame(function() {
+                    document.querySelectorAll('.score-bar-fill').forEach(function(f) {
+                        f.style.width = f.getAttribute('data-width');
+                    });
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (e.target.id === 'restartBtn') {
+                    if (window.linkValidator && typeof window.linkValidator.clearLocalResult === 'function') {
+                        window.linkValidator.clearLocalResult();
+                    }
+                    var token = null;
+                    var urlParams = new URLSearchParams(window.location.search);
+                    token = urlParams.get('token');
+                    if (!token && window.linkValidator && window.linkValidator.token) {
+                        token = window.linkValidator.token;
+                    }
+                    if (token) {
+                        var newUrlParams = new URLSearchParams();
+                        newUrlParams.set('token', token);
+                        newUrlParams.set('restart', 'true');
+                        if (urlParams.get('unlimited') === 'true') {
+                            newUrlParams.set('unlimited', 'true');
+                        }
+                        window.location.href = window.location.pathname + '?' + newUrlParams.toString();
+                        return;
+                    }
+                    window.__amt_test_completed = false;
+                    localStorage.removeItem(getCompletionFlagKey());
+                    testStarted = false;
+                    currentQuestionIndex = 0;
+                    dimensionScores = new Array(10).fill(0);
+                    answers = new Array(totalQuestions).fill(null);
+                    openingAnswerIndex = null;
+                    warmupPage.classList.remove('warmup-play');
+                    showPage(coverPage);
+                    addPromotionLinkDelayed();
+                }
+            });
+
+            renderCover();
+            showPage(coverPage);
+        })();
+    </script>
+
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        (function() {
+            var validatorInstance = null;
+
+            if (typeof PsyTestValidator !== 'undefined') {
+                PsyTestValidator.init(null, {
+                    onSuccess: function(result, validator) {
+                        console.log('SDK初始化成功，链接有效:', result);
+                        validatorInstance = validator;
+                        window.linkValidator = validator;
+                        document.body.classList.remove('page-disabled');
+                    },
+                    onError: function(error) {
+                        console.error('SDK初始化失败，链接无效:', error);
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                            window.linkValidator = validatorInstance;
+                        }
+                        document.body.classList.remove('page-disabled');
+                    },
+                    onLoad: function(data) {
+                        console.log('SDK加载完成回调:', data);
+                        if (!validatorInstance) {
+                            if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                                validatorInstance = window.PsyTestValidator.getInstance();
+                            }
+                            if (validatorInstance) {
+                                window.linkValidator = validatorInstance;
+                            }
+                        }
+
+                        setTimeout(function() {
+                            if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                                PsyTestValidator.addPromotionLink();
+                            }
+                        }, 100);
+
+                        var urlParams = new URLSearchParams(window.location.search);
+                        var isRestart = urlParams.get('restart') === 'true';
+
+                        if (isRestart) {
+                            if (validatorInstance && validatorInstance.clearLocalResult) {
+                                validatorInstance.clearLocalResult();
+                            }
+                            var restartToken = validatorInstance && validatorInstance.token;
+                            if (restartToken) {
+                                try {
+                                    localStorage.removeItem('test_result_' + restartToken);
+                                    localStorage.removeItem('amt_test_completed_' + restartToken);
+                                } catch (e) {}
+                            }
+                            window.__amt_test_completed = false;
+                            testStarted = true;
+                            urlParams.delete('restart');
+                            var newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                            window.history.replaceState({}, '', newUrl);
+                            return;
+                        }
+
+                        if (data.valid && data.has_local_result) {
+                            if (typeof window.amtRestoreResult === 'function') {
+                                window.amtRestoreResult();
+                            }
+                            return;
+                        }
+                    }
+                });
+            } else {
+                console.error('验证SDK未加载');
+                document.body.classList.remove('page-disabled');
+            }
+        })();
+    </script>
+</body>
+</html>

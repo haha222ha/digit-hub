@@ -137,7 +137,7 @@ def create_order(
     channel: str = "wxpay",
     device: str = "pc",
 ) -> dict:
-    from cloud_deploy.cloud_api.payment_plans import is_addon_plan, is_assess_plan
+    from cloud_deploy.cloud_api.payment_plans import is_addon_plan, is_assess_plan, is_psy_dist_plan
 
     plan = get_plan(plan_code)
     if not plan:
@@ -192,6 +192,8 @@ def create_order(
         goods_name = f"心象测-{plan['label']}"
     elif is_addon_plan(plan["plan_code"]):
         goods_name = f"定制分析-{plan['label']}"
+    elif is_psy_dist_plan(plan["plan_code"]):
+        goods_name = f"心理分销-{plan['label']}"
     else:
         goods_name = f"AI选品会员-{plan['label']}"
 
@@ -478,6 +480,46 @@ def handle_hwxun_notify(params: dict) -> str:
         return "fail"
     paid_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     ch = row.get("channel") or "wxpay"
+    from cloud_deploy.cloud_api.payment_plans import is_addon_plan, is_psy_dist_plan
+
+    if is_psy_dist_plan(row["plan_code"]):
+        ok = db.mark_payment_order_paid(
+            order_no,
+            gateway_trade_no=gateway_trade_no,
+            auth_code="",
+            paid_at=paid_at,
+        )
+        if not ok:
+            ok = db.mark_payment_order_paid_force(
+                order_no,
+                gateway_trade_no=gateway_trade_no,
+                auth_code="",
+                paid_at=paid_at,
+            )
+        if not ok:
+            return "fail"
+        user_id = row.get("user_id")
+        if user_id:
+            try:
+                from cloud_deploy.cloud_api import dist_service
+
+                dist_service.fulfill_quota_from_payment(int(user_id), row["plan_code"], order_no)
+                db.mark_payment_order_fulfilled(order_no, int(user_id))
+            except Exception as e:
+                logger.exception(
+                    "psy_dist quota fulfill failed order_no=%s user_id=%s",
+                    order_no,
+                    user_id,
+                )
+                try:
+                    db.mark_payment_order_fulfill_error(
+                        order_no,
+                        error=f"psy_dist_failed: {type(e).__name__}: {e}",
+                    )
+                except Exception:
+                    pass
+        return "success"
+
     note = _payment_fulfillment_note(order_no, ch, row["plan_code"])
     codes = db.generate_auth_codes(
         count=1,

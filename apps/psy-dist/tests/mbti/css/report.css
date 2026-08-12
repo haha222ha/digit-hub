@@ -1,0 +1,476 @@
+/**
+ * MBTI 报告页面样式
+ * 完全独立的样式，不依赖任何外部框架
+ */
+
+/* 报告容器 */
+.report-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+/* 加载提示 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1890ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* 个性类型展示区 */
+.type-hero {
+  border-radius: 24px;
+  padding: 48px 40px;
+  margin-bottom: 32px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  color: white;
+}
+
+.type-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(50%, -50%);
+}
+
+.type-hero-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 8px 20px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.type-code {
+  font-size: 120px;
+  font-weight: bold;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  letter-spacing: 6px;
+  margin-bottom: 16px;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+.type-name {
+  font-size: 42px;
+  margin: 0 0 24px 0;
+  font-weight: 600;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  line-height: 1.2;
+}
+
+.type-slogan {
+  font-size: 22px;
+  line-height: 1.6;
+  margin: 0 auto 32px;
+  max-width: 600px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  font-weight: 400;
+}
+
+.report-date {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+/* 章节标题 */
+.section-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+  margin: 0 0 32px 0;
+}
+
+/* 维度得分详情 */
+.dimensions-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.dimensions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+}
+
+.dimension-card {
+  min-height: 300px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dimension-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* 类型详细描述 */
+.description-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.description-content {
+  margin-top: 24px;
+}
+
+/* 优势与劣势 */
+.strengths-weaknesses-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.strengths-card,
+.weaknesses-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.strengths-card {
+  background: linear-gradient(135deg, #f0fdf4, #ffffff);
+}
+
+.weaknesses-card {
+  background: linear-gradient(135deg, #fffbeb, #ffffff);
+}
+
+.card-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+}
+
+.strengths-card .card-title {
+  color: #059669;
+}
+
+.weaknesses-card .card-title {
+  color: #d97706;
+}
+
+.list-content {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list-content li {
+  padding-left: 24px;
+  position: relative;
+}
+
+.list-content li::before {
+  content: '•';
+  position: absolute;
+  left: 8px;
+  color: #666;
+  font-weight: bold;
+}
+
+/* 章节副标题 */
+.section-subtitle {
+  text-align: center;
+  color: #6b7280;
+  font-size: 16px;
+  margin: -24px 0 32px 0;
+}
+
+/* 核心特质与行为模式 */
+.core-traits-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.core-traits-collapse {
+  margin-top: 24px;
+}
+
+.core-trait-panel {
+  margin-bottom: 16px;
+}
+
+.core-trait-header {
+  cursor: pointer;
+}
+
+/* 生活工作场景建议 */
+.lifestyle-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.lifestyle-grid {
+  margin-top: 24px;
+}
+
+/* 压力应对与成长路径 */
+.stress-growth-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stress-growth-content {
+  margin-top: 24px;
+}
+
+/* 个性化发展建议 */
+.recommendations-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.recommendations-list {
+  margin-top: 24px;
+}
+
+/* 理解与应用 */
+.understanding-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.understanding-content {
+  margin-top: 24px;
+}
+
+.card-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 20px 0;
+}
+
+/* 底部操作区 */
+.report-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+  padding: 24px;
+  width: 100%;
+}
+
+.footer-button {
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.footer-button:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.footer-button.primary {
+  background: #1890ff;
+  border-color: #1890ff;
+  color: #fff;
+}
+
+.footer-button.primary:hover {
+  background: #40a9ff;
+  border-color: #40a9ff;
+}
+
+/* 推广链接区域样式（SDK自动添加到.report-footer中） */
+.report-footer #link-validator-promotion-link {
+  width: 100%;
+  text-align: center;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .report-container {
+    padding: 12px;
+  }
+  
+  .type-hero {
+    padding: 32px 24px;
+  }
+  
+  .type-code {
+    font-size: 80px;
+    letter-spacing: 4px;
+  }
+  
+  .type-name {
+    font-size: 32px;
+  }
+  
+  .type-slogan {
+    font-size: 18px;
+  }
+  
+  .section-title {
+    font-size: 24px;
+  }
+  
+  .dimensions-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .dimension-card {
+    padding: 16px;
+  }
+  
+  .strengths-weaknesses-section {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .strengths-card,
+  .weaknesses-card,
+  .description-section,
+  .core-traits-section,
+  .lifestyle-section,
+  .stress-growth-section,
+  .recommendations-section,
+  .understanding-section {
+    padding: 24px 16px;
+  }
+  
+  .lifestyle-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stress-growth-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .report-footer {
+    flex-direction: column;
+  }
+  
+  .footer-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .type-code {
+    font-size: 60px;
+    letter-spacing: 2px;
+  }
+  
+  .type-name {
+    font-size: 28px;
+  }
+  
+  .type-slogan {
+    font-size: 16px;
+  }
+  
+  .section-title {
+    font-size: 20px;
+  }
+  
+  .dimension-card {
+    padding: 12px;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .report-container {
+    background: #fff;
+    padding: 0;
+  }
+  
+  .report-footer {
+    display: none;
+  }
+  
+  .loading-overlay {
+    display: none;
+  }
+  
+  .type-hero {
+    break-inside: avoid;
+  }
+  
+  .dimension-card,
+  .strengths-card,
+  .weaknesses-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+

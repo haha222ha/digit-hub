@@ -1,0 +1,2590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="TAA心理年龄测试 - 探索你的内心世界，了解你的心理年龄与实际年龄的差异">
+    <meta name="keywords" content="心理年龄测试,心理测评,TAA,年龄测试">
+    <title>TAA心理年龄测试 - 探索你的内心世界</title>
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <!-- 使用在线CDN资源，方便测试 -->
+    <!-- 添加备用CDN和错误处理，提高QQ浏览器兼容性 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          onerror="console.warn('Font Awesome加载失败，图标可能无法显示'); this.onerror=null;">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"
+            onerror="console.error('ECharts加载失败，雷达图可能无法显示'); this.onerror=null; window.echartsFallback = true;"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 100, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .page {
+            padding: 50px 40px;
+            display: none;
+            flex-direction: column;
+            min-height: 600px;
+        }
+        
+        .active {
+            display: flex;
+        }
+        
+        /* 欢迎页样式 */
+        #welcome-page {
+            text-align: center;
+            background: linear-gradient(to bottom right, #ffffff, #f8fbff);
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #6a93cb 0%, #a4bfef 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 5px 15px rgba(106, 147, 203, 0.2);
+        }
+        
+        .logo i {
+            font-size: 50px;
+            color: white;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #6a93cb, #4a6fa5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .features {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .feature {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            width: 200px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature i {
+            font-size: 2.5rem;
+            color: #6a93cb;
+            margin-bottom: 15px;
+        }
+        
+        .feature h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .feature p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #6a93cb 0%, #4a6fa5 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 5px 15px rgba(106, 147, 203, 0.4);
+            box-sizing: border-box;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(106, 147, 203, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-prev {
+            background: white;
+            color: #6a93cb;
+            border: 2px solid #6a93cb;
+            padding: 14px 38px;
+        }
+        
+        .btn-next {
+            background: linear-gradient(135deg, #6a93cb 0%, #4a6fa5 100%);
+            color: white;
+            padding: 16px 40px;
+        }
+        
+        /* 测试页样式 */
+        #test-page {
+            background: white;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background: #f0f4ff;
+            border-radius: 10px;
+            height: 12px;
+            margin-bottom: 40px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #6a93cb, #4a6fa5);
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+        
+        .question-count {
+            text-align: right;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .question-text {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+        
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .option {
+            padding: 20px;
+            background: #f8fbff;
+            border: 2px solid #e0e7ff;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option:hover {
+            background: #eef5ff;
+            border-color: #c2d6ff;
+            transform: translateY(-2px);
+        }
+        
+        .option.selected {
+            background: #e1ebff;
+            border-color: #6a93cb;
+            box-shadow: 0 5px 15px rgba(106, 147, 203, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .option .index {
+            width: 30px;
+            height: 30px;
+            background: #6a93cb;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .option.selected .index {
+            background: #4a6fa5;
+            transform: scale(1.1);
+        }
+        
+        .option .checkmark {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            color: #6a93cb;
+            font-size: 1.2rem;
+            transition: opacity 0.3s ease;
+        }
+        
+        .option.selected .checkmark {
+            opacity: 1;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+        
+        /* 结果页样式 */
+        #result-page {
+            text-align: center;
+            background: linear-gradient(to bottom right, #ffffff, #f8fbff);
+        }
+        
+        .result-header {
+            margin-bottom: 30px;
+        }
+        
+        .result-title {
+            font-size: 2.2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .result-subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            display: none;
+        }
+        
+        /* 圆形年龄显示样式 - 放大1.5倍 */
+        .age-circle-container {
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .age-circle {
+            width: 300px; /* 从200px增加到300px，放大1.5倍 */
+            height: 300px; /* 从200px增加到300px，放大1.5倍 */
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6a93cb 0%, #a4bfef 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 10px 30px rgba(106, 147, 203, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .age-circle::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .age-number {
+            font-size: 6rem; /* 从4rem增加到6rem，放大1.5倍 */
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+        
+        .age-label {
+            font-size: 1.8rem; /* 从1.2rem增加到1.8rem，放大1.5倍 */
+            opacity: 0.9;
+        }
+        
+        /* 年龄差异显示样式 - 修改为黑色字体 */
+        .age-diff-container {
+            margin: 20px 0 40px;
+        }
+        
+        .age-diff {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #000; /* 黑色字体 */
+            display: inline-block;
+        }
+        
+        .age-diff span {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        /* 年龄进度条样式 - 放宽一点 */
+        .age-progress-container {
+            margin: 40px 0 30px;
+            width: 100%;
+            padding: 0 20px;
+        }
+        
+        .age-progress {
+            position: relative;
+            height: 40px; /* 从30px增加到40px，放宽一点 */
+            background: #f8f9fa;
+            border-radius: 20px; /* 圆角相应调整 */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .progress-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #a4bfef, #6a93cb);
+            opacity: 0.2;
+        }
+        
+        .progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #6a93cb, #4a6fa5);
+            border-radius: 20px; /* 圆角相应调整 */
+            transition: width 1.5s ease;
+            box-shadow: 0 2px 10px rgba(106, 147, 203, 0.3);
+        }
+        
+        .progress-labels {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            z-index: 2;
+        }
+        
+        .progress-label {
+            font-size: 0.9rem;
+            color: #4a6fa5;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .progress-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.4rem; /* 从1.2rem增加到1.4rem，适应新高度 */
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            z-index: 3;
+        }
+        
+        /* 雷达图容器样式 - 优化移动端留白 */
+        .radar-container {
+            width: 100%;
+            height: 600px;
+            margin: 30px 0;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #radar-chart {
+            width: 100%;
+            height: 100%;
+            min-height: 550px;
+        }
+        
+        /* 底部操作区 */
+        .report-footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-top: 32px;
+            padding: 24px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* 推广链接区域样式（SDK自动添加到.report-footer中） */
+        .report-footer #link-validator-promotion-link {
+            width: 100%;
+            text-align: center;
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            box-sizing: border-box;
+        }
+        
+        /* 首页推广链接样式（SDK自动添加到.welcome-footer中） */
+        .welcome-footer #link-validator-promotion-link {
+            width: 100%;
+            text-align: center;
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        /* 确保welcome-footer可见 */
+        .welcome-footer {
+            display: block !important;
+            visibility: visible !important;
+        }
+        
+        .result-description {
+            text-align: left;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            margin: 30px 0;
+            line-height: 1.8;
+        }
+        
+        .suggestion {
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            margin: 25px 0;
+            text-align: left;
+            border: none;
+            box-shadow: none;
+        }
+        
+        .suggestion h3 {
+            color: #6a93cb;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .suggestion h3 i {
+            margin-right: 10px;
+            color: #6a93cb;
+        }
+        
+        .suggestion p {
+            color: #6a93cb;
+        }
+        
+        /* 免责声明样式 */
+        .result-disclaimer {
+            text-align: center;
+            color: #666;
+            font-size: 1.08rem;
+            margin: 25px 0 15px;
+            line-height: 1.4;
+            opacity: 0.7;
+        }
+        
+        .footer {
+            margin-top: auto;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            padding-top: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* 加载动画样式 */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #6a93cb;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        .loading-text {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 模态弹窗样式 - 优化 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        
+        .modal h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .modal p {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e7ff;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            text-align: center;
+            margin: 15px 0;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .modal-input:focus {
+            outline: none;
+            border-color: #6a93cb;
+        }
+        
+        .modal-input:invalid {
+            border-color: #e74c3c;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .modal-btn {
+            padding: 10px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .modal-btn.confirm {
+            background: #6a93cb;
+            color: white;
+            width: 100%;
+        }
+        
+        .modal-btn.confirm:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        @media (max-width: 768px) {
+            .page {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .feature {
+                width: 100%;
+            }
+            
+            .question-text {
+                font-size: 1.2rem;
+            }
+            
+            .result-disclaimer {
+                font-size: 0.9rem;
+            }
+            
+            .result-title {
+                font-size: 1.8rem;
+            }
+            
+            /* 移动端圆形年龄显示优化 */
+            .age-circle {
+                width: 225px; /* 从150px增加到225px，放大1.5倍 */
+                height: 225px; /* 从150px增加到225px，放大1.5倍 */
+            }
+            
+            .age-number {
+                font-size: 4.5rem; /* 从3rem增加到4.5rem，放大1.5倍 */
+            }
+            
+            .age-label {
+                font-size: 1.35rem; /* 从1rem增加到1.35rem，放大1.5倍 */
+            }
+            
+            .age-diff {
+                font-size: 1.2rem;
+            }
+            
+            /* 移动端进度条优化 */
+            .age-progress-container {
+                margin: 30px 0 20px;
+                padding: 0 15px;
+            }
+            
+            .age-progress {
+                height: 35px; /* 从25px增加到35px，放宽一点 */
+            }
+            
+            .progress-label {
+                font-size: 0.8rem;
+            }
+            
+            .progress-value {
+                font-size: 1.2rem; /* 从1rem增加到1.2rem，适应新高度 */
+            }
+            
+            /* 移动端雷达图优化 - 减少上下留白 */
+            .radar-container {
+                height: 500px;
+                margin: 20px 0 15px; /* 减少上下margin */
+                padding: 15px 15px 10px; /* 减少底部padding */
+            }
+            
+            #radar-chart {
+                min-height: 450px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+                width: 95%;
+            }
+            
+            .btn-prev, .btn-next {
+                padding: 12px 24px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .page {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .feature {
+                padding: 15px;
+            }
+            
+            .feature i {
+                font-size: 2rem;
+            }
+            
+            .btn {
+                padding: 14px 30px;
+                font-size: 1rem;
+            }
+            
+            .question-text {
+                font-size: 1.1rem;
+            }
+            
+            .option {
+                padding: 15px;
+            }
+            
+            .result-title {
+                font-size: 1.5rem;
+            }
+            
+            /* 小屏手机圆形年龄显示优化 */
+            .age-circle {
+                width: 180px; /* 从120px增加到180px，放大1.5倍 */
+                height: 180px; /* 从120px增加到180px，放大1.5倍 */
+            }
+            
+            .age-number {
+                font-size: 3.75rem; /* 从2.5rem增加到3.75rem，放大1.5倍 */
+            }
+            
+            .age-label {
+                font-size: 1.35rem; /* 从0.9rem增加到1.35rem，放大1.5倍 */
+            }
+            
+            .age-diff {
+                font-size: 1rem;
+            }
+            
+            /* 小屏手机进度条优化 */
+            .age-progress-container {
+                margin: 25px 0 15px;
+                padding: 0 10px;
+            }
+            
+            .age-progress {
+                height: 33px; /* 从22px增加到33px，放宽一点 */
+            }
+            
+            .progress-label {
+                font-size: 0.7rem;
+                padding: 1px 5px;
+            }
+            
+            .progress-value {
+                font-size: 1.1rem; /* 从0.9rem增加到1.1rem，适应新高度 */
+            }
+            
+            /* 小屏手机雷达图进一步优化 - 减少上下留白 */
+            .radar-container {
+                height: 450px;
+                padding: 10px 10px 5px; /* 减少底部padding */
+                margin: 15px 0 10px; /* 减少上下margin */
+            }
+            
+            #radar-chart {
+                min-height: 400px;
+            }
+            
+            .result-description {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 错误提示容器 -->
+    <div id="errorOverlay" class="error-overlay" style="display: none;">
+        <p id="errorMessage"></p>
+    </div>
+    
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+    
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init(null, {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                        window.linkValidator = validatorInstance;
+                    }
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (validatorInstance) {
+                            window.linkValidator = validatorInstance;
+                        }
+                    }
+                    
+                    // aat测试的结果页在同一个HTML中（#result-page），不需要跳转
+                    // 检查是否是重新测试（通过URL参数判断）
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const isRestart = urlParams.get('restart') === 'true';
+                    
+                    // 如果是重新测试，清除本地测试结果
+                    if (isRestart && validatorInstance && validatorInstance.clearLocalResult) {
+                        validatorInstance.clearLocalResult(); // aat是单视角测试
+                        // 清除restart参数（避免刷新后再次触发）
+                        urlParams.delete('restart');
+                        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                        window.history.replaceState({}, '', newUrl);
+                        // 重新测试时，保持在欢迎页，不跳转到结果页
+                        return;
+                    }
+                    
+                    // 检查当前页面状态
+                    const resultPage = document.getElementById('result-page');
+                    const welcomePage = document.getElementById('welcome-page');
+                    const testPage = document.getElementById('test-page');
+                    const isOnResultPage = resultPage && resultPage.classList.contains('active');
+                    const isOnWelcomePage = welcomePage && welcomePage.classList.contains('active');
+                    const isOnTestPage = testPage && testPage.classList.contains('active');
+                    
+                    // 如果有本地结果，需要切换到结果页并显示结果
+                    if (data.has_local_result && data.valid && !isRestart) {
+                        // 检查结果内容是否已经显示
+                        const resultContent = document.getElementById('result-content');
+                        const resultContentDisplayed = resultContent && resultContent.style.display !== 'none';
+                        
+                        // 如果当前在结果页面且结果内容已显示，保持在结果页
+                        if (isOnResultPage && resultContentDisplayed) {
+                            console.log('当前在结果页面，且有本地结果且已显示，保持在结果页');
+                            return;
+                        }
+                        
+                        // 如果不在结果页，切换到结果页并显示结果
+                        console.log('检测到本地结果，切换到结果页并显示结果', {
+                            isOnResultPage,
+                            isOnWelcomePage,
+                            isOnTestPage,
+                            hasLocalResult: data.has_local_result
+                        });
+                        
+                        // 隐藏其他页面
+                        if (welcomePage) welcomePage.classList.remove('active');
+                        if (testPage) testPage.classList.remove('active');
+                        
+                        // 显示结果页面
+                        if (resultPage) {
+                            resultPage.classList.add('active');
+                            // 页面切换后，重新调用addPromotionLink，确保推广链接添加到可见的footer
+                            setTimeout(() => {
+                                if (window.linkValidator && typeof window.PsyTestValidator !== 'undefined' && window.PsyTestValidator.addPromotionLink) {
+                                    window.PsyTestValidator.addPromotionLink();
+                                }
+                            }, 200);
+                            // 延迟加载和显示结果内容，确保页面已切换
+                            setTimeout(() => {
+                                // 从localStorage加载保存的结果数据
+                                const token = urlParams.get('token') || (validatorInstance && validatorInstance.token);
+                                if (token && window.linkValidator) {
+                                    try {
+                                        // 尝试从SDK保存的localStorage中加载结果
+                                        const storageKey = `test_result_${token}`;
+                                        const savedResult = localStorage.getItem(storageKey);
+                                        if (savedResult) {
+                                            try {
+                                                const resultData = JSON.parse(savedResult);
+                                                console.log('从localStorage加载结果数据:', resultData);
+                                                
+                                                // 如果结果数据包含完整的测试结果，直接使用
+                                                if (resultData.psychologicalAge !== undefined && resultData.userAge !== undefined) {
+                                                    // 恢复全局变量
+                                                    userAge = resultData.userAge;
+                                                    
+                                                    // 使用保存的结果数据填充页面
+                                                    const resultContent = document.getElementById('result-content');
+                                                    const actualAgeSpan = document.getElementById('actual-age');
+                                                    const circleAge = document.getElementById('circle-age');
+                                                    const ageDiffElement = document.getElementById('age-diff');
+                                                    const analysisText = document.getElementById('analysis-text');
+                                                    const strengthsText = document.getElementById('strengths-text');
+                                                    const suggestionText = document.getElementById('suggestion-text');
+                                                    const progressFill = document.getElementById('progress-fill');
+                                                    const progressValue = document.getElementById('progress-value');
+                                                    
+                                                    if (actualAgeSpan) actualAgeSpan.textContent = resultData.userAge;
+                                                    if (circleAge) circleAge.textContent = resultData.psychologicalAge;
+                                                    
+                                                    // 更新年龄差异显示
+                                                    const ageDiff = resultData.ageDiff || (resultData.psychologicalAge - resultData.userAge);
+                                                    if (ageDiffElement) {
+                                                        if (ageDiff > 5) {
+                                                            ageDiffElement.innerHTML = `您的心理年龄可能比实际年龄大 <span>${ageDiff}岁</span>`;
+                                                        } else if (ageDiff < -5) {
+                                                            ageDiffElement.innerHTML = `您的心理年龄可能比实际年龄小 <span>${Math.abs(ageDiff)}岁</span>`;
+                                                        } else {
+                                                            ageDiffElement.innerHTML = `您的心理年龄与实际年龄基本一致`;
+                                                        }
+                                                    }
+                                                    
+                                                    // 更新圆形显示和进度条
+                                                    if (progressFill && progressValue) {
+                                                        const psychologicalAge = resultData.psychologicalAge;
+                                                        let progressPercent;
+                                                        if (psychologicalAge <= 10) {
+                                                            progressPercent = 0;
+                                                        } else if (psychologicalAge >= 80) {
+                                                            progressPercent = 100;
+                                                        } else {
+                                                            progressPercent = ((psychologicalAge - 10) / 70) * 100;
+                                                        }
+                                                        progressFill.style.width = `${progressPercent}%`;
+                                                        progressValue.textContent = `${psychologicalAge}岁`;
+                                                    }
+                                                    
+                                                    // 设置解析文本
+                                                    if (resultData.analysis) {
+                                                        if (analysisText) analysisText.textContent = resultData.analysis.analysis || resultData.analysis;
+                                                        if (strengthsText) strengthsText.textContent = resultData.analysis.strengths || '';
+                                                        if (suggestionText) suggestionText.textContent = resultData.analysis.suggestion || '';
+                                                    }
+                                                    
+                                                    // 显示结果内容
+                                                    if (resultContent) {
+                                                        resultContent.style.display = 'block';
+                                                    }
+                                                    
+                                                    // 绘制雷达图（延迟执行，确保容器已渲染）
+                                                    if (resultData.dimensionScores) {
+                                                        // 等待页面切换完成后再绘制
+                                                        setTimeout(() => {
+                                                            try {
+                                                                // 通过window对象访问drawRadarChart和radarChart（它们在另一个script标签中定义）
+                                                                // 由于作用域隔离，需要等待这些变量被赋值到window上，或者直接调用
+                                                                if (typeof window.drawRadarChart === 'function') {
+                                                                    // 如果已经挂载到window上，直接使用
+                                                                    window.drawRadarChart(resultData.dimensionScores);
+                                                                } else if (typeof drawRadarChart === 'function') {
+                                                                    // 如果在当前作用域中可用，直接使用
+                                                                    drawRadarChart(resultData.dimensionScores);
+                                                                } else {
+                                                                    // 尝试延迟访问，等待函数定义
+                                                                    // 注意：drawRadarChart在另一个script标签中定义，需要等待它被赋值到window上
+                                                                    let retryCount = 0;
+                                                                    const maxRetries = 30; // 增加到30次，等待3秒
+                                                                    const checkAndDraw = setInterval(() => {
+                                                                        // 优先检查window.drawRadarChart（函数定义时会赋值到这里）
+                                                                        if (typeof window.drawRadarChart === 'function') {
+                                                                            clearInterval(checkAndDraw);
+                                                                            window.drawRadarChart(resultData.dimensionScores);
+                                                                        } else if (typeof drawRadarChart === 'function') {
+                                                                            // 如果在当前作用域中可用（理论上不会进入这里）
+                                                                            clearInterval(checkAndDraw);
+                                                                            drawRadarChart(resultData.dimensionScores);
+                                                                        } else if (retryCount >= maxRetries) {
+                                                                            clearInterval(checkAndDraw);
+                                                                            console.error('drawRadarChart函数未找到，无法绘制雷达图', {
+                                                                                windowDrawRadarChart: typeof window.drawRadarChart,
+                                                                                localDrawRadarChart: typeof drawRadarChart,
+                                                                                retryCount: retryCount
+                                                                            });
+                                                                        }
+                                                                        retryCount++;
+                                                                    }, 100);
+                                                                }
+                                                                
+                                                                // 多次调用resize确保图表大小正确
+                                                                setTimeout(() => {
+                                                                    const chartInstance = window.radarChart || (typeof radarChart !== 'undefined' ? radarChart : null);
+                                                                    if (chartInstance && typeof chartInstance.resize === 'function') {
+                                                                        chartInstance.resize();
+                                                                    }
+                                                                    window.dispatchEvent(new Event('resize'));
+                                                                }, 300);
+                                                                setTimeout(() => {
+                                                                    const chartInstance = window.radarChart || (typeof radarChart !== 'undefined' ? radarChart : null);
+                                                                    if (chartInstance && typeof chartInstance.resize === 'function') {
+                                                                        chartInstance.resize();
+                                                                    }
+                                                                    window.dispatchEvent(new Event('resize'));
+                                                                }, 600);
+                                                                setTimeout(() => {
+                                                                    const chartInstance = window.radarChart || (typeof radarChart !== 'undefined' ? radarChart : null);
+                                                                    if (chartInstance && typeof chartInstance.resize === 'function') {
+                                                                        chartInstance.resize();
+                                                                    }
+                                                                }, 1000);
+                                                            } catch (error) {
+                                                                console.error('绘制雷达图时出错:', error);
+                                                            }
+                                                        }, 400);
+                                                    }
+                                                    
+                                                    return;
+                                                }
+                                            } catch (e) {
+                                                console.error('解析localStorage结果数据失败:', e);
+                                            }
+                                        }
+                                    } catch (error) {
+                                        console.error('从localStorage加载结果失败:', error);
+                                    }
+                                }
+                                
+                                // 如果无法从localStorage加载结果，只显示结果内容容器
+                                // 这种情况下，用户需要重新测试
+                                const resultContent = document.getElementById('result-content');
+                                if (resultContent) {
+                                    resultContent.style.display = 'block';
+                                }
+                            }, 100);
+                        }
+                        return;
+                    }
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+            document.body.classList.add('page-disabled');
+            const errorOverlay = document.getElementById('errorOverlay');
+            const errorMessageEl = document.getElementById('errorMessage');
+            if (errorMessageEl) {
+                errorMessageEl.textContent = '验证SDK未加载，请检查文件路径';
+            }
+            if (errorOverlay) {
+                errorOverlay.style.display = 'flex';
+            }
+        }
+    </script>
+    
+    <!-- 加载动画 -->
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在分析您的心理年龄，请稍候...</div>
+    </div>
+    
+    <!-- 年龄输入模态弹窗 - 优化版 -->
+    <div id="age-modal" class="modal">
+        <div class="modal-content">
+            <h3>请输入您的实际年龄</h3>
+            <p>为了准确计算您的心理年龄，请提供您的实际年龄信息</p>
+            <input type="number" id="modal-age-input" min="1" max="120" placeholder="例如：28" class="modal-input" required>
+            <div class="modal-buttons">
+                <button id="modal-confirm-btn" class="modal-btn confirm">确认提交</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- 欢迎页面 -->
+        <div id="welcome-page" class="page active">
+            <div class="logo">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h1>TAA心理年龄测试</h1>
+            <p class="subtitle">探索你的内心世界，了解你的心理年龄与实际年龄的差异，获取专业建议，促进心理健康成长</p>
+            
+            <button id="start-btn" class="btn" onclick="startTest()">开始测试 <i class="fas fa-arrow-right"></i></button>
+            
+            <div class="features">
+                <div class="feature">
+                    <i class="fas fa-user-graduate"></i>
+                    <h3>科学评估</h3>
+                    <p>基于心理学研究的专业测评工具</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>深度分析</h3>
+                    <p>揭示心理年龄与实际年龄的差异</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-lightbulb"></i>
+                    <h3>实用建议</h3>
+                    <p>提供针对性心理成长建议</p>
+                </div>
+            </div>
+            
+            <!-- 底部说明区域（用于SDK添加推广链接） -->
+            <div class="footer welcome-footer">
+                <p>本测试包含50道题目，大约需要10-15分钟完成</p>
+                <p>测试结果仅供参考，专业心理评估请咨询心理专家</p>
+            </div>
+        </div>
+        
+        <!-- 测试页面 -->
+        <div id="test-page" class="page">
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="question-count" id="question-count">第 1 题 / 共 50 题</div>
+            
+            <div class="question-text" id="question-text">
+                当你遇到一个新环境时，你通常会：
+            </div>
+            
+            <div class="options-container" id="options-container">
+                <div class="option" data-value="1">
+                    <div class="index">A</div>
+                    <div class="text">感到紧张不安，需要时间适应</div>
+                    <div class="checkmark"><i class="fas fa-check"></i></div>
+                </div>
+                <div class="option" data-value="2">
+                    <div class="index">B</div>
+                    <div class="text">既好奇又谨慎，逐步探索</div>
+                    <div class="checkmark"><i class="fas fa-check"></i></div>
+                </div>
+                <div class="option" data-value="3">
+                    <div class="index">C</div>
+                    <div class="text">兴奋期待，快速融入新环境</div>
+                    <div class="checkmark"><i class="fas fa-check"></i></div>
+                </div>
+                <div class="option" data-value="4">
+                    <div class="index">D</div>
+                    <div class="text">观察他人反应，跟随大家行动</div>
+                    <div class="checkmark"><i class="fas fa-check"></i></div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button id="prev-btn" class="btn btn-prev"><i class="fas fa-arrow-left"></i> 上一题</button>
+                <button id="next-btn" class="btn btn-next">下一题 <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+        
+        <!-- 结果页面 -->
+        <div id="result-page" class="page">
+            <div class="result-header">
+                <h2 class="result-title">您的心理年龄测试结果</h2>
+                <p class="result-subtitle"></p>
+            </div>
+            
+            <!-- 结果内容，初始隐藏 -->
+            <div id="result-content" style="display: none;">
+                <!-- 圆形年龄显示 -->
+                <div class="age-circle-container">
+                    <div class="age-circle">
+                        <div class="age-number" id="circle-age">28</div>
+                        <div class="age-label">心理年龄</div>
+                    </div>
+                </div>
+                
+                <!-- 年龄差异显示 -->
+                <div class="age-diff-container">
+                    <div id="age-diff" class="age-diff">
+                        您的实际年龄是 <span id="actual-age">28</span> 岁，心理年龄与实际年龄基本一致
+                    </div>
+                </div>
+                
+                <!-- 年龄进度条 -->
+                <div class="age-progress-container">
+                    <div class="age-progress">
+                        <div class="progress-background"></div>
+                        <div class="progress-fill" id="progress-fill" style="width: 50%;"></div>
+                        <div class="progress-labels">
+                            <span class="progress-label">10岁</span>
+                            <span class="progress-label">80岁</span>
+                        </div>
+                        <div class="progress-value" id="progress-value">28岁</div>
+                    </div>
+                </div>
+                
+                <!-- 五维度雷达图 -->
+                <div class="radar-container">
+                    <div id="radar-chart"></div>
+                </div>
+                
+                <div class="result-description">
+                    <h3><i class="fas fa-chart-pie"></i> 综合分析</h3>
+                    <p id="analysis-text">您的心理年龄与实际年龄基本匹配，显示出良好的心理发展平衡。您既保持了年轻人应有的活力和好奇心，又具备了一定的责任感和成熟度。在决策时能够平衡情感与理性，在人际关系中表现出适当的独立性和依赖性。</p>
+                    
+                    <h3><i class="fas fa-star"></i> 主要优势</h3>
+                    <p id="strengths-text">您拥有较强的适应能力和学习能力，能够快速应对环境变化。情绪稳定性较好，在压力下仍能保持理性思考。具有良好的人际关系处理能力，既能享受独处时光，也能融入群体。</p>
+                    
+                    <div class="suggestion">
+                        <h3><i class="fas fa-lightbulb"></i> 成长建议</h3>
+                        <p id="suggestion-text">培养长期规划和目标设定的能力，为未来做准备。学习一些传统技能或知识，平衡现代生活方式。承担一些需要责任感的任务，提升成熟度。在决策时可以更多考虑长远影响。</p>
+                    </div>
+                    
+                    <div class="result-disclaimer">*测试结果仅供参考，不作诊断使用</div>
+                </div>
+            </div>
+            
+            <!-- 底部操作区 -->
+            <div class="report-footer">
+                <button id="restart-btn" class="btn"><i class="fas fa-redo"></i> 重新测试</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    
+        function startTest() {
+            // 测试版本：直接显示年龄输入弹窗，跳过授权验证
+            const ageModal = document.getElementById('age-modal');
+            if (ageModal) {
+                ageModal.classList.add('active');
+            }
+            
+            /* 原授权验证代码（已注释）
+            checkAuthCode(() => {
+                const ageModal = document.getElementById('age-modal');
+                if (ageModal) {
+                    ageModal.classList.add('active');
+                }
+            });
+            */
+        }
+        
+        // 等待DOM完全加载后再执行JavaScript代码
+        document.addEventListener('DOMContentLoaded', function() {
+            // QQ浏览器兼容性检查：验证关键资源是否加载成功
+            if (typeof echarts === 'undefined') {
+                console.warn('ECharts库可能未加载成功，雷达图功能可能不可用');
+                // 设置标记，后续代码会处理这种情况
+                window.echartsNotLoaded = true;
+            }
+            // 测试数据 - 完整的50道题
+            const questions = [
+                {
+                    text: "当你遇到一个新环境时，你通常会：",
+                    options: [
+                        { text: "感到紧张不安，需要时间适应", value: 1 },
+                        { text: "既好奇又谨慎，逐步探索", value: 2 },
+                        { text: "兴奋期待，快速融入新环境", value: 3 },
+                        { text: "观察他人反应，跟随大家行动", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对压力时，你更倾向于：",
+                    options: [
+                        { text: "感到焦虑，需要他人安慰", value: 1 },
+                        { text: "寻找解决方案，逐步解决问题", value: 2 },
+                        { text: "保持乐观，相信事情会好转", value: 3 },
+                        { text: "暂时逃避，稍后再处理", value: 4 }
+                    ]
+                },
+                {
+                    text: "在社交场合中，你通常是：",
+                    options: [
+                        { text: "安静观察，等待别人主动", value: 1 },
+                        { text: "与少数人深入交流", value: 2 },
+                        { text: "活跃气氛，与多人互动", value: 3 },
+                        { text: "跟随大家，避免突出自己", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于未来规划，你倾向于：",
+                    options: [
+                        { text: "很少考虑长期未来", value: 1 },
+                        { text: "有大致方向，灵活调整", value: 2 },
+                        { text: "有详细计划并努力实现", value: 3 },
+                        { text: "顺其自然，随遇而安", value: 4 }
+                    ]
+                },
+                {
+                    text: "处理冲突时，你通常：",
+                    options: [
+                        { text: "回避冲突，避免争执", value: 1 },
+                        { text: "表达感受但寻求和解", value: 2 },
+                        { text: "直接表达立场，坚持己见", value: 3 },
+                        { text: "寻求第三方帮助解决", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对失败时，你的第一反应是：",
+                    options: [
+                        { text: "自我怀疑，感到沮丧", value: 1 },
+                        { text: "分析原因，吸取教训", value: 2 },
+                        { text: "快速调整，继续前进", value: 3 },
+                        { text: "找借口或归咎于外部因素", value: 4 }
+                    ]
+                },
+                {
+                    text: "在团队合作中，你更愿意扮演：",
+                    options: [
+                        { text: "听从指示的执行者", value: 1 },
+                        { text: "协调沟通的中间人", value: 2 },
+                        { text: "制定方向的领导者", value: 3 },
+                        { text: "提供创意和建议的智囊", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于新知识的学习，你通常：",
+                    options: [
+                        { text: "需要反复练习才能掌握", value: 1 },
+                        { text: "按部就班，循序渐进", value: 2 },
+                        { text: "快速理解并应用", value: 3 },
+                        { text: "只学习感兴趣的部分", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对批评时，你的态度是：",
+                    options: [
+                        { text: "感到受伤，难以接受", value: 1 },
+                        { text: "理性分析，有则改之", value: 2 },
+                        { text: "积极寻求改进方法", value: 3 },
+                        { text: "选择性听取，坚持己见", value: 4 }
+                    ]
+                },
+                {
+                    text: "在休闲时间，你更喜欢：",
+                    options: [
+                        { text: "独自休息或思考", value: 1 },
+                        { text: "与亲友共度时光", value: 2 },
+                        { text: "尝试新活动或冒险", value: 3 },
+                        { text: "按固定习惯放松", value: 4 }
+                    ]
+                },
+                {
+                    text: "做重要决定时，你主要依靠：",
+                    options: [
+                        { text: "直觉和感觉", value: 1 },
+                        { text: "逻辑和分析", value: 2 },
+                        { text: "他人建议和经验", value: 3 },
+                        { text: "多方权衡比较", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对不确定的情况，你通常会：",
+                    options: [
+                        { text: "感到焦虑，避免做决定", value: 1 },
+                        { text: "收集更多信息再决定", value: 2 },
+                        { text: "凭直觉快速做出选择", value: 3 },
+                        { text: "观望等待情况明朗", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于金钱管理，你的态度是：",
+                    options: [
+                        { text: "随性花费，不太规划", value: 1 },
+                        { text: "有基本预算，适度消费", value: 2 },
+                        { text: "精打细算，严格储蓄", value: 3 },
+                        { text: "投资理财，追求增值", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对挑战时，你的动力主要来自：",
+                    options: [
+                        { text: "避免失败或批评", value: 1 },
+                        { text: "个人成长和进步", value: 2 },
+                        { text: "竞争和获胜的欲望", value: 3 },
+                        { text: "他人的期待和认可", value: 4 }
+                    ]
+                },
+                {
+                    text: "在人际关系中，你更重视：",
+                    options: [
+                        { text: "深度和真诚", value: 1 },
+                        { text: "和谐与包容", value: 2 },
+                        { text: "互助和共赢", value: 3 },
+                        { text: "自由和独立", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对新技术，你的态度是：",
+                    options: [
+                        { text: "抵触改变，习惯旧方式", value: 1 },
+                        { text: "谨慎尝试，逐步适应", value: 2 },
+                        { text: "积极学习，快速掌握", value: 3 },
+                        { text: "选择性使用有用功能", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于规则和制度，你的看法是：",
+                    options: [
+                        { text: "严格遵守，不敢违背", value: 1 },
+                        { text: "理解并合理遵守", value: 2 },
+                        { text: "必要时可以灵活变通", value: 3 },
+                        { text: "质疑不合理的规则", value: 4 }
+                    ]
+                },
+                {
+                    text: "当你感到情绪低落时，通常会：",
+                    options: [
+                        { text: "独自消化，不愿打扰他人", value: 1 },
+                        { text: "与信任的人倾诉", value: 2 },
+                        { text: "通过活动转移注意力", value: 3 },
+                        { text: "分析原因并解决问题", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于生活中的变化，你的适应速度：",
+                    options: [
+                        { text: "较慢，需要很长时间", value: 1 },
+                        { text: "适中，逐步调整", value: 2 },
+                        { text: "很快，能迅速适应", value: 3 },
+                        { text: "视变化性质而定", value: 4 }
+                    ]
+                },
+                {
+                    text: "在表达意见时，你倾向于：",
+                    options: [
+                        { text: "保留个人看法", value: 1 },
+                        { text: "委婉表达，顾及他人感受", value: 2 },
+                        { text: "直接坦诚地表达", value: 3 },
+                        { text: "选择性表达，看场合", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对他人的成功，你的感受是：",
+                    options: [
+                        { text: "羡慕或自卑", value: 1 },
+                        { text: "为他们高兴", value: 2 },
+                        { text: "受到激励，想要超越", value: 3 },
+                        { text: "分析其成功原因", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于时间管理，你的习惯是：",
+                    options: [
+                        { text: "随性，经常拖延", value: 1 },
+                        { text: "有基本计划，但可调整", value: 2 },
+                        { text: "严格按计划执行", value: 3 },
+                        { text: "优先处理重要事项", value: 4 }
+                    ]
+                },
+                {
+                    text: "在解决问题时，你更注重：",
+                    options: [
+                        { text: "避免问题再次发生", value: 1 },
+                        { text: "快速有效的解决方案", value: 2 },
+                        { text: "根本原因的深入分析", value: 3 },
+                        { text: "多方利益的平衡", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于冒险和尝试新事物，你的态度是：",
+                    options: [
+                        { text: "尽量避免风险", value: 1 },
+                        { text: "适度尝试，控制风险", value: 2 },
+                        { text: "乐于冒险，追求刺激", value: 3 },
+                        { text: "权衡利弊后决定", value: 4 }
+                    ]
+                },
+                {
+                    text: "在团队中收到不同意见时，你通常会：",
+                    options: [
+                        { text: "顺从多数意见", value: 1 },
+                        { text: "尝试协调不同观点", value: 2 },
+                        { text: "坚持自己的看法", value: 3 },
+                        { text: "分析各种意见的优劣", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对复杂任务，你的处理方式是：",
+                    options: [
+                        { text: "感到不知所措，需要帮助", value: 1 },
+                        { text: "分解任务，逐步完成", value: 2 },
+                        { text: "全身心投入，一气呵成", value: 3 },
+                        { text: "寻求更简单的方法", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于个人成就，你的追求是：",
+                    options: [
+                        { text: "满足基本需求即可", value: 1 },
+                        { text: "稳步提升，不断进步", value: 2 },
+                        { text: "追求卓越，做到最好", value: 3 },
+                        { text: "平衡工作与生活", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对批评和反对声音，你的反应是：",
+                    options: [
+                        { text: "容易动摇，自我怀疑", value: 1 },
+                        { text: "理性分析，有选择地接受", value: 2 },
+                        { text: "坚持己见，不受影响", value: 3 },
+                        { text: "寻求更多人的意见", value: 4 }
+                    ]
+                },
+                {
+                    text: "在人际关系出现问题时，你倾向于：",
+                    options: [
+                        { text: "回避问题，希望自然解决", value: 1 },
+                        { text: "主动沟通，寻求和解", value: 2 },
+                        { text: "明确表达自己的立场", value: 3 },
+                        { text: "给对方时间冷静", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于长期目标，你的坚持程度：",
+                    options: [
+                        { text: "容易放弃，缺乏毅力", value: 1 },
+                        { text: "有基本坚持，但可调整", value: 2 },
+                        { text: "非常坚持，不轻易改变", value: 3 },
+                        { text: "根据情况灵活调整目标", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对多个任务时，你的优先级排序基于：",
+                    options: [
+                        { text: "紧急程度", value: 1 },
+                        { text: "重要程度", value: 2 },
+                        { text: "个人兴趣", value: 3 },
+                        { text: "难易程度", value: 4 }
+                    ]
+                },
+                {
+                    text: "在学习和工作中，你的专注力：",
+                    options: [
+                        { text: "容易分心，需要外部督促", value: 1 },
+                        { text: "可以保持基本专注", value: 2 },
+                        { text: "高度专注，不易受干扰", value: 3 },
+                        { text: "视任务兴趣而定", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对陌生人的求助，你的反应是：",
+                    options: [
+                        { text: "谨慎，保持距离", value: 1 },
+                        { text: "在能力范围内提供帮助", value: 2 },
+                        { text: "热心主动地提供帮助", value: 3 },
+                        { text: "评估情况后决定", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于生活中的小确幸，你的感受是：",
+                    options: [
+                        { text: "不太在意，习以为常", value: 1 },
+                        { text: "能感受到并珍惜", value: 2 },
+                        { text: "主动创造快乐时刻", value: 3 },
+                        { text: "更关注大目标的实现", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对他人的错误，你的态度是：",
+                    options: [
+                        { text: "严厉批评，难以容忍", value: 1 },
+                        { text: "理解并给予改正机会", value: 2 },
+                        { text: "帮助分析错误原因", value: 3 },
+                        { text: "视关系和情况而定", value: 4 }
+                    ]
+                },
+                {
+                    text: "在团队中，你更看重：",
+                    options: [
+                        { text: "和谐的工作氛围", value: 1 },
+                        { text: "明确的分工和责任", value: 2 },
+                        { text: "高效的执行力", value: 3 },
+                        { text: "创新的想法和方案", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对个人缺点，你的态度是：",
+                    options: [
+                        { text: "回避，不愿面对", value: 1 },
+                        { text: "承认并尝试改进", value: 2 },
+                        { text: "将其视为个人特点", value: 3 },
+                        { text: "寻找互补的合作者", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于未来的不确定性，你的感受是：",
+                    options: [
+                        { text: "焦虑和担忧", value: 1 },
+                        { text: "既担忧又期待", value: 2 },
+                        { text: "充满期待和好奇", value: 3 },
+                        { text: "专注于当下可控制的事", value: 4 }
+                    ]
+                },
+                {
+                    text: "在表达爱和关怀时，你倾向于：",
+                    options: [
+                        { text: "通过行动而非言语", value: 1 },
+                        { text: "直接表达情感", value: 2 },
+                        { text: "创造特别的时刻", value: 3 },
+                        { text: "提供实际帮助和支持", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对生活中的挫折，你的恢复速度：",
+                    options: [
+                        { text: "较慢，需要很长时间", value: 1 },
+                        { text: "需要一些时间调整", value: 2 },
+                        { text: "较快，能迅速恢复", value: 3 },
+                        { text: "视挫折的严重程度而定", value: 4 }
+                    ]
+                },
+                {
+                    text: "在团队决策中，你更倾向于：",
+                    options: [
+                        { text: "听从权威或专家意见", value: 1 },
+                        { text: "寻求共识和妥协", value: 2 },
+                        { text: "坚持自己认为正确的", value: 3 },
+                        { text: "收集数据和分析后决定", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于个人空间和时间，你的需求是：",
+                    options: [
+                        { text: "大量独处时间", value: 1 },
+                        { text: "适度的个人空间", value: 2 },
+                        { text: "更喜欢与人共处", value: 3 },
+                        { text: "视心情和状态而定", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对他人的成功建议，你的态度是：",
+                    options: [
+                        { text: "怀疑，需要验证", value: 1 },
+                        { text: "开放接受并尝试", value: 2 },
+                        { text: "选择性采纳适合的", value: 3 },
+                        { text: "更相信自己的经验", value: 4 }
+                    ]
+                },
+                {
+                    text: "在追求目标时，你更注重：",
+                    options: [
+                        { text: "过程的体验和成长", value: 1 },
+                        { text: "最终结果的达成", value: 2 },
+                        { text: "效率和速度", value: 3 },
+                        { text: "方法的正确性", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对生活中的选择，你的决策风格是：",
+                    options: [
+                        { text: "犹豫不决，需要建议", value: 1 },
+                        { text: "权衡利弊后决定", value: 2 },
+                        { text: "凭直觉快速决定", value: 3 },
+                        { text: "收集充分信息后决定", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于个人价值观，你的坚持程度：",
+                    options: [
+                        { text: "容易受环境影响而改变", value: 1 },
+                        { text: "有核心坚持，但可调整", value: 2 },
+                        { text: "非常坚持，不易改变", value: 3 },
+                        { text: "根据情况灵活应用", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对新技术和社会变化，你的适应能力：",
+                    options: [
+                        { text: "较慢，需要很长时间", value: 1 },
+                        { text: "一般，能逐步适应", value: 2 },
+                        { text: "很快，能迅速跟上", value: 3 },
+                        { text: "选择性适应有用变化", value: 4 }
+                    ]
+                },
+                {
+                    text: "在人际关系中，你的信任建立：",
+                    options: [
+                        { text: "很慢，需要长时间考验", value: 1 },
+                        { text: "需要一定时间和经历", value: 2 },
+                        { text: "较快，愿意先信任", value: 3 },
+                        { text: "视对方行为和表现而定", value: 4 }
+                    ]
+                },
+                {
+                    text: "对于生活中的责任，你的承担态度：",
+                    options: [
+                        { text: "尽量避免额外责任", value: 1 },
+                        { text: "承担应尽的责任", value: 2 },
+                        { text: "主动承担更多责任", value: 3 },
+                        { text: "选择性承担有价值责任", value: 4 }
+                    ]
+                },
+                {
+                    text: "面对个人成长，你的追求是：",
+                    options: [
+                        { text: "满足现状，不愿改变", value: 1 },
+                        { text: "持续学习和改进", value: 2 },
+                        { text: "追求卓越和突破", value: 3 },
+                        { text: "平衡成长与舒适", value: 4 }
+                    ]
+                }
+            ];
+            
+            // 全局变量
+            let currentQuestion = 0;
+            let userAnswers = new Array(questions.length).fill(null);
+            let userAge = 0;
+            let radarChart = null;
+            // 将radarChart暴露到window对象，方便从localStorage加载时访问
+            if (typeof window !== 'undefined') {
+                window.radarChart = null;
+            }
+            
+            // DOM元素
+            const welcomePage = document.getElementById('welcome-page');
+            const testPage = document.getElementById('test-page');
+            const resultPage = document.getElementById('result-page');
+            const startBtn = document.getElementById('start-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const progressBar = document.getElementById('progress-bar');
+            const questionCount = document.getElementById('question-count');
+            const questionText = document.getElementById('question-text');
+            const optionsContainer = document.getElementById('options-container');
+            const resultContent = document.getElementById('result-content');
+            const circleAge = document.getElementById('circle-age');
+            const actualAgeSpan = document.getElementById('actual-age');
+            const ageDiffElement = document.getElementById('age-diff');
+            const analysisText = document.getElementById('analysis-text');
+            const strengthsText = document.getElementById('strengths-text');
+            const suggestionText = document.getElementById('suggestion-text');
+            const ageModal = document.getElementById('age-modal');
+            const modalAgeInput = document.getElementById('modal-age-input');
+            const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+            const progressFill = document.getElementById('progress-fill');
+            const progressValue = document.getElementById('progress-value');
+            const radarChartDom = document.getElementById('radar-chart');
+            const loading = document.getElementById('loading');
+            
+            // 初始化测试
+            function initTest() {
+                userAnswers = new Array(questions.length).fill(null);
+                currentQuestion = 0;
+                updateQuestion();
+                updateProgress();
+            }
+            
+            // 更新题目显示
+            function updateQuestion() {
+                const q = questions[currentQuestion];
+                questionText.textContent = q.text;
+                questionCount.textContent = `第 ${currentQuestion + 1} 题 / 共 ${questions.length} 题`;
+                
+                optionsContainer.innerHTML = '';
+                q.options.forEach((option, index) => {
+                    const optionElement = document.createElement('div');
+                    optionElement.className = 'option';
+                    if (userAnswers[currentQuestion] === index) {
+                        optionElement.classList.add('selected');
+                    }
+                    optionElement.dataset.value = index;
+                    optionElement.innerHTML = `
+                        <div class="index">${String.fromCharCode(65 + index)}</div>
+                        <div class="text">${option.text}</div>
+                        <div class="checkmark"><i class="fas fa-check"></i></div>
+                    `;
+                    optionElement.addEventListener('click', () => selectOption(index));
+                    optionsContainer.appendChild(optionElement);
+                });
+                
+                // 更新按钮状态
+                prevBtn.disabled = currentQuestion === 0;
+                nextBtn.textContent = currentQuestion === questions.length - 1 ? '查看结果' : '下一题';
+            }
+            
+            // 选择选项
+            function selectOption(optionIndex) {
+                userAnswers[currentQuestion] = optionIndex;
+                
+                // 更新UI
+                document.querySelectorAll('.option').forEach((opt, idx) => {
+                    if (idx === optionIndex) {
+                        opt.classList.add('selected');
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                });
+                
+                // 自动跳转到下一题
+                setTimeout(() => {
+                    if (currentQuestion < questions.length - 1) {
+                        currentQuestion++;
+                        updateQuestion();
+                        updateProgress();
+                    } else {
+                        showResults();
+                    }
+                }, 300);
+            }
+            
+            // 更新进度条
+            function updateProgress() {
+                const progress = ((currentQuestion + 1) / questions.length) * 100;
+                progressBar.style.width = `${progress}%`;
+            }
+            
+            // 计算心理年龄
+            function calculatePsychologicalAge() {
+                if (!userAge) return 25;
+                
+                let totalScore = 0;
+                let answeredCount = 0;
+                
+                // 计算总分
+                userAnswers.forEach((answer, index) => {
+                    if (answer !== null) {
+                        const optionValue = questions[index].options[answer].value;
+                        totalScore += optionValue;
+                        answeredCount++;
+                    }
+                });
+                
+                if (answeredCount === 0) return userAge;
+                
+                const avgScore = totalScore / answeredCount;
+                
+                // 基于用户年龄和答题分数计算心理年龄
+                const 基础年龄 = 15;       // 基础心理年龄（可调整，比如14或16）
+                const 缓和系数 = 8;        // 每1分平均选项增加的年龄（原70/3≈23，现改为8）
+                let psychologicalAge = 基础年龄 + (avgScore - 1) * 缓和系数;
+                
+                // 校准：限制在实际年龄±10岁内（避免低龄测高龄/高龄测低龄）
+                psychologicalAge = Math.max(
+                    Math.min(psychologicalAge, userAge + 10), // 最高不超过实际年龄+10
+                    Math.max(psychologicalAge, userAge - 10)  // 最低不低于实际年龄-10
+                );
+                
+                // 最终范围限制（确保在10-80岁之间）
+                psychologicalAge = Math.max(10, Math.min(80, psychologicalAge));
+
+                return Math.round(psychologicalAge);
+            }
+            
+            // 计算五个维度的分数
+            function calculateDimensionScores() {
+                // 初始化五个维度的分数
+                const dimensions = {
+                    "心态活力": 0,
+                    "责任感": 0,
+                    "冒险精神": 0,
+                    "社交倾向": 0,
+                    "情绪稳定": 0
+                };
+                
+                // 计数每个维度被回答的次数
+                const dimensionCounts = {
+                    "心态活力": 0,
+                    "责任感": 0,
+                    "冒险精神": 0,
+                    "社交倾向": 0,
+                    "情绪稳定": 0
+                };
+                
+                // 遍历所有题目，累加每个维度的分数
+                userAnswers.forEach((answer, index) => {
+                    if (answer !== null) {
+                        const question = questions[index];
+                        const option = question.options[answer];
+                        
+                        // 根据题目内容累加到相应维度
+                        if (question.text.includes("新环境") || question.text.includes("变化")) {
+                            dimensions["心态活力"] += option.value;
+                            dimensionCounts["心态活力"]++;
+                        }
+                        if (question.text.includes("压力") || question.text.includes("责任") || question.text.includes("任务")) {
+                            dimensions["责任感"] += option.value;
+                            dimensionCounts["责任感"]++;
+                        }
+                        if (question.text.includes("冒险") || question.text.includes("挑战") || question.text.includes("风险")) {
+                            dimensions["冒险精神"] += option.value;
+                            dimensionCounts["冒险精神"]++;
+                        }
+                        if (question.text.includes("社交") || question.text.includes("他人") || question.text.includes("群体")) {
+                            dimensions["社交倾向"] += option.value;
+                            dimensionCounts["社交倾向"]++;
+                        }
+                        if (question.text.includes("情绪") || question.text.includes("压力") || question.text.includes("紧张")) {
+                            dimensions["情绪稳定"] += option.value;
+                            dimensionCounts["情绪稳定"]++;
+                        }
+                    }
+                });
+                
+                // 计算每个维度的平均分（0-100）
+                const scores = {};
+                for (const dimension in dimensions) {
+                    if (dimensionCounts[dimension] > 0) {
+                        scores[dimension] = Math.round((dimensions[dimension] / dimensionCounts[dimension]) * 25);
+                    } else {
+                        scores[dimension] = 50; // 默认值
+                    }
+                }
+                
+                return scores;
+            }
+            
+            // 获取年龄段解析文本
+            function getAgeAnalysis(psychologicalAge) {
+                let analysis = "";
+                let strengths = "";
+                let suggestion = "";
+                
+                // 根据心理年龄确定年龄段
+                if (psychologicalAge >= 10 && psychologicalAge <= 19) {
+                    analysis = "您的心理年龄约为" + psychologicalAge + "岁。您正处于青少年阶段，对新事物充满好奇，富有创造力和冒险精神。您可能更注重当下体验，但在责任承担和长期规划方面还需要更多成长。这种年轻心态让您在适应变化时更有优势。";
+                    strengths = "您拥有开放的思维和强烈的好奇心，容易接受新事物。学习能力强，能够快速掌握新技能。情绪恢复快，能从挫折中迅速反弹。在社交中充满活力和热情。";
+                    suggestion = "培养长期规划和目标设定的能力，为未来做准备。学习一些传统技能或知识，平衡现代生活方式。承担一些需要责任感的任务，提升成熟度。在决策时可以更多考虑长远影响。";
+                } else if (psychologicalAge >= 20 && psychologicalAge <= 29) {
+                    analysis = "您的心理年龄约为" + psychologicalAge + "岁。您正处于青年阶段，既保持了年轻人的活力和好奇心，又具备了一定的责任感和成熟度。您正在探索自我，建立独立的人生观和价值观，在理想与现实之间寻找平衡。";
+                    strengths = "您拥有较强的适应能力和学习能力，能够快速应对环境变化。既享受独处时光，也能融入群体。在决策时能够平衡情感与理性，具有良好的人际关系处理能力。";
+                    suggestion = "继续探索多样化的兴趣爱好，这有助于维持认知灵活性。尝试参与一些需要深度思考的活动，如阅读哲学书籍或学习新技能。在工作和生活中寻找平衡，为未来的发展打下坚实基础。";
+                } else if (psychologicalAge >= 30 && psychologicalAge <= 39) {
+                    analysis = "您的心理年龄约为" + psychologicalAge + "岁。您正处于壮年阶段，显示出成熟稳重的特质。您对生活有较深的理解，能够平衡工作与家庭，在事业上追求进步，在生活中承担责任。这个阶段的您既有经验又有活力。";
+                    strengths = "您拥有出色的决策能力和问题解决技巧，能够预见长远后果。在压力下保持冷静，具有领导潜质。对人生有清晰的目标和规划，执行力强。";
+                    suggestion = "继续保持学习和成长的心态，不断提升自己。在专注事业的同时，不要忽视个人生活和健康。培养一些放松的爱好，平衡工作压力。为未来的家庭和职业发展做好规划。";
+                } else if (psychologicalAge >= 40 && psychologicalAge <= 49) {
+                    analysis = "您的心理年龄约为" + psychologicalAge + "岁。您完全知道怎么处理各种矛盾，也知道自己的问题出在哪里，有了丰富的社会经验和与人打交道的能力。对于生活中的大部分问题，您已经有了解决的办法。这个阶段的您既成熟又务实。";
+                    strengths = "您拥有丰富的人生经验和智慧，能够从容应对各种挑战。情绪稳定，处事冷静，具有很强的问题解决能力。在人际关系中游刃有余，懂得平衡各方利益。";
+                    suggestion = "利用您的经验和智慧指导年轻人，传承知识。继续保持学习新事物的热情，避免思维僵化。在工作和生活中寻找新的挑战和目标，保持生命的活力。注意工作与生活的平衡，关注健康。";
+                } else if (psychologicalAge >= 50 && psychologicalAge <= 59) {
+                    analysis = "您的心理年龄约为" + psychologicalAge + "岁。您正处于中老年阶段，拥有丰富的人生阅历和深厚的智慧。您对事物有深刻的理解，能够看到问题的本质，处事从容不迫，懂得享受生活的真谛。";
+                    strengths = "您拥有卓越的判断力和决策能力，能够从宏观角度思考问题。情绪极其稳定，在复杂情况下仍能保持理性。人际关系处理圆融，深受他人尊重。";
+                    suggestion = "分享您的人生智慧和经验，帮助年轻一代成长。培养一些深度的兴趣爱好，如阅读、艺术或哲学思考。保持适度的身体锻炼和社交活动，维持身心健康。享受成熟带来的从容和智慧。";
+                } else if (psychologicalAge >= 60 && psychologicalAge <= 69) {
+                    analysis = "您的心理年龄约为" + psychologicalAge + "岁。您正处于老年阶段，展现出超然的智慧和深邃的洞察力。您对人生有透彻的理解，能够从容面对生命的起伏，懂得珍惜当下，享受内心的平静与满足。";
+                    strengths = "您拥有极其丰富的人生经验和智慧，能够从历史的角度看待问题。情绪极其稳定，处事泰然自若。对人际关系有深刻理解，能够给予他人宝贵的建议。";
+                    suggestion = "继续分享您的智慧和经验，为后人留下宝贵的精神财富。保持适度的身心活动，维持健康状态。享受内心的平静和满足，珍惜与亲友共度的时光。以宽容和理解的心态看待世界的变化。";
+                } else if (psychologicalAge >= 70 && psychologicalAge <= 80) {
+                    analysis = "您的心理年龄约为" + psychologicalAge + "岁。您正处于高龄阶段，展现出超凡的智慧和生命的透彻领悟。您对人生有极其深刻的理解，能够以平和的心态面对一切，懂得生命的真谛，内心充满宁静与智慧。";
+                    strengths = "您拥有无与伦比的人生智慧和洞察力，能够从哲学高度思考问题。情绪达到极高的稳定状态，处事从容淡定。对生命有深刻的理解，能够给予他人终极的人生指导。";
+                    suggestion = "享受内心的极致平静和智慧，以超然的态度看待世界。继续分享您的人生智慧，为后人提供精神指引。保持简单而有规律的生活，珍惜每一个当下。以感恩和满足的心态回顾一生，享受生命的圆满。";
+                }
+                
+                return { analysis, strengths, suggestion };
+            }
+            
+            // 更新年龄显示和进度条
+            function updateAgeDisplay(psychologicalAge) {
+                // 设置圆形显示的心理年龄
+                circleAge.textContent = psychologicalAge;
+                
+                // 计算进度条百分比（10-80岁范围映射到0-100%）
+                let progressPercent;
+                if (psychologicalAge <= 10) {
+                    progressPercent = 0;
+                } else if (psychologicalAge >= 80) {
+                    progressPercent = 100;
+                } else {
+                    progressPercent = ((psychologicalAge - 10) / 70) * 100;
+                }
+                
+                // 更新进度条
+                progressFill.style.width = `${progressPercent}%`;
+                progressValue.textContent = `${psychologicalAge}岁`;
+            }
+            
+            // 绘制雷达图 - 优化动画和居中显示
+            function drawRadarChart(scores) {
+                // 将函数暴露到window对象，方便从localStorage加载时访问
+                if (typeof window !== 'undefined') {
+                    window.drawRadarChart = drawRadarChart;
+                }
+                
+                // 检查ECharts是否已加载（QQ浏览器兼容性处理）
+                if (typeof echarts === 'undefined') {
+                    console.error('ECharts库未加载，雷达图无法显示');
+                    // 在雷达图容器中显示提示信息
+                    if (radarChartDom) {
+                        radarChartDom.innerHTML = '<div style="text-align:center;padding:40px;color:#666;">雷达图暂时无法显示<br/>请检查网络连接或刷新页面</div>';
+                    }
+                    return;
+                }
+                
+                // 检查DOM元素是否存在
+                if (!radarChartDom) {
+                    console.error('雷达图容器不存在');
+                    return;
+                }
+                
+                // 销毁之前的图表实例
+                if (radarChart) {
+                    radarChart.dispose();
+                    radarChart = null;
+                    window.radarChart = null;
+                }
+                if (window.radarChart) {
+                    window.radarChart.dispose();
+                    window.radarChart = null;
+                }
+                
+                // 初始化图表
+                try {
+                    radarChart = echarts.init(radarChartDom);
+                    // 同步到window对象，方便从localStorage加载时访问
+                    window.radarChart = radarChart;
+                } catch (error) {
+                    console.error('初始化雷达图失败:', error);
+                    if (radarChartDom) {
+                        radarChartDom.innerHTML = '<div style="text-align:center;padding:40px;color:#666;">雷达图初始化失败<br/>请刷新页面重试</div>';
+                    }
+                    return;
+                }
+                
+                // 根据屏幕宽度调整雷达图大小
+                const screenWidth = window.innerWidth;
+                let radarRadius = '75%';
+                let fontSize = 18;
+                let nameGap = 15;
+                
+                if (screenWidth <= 768) {
+                    radarRadius = '65%';
+                    fontSize = 16;
+                    nameGap = 10;
+                }
+                
+                if (screenWidth <= 480) {
+                    radarRadius = '55%';
+                    fontSize = 14;
+                    nameGap = 8;
+                }
+                
+                // 配置项 - 优化动画和显示
+                const option = {
+                    animation: false, // 禁用动画，避免过渡效果
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function(params) {
+                            return `${params.name}: ${params.value}分`;
+                        }
+                    },
+                    radar: {
+                        shape: 'circle',
+                        indicator: [
+                            { name: '心态活力', max: 100 },
+                            { name: '责任感', max: 100 },
+                            { name: '冒险精神', max: 100 },
+                            { name: '社交倾向', max: 100 },
+                            { name: '情绪稳定', max: 100 }
+                        ],
+                        axisName: {
+                            color: '#6a93cb',
+                            fontWeight: 'bold',
+                            fontSize: fontSize,
+                            padding: [5, 5]
+                        },
+                        nameGap: nameGap,
+                        splitArea: {
+                            areaStyle: {
+                                color: ['rgba(106, 147, 203, 0.1)', 'rgba(106, 147, 203, 0.05)']
+                            }
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: 'rgba(106, 147, 203, 0.3)'
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: 'rgba(106, 147, 203, 0.2)'
+                            }
+                        },
+                        radius: radarRadius,
+                        center: ['50%', '50%'] // 确保居中
+                    },
+                    series: [
+                        {
+                            name: '心理特质评估',
+                            type: 'radar',
+                            animation: false, // 禁用系列动画
+                            data: [
+                                {
+                                    value: [
+                                        scores["心态活力"],
+                                        scores["责任感"],
+                                        scores["冒险精神"],
+                                        scores["社交倾向"],
+                                        scores["情绪稳定"]
+                                    ],
+                                    name: '您的评估结果',
+                                    areaStyle: {
+                                        color: 'rgba(106, 147, 203, 0.3)'
+                                    },
+                                    lineStyle: {
+                                        color: '#6a93cb',
+                                        width: 3
+                                    },
+                                    itemStyle: {
+                                        color: '#6a93cb'
+                                    },
+                                    label: {
+                                        show: true,
+                                        formatter: function(params) {
+                                            return params.value;
+                                        },
+                                        color: '#4a6fa5',
+                                        fontWeight: 'bold',
+                                        fontSize: fontSize - 2
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                };
+                
+                // 应用配置项（添加错误处理）
+                try {
+                    radarChart.setOption(option);
+                } catch (error) {
+                    console.error('设置雷达图配置失败:', error);
+                    if (radarChartDom) {
+                        radarChartDom.innerHTML = '<div style="text-align:center;padding:40px;color:#666;">雷达图渲染失败<br/>请刷新页面重试</div>';
+                    }
+                    return;
+                }
+                
+                // 确保图表在容器中居中显示
+                // 延迟调用resize，确保容器已经完全渲染
+                setTimeout(() => {
+                    if (radarChart) {
+                        try {
+                            radarChart.resize();
+                        } catch (error) {
+                            console.error('调整雷达图大小失败:', error);
+                        }
+                    }
+                }, 100);
+                
+                // 再次延迟调用，确保所有CSS都已应用
+                setTimeout(() => {
+                    if (radarChart) {
+                        try {
+                            radarChart.resize();
+                        } catch (error) {
+                            console.error('调整雷达图大小失败:', error);
+                        }
+                    }
+                }, 300);
+                
+                // 响应式调整
+                window.addEventListener('resize', function() {
+                    if (radarChart) {
+                        try {
+                            radarChart.resize();
+                        } catch (error) {
+                            console.error('调整雷达图大小失败:', error);
+                        }
+                    }
+                });
+            }
+            
+            // 将drawRadarChart暴露到window对象，方便从localStorage加载时访问
+            // 在函数定义后立即赋值，不依赖函数是否被调用
+            if (typeof window !== 'undefined' && typeof drawRadarChart === 'function') {
+                window.drawRadarChart = drawRadarChart;
+            }
+            
+            // 显示结果
+            async function showResults() {
+                // 显示加载动画
+                if (loading) loading.style.display = 'flex';
+                
+                // 切换到结果页面
+                testPage.classList.remove('active');
+                resultPage.classList.add('active');
+                
+                // 延迟执行，模拟分析过程
+                setTimeout(async () => {
+                    try {
+                        // 计算心理年龄
+                        const psychologicalAge = calculatePsychologicalAge();
+                        const ageDiff = psychologicalAge - userAge;
+                        
+                        // 计算五个维度的分数
+                        const dimensionScores = calculateDimensionScores();
+                        
+                        // 设置结果页面内容
+                        actualAgeSpan.textContent = userAge;
+                        
+                        // 更新圆形显示和进度条
+                        updateAgeDisplay(psychologicalAge);
+                        
+                        // 根据年龄差设置不同文案
+                        if (ageDiff > 5) {
+                            ageDiffElement.innerHTML = `您的心理年龄可能比实际年龄大 <span>${ageDiff}岁</span>`;
+                        } else if (ageDiff < -5) {
+                            ageDiffElement.innerHTML = `您的心理年龄可能比实际年龄小 <span>${Math.abs(ageDiff)}岁</span>`;
+                        } else {
+                            ageDiffElement.innerHTML = `您的心理年龄与实际年龄基本一致`;
+                        }
+                        
+                        // 根据心理年龄获取相应的解析文本
+                        const ageAnalysis = getAgeAnalysis(psychologicalAge);
+                        
+                        // 设置解析文本
+                        analysisText.textContent = ageAnalysis.analysis;
+                        strengthsText.textContent = ageAnalysis.strengths;
+                        suggestionText.textContent = ageAnalysis.suggestion;
+                        
+                        // 绘制雷达图（添加错误处理，确保即使雷达图失败也能显示其他结果）
+                        try {
+                            drawRadarChart(dimensionScores);
+                        } catch (error) {
+                            console.error('绘制雷达图时出错:', error);
+                            // 即使雷达图失败，也继续显示其他结果
+                        }
+                        
+                        // 构建测试结果数据
+                        const testResult = {
+                            psychologicalAge: psychologicalAge,
+                            userAge: userAge,
+                            ageDiff: ageDiff,
+                            dimensionScores: dimensionScores,
+                            analysis: ageAnalysis,
+                            timestamp: Date.now()
+                        };
+                        
+                        // 调用测试完成API（aat是单视角测试）
+                        // 添加标记，避免重复调用
+                        if (window.linkValidator && !window.__aat_test_completed) {
+                            try {
+                                window.__aat_test_completed = true; // 标记已完成，避免重复调用
+                                
+                                const completeResult = await window.linkValidator.completeTest(undefined, testResult);
+                                console.log('测试完成记录成功', completeResult);
+                                
+                                // 如果测试完成成功，即使链接次数用完，也不显示弹窗
+                                // 因为用户已经完成测试，应该能够查看结果
+                                if (completeResult.success !== false) {
+                                    // 保持valid状态为true，避免后续验证触发弹窗
+                                    window.linkValidator.valid = true;
+                                }
+                            } catch (error) {
+                                console.error('记录测试完成失败:', error);
+                                // 测试完成记录失败不影响显示结果，只记录错误
+                                // 但确保valid状态不被改变，避免触发不必要的弹窗
+                                if (window.linkValidator) {
+                                    window.linkValidator.valid = true;
+                                }
+                                window.__aat_test_completed = false; // 失败时重置标记，允许重试
+                            }
+                        }
+                        
+                        // 显示结果内容
+                        resultContent.style.display = 'block';
+                    } catch (error) {
+                        console.error('生成报告时出错:', error);
+                    } finally {
+                        // 隐藏加载动画
+                        if (loading) loading.style.display = 'none';
+                    }
+                }, 2000);
+            }
+            
+            // 处理年龄输入并开始测试
+            async function startTestWithAge() {
+                // 获取用户输入的年龄
+                userAge = parseInt(modalAgeInput.value);
+                
+                if (isNaN(userAge) || userAge < 1 || userAge > 120) {
+                    alert("请输入有效的年龄（1-120岁）");
+                    return;
+                }
+                
+                // 等待SDK初始化完成（最多等待5秒）
+                let waitCount = 0;
+                console.log('[startTestWithAge] 开始等待SDK初始化，当前状态:', {
+                    linkValidator: !!window.linkValidator,
+                    PsyTestValidator: !!window.PsyTestValidator,
+                    waitCount: 0
+                });
+                
+                while (!window.linkValidator && waitCount < 50) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    waitCount++;
+                    
+                    // 每10次循环（1秒）检查一次，并尝试从PsyTestValidator获取实例
+                    if (waitCount % 10 === 0 && window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        const instance = window.PsyTestValidator.getInstance();
+                        if (instance) {
+                            window.linkValidator = instance;
+                            console.log('[startTestWithAge] 从PsyTestValidator获取到实例');
+                            break;
+                        }
+                    }
+                }
+                
+                console.log('[startTestWithAge] 等待完成，最终状态:', {
+                    linkValidator: !!window.linkValidator,
+                    waitCount: waitCount,
+                    PsyTestValidator: !!window.PsyTestValidator
+                });
+                
+                // 检查SDK是否初始化
+                if (!window.linkValidator) {
+                    console.error('[startTestWithAge] SDK未初始化，无法开始测试', {
+                        linkValidator: window.linkValidator,
+                        PsyTestValidator: window.PsyTestValidator,
+                        getInstance: typeof window.PsyTestValidator?.getInstance
+                    });
+                    alert('验证SDK未初始化，无法开始测试。请刷新页面重试。');
+                    return;
+                }
+                
+                // 先验证链接有效性（如果无效会显示弹窗）
+                let isValid = false;
+                if (typeof window.linkValidator.validateForUserAction === 'function') {
+                    try {
+                        isValid = await window.linkValidator.validateForUserAction();
+                        console.log('验证结果:', { isValid, valid: window.linkValidator.valid, error: window.linkValidator.validationError });
+                        
+                        // 检查验证结果和验证状态（双重检查）
+                        if (!isValid || window.linkValidator.valid === false) {
+                            // 链接无效，已显示弹窗，不进入答题页面
+                            console.warn('链接验证失败，无法开始测试', {
+                                isValid,
+                                valid: window.linkValidator.valid,
+                                error: window.linkValidator.validationError
+                            });
+                            return;
+                        }
+                    } catch (error) {
+                        // 验证失败，已显示弹窗，不进入答题页面
+                        console.error('链接验证失败:', error);
+                        if (window.linkValidator) {
+                            window.linkValidator.valid = false;
+                        }
+                        return;
+                    }
+                } else {
+                    // 如果validateForUserAction不存在，检查valid状态
+                    if (window.linkValidator.valid === false) {
+                        alert(window.linkValidator.validationError || '测试链接无效，请检查链接是否正确');
+                        return;
+                    }
+                    isValid = window.linkValidator.valid !== false;
+                }
+                
+                // 最终检查：确保验证通过才进入答题页面
+                if (!isValid || (window.linkValidator && window.linkValidator.valid === false)) {
+                    console.warn('最终验证检查失败，无法开始测试');
+                    return;
+                }
+                
+                // 检查是否是重新测试（通过URL参数判断）
+                const urlParamsForRestart = new URLSearchParams(window.location.search);
+                const isRestart = urlParamsForRestart.get('restart') === 'true';
+                
+                // 链接验证通过，调用测试开始API（aat是单视角测试）
+                // 重要：如果是重新测试，不应该调用startTest()，因为这会再次扣除使用次数
+                // 重新测试只是清除了本地结果，用户重新答题，不应该重复扣除次数
+                // 添加标记，避免重复调用
+                if (!isRestart && window.linkValidator && !window.__aat_test_started) {
+                    try {
+                        window.__aat_test_started = true; // 标记已开始，避免重复调用
+                        await window.linkValidator.startTest();
+                        console.log('测试开始记录成功');
+                    } catch (error) {
+                        console.error('记录测试开始失败:', error);
+                        window.__aat_test_started = false; // 失败时重置标记，允许重试
+                        // 测试开始失败，不进入答题页面
+                        return;
+                    }
+                } else if (isRestart) {
+                    console.log('[startTestWithAge] 重新测试模式，跳过startTest()调用，避免重复扣除次数');
+                    // 重新测试时，重置标记，允许再次开始
+                    window.__aat_test_started = false;
+                    window.__aat_test_completed = false;
+                } else if (window.__aat_test_started) {
+                    console.warn('[startTestWithAge] 测试已经开始，跳过重复调用startTest()');
+                }
+                
+                // 隐藏模态弹窗
+                ageModal.classList.remove('active');
+                
+                // 切换到测试页面并初始化测试
+                welcomePage.classList.remove('active');
+                testPage.classList.add('active');
+                initTest();
+            }
+            
+            nextBtn.addEventListener('click', () => {
+                if (userAnswers[currentQuestion] === null) {
+                    alert("请选择一个答案");
+                    return;
+                }
+                
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    updateQuestion();
+                    updateProgress();
+                } else {
+                    showResults();
+                }
+            });
+            
+            prevBtn.addEventListener('click', () => {
+                if (currentQuestion > 0) {
+                    currentQuestion--;
+                    updateQuestion();
+                    updateProgress();
+                }
+            });
+            
+            // 模态弹窗事件
+            modalConfirmBtn.addEventListener('click', startTestWithAge);
+            
+            // 按回车键确认年龄输入
+            modalAgeInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    startTestWithAge();
+                }
+            });
+            
+            // 实时验证年龄输入
+            modalAgeInput.addEventListener('input', function() {
+                const age = parseInt(this.value);
+                if (age >= 1 && age <= 120) {
+                    modalConfirmBtn.disabled = false;
+                } else {
+                    modalConfirmBtn.disabled = true;
+                }
+            });
+            
+            restartBtn.addEventListener('click', () => {
+                // 清除SDK保存的结果
+                if (window.linkValidator && window.linkValidator.clearLocalResult) {
+                    window.linkValidator.clearLocalResult(); // aat是单视角测试
+                }
+                
+                // 获取token（从URL参数或window.linkValidator）
+                const urlParams = new URLSearchParams(window.location.search);
+                let token = urlParams.get('token');
+                
+                // 如果URL中没有token，尝试从window.linkValidator获取
+                if (!token && window.linkValidator && window.linkValidator.token) {
+                    token = window.linkValidator.token;
+                }
+                
+                // 如果有token，构建带restart参数的URL并刷新页面
+                if (token) {
+                    const newUrlParams = new URLSearchParams();
+                    newUrlParams.set('token', token);
+                    newUrlParams.set('restart', 'true');
+                    
+                    // 检查是否是无限测试模式
+                    const isUnlimited = urlParams.get('unlimited') === 'true';
+                    if (isUnlimited) {
+                        newUrlParams.set('unlimited', 'true');
+                    }
+                    
+                    const newUrl = window.location.pathname + '?' + newUrlParams.toString();
+                    window.location.href = newUrl;
+                } else {
+                    // 没有token，直接重置页面
+                    resultPage.classList.remove('active');
+                    welcomePage.classList.add('active');
+                    // 重置年龄输入
+                    modalAgeInput.value = '';
+                    resultContent.style.display = 'none';
+                    ageModal.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

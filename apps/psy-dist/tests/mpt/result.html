@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>麋鹿·性偏好测试结果</title>
+  <!-- 引入验证SDK -->
+  <script src="/static/js/link-validator.js"></script>
+  <style>
+    body { margin:0; font-family:'Microsoft YaHei', Arial, sans-serif; background:hwb(0 99% 1%); }
+    .wrap { max-width: 980px; margin: 24px auto; background: hsl(226, 100%, 69%); border-radius: 18px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); padding: 20px 24px; }
+    .title { text-align:center; font-size: 28px; font-weight: 900; letter-spacing:2px; margin: 8px 0 6px 0; color: #eee; }
+    .sub { text-align:center; color:#666; margin-bottom: 16px; }
+    .hr { height:1px; background:#eee; margin: 12px 0 18px 0; }
+    .section-title { text-align:center; font-size: 18px; font-weight: 800; letter-spacing:1px; color:hsl(0, 0%, 100%); margin: 8px 0 12px 0; }
+    .panel { background:#fff; border: 1px solid #4165f7; border-radius: 12px; padding: 18px; }
+    .radar-box { display:flex; justify-content:center; align-items:center; padding: 12px; }
+    @media (max-width: 768px) {
+      .panel { padding: 12px; }
+      .radar-box { padding: 4px; }
+    }
+    canvas { 
+      width: 100%; 
+      max-width: 900px; 
+      height: auto; 
+      aspect-ratio: 900 / 900;
+      min-height: 500px;
+    }
+    @media (max-width: 768px) {
+      .radar-box { padding: 8px; }
+      canvas { 
+        max-width: 100%; 
+        aspect-ratio: 1 / 1;
+        min-height: 600px;
+      }
+    }
+    .legend { text-align:center; color:#555; margin-top: 8px; font-size: 13px; }
+    .analysis-wrap { margin-top: 20px; }
+    .card { border-radius: 12px; border:1px solid #f0f0f0; background:#fafcfe; margin: 14px 0; padding: 16px 14px; }
+    .card h3 { margin: 0 0 8px 0; font-size: 18px; }
+    .score { color:#2d8cf0; font-weight: 800; margin-left: 8px; }
+    .para { color:#333; line-height: 1.9; margin: 10px 0 0 0; }
+    .note { color:#777; }
+    .back { display:block; width:180px; margin: 24px auto; background:#7c5cff; color:#fff; border:none; padding: 10px 16px; border-radius: 24px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="title">（麋鹿）性偏好测试</div>
+    <div class="hr"></div>
+    <div class="section-title">测评结果</div>
+    <div class="panel">
+      <div class="radar-box">
+        <canvas id="radar"></canvas>
+      </div>
+      <div class="legend">各维度得分（蓝：得分）</div>
+    </div>
+
+    <div class="section-title" style="margin-top:22px;">分析与建议</div>
+    <div class="analysis-wrap" id="analysis"></div>
+
+    <button class="back" id="restartButton">重新测试</button>
+    
+    <!-- 推广链接容器（SDK会自动添加，放在最底部） -->
+    <div class="report-footer-promotion"></div>
+  </div>
+  
+  <script>
+    // 初始化验证SDK
+    let linkValidator = null;
+    
+    // SDK加载完成后的回调
+    if (typeof PsyTestValidator !== 'undefined') {
+      // SDK已加载，直接初始化
+      initializeSDK();
+    } else {
+      // 等待SDK加载
+      window.addEventListener('load', function() {
+        if (typeof PsyTestValidator !== 'undefined') {
+          initializeSDK();
+        } else {
+          console.error('验证SDK未加载');
+        }
+      });
+    }
+    
+    async function initializeSDK() {
+      // 从URL获取token和unlimited参数
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      const unlimited = urlParams.get('unlimited') === 'true';
+      
+      // 初始化SDK（注意：第一个参数是testCode字符串，第二个参数是options对象）
+      linkValidator = await PsyTestValidator.init('mpt', {
+        token: token || undefined,
+        unlimited: unlimited || false,
+        onSuccess: function(data, validator) {
+          console.log('SDK初始化成功，链接有效:', data);
+          // 确保window.linkValidator已设置
+          if (validator) {
+            window.linkValidator = validator;
+          }
+        },
+        onError: function(error) {
+          console.error('SDK初始化失败:', error);
+        },
+        onLoad: function(data) {
+          console.log('SDK加载完成回调:', data);
+          
+          // 调用addPromotionLink确保推广链接显示（报告页使用report-footer-promotion容器）
+          setTimeout(() => {
+            // 对于报告页，先移除.report-footer中的推广链接（如果SDK已经添加了）
+            const reportFooter = document.querySelector('.report-footer');
+            if (reportFooter) {
+              const existingLinkInFooter = reportFooter.querySelector('#link-validator-promotion-link');
+              if (existingLinkInFooter) {
+                existingLinkInFooter.remove();
+              }
+            }
+            
+            // 检查是否有专门的推广链接容器
+            const reportPromotionContainer = document.querySelector('.report-footer-promotion');
+            if (reportPromotionContainer) {
+              // 手动添加推广链接到指定容器（使用SDK的样式）
+              const existingLink = reportPromotionContainer.querySelector('#link-validator-promotion-link');
+              if (!existingLink) {
+                // 创建推广链接容器（使用SDK的样式，添加背景以提高可见性）
+                const promotionContainer = document.createElement('div');
+                promotionContainer.id = 'link-validator-promotion-link';
+                promotionContainer.style.cssText = `
+                  color: #333;
+                  font-size: 14px;
+                  line-height: 1.6;
+                  margin: 0;
+                  width: 100%;
+                  text-align: center;
+                  padding: 16px 20px;
+                  margin-top: 16px;
+                  box-sizing: border-box;
+                  background: rgba(255, 255, 255, 0.95);
+                  border-radius: 8px;
+                  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                `;
+                
+                // 创建推广链接文本和链接（使用SDK的样式）
+                const promotionText = document.createTextNode('如果您也想为他人提供测试服务，');
+                const promotionLink = document.createElement('a');
+                promotionLink.href = '/';
+                promotionLink.target = '_blank';
+                promotionLink.rel = 'noopener noreferrer';
+                promotionLink.textContent = '点击这里了解更多';
+                promotionLink.style.cssText = `
+                  color: #1890ff;
+                  text-decoration: none;
+                  cursor: pointer;
+                  font-weight: 500;
+                `;
+                
+                // 添加链接悬停效果
+                promotionLink.addEventListener('mouseenter', function() {
+                  this.style.textDecoration = 'underline';
+                });
+                promotionLink.addEventListener('mouseleave', function() {
+                  this.style.textDecoration = 'none';
+                });
+                
+                // 组装推广链接
+                promotionContainer.appendChild(promotionText);
+                promotionContainer.appendChild(promotionLink);
+                reportPromotionContainer.appendChild(promotionContainer);
+              }
+            } else if (typeof PsyTestValidator.addPromotionLink === 'function') {
+              PsyTestValidator.addPromotionLink();
+            }
+          }, 100);
+        }
+      });
+      
+      // 将linkValidator挂载到window对象，方便其他脚本使用
+      // SDK的init方法已经自动设置了window.linkValidator，但为了确保，这里再设置一次
+      if (linkValidator) {
+        window.linkValidator = linkValidator;
+      }
+    }
+  </script>
+  <script src="result.js"></script>
+</body>
+</html>
+
+
+

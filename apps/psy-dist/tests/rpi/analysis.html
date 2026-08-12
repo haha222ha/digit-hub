@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="RPI恋爱占有欲指数测试 - 分析中">
+    <meta name="keywords" content="RPI,恋爱占有欲,占有欲测试,恋爱测试,心理测评">
+    <title>RPI恋爱占有欲指数测试 - 分析中</title>
+    <link rel="stylesheet" href="css/analysis.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none; /* 禁用所有鼠标事件 */
+            opacity: 0.6; /* 变灰 */
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="rpi-analysis-layout" id="app">
+        <!-- 加载提示 -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">加载中...</div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="rpi-analysis-content">
+            <!-- Header -->
+            <div class="rpi-analysis-header">
+                <div class="rpi-analysis-icon-wrapper">
+                    <span class="rpi-analysis-icon">💕</span>
+                </div>
+                <h1 class="rpi-analysis-title" id="analysisTitle">报告分析中</h1>
+                <p class="rpi-analysis-subtitle" id="testTypeSubtitle">RPI 恋爱占有欲指数测评 · 给自己测</p>
+            </div>
+
+            <!-- 进度圈 -->
+            <div class="rpi-analysis-progress-circle">
+                <svg class="rpi-progress-ring-svg" width="180" height="180">
+                    <circle class="rpi-progress-ring-background" cx="90" cy="90" r="80" fill="none" stroke="rgba(255, 255, 255, 0.3)" stroke-width="8"></circle>
+                    <circle class="rpi-progress-ring-fill" id="progressRingFill" cx="90" cy="90" r="80" fill="none" stroke="url(#gradient)" stroke-width="8" stroke-linecap="round" transform="rotate(-90 90 90)" stroke-dasharray="502.65" stroke-dashoffset="502.65"></circle>
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#F472B6;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#EC4899;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#BE185D;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div class="rpi-analysis-countdown">
+                    <div class="rpi-analysis-countdown-number" id="countdownNumber">5</div>
+                    <div class="rpi-analysis-countdown-text">秒后查看报告</div>
+                </div>
+            </div>
+
+            <!-- 分析步骤列表 -->
+            <div class="rpi-analysis-steps" id="analysisSteps">
+                <!-- 步骤将通过JavaScript动态生成 -->
+            </div>
+
+            <!-- 提示文字 -->
+            <div class="rpi-analysis-tips">
+                <p class="rpi-analysis-tip-text">💡 我们正在基于心理学理论分析您的占有欲特征...</p>
+                <p class="rpi-analysis-tip-text">📊 包含四维度分析、雷达图、人格类型、依恋模式等</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入数据模块 -->
+    <script type="module" src="js/analysis.js"></script>
+    
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        // 等待DOM加载完成后再启用安全功能
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+</body>
+</html>
+

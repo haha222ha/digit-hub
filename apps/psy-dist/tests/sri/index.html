@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="SRI性压抑指数评估量表 - 专业的性心理测试">
+    <meta name="keywords" content="SRI,性压抑指数,性心理测试,心理测评">
+    <title>SRI 性压抑指数评估量表</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none; /* 禁用所有鼠标事件 */
+            opacity: 0.6; /* 变灰 */
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 错误提示容器 -->
+    <div id="errorOverlay" class="error-overlay" style="display: none;">
+        <p id="errorMessage"></p>
+    </div>
+    <div class="consent-container" id="app">
+        <!-- 标题卡片 -->
+        <div class="title-card">
+            <div class="title-icon">💝</div>
+            <h1 class="main-title">SRI 性压抑指数评估量表</h1>
+            <p class="subtitle">基于科学研究的心理测评工具</p>
+        </div>
+
+        <!-- 知情同意书 -->
+        <div class="consent-card">
+            <div class="consent-header">
+                <span class="consent-icon">📋</span>
+                <h2 class="consent-title">知情同意书</h2>
+            </div>
+
+            <div class="consent-content">
+                <!-- 评估目的 -->
+                <div class="consent-section">
+                    <div class="section-header">
+                        <span class="section-icon">🎯</span>
+                        <h3 class="section-title">评估目的</h3>
+                    </div>
+                    <p class="section-text">
+                        本评估旨在帮助您了解自己在性心理方面的特征，包括对性态度、性焦虑与罪恶感、性抑制以及性脚本与行为开放性等维度的评估。这是一个基于科学研究的自我探索工具，可以促进您对自身性心理健康的认知和理解。
+                    </p>
+                </div>
+
+                <!-- 非诊断性质 -->
+                <div class="consent-section">
+                    <div class="section-header">
+                        <span class="section-icon">⚕️</span>
+                        <h3 class="section-title">非诊断性质</h3>
+                    </div>
+                    <p class="section-text">
+                        本评估是一个有趣的自我探索工具，帮助您了解自己的性态度类型。这只是娱乐性质的测评，不具有医学诊断功能。结果仅供参考和娱乐，请轻松看待。
+                    </p>
+                </div>
+
+                <!-- 自愿参与 -->
+                <div class="consent-section">
+                    <div class="section-header">
+                        <span class="section-icon">👥</span>
+                        <h3 class="section-title">自愿参与</h3>
+                    </div>
+                    <p class="section-text">
+                        参与本评估完全基于自愿原则。您可以在任何时候选择退出评估，无需给出任何理由。评估过程中如果感到不适，可随时停止测试。
+                    </p>
+                </div>
+
+                <!-- 提示框 -->
+                <div class="consent-notice">
+                    开始测试即表示您已阅读并同意上述所有说明。
+                </div>
+            </div>
+        </div>
+
+        <!-- 开始测试按钮 -->
+        <div class="consent-footer welcome-footer">
+            <button class="start-button" id="startButton">
+                开始测试
+            </button>
+            <p class="footer-note">
+                本工具基于科学研究开发，数据来源包括 SIS/SES-SF、Mosher 性罪恶感量表、KISS-9 性脚本量表等经过验证的心理测量工具。
+            </p>
+        </div>
+    </div>
+
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        // 等待DOM加载完成后再启用安全功能
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+    
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init(null, {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    // 尝试获取实例，即使无效
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    // 确保 window.linkValidator 被设置（即使验证失败）
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    // 页面不禁用，允许用户看到页面内容
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    // 确保获取到validator实例
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        // 如果还是获取不到，尝试从window.linkValidator获取
+                        if (!validatorInstance && window.linkValidator) {
+                            validatorInstance = window.linkValidator;
+                        }
+                    }
+                    // 确保 window.linkValidator 被设置
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+            document.body.classList.add('page-disabled');
+            const errorOverlay = document.getElementById('errorOverlay');
+            const errorMessageEl = document.getElementById('errorMessage');
+            if (errorMessageEl) {
+                errorMessageEl.textContent = '验证SDK未加载，请检查文件路径';
+            }
+            if (errorOverlay) {
+                errorOverlay.style.display = 'flex';
+            }
+        }
+    </script>
+
+    <!-- 导入数据模块 -->
+    <script type="module" src="js/consent.js"></script>
+</body>
+</html>
+

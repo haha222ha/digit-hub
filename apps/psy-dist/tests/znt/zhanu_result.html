@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>渣女测试结果</title>
+    <link rel="stylesheet" href="css/theme-elegantrose.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p { margin: 0; line-height: 1.6; }
+
+        /* 报告页底部操作区（用于SDK添加推广链接） */
+        .report-footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-top: 32px;
+            padding: 24px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* 推广链接区域样式（SDK自动添加到.report-footer中） */
+        .report-footer #link-validator-promotion-link {
+            width: 100%;
+            text-align: center;
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid var(--border-color);
+            box-sizing: border-box;
+        }
+
+        /* 结果页专属样式 */
+        .result-page {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* 顶部 Hero 区域 */
+        .result-hero {
+            text-align: center;
+            padding: 32px 20px 24px;
+            position: relative;
+        }
+        
+        .result-badge {
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 16px;
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+            border: 2px solid var(--border-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 52px;
+            box-shadow: 0 0 40px var(--rose-glow);
+            animation: badgeAppear 0.8s ease forwards;
+        }
+        
+        @keyframes badgeAppear {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .result-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 6px;
+            animation: fadeInUp 0.6s ease 0.2s forwards;
+            opacity: 0;
+        }
+        
+        /* 人格语录 */
+        .result-quote {
+            color: var(--rose-gold);
+            font-size: 1rem;
+            margin: 0 0 12px;
+            font-style: italic;
+            animation: fadeInUp 0.6s ease 0.3s forwards;
+            opacity: 0;
+        }
+        
+        .result-score {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            animation: fadeInUp 0.6s ease 0.4s forwards;
+            opacity: 0;
+        }
+        
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(20px); }
+        }
+        
+        /* 雷达图区域 */
+        .radar-section {
+            margin: 24px 0;
+            animation: fadeInUp 0.6s ease 0.5s forwards;
+            opacity: 0;
+        }
+        
+        .radar-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .radar-title {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        
+        .radar-canvas {
+            max-width: 280px;
+            height: auto;
+            margin: 0 auto;
+        }
+        
+        /* 指数展示 */
+        .index-section {
+            margin: 24px 0;
+            animation: fadeInUp 0.6s ease 0.6s forwards;
+            opacity: 0;
+        }
+        
+        .index-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        
+        .index-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px 10px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .index-card:hover {
+            border-color: var(--rose-gold);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px var(--rose-glow);
+        }
+        
+        .index-name {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+        
+        .index-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--rose-gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* 性格特征 */
+        .feature-section {
+            margin: 24px 0;
+            animation: fadeInUp 0.6s ease 0.7s forwards;
+            opacity: 0;
+        }
+        
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 22px 18px;
+        }
+        
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 18px;
+            background: var(--rose-gold-gradient);
+            border-radius: 2px;
+        }
+        
+        .feature-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            margin: 0 0 16px;
+        }
+        
+        .behavior-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .behavior-list li {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .behavior-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .behavior-list li::before {
+            content: '✦';
+            color: var(--rose-gold);
+            margin-right: 10px;
+            flex-shrink: 0;
+            font-size: 0.7rem;
+            margin-top: 2px;
+        }
+        
+        /* 情感建议 */
+        .advice-section {
+            margin: 24px 0;
+            animation: fadeInUp 0.6s ease 0.8s forwards;
+            opacity: 0;
+        }
+        
+        .advice-card {
+            background: linear-gradient(180deg, rgba(232, 180, 184, 0.08) 0%, var(--bg-card) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 22px 18px;
+        }
+        
+        .advice-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .advice-list li {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .advice-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .advice-icon {
+            width: 26px;
+            height: 26px;
+            background: var(--bg-secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+            font-size: 0.75rem;
+        }
+        
+        /* 最佳配对 */
+        .match-section {
+            margin: 24px 0;
+            animation: fadeInUp 0.6s ease 0.9s forwards;
+            opacity: 0;
+        }
+        
+        .match-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 22px 18px;
+        }
+        
+        .match-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+        }
+        
+        .match-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--rose-gold-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        
+        .match-info {
+            flex: 1;
+        }
+        
+        .match-label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+        
+        .match-type {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .match-reason {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        
+        /* 底部按钮 */
+        .action-section {
+            margin: 32px 0;
+            animation: fadeInUp 0.6s ease 1s forwards;
+            opacity: 0;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .action-btn {
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 100%;
+            padding: 14px 16px;
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            background: var(--rose-gold-gradient);
+            color: var(--bg-primary);
+            font-weight: 600;
+            box-shadow: 0 4px 20px var(--rose-glow);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px var(--rose-glow);
+        }
+        
+        /* 分割线 */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0;
+            color: var(--rose-gold);
+            font-size: 0.65rem;
+            opacity: 0.5;
+        }
+        
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--rose-gold), transparent);
+        }
+        
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-card);
+            border: 1px solid var(--rose-gold);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 380px) {
+            .index-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            
+            .index-card {
+                padding: 12px 6px;
+            }
+            
+            .index-value {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container result-page">
+        <!-- Hero 区域 -->
+        <div class="result-hero">
+            <div class="result-badge" id="typeIcon">⭐</div>
+            <h1 class="result-title" id="typeName">加载中...</h1>
+            <p class="result-quote" id="typeQuote"></p>
+            <p class="result-score">你的得分：<span id="scoreVal">0</span>分</p>
+        </div>
+        
+        <!-- 雷达图 -->
+        <div class="radar-section">
+            <div class="radar-container">
+                <p class="radar-title">你的性格雷达</p>
+                <canvas id="radarCanvas" class="radar-canvas" width="280" height="280"></canvas>
+            </div>
+        </div>
+        
+        <!-- 三大指数 -->
+        <div class="index-section">
+            <div class="index-grid">
+                <div class="index-card">
+                    <p class="index-name">暖女指数</p>
+                    <p class="index-value"><span id="warmIdx">0</span>%</p>
+                </div>
+                <div class="index-card">
+                    <p class="index-name">独立指数</p>
+                    <p class="index-value"><span id="indIdx">0</span>%</p>
+                </div>
+                <div class="index-card">
+                    <p class="index-name">情感投入</p>
+                    <p class="index-value"><span id="loveIdx">0</span>%</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-divider">✦</div>
+        
+        <!-- 性格特征 -->
+        <div class="feature-section">
+            <div class="feature-card">
+                <h2 class="section-title">性格特征</h2>
+                <p class="feature-desc" id="featureDesc">加载中...</p>
+                <ul class="behavior-list" id="behaviorList"></ul>
+            </div>
+        </div>
+        
+        <!-- 情感建议 -->
+        <div class="advice-section">
+            <div class="advice-card">
+                <h2 class="section-title">成长建议</h2>
+                <ul class="advice-list" id="adviceList"></ul>
+            </div>
+        </div>
+        
+        <!-- 最佳配对 -->
+        <div class="match-section">
+            <div class="match-card">
+                <h2 class="section-title">最佳配对</h2>
+                <div class="match-content">
+                    <div class="match-icon" id="matchIcon">💕</div>
+                    <div class="match-info">
+                        <p class="match-label">与你最契合的类型</p>
+                        <p class="match-type" id="matchType">加载中...</p>
+                        <p class="match-reason" id="matchReason">加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-divider">✦</div>
+        
+        <!-- 底部按钮 -->
+        <div class="action-section report-footer">
+            <button id="retry-btn" class="action-btn">重新测试</button>
+        </div>
+    </div>
+
+    <!-- 错误提示容器 -->
+    <div id="errorOverlay" class="error-overlay" style="display: none;">
+        <p id="errorMessage"></p>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+
+        if (typeof PsyTestValidator !== 'undefined') {
+            // 明确传入testCode 'znt'
+            PsyTestValidator.init('znt', {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) errorOverlay.style.display = 'none';
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) errorOverlay.style.display = 'none';
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (!validatorInstance && window.linkValidator) {
+                            validatorInstance = window.linkValidator;
+                        }
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+
+                    // 调用addPromotionLink确保推广链接显示（结果页使用report-footer容器）
+                    setTimeout(() => {
+                        if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                            PsyTestValidator.addPromotionLink();
+                        }
+                    }, 200);
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+        }
+    </script>
+
+    <script src="zhanu_result.js"></script>
+</body>
+</html>

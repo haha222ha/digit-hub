@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="RPI恋爱占有欲指数测试 - 基本信息">
+    <meta name="keywords" content="RPI,恋爱占有欲,占有欲测试,恋爱测试,心理测评">
+    <title>RPI恋爱占有欲指数测试 - 基本信息</title>
+    <link rel="stylesheet" href="css/intro.css">
+    <link rel="stylesheet" href="css/demographic.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none; /* 禁用所有鼠标事件 */
+            opacity: 0.6; /* 变灰 */
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="rpi-demographic-wrapper">
+        <!-- 加载提示 -->
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">加载中...</div>
+        </div>
+
+        <!-- 顶部导航 -->
+        <header class="rpi-header">
+            <div class="rpi-header-content">
+                <div class="rpi-logo" onclick="window.location.href='index.html'" style="cursor: pointer;">
+                    <div class="rpi-logo-icon">💕</div>
+                    <div class="rpi-logo-text">
+                        <div class="rpi-logo-title">RPI Calculator</div>
+                        <div class="rpi-logo-subtitle">恋爱占有欲指数计算器</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 16px; align-items: center;">
+                    <span style="font-size: 15px; font-weight: 600; color: var(--rpi-primary);" id="testTypeText">
+                        💖 给自己测
+                    </span>
+                    <button class="rpi-back-button" onclick="window.history.back();">
+                        <span class="anticon anticon-arrow-left">
+                            <svg viewBox="64 64 896 896" focusable="false" data-icon="arrow-left" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M872 474H286.9l352.8-328.1c12.4-11.5 13.6-30.3 2.1-42.8L614.8 86.3c-11.5-12.4-30.3-13.6-42.8-2.1L156.9 474.1c-12.5 11.6-12.5 30.3 0 41.9l415.1 415.1c12.5 11.6 31.3 11.6 42.8 0l24.4-24.4c11.5-12.5 10.3-31.3-2.1-42.8L286.9 550H872c17.7 0 32-14.3 32-32v-36c0-17.7-14.3-32-32-32z"></path></svg>
+                        </span>
+                        返回
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容 -->
+        <div class="rpi-demographic-container">
+            <!-- Hero -->
+            <div class="rpi-demographic-hero">
+                <div class="rpi-demographic-hero-icon">👤</div>
+                <h1 class="rpi-demographic-hero-title" id="heroTitle">基本信息</h1>
+                <p class="rpi-demographic-hero-desc" id="heroDesc">
+                    请提供一些基本信息，这将帮助我们提供更准确的结果分析
+                </p>
+            </div>
+
+            <!-- 表单卡片 -->
+            <div class="rpi-demographic-form-card">
+                <!-- 年龄段 -->
+                <div class="rpi-demographic-form-item">
+                    <div class="rpi-demographic-form-label">
+                        <span class="rpi-demographic-label-icon">🎂</span>
+                        <span class="rpi-demographic-label-text" id="ageLabel">您的年龄段</span>
+                        <span class="rpi-demographic-required">*</span>
+                    </div>
+                    <div class="rpi-demographic-radio-group">
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="age" value="under18" id="age-under18">
+                            <span>18岁以下</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="age" value="18-24" id="age-18-24">
+                            <span>18-24岁</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="age" value="25-29" id="age-25-29">
+                            <span>25-29岁</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="age" value="30-34" id="age-30-34">
+                            <span>30-34岁</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="age" value="35-39" id="age-35-39">
+                            <span>35-39岁</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="age" value="40+" id="age-40+">
+                            <span>40岁以上</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 性别 -->
+                <div class="rpi-demographic-form-item">
+                    <div class="rpi-demographic-form-label">
+                        <span class="rpi-demographic-label-icon">⚧️</span>
+                        <span class="rpi-demographic-label-text" id="genderLabel">您的性别</span>
+                        <span class="rpi-demographic-required">*</span>
+                    </div>
+                    <div class="rpi-demographic-radio-group">
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="gender" value="male" id="gender-male">
+                            <span>男性</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="gender" value="female" id="gender-female">
+                            <span>女性</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="gender" value="other" id="gender-other">
+                            <span>其他</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="gender" value="prefer-not-say" id="gender-prefer-not-say">
+                            <span>不愿透露</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 星座 -->
+                <div class="rpi-demographic-form-item">
+                    <div class="rpi-demographic-form-label">
+                        <span class="rpi-demographic-label-icon">⭐</span>
+                        <span class="rpi-demographic-label-text" id="zodiacLabel">您的星座</span>
+                        <span class="rpi-demographic-required">*</span>
+                    </div>
+                    <div class="rpi-custom-select" id="zodiacSelectWrapper">
+                        <div class="rpi-custom-select-trigger" id="zodiacSelectTrigger">
+                            <span class="rpi-custom-select-placeholder">请选择星座</span>
+                            <span class="rpi-custom-select-arrow">▼</span>
+                        </div>
+                        <div class="rpi-custom-select-dropdown" id="zodiacSelectDropdown">
+                            <div class="rpi-custom-select-option" data-value="">
+                                <span class="rpi-custom-select-option-text">请选择星座</span>
+                            </div>
+                            <div class="rpi-custom-select-option" data-value="aries">
+                                <span class="rpi-custom-select-option-text">白羊座</span>
+                                <span class="rpi-custom-select-option-icon">♈</span>
+                            </div>
+                            <div class="rpi-custom-select-option" data-value="taurus">
+                                <span class="rpi-custom-select-option-text">金牛座</span>
+                                <span class="rpi-custom-select-option-icon">♉</span>
+                            </div>
+                            <div class="rpi-custom-select-option" data-value="gemini">
+                                <span class="rpi-custom-select-option-text">双子座</span>
+                                <span class="rpi-custom-select-option-icon">♊</span>
+                            </div>
+                            <div class="rpi-custom-select-option" data-value="cancer">
+                                <span class="rpi-custom-select-option-text">巨蟹座</span>
+                                <span class="rpi-custom-select-option-icon">♋</span>
+                            </div>
+                            <div class="rpi-custom-select-option" data-value="leo">
+                                <span class="rpi-custom-select-option-text">狮子座</span>
+                                <span class="rpi-custom-select-option-icon">♌</span>
+                            </div>
+                            <div class="rpi-custom-select-option" data-value="virgo">
+                                <span class="rpi-custom-select-option-text">处女座</span>
+                                <span class="rpi-custom-select-option-icon">♍</span>
+                            </div>
+                            <div class="rpi-custom-select-option" data-value="libra">
+                                <span class="rpi-custom-select-option-text">天秤座</span>
+                                <span class="rpi-custom-select-option-icon">♎</span>
+                            </div>
+                            <div class="rpi-custom-select-option" data-value="scorpio">
+                                <span class="rpi-custom-select-option-text">天蝎座</span>
+                                <span class="rpi-custom-select-option-icon">♏</span>
+                            </div>
+                            <div class="rpi-custom-select-option" data-value="sagittarius">
+                                <span class="rpi-custom-select-option-text">射手座</span>
+                                <span class="rpi-custom-select-option-icon">♐</span>
+                            </div>
+                            <div class="rpi-custom-select-option" data-value="capricorn">
+                                <span class="rpi-custom-select-option-text">摩羯座</span>
+                                <span class="rpi-custom-select-option-icon">♑</span>
+                            </div>
+                            <div class="rpi-custom-select-option" data-value="aquarius">
+                                <span class="rpi-custom-select-option-text">水瓶座</span>
+                                <span class="rpi-custom-select-option-icon">♒</span>
+                            </div>
+                            <div class="rpi-custom-select-option" data-value="pisces">
+                                <span class="rpi-custom-select-option-text">双鱼座</span>
+                                <span class="rpi-custom-select-option-icon">♓</span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="zodiacSelect" name="zodiac" value="" required>
+                    </div>
+                </div>
+
+                <!-- 恋爱状态 -->
+                <div class="rpi-demographic-form-item">
+                    <div class="rpi-demographic-form-label">
+                        <span class="rpi-demographic-label-icon">💑</span>
+                        <span class="rpi-demographic-label-text" id="relationshipStatusLabel">您目前的恋爱状态</span>
+                        <span class="rpi-demographic-required">*</span>
+                    </div>
+                    <div class="rpi-demographic-radio-group rpi-demographic-radio-group-grid">
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipStatus" value="single-never" id="status-single-never">
+                            <span>单身（从未恋爱）</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipStatus" value="single-experienced" id="status-single-experienced">
+                            <span>单身（单段或多段）</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipStatus" value="honeymoon" id="status-honeymoon">
+                            <span>热恋期</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipStatus" value="stable" id="status-stable">
+                            <span>平淡期</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipStatus" value="adjustment" id="status-adjustment">
+                            <span>磨合期</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipStatus" value="frequent-quarrels" id="status-frequent-quarrels">
+                            <span>三天两吵</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipStatus" value="cold-war" id="status-cold-war">
+                            <span>冷战期</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipStatus" value="engaged-married" id="status-engaged-married">
+                            <span>已订婚/结婚</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipStatus" value="long-distance" id="status-long-distance">
+                            <span>异地恋</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 恋爱持续时间 -->
+                <div class="rpi-demographic-form-item">
+                    <div class="rpi-demographic-form-label">
+                        <span class="rpi-demographic-label-icon">⏱️</span>
+                        <span class="rpi-demographic-label-text" id="relationshipDurationLabel">当前(最近)一段恋爱的持续时间</span>
+                    </div>
+                    <div class="rpi-demographic-radio-group">
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipDuration" value="never" id="duration-never">
+                            <span>从未恋爱</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipDuration" value="less-3m" id="duration-less-3m">
+                            <span>少于3个月</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipDuration" value="3-6m" id="duration-3-6m">
+                            <span>3-6个月</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipDuration" value="6m-1y" id="duration-6m-1y">
+                            <span>6个月-1年</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipDuration" value="1-2y" id="duration-1-2y">
+                            <span>1-2年</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipDuration" value="2-3y" id="duration-2-3y">
+                            <span>2-3年</span>
+                        </label>
+                        <label class="rpi-demographic-radio-item">
+                            <input type="radio" name="relationshipDuration" value="3y+" id="duration-3y+">
+                            <span>3年以上</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 提示信息 -->
+            <div class="rpi-demographic-tip">
+                <span class="rpi-demographic-tip-icon">💡</span>
+                <p>
+                    这些信息将帮助我们提供更个性化的分析结果。所有信息仅在您的设备本地存储，完全匿名且安全。
+                </p>
+            </div>
+
+            <!-- 底部按钮 -->
+            <div class="rpi-demographic-actions">
+                <button class="rpi-demographic-btn-submit" id="submitButton" onclick="handleSubmit()" disabled>
+                    下一步，开始答题
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入数据模块 -->
+    <script type="module" src="js/demographic.js"></script>
+    
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        // 等待DOM加载完成后再启用安全功能
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+</body>
+</html>

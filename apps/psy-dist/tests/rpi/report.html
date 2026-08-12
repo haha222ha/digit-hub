@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="RPI恋爱占有欲指数测试 - 评估报告">
+    <meta name="keywords" content="RPI,恋爱占有欲,占有欲测试,恋爱测试,心理测评">
+    <title>RPI恋爱占有欲指数测试 - 评估报告</title>
+    <link rel="stylesheet" href="css/intro.css">
+    <link rel="stylesheet" href="css/report.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none; /* 禁用所有鼠标事件 */
+            opacity: 0.6; /* 变灰 */
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="rpi-intro-layout">
+        <div class="rpi-report-container" id="app">
+        <!-- 加载提示 -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">正在生成报告...</div>
+        </div>
+
+        <!-- 顶部导航 -->
+        <header class="rpi-header">
+            <div class="rpi-header-content" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 20px;">💕</span>
+                    <span style="font-size: 16px; font-weight: 700; color: var(--rpi-primary);">
+                        RPI 评估结果
+                    </span>
+                </div>
+                <div class="rpi-report-switch-container" id="reportSwitchContainer" style="display: none;">
+                    <div class="rpi-report-switch">
+                        <button class="rpi-report-switch-btn" id="switchSelfBtn" data-type="self">
+                            <span class="rpi-report-switch-icon">💖</span>
+                            <span class="rpi-report-switch-text">查看自己报告</span>
+                        </button>
+                        <button class="rpi-report-switch-btn" id="switchPartnerBtn" data-type="partner">
+                            <span class="rpi-report-switch-icon">💞</span>
+                            <span class="rpi-report-switch-text">查看恋人报告</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <div class="rpi-report-main" id="reportMain">
+            <!-- RPI总指数卡片 -->
+            <div class="rpi-report-hero-card" id="heroCard">
+                <div class="rpi-report-hero-icon-wrapper">
+                    <div class="rpi-report-hero-icon">💕</div>
+                </div>
+                <h1 class="rpi-report-hero-title" id="heroTitle">恋爱占有欲指数 (RPI)</h1>
+                <div class="rpi-report-hero-score" id="heroScore">0</div>
+                <div class="rpi-report-hero-level" id="heroLevel">
+                    很低 （自由自在）
+                </div>
+                <p class="rpi-report-hero-text" id="heroText">
+                    您的恋爱占有欲指数为 <strong>0</strong>，处于「很低（自由自在）」水平
+                </p>
+                
+                <!-- 进度条 -->
+                <div class="rpi-report-scale">
+                    <div class="rpi-report-scale-bar">
+                        <div class="rpi-report-scale-marker" id="scaleMarker" style="left: 0%"></div>
+                    </div>
+                    <div class="rpi-report-scale-labels">
+                        <span>0（自由自在）</span>
+                        <span>50（恰到好处）</span>
+                        <span>100（爱到极致）</span>
+                    </div>
+                </div>
+
+                <!-- 结果解释 -->
+                <div class="rpi-report-interpretation" id="interpretation">
+                    <div class="rpi-interpretation-header">
+                        <span class="rpi-interpretation-emoji">💭</span>
+                        <h3>综合结果解释</h3>
+                    </div>
+                    <div class="rpi-report-interpretation-content" id="interpretationContent">
+                        <!-- 内容将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 个性化建议 -->
+                <div class="rpi-report-suggestions-box" id="suggestionsBox">
+                    <h4 id="suggestionsTitle">💡 给您的建议</h4>
+                    <div class="rpi-report-suggestion-list" id="suggestionsContent">
+                        <!-- 建议内容将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 四个维度分析 -->
+            <div class="rpi-report-section" id="dimensionsSection">
+                <h2 class="rpi-report-section-title">
+                    <span class="rpi-report-section-icon">📊</span>
+                    四维度分析
+                </h2>
+                <div class="rpi-report-dimensions-grid" id="dimensionsGrid">
+                    <!-- 维度卡片将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 可视化分析 - 双雷达图 -->
+            <div class="rpi-report-section" id="radarsSection">
+                <h2 class="rpi-report-section-title">
+                    <span class="rpi-report-section-icon">📊</span>
+                    可视化分析
+                </h2>
+                <div class="rpi-report-radars-container" id="radarsContainer">
+                    <!-- 雷达图将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 恋爱占有欲人格类型 -->
+            <div class="rpi-report-section" id="personalitySection">
+                <h2 class="rpi-report-section-title">
+                    <span class="rpi-report-section-icon">✨</span>
+                    恋爱占有欲人格类型
+                </h2>
+                <div id="personalityContent">
+                    <!-- 人格类型内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 依恋模式分析 -->
+            <div class="rpi-report-section" id="attachmentSection">
+                <h2 class="rpi-report-section-title">
+                    <span class="rpi-report-section-icon">🧠</span>
+                    依恋模式分析
+                </h2>
+                <div id="attachmentContent">
+                    <!-- 依恋模式内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 占有欲影响路径分析 -->
+            <div class="rpi-report-section" id="pathSection">
+                <h2 class="rpi-report-section-title">
+                    <span class="rpi-report-section-icon">🔄</span>
+                    占有欲影响路径分析
+                </h2>
+                <div id="pathContent">
+                    <!-- 影响路径内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 爱情心理学专家建议 -->
+            <div class="rpi-report-section" id="expertSection">
+                <h2 class="rpi-report-section-title">
+                    <span class="rpi-report-section-icon">💡</span>
+                    爱情心理学专家建议
+                </h2>
+                <div class="rpi-report-expert-cards" id="expertContent">
+                    <!-- 专家建议内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 星座参考 -->
+            <div class="rpi-report-section" id="zodiacSection">
+                <!-- 星座内容将通过JavaScript动态生成 -->
+            </div>
+
+            <!-- 关系健康度评估 -->
+            <div class="rpi-report-section" id="healthSection">
+                <h2 class="rpi-report-section-title">
+                    <span class="rpi-report-section-icon">❤️</span>
+                    关系健康度评估
+                </h2>
+                <div id="healthContent">
+                    <!-- 健康度评估内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 有效沟通技巧指南 -->
+            <div class="rpi-report-section" id="communicationSection">
+                <h2 class="rpi-report-section-title">
+                    <span class="rpi-report-section-icon">💬</span>
+                    有效沟通技巧指南
+                </h2>
+                <div id="communicationContent">
+                    <!-- 沟通技巧内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 30天自我成长计划 -->
+            <div class="rpi-report-section" id="growthSection">
+                <h2 class="rpi-report-section-title">
+                    <span class="rpi-report-section-icon">📅</span>
+                    30天自我成长计划
+                </h2>
+                <div id="growthContent">
+                    <!-- 成长计划内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 推荐学习资源 -->
+            <div class="rpi-report-section" id="resourcesSection">
+                <h2 class="rpi-report-section-title">
+                    <span class="rpi-report-section-icon">📚</span>
+                    推荐学习资源
+                </h2>
+                <div id="resourcesContent">
+                    <!-- 学习资源内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 评估信息 -->
+            <div class="rpi-report-info-card" id="infoCard">
+                <!-- 评估信息内容将通过JavaScript动态生成 -->
+            </div>
+
+            <!-- 重要声明 -->
+            <div class="rpi-report-disclaimer-card">
+                <span class="rpi-report-disclaimer-icon">⚠️</span>
+                <div>
+                    <strong>重要声明</strong>
+                    <p>
+                        本测评结果仅供娱乐参考，不构成专业诊断。RPI指数是一个有趣的自我探索工具，
+                        帮助你了解自己在恋爱关系中的小特点。轻松看待结果，开心就好！
+                    </p>
+                    <p>
+                        您的所有数据都安全地保存在本地设备上，我们不会收集或传输你的个人信息。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 底部操作按钮 -->
+            <div class="rpi-report-footer-actions" id="footerActions">
+                <!-- 直接在HTML中渲染按钮，确保即使JavaScript加载失败也能显示 -->
+                <button id="rpi-restart-btn" class="rpi-report-footer-btn rpi-report-footer-btn-primary" onclick="(function(){const f=window.handleRestart||window.rpiRestart;if(typeof f==='function'){f();}else{var h1=!!localStorage.getItem('rpi_test_result_self'),h2=!!localStorage.getItem('rpi_test_result_partner'),b=h1&&h2;if(b){localStorage.removeItem('rpi_test_result_self');localStorage.removeItem('rpi_test_result_partner');localStorage.removeItem('rpi_test_progress_self');localStorage.removeItem('rpi_test_progress_partner');localStorage.removeItem('rpi_test_type');localStorage.removeItem('rpi_consent_self');localStorage.removeItem('rpi_consent_partner');localStorage.removeItem('rpi_demographic_self');localStorage.removeItem('rpi_demographic_partner');}var t=localStorage.getItem('rpi_test_token')||new URLSearchParams(window.location.search).get('token');window.location.href=t?'index.html?token='+encodeURIComponent(t):'index.html';}})();return false;">
+                    <span class="anticon anticon-reload">
+                        <svg viewBox="64 64 896 896" focusable="false" data-icon="reload" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M909.1 209.3l-56.4 44.1C775.8 155.1 656.2 92 521.9 92 290 92 102.3 279.5 102 511.5 101.7 743.7 289.8 932 521.9 932c181.3 0 335.8-115 394.6-276.1 1.5-4.2-.7-8.9-4.9-10.3l-56.7-19.5a8 8 0 00-10.1 4.8c-1.8 5-3.8 10-5.9 14.9-17.3 41-42.1 77.8-73.7 109.4A344.77 344.77 0 01655.9 829c-42.3 0-82.5-11.4-117.6-33.1a345.12 345.12 0 01-104.8-93.9A345.1 345.1 0 01318.3 652c-11.4-42.3 5.7-87.6 42.8-114.6 40.9-29.6 98.7-30.5 140.9-2.7 1.5.9 3.1 1.8 4.5 2.9 4.7 3.1 7.5 8.8 6.6 14.5l-28.5 171a8 8 0 01-10.3 6.2l-170-54.5c-5.8-1.9-9.5-7.6-7.7-13.4l28.5-171c.9-5.7 5.5-10.2 11.2-11.1 5.6-.9 11.1 2.1 13.4 7.5l29.3 93 1.2 3.8a345.13 345.13 0 01112.1 129.7 345.1 345.1 0 0191.4 111.6c24.3 38.2 37.1 81.9 37.1 125.7 0 190.5-154.9 345.5-345.5 345.5S176.4 702 176.4 511.5c0-89.7 34.5-174 97.1-237.5 58.7-58.7 136.8-91 219.9-91 73.2 0 141.5 25.5 196.7 71.5L818 311.7a8 8 0 0012.7-4.1l54.5-170.2a8 8 0 00-6.7-10.1l-170-54.5a8 8 0 00-10.1 6.7l-9.2 28.8c-2.4-1-4.9-2-7.4-2.9z"></path></svg>
+                    </span>
+                    重新测试
+                </button>
+            </div>
+
+            <!-- 推广信息 -->
+            <div class="rpi-promotion-info">
+                <span class="rpi-promotion-text">如果您也想为他人提供测试服务，</span>
+                <a href="/" class="rpi-promotion-link" target="_blank" rel="noopener noreferrer">点击这里了解更多</a>
+            </div>
+
+            <!-- 备用：直接在HTML中定义重新测试函数（如果模块加载失败） -->
+            <script>
+              // 定义清除和跳转函数
+              window.rpiRestart = function() {
+                try {
+                  console.log('rpiRestart 被调用（备用函数）');
+                  
+                  // 检查两个视角是否都完成了
+                  const hasSelf = !!localStorage.getItem('rpi_test_result_self');
+                  const hasPartner = !!localStorage.getItem('rpi_test_result_partner');
+                  const bothCompleted = hasSelf && hasPartner;
+                  
+                  console.log('测试完成状态检查:', { hasSelf, hasPartner, bothCompleted });
+                  
+                  // 只有两个视角都完成时才清除数据
+                  if (bothCompleted) {
+                    console.log('两个视角都已完成，开始清除 localStorage...');
+                    
+                    // 清除 localStorage
+                    const keysToRemove = [
+                      'rpi_test_result_self',
+                      'rpi_test_result_partner',
+                      'rpi_test_progress_self',
+                      'rpi_test_progress_partner',
+                      'rpi_test_type',
+                      'rpi_consent_self',
+                      'rpi_consent_partner',
+                      'rpi_demographic_self',
+                      'rpi_demographic_partner'
+                    ];
+                    
+                    keysToRemove.forEach(key => {
+                      const hadValue = localStorage.getItem(key) !== null;
+                      localStorage.removeItem(key);
+                      if (hadValue) {
+                        console.log('已清除:', key);
+                      }
+                    });
+                    
+                    // 验证清除结果
+                    const selfResult = localStorage.getItem('rpi_test_result_self');
+                    const partnerResult = localStorage.getItem('rpi_test_result_partner');
+                    console.log('清除后验证 - self:', selfResult ? '仍存在' : '已清除', 'partner:', partnerResult ? '仍存在' : '已清除');
+                  } else {
+                    console.log('只有一个视角完成，不清除数据，只跳转回首页');
+                  }
+                  
+                  // 获取 token
+                  const token = localStorage.getItem('rpi_test_token') || new URLSearchParams(window.location.search).get('token');
+                  console.log('获取到的 token:', token);
+                  
+                  // 跳转到首页
+                  const targetUrl = token ? `index.html?token=${encodeURIComponent(token)}` : 'index.html';
+                  console.log('准备跳转到:', targetUrl);
+                  
+                  // 立即跳转
+                  window.location.href = targetUrl;
+                } catch (error) {
+                  console.error('rpiRestart 执行出错:', error);
+                  alert('重新测试失败: ' + error.message);
+                }
+              };
+              
+              // 导出到全局，确保可以直接调用
+              console.log('window.rpiRestart 已定义:', typeof window.rpiRestart);
+              
+              // 确保按钮存在：在页面加载时检查并创建按钮
+              (function() {
+                function ensureRestartButton() {
+                  const footerActions = document.getElementById('footerActions');
+                  if (!footerActions) {
+                    console.warn('footerActions 元素不存在，延迟创建按钮');
+                    setTimeout(ensureRestartButton, 100);
+                    return;
+                  }
+                  
+                  let btn = document.getElementById('rpi-restart-btn');
+                  if (!btn && footerActions) {
+                    console.log('按钮不存在，正在创建...');
+                    const btnHTML = '<button id="rpi-restart-btn" class="rpi-report-footer-btn rpi-report-footer-btn-primary" onclick="localStorage.removeItem(\'rpi_test_result_self\');localStorage.removeItem(\'rpi_test_result_partner\');localStorage.removeItem(\'rpi_test_type\');localStorage.removeItem(\'rpi_consent_self\');localStorage.removeItem(\'rpi_consent_partner\');localStorage.removeItem(\'rpi_demographic_self\');localStorage.removeItem(\'rpi_demographic_partner\');var t=localStorage.getItem(\'rpi_test_token\')||new URLSearchParams(window.location.search).get(\'token\');window.location.href=t?\'index.html?token=\'+t:\'index.html\';return false;"><span class="anticon anticon-reload"><svg viewBox="64 64 896 896" focusable="false" data-icon="reload" width="14" height="14" fill="currentColor"><path d="M909.1 209.3l-56.4 44.1C775.8 155.1 656.2 92 521.9 92 290 92 102.3 279.5 102 511.5 101.7 743.7 289.8 932 521.9 932c181.3 0 335.8-115 394.6-276.1 1.5-4.2-.7-8.9-4.9-10.3l-56.7-19.5a8 8 0 00-10.1 4.8c-1.8 5-3.8 10-5.9 14.9-17.3 41-42.1 77.8-73.7 109.4A344.77 344.77 0 01655.9 829c-42.3 0-82.5-11.4-117.6-33.1a345.12 345.12 0 01-104.8-93.9A345.1 345.1 0 01318.3 652c-11.4-42.3 5.7-87.6 42.8-114.6 40.9-29.6 98.7-30.5 140.9-2.7 1.5.9 3.1 1.8 4.5 2.9 4.7 3.1 7.5 8.8 6.6 14.5l-28.5 171a8 8 0 01-10.3 6.2l-170-54.5c-5.8-1.9-9.5-7.6-7.7-13.4l28.5-171c.9-5.7 5.5-10.2 11.2-11.1 5.6-.9 11.1 2.1 13.4 7.5l29.3 93 1.2 3.8a345.13 345.13 0 01112.1 129.7 345.1 345.1 0 0191.4 111.6c24.3 38.2 37.1 81.9 37.1 125.7 0 190.5-154.9 345.5-345.5 345.5S176.4 702 176.4 511.5c0-89.7 34.5-174 97.1-237.5 58.7-58.7 136.8-91 219.9-91 73.2 0 141.5 25.5 196.7 71.5L818 311.7a8 8 0 0012.7-4.1l54.5-170.2a8 8 0 00-6.7-10.1l-170-54.5a8 8 0 00-10.1 6.7l-9.2 28.8c-2.4-1-4.9-2-7.4-2.9z"></path></svg></span>重新测试</button>';
+                    footerActions.innerHTML = btnHTML;
+                    console.log('按钮已创建');
+                  } else if (btn) {
+                    console.log('按钮已存在');
+                  }
+                }
+                
+                // 页面加载时立即检查
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', ensureRestartButton);
+                } else {
+                  ensureRestartButton();
+                }
+                
+                // 延迟再次检查（防止被其他脚本覆盖）
+                setTimeout(ensureRestartButton, 500);
+                setTimeout(ensureRestartButton, 1000);
+              })();
+            </script>
+        </div>
+    </div>
+
+
+    <!-- 导入数据模块 -->
+    <script type="module" src="js/report.js"></script>
+    
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        // 等待DOM加载完成后再启用安全功能
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+</body>
+</html>
+

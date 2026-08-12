@@ -334,3 +334,30 @@ def change_member_password(
         db.change_password(user_id, new_password, current_password=current_password)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+def register_dist_user(
+    username: str,
+    password: str,
+    *,
+    email: str = "",
+    invite_code: str = "",
+    device_id: str,
+    device_label: str = "psy-dist",
+) -> dict:
+    from cloud_deploy.cloud_api import dist_db
+
+    profile = db.register_user_account(username, password, email=email)
+    uid = int(profile["id"])
+    dist_db.ensure_distributor(uid)
+    if invite_code:
+        inviter = dist_db.find_distributor_by_invite_code(invite_code)
+        if inviter:
+            dist_db.add_quota(int(inviter["user_id"]), 5, change_type="invite", remark=f"邀请 {username}")
+            dist_db.add_quota(uid, 5, change_type="invite_bonus", remark="注册邀请奖励")
+    token = issue_member_token(uid, profile.get("username") or username, device_id, device_label)
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "membership": profile,
+    }

@@ -1,0 +1,603 @@
+/* 介绍页专用样式 */
+
+/* 主容器 */
+.mbti16stage-welcome {
+    min-height: 100vh;
+    padding: 60px 20px 40px;
+    background: linear-gradient(180deg, #f8fafc, #eef2ff 40%, #e0e7ff);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 背景光效 */
+.mbti16stage-welcome .aurora-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.mbti16stage-welcome .aurora-bg .aurora {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: aurora-float 20s ease-in-out infinite;
+}
+
+.mbti16stage-welcome .aurora-bg .aurora-1 {
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(ellipse, rgba(139, 92, 246, 0.35) 0%, transparent 70%);
+    top: -250px;
+    left: -200px;
+    opacity: 0.6;
+}
+
+.mbti16stage-welcome .aurora-bg .aurora-2 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(ellipse, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+    top: 25%;
+    right: -150px;
+    animation-delay: -7s;
+    opacity: 0.5;
+}
+
+.mbti16stage-welcome .aurora-bg .aurora-3 {
+    width: 550px;
+    height: 550px;
+    background: radial-gradient(ellipse, rgba(236, 72, 153, 0.25) 0%, transparent 70%);
+    bottom: -200px;
+    left: 15%;
+    animation-delay: -14s;
+    opacity: 0.4;
+}
+
+.mbti16stage-welcome .aurora-bg .stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(139, 92, 246, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139, 92, 246, 0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: none;
+}
+
+.mbti16stage-welcome .aurora-bg::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 300px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, transparent 100%);
+}
+
+/* 容器 */
+.mbti16stage-welcome .welcome-container {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+/* 头部样式 */
+.mbti16stage-welcome .hero-section {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.mbti16stage-welcome .hero-section .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 100px;
+    color: #8b5cf6;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.mbti16stage-welcome .hero-section .hero-badge .badge-icon {
+    width: 16px;
+    height: 16px;
+    stroke: #8b5cf6;
+}
+
+.mbti16stage-welcome .hero-section .hero-title {
+    font-size: 40px;
+    font-weight: 700;
+    margin: 0 0 20px;
+    line-height: 1.2;
+}
+
+.mbti16stage-welcome .hero-section .hero-title .title-gradient {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1, #4f46e5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.mbti16stage-welcome .hero-section .hero-title .title-dot {
+    color: #e2e8f0;
+    margin: 0 4px;
+}
+
+.mbti16stage-welcome .hero-section .hero-title .title-accent {
+    color: #1e293b;
+}
+
+.mbti16stage-welcome .hero-section .hero-subtitle {
+    font-size: 17px;
+    color: #475569;
+    margin: 0;
+    line-height: 1.7;
+    font-weight: 400;
+}
+
+/* 介绍卡片 */
+.mbti16stage-welcome .intro-card {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 24px;
+    padding: 36px;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.mbti16stage-welcome .intro-card .card-section {
+    margin-bottom: 32px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.mbti16stage-welcome .intro-card .card-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.mbti16stage-welcome .intro-card .section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 17px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 18px;
+}
+
+.mbti16stage-welcome .intro-card .section-title .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+    border-radius: 10px;
+}
+
+.mbti16stage-welcome .intro-card .section-title .icon-wrapper svg {
+    width: 18px;
+    height: 18px;
+    stroke: #fff;
+}
+
+.mbti16stage-welcome .intro-card .section-title .icon-chart {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+}
+
+.mbti16stage-welcome .intro-card .section-title .icon-chart svg {
+    stroke: #fff;
+}
+
+.mbti16stage-welcome .intro-card .section-title .icon-time {
+    background: linear-gradient(135deg, #10b981, #34d399);
+}
+
+.mbti16stage-welcome .intro-card .section-title .icon-time svg {
+    stroke: #fff;
+}
+
+.mbti16stage-welcome .intro-card .section-content {
+    font-size: 15px;
+    line-height: 1.85;
+    color: #475569;
+    margin: 0;
+    padding-left: 48px;
+}
+
+.mbti16stage-welcome .intro-card .section-content strong {
+    color: #d97706;
+    font-weight: 600;
+}
+
+/* 功能列表 */
+.mbti16stage-welcome .intro-card .feature-list {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 48px;
+}
+
+.mbti16stage-welcome .intro-card .feature-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid #F1F5F9;
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.mbti16stage-welcome .intro-card .feature-list li:first-child {
+    padding-top: 0;
+}
+
+.mbti16stage-welcome .intro-card .feature-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.mbti16stage-welcome .intro-card .feature-list li .feature-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: rgba(139, 92, 246, 0.12);
+    border-radius: 8px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.mbti16stage-welcome .intro-card .feature-list li .feature-icon svg {
+    width: 14px;
+    height: 14px;
+    stroke: #8b5cf6;
+}
+
+.mbti16stage-welcome .intro-card .feature-list li:nth-child(2) .feature-icon {
+    background: rgba(245, 158, 11, 0.12);
+}
+
+.mbti16stage-welcome .intro-card .feature-list li:nth-child(2) .feature-icon svg {
+    stroke: #f59e0b;
+}
+
+.mbti16stage-welcome .intro-card .feature-list li:nth-child(3) .feature-icon {
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.mbti16stage-welcome .intro-card .feature-list li:nth-child(3) .feature-icon svg {
+    stroke: #10b981;
+}
+
+.mbti16stage-welcome .intro-card .feature-list li:nth-child(4) .feature-icon {
+    background: rgba(59, 130, 246, 0.12);
+}
+
+.mbti16stage-welcome .intro-card .feature-list li:nth-child(4) .feature-icon svg {
+    stroke: #3b82f6;
+}
+
+/* 信息网格 */
+.mbti16stage-welcome .intro-card .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-left: 48px;
+}
+
+.mbti16stage-welcome .intro-card .info-grid .info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px 16px;
+    background: #f8fafc;
+    border: 1px solid #F1F5F9;
+    border-radius: 16px;
+    transition: all 0.2s ease-out;
+    cursor: default;
+}
+
+.mbti16stage-welcome .intro-card .info-grid .info-item:hover {
+    background: #fff;
+    border-color: #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.mbti16stage-welcome .intro-card .info-grid .info-item .info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(139, 92, 246, 0.12);
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.mbti16stage-welcome .intro-card .info-grid .info-item .info-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: #8b5cf6;
+}
+
+.mbti16stage-welcome .intro-card .info-grid .info-item:nth-child(2) .info-icon {
+    background: rgba(59, 130, 246, 0.12);
+}
+
+.mbti16stage-welcome .intro-card .info-grid .info-item:nth-child(2) .info-icon svg {
+    stroke: #3b82f6;
+}
+
+.mbti16stage-welcome .intro-card .info-grid .info-item:nth-child(3) .info-icon {
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.mbti16stage-welcome .intro-card .info-grid .info-item:nth-child(3) .info-icon svg {
+    stroke: #10b981;
+}
+
+.mbti16stage-welcome .intro-card .info-grid .info-item .info-label {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 6px;
+    font-weight: 400;
+}
+
+.mbti16stage-welcome .intro-card .info-grid .info-item .info-value {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+/* 开始按钮部分 */
+.mbti16stage-welcome .start-section {
+    text-align: center;
+}
+
+.mbti16stage-welcome .start-section .start-btn-large {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 52px;
+    font-size: 17px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
+}
+
+.mbti16stage-welcome .start-section .start-btn-large .btn-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.2s ease-out;
+}
+
+.mbti16stage-welcome .start-section .start-btn-large .btn-text {
+    position: relative;
+    z-index: 1;
+}
+
+.mbti16stage-welcome .start-section .start-btn-large .btn-arrow {
+    position: relative;
+    z-index: 1;
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s ease-out;
+}
+
+.mbti16stage-welcome .start-section .start-btn-large:hover {
+    box-shadow: 0 12px 32px rgba(139, 92, 246, 0.4);
+}
+
+.mbti16stage-welcome .start-section .start-btn-large:hover .btn-glow {
+    opacity: 1;
+}
+
+.mbti16stage-welcome .start-section .start-btn-large:hover .btn-arrow {
+    transform: translate(4px);
+}
+
+.mbti16stage-welcome .start-section .start-btn-large:active {
+    transform: scale(0.98);
+}
+
+.mbti16stage-welcome .start-section .start-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 24px 0 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.mbti16stage-welcome .start-section .start-hint svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .mbti16stage-welcome {
+        padding: 32px 16px;
+    }
+
+    .mbti16stage-welcome .hero-section {
+        margin-bottom: 24px;
+    }
+
+    .mbti16stage-welcome .hero-section .hero-badge {
+        padding: 8px 16px;
+        font-size: 12px;
+        margin-bottom: 16px;
+    }
+
+    .mbti16stage-welcome .hero-section .hero-badge .badge-icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    .mbti16stage-welcome .hero-section .hero-title {
+        font-size: 26px;
+        margin-bottom: 12px;
+    }
+
+    .mbti16stage-welcome .hero-section .hero-title .title-dot {
+        display: inline;
+        margin: 0 4px;
+    }
+
+    .mbti16stage-welcome .hero-section .hero-subtitle {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .mbti16stage-welcome .intro-card {
+        padding: 28px 20px;
+        border-radius: 20px;
+    }
+
+    .mbti16stage-welcome .intro-card .card-section {
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+    }
+
+    .mbti16stage-welcome .intro-card .section-title {
+        font-size: 16px;
+        gap: 10px;
+    }
+
+    .mbti16stage-welcome .intro-card .section-title .icon-wrapper {
+        width: 32px;
+        height: 32px;
+    }
+
+    .mbti16stage-welcome .intro-card .section-title .icon-wrapper svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .mbti16stage-welcome .intro-card .section-content {
+        font-size: 14px;
+        padding-left: 42px;
+    }
+
+    .mbti16stage-welcome .intro-card .feature-list {
+        padding-left: 42px;
+    }
+
+    .mbti16stage-welcome .intro-card .feature-list li {
+        font-size: 13px;
+        gap: 12px;
+    }
+
+    .mbti16stage-welcome .intro-card .feature-list li .feature-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .mbti16stage-welcome .intro-card .feature-list li .feature-icon svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    .mbti16stage-welcome .intro-card .info-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-left: 0;
+    }
+
+    .mbti16stage-welcome .intro-card .info-grid .info-item {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 16px;
+        padding: 16px 20px;
+        text-align: left;
+    }
+
+    .mbti16stage-welcome .intro-card .info-grid .info-item .info-icon {
+        margin-bottom: 0;
+        width: 36px;
+        height: 36px;
+    }
+
+    .mbti16stage-welcome .intro-card .info-grid .info-item .info-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .mbti16stage-welcome .intro-card .info-grid .info-item .info-label {
+        margin-bottom: 2px;
+    }
+
+    .mbti16stage-welcome .start-section .start-btn-large {
+        width: 100%;
+        justify-content: center;
+        padding: 18px 32px;
+        font-size: 16px;
+    }
+}
+
+/* 无障碍支持 - 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+    .mbti16stage-welcome .aurora-bg .aurora,
+    .mbti16stage-welcome .aurora-bg .stars {
+        animation: none;
+    }
+
+    .mbti16stage-welcome .start-btn-large .btn-arrow {
+        transition: none;
+    }
+}
+
+/* 推广链接样式（SDK自动添加到.welcome-footer中） */
+.mbti16stage-welcome .welcome-footer #link-validator-promotion-link {
+    width: 100%;
+    text-align: center;
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* 确保welcome-footer可见 */
+.mbti16stage-welcome .welcome-footer {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    visibility: visible !important;
+}

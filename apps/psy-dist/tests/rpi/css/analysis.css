@@ -1,0 +1,506 @@
+/**
+ * RPI 分析页面样式
+ * 完全独立的样式，不依赖任何外部框架
+ * 基于原网站精确还原：颜色、字体、间距、动画效果
+ */
+
+/* ===== CSS 变量（与原网站一致）===== */
+:root {
+  --rpi-primary: #E92063;                  /* hsl(340 82% 52%) */
+  --rpi-secondary: #E64D66;                /* hsl(350 75% 60%) */
+  --rpi-accent: #D92680;                   /* hsl(330 70% 50%) */
+  --rpi-background: #F9F5F7;               /* hsl(340 25% 97%) */
+  --rpi-foreground: #2D1F24;               /* hsl(340 18% 15%) */
+  --rpi-muted-foreground: #7E676F;         /* hsl(340 10% 45%) */
+  --rpi-card: #FFFFFF;
+  --rpi-border: #EBE5E7;                   /* hsl(340 15% 91%) */
+  --rpi-success: #3C83F6;                  /* hsl(217 91% 60%) */
+  --rpi-radius: 12px;                      /* 0.75rem */
+}
+
+/* ========== 全局样式 ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 
+               'Roboto', 'Noto Sans', 'Ubuntu', 'Cantarell', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECDD3 25%, #FCA5A5 50%, #F87171 75%, #EF4444 100%);
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========== 加载提示 ========== */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--rpi-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* ========== 容器 ========== */
+.rpi-analysis-layout {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECDD3 25%, #FCA5A5 50%, #F87171 75%, #EF4444 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.rpi-analysis-layout::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  animation: rotate 30s linear infinite;
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ========== 主内容区 ========== */
+.rpi-analysis-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* ========== Header ========== */
+.rpi-analysis-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.rpi-analysis-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.rpi-analysis-icon {
+  font-size: 56px;
+  color: white;
+  animation: pulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.4));
+  display: block;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+.rpi-heart-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* ========== 分析标题 ========== */
+.rpi-analysis-title {
+  color: white !important;
+  margin: 0 !important;
+  font-size: 36px !important;
+  font-weight: 700 !important;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  letter-spacing: 1px;
+}
+
+.rpi-analysis-subtitle {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* ========== 进度圈 ========== */
+.rpi-analysis-progress-circle {
+  margin-bottom: 48px;
+  position: relative;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rpi-progress-ring-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 180px;
+  height: 180px;
+}
+
+.rpi-progress-ring-background {
+  fill: none;
+}
+
+.rpi-progress-ring-fill {
+  fill: none;
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+.rpi-analysis-countdown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.rpi-analysis-countdown-number {
+  font-size: 56px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #EC4899, #BE185D);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.rpi-analysis-countdown-text {
+  font-size: 14px;
+  color: #BE185D;
+  font-weight: 600;
+}
+
+/* ========== 分析步骤列表 ========== */
+.rpi-analysis-steps {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  padding: 32px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin-bottom: 32px;
+  min-width: 400px;
+  max-width: 500px;
+  text-align: left;
+}
+
+.rpi-analysis-step {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  transition: all 0.3s ease;
+}
+
+.rpi-analysis-step-icon {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.rpi-analysis-step-pending .rpi-analysis-step-icon {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.rpi-analysis-step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  display: block;
+}
+
+.rpi-analysis-step-loading .rpi-analysis-step-icon {
+  background: rgba(236, 72, 153, 0.3);
+  color: white;
+  box-shadow: 0 0 12px rgba(236, 72, 153, 0.5);
+}
+
+.rpi-analysis-step-loading .rpi-analysis-step-icon .anticon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  animation: spin 1s linear infinite;
+}
+
+.rpi-analysis-step-completed .rpi-analysis-step-icon {
+  background: rgba(34, 197, 94, 0.3);
+  color: white;
+}
+
+.rpi-analysis-step-completed .rpi-analysis-step-icon .anticon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+@keyframes loadingCircle {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rpi-analysis-step-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.rpi-analysis-step-pending .rpi-analysis-step-text {
+  opacity: 0.5;
+}
+
+.rpi-analysis-step-loading .rpi-analysis-step-text {
+  opacity: 1;
+  font-weight: 600;
+}
+
+.rpi-analysis-step-completed .rpi-analysis-step-text {
+  opacity: 0.8;
+}
+
+/* ========== 提示文字 ========== */
+.rpi-analysis-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.rpi-analysis-tip-text {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 14px !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  margin: 0 !important;
+}
+
+/* ========== 响应式设计 ========== */
+@media (max-width: 768px) {
+  .rpi-analysis-layout {
+    padding: 40px 20px 60px;
+  }
+
+  .rpi-analysis-content {
+    max-width: 100%;
+  }
+
+  .rpi-analysis-header {
+    margin-bottom: 32px;
+  }
+
+  .rpi-analysis-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+  }
+
+  .rpi-analysis-icon {
+    font-size: 40px;
+  }
+
+  .rpi-analysis-title {
+    font-size: 28px !important;
+    margin-bottom: 8px;
+  }
+
+  .rpi-analysis-subtitle {
+    font-size: 14px !important;
+  }
+
+  .rpi-analysis-progress-circle {
+    width: 160px;
+    height: 160px;
+    margin-bottom: 32px;
+  }
+
+  .rpi-progress-ring-svg {
+    width: 160px;
+    height: 160px;
+  }
+
+  .rpi-analysis-steps {
+    min-width: auto;
+    width: 100%;
+    max-width: 100%;
+    padding: 24px 20px;
+    margin-bottom: 24px;
+  }
+
+  .rpi-analysis-step {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .rpi-analysis-step-number {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    margin-right: 12px;
+  }
+
+  .rpi-analysis-step-text {
+    font-size: 14px;
+  }
+
+  .rpi-analysis-tips {
+    gap: 6px;
+  }
+
+  .rpi-analysis-tip-text {
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .rpi-analysis-layout {
+    padding: 32px 6px 50px;
+  }
+
+  .rpi-analysis-icon-wrapper {
+    width: 72px;
+    height: 72px;
+    margin-bottom: 16px;
+  }
+
+  .rpi-analysis-icon {
+    font-size: 36px;
+  }
+
+  .rpi-analysis-title {
+    font-size: 24px !important;
+  }
+
+  .rpi-analysis-subtitle {
+    font-size: 13px !important;
+  }
+
+  .rpi-analysis-progress-circle {
+    width: 140px;
+    height: 140px;
+    margin-bottom: 24px;
+  }
+
+  .rpi-progress-ring-svg {
+    width: 140px;
+    height: 140px;
+  }
+
+  .rpi-analysis-countdown-number {
+    font-size: 40px;
+  }
+
+  .rpi-analysis-countdown-text {
+    font-size: 12px;
+  }
+
+  .rpi-analysis-steps {
+    padding: 20px 6px;
+  }
+
+  .rpi-analysis-step {
+    padding: 12px;
+  }
+
+  .rpi-analysis-step-number {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+    margin-right: 10px;
+  }
+
+  .rpi-analysis-step-text {
+    font-size: 13px;
+  }
+
+  .rpi-analysis-tip-text {
+    font-size: 12px !important;
+  }
+}
+

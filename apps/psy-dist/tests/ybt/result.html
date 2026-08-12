@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>病娇体质测试结果</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 引入验证SDK -->
+    <script src="/static/js/link-validator.js"></script>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .result-container {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn {
+            font-size: 24px;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .header-icons {
+            display: flex;
+            gap: 15px;
+            font-size: 20px;
+        }
+        
+        .heart-icon {
+            width: 80px;
+            height: 80px;
+            background: #ffe0f0;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #ff6b9d;
+        }
+        
+        .test-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .score-display {
+            font-size: 60px;
+            font-weight: bold;
+            color: #ff6b9d;
+            margin: 10px 0;
+            line-height: 1;
+            text-align: center;
+        }
+        
+        .level-indicator {
+            background: #fff3cd;
+            color: #ff6b9d;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 0 auto;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .description .highlight {
+            color: #ff6b9d;
+        }
+        
+        .progress-container {
+            margin: 20px 0 30px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ffd5e5;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #ff6b9d;
+            border-radius: 4px;
+            transition: width 0.8s ease;
+        }
+        
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .top-score-module {
+            background: #fff;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            border: 2px solid #ff6b9d;
+            box-shadow: 0 2px 8px rgba(255,107,157,0.1);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin: 30px 0 20px 0;
+            padding-left: 15px;
+            border-left: 4px solid #ff6b9d;
+        }
+        
+        
+        .dimension-progress {
+            width: 100%;
+            height: 6px;
+            background: #ffd5e5;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .personality-section, .attachment-section {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            border: 2px solid #ff6b9d;
+            box-shadow: 0 2px 8px rgba(255,107,157,0.1);
+        }
+        /* 类型标题与说明 */
+        .type-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #ffb300; /* 温暖黄色 */
+            text-align: center;
+            letter-spacing: 2px;
+            margin: 6px 0 8px 0;
+        }
+        .type-desc {
+            color: #555;
+            font-size: 15px;
+            text-align: center;
+            line-height: 1.9;
+            margin: 6px 0 14px 0;
+        }
+        /* 核心特征标签 */
+        .traits-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 14px;
+            margin: 6px 0 6px 0;
+        }
+        .trait-pill {
+            background: #fff7e8;
+            color: #7a4b00;
+            border: 1px solid #ffe0ad;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        
+        .section-icon-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .section-icon-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .icon-bg-1 {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+        }
+        
+        .icon-bg-2 {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+        }
+        
+        .section-icon {
+            font-size: 24px;
+        }
+        
+        .personality-type {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .section-subtitle {
+            color: #ff6b9d;
+            font-weight: 700;
+            font-size: 16px;
+            margin: 10px 0 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .section-content {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.9;
+            margin-bottom: 15px;
+        }
+        
+        .advantages-title, .disadvantages-title, .suggestions-title {
+            font-weight: bold;
+            color: #333;
+            margin: 15px 0 10px 0;
+            font-size: 15px;
+        }
+        
+        .list-item {
+            padding: 8px 0;
+            padding-left: 20px;
+            font-size: 14px;
+            color: #666;
+            position: relative;
+        }
+        
+        .list-item:before {
+            content: "•";
+            position: absolute;
+            left: 5px;
+            color: #ff6b9d;
+        }
+        /* 分组清单不同色彩语义 */
+        #advantagesList .list-item:before,
+        #attachmentAdvantagesList .list-item:before {
+            content: "✓";
+            color: #2d8cf0;
+            font-weight: 700;
+        }
+        #disadvantagesList .list-item:before,
+        #attachmentDisadvantagesList .list-item:before {
+            content: "!";
+            color: #ff6b6b;
+            font-weight: 900;
+        }
+        #personalitySuggestionsList .list-item:before,
+        #attachmentSuggestionsList .list-item:before {
+            content: "💡";
+            color: #f5a623;
+        }
+        
+        .radar-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: #fff;
+            border-radius: 12px;
+            border: 2px solid #ff6b9d;
+            box-shadow: 0 2px 8px rgba(255,107,157,0.1);
+        }
+        
+        .radar-chart {
+            width: 320px;
+            height: 320px;
+        }
+        
+        .radar-subtitle {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .viz-block { margin: 8px 0 22px 0; }
+        .viz-title {
+            text-align: center;
+            font-weight: 800;
+            color: #333;
+            margin: 8px 0 6px 0;
+            letter-spacing: 1px;
+        }
+        .viz-note {
+            text-align: center;
+            color: #777;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+        .viz-summary {
+            text-align: center;
+            margin-top: 4px;
+            color: #333;
+            font-size: 14px;
+        }
+        .lead-text { color: #ff2e7e; font-weight: 800; }
+        
+        .detailed-scores {
+            background: #fff;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 16px;
+            border: 2px solid #ff6b9d;
+            box-shadow: 0 2px 8px rgba(255,107,157,0.1);
+        }
+        .score-card {
+            background: #fff7fb;
+            border: 1px solid #ffe0ef;
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 6px 10px;
+            margin-bottom: 12px;
+        }
+        .score-card:last-child { margin-bottom: 0; }
+        .score-card .title {
+            font-weight: 700;
+            color: #333;
+        }
+        .score-card .subtitle {
+            grid-column: 1 / -1;
+            font-size: 13px;
+            color: #777;
+            line-height: 1.5;
+        }
+        .score-card .score {
+            align-self: start;
+            font-weight: 800;
+            color: #ff2e7e;
+            font-size: 20px;
+        }
+        .score-meta {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 14px;
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .guide-section {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            border: 2px solid #ff6b9d;
+            box-shadow: 0 2px 8px rgba(255,107,157,0.1);
+        }
+        
+        .guide-subtitle {
+            font-weight: bold;
+            color: #333;
+            margin: 15px 0 10px 0;
+            font-size: 15px;
+        }
+        
+        .resource-section {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            border: 2px solid #ff6b9d;
+            box-shadow: 0 2px 8px rgba(255,107,157,0.1);
+        }
+        
+        .back-button {
+            background: #ff6b9d;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 30px auto;
+            display: block;
+            transition: background 0.3s;
+        }
+        
+        .back-button:hover {
+            background: #ff8db3;
+        }
+        
+        @media (max-width: 600px) {
+            .result-container {
+                padding: 15px;
+            }
+            
+            .score-display {
+                font-size: 48px;
+            }
+            
+            .test-title {
+                font-size: 18px;
+            }
+        }
+        
+        .dimension-progress-fill {
+            height: 100%;
+            background: #ff6b9d;
+            border-radius: 3px;
+            transition: width 0.8s ease;
+        }
+        
+        .dimensions-container {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            border: 2px solid #ff6b9d;
+            box-shadow: 0 2px 8px rgba(255,107,157,0.1);
+        }
+        
+        .dimensions-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .dimensions-header .section-title {
+            margin: 0;
+            padding: 0;
+            border: none;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .chart-icon {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+        
+        .dimension-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .dimension-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .dimension-icon {
+            font-size: 24px;
+            margin-right: 12px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        
+        .orange-icon {
+            filter: hue-rotate(15deg) saturate(1.5);
+        }
+        
+        .dimension-info {
+            flex: 1;
+        }
+        
+        .dimension-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .dimension-name {
+            font-weight: bold;
+            font-size: 15px;
+            color: #333;
+        }
+        
+        .dimension-score {
+            font-weight: bold;
+            font-size: 16px;
+            color: #ff6b9d;
+        }
+        
+        .dimension-desc {
+            font-size: 13px;
+            color: #666;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+        
+        .explanation-section, .suggestions-section {
+            margin-top: 25px;
+            text-align: left;
+        }
+        
+        .module-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .module-icon {
+            width: 24px;
+            height: 24px;
+            background: #ff6b9d;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 14px;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .module-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff6b9d;
+        }
+        
+        .explanation-content {
+            font-size: 15px;
+            color: #333;
+            line-height: 1.8;
+            margin-bottom: 0;
+        }
+        
+        .explanation-content p {
+            margin: 0 0 12px 0;
+        }
+        
+        .explanation-content p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .suggestions-content {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.8;
+        }
+        
+        .suggestion-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .suggestion-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .suggestion-icon {
+            color: #ff6b9d;
+            margin-right: 8px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        /* ===== 病娇主题增强（不影响占有欲原样式，仅此页启用） ===== */
+        body.yandere-theme .module-title,
+        body.yandere-theme .level-indicator,
+        body.yandere-theme .dimension-score,
+        body.yandere-theme .lead-text { color: #ff2e7e; }
+        
+        body.yandere-theme .top-score-module.yandere-card {
+            position: relative;
+            background: radial-gradient(1200px 400px at 50% -20%, rgba(255,46,126,0.18), transparent),
+                        linear-gradient(180deg, #fff, #fff);
+            border-color: #ff2e7e;
+            box-shadow: 0 8px 20px rgba(255,46,126,0.16);
+        }
+        body.yandere-theme .top-score-module.yandere-card:before{
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image: radial-gradient(rgba(255,46,126,0.10) 1px, transparent 1px);
+            background-size: 12px 12px;
+            mask-image: linear-gradient(#000, transparent);
+            border-radius: 15px;
+        }
+        body.yandere-theme .heart-icon {
+            background: radial-gradient(circle at 30% 30%, #ffd6e7, #ffb6d0);
+            color: #ff2e7e;
+            box-shadow: 0 6px 16px rgba(255,46,126,0.28) inset;
+        }
+        body.yandere-theme .score-display {
+            color: #ff2e7e;
+            text-shadow: 0 2px 12px rgba(255,46,126,0.25);
+            animation: yanderePulse 1.8s ease-in-out infinite;
+        }
+        @keyframes yanderePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        body.yandere-theme .progress-bar { background: #ffd0e1; }
+        body.yandere-theme .progress-fill { background: linear-gradient(90deg, #ff6b9d, #ff2e7e); box-shadow: 0 0 12px rgba(255,46,126,0.35); }
+        body.yandere-theme .dimension-progress-fill { background: linear-gradient(90deg, #ff6b9d, #ff2e7e); }
+        body.yandere-theme .personality-section,
+        body.yandere-theme .attachment-section,
+        body.yandere-theme .detailed-scores,
+        body.yandere-theme .guide-section,
+        body.yandere-theme .resource-section,
+        body.yandere-theme .dimensions-container {
+            border-color: #ff2e7e;
+            box-shadow: 0 6px 18px rgba(255,46,126,0.10);
+        }
+        body.yandere-theme .trait-pill { background: #fff0f6; color: #7a0042; border-color: #ffc2d9; }
+        body.yandere-theme .back-button { background: linear-gradient(90deg, #ff6b9d, #ff2e7e); box-shadow: 0 6px 16px rgba(255,46,126,0.28); }
+        body.yandere-theme .back-button:hover { filter: brightness(1.05); }
+        
+        /* 顶部徽章 */
+        .ydi-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            color: #7a0031;
+            background: linear-gradient(180deg, #fff0f6, #ffe3ef);
+            border: 1px solid #ffd0e1;
+            box-shadow: 0 2px 8px rgba(255,46,126,0.12);
+            margin: 0 auto 8px auto;
+        }
+        .ydi-badge .emj { filter: drop-shadow(0 1px 2px rgba(255,46,126,0.4)); }
+        
+        /* 分享区（已移除UI，仅保留主题样式占位，无实际元素） */
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <div class="header-top">
+            <a href="index.html" class="back-btn">←</a>
+            <div class="header-icons">
+                <span>❤</span>
+                <span>↗</span>
+            </div>
+        </div>
+
+        <div class="top-score-module yandere-card">
+            <div style="text-align:center;">
+                <div class="ydi-badge"><span class="emj">🗡️</span><span>Yandere Index</span><span class="emj">❤</span></div>
+            </div>
+            <div class="heart-icon">❤</div>
+            <div class="test-title">病娇体质指数(YDI)</div>
+            <div class="score-display" id="yandereIndex">--</div>
+            <div style="text-align: center;">
+                <div class="level-indicator" id="levelIndicator">--</div>
+            </div>
+            <div class="description" id="description">加载中...</div>
+            <div class="progress-container">
+                <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                <div class="progress-labels"><span>0(直球纯爱)</span><span>50(口嫌体直)</span><span>100(黑化病娇)</span></div>
+            </div>
+            <div class="explanation-section">
+                <div class="module-header"><div class="module-icon">ℹ</div><div class="module-title">结果解释</div></div>
+                <div class="explanation-content" id="explanationContent"><p>加载中...</p></div>
+            </div>
+            <div class="suggestions-section">
+                <div class="module-header"><div class="module-icon">📈</div><div class="module-title">个性化建议</div></div>
+                <div class="suggestions-content" id="suggestionsList">
+                    <div class="suggestion-item"><span class="suggestion-icon">✓</span><span>加载中...</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dimensions-container">
+            <div class="dimensions-header"><span class="chart-icon">📊</span><span class="section-title">四维度分析</span></div>
+            <div class="dimension-row">
+                <span class="dimension-icon">👥</span>
+                <div class="dimension-info">
+                    <div class="dimension-header-row"><span class="dimension-name">恋爱依附力</span><span class="dimension-score" id="attachScoreDisplay">--</span></div>
+                    <div class="dimension-progress"><div class="dimension-progress-fill" id="attachProgress"></div></div>
+                    <div class="dimension-desc">对伴侣的依赖与黏人倾向</div>
+                </div>
+            </div>
+            <div class="dimension-row">
+                <span class="dimension-icon">🔒</span>
+                <div class="dimension-info">
+                    <div class="dimension-header-row"><span class="dimension-name">独占欲能量</span><span class="dimension-score" id="possessScoreDisplay">--</span></div>
+                    <div class="dimension-progress"><div class="dimension-progress-fill" id="possessProgress"></div></div>
+                    <div class="dimension-desc">对关系的掌控与独占倾向</div>
+                </div>
+            </div>
+            <div class="dimension-row">
+                <span class="dimension-icon">🌪️</span>
+                <div class="dimension-info">
+                    <div class="dimension-header-row"><span class="dimension-name">情绪波动率</span><span class="dimension-score" id="neuroScoreDisplay">--</span></div>
+                    <div class="dimension-progress"><div class="dimension-progress-fill" id="neuroProgress"></div></div>
+                    <div class="dimension-desc">情绪起伏与冲击强度</div>
+                </div>
+            </div>
+            <div class="dimension-row">
+                <span class="dimension-icon">🧠</span>
+                <div class="dimension-info">
+                    <div class="dimension-header-row"><span class="dimension-name">理智临界线</span><span class="dimension-score" id="rationalScoreDisplay">--</span></div>
+                    <div class="dimension-progress"><div class="dimension-progress-fill" id="rationalProgress"></div></div>
+                    <div class="dimension-desc">情绪上头时的自控/冲动阈值</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">可视化分析</div>
+        <div class="viz-block">
+            <div class="viz-title">病娇体质雷达图</div>
+            <div class="radar-container">
+                <canvas class="radar-chart" id="radarChart"></canvas>
+            </div>
+            <div class="viz-note">四维归一化分布图（0-100，显示相对强度）</div>
+            <div class="viz-title">风格倾向雷达图</div>
+            <div class="radar-container">
+                <canvas class="radar-chart" id="attachRadar"></canvas>
+            </div>
+            <div class="viz-summary">主导风格：<span id="leadAttachment" class="lead-text">--</span></div>
+            <div class="viz-note">相对评分（20-80）用于风格对比</div>
+        </div>
+
+        <!-- 病娇人格型模块（沿用结构） -->
+        <div class="personality-section">
+            <div class="section-icon-header">
+                <div class="section-icon-circle icon-bg-1">
+                    <span class="section-icon">🧩</span>
+                </div>
+                <div>
+                    <div class="personality-type">病娇风格类型</div>
+                </div>
+            </div>
+            <div class="type-title" id="personalityLevel">—</div>
+            <div class="section-content" id="personalityContent">加载中...</div>
+            <div class="section-subtitle">✨ 核心特征</div>
+            <div class="traits-wrap" id="personalityTraits"></div>
+            <div class="advantages-title">优点</div>
+            <div id="advantagesList"></div>
+            <div class="disadvantages-title">缺点</div>
+            <div id="disadvantagesList"></div>
+            <div class="suggestions-title">建议</div>
+            <div id="personalitySuggestionsList"></div>
+        </div>
+
+        <!-- 依恋/调适类型模块（沿用结构与命名） -->
+        <div class="attachment-section">
+            <div class="section-icon-header">
+                <div class="section-icon-circle icon-bg-2">
+                    <span class="section-icon">☀</span>
+                </div>
+                <div>
+                    <div class="personality-type">调适模式类型</div>
+                </div>
+            </div>
+            <div class="type-title" id="attachmentLevel">—</div>
+            <div class="section-content" id="attachmentContent">加载中...</div>
+            <div class="section-subtitle">✨ 核心特征</div>
+            <div class="traits-wrap" id="attachmentTraits"></div>
+            <div class="advantages-title">优点</div>
+            <div id="attachmentAdvantagesList"></div>
+            <div class="disadvantages-title">缺点</div>
+            <div id="attachmentDisadvantagesList"></div>
+            <div class="suggestions-title">建议</div>
+            <div id="attachmentSuggestionsList"></div>
+        </div>
+
+        <div class="section-title">量表详细分数</div>
+        <div class="detailed-scores">
+            <div class="score-card" id="attachDetail"><div class="title">恋爱依附力量表</div><div class="score" id="attachDetailScore">--</div><div class="subtitle">依赖/害怕失去等依恋倾向</div><div class="score-meta"><span id="attachZ">Z分数：--</span></div></div>
+            <div class="score-card" id="possessDetail"><div class="title">独占欲能量量表</div><div class="score" id="possessDetailScore">--</div><div class="subtitle">控制、占有与独占意愿</div><div class="score-meta"><span id="possessZ">Z分数：--</span></div></div>
+            <div class="score-card" id="neuroDetail"><div class="title">情绪波动率量表</div><div class="score" id="neuroDetailScore">--</div><div class="subtitle">情绪稳定性与极端反应</div><div class="score-meta"><span id="neuroZ">Z分数：--</span></div></div>
+            <div class="score-card" id="rationalDetail"><div class="title">理智临界线路径</div><div class="score" id="rationalDetailScore">--</div><div class="subtitle">冲动控制与冷静思考能力（分数越高表示越容易冲动）</div><div class="score-meta"><span id="rationalZ">Z分数：--</span></div></div>
+        </div>
+
+        <!-- 健康关系养成指南 -->
+        <div class="section-title">健康关系养成指南</div>
+        <div class="guide-section">
+            <div class="guide-subtitle">自我成长</div>
+            <div class="list-item">建立情绪停顿：先呼吸再回应</div>
+            <div class="list-item">固定个人时间：兴趣/健身/学习</div>
+            <div class="list-item">识别依赖触发点并记录复盘</div>
+            <div class="list-item">训练自我安抚与边界表达</div>
+            <div class="guide-subtitle">伴侣互动</div>
+            <div class="list-item">使用“我感受”陈述替代指责</div>
+            <div class="list-item">约定信息回应预期，减少过度联想</div>
+            <div class="list-item">设立每周一次的深度沟通时间</div>
+            <div class="list-item">在冲突后做复盘与修复行动</div>
+        </div>
+
+        <!-- 推荐学习资源 -->
+        <div class="section-title">推荐学习资源</div>
+        <div class="resource-section">
+            <div class="list-item">《依恋》- 约翰·鲍比</div>
+            <div class="list-item">《非暴力沟通》- 罗森博格</div>
+            <div class="list-item">《情绪勒索》- 苏珊·福沃德</div>
+            <div class="list-item">心理咨询与情感调适课程</div>
+        </div>
+
+        
+
+        <button class="back-button" id="restartButton">重新测试</button>
+        
+        <!-- 推广链接容器（SDK会自动添加，放在最底部） -->
+        <div class="report-footer-promotion"></div>
+    </div>
+
+    <script>
+        // 初始化验证SDK
+        let linkValidator = null;
+        
+        // SDK加载完成后的回调
+        if (typeof PsyTestValidator !== 'undefined') {
+            // SDK已加载，直接初始化
+            initializeSDK();
+        } else {
+            // 等待SDK加载
+            window.addEventListener('load', function() {
+                if (typeof PsyTestValidator !== 'undefined') {
+                    initializeSDK();
+                } else {
+                    console.error('验证SDK未加载');
+                }
+            });
+        }
+        
+        async function initializeSDK() {
+            // 从URL获取token和unlimited参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const unlimited = urlParams.get('unlimited') === 'true';
+            
+            // 初始化SDK（注意：第一个参数是testCode字符串，第二个参数是options对象）
+            linkValidator = await PsyTestValidator.init('ybt', {
+                token: token || undefined,
+                unlimited: unlimited || false,
+                onSuccess: function(data, validator) {
+                    console.log('SDK初始化成功，链接有效:', data);
+                    // 确保window.linkValidator已设置
+                    if (validator) {
+                        window.linkValidator = validator;
+                    }
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败:', error);
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    
+                    // 调用addPromotionLink确保推广链接显示（报告页使用report-footer-promotion容器）
+                    setTimeout(() => {
+                        // 对于报告页，先移除.report-footer中的推广链接（如果SDK已经添加了）
+                        const reportFooter = document.querySelector('.report-footer');
+                        if (reportFooter) {
+                            const existingLinkInFooter = reportFooter.querySelector('#link-validator-promotion-link');
+                            if (existingLinkInFooter) {
+                                existingLinkInFooter.remove();
+                            }
+                        }
+                        
+                        // 检查是否有专门的推广链接容器
+                        const reportPromotionContainer = document.querySelector('.report-footer-promotion');
+                        if (reportPromotionContainer) {
+                            // 手动添加推广链接到指定容器（使用SDK的样式）
+                            const existingLink = reportPromotionContainer.querySelector('#link-validator-promotion-link');
+                            if (!existingLink) {
+                                // 创建推广链接容器（使用SDK的样式）
+                                const promotionContainer = document.createElement('div');
+                                promotionContainer.id = 'link-validator-promotion-link';
+                                promotionContainer.style.cssText = `
+                                    color: #666;
+                                    font-size: 14px;
+                                    line-height: 1.6;
+                                    margin: 0;
+                                    width: 100%;
+                                    text-align: center;
+                                    padding-top: 16px;
+                                    margin-top: 16px;
+                                    box-sizing: border-box;
+                                `;
+                                
+                                // 创建推广链接文本和链接（使用SDK的样式）
+                                const promotionText = document.createTextNode('如果您也想为他人提供测试服务，');
+                                const promotionLink = document.createElement('a');
+                                promotionLink.href = '/';
+                                promotionLink.target = '_blank';
+                                promotionLink.rel = 'noopener noreferrer';
+                                promotionLink.textContent = '点击这里了解更多';
+                                promotionLink.style.cssText = `
+                                    color: #1890ff;
+                                    text-decoration: none;
+                                    cursor: pointer;
+                                `;
+                                
+                                // 添加链接悬停效果
+                                promotionLink.addEventListener('mouseenter', function() {
+                                    this.style.textDecoration = 'underline';
+                                });
+                                promotionLink.addEventListener('mouseleave', function() {
+                                    this.style.textDecoration = 'none';
+                                });
+                                
+                                // 组装推广链接
+                                promotionContainer.appendChild(promotionText);
+                                promotionContainer.appendChild(promotionLink);
+                                reportPromotionContainer.appendChild(promotionContainer);
+                            }
+                        } else if (typeof PsyTestValidator.addPromotionLink === 'function') {
+                            PsyTestValidator.addPromotionLink();
+                        }
+                    }, 100);
+                }
+            });
+            
+            // 将linkValidator挂载到window对象，方便其他脚本使用
+            // SDK的init方法已经自动设置了window.linkValidator，但为了确保，这里再设置一次
+            if (linkValidator) {
+                window.linkValidator = linkValidator;
+            }
+        }
+    </script>
+    <script src="result.js"></script>
+    </body>
+    </html>
+
+

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>城市性格测试 - 你的匹配结果</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/report.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body class="page-disabled">
+    <!-- 报告页主容器 -->
+    <div class="report-container">
+        <!-- 报告标题区域 -->
+        <header class="report-header">
+            <h1 class="report-title">你的城市性格匹配结果</h1>
+            <p class="report-subtitle">根据你的回答，我们为你找到了最适合的城市</p>
+        </header>
+
+        <!-- 匹配城市展示区域 -->
+        <section class="match-city-section">
+            <!-- 白色卡片，顶部城市图片 -->
+            <div class="match-city-card-white" id="match-city-card-white">
+                <div class="city-image-container" id="city-image-container">
+                    <!-- 城市图片将通过JavaScript动态生成 -->
+                </div>
+                <div class="match-score-white" id="match-score-white">
+                    <span class="score-label-white">匹配度: </span>
+                    <span class="score-value-white" id="score-value-white">--%</span>
+                </div>
+                <div class="city-name-white" id="city-name-white">
+                    <svg class="city-icon-white" width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#2ecc71"/>
+                    </svg>
+                    <span>你的天选之城: <span id="city-name-text-white">--</span></span>
+                </div>
+                <div class="city-keywords-white" id="city-keywords-white">
+                    <!-- 城市标签将通过JavaScript动态生成 -->
+                </div>
+                <!-- 匹配理由 -->
+                <div class="city-match-reason" id="city-match-reason">
+                    <!-- 匹配理由将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 其他匹配城市 -->
+        <section class="other-cities-section">
+            <h2 class="section-title">其他匹配城市</h2>
+            <div class="other-cities-grid" id="other-cities-grid">
+                <!-- 其他匹配城市将通过JavaScript动态生成 -->
+            </div>
+        </section>
+
+        <!-- 城市详情区域 -->
+        <section class="city-details-section">
+            <!-- 基本信息 -->
+            <div class="detail-section" id="basic-info-section">
+                <h2 class="detail-title">城市简介</h2>
+                <div class="detail-content" id="basic-info-content">
+                    <!-- 基本信息将通过JavaScript动态填充 -->
+                </div>
+            </div>
+
+            <!-- 美食 -->
+            <div class="detail-section" id="cuisine-section">
+                <h2 class="detail-title">🍜 美食</h2>
+                <div class="detail-content" id="cuisine-content">
+                    <!-- 美食信息将通过JavaScript动态填充 -->
+                </div>
+            </div>
+
+            <!-- 风景 -->
+            <div class="detail-section" id="scenery-section">
+                <h2 class="detail-title">🏔️ 风景</h2>
+                <div class="detail-content" id="scenery-content">
+                    <!-- 风景信息将通过JavaScript动态填充 -->
+                </div>
+            </div>
+
+            <!-- 文化 -->
+            <div class="detail-section" id="culture-section">
+                <h2 class="detail-title">🏛️ 文化</h2>
+                <div class="detail-content" id="culture-content">
+                    <!-- 文化信息将通过JavaScript动态填充 -->
+                </div>
+            </div>
+
+            <!-- 生活指南 -->
+            <div class="detail-section" id="living-guide-section">
+                <h2 class="detail-title">🏠 生活指南</h2>
+                <div class="detail-content" id="living-guide-content">
+                    <!-- 生活指南信息将通过JavaScript动态填充 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 操作按钮区域 -->
+        <section class="report-actions">
+            <button class="action-btn retest-btn" id="retest-btn">
+                <span class="btn-icon">🔄</span>
+                <span class="btn-text">重新测试</span>
+            </button>
+        </section>
+
+        <!-- 底部操作区（用于SDK添加推广链接） -->
+        <footer class="report-footer" style="padding: 24px 20px; text-align: center; margin-top: 40px;">
+        </footer>
+    </div>
+
+    <!-- 错误提示容器 -->
+    <div id="errorOverlay" class="error-overlay" style="display: none;">
+        <p id="errorMessage"></p>
+    </div>
+
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        // 等待DOM加载完成后再启用安全功能
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+    
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            // 明确传入testCode，因为CMT测试使用test.html而不是index.html，SDK可能无法从URL自动提取
+            PsyTestValidator.init('cmt', {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    // 页面启用
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    // 尝试获取实例，即使无效
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    // 确保 window.linkValidator 被设置（即使验证失败）
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    // 报告页即使链接无效也应该能查看（可能用户直接访问报告页）
+                    // 不显示错误弹窗，只记录错误
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                },
+                // 添加suppressErrors选项，避免在报告页显示错误弹窗
+                suppressErrors: true,
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    // 确保获取到validator实例
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (!validatorInstance && window.linkValidator) {
+                            validatorInstance = window.linkValidator;
+                        }
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    
+                    // 调用addPromotionLink确保推广链接显示（报告页使用report-footer容器）
+                    setTimeout(() => {
+                        if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                            PsyTestValidator.addPromotionLink();
+                        }
+                    }, 100);
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+            // SDK未加载时，页面不禁用，允许查看报告
+            document.body.classList.remove('page-disabled');
+        }
+    </script>
+
+    <!-- 加载数据文件 -->
+    <script src="js/cities.js"></script>
+    <script src="js/dimensions.js"></script>
+    <script src="js/matchReasons.js"></script>
+    <script src="js/report.js"></script>
+</body>
+</html>
+

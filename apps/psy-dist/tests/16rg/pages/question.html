@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>16人格·心智阶位测评 - 答题中</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/page-transitions.css">
+    <link rel="stylesheet" href="../assets/css/question.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+</head>
+<body>
+    <div class="mbti16stage-questionnaire has-theme page-container">
+        <!-- 背景光效 -->
+        <div class="glow-orbs">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+        </div>
+
+        <!-- 答题容器 -->
+        <div class="questionnaire-container">
+            <div class="question-wrapper">
+                <!-- 问题卡片 -->
+                <div class="question-card">
+                    <!-- 卡片头部 -->
+                    <div class="card-header">
+                        <div class="type-badge">
+                            <svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                <polyline points="2 17 12 22 22 17"></polyline>
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
+                            <div class="badge-info">
+                                <span class="type-code">INTJ</span>
+                                <span class="type-name">战略策划者</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 进度部分 -->
+                    <div class="progress-section">
+                        <div class="progress-info">
+                            <div class="progress-text">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                </svg>
+                                <span>第 <strong>1</strong> 题，共 32 题</span>
+                            </div>
+                            <div class="progress-stats">
+                                <span class="stat-answered">0</span>
+                                <span class="stat-divider">/</span>
+                                <span class="stat-total">32</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill"></div>
+                            </div>
+                            <div class="progress-percentage">0%</div>
+                        </div>
+                    </div>
+
+                    <!-- 卡片主体 -->
+                    <div class="card-body">
+                        <!-- 题目内容 -->
+                        <div class="question-content">
+                            <div class="question-number">Q1</div>
+                            <p class="question-text">面对缺乏逻辑的观点，我能保持耐心，并尝试理解对方的思路。</p>
+                        </div>
+
+                        <!-- 选项容器 -->
+                        <div class="options-container">
+                            <button class="option-card">
+                                <div class="option-indicator">
+                                    <span class="indicator-dot"></span>
+                                </div>
+                                <span class="option-text">完全不符合</span>
+                            </button>
+                            <button class="option-card">
+                                <div class="option-indicator">
+                                    <span class="indicator-dot"></span>
+                                </div>
+                                <span class="option-text">比较不符合</span>
+                            </button>
+                            <button class="option-card">
+                                <div class="option-indicator">
+                                    <span class="indicator-dot"></span>
+                                </div>
+                                <span class="option-text">不确定</span>
+                            </button>
+                            <button class="option-card">
+                                <div class="option-indicator">
+                                    <span class="indicator-dot"></span>
+                                </div>
+                                <span class="option-text">比较符合</span>
+                            </button>
+                            <button class="option-card is-selected">
+                                <div class="option-indicator">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </div>
+                                <span class="option-text">完全符合</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 卡片底部 -->
+                    <div class="card-footer">
+                        <button class="btn-nav btn-back" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="19" y1="12" x2="5" y2="12"></line>
+                                <polyline points="12 19 5 12 12 5"></polyline>
+                            </svg>
+                            <span>上一题</span>
+                        </button>
+                        <button class="btn-nav btn-next">
+                            <span>下一题</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 未完成提示 -->
+                <div class="incomplete-alert" style="display: none;">
+                    <div class="alert-content">
+                        <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span class="alert-text">还有 <strong>31</strong> 道题未回答</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK（答题页，不需要推广信息）
+        let validatorInstance = null;
+        
+        // 检查URL中是否有token（如果有token，说明是从其他页面跳转过来的，应该允许继续）
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get('token');
+        const isUnlimitedFromUrl = urlParams.get('unlimited') === 'true';
+        const hasToken = tokenFromUrl !== null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            // 使用非标准文件名，需要明确传入testCode
+            // 如果URL中有token，使用suppressErrors选项抑制错误弹窗（因为这是中间页面，用户已经通过了首页验证）
+            PsyTestValidator.init('16rg', {
+                suppressErrors: hasToken, // 如果URL中有token，抑制错误弹窗
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    // 确保token被设置（如果URL中有token但SDK没有提取到）
+                    if (hasToken && tokenFromUrl && !validator.token) {
+                        validator.token = tokenFromUrl;
+                        validator.unlimited = isUnlimitedFromUrl;
+                        console.log('手动设置token到validator实例:', tokenFromUrl);
+                    }
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    // 如果URL中有token，返回true阻止显示错误弹窗（双重保险）
+                    if (hasToken && tokenFromUrl) {
+                        console.log('URL中有token，手动创建validator实例（中间页面）');
+                        // 手动创建一个包含token的validator对象
+                        // 因为SDK无法识别pages/question.html格式，我们需要手动创建
+                        try {
+                            // 尝试使用SDK的内部类创建实例
+                            if (window.PsyTestValidatorInstance) {
+                                validatorInstance = new window.PsyTestValidatorInstance(tokenFromUrl, '16rg', isUnlimitedFromUrl);
+                            } else {
+                                // 如果无法访问内部类，创建一个简单的对象
+                                validatorInstance = {
+                                    token: tokenFromUrl,
+                                    testCode: '16rg',
+                                    unlimited: isUnlimitedFromUrl,
+                                    valid: false, // 标记为无效，但不阻止使用
+                                    // 实现completeTest方法
+                                    completeTest: async function(perspective, resultData) {
+                                        if (!this.token) {
+                                            throw new Error('Token不存在');
+                                        }
+                                        // 调用SDK的completeTest函数
+                                        const response = await fetch(`${window.location.origin}/api/links/complete-test`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify({
+                                                token: this.token,
+                                                perspective: perspective,
+                                                resultData: resultData
+                                            })
+                                        });
+                                        const result = await response.json();
+                                        if (!response.ok) {
+                                            throw new Error(result.message || '测试完成失败');
+                                        }
+                                        return result.data || result;
+                                    }
+                                };
+                            }
+                            window.linkValidator = validatorInstance;
+                            console.log('手动创建validator实例成功:', validatorInstance);
+                        } catch (e) {
+                            console.error('手动创建validator实例失败:', e);
+                            // 如果创建失败，创建一个最简单的对象
+                            validatorInstance = {
+                                token: tokenFromUrl,
+                                testCode: '16rg',
+                                unlimited: isUnlimitedFromUrl,
+                                valid: false,
+                                completeTest: async function(perspective, resultData) {
+                                    const response = await fetch(`${window.location.origin}/api/links/complete-test`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ token: this.token, perspective: perspective, resultData: resultData })
+                                    });
+                                    const result = await response.json();
+                                    if (!response.ok) throw new Error(result.message || '测试完成失败');
+                                    return result.data || result;
+                                }
+                            };
+                            window.linkValidator = validatorInstance;
+                        }
+                        // 返回true阻止显示错误弹窗
+                        return true;
+                    }
+                    // 如果没有token，允许显示错误弹窗
+                    // 尝试获取实例，即使无效
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    // 返回false或undefined，允许显示错误弹窗
+                    return false;
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    // 确保获取到validator实例
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        // 如果仍然没有实例且URL中有token，手动创建
+                        if (!validatorInstance && hasToken && tokenFromUrl) {
+                            console.log('onLoad中手动创建validator实例');
+                            validatorInstance = {
+                                token: tokenFromUrl,
+                                testCode: '16rg',
+                                unlimited: isUnlimitedFromUrl,
+                                valid: false,
+                                completeTest: async function(perspective, resultData) {
+                                    const response = await fetch(`${window.location.origin}/api/links/complete-test`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ token: this.token, perspective: perspective, resultData: resultData })
+                                    });
+                                    const result = await response.json();
+                                    if (!response.ok) throw new Error(result.message || '测试完成失败');
+                                    return result.data || result;
+                                }
+                            };
+                        }
+                        if (validatorInstance) {
+                            window.linkValidator = validatorInstance;
+                        }
+                    }
+                    
+                    // 如果URL中有token但validator实例没有token，手动设置
+                    if (hasToken && tokenFromUrl && validatorInstance && !validatorInstance.token) {
+                        validatorInstance.token = tokenFromUrl;
+                        validatorInstance.unlimited = isUnlimitedFromUrl;
+                        console.log('手动设置token到validator实例（onLoad）:', tokenFromUrl);
+                    }
+                    
+                    // 答题页不需要推广信息，禁用SDK的自动添加推广链接功能
+                    window.__RPI_DISABLE_SDK_PROMOTION = true;
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+        }
+    </script>
+    
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        if (typeof TestSecurity !== 'undefined') {
+            TestSecurity.enable();
+        }
+    </script>
+    
+    <script src="../assets/js/common.js"></script>
+    <script src="../assets/js/error-handler.js"></script>
+    <script src="../assets/js/question.js"></script>
+</body>
+</html>
+

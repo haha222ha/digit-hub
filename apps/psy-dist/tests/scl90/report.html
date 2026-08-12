@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="SCL-90症状自评量表 - 心理健康测评报告">
+    <meta name="keywords" content="SCL-90,心理健康测试,症状自评量表,心理测评报告">
+    <title>SCL-90 心理健康测评报告</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/report.css">
+</head>
+<body>
+    <div class="report-container" id="app">
+        <!-- 加载提示 -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">正在生成报告...</div>
+        </div>
+
+        <!-- 报告头部 -->
+        <div class="report-header" id="reportHeader">
+            <div class="header-icon">
+                <span class="icon-heart">♥</span>
+            </div>
+            <h1 class="report-title">SCL-90 心理健康测评报告</h1>
+            <p class="report-date" id="reportDate">加载中...</p>
+        </div>
+
+        <!-- 总体评估结果 -->
+        <div class="overall-result" id="overallResult">
+            <h2 class="section-title">总体评估结果</h2>
+            <div class="overall-stats">
+                <div class="stat-item">
+                    <div class="stat-label">SCL-90 总分</div>
+                    <div class="stat-value" id="totalScore">0</div>
+                    <div class="stat-subtitle">满分 450 分</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">心理健康程度</div>
+                    <div class="severity-badge" id="severityBadge">有点</div>
+                    <div class="stat-subtitle" id="severitySubtitle">状态良好</div>
+                </div>
+            </div>
+            <div class="overall-interpretation" id="overallInterpretation">
+                <!-- 解释文本将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 因子维度详情 -->
+        <div class="factors-section" id="factorsSection">
+            <h2 class="section-title">因子维度详情</h2>
+            <div class="factors-grid" id="factorsGrid">
+                <!-- 因子卡片将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 雷达图 -->
+        <div class="radar-chart-section" id="radarChartSection">
+            <h2 class="section-title">因子维度雷达图</h2>
+            <div class="radar-chart-container">
+                <canvas id="radarChart" width="600" height="600"></canvas>
+            </div>
+        </div>
+
+        <!-- 详细因子分析 -->
+        <div class="detailed-analysis" id="detailedAnalysis">
+            <h2 class="section-title">详细因子特征分析</h2>
+            <div class="factor-details" id="factorDetails">
+                <!-- 详细分析内容将通过JavaScript动态生成 -->
+            </div>
+            <!-- 底部说明 -->
+            <div class="analysis-footer-note" id="analysisFooterNote">
+                <!-- 说明文本将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 健康综述 -->
+        <div class="health-summary" id="healthSummary" style="display: block;">
+            <h2 class="section-title">健康综述</h2>
+            <div class="health-summary-content" id="healthSummaryContent">
+                <div style="padding: 20px; text-align: center; color: #999;">
+                    正在加载健康综述...
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部说明 -->
+        <div class="report-footer-note" id="reportFooterNote" style="display: block;">
+            <div class="footer-note-content">
+                <div class="footer-note-time">正在加载报告信息...</div>
+                <div class="footer-note-disclaimer">
+                    此报告基于 SCL-90 症状自评量表生成，仅供参考，不能替代专业诊断。
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部操作区 -->
+        <div class="report-footer">
+            <button class="footer-button primary" onclick="retest()">重新测试</button>
+        </div>
+    </div>
+
+    <!-- 导入数据模块 -->
+    <script type="module">
+        // 立即执行的测试日志
+        console.log('=== SCL-90报告页面脚本开始加载 ===');
+        console.log('当前时间:', new Date().toISOString());
+        console.log('健康综述元素存在:', !!document.getElementById('healthSummaryContent'));
+        console.log('底部说明元素存在:', !!document.getElementById('reportFooterNote'));
+    </script>
+    <script type="module" src="js/report.js"></script>
+    <script>
+        // 非模块脚本，确保能执行
+        console.log('=== 报告页面HTML加载完成 ===');
+        
+        /**
+         * 获取token的工具函数
+         * 从多个来源尝试获取token：URL、localStorage、SDK实例
+         */
+        function getToken() {
+            // 方法1：从URL中提取token
+            const path = window.location.pathname;
+            const searchParams = new URLSearchParams(window.location.search);
+            
+            // 尝试匹配 /test/{test_code}/{token} 格式
+            const standardMatch = path.match(/^\/test\/([^\/]+)\/([^\/]+)$/);
+            if (standardMatch) {
+                return standardMatch[2];
+            }
+            
+            // 尝试匹配 /tests/{test_code}/index.html?token={token} 格式
+            const staticFileMatch = path.match(/^\/tests\/([^\/]+)\/index\.html$/);
+            const tokenFromQuery = searchParams.get('token');
+            if (staticFileMatch && tokenFromQuery) {
+                return tokenFromQuery;
+            }
+            
+            // 尝试匹配 /tests/{test_code}/report.html?token={token} 格式
+            const reportFileMatch = path.match(/^\/tests\/([^\/]+)\/report\.html$/);
+            if (reportFileMatch && tokenFromQuery) {
+                return tokenFromQuery;
+            }
+            
+            // 方法2：从localStorage中查找token（遍历所有test_result_开头的key）
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('test_result_')) {
+                        const token = key.replace('test_result_', '');
+                        // 验证token格式（通常是长字符串）
+                        if (token && token.length > 10) {
+                            return token;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('从localStorage获取token失败:', e);
+            }
+            
+            // 方法3：从SDK实例中获取（如果已初始化）
+            if (window.linkValidator && window.linkValidator.token) {
+                return window.linkValidator.token;
+            }
+            
+            return null;
+        }
+        
+        /**
+         * 重新测试函数
+         * 跳转到测试页面，保留token信息，并添加restart参数
+         */
+        function retest() {
+            const token = getToken();
+            const testCode = 'scl90'; // SCL90测试代码
+            
+            if (token) {
+                // 获取当前URL的查询参数（如perspective、unlimited等）
+                const urlParams = new URLSearchParams(window.location.search);
+                const perspective = urlParams.get('perspective');
+                const unlimited = urlParams.get('unlimited');
+                
+                // 构建查询参数
+                const queryParams = new URLSearchParams();
+                queryParams.set('restart', 'true'); // 添加restart参数，表示重新测试
+                if (perspective) {
+                    queryParams.set('perspective', perspective);
+                }
+                if (unlimited) {
+                    queryParams.set('unlimited', unlimited);
+                }
+                
+                // 根据是否是无限测试模式，选择不同的URL格式
+                let url;
+                if (unlimited) {
+                    // 无限测试模式：/test/{test_code}?unlimited=true&token={token}&restart=true
+                    queryParams.set('token', token); // 确保token在查询参数中
+                    const queryString = queryParams.toString();
+                    url = `/test/${testCode}${queryString ? '?' + queryString : ''}`;
+                } else {
+                    // 普通模式：/test/{test_code}/{token}?restart=true&...
+                    const queryString = queryParams.toString();
+                    url = `/test/${testCode}/${token}${queryString ? '?' + queryString : ''}`;
+                }
+                console.log('重新测试：跳转到', url);
+                window.location.href = url;
+            } else {
+                // 如果无法获取token，显示提示并跳转到首页
+                alert('无法获取测试链接信息，请使用正确的测试链接访问');
+                // 可以选择跳转到首页或保持当前页面
+                // window.location.href = '/';
+            }
+        }
+    </script>
+</body>
+</html>
+

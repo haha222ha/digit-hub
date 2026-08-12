@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="动物塑形心理测试 - 专业的性格评估工具">
+    <meta name="keywords" content="动物塑形,性格测试,心理测评,动物原型">
+    <title>动物塑形心理测试</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none; /* 禁用所有鼠标事件 */
+            opacity: 0.6; /* 变灰 */
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 错误提示容器 -->
+    <div id="errorOverlay" class="error-overlay" style="display: none;">
+        <p id="errorMessage"></p>
+    </div>
+    <!-- 开始页面 -->
+    <div id="start-screen" class="hidden">
+        <!-- Logo区域 -->
+        <div class="logo-section">
+            <div class="logo-icon">🐾</div>
+            <h1 class="logo-title">
+                <span class="logo-en">Animal Personality</span>
+                <span class="logo-cn">动物塑测试</span>
+            </h1>
+            <p class="logo-subtitle">基于心理学研究的专业评估工具</p>
+        </div>
+
+        <!-- 测试标题卡片 -->
+        <div class="title-card">
+            <h2>动物塑测试</h2>
+            <p>专业的性格评估工具，基于多个经过验证的心理测量量表，通过60道精心设计的问题，帮助您科学地了解自己的动物性格原型，揭示隐藏在内心深处的本质特征。</p>
+        </div>
+
+        <!-- 介绍卡片 -->
+        <div class="intro-card">
+            <div class="intro-icon">✨</div>
+            <h3>探索你的动物塑原型</h3>
+            <p>通过深度心理学分析，发现你内在的动物特质。每种动物代表着独特的性格维度和行为模式，让我们一起揭开你的性格密码。</p>
+            <button id="start-btn" class="intro-start-btn">🚀 立即开始测试</button>
+        </div>
+
+        <!-- 测试信息卡片组 -->
+        <div class="info-cards">
+            <div class="info-card">
+                <div class="info-icon">⏱️</div>
+                <div class="info-number">15-20</div>
+                <div class="info-label">分钟完成</div>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">📋</div>
+                <div class="info-number">60</div>
+                <div class="info-label">精选问题</div>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">🐾</div>
+                <div class="info-number">20</div>
+                <div class="info-label">动物类型</div>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">🏛️</div>
+                <div class="info-number">7</div>
+                <div class="info-label">性格维度</div>
+            </div>
+        </div>
+
+        <!-- 科学基础说明卡片 -->
+        <div class="science-card">
+            <div class="science-icon">🏛️</div>
+            <h3>科学可靠的评估基础</h3>
+            <p>基于心理学研究的专业量表，全面评估性格的七个核心维度</p>
+            <div class="dimensions-grid">
+                <div class="dimension-item">
+                    <div class="dimension-icon">👑</div>
+                    <div class="dimension-content">
+                        <div class="dimension-title">支配性(DOM)</div>
+                        <div class="dimension-desc">评估你的领导能力、控制欲望和统御力倾向</div>
+                    </div>
+                </div>
+                <div class="dimension-item">
+                    <div class="dimension-icon">🧠</div>
+                    <div class="dimension-content">
+                        <div class="dimension-title">策略性(STR)</div>
+                        <div class="dimension-desc">测量智慧、规划能力和解决问题的方式</div>
+                    </div>
+                </div>
+                <div class="dimension-item">
+                    <div class="dimension-icon">🤝</div>
+                    <div class="dimension-content">
+                        <div class="dimension-title">社群性(COM)</div>
+                        <div class="dimension-desc">评估社交倾向、团队协作和归属感需求</div>
+                    </div>
+                </div>
+                <div class="dimension-item">
+                    <div class="dimension-icon">🌙</div>
+                    <div class="dimension-content">
+                        <div class="dimension-title">独处性(SOL)</div>
+                        <div class="dimension-desc">测量独立性、内省能力和自我满足程度</div>
+                    </div>
+                </div>
+                <div class="dimension-item">
+                    <div class="dimension-icon">⚡</div>
+                    <div class="dimension-content">
+                        <div class="dimension-title">敏捷性(AGI)</div>
+                        <div class="dimension-desc">评估适应能力、反应速度和灵活性</div>
+                    </div>
+                </div>
+                <div class="dimension-item">
+                    <div class="dimension-icon">🛡️</div>
+                    <div class="dimension-content">
+                        <div class="dimension-title">安全性(SEC)</div>
+                        <div class="dimension-desc">测量稳定性需求、谨慎程度和风险态度</div>
+                    </div>
+                </div>
+                <div class="dimension-item">
+                    <div class="dimension-icon">🎨</div>
+                    <div class="dimension-content">
+                        <div class="dimension-title">美学性(AES)</div>
+                        <div class="dimension-desc">评估艺术感知、理想主义和美的追求</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部CTA卡片 -->
+        <div class="cta-card">
+            <h3>准备好探索你的动物性格了吗？</h3>
+            <p>通过科学的评估工具，深入了解自己的性格特质，发现内心深处的动物原型。</p>
+            <button id="start-btn-bottom" class="cta-btn">立即开始测试</button>
+        </div>
+    </div>
+
+    <!-- 测试页面 -->
+    <div id="quiz-screen" class="hidden">
+        <!-- 顶部进度区域 -->
+        <div class="progress-section">
+            <div class="progress-bar-container">
+                <div class="progress-bar-bg">
+                    <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                </div>
+            </div>
+            <div class="progress-info">
+                <span class="progress-text">第 <span id="current-question">0</span> 题 / 共 <span id="total-questions">0</span> 题</span>
+                <span class="progress-percent" id="progress-percent">0%</span>
+            </div>
+        </div>
+
+        <!-- 题目卡片 -->
+        <div class="question-card">
+            <div class="question-badge" id="question-badge">1</div>
+            <h2 id="question-title" class="question-text">问题</h2>
+        </div>
+
+        <!-- 选项卡片组 -->
+        <div id="options-container" class="options-container"></div>
+
+        <!-- 提交按钮容器 -->
+        <div id="submit-container" class="submit-container hidden">
+            <button id="submit-btn" class="submit-btn">提交答案 ✨</button>
+        </div>
+    </div>
+
+    <!-- 结果页面 -->
+    <div id="result-screen" class="hidden">
+        <div class="result-container">
+            <!-- 结果标题 -->
+            <h1 class="result-title">你的动物性格原型是：</h1>
+            
+            <!-- 结果内容 -->
+            <div id="result-content"></div>
+            
+            <!-- 重新测试按钮 -->
+            <div class="restart-container">
+                <button id="restart-btn" class="restart-btn">🔄 重新测试</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <span class="footer-emoji">🐾</span>
+                <span class="footer-name">Animal Personality Test</span>
+            </div>
+            <p class="footer-description">基于心理学研究的动物性格测试，帮助您更好地了解自己的性格特点和行为模式。</p>
+            <p class="footer-copyright">© 2024 Animal Personality Test. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+    
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init(null, {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                        window.linkValidator = validatorInstance;
+                    }
+                    document.body.classList.remove('page-disabled');
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (validatorInstance) {
+                            window.linkValidator = validatorInstance;
+                        }
+                    }
+                    
+                    // 检查是否是重新测试（通过URL参数判断）
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const isRestart = urlParams.get('restart') === 'true';
+                    
+                    // 如果是重新测试，清除本地测试结果
+                    if (isRestart && validatorInstance && validatorInstance.clearLocalResult) {
+                        validatorInstance.clearLocalResult(); // ast是单视角测试
+                        // 清除restart参数（避免刷新后再次触发）
+                        urlParams.delete('restart');
+                        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                        window.history.replaceState({}, '', newUrl);
+                        // 清除本地存储的结果（ast使用的key）
+                        localStorage.removeItem('quizResult');
+                        localStorage.removeItem('quizProgress');
+                        // 注意：结果页在同一个HTML中，不需要跳转，只需要确保init()函数会显示开始页
+                        return;
+                    }
+                    
+                    // 如果链接有效且有测试结果，且不是重新测试
+                    // 注意：ast的结果页在同一个HTML中，不需要跳转
+                    // SDK的has_local_result会检查test_result_{token}，但ast使用的是quizResult
+                    // 所以这里不处理跳转，让main.js的init()函数来处理结果显示
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+            document.body.classList.add('page-disabled');
+            const errorOverlay = document.getElementById('errorOverlay');
+            const errorMessageEl = document.getElementById('errorMessage');
+            if (errorMessageEl) {
+                errorMessageEl.textContent = '验证SDK未加载，请检查文件路径';
+            }
+            if (errorOverlay) {
+                errorOverlay.style.display = 'flex';
+            }
+        }
+    </script>
+    
+    <script src="js/data/questions.js"></script>
+    <script src="js/data/scoreMap.js"></script>
+    <script src="js/data/animals.js"></script>
+    <script src="js/algorithm.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>答题 - 这b班上得值不值</title>
+
+  <!-- 引入安全工具库（必须在head中尽早加载） -->
+  <script src="/static/js/test-security.js"></script>
+
+  <style>
+    /* 页面禁用样式 */
+    body.page-disabled {
+      pointer-events: none;
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .error-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none; align-items: center; justify-content: center;
+      z-index: 10000; text-align: center; font-size: 16px;
+      color: #fff; padding: 20px; box-sizing: border-box;
+    }
+    .error-overlay p { margin: 0; line-height: 1.6; }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+      background: #f5f4f0; color: #1a1a1a;
+      height: 100dvh; display: flex; flex-direction: column;
+      max-width: 480px; margin: 0 auto; overflow: hidden;
+    }
+    .top-bar { flex-shrink: 0; padding: 16px 20px 12px; background: #f5f4f0; }
+    .top-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .back-btn {
+      width: 36px; height: 36px; border-radius: 10px;
+      border: 1.5px solid #e0ddd8; background: #fff;
+      font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #666; flex-shrink: 0; transition: background 0.15s;
+    }
+    .back-btn:active { background: #f0ede8; }
+    .progress-wrap { flex: 1; }
+    .progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 7px; }
+    .progress-track { height: 5px; background: #e8e5df; border-radius: 3px; overflow: hidden; }
+    .progress-fill {
+      height: 100%; background: linear-gradient(90deg, #7c3aed, #db2777);
+      border-radius: 3px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .step-pills { display: flex; gap: 4px; }
+    .pill { flex: 1; height: 4px; border-radius: 2px; background: #e0ddd8; transition: background 0.3s; }
+    .pill.done { background: #a78bfa; }
+    .pill.active { background: linear-gradient(90deg,#7c3aed,#db2777); }
+
+    .question-stage { flex: 1; overflow: hidden; position: relative; }
+    .q-slide {
+      position: absolute; inset: 0; padding: 28px 20px 0;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
+    }
+    .q-slide.enter-from-right { transform: translateX(100%); opacity: 0; }
+    .q-slide.enter-from-left  { transform: translateX(-100%); opacity: 0; }
+    .q-slide.active { transform: translateX(0); opacity: 1; }
+    .q-slide.exit-to-left   { transform: translateX(-100%); opacity: 0; }
+    .q-slide.exit-to-right  { transform: translateX(100%); opacity: 0; }
+
+    .q-step-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 12px; color: #a78bfa; font-weight: 700;
+      background: #f3f0ff; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px;
+    }
+    .q-title { font-size: 26px; font-weight: 900; line-height: 1.25; letter-spacing: -0.02em; color: #1a1a1a; margin-bottom: 8px; }
+    .q-hint { font-size: 13px; color: #aaa; line-height: 1.6; margin-bottom: 28px; }
+
+    .big-input-wrap {
+      background: #fff; border: 2px solid #e8e5df; border-radius: 16px;
+      padding: 18px 20px; display: flex; align-items: center; gap: 12px;
+      margin-bottom: 12px; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .big-input-wrap:focus-within { border-color: #7c3aed; box-shadow: 0 0 0 4px rgba(124,58,237,0.08); }
+    .big-input {
+      flex: 1; border: none; outline: none;
+      font-size: 32px; font-weight: 900; color: #1a1a1a;
+      background: transparent; -moz-appearance: textfield;
+    }
+    .big-input::-webkit-inner-spin-button,
+    .big-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .big-input::placeholder { color: #ccc; }
+    .input-unit { font-size: 14px; color: #bbb; white-space: nowrap; }
+    .input-note { font-size: 12px; color: #bbb; padding-left: 4px; }
+
+    .options-list { display: flex; flex-direction: column; gap: 10px; padding-bottom: 16px; }
+    .opt {
+      background: #fff; border: 2px solid #e8e5df; border-radius: 14px;
+      padding: 16px 18px; display: flex; align-items: center; gap: 14px;
+      cursor: pointer; transition: all 0.18s; user-select: none;
+    }
+    .opt:active { transform: scale(0.98); }
+    .opt.selected { border-color: #7c3aed; background: #faf8ff; box-shadow: 0 0 0 1px rgba(124,58,237,0.15); }
+    .opt-icon {
+      font-size: 24px; width: 44px; height: 44px;
+      background: #f5f4f0; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.18s;
+    }
+    .opt.selected .opt-icon { background: #f3f0ff; }
+    .opt-body { flex: 1; }
+    .opt-name { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+    .opt-desc { font-size: 12px; color: #aaa; margin-top: 2px; }
+    .opt.selected .opt-name { color: #7c3aed; }
+    .opt-radio {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid #ddd; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.18s;
+    }
+    .opt.selected .opt-radio { border-color: #7c3aed; background: #7c3aed; }
+    .opt-radio-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #fff; opacity: 0; transform: scale(0); transition: all 0.18s;
+    }
+    .opt.selected .opt-radio-dot { opacity: 1; transform: scale(1); }
+
+    .slider-section { padding-bottom: 16px; }
+    .slider-display {
+      background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 16px;
+      text-align: center; border: 2px solid #e8e5df;
+    }
+    .slider-big-val {
+      font-size: 52px; font-weight: 900;
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;
+    }
+    .slider-unit { font-size: 16px; color: #aaa; margin-top: 4px; }
+    input[type=range] {
+      -webkit-appearance: none; width: 100%; height: 6px;
+      border-radius: 3px; background: #e8e5df; outline: none; cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%;
+      background: #fff; border: 3px solid #7c3aed;
+      box-shadow: 0 2px 8px rgba(124,58,237,0.25); cursor: pointer;
+    }
+    .slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: #bbb; margin-top: 8px; }
+
+    .bottom-bar {
+      flex-shrink: 0;
+      padding: 12px 20px 32px;
+      background: linear-gradient(to top, #f5f4f0 80%, transparent);
+    }
+    .btn-next {
+      width: 100%; background: #d0ccc6; color: #fff;
+      font-size: 17px; font-weight: 700; padding: 18px;
+      border-radius: 16px; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.2s; box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      pointer-events: none;
+    }
+    .btn-next.ready {
+      background: #1a1a1a; pointer-events: auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .btn-next.ready:active { transform: scale(0.98); }
+
+    .select-hint {
+      text-align: center; font-size: 12px; color: #bbb; margin-top: 10px;
+      transition: opacity 0.2s;
+    }
+    .select-hint.hidden { opacity: 0; }
+
+    /* 选显卡片样式 */
+    .option-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-bottom: 16px; }
+    .option-card {
+      background: #fff; border: 2px solid #e8e5df; border-radius: 14px;
+      padding: 16px 14px; text-align: center; cursor: pointer;
+      transition: all 0.18s;
+    }
+    .option-card:active { transform: scale(0.97); }
+    .option-card.selected { border-color: #7c3aed; background: #faf8ff; }
+    .option-card-icon { font-size: 28px; margin-bottom: 8px; }
+    .option-card-name { font-size: 14px; font-weight: 700; color: #1a1a1a; }
+    .option-card.selected .option-card-name { color: #7c3aed; }
+    .option-card-desc { font-size: 11px; color: #aaa; margin-top: 4px; }
+  </style>
+</head>
+<body class="page-disabled">
+  <!-- 错误提示容器 -->
+  <div id="errorOverlay" class="error-overlay" style="display: none;">
+    <p id="errorMessage"></p>
+  </div>
+
+  <div class="top-bar">
+    <div class="top-row">
+      <button class="back-btn" id="backBtn">←</button>
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span id="stepLabel">第 1 题 / 共 20 题</span>
+          <span id="pctLabel">5%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width:5%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="step-pills" id="stepPills"></div>
+  </div>
+
+  <div class="question-stage" id="stage"></div>
+
+  <div class="bottom-bar">
+    <button class="btn-next" id="btnNext">下一题 →</button>
+    <div class="select-hint hidden" id="selectHint">请先完成作答</div>
+  </div>
+
+  <!-- 启用安全功能 -->
+  <script>
+    (function() {
+      function enableSecurity() {
+        if (typeof TestSecurity !== 'undefined') {
+          TestSecurity.enable();
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', enableSecurity);
+      } else {
+        enableSecurity();
+      }
+    })();
+  </script>
+
+  <!-- 引入验证SDK（必需） -->
+  <script src="/static/js/link-validator.js"></script>
+  <script>
+    // ====== 题目配置 ======
+    const questions = [
+      {
+        id: 'salary',
+        type: 'number',
+        tag: '💰 薪资信息',
+        title: '你的税前年薪<br>总包是多少？',
+        hint: '填写总包数字，如有期权股票可折算现金加进去',
+        unit: '万元/年',
+        placeholder: '25',
+        min: 1,
+        max: 1000,
+        step: 0.1,
+        default: null
+      },
+      {
+        id: 'country',
+        type: 'select',
+        tag: '🌍 基本信息',
+        title: '你在哪个<br>国家/地区工作？',
+        hint: '选择工作所在地，用于PPP购买力转换',
+        options: [
+          { value: 'CN', label: '中国大陆', icon: '🇨🇳' },
+          { value: 'US', label: '美国', icon: '🇺🇸' },
+          { value: 'JP', label: '日本', icon: '🇯🇵' },
+          { value: 'GB', label: '英国', icon: '🇬🇧' },
+          { value: 'DE', label: '德国', icon: '🇩🇪' },
+          { value: 'SG', label: '新加坡', icon: '🇸🇬' },
+          { value: 'HK', label: '中国香港', icon: '🇭🇰' },
+          { value: 'TW', label: '中国台湾', icon: '🇹🇼' },
+          { value: 'KR', label: '韩国', icon: '🇰🇷' },
+          { value: 'AU', label: '澳大利亚', icon: '🇦🇺' },
+          { value: 'OTHER', label: '其他地区', icon: '🌍' }
+        ]
+      },
+      {
+        id: 'workDaysPerWeek',
+        type: 'slider',
+        tag: '📅 工作时间',
+        title: '每周要<br>上几天班？',
+        hint: '包含在公司的工作日，不含居家办公',
+        min: 3,
+        max: 7,
+        step: 1,
+        default: 5,
+        display: 'd',
+        unit: '天/周',
+        labels: ['3天', '5天', '7天']
+      },
+      {
+        id: 'workHours',
+        type: 'slider',
+        tag: '⏰ 工作时长',
+        title: '每天在公司<br>待多少小时？',
+        hint: '从到公司到离开，含午休时间',
+        min: 6,
+        max: 16,
+        step: 0.5,
+        default: 10,
+        display: 'h',
+        unit: '小时/天',
+        labels: ['6h 准点下班', '10h 正常', '16h 007']
+      },
+      {
+        id: 'commuteHours',
+        type: 'slider',
+        tag: '🚇 通勤成本',
+        title: '每天通勤<br>要多久？',
+        hint: '上下班往返的总时间',
+        min: 0,
+        max: 4,
+        step: 0.5,
+        default: 1,
+        display: 'c',
+        unit: '小时/天',
+        labels: ['0 无需通勤', '1小时', '4小时 跨城']
+      },
+      {
+        id: 'restTime',
+        type: 'slider',
+        tag: '☕ 休息时间',
+        title: '每天午休&<br>摸鱼多久？',
+        hint: '含午休、下午茶、蹲坑等离开工位的时间',
+        min: 0,
+        max: 4,
+        step: 0.5,
+        default: 1.5,
+        display: 'r',
+        unit: '小时/天',
+        labels: ['0 无休息', '1.5小时', '4小时 摸鱼王']
+      },
+      {
+        id: 'wfhDaysPerWeek',
+        type: 'slider',
+        tag: '🏠 居家办公',
+        title: '每周有几天<br>居家办公？',
+        hint: 'Work From Home天数，部分算部分',
+        min: 0,
+        max: 5,
+        step: 1,
+        default: 0,
+        display: 'w',
+        unit: '天/周',
+        labels: ['0 全坐班', '2天 混合', '5天 全远程']
+      },
+      {
+        id: 'annualLeave',
+        type: 'number',
+        tag: '🏖️ 假期福利',
+        title: '你每年<br>有多少天年假？',
+        hint: '不包括法定节假日',
+        unit: '天/年',
+        placeholder: '5',
+        min: 0,
+        max: 30,
+        step: 1,
+        default: 5
+      },
+      {
+        id: 'cityFactor',
+        type: 'select',
+        tag: '🏙️ 工作地点',
+        title: '你在哪个<br>级别的城市？',
+        hint: '城市消费水平会影响实际购买力',
+        options: [
+          { value: '0.70', label: '一线城市', icon: '🏙️', desc: '北上广深' },
+          { value: '0.80', label: '新一线', icon: '🌆', desc: '成都杭州武汉等' },
+          { value: '1.00', label: '二线城市', icon: '🏘️', desc: '省会城市' },
+          { value: '1.10', label: '三线城市', icon: '🏡', desc: '普通地级市' },
+          { value: '1.25', label: '四线城市', icon: '🌲', desc: '小城市' },
+          { value: '1.40', label: '县城', icon: '🏘', desc: '县级市' },
+          { value: '1.50', label: '乡镇', icon: '🏞️', desc: '乡镇地区' }
+        ]
+      },
+      {
+        id: 'workEnvironment',
+        type: 'select',
+        tag: '🏢 工作环境',
+        title: '你的工作<br>环境是？',
+        hint: '影响工作舒适度系数',
+        options: [
+          { value: '0.8', label: '偏僻工厂/户外', icon: '🏭', desc: '偏远地区' },
+          { value: '0.9', label: '工厂/工地/户外', icon: '🏗️', desc: '非室内环境' },
+          { value: '1.0', label: '普通办公室', icon: '🏢', desc: '标准办公环境' },
+          { value: '1.1', label: 'CBD写字楼', icon: '🌃', desc: '高端商务区' }
+        ]
+      },
+      {
+        id: 'workIntensity',
+        type: 'select',
+        tag: '🔥 工作强度',
+        title: '你的工作<br>强度如何？',
+        hint: '单位时间内的脑力/体力消耗密度',
+        options: [
+          { value: '0.7', label: '非常轻松', icon: '😌', desc: '任务极少，大量空闲' },
+          { value: '0.85', label: '较为轻松', icon: '☕', desc: '偶尔有任务' },
+          { value: '1.0', label: '正常强度', icon: '💼', desc: '任务量适中' },
+          { value: '1.2', label: '较为繁忙', icon: '😰', desc: '持续有压力' },
+          { value: '1.5', label: '高压内卷', icon: '🔥', desc: '长期高强度' }
+        ]
+      },
+      {
+        id: 'leadership',
+        type: 'select',
+        tag: '👔 领导关系',
+        title: '你和领导<br>关系如何？',
+        hint: '领导对你的态度和支持程度',
+        options: [
+          { value: '0.7', label: '对我不爽', icon: '😤', desc: '关系紧张' },
+          { value: '0.9', label: '管理严格', icon: '😐', desc: '风格严厉' },
+          { value: '1.0', label: '中规中矩', icon: '🙂', desc: '普通上下级' },
+          { value: '1.1', label: '善解人意', icon: '😊', desc: '理解支持' },
+          { value: '1.3', label: '我是嫡系', icon: '👑', desc: '核心圈子' }
+        ]
+      },
+      {
+        id: 'teamwork',
+        type: 'select',
+        tag: '👥 同事环境',
+        title: '和同事们<br>相处如何？',
+        hint: '团队氛围和人际关系',
+        options: [
+          { value: '0.9', label: '都是傻逼', icon: '😖', desc: '关系紧张' },
+          { value: '1.0', label: '萍水相逢', icon: '😐', desc: '专业距离' },
+          { value: '1.1', label: '和和睦睦', icon: '😊', desc: '氛围融洽' },
+          { value: '1.2', label: '私交甚好', icon: '🤝', desc: '好友同事' }
+        ]
+      },
+      {
+        id: 'attractiveness',
+        type: 'select',
+        tag: '💕 异性环境',
+        title: '周围好看<br>异性多吗？',
+        hint: '影响工作中的愉悦感和幸福感',
+        options: [
+          { value: '0.9', label: '几乎没有', icon: '🚫', desc: '颜值荒漠' },
+          { value: '1.0', label: '不多不少', icon: '⚖️', desc: '刚刚好' },
+          { value: '1.1', label: '很多好看', icon: '✨', desc: '赏心悦目' }
+        ]
+      },
+      {
+        id: 'homeTown',
+        type: 'select',
+        tag: '🏠 生活状态',
+        title: '你是否在<br>家乡工作？',
+        hint: '影响生活成本和情感支持',
+        options: [
+          { value: 'no', label: '不在家乡', icon: '✈️', desc: '异乡打拼' },
+          { value: 'yes', label: '在家乡', icon: '🏡', desc: '家人身边' }
+        ]
+      },
+      {
+        id: 'hasShuttle',
+        type: 'shuttle',
+        tag: '🚌 通勤福利',
+        title: '公司有<br>班车服务吗？',
+        hint: '班车可有效节省通勤时间和精力',
+        options: [
+          { value: 'none', label: '无班车', icon: '❌', desc: '自行解决', factor: 1.0 },
+          { value: '0.9', label: '班车不便', icon: '🚌', desc: '需要换乘', factor: 0.9 },
+          { value: '0.7', label: '便利班车', icon: '🚌', desc: '直达或短途', factor: 0.7 },
+          { value: '0.5', label: '班车直达', icon: '🚐', desc: '门到门', factor: 0.5 }
+        ]
+      },
+      {
+        id: 'hasCanteen',
+        type: 'canteen',
+        tag: '🍽️ 食堂福利',
+        title: '公司食堂<br>怎么样？',
+        hint: '好的食堂能省时省钱，提升幸福感',
+        options: [
+          { value: 'none', label: '无食堂', icon: '❌', desc: '自己解决', factor: 1.0 },
+          { value: '0.95', label: '很难吃', icon: '😖', desc: '难以下咽', factor: 0.95 },
+          { value: '1.00', label: '食堂一般', icon: '😐', desc: '勉强能吃', factor: 1.0 },
+          { value: '1.05', label: '食堂不错', icon: '😊', desc: '满意水平', factor: 1.05 },
+          { value: '1.15', label: '食堂超赞', icon: '🤩', desc: '超出预期', factor: 1.15 }
+        ]
+      },
+      {
+        id: 'jobStability',
+        type: 'select',
+        tag: '📋 职业情况',
+        title: '你工作的<br>稳定度如何？',
+        hint: '不同性质工作的风险和收益不同',
+        options: [
+          { value: 'government', label: '政府/事业单位', icon: '🏛️', desc: '铁饭碗' },
+          { value: 'state', label: '国企/大型企业', icon: '🏢', desc: '稳定性高' },
+          { value: 'foreign', label: '外企/守法企业', icon: '🌐', desc: '规范管理' },
+          { value: 'private', label: '私企/狼性文化', icon: '狼', desc: '高风险高回报' },
+          { value: 'dispatch', label: '劳务派遣/OD', icon: '📄', desc: '灵活用工' },
+          { value: 'freelance', label: '自由职业', icon: '🎨', desc: '完全自由' }
+        ]
+      },
+      {
+        id: 'degreeType',
+        type: 'select',
+        tag: '🎓 教育背景',
+        title: '你的最高<br>学历是？',
+        hint: '学历影响职业发展天花板',
+        options: [
+          { value: '0.8', label: '专科及以下', icon: '🎒', desc: '专科/中专/高中' },
+          { value: '1.0', label: '普通本科', icon: '🎓', desc: '普通院校本科' },
+          { value: '1.2', label: '重点本科', icon: '🏆', desc: '211/985/QS100' },
+          { value: '1.4', label: '普通硕士', icon: '📚', desc: '普通院校硕士' },
+          { value: '1.6', label: '重点硕士', icon: '📖', desc: '211/985硕士' },
+          { value: '1.8', label: '普通博士', icon: '🔬', desc: '普通院校博士' },
+          { value: '2.0', label: '重点博士', icon: '🧠', desc: '顶尖院校博士' }
+        ]
+      },
+      {
+        id: 'workYears',
+        type: 'select',
+        tag: '📈 工作经验',
+        title: '你工作<br>多少年了？',
+        hint: '影响薪资议价能力和稳定性需求',
+        options: [
+          { value: '0', label: '应届生', icon: '🌱', desc: '刚毕业' },
+          { value: '1', label: '1-3年', icon: '📗', desc: '职场新人' },
+          { value: '2', label: '3-5年', icon: '📙', desc: '成长阶段' },
+          { value: '4', label: '5-8年', icon: '📘', desc: '资深阶段' },
+          { value: '6', label: '8-10年', icon: '📕', desc: '专家级别' },
+          { value: '10', label: '10-12年', icon: '📓', desc: '高层管理' },
+          { value: '15', label: '12年以上', icon: '📒', desc: '资深领袖' }
+        ]
+      }
+    ];
+
+    // ====== 状态管理 ======
+    let currentIndex = 0;
+    let answers = {};
+    let isAnimating = false;
+    let validatorInstance = null;
+
+    // ====== SDK初始化 ======
+    if (typeof PsyTestValidator !== 'undefined') {
+      PsyTestValidator.init('wjt', {
+        onSuccess: function(result, validator) {
+          console.log('SDK初始化成功:', result);
+          validatorInstance = validator;
+          window.linkValidator = validator;
+          document.body.classList.remove('page-disabled');
+          const errorOverlay = document.getElementById('errorOverlay');
+          if (errorOverlay) errorOverlay.style.display = 'none';
+        },
+        onError: function(error) {
+          console.error('SDK初始化失败:', error);
+          if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+            validatorInstance = window.PsyTestValidator.getInstance();
+          }
+          if (validatorInstance) window.linkValidator = validatorInstance;
+          document.body.classList.remove('page-disabled');
+        },
+        onLoad: function(data) {
+          console.log('SDK加载完成:', data);
+          if (!validatorInstance) {
+            if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+              validatorInstance = window.PsyTestValidator.getInstance();
+            }
+            if (!validatorInstance && window.linkValidator) validatorInstance = window.linkValidator;
+          }
+          if (validatorInstance) window.linkValidator = validatorInstance;
+
+          // 答题页禁用推广信息
+          window.__RPI_DISABLE_SDK_PROMOTION = true;
+
+          // 检查是否是重新测试
+          const urlParams = new URLSearchParams(window.location.search);
+          const isRestart = urlParams.get('restart') === 'true';
+          if (isRestart) {
+            console.log('检测到重新测试参数，清除答题进度');
+            urlParams.delete('restart');
+            const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+            window.history.replaceState({}, '', newUrl);
+            // 不恢复进度，从头开始
+          } else {
+            // 恢复答题进度
+            const savedAnswers = localStorage.getItem('wjt_quiz_answers');
+            const savedIndex = localStorage.getItem('wjt_quiz_index');
+            if (savedAnswers) {
+              try {
+                answers = JSON.parse(savedAnswers);
+              } catch(e) {}
+            }
+            if (savedIndex && !isNaN(parseInt(savedIndex))) {
+              currentIndex = Math.max(0, parseInt(savedIndex));
+            }
+          }
+        }
+      });
+    } else {
+      console.error('验证SDK未加载');
+      document.body.classList.remove('page-disabled');
+    }
+
+    // ====== 返回按钮 ======
+    document.getElementById('backBtn').addEventListener('click', function() {
+      // 清除答题进度
+      localStorage.removeItem('wjt_quiz_answers');
+      localStorage.removeItem('wjt_quiz_index');
+      // 构建index.html URL并跳转
+      const urlParams = new URLSearchParams();
+      const token = window.linkValidator && window.linkValidator.token;
+      const isUnlimited = window.linkValidator && window.linkValidator.unlimited;
+      if (isUnlimited && token) {
+        urlParams.set('unlimited', 'true');
+        urlParams.set('token', token);
+      } else if (token) {
+        urlParams.set('token', token);
+      }
+      const queryString = urlParams.toString();
+      const indexUrl = queryString ? `index.html?${queryString}` : 'index.html';
+      window.location.href = indexUrl;
+    });
+
+    // ====== 渲染题目 ======
+    function renderQuestion(index) {
+      const q = questions[index];
+      const stage = document.getElementById('stage');
+
+      let html = `<div class="q-slide active" id="q-current">`;
+      html += `<div class="q-step-tag">${q.tag}</div>`;
+      html += `<div class="q-title">${q.title}</div>`;
+      html += `<div class="q-hint">${q.hint}</div>`;
+
+      if (q.type === 'number') {
+        html += `<div class="big-input-wrap">`;
+        html += `<input type="number" class="big-input" id="numInput" placeholder="${q.placeholder}" `;
+        html += `min="${q.min}" max="${q.max}" step="${q.step}" `;
+        html += `value="${answers[q.id] || ''}">`;
+        html += `<span class="input-unit">${q.unit}</span>`;
+        html += `</div>`;
+      } else if (q.type === 'slider') {
+        const val = answers[q.id] ?? q.default;
+        answers[q.id] = val;
+        html += `<div class="slider-section">`;
+        html += `<div class="slider-display">`;
+        html += `<div class="slider-big-val" id="sliderVal">${val}</div>`;
+        html += `<div class="slider-unit">${q.unit}</div>`;
+        html += `</div>`;
+        html += `<input type="range" min="${q.min}" max="${q.max}" value="${val}" step="${q.step}" id="sliderInput" `;
+        html += `oninput="updateSlider(this.value, '${q.display}')">`;
+        html += `<div class="slider-labels"><span>${q.labels[0]}</span><span>${q.labels[1]}</span><span>${q.labels[2]}</span></div>`;
+        html += `</div>`;
+      } else if (q.type === 'select') {
+        html += `<div class="options-list">`;
+        q.options.forEach(opt => {
+          const isSelected = answers[q.id] === opt.value;
+          html += `<div class="opt${isSelected ? ' selected' : ''}" onclick="selectOpt('${q.id}', '${opt.value}')">`;
+          html += `<div class="opt-icon">${opt.icon}</div>`;
+          html += `<div class="opt-body">`;
+          html += `<div class="opt-name">${opt.label}</div>`;
+          if (opt.desc) html += `<div class="opt-desc">${opt.desc}</div>`;
+          html += `</div>`;
+          html += `<div class="opt-radio"><div class="opt-radio-dot"></div></div>`;
+          html += `</div>`;
+        });
+        html += `</div>`;
+      } else if (q.type === 'shuttle' || q.type === 'canteen') {
+        html += `<div class="options-list">`;
+        q.options.forEach(opt => {
+          const isSelected = answers[q.id] === opt.value;
+          html += `<div class="opt${isSelected ? ' selected' : ''}" onclick="selectOpt('${q.id}', '${opt.value}')">`;
+          html += `<div class="opt-icon">${opt.icon}</div>`;
+          html += `<div class="opt-body"><div class="opt-name">${opt.label}</div>`;
+          html += `<div class="opt-desc">${opt.desc}</div></div>`;
+          html += `<div class="opt-radio"><div class="opt-radio-dot"></div></div>`;
+          html += `</div>`;
+        });
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+      html += `<div class="q-slide enter-from-right" id="q-next"></div>`;
+
+      stage.innerHTML = html;
+
+      const numInput = document.getElementById('numInput');
+      if (numInput) {
+        numInput.addEventListener('input', (e) => {
+          const val = e.target.value;
+          answers[q.id] = val ? parseFloat(val) : null;
+          updateNextButton();
+          saveProgress();
+        });
+        numInput.focus();
+      }
+    }
+
+    function updateSlider(value, display) {
+      document.getElementById('sliderVal').textContent = value;
+      const q = questions[currentIndex];
+      answers[q.id] = parseFloat(value);
+      updateNextButton();
+      saveProgress();
+    }
+
+    function selectOpt(questionId, value) {
+      answers[questionId] = value;
+      document.querySelectorAll('.q-slide.active .opt').forEach(o => o.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      updateNextButton();
+      saveProgress();
+    }
+
+    function updateNextButton() {
+      const btn = document.getElementById('btnNext');
+      const hint = document.getElementById('selectHint');
+      const q = questions[currentIndex];
+      let isReady = false;
+
+      if (q.type === 'number') {
+        isReady = answers[q.id] !== null && answers[q.id] !== undefined && answers[q.id] !== '';
+      } else if (q.type === 'slider') {
+        isReady = answers[q.id] !== null && answers[q.id] !== undefined;
+      } else {
+        isReady = answers[q.id] !== undefined;
+      }
+
+      btn.classList.toggle('ready', isReady);
+      hint.classList.toggle('hidden', isReady);
+    }
+
+    // ====== 保存进度 ======
+    function saveProgress() {
+      try {
+        localStorage.setItem('wjt_quiz_answers', JSON.stringify(answers));
+        localStorage.setItem('wjt_quiz_index', String(currentIndex));
+      } catch(e) {}
+    }
+
+    // ====== 导航 ======
+    document.getElementById('btnNext').addEventListener('click', function() {
+      if (isAnimating) return;
+      const btn = document.getElementById('btnNext');
+      if (!btn.classList.contains('ready')) {
+        document.getElementById('selectHint').classList.remove('hidden');
+        return;
+      }
+
+      isAnimating = true;
+      const cur = document.getElementById('q-current');
+      const nxt = document.getElementById('q-next');
+
+      if (currentIndex < questions.length - 1) {
+        cur.classList.remove('active');
+        cur.classList.add('exit-to-left');
+
+        currentIndex++;
+        saveProgress();
+        renderQuestion(currentIndex);
+
+        setTimeout(() => {
+          cur.classList.remove('exit-to-left');
+          cur.classList.add('enter-from-right');
+          updateProgress();
+          updateNextButton();
+          isAnimating = false;
+        }, 350);
+      } else {
+        generateReport();
+      }
+    });
+
+    function updateProgress() {
+      const pct = Math.round((currentIndex + 1) / questions.length * 100);
+      document.getElementById('stepLabel').textContent = `第 ${currentIndex + 1} 题 / 共 ${questions.length} 题`;
+      document.getElementById('pctLabel').textContent = `${pct}%`;
+      document.getElementById('progressFill').style.width = `${pct}%`;
+
+      const pills = document.getElementById('stepPills');
+      pills.innerHTML = questions.map((_, i) => {
+        let cls = 'pill';
+        if (i < currentIndex) cls += ' done';
+        else if (i === currentIndex) cls += ' active';
+        return `<div class="${cls}"></div>`;
+      }).join('');
+
+      const btn = document.getElementById('btnNext');
+      btn.textContent = currentIndex === questions.length - 1 ? '查看报告 →' : '下一题 →';
+    }
+
+    // ====== 生成报告 ======
+    async function generateReport() {
+      saveProgress();
+
+      // 优先使用SDK的token
+      let token = null;
+      if (window.linkValidator && window.linkValidator.token) {
+        token = window.linkValidator.token;
+      } else {
+        token = 'local_' + Date.now();
+      }
+
+      // 保存到localStorage（使用SDK token作为key）
+      const storageKey = `wjt_result_${token}`;
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({
+          token: token,
+          answers: answers,
+          timestamp: new Date().toISOString()
+        }));
+        // 兼容旧key
+        localStorage.setItem('worthjob_answers', JSON.stringify(answers));
+      } catch(e) {}
+
+      // 调用测试完成
+      if (window.linkValidator) {
+        try {
+          await window.linkValidator.completeTest(undefined, { completed: true });
+          console.log('测试完成记录成功');
+        } catch(e) {
+          console.error('记录测试完成失败:', e);
+        }
+      }
+
+      // 清除答题进度
+      localStorage.removeItem('wjt_quiz_answers');
+      localStorage.removeItem('wjt_quiz_index');
+
+      // 构建报告页URL
+      let reportUrl = 'report.html';
+      const urlParams = new URLSearchParams();
+      const isUnlimited = window.linkValidator && window.linkValidator.unlimited;
+      if (isUnlimited && token) {
+        urlParams.set('unlimited', 'true');
+        urlParams.set('token', token);
+      } else if (token) {
+        urlParams.set('token', token);
+      }
+      const queryString = urlParams.toString();
+      if (queryString) reportUrl = `${reportUrl}?${queryString}`;
+      window.location.href = reportUrl;
+    }
+
+    // ====== 初始化 ======
+    function init() {
+      const pills = document.getElementById('stepPills');
+      pills.innerHTML = questions.map(() => '<div class="pill"></div>').join('');
+
+      renderQuestion(currentIndex);
+      updateProgress();
+    }
+
+    init();
+  </script>
+</body>
+</html>

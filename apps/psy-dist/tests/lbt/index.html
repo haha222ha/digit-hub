@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>恋爱脑测试</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 欢迎页面 -->
+    <div class="welcome-container" id="welcomePage">
+        <!-- 标题卡片 -->
+        <div class="welcome-title-card">
+            <div class="welcome-title-icon">💗</div>
+            <h1 class="welcome-main-title">恋爱脑测试</h1>
+            <p class="welcome-subtitle">了解你在恋爱中的投入程度</p>
+        </div>
+
+        <!-- 介绍卡片 -->
+        <div class="welcome-info-card">
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">🎯</span>
+                    <h3 class="welcome-section-title">测试目的</h3>
+                </div>
+                <p class="welcome-section-text">
+                    本测试旨在帮助您了解自己在恋爱关系中的投入程度和"恋爱脑"倾向。通过评估您在情感投入、行为表现、情绪反应等方面的表现，全面分析您的恋爱态度和行为模式。测试结果可以帮助您更好地理解自己在恋爱中的表现，从而在享受恋爱的同时保持理性思考。
+                </p>
+            </div>
+
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">📋</span>
+                    <h3 class="welcome-section-title">测试说明</h3>
+                </div>
+                <p class="welcome-section-text">
+                    本测试共包含20道题目，大约需要5-10分钟完成。请根据您的真实想法和实际行为，选择最符合您的选项。每题有5个选项，请诚实作答以获得准确的结果。测试将从多个维度评估您在恋爱中的表现，包括情感投入、行为习惯、情绪反应等。
+                </p>
+            </div>
+
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">⚕️</span>
+                    <h3 class="welcome-section-title">重要提示</h3>
+                </div>
+                <p class="welcome-section-text">
+                    本测试结果仅供参考和娱乐，不能替代专业心理评估。测试旨在帮助您自我了解，而非诊断工具。如果您在恋爱关系中遇到严重的困扰或情感问题，建议咨询专业心理医生或心理咨询师。记住，适度的情感投入是健康的，但也要保持自我和理性。
+                </p>
+            </div>
+
+            <div class="welcome-notice">
+                开始测试即表示您已阅读并同意上述所有说明。
+            </div>
+        </div>
+
+        <!-- 开始测试按钮 -->
+        <div class="welcome-footer">
+            <button class="welcome-start-button" id="welcomeStartButton">
+                开始测试
+            </button>
+            <p class="welcome-footer-note">
+                本测试基于心理学理论开发，结果仅供参考和娱乐使用。
+            </p>
+        </div>
+    </div>
+
+    <!-- 测试页面 -->
+    <div id="testPage" style="display: none;">
+        <div class="test-header">
+            <span class="test-title">恋爱脑测试</span>
+        </div>
+        <div class="test-container">
+        <div class="progress-bar-bg">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="question-info" id="questionInfo"></div>
+        <div class="question-title" id="questionTitle"></div>
+        <div class="options-list" id="optionsList"></div>
+        <div class="test-btns">
+            <button id="prevBtn" class="nav-btn">上一题</button>
+            <button id="nextBtn" class="nav-btn main-btn">下一题</button>
+        </div>
+    </div>
+    </div>
+
+    <!-- 错误提示容器 -->
+    <div id="errorOverlay" class="error-overlay" style="display: none;">
+        <p id="errorMessage"></p>
+    </div>
+
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        // 等待DOM加载完成后再启用安全功能
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+    
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init(null, {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    document.body.classList.remove('page-disabled');
+                    document.getElementById('errorOverlay').style.display = 'none';
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                        window.linkValidator = validatorInstance;
+                    }
+                    document.body.classList.remove('page-disabled');
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (validatorInstance) {
+                            window.linkValidator = validatorInstance;
+                        }
+                    }
+                    
+                    // 检查是否是重新测试（通过URL参数判断）
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const isRestart = urlParams.get('restart') === 'true';
+                    
+                    // 如果是重新测试，清除本地测试结果
+                    if (isRestart && validatorInstance && validatorInstance.clearLocalResult) {
+                        validatorInstance.clearLocalResult(); // lbt是单视角测试，不需要传递perspective参数
+                        // 清除restart参数（避免刷新后再次触发）
+                        urlParams.delete('restart');
+                        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                        window.history.replaceState({}, '', newUrl);
+                        return; // 重新测试时，清除结果后不跳转，停留在欢迎页
+                    }
+                    
+                    // 如果链接有效且有测试结果，且不是重新测试，才跳转到报告页
+                    if (data.valid && data.has_local_result && !isRestart) {
+                        // 构建报告页面URL（需要包含token以便SDK验证）
+                        let resultUrl = 'result.html';
+                        const reportUrlParams = new URLSearchParams();
+                        const token = urlParams.get('token') || (validatorInstance && validatorInstance.token);
+                        const isUnlimited = urlParams.get('unlimited') === 'true';
+                        
+                        if (isUnlimited && token) {
+                            reportUrlParams.set('unlimited', 'true');
+                            reportUrlParams.set('token', token);
+                        } else if (token) {
+                            reportUrlParams.set('token', token);
+                        }
+                        
+                        const queryString = reportUrlParams.toString();
+                        if (queryString) {
+                            resultUrl = `${resultUrl}?${queryString}`;
+                        }
+                        
+                        window.location.href = resultUrl;
+                        return;
+                    }
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+        }
+    </script>
+    
+    <script src="test.js"></script>
+    <script src="welcome.js"></script>
+</body>
+</html>
+

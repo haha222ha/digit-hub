@@ -1,0 +1,1 @@
+function e(){return typeof navigator>"u"?!1:/MicroMessenger/i.test(navigator.userAgent)}function n(){return typeof navigator>"u"?!1:/iPhone|iPad|iPod/i.test(navigator.userAgent)}export{e as a,n as i};

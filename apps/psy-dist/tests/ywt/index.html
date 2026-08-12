@@ -1,0 +1,3213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>你的什么欲望最强</title>
+  <meta name="description" content="别装了，测一下就知道你到底是什么样的人。嘴上说佛系的人，心里想什么自己清楚。30 道题，测完可能会破防。" />
+  <meta property="og:title" content="你的什么欲望最强" />
+  <meta property="og:description" content="别装了，测一下就知道你到底是什么样的人。30 道题，测完可能会破防。" />
+  <meta property="og:site_name" content="你的什么欲望最强" />
+  <script src="/static/js/test-security.js"></script>
+  <script>
+    if (typeof TestSecurity !== 'undefined') {
+      TestSecurity.enable();
+    }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fff7ef;
+      --bg-2: #f7ede3;
+      --text: #1c1412;
+      --muted: #7d6f68;
+      --muted-2: #a0938b;
+      --card: rgba(255, 255, 255, .78);
+      --card-solid: #ffffff;
+      --line: rgba(28, 20, 18, .1);
+      --orange: #ff642a;
+      --pink: #ff4184;
+      --red: #ff3e57;
+      --yellow: #ffdc75;
+      --dark: #1c1412;
+      --shadow: 0 20px 60px rgba(75, 38, 22, .14);
+      --shadow-soft: 0 12px 32px rgba(75, 38, 22, .08);
+      --radius: 24px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 100, 42, .12), transparent 30%),
+        radial-gradient(circle at right 22%, rgba(255, 65, 132, .12), transparent 34%),
+        linear-gradient(180deg, #fff8f1 0%, #f8eee5 52%, #fffaf5 100%);
+      color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    button {
+      font: inherit;
+      border: 0;
+      background: none;
+      cursor: pointer;
+    }
+
+    .page {
+      display: none;
+      min-height: 100svh;
+    }
+
+    .page.active {
+      display: flex;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, var(--orange), var(--pink));
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .glass-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.85);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(14px);
+    }
+
+    .primary-btn {
+      width: 100%;
+      height: 56px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--orange), var(--pink));
+      color: #fff;
+      font-size: 17px;
+      font-weight: 900;
+      box-shadow: 0 16px 34px rgba(255, 74, 94, .28);
+      transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+    }
+
+    .primary-btn:active {
+      transform: scale(.98);
+      box-shadow: 0 10px 22px rgba(255, 74, 94, .22);
+    }
+
+    .outline-btn {
+      height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.75);
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .outline-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .dark-btn {
+      height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: var(--dark);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .tiny {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* =========================
+       Home
+    ========================== */
+
+    #home-page {
+      position: relative;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .home-bg-orb {
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+      filter: blur(48px);
+      opacity: .8;
+    }
+
+    .orb-1 {
+      width: 280px;
+      height: 280px;
+      background: rgba(255,100,42,.14);
+      top: -120px;
+      left: -110px;
+    }
+
+    .orb-2 {
+      width: 240px;
+      height: 240px;
+      background: rgba(255,65,132,.13);
+      right: -120px;
+      top: 160px;
+    }
+
+    .orb-3 {
+      width: 260px;
+      height: 260px;
+      background: rgba(255,220,117,.16);
+      left: -130px;
+      bottom: 40px;
+    }
+
+    .home-header {
+      position: relative;
+      z-index: 2;
+      padding: 14px 18px 0;
+    }
+
+    .home-header-inner {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--orange), var(--pink));
+      color: #fff;
+      font-size: 15px;
+      box-shadow: 0 8px 20px rgba(255,74,94,.22);
+    }
+
+    .header-pill {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(28,20,18,.06);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .home-main {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    .home-content {
+      width: 100%;
+      padding: 18px 18px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .hero-tag {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255, 100, 42, .09);
+      color: #d84317;
+      border: 1px solid rgba(255, 100, 42, .14);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .hero-title-wrap {
+      text-align: center;
+      margin-top: 2px;
+    }
+
+    .hero-kicker {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .hero-title {
+      margin: 0;
+      font-size: clamp(38px, 11vw, 54px);
+      line-height: .98;
+      letter-spacing: -2px;
+      font-weight: 1000;
+    }
+
+    .hero-subtitle {
+      margin: 14px auto 0;
+      max-width: 390px;
+      color: var(--text);
+      font-size: 21px;
+      line-height: 1.34;
+      font-weight: 1000;
+    }
+
+    .hero-intro {
+      margin: 0 auto;
+      max-width: 390px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.85;
+    }
+
+    .hero-intro strong {
+      color: var(--text);
+      font-weight: 900;
+      background: linear-gradient(transparent 58%, rgba(255,220,117,.85) 0);
+    }
+
+    .selling-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .selling-card {
+      min-height: 116px;
+      border-radius: 20px;
+      padding: 13px 9px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .selling-num {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: var(--dark);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 1000;
+    }
+
+    .selling-card b {
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .selling-card span {
+      font-size: 10px;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+
+    .live-panel {
+      border-radius: 22px;
+      padding: 14px 16px;
+    }
+
+    .live-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .live-row + .live-row {
+      margin-top: 8px;
+    }
+
+    .live-row b {
+      color: var(--red);
+      font-size: 18px;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ping {
+      display: inline-flex;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--pink);
+      margin-right: 6px;
+      position: relative;
+    }
+
+    .ping:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: var(--pink);
+      animation: ping 1.2s cubic-bezier(0,0,.2,1) infinite;
+    }
+
+    @keyframes ping {
+      75%, 100% {
+        transform: scale(2.6);
+        opacity: 0;
+      }
+    }
+
+    .home-cta-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .time-tip {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .disclaimer {
+      text-align: center;
+      font-size: 11px;
+      color: rgba(125,111,104,.62);
+      padding-bottom: calc(4px + var(--safe-bottom));
+    }
+
+    body.page-disabled {
+      pointer-events: none;
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .welcome-footer,
+    .report-footer {
+      display: block !important;
+      visibility: visible !important;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .welcome-footer #link-validator-promotion-link,
+    .report-footer #link-validator-promotion-link {
+      width: 100%;
+      text-align: center;
+      padding-top: 12px;
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      box-sizing: border-box;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* =========================
+       Quiz
+    ========================== */
+
+    #quiz-page {
+      flex-direction: column;
+    }
+
+    .quiz-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      width: 100%;
+      background: rgba(255, 247, 239, .86);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(28,20,18,.08);
+    }
+
+    .quiz-header-inner {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 12px 18px;
+    }
+
+    .quiz-topline {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+
+    .back-btn {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      padding: 6px 0;
+    }
+
+    .progress-count {
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 1000;
+    }
+
+    .progress-track {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,100,42,.15);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--orange), var(--pink));
+      transition: width .25s ease;
+    }
+
+    .quiz-main {
+      flex: 1;
+      width: 100%;
+    }
+
+    .quiz-content {
+      width: 100%;
+      padding: 24px 18px calc(24px + var(--safe-bottom));
+    }
+
+    .detect-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--dark);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 18px;
+    }
+
+    .question-card {
+      border-radius: 26px;
+      padding: 22px 18px 18px;
+    }
+
+    .question-title {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.34;
+      letter-spacing: -.5px;
+      font-weight: 1000;
+    }
+
+    .question-sub {
+      margin-top: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .options {
+      margin-top: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .option-card {
+      width: 100%;
+      text-align: left;
+      border-radius: 20px;
+      background: rgba(255,255,255,.86);
+      border: 1px solid rgba(28,20,18,.08);
+      box-shadow: 0 10px 24px rgba(75,38,22,.06);
+      transition: transform .16s ease, border-color .16s ease, background .16s ease;
+    }
+
+    .option-card:active {
+      transform: scale(.99);
+    }
+
+    .option-card.selected {
+      border: 2px solid var(--red);
+      background: linear-gradient(135deg, rgba(255,100,42,.1), rgba(255,65,132,.1));
+    }
+
+    .option-inner {
+      padding: 15px;
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+    }
+
+    .option-key {
+      flex: 0 0 auto;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: #f0e5dc;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 1000;
+      transition: background .16s ease, color .16s ease;
+    }
+
+    .option-card.selected .option-key {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .option-text {
+      padding-top: 4px;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.45;
+      font-weight: 800;
+    }
+
+    .quiz-note {
+      margin-top: 18px;
+      border-radius: 22px;
+      padding: 18px;
+      background: var(--dark);
+      color: #fff;
+      box-shadow: 0 14px 36px rgba(28,20,18,.18);
+    }
+
+    .quiz-note small {
+      display: block;
+      color: var(--yellow);
+      font-size: 12px;
+      font-weight: 1000;
+      margin-bottom: 8px;
+    }
+
+    .quiz-note p {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.38;
+      font-weight: 1000;
+    }
+
+    .quiz-actions {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .auto-tip {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    /* =========================
+       Result
+    ========================== */
+
+    #result-page {
+      flex-direction: column;
+    }
+
+    .result-content {
+      width: 100%;
+      padding: 16px 18px calc(28px + var(--safe-bottom));
+    }
+
+    .result-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at top right, rgba(255,65,132,.17), transparent 34%),
+        radial-gradient(circle at left 22%, rgba(255,100,42,.12), transparent 30%),
+        rgba(255,255,255,.86);
+      border: 1px solid rgba(255,255,255,.92);
+      box-shadow: var(--shadow);
+      padding: 22px 18px;
+    }
+
+    .result-card:before {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 999px;
+      background: rgba(255,220,117,.16);
+      filter: blur(30px);
+      left: -80px;
+      top: 160px;
+    }
+
+    .result-top {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .report-kicker {
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--dark);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 1000;
+      margin-bottom: 28px;
+    }
+
+    .result-small {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .result-title {
+      margin: 0;
+      font-size: clamp(42px, 12vw, 56px);
+      line-height: .98;
+      letter-spacing: -2px;
+      font-weight: 1000;
+    }
+
+    .attr-pill {
+      display: inline-flex;
+      margin-top: 14px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      background: rgba(255,100,42,.09);
+      border: 1px solid rgba(255,100,42,.14);
+      color: #d84317;
+      font-size: 13px;
+      font-weight: 1000;
+    }
+
+    .result-meta {
+      margin-top: 12px;
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .result-meta b {
+      color: var(--red);
+      font-weight: 1000;
+    }
+
+    .share-quote {
+      position: relative;
+      z-index: 2;
+      margin-top: 22px;
+      padding: 20px 18px;
+      border-radius: 24px;
+      background: var(--dark);
+      color: #fff;
+      text-align: center;
+      font-size: 20px;
+      line-height: 1.45;
+      font-weight: 1000;
+      box-shadow: 0 18px 40px rgba(28,20,18,.22);
+    }
+
+    .comment-box {
+      position: relative;
+      z-index: 2;
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 20px;
+      background: rgba(255,100,42,.08);
+      color: #5e4037;
+      font-size: 14px;
+      line-height: 1.7;
+      font-weight: 800;
+    }
+
+    .section-title {
+      position: relative;
+      z-index: 2;
+      margin: 24px 0 12px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .section-title h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 1000;
+    }
+
+    .section-title span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .spectrum {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      gap: 12px;
+    }
+
+    .dim-row {
+      display: grid;
+      gap: 6px;
+    }
+
+    .dim-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .dim-head b {
+      font-weight: 900;
+    }
+
+    .dim-head span {
+      color: var(--red);
+      font-weight: 1000;
+    }
+
+    .dim-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #f0e5dc;
+      overflow: hidden;
+    }
+
+    .dim-fill {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--orange), var(--pink));
+      transition: width .8s ease-out;
+    }
+
+    .radar-text {
+      position: relative;
+      z-index: 2;
+      margin-top: 16px;
+      padding: 17px;
+      border-radius: 20px;
+      background: rgba(255,220,117,.3);
+      border: 1px solid rgba(255,220,117,.38);
+      color: #6b4d21;
+      font-size: 14px;
+      line-height: 1.7;
+      font-weight: 900;
+    }
+
+    .analysis-box {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      gap: 14px;
+    }
+
+    .analysis-box p {
+      margin: 0;
+      color: #675a53;
+      font-size: 14px;
+      line-height: 1.85;
+    }
+
+    .result-actions {
+      margin-top: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .result-actions-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* =========================
+       Overlay / Dialog
+    ========================== */
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,247,239,.76);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .loading-card {
+      width: min(320px, 100%);
+      border-radius: 26px;
+      padding: 28px 20px;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 16px;
+      border-radius: 999px;
+      border: 4px solid rgba(255,100,42,.2);
+      border-top-color: var(--red);
+      animation: spin .9s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-card h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: 1000;
+    }
+
+    .loading-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .dialog-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(28,20,18,.48);
+      padding: 18px;
+    }
+
+    .dialog-backdrop.show {
+      display: flex;
+    }
+
+    .dialog {
+      width: min(360px, 100%);
+      border-radius: 26px;
+      padding: 22px 18px 18px;
+      background: #fffaf5;
+      box-shadow: var(--shadow);
+    }
+
+    .dialog h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      font-weight: 1000;
+    }
+
+    .dialog p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .dialog-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* =========================
+       Responsive
+    ========================== */
+
+    @media (min-width: 760px) {
+      body {
+        background:
+          radial-gradient(circle at top left, rgba(255, 100, 42, .15), transparent 28%),
+          radial-gradient(circle at right 25%, rgba(255, 65, 132, .14), transparent 30%),
+          #f6ede4;
+      }
+
+      .app-shell {
+        min-height: 100svh;
+        box-shadow: 0 0 0 1px rgba(28,20,18,.04), 0 26px 80px rgba(75,38,22,.16);
+        background:
+          radial-gradient(circle at top left, rgba(255,100,42,.1), transparent 32%),
+          radial-gradient(circle at right 22%, rgba(255,65,132,.1), transparent 34%),
+          linear-gradient(180deg, #fff8f1, #fffaf6);
+      }
+    }
+  </style>
+</head>
+
+<body class="page-disabled">
+  <!-- =========================
+       HOME
+  ========================== -->
+  <section id="home-page" class="page active">
+    <div class="app-shell">
+      <div class="home-bg-orb orb-1"></div>
+      <div class="home-bg-orb orb-2"></div>
+      <div class="home-bg-orb orb-3"></div>
+
+      <header class="home-header">
+        <div class="home-header-inner">
+          <div class="brand">
+            <div class="brand-icon">♡</div>
+            <span>欲望测试</span>
+          </div>
+          <div class="header-pill">小红书爆款测试</div>
+        </div>
+      </header>
+
+      <main class="home-main">
+        <div class="home-content">
+          <div class="hero-tags">
+            <div class="hero-tag">30 道扎心题</div>
+            <div class="hero-tag">5 分钟完成</div>
+            <div class="hero-tag">6 维度分析</div>
+          </div>
+
+          <section class="hero-title-wrap">
+            <div class="hero-kicker">别急着装清醒</div>
+            <h1 class="hero-title">
+              你的什么<br />
+              <span class="gradient-text">欲望最强？</span>
+            </h1>
+            <div class="hero-subtitle">
+              别装了，<br />
+              你心里想什么自己清楚。
+            </div>
+          </section>
+
+          <p class="hero-intro">
+            每个人嘴上说的和心里想的，往往是两回事。有人嘴上佛系，心里比谁都卷；有人表面清醒，深夜 emo 到天明。
+            <strong>30 道题，测完可能会破防，但至少你会更了解自己。</strong>
+          </p>
+
+          <section class="selling-grid">
+            <div class="selling-card glass-card">
+              <div class="selling-num">30</div>
+              <b>扎心题</b>
+              <span>每道都直击痛点，不绕弯子</span>
+            </div>
+            <div class="selling-card glass-card">
+              <div class="selling-num">5</div>
+              <b>分钟完成</b>
+              <span>碎片时间随时测</span>
+            </div>
+            <div class="selling-card glass-card">
+              <div class="selling-num">6</div>
+              <b>维度分析</b>
+              <span>把你拆明白</span>
+            </div>
+          </section>
+
+          <section class="live-panel glass-card">
+            <div class="live-row">
+              <span><i class="ping"></i>现在有 N 个人在和你一起测</span>
+              <b id="online-count">328</b>
+            </div>
+            <div class="live-row">
+              <span>今天一共完成了 N 次测试</span>
+              <b id="today-count">18642</b>
+            </div>
+          </section>
+
+          <div class="home-cta-wrap">
+            <button class="primary-btn" type="button" id="start-btn">
+              开始检测我的真实欲望 →
+            </button>
+            <div class="time-tip">共 30 道题，约 5 分钟完成</div>
+          </div>
+
+          <div class="disclaimer welcome-footer">
+            本测试仅供娱乐，不具备任何专业心理学效力
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- =========================
+       QUIZ
+  ========================== -->
+  <section id="quiz-page" class="page">
+    <div class="app-shell">
+      <header class="quiz-header">
+        <div class="quiz-header-inner">
+          <div class="quiz-topline">
+            <div class="progress-count" id="progress-text">01 / 30</div>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+      </header>
+
+      <main class="quiz-main">
+        <div class="quiz-content" id="quiz-content">
+          <div class="detect-pill" id="detect-pill">第 1 题</div>
+
+          <section class="question-card glass-card" id="question-card">
+            <h2 class="question-title" id="question-title">暂无题目</h2>
+            <div class="question-sub">
+              别选“应该选的”，选你第一反应。越犹豫，越容易暴露。
+            </div>
+            <div class="options" id="options"></div>
+          </section>
+
+          <div class="quiz-actions">
+            <button class="outline-btn" type="button" id="prev-btn">← 上一题</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- =========================
+       RESULT
+  ========================== -->
+  <section id="result-page" class="page">
+    <div class="app-shell">
+      <main class="result-content">
+        <article class="result-card">
+          <header class="result-top">
+            <div class="report-kicker">欲望检测报告已生成</div>
+            <div class="result-small">你的隐藏属性是</div>
+            <h1 class="result-title gradient-text" id="result-title">恋爱上头</h1>
+            <div class="attr-pill" id="attr-pill">属性：恋爱上头</div>
+
+            <div class="result-meta">
+              <div id="completed-line">你是第 <b>1186420</b> 个完成这个测试的人</div>
+              <div id="percent-line">和你一样的人仅占 <b>6.4%</b></div>
+            </div>
+          </header>
+
+          <section class="share-quote" id="share-box">
+            “我嘴上说随缘，心里已经演到大结局。”
+          </section>
+
+          <section class="comment-box" id="comment-box">
+            嘴上说随缘，真喜欢上了比谁都认真。你的清醒人设迟早崩。
+          </section>
+
+          <section>
+            <div class="section-title">
+              <h3>检测结果</h3>
+              <span>6 维度欲望雷达</span>
+            </div>
+            <div class="spectrum" id="spectrum"></div>
+          </section>
+
+          <section class="radar-text" id="radar-text">
+            你不是不清醒，你只是喜欢上之后太容易认真。
+          </section>
+
+          <section>
+            <div class="section-title">
+              <h3>完整分析</h3>
+              <span>测完可能会破防</span>
+            </div>
+            <div class="analysis-box" id="analysis-box"></div>
+          </section>
+        </article>
+
+        <section class="result-actions">
+          <button class="primary-btn" type="button" id="home-btn">重新测试</button>
+        </section>
+        <div class="disclaimer">
+          本测试仅供娱乐，不具备任何专业心理学效力
+        </div>
+        <div class="report-footer"></div>
+      </main>
+    </div>
+  </section>
+
+  <!-- loading overlay -->
+  <div class="overlay" id="loading-overlay">
+    <div class="loading-card glass-card">
+      <div class="spinner"></div>
+      <h3>正在生成你的欲望报告...</h3>
+      <p>别急，正在把你心里那点东西拆明白。</p>
+    </div>
+  </div>
+
+  <script>
+    const TOTAL_DISPLAY_QUESTIONS = 30;
+
+    const DIMS = [
+      { key: "abstinence", name: "禁欲", color: "linear-gradient(90deg,#31b98f,#6bd8b6)" },
+      { key: "love", name: "爱欲", color: "linear-gradient(90deg,#ff6aa2,#ff4184)" },
+      { key: "lust", name: "情欲", color: "linear-gradient(90deg,#ff642a,#ff3e57)" },
+      { key: "appetite", name: "食欲", color: "linear-gradient(90deg,#ffc53d,#ff9f1c)" },
+      { key: "material", name: "物欲", color: "linear-gradient(90deg,#4aa8ff,#7c5cff)" },
+      { key: "possessive", name: "占有欲", color: "linear-gradient(90deg,#ff3e57,#1c1412)" }
+    ];
+
+    const QUESTIONS = [
+  {
+    "order": 1,
+    "title": "深夜刷到前任秀恩爱，你的第一反应？",
+    "detect": "这一题正在检测：你放下了多少",
+    "note": "你不是没反应，你只是很会装没事。",
+    "options": [
+      {
+        "key": "a",
+        "label": "手滑点个赞，表示老子过得更好",
+        "scores": {
+          "lust": 1,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "直接划走，眼不见为净",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "c",
+        "label": "截图发给闺蜜/兄弟吐槽",
+        "scores": {
+          "love": 1,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "d",
+        "label": "默默看一下，心里有点酸",
+        "scores": {
+          "love": 2,
+          "lust": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 2,
+    "title": "朋友圈看到别人晒工资条，你的第一反应？",
+    "detect": "这一题正在检测：你的胜负心",
+    "note": "嘴上说不羡慕的人，心里算盘打得最响。",
+    "options": [
+      {
+        "key": "a",
+        "label": "羡慕，自己也想赚那么多",
+        "scores": {
+          "material": 2,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "没感觉，各人有各命",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "c",
+        "label": "默默较劲，早晚超过他",
+        "scores": {
+          "possessive": 2,
+          "material": 1
+        }
+      },
+      {
+        "key": "d",
+        "label": "觉得晒这个很 low",
+        "scores": {
+          "abstinence": 1,
+          "possessive": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 3,
+    "title": "一个人在家，你会开着灯还是关着灯？",
+    "detect": "这一题正在检测：你对安全感的需求",
+    "note": "灯开着还是关着，暴露的是你愿不愿意面对自己。",
+    "options": [
+      {
+        "key": "a",
+        "label": "全屋都亮着，不怕电费",
+        "scores": {
+          "material": 1,
+          "appetite": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "只开一盏暖灯，够用就行",
+        "scores": {
+          "love": 1,
+          "abstinence": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "关掉大灯，开着小夜灯",
+        "scores": {
+          "lust": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "全关了，黑暗里最舒服",
+        "scores": {
+          "abstinence": 2
+        }
+      }
+    ]
+  },
+  {
+    "order": 4,
+    "title": "深夜睡不着，你最常想的是什么？",
+    "detect": "这一题正在检测：你深夜最诚实的欲望",
+    "note": "白天装得再好，深夜都会原形毕露。",
+    "options": [
+      {
+        "key": "a",
+        "label": "明天吃什么",
+        "scores": {
+          "appetite": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "某个放不下的人",
+        "scores": {
+          "love": 2,
+          "lust": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "工作/学习上的事",
+        "scores": {
+          "possessive": 2,
+          "material": 1
+        }
+      },
+      {
+        "key": "d",
+        "label": "什么都不想，放空",
+        "scores": {
+          "abstinence": 2
+        }
+      }
+    ]
+  },
+  {
+    "order": 5,
+    "title": "路过奶茶店，你的真实反应？",
+    "detect": "这一题正在检测：你的即时快乐指数",
+    "note": "成年人的崩溃，有时候只需要一杯全糖去冰。",
+    "options": [
+      {
+        "key": "a",
+        "label": "必须来一杯，全糖去冰",
+        "scores": {
+          "appetite": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "看心情，偶尔奖励自己",
+        "scores": {
+          "abstinence": 1,
+          "appetite": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "计算热量，忍了",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "顺便买点甜品一起",
+        "scores": {
+          "appetite": 2,
+          "material": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 6,
+    "title": "看到喜欢的东西但有点贵，你会？",
+    "detect": "这一题正在检测：你的花钱底线",
+    "note": "纠结三天最后还是买了，说的就是你。",
+    "options": [
+      {
+        "key": "a",
+        "label": "直接买，开心最重要",
+        "scores": {
+          "material": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "纠结三天，最后还是买了",
+        "scores": {
+          "material": 2,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "果断放弃，不值",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "找平替，凑合用",
+        "scores": {
+          "abstinence": 1,
+          "material": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 7,
+    "title": "朋友聚会，你的角色通常是？",
+    "detect": "这一题正在检测：你在人群里的位置",
+    "note": "你在饭桌上的角色，基本就是你在关系里的角色。",
+    "options": [
+      {
+        "key": "a",
+        "label": "点菜的那个，必须点好吃的",
+        "scores": {
+          "appetite": 2,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "组局的那个，人齐了才开心",
+        "scores": {
+          "love": 2
+        }
+      },
+      {
+        "key": "c",
+        "label": "默默吃饭的那个，能不去就不去",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "活跃气氛的那个，C 位必须是我",
+        "scores": {
+          "lust": 1,
+          "possessive": 2
+        }
+      }
+    ]
+  },
+  {
+    "order": 8,
+    "title": "你的手机相册里，最多的是？",
+    "detect": "这一题正在检测：你最想留住什么",
+    "note": "相册不会骗人，你拍什么就缺什么。",
+    "options": [
+      {
+        "key": "a",
+        "label": "美食照片",
+        "scores": {
+          "appetite": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "自拍/人像",
+        "scores": {
+          "lust": 2,
+          "material": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "风景/静物",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "和对象的合照",
+        "scores": {
+          "love": 2,
+          "possessive": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 9,
+    "title": "如果给你一万块随便花，你会？",
+    "detect": "这一题正在检测：钱对你意味着什么",
+    "note": "一万块怎么花，比一万句口号诚实。",
+    "options": [
+      {
+        "key": "a",
+        "label": "买那个惦记很久的大件",
+        "scores": {
+          "material": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "吃遍想吃的所有店",
+        "scores": {
+          "appetite": 2
+        }
+      },
+      {
+        "key": "c",
+        "label": "攒着，有备无患",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "给喜欢的人买礼物",
+        "scores": {
+          "love": 2
+        }
+      }
+    ]
+  },
+  {
+    "order": 10,
+    "title": "你最受不了恋人做哪件事？",
+    "detect": "这一题正在检测：你的领地意识",
+    "note": "最受不了什么，往往就是最怕失去什么。",
+    "options": [
+      {
+        "key": "a",
+        "label": "和异性走得太近",
+        "scores": {
+          "possessive": 2,
+          "lust": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "对你冷暴力",
+        "scores": {
+          "love": 2
+        }
+      },
+      {
+        "key": "c",
+        "label": "舍不得给你花钱",
+        "scores": {
+          "material": 1,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "d",
+        "label": "管东管西限制自由",
+        "scores": {
+          "abstinence": 1,
+          "possessive": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 11,
+    "title": "周末你的理想状态？",
+    "detect": "这一题正在检测：你怎么给自己充电",
+    "note": "周末理想状态，基本就是你真实的情绪需求。",
+    "options": [
+      {
+        "key": "a",
+        "label": "约朋友逛街吃饭",
+        "scores": {
+          "love": 1,
+          "appetite": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "宅家刷剧吃外卖",
+        "scores": {
+          "appetite": 2,
+          "lust": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "一个人出门散步放空",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "网购/逛购物 app",
+        "scores": {
+          "material": 2
+        }
+      }
+    ]
+  },
+  {
+    "order": 12,
+    "title": "你买东西更看重？",
+    "detect": "这一题正在检测：你的审美占有欲",
+    "note": "你买东西看重什么，就暴露你想证明什么。",
+    "options": [
+      {
+        "key": "a",
+        "label": "颜值，好看就行",
+        "scores": {
+          "material": 2,
+          "lust": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "实用，能用就行",
+        "scores": {
+          "abstinence": 1,
+          "material": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "品牌，要有面子",
+        "scores": {
+          "material": 2,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "d",
+        "label": "限量/独特，别人没有的",
+        "scores": {
+          "possessive": 2,
+          "material": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 13,
+    "title": "你觉得哪种表白方式最戳你？",
+    "detect": "这一题正在检测：你想被怎样爱",
+    "note": "被哪种表白戳到，决定你要的是仪式还是确定感。",
+    "options": [
+      {
+        "key": "a",
+        "label": "当众表白，让所有人都知道",
+        "scores": {
+          "possessive": 2,
+          "lust": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "私下认真说，只属于两个人的",
+        "scores": {
+          "love": 2
+        }
+      },
+      {
+        "key": "c",
+        "label": "写长信/做视频，用心那种",
+        "scores": {
+          "love": 2,
+          "material": 1
+        }
+      },
+      {
+        "key": "d",
+        "label": "直接行动，别整虚的",
+        "scores": {
+          "lust": 2,
+          "abstinence": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 14,
+    "title": "压力大的时候，你会？",
+    "detect": "这一题正在检测：压力下的真实出口",
+    "note": "压力大时你找什么，就是你最依赖什么。",
+    "options": [
+      {
+        "key": "a",
+        "label": "疯狂购物",
+        "scores": {
+          "material": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "暴饮暴食",
+        "scores": {
+          "appetite": 2
+        }
+      },
+      {
+        "key": "c",
+        "label": "找人倾诉/抱抱",
+        "scores": {
+          "love": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "一个人待着，谁也别理",
+        "scores": {
+          "abstinence": 2
+        }
+      }
+    ]
+  },
+  {
+    "order": 15,
+    "title": "你对\"限量\"两个字的态度？",
+    "detect": "这一题正在检测：你对稀缺的执念",
+    "note": "限量两个字，对你是诱惑还是套路？",
+    "options": [
+      {
+        "key": "a",
+        "label": "必须拿下，错过就没了",
+        "scores": {
+          "possessive": 2,
+          "material": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "看喜不喜欢，喜欢再抢",
+        "scores": {
+          "material": 1,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "营销套路，不理",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "买不起就算了",
+        "scores": {
+          "abstinence": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 16,
+    "title": "你的购物车里通常？",
+    "detect": "这一题正在检测：你的下单冲动",
+    "note": "购物车里的东西，比朋友圈更像你本人。",
+    "options": [
+      {
+        "key": "a",
+        "label": "塞满了，随时准备下单",
+        "scores": {
+          "material": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "放着想买的东西，等打折",
+        "scores": {
+          "material": 1,
+          "abstinence": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "基本空着，需要才买",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "都是给别人看的东西",
+        "scores": {
+          "material": 1,
+          "possessive": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 17,
+    "title": "你更害怕失去哪种东西？",
+    "detect": "这一题正在检测：你最怕失去什么",
+    "note": "最怕失去的，才是你真正抓着不放的。",
+    "options": [
+      {
+        "key": "a",
+        "label": "钱/资产",
+        "scores": {
+          "material": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "爱人/感情",
+        "scores": {
+          "love": 2,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "自由/独处时间",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "面子/地位",
+        "scores": {
+          "possessive": 2,
+          "material": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 18,
+    "title": "看到别人晒恩爱，你内心真实 OS？",
+    "detect": "这一题正在检测：你对亲密关系的真实态度",
+    "note": "看到别人秀恩爱时的 OS，藏不住。",
+    "options": [
+      {
+        "key": "a",
+        "label": "秀什么秀，有什么好秀的",
+        "scores": {
+          "possessive": 1,
+          "abstinence": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "酸了，我也想要",
+        "scores": {
+          "love": 2
+        }
+      },
+      {
+        "key": "c",
+        "label": "无感，与我无关",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "默默记下，学一招",
+        "scores": {
+          "lust": 1,
+          "love": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 19,
+    "title": "你觉得人活着最重要的是？",
+    "detect": "这一题正在检测：你的人生排序",
+    "note": "你觉得最重要的那件事，就是你欲望的主旋律。",
+    "options": [
+      {
+        "key": "a",
+        "label": "有钱，什么都能买",
+        "scores": {
+          "material": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "有爱，有人陪",
+        "scores": {
+          "love": 2
+        }
+      },
+      {
+        "key": "c",
+        "label": "自由，想干嘛干嘛",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "赢，比别人强",
+        "scores": {
+          "possessive": 2
+        }
+      }
+    ]
+  },
+  {
+    "order": 20,
+    "title": "深夜刷购物 app，你会？",
+    "detect": "这一题正在检测：深夜的自制力",
+    "note": "深夜刷购物 app，理性通常最先下班。",
+    "options": [
+      {
+        "key": "a",
+        "label": "控制不住下单",
+        "scores": {
+          "material": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "加购物车，等清醒了再说",
+        "scores": {
+          "material": 1,
+          "abstinence": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "纯逛，不买",
+        "scores": {
+          "abstinence": 1,
+          "material": 1
+        }
+      },
+      {
+        "key": "d",
+        "label": "看看有什么好吃的",
+        "scores": {
+          "appetite": 2
+        }
+      }
+    ]
+  },
+  {
+    "order": 21,
+    "title": "你对前任的态度？",
+    "detect": "这一题正在检测：你对过去的执念",
+    "note": "对前任的态度，暴露你有没有真的翻篇。",
+    "options": [
+      {
+        "key": "a",
+        "label": "老死不相往来",
+        "scores": {
+          "abstinence": 1,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "偶尔会想起",
+        "scores": {
+          "love": 2
+        }
+      },
+      {
+        "key": "c",
+        "label": "还能做朋友",
+        "scores": {
+          "abstinence": 1,
+          "love": 1
+        }
+      },
+      {
+        "key": "d",
+        "label": "希望他过得不好",
+        "scores": {
+          "possessive": 2,
+          "lust": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 22,
+    "title": "你的理想居住环境？",
+    "detect": "这一题正在检测：你想要怎样的生活容器",
+    "note": "理想居住环境，其实是你理想人生的缩影。",
+    "options": [
+      {
+        "key": "a",
+        "label": "大房子，东西塞满",
+        "scores": {
+          "material": 2,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "小而美，每样都是心头好",
+        "scores": {
+          "material": 1,
+          "love": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "极简风，越空越好",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "温馨就行，有家的感觉",
+        "scores": {
+          "love": 2
+        }
+      }
+    ]
+  },
+  {
+    "order": 23,
+    "title": "你最受不了哪种人？",
+    "detect": "这一题正在检测：你的雷区清单",
+    "note": "最受不了哪种人，往往就是你最怕自己变成的样子。",
+    "options": [
+      {
+        "key": "a",
+        "label": "抠门的人",
+        "scores": {
+          "material": 1,
+          "appetite": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "到处撩的人",
+        "scores": {
+          "possessive": 2,
+          "love": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "虚荣爱炫耀的人",
+        "scores": {
+          "abstinence": 1,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "d",
+        "label": "冷漠无情的人",
+        "scores": {
+          "love": 2
+        }
+      }
+    ]
+  },
+  {
+    "order": 24,
+    "title": "吃到超好吃的东西，你会？",
+    "detect": "这一题正在检测：你的分享欲与占有欲",
+    "note": "好吃的是分享还是独享，很能说明问题。",
+    "options": [
+      {
+        "key": "a",
+        "label": "下次还来，成为常客",
+        "scores": {
+          "appetite": 2,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "安利给所有人",
+        "scores": {
+          "love": 1,
+          "appetite": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "默默记下，自己偷偷来",
+        "scores": {
+          "possessive": 2,
+          "appetite": 1
+        }
+      },
+      {
+        "key": "d",
+        "label": "享受当下就好",
+        "scores": {
+          "abstinence": 1,
+          "appetite": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 25,
+    "title": "你对\"独占\"这个词的感觉？",
+    "detect": "这一题正在检测：你对独占的真实感受",
+    "note": "你对「独占」两个字的感觉，别骗自己。",
+    "options": [
+      {
+        "key": "a",
+        "label": "很爽，就要独占",
+        "scores": {
+          "possessive": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "看情况，重要的才独占",
+        "scores": {
+          "possessive": 1,
+          "love": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "没必要，分享更快乐",
+        "scores": {
+          "love": 1,
+          "abstinence": 1
+        }
+      },
+      {
+        "key": "d",
+        "label": "无感",
+        "scores": {
+          "abstinence": 2
+        }
+      }
+    ]
+  },
+  {
+    "order": 26,
+    "title": "你的消费观更接近？",
+    "detect": "这一题正在检测：你的金钱观",
+    "note": "消费观背后，是你怎么对待欲望。",
+    "options": [
+      {
+        "key": "a",
+        "label": "赚钱就是为了花",
+        "scores": {
+          "material": 2,
+          "appetite": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "该省省该花花",
+        "scores": {
+          "abstinence": 1,
+          "material": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "能不花就不花",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "花在刀刃上，买好的",
+        "scores": {
+          "material": 2
+        }
+      }
+    ]
+  },
+  {
+    "order": 27,
+    "title": "你觉得自己的占有欲强吗？",
+    "detect": "这一题正在检测：你的占有欲强度",
+    "note": "直接问了，别装佛系。",
+    "options": [
+      {
+        "key": "a",
+        "label": "超强，我的就是我的",
+        "scores": {
+          "possessive": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "还行，看对什么",
+        "scores": {
+          "possessive": 1
+        }
+      },
+      {
+        "key": "c",
+        "label": "不强，随缘",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "对人才强，对物还好",
+        "scores": {
+          "possessive": 2,
+          "love": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 28,
+    "title": "你更容易被哪种人吸引？",
+    "detect": "这一题正在检测：你更容易被什么拿捏",
+    "note": "你更容易被哪种人吸引，就是欲望的入口。",
+    "options": [
+      {
+        "key": "a",
+        "label": "长得好看的",
+        "scores": {
+          "lust": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "对你好的",
+        "scores": {
+          "love": 2
+        }
+      },
+      {
+        "key": "c",
+        "label": "有钱/有能力的",
+        "scores": {
+          "material": 1,
+          "possessive": 1
+        }
+      },
+      {
+        "key": "d",
+        "label": "神秘/有距离感的",
+        "scores": {
+          "lust": 1,
+          "possessive": 1
+        }
+      }
+    ]
+  },
+  {
+    "order": 29,
+    "title": "你觉得哪种快乐最实在？",
+    "detect": "这一题正在检测：你最实在的快乐来源",
+    "note": "哪种快乐最实在，决定你怎么续命。",
+    "options": [
+      {
+        "key": "a",
+        "label": "买到喜欢的东西",
+        "scores": {
+          "material": 2
+        }
+      },
+      {
+        "key": "b",
+        "label": "吃到好吃的",
+        "scores": {
+          "appetite": 2
+        }
+      },
+      {
+        "key": "c",
+        "label": "和喜欢的人在一起",
+        "scores": {
+          "love": 2
+        }
+      },
+      {
+        "key": "d",
+        "label": "一个人自由自在",
+        "scores": {
+          "abstinence": 2
+        }
+      }
+    ]
+  },
+  {
+    "order": 30,
+    "title": "最后直说，你觉得自己是个怎样的人？",
+    "detect": "这一题正在检测：你的最终底牌",
+    "note": "别装了，这题基本就是你本人。",
+    "options": [
+      {
+        "key": "a",
+        "label": "想要的就要得到",
+        "scores": {
+          "possessive": 2,
+          "material": 1
+        }
+      },
+      {
+        "key": "b",
+        "label": "随遇而安，顺其自然",
+        "scores": {
+          "abstinence": 2
+        }
+      },
+      {
+        "key": "c",
+        "label": "重感情，容易上头",
+        "scores": {
+          "love": 2,
+          "lust": 1
+        }
+      },
+      {
+        "key": "d",
+        "label": "享乐主义，及时行乐",
+        "scores": {
+          "appetite": 1,
+          "material": 1,
+          "lust": 1
+        }
+      }
+    ]
+  }
+];
+
+    const RESULTS = [
+  {
+    "id": 1,
+    "name": "随心所欲",
+    "attribute": "随心所欲",
+    "comment": "你随心所欲的样子，别人羡慕不来。说好听点是洒脱，说难听点就是管不住自己。",
+    "radarText": "你不是欲望太重，你只是太懂怎么哄自己开心。",
+    "shareText": "我不是贪心，我只是人生不想过得太委屈。",
+    "radar": {
+      "abstinence": 5,
+      "love": 60,
+      "lust": 70,
+      "appetite": 85,
+      "material": 95,
+      "possessive": 40
+    },
+    "analysis": [
+      "你的物欲和食欲都很高。生活已经够苦了，你当然不会再亏待自己。别人还在纠结「要不要买」「会不会太贵」「是不是不该吃」，你已经默默下单、开吃、享受人生了。你很清楚，努力生活不是为了把自己过得苦哈哈，而是为了在能力范围内把日子过舒服。",
+      "你的爱欲和情欲也不低。你不是完全不需要亲密关系的人，甚至偶尔也会期待一场热烈、浪漫、让人上头的心动。但你不会为了爱把自己搞得太狼狈。能遇到真爱当然很好，遇不到也没关系，自己一个人照样能把生活安排得有滋有味。",
+      "你的占有欲中等。你不是那种什么都要抓在手里的人，但如果自己真的很喜欢，也会有一点小小的不舍和在意。只是大多数时候，你更愿意保持潇洒，不想让自己看起来太狼狈。",
+      "你的禁欲指数非常低。你的人生信条就是：想吃就吃，想买就买，想开心就开心。只要不伤害别人，为什么不能让自己活得爽一点？"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "情深似海",
+    "attribute": "情深似海",
+    "comment": "对爱真情实感，定能遇到良人！但前提是你别太上头把人吓跑。",
+    "radarText": "你的爱不是随便说说，是一旦开始就很难全身而退。",
+    "shareText": "我不是恋爱脑，我只是爱得太真。",
+    "radar": {
+      "abstinence": 15,
+      "love": 95,
+      "lust": 80,
+      "appetite": 50,
+      "material": 55,
+      "possessive": 60
+    },
+    "analysis": [
+      "你的爱欲是最突出的。你不是每天都嚷嚷着想谈恋爱的人，但你一旦真的喜欢上谁，就很难只是浅浅喜欢。你会把对方放进心里很深的位置，会在意对方的情绪、习惯、喜好，甚至会不自觉地替对方考虑很多事情。",
+      "你不是没脑子的恋爱脑，但你确实很容易在感情里认真。别人可能只是暧昧一下、试探一下、玩一玩，你却很容易动真格。你嘴上可以说「随缘」，心里却早就把很多细节记得清清楚楚。",
+      "你的情欲也不低。你并不是只追求精神恋爱的人，真正吸引你的人，往往既要让你心软，也要让你心动。你喜欢那种眼神、氛围、距离都刚刚好的感觉，那会让你很难保持完全冷静。",
+      "你的占有欲也不算低。你可以大方，可以体面，但前提是你没有真的上心。一旦真的喜欢，你就很难做到完全不在意。你不是想控制谁，只是很难接受自己认真放在心上的人，也被别人轻易靠近。"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "超强占有欲",
+    "attribute": "超强占有欲",
+    "comment": "凭实力征服，靠能力独占。但你抓得太紧，有时候反而容易失去。",
+    "radarText": "你不是占有欲强，你只是很难把重要的东西拱手让人。",
+    "shareText": "我不是什么都要，但我要的就不想让。",
+    "radar": {
+      "abstinence": 10,
+      "love": 60,
+      "lust": 65,
+      "appetite": 55,
+      "material": 70,
+      "possessive": 95
+    },
+    "analysis": [
+      "你的占有欲真的很强。你不是那种「随便吧」「都可以」「无所谓」的人。只要是你认定的东西，不管是目标、关系、机会，还是某个重要的人，你都很难做到轻易放手。",
+      "你骨子里有很强的胜负心。别人看起来可能只是随便争一争，但你是真的会在心里较劲。你不喜欢输，也不喜欢自己在乎的东西被别人轻易拿走。你很清楚自己想要什么，所以一旦看准了，就会想办法靠近、得到、守住。",
+      "感情里的你也有很强的领地意识。你可以装作不在乎，但如果对方真的和别人走得太近，你心里一定会不舒服。你未必会马上表现出来，但你会观察、会比较、会在意，甚至会默默记账。",
+      "你的物欲和爱欲都不低，这也让你的占有欲更明显。因为你不是空想型的人，你是真的想把喜欢的、想要的、重要的东西握在自己手里。"
+    ]
+  },
+  {
+    "id": 4,
+    "name": "深情好色",
+    "attribute": "深情好色",
+    "comment": "看得出来，是混迹多年的 lsp 了。但你走心的时候比谁都认真。",
+    "radarText": "你既要灵魂共振，也要心跳加速。",
+    "shareText": "我不是只看脸，我只是刚好也很吃脸。",
+    "radar": {
+      "abstinence": 5,
+      "love": 80,
+      "lust": 95,
+      "appetite": 45,
+      "material": 60,
+      "possessive": 75
+    },
+    "analysis": [
+      "你的情欲很高，爱欲也很高。你不是那种只看脸、只看身材、只追求刺激的人，但你也确实很难对美好的吸引力无动于衷。你会被氛围、眼神、声音、距离感打动，也很容易被某种暧昧的张力击中。",
+      "但你不是只走肾不走心。真正让你上头的人，一定不只是外在吸引你，还要能让你动感情。你对亲密关系有期待，对浪漫有幻想，对深情也有执念。你想要的不是冷冰冰的关系，而是既有心动，也有偏爱。",
+      "你的占有欲也很高。因为你一旦认真，就会变得很专一，也很介意对方是否同样认真。你最受不了那种若即若离、暧昧不清、到处留情的人。你可以热烈，但你也希望这种热烈是双向的。",
+      "你的禁欲指数几乎没有。你不是很擅长压抑自己，喜欢就是喜欢，心动就是心动。你相信人的欲望没有什么可耻的，真正可耻的是明明想要，却装作自己无欲无求。"
+    ]
+  },
+  {
+    "id": 5,
+    "name": "清心寡欲",
+    "attribute": "清心寡欲",
+    "comment": "既已脱身红尘，不如皈依佛门。但别装了，你也有忍不住的时候。",
+    "radarText": "你不是冷淡，你只是很难被普通诱惑打动。",
+    "shareText": "不是我没欲望，是很多东西真的没必要。",
+    "radar": {
+      "abstinence": 90,
+      "love": 10,
+      "lust": 15,
+      "appetite": 10,
+      "material": 15,
+      "possessive": 10
+    },
+    "analysis": [
+      "你的禁欲指数很高。很多人都逃不过这个世界的诱惑，但你偏偏能把很多东西看得很淡。别人眼里的热闹、刺激、占有、攀比，在你这里都没有那么强的吸引力。你不是完全没有欲望，只是你的欲望阈值很高，不太容易被轻易点燃。",
+      "你的物欲和食欲都比较低。你不太信奉「买了就会快乐」「吃了就能解决一切」。你当然也会享受生活，但你很少把快乐完全寄托在外物上。相比拥有更多东西，你更在意自己是不是自在、轻松、没有负担。",
+      "你的爱欲和情欲也偏低。你不是没有感情，只是对亲密关系没有那么强的执念。能遇到合适的人当然可以，但遇不到也没什么大不了。你一个人也能过得很好，甚至很多时候，一个人反而更舒服。",
+      "你的占有欲很低。你明白很多东西越抓越累，越执着越痛苦。你不喜欢强求，也不太愿意为了争抢什么把自己搞得面目全非。"
+    ]
+  },
+  {
+    "id": 6,
+    "name": "无欲无求",
+    "attribute": "无欲无求",
+    "comment": "既然一切都看淡，不如就此出家！测完你真的确定自己还活着吗？",
+    "radarText": "你像是来人间体验了一圈，然后决定保持旁观。",
+    "shareText": "人间很好，但我真的没有很想参与。",
+    "radar": {
+      "abstinence": 98,
+      "love": 5,
+      "lust": 5,
+      "appetite": 5,
+      "material": 5,
+      "possessive": 5
+    },
+    "analysis": [
+      "你的欲望低到有点不真实。别人还在人间为了爱恨情仇、吃喝玩乐、名利输赢反复横跳，你已经像提前进入了人生的贤者模式。很多人追着跑的东西，在你眼里只是「也就那样」。",
+      "你的爱欲很低。你对爱情没有太多执念，不太会因为别人几句话、几个眼神就彻底上头。你不是不懂爱，只是很难把人生重心完全交给某段关系。相比轰轰烈烈，你更能接受平静、独立、顺其自然。",
+      "你的情欲、食欲、物欲都非常低。你很少被外在刺激牵着走，也不太容易被「拥有更多」这件事打动。很多时候，你想要的不是更多，而是更少一点，再少一点，最好什么都别来烦你。",
+      "你的占有欲几乎没有。你很少执着于「必须是我的」。是你的不用抢，不是你的也懒得抢。你看起来佛，其实是早就把很多东西想明白了。"
+    ]
+  },
+  {
+    "id": 7,
+    "name": "干饭至上",
+    "attribute": "干饭至上",
+    "comment": "天大的事，也得先吃顿好的。你的胃比你的心诚实多了。",
+    "radarText": "你的快乐入口很明确：先吃饱，再谈人生。",
+    "shareText": "没有什么坎是一顿饭过不去的，不行就两顿。",
+    "radar": {
+      "abstinence": 10,
+      "love": 40,
+      "lust": 45,
+      "appetite": 95,
+      "material": 60,
+      "possessive": 30
+    },
+    "analysis": [
+      "你的食欲最强。这里的食欲不只是「爱吃」，而是你很懂得用具体的快乐拯救自己。别人压力大可能会 emo、内耗、失眠，你不一样，你知道再糟糕的日子，也可以先靠一顿好吃的续命。",
+      "你不是单纯嘴馋，而是很重视生活里的即时满足感。好吃的、好喝的、热闹的、舒服的、有烟火气的东西，都能让你迅速回血。你对生活的判断很朴素：人不能只靠理想活着，人也得吃点香的、喝点甜的、过点有滋味的日子。",
+      "你的物欲也不低。你喜欢那些能让生活变得更舒服的小东西，未必一定要多贵，但一定要让你觉得「值得」。你很少愿意长期亏待自己，因为你知道情绪也是要被喂饱的。",
+      "你的爱欲和情欲属于中等偏上。你不是没有浪漫细胞，只是比起虚无缥缈的承诺，你更容易被真实的照顾打动。比起一句「我想你」，有时候一顿热饭、一杯奶茶、一个记得你口味的人，更能让你心软。"
+    ]
+  },
+  {
+    "id": 8,
+    "name": "恋爱上头",
+    "attribute": "恋爱上头",
+    "comment": "嘴上说随缘，真喜欢上了比谁都认真。你的清醒人设迟早崩。",
+    "radarText": "你不是不清醒，你只是喜欢上之后太容易认真。",
+    "shareText": "我嘴上说随缘，心里已经演到大结局。",
+    "radar": {
+      "abstinence": 10,
+      "love": 95,
+      "lust": 70,
+      "appetite": 40,
+      "material": 50,
+      "possessive": 80
+    },
+    "analysis": [
+      "你的爱欲很高，占有欲也很高。你平时可能看起来挺清醒，甚至还能劝别人别太恋爱脑，但轮到自己真的动心时，你就很难再保持完全理智。",
+      "你不是见一个爱一个的人。恰恰相反，你真正上头的次数可能并不多，但只要真的喜欢上，你就会变得很认真、很在意、很容易被对方影响。对方一句话、一个表情、一次回复速度的变化，都可能被你反复揣摩。",
+      "你的占有欲不是无理取闹，而是来源于认真。因为你投入了，所以你希望自己在对方心里是特别的；因为你在乎，所以你很难接受对方对谁都一样。你要的不是普通关系，而是偏爱，是明确，是被坚定选择。",
+      "你的情欲也不低。真正让你上头的人，往往不只是对你好，还要有吸引力，有氛围感，有那种让你心跳变快的瞬间。你要的爱情不是白开水，而是会让人失眠的那种。"
+    ]
+  },
+  {
+    "id": 9,
+    "name": "啥都想要",
+    "attribute": "啥都想要",
+    "comment": "不是贪心，是喜欢的东西太多，人生又太短。但你的钱包可能不同意。",
+    "radarText": "你的人生关键词不是克制，是「喜欢就别装」。",
+    "shareText": "我不是啥都要，我只是眼光太好了。",
+    "radar": {
+      "abstinence": 10,
+      "love": 55,
+      "lust": 60,
+      "appetite": 70,
+      "material": 95,
+      "possessive": 70
+    },
+    "analysis": [
+      "你的物欲非常强。你对「拥有」这件事有天然的敏感度。好看的、好用的、特别的、限量的、能提升生活幸福感的东西，都很容易让你心动。你不一定真的会全部买下，但你的脑子里已经给它们安排好了位置。",
+      "你不是盲目消费型的人，你只是很难对喜欢的东西无动于衷。别人觉得「差不多就行」，你会觉得「不行，喜欢的和凑合的根本不是一回事」。你希望自己的生活是被喜欢的东西包围的，而不是被将就堆满的。",
+      "你的食欲、情欲、爱欲也不低。你是一个对快乐反应很灵敏的人，吃喝、心动、漂亮东西、舒服关系，都可能成为你人生里的能量补给。你很难长期过一种干巴巴、没滋味、没期待的生活。",
+      "你的占有欲也偏高。你喜欢的东西，不太愿意轻易错过；你认定的东西，也不太想让给别人。你不是小气，你只是太清楚自己想要什么。"
+    ]
+  },
+  {
+    "id": 10,
+    "name": "野心不小",
+    "attribute": "野心不小",
+    "comment": "看起来云淡风轻，其实心里早有盘算。你的佛系人设骗了不少人。",
+    "radarText": "你不是随便想赢，你是真的不想输。",
+    "shareText": "我可以不说，但我心里真的有目标。",
+    "radar": {
+      "abstinence": 15,
+      "love": 45,
+      "lust": 50,
+      "appetite": 55,
+      "material": 80,
+      "possessive": 95
+    },
+    "analysis": [
+      "你的占有欲和物欲都很高，但这里的占有欲不只是感情上的吃醋，更像是一种强烈的「我要拿到」的底层驱动力。你不是一个甘心长期停在原地的人，也不太能接受自己一直处在被动位置。",
+      "你对成功、资源、位置、认可都有一定渴望。哪怕你嘴上说「还好吧」，心里其实也知道自己不是真的完全无所谓。你不是非要站在所有人前面，但你一定希望自己的人生是往上走的，而不是被别人安排、被环境推着走。",
+      "你的物欲高，是因为你很清楚现实世界需要筹码。好的生活、好的选择权、好的安全感，很多时候都离不开实际拥有的东西。你不一定拜金，但你知道钱、能力、资源都很重要。",
+      "在关系里，你也不是完全没有占有欲。只是你的占有欲未必表现为撒娇吃醋，而是会变成比较、观察、判断。你会默默确认自己是不是重要，是不是有位置，是不是被认真对待。"
+    ]
+  },
+  {
+    "id": 11,
+    "name": "及时行乐",
+    "attribute": "及时行乐",
+    "comment": "快乐能今天拥有，就不要拖到明天。你的信用卡账单说明了一切。",
+    "radarText": "你的人生不是禁欲系，是快乐优先系。",
+    "shareText": "人生苦短，先爽再说。",
+    "radar": {
+      "abstinence": 5,
+      "love": 60,
+      "lust": 80,
+      "appetite": 80,
+      "material": 80,
+      "possessive": 50
+    },
+    "analysis": [
+      "你的欲望分布非常热闹。物欲、食欲、情欲都很高，禁欲几乎不存在。你是那种很难长期压抑自己的人，喜欢的东西、想吃的东西、让你心动的人、让你快乐的体验，只要条件允许，你都不想错过。",
+      "你不喜欢把人生过得太苦。你会觉得人已经要面对很多压力了，如果连一点即时快乐都不给自己，那生活也太没意思了。你不是不懂克制，只是你不愿意把「克制」当成唯一的人生美德。",
+      "你的情欲和爱欲都不低，所以你也很容易被氛围感、吸引力、暧昧张力打动。你不一定总是主动，但你对心动信号很敏感。一旦遇到让你感兴趣的人或场景，你很难完全无动于衷。",
+      "你的占有欲中等偏上。你平时看起来洒脱，但面对真正喜欢、真正想要的东西，也会有一点「不想让」的心态。你不是非要控制一切，只是不想让人生里那些难得的快乐轻易溜走。"
+    ]
+  },
+  {
+    "id": 12,
+    "name": "人间清醒",
+    "attribute": "人间清醒",
+    "comment": "不是没有欲望，只是不太容易被欲望牵着走。但你清醒的样子有时候也挺让人心疼的。",
+    "radarText": "你不是佛，你只是太懂什么不值得。",
+    "shareText": "我不是没欲望，我只是不上头。",
+    "radar": {
+      "abstinence": 80,
+      "love": 30,
+      "lust": 25,
+      "appetite": 35,
+      "material": 40,
+      "possessive": 35
+    },
+    "analysis": [
+      "你的禁欲指数很高，但还没有到「无欲无求」的程度。你不是完全不想要，也不是对人间一切都没兴趣。你只是比大多数人更能分清：什么是真的需要，什么只是短暂上头。",
+      "你可以喜欢一个东西，但不一定非要拥有；你可以对一个人有好感，但不一定马上沉进去；你可以羡慕某种生活，但不会为了追赶它把自己搞得很累。你不是冷漠，而是很少被欲望推着跑。",
+      "你的物欲、食欲、爱欲都不是零。该享受的时候你也能享受，该心动的时候你也会心动。只是你很少让这些东西失控。别人可能一上头就冲动决定，你通常会先停一下，想一想，看看值不值得。",
+      "你的占有欲也不强。你不太喜欢强求，更不喜欢为了争抢什么让自己失态。你相信真正适合自己的东西，不需要靠撕扯才能留下。"
+    ]
+  },
+  {
+    "id": 13,
+    "name": "嘴上佛系心里卷",
+    "attribute": "嘴上佛系心里卷",
+    "comment": "嘴上说\"都行\"，心里早就盘算好了。你的佛系人设，骗得了别人骗不了自己。",
+    "radarText": "你不是真的无所谓，你只是把野心藏得很深。",
+    "shareText": "我佛系？我只是懒得跟你们争而已。",
+    "radar": {
+      "abstinence": 60,
+      "love": 40,
+      "lust": 35,
+      "appetite": 50,
+      "material": 70,
+      "possessive": 85
+    },
+    "analysis": [
+      "你是一个看起来云淡风轻，实际上内心戏很足的人。别人觉得你「都行」「随便」「无所谓」，但其实你心里早就有了自己的判断和目标。",
+      "你的占有欲其实很强，只是你不会轻易表现出来。你不喜欢争抢的过程，但你在意结果。别人在明面上较劲的时候，你已经在暗处默默布局了。你不是不争，你是只争自己想要的。",
+      "你的物欲不低，但你会克制。你很清楚什么东西值得投入，什么东西只是消耗。你不会为了一时冲动买单，但你看准的东西，一定会想办法拿下。",
+      "你的禁欲指数偏高，这让你看起来很「稳」。但这种稳不是真的无欲，而是你在等一个值得出手的时机。你不是没有欲望，你只是在精准地分配自己的欲望。"
+    ]
+  },
+  {
+    "id": 14,
+    "name": "外冷内热",
+    "attribute": "外冷内热",
+    "comment": "表面生人勿近，熟了之后粘人到可怕。你的高冷人设撑不过三天。",
+    "radarText": "你的冷是保护色，你的热才是真实的自己。",
+    "shareText": "我不是高冷，我只是对不熟的人没电。",
+    "radar": {
+      "abstinence": 70,
+      "love": 85,
+      "lust": 75,
+      "appetite": 30,
+      "material": 35,
+      "possessive": 55
+    },
+    "analysis": [
+      "你是一个典型的外冷内热型。不熟悉你的人觉得你高冷、有距离感、不太好接近。但真正走进你心里的人才知道，你一旦认定一个人，就会变得很软、很粘、很在意。",
+      "你的爱欲很高。你不是随便对谁都能动心的人，但一旦动心，你就会投入得很深。你会记住对方的喜好、在意对方的情绪、主动替对方考虑很多。你的爱不是挂在嘴上的，而是藏在细节里的。",
+      "你的情欲也不低。你容易被氛围感打动，对真正吸引你的人没有太多抵抗力。你不是对所有人都这样，但面对那个对的人，你会从冰块变成暖炉。",
+      "你的禁欲指数偏高，这是你的保护层。你用距离感过滤掉不够真诚的人，只把热情留给值得的人。你不是冷漠，你只是很挑。"
+    ]
+  },
+  {
+    "id": 15,
+    "name": "深夜 emo 型",
+    "attribute": "深夜 emo 型",
+    "comment": "白天笑嘻嘻，晚上 emo 到天明。你的情绪开关只有深夜才打开。",
+    "radarText": "你的欲望不是太多，而是太容易被情绪放大。",
+    "shareText": "我不是矫情，我只是夜里比较诚实。",
+    "radar": {
+      "abstinence": 20,
+      "love": 80,
+      "lust": 85,
+      "appetite": 70,
+      "material": 40,
+      "possessive": 60
+    },
+    "analysis": [
+      "你是一个情绪感受力很强的人。白天你可以正常社交、工作、生活，但一到深夜，所有压下去的情绪都会涌上来。你的欲望不是最强烈的，但你的感受力是最敏锐的。",
+      "你的爱欲和情欲都很高。你很容易被一个人打动，也很容易因为一个人 emo。对方的一个眼神、一句话、一次晚回，都能在你心里演完一整部电影。你不是故意想太多，你只是真的感受得太细。",
+      "你的食欲也偏高。深夜的你特别容易被食物治愈，奶茶、外卖、零食，都是你对抗 emo 的武器。你知道这不健康，但那一刻的满足感真的能让你好受一点。",
+      "你的占有欲不低。你嘴上不说，但你很在意自己在一个人心里的位置。你可以接受对方有别的朋友，但你不能接受自己不是最重要的那个。你不是控制欲强，你只是太需要被确认。"
+    ]
+  }
+];
+
+    const $ = (id) => document.getElementById(id);
+
+    let currentIndex = 0;
+    let answers = {};
+    let nextTimer = null;
+    let liveTimer = null;
+    let testStarted = false;
+
+    function getStorageKey(token) {
+      return "test_result_" + (token || (window.linkValidator && window.linkValidator.token) || "local");
+    }
+
+    function getCompletionFlagKey() {
+      const token = window.linkValidator && window.linkValidator.token;
+      return "ywt_test_completed_" + (token || "");
+    }
+
+    function addPromotionLinkDelayed() {
+      setTimeout(() => {
+        if (window.PsyTestValidator && typeof window.PsyTestValidator.addPromotionLink === "function") {
+          window.PsyTestValidator.addPromotionLink();
+        }
+      }, 200);
+    }
+
+    async function waitForValidator() {
+      let waitCount = 0;
+      while (!window.linkValidator && waitCount < 30) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        waitCount++;
+        if (waitCount % 10 === 0 && window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === "function") {
+          const instance = window.PsyTestValidator.getInstance();
+          if (instance) {
+            window.linkValidator = instance;
+            break;
+          }
+        }
+      }
+      return window.linkValidator;
+    }
+
+    async function validateAndStartTest() {
+      const validator = await waitForValidator();
+      if (!validator) {
+        alert("验证SDK未初始化，无法开始测试。请刷新页面重试。");
+        return false;
+      }
+
+      let isValid = false;
+      if (typeof validator.validateForUserAction === "function") {
+        try {
+          isValid = await validator.validateForUserAction();
+          if (!isValid || validator.valid === false) return false;
+        } catch (error) {
+          console.error("链接验证失败:", error);
+          validator.valid = false;
+          return false;
+        }
+      } else {
+        if (validator.valid === false) {
+          alert(validator.validationError || "测试链接无效，请检查链接是否正确");
+          return false;
+        }
+        isValid = validator.valid !== false;
+      }
+
+      if (!isValid || validator.valid === false) return false;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const isRestart = urlParams.get("restart") === "true" || window.__ywt_retest_mode === true;
+      if (!isRestart && !testStarted) {
+        try {
+          await validator.startTest();
+          testStarted = true;
+          console.log("测试开始记录成功");
+        } catch (error) {
+          console.error("记录测试开始失败:", error);
+          return false;
+        }
+      } else {
+        testStarted = true;
+        window.__ywt_retest_mode = false;
+        console.log("重新测试模式，跳过 startTest()");
+      }
+
+      return true;
+    }
+
+    function saveTestResult(testResult) {
+      const token = window.linkValidator && window.linkValidator.token;
+      if (!token) return;
+      try {
+        localStorage.setItem(getStorageKey(token), JSON.stringify({
+          token: token,
+          result: testResult,
+          timestamp: testResult.timestamp
+        }));
+      } catch (error) {
+        console.error("保存测试结果失败:", error);
+      }
+    }
+
+    function setPage(id) {
+      document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
+      $(id).classList.add("active");
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    function startLiveStats() {
+      clearInterval(liveTimer);
+
+      let online = 260 + Math.floor(Math.random() * 140);
+      let today = 16000 + Math.floor(Math.random() * 5000);
+
+      $("online-count").textContent = online.toLocaleString();
+      $("today-count").textContent = today.toLocaleString();
+
+      liveTimer = setInterval(() => {
+        online = Math.max(88, online + Math.floor(Math.random() * 9) - 4);
+        today += Math.random() > .65 ? 1 : 0;
+        $("online-count").textContent = online.toLocaleString();
+        $("today-count").textContent = today.toLocaleString();
+      }, 4500);
+    }
+
+    async function startTest() {
+      const canStart = await validateAndStartTest();
+      if (!canStart) return;
+
+      currentIndex = 0;
+      answers = {};
+      clearTimeout(nextTimer);
+      setPage("quiz-page");
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = QUESTIONS[currentIndex];
+
+      if (!q) {
+        $("quiz-content").innerHTML = '<div class="empty-state">暂无题目</div>';
+        return;
+      }
+
+      $("progress-text").textContent =
+        String(currentIndex + 1).padStart(2, "0") + " / " + TOTAL_DISPLAY_QUESTIONS;
+
+      $("progress-fill").style.width =
+        Math.max(3, ((currentIndex + 1) / TOTAL_DISPLAY_QUESTIONS) * 100) + "%";
+
+      $("detect-pill").textContent = "第 " + (currentIndex + 1) + " 题";
+      $("question-title").textContent = q.title;
+      $("prev-btn").disabled = currentIndex === 0;
+
+      const selected = answers[q.order];
+
+      $("options").innerHTML = q.options.map(opt => {
+        const active = selected === opt.key ? " selected" : "";
+        return `
+          <button class="option-card${active}" type="button" data-key="${opt.key}">
+            <div class="option-inner">
+              <div class="option-key">${opt.key.toUpperCase()}</div>
+              <div class="option-text">${opt.label}</div>
+            </div>
+          </button>
+        `;
+      }).join("");
+
+      document.querySelectorAll(".option-card").forEach(btn => {
+        btn.addEventListener("click", () => selectOption(btn.dataset.key));
+      });
+    }
+
+    function selectOption(key) {
+      const q = QUESTIONS[currentIndex];
+      answers[q.order] = key;
+
+      document.querySelectorAll(".option-card").forEach(btn => {
+        btn.classList.toggle("selected", btn.dataset.key === key);
+      });
+
+      clearTimeout(nextTimer);
+
+      nextTimer = setTimeout(() => {
+        if (currentIndex < QUESTIONS.length - 1) {
+          currentIndex += 1;
+          renderQuestion();
+        } else {
+          finishTest();
+        }
+      }, 400);
+    }
+
+    function prevQuestion() {
+      if (currentIndex <= 0) return;
+      clearTimeout(nextTimer);
+      currentIndex -= 1;
+      renderQuestion();
+    }
+
+    function maxRaw() {
+      const max = {};
+      DIMS.forEach(d => { max[d.key] = 0; });
+      QUESTIONS.forEach(q => {
+        DIMS.forEach(d => {
+          let best = 0;
+          q.options.forEach(opt => {
+            best = Math.max(best, (opt.scores && opt.scores[d.key]) || 0);
+          });
+          max[d.key] += best;
+        });
+      });
+      return max;
+    }
+
+    function scoreAnswers() {
+      const totals = {};
+      DIMS.forEach(d => totals[d.key] = 0);
+
+      QUESTIONS.forEach(q => {
+        const key = answers[q.order];
+        const opt = q.options.find(o => o.key === key);
+        if (!opt || !opt.scores) return;
+
+        Object.entries(opt.scores).forEach(([dim, val]) => {
+          totals[dim] = (totals[dim] || 0) + val;
+        });
+      });
+
+      return totals;
+    }
+
+    function normalize(totals) {
+      const max = maxRaw();
+      const norm = {};
+      DIMS.forEach(d => {
+        norm[d.key] = max[d.key] ? Math.round((totals[d.key] / max[d.key]) * 100) : 0;
+      });
+      return norm;
+    }
+
+    /** 最近邻匹配（对齐内容文档欧氏距离算法） */
+    function chooseResult(totals) {
+      const norm = normalize(totals);
+      let best = null;
+
+      RESULTS.forEach(r => {
+        let dist = 0;
+        DIMS.forEach(d => {
+          const diff = norm[d.key] - (r.radar[d.key] || 0);
+          dist += diff * diff;
+        });
+        dist = Math.sqrt(dist);
+        if (!best || dist < best.dist) best = { result: r, dist, norm };
+      });
+
+      return best ? best.result : RESULTS[0];
+    }
+
+    function jitterRadar(radar) {
+      const entries = DIMS.map(dim => {
+        const raw = radar[dim.key] ?? 0;
+        const num = raw === "爆表" ? 120 : Number(raw);
+        return {
+          ...dim,
+          raw,
+          value: Number.isFinite(num) ? num : 0,
+          overflow: raw === "爆表"
+        };
+      });
+
+      const maxVal = Math.max(...entries.map(e => e.value), 1);
+
+      return entries.map(e => {
+        let value = e.value;
+
+        if (value < maxVal) {
+          const rate = .01 + Math.random() * .1;
+          const sign = Math.random() > .5 ? 1 : -1;
+          value = Math.max(1, Math.round(value * (1 + sign * rate)));
+        }
+
+        const display = e.overflow && value === maxVal ? "爆表" : value + "%";
+        const width = Math.min(100, Math.round((value / Math.max(maxVal, 100)) * 100));
+
+        return { ...e, value, display, width };
+      });
+    }
+
+    function finishTest() {
+      $("loading-overlay").classList.add("show");
+
+      setTimeout(async () => {
+        const totals = scoreAnswers();
+        const result = chooseResult(totals);
+        const completed = 1170000 + Math.floor(Math.random() * 38000);
+        const percent = (3 + Math.random() * 9).toFixed(1);
+        const bars = jitterRadar(result.radar);
+
+        renderResult(result, completed, percent, bars);
+
+        const testResult = {
+          resultId: result.id,
+          resultName: result.name,
+          attribute: result.attribute,
+          comment: result.comment,
+          radarText: result.radarText,
+          shareText: result.shareText,
+          analysis: result.analysis,
+          radar: result.radar,
+          bars: bars,
+          completed: completed,
+          percent: percent,
+          answers: answers,
+          totals: totals,
+          timestamp: new Date().toISOString()
+        };
+        saveTestResult(testResult);
+
+        const completionFlagKey = getCompletionFlagKey();
+        const alreadyCompleted = window.__ywt_test_completed || localStorage.getItem(completionFlagKey) === "true";
+        if (!alreadyCompleted && window.linkValidator) {
+          try {
+            window.__ywt_test_completed = true;
+            localStorage.setItem(completionFlagKey, "true");
+            await window.linkValidator.completeTest(undefined, testResult);
+            console.log("测试完成记录成功");
+          } catch (error) {
+            console.error("记录测试完成失败:", error);
+            window.__ywt_test_completed = false;
+            localStorage.removeItem(completionFlagKey);
+          }
+        }
+
+        $("loading-overlay").classList.remove("show");
+        setPage("result-page");
+        addPromotionLinkDelayed();
+      }, 1200);
+    }
+
+    function renderResult(result, completed, percent, bars) {
+      $("result-title").textContent = result.name;
+      $("attr-pill").textContent = "属性：" + result.attribute;
+
+      $("completed-line").innerHTML =
+        `你是第 <b>${Number(completed).toLocaleString()}</b> 个完成这个测试的人`;
+
+      $("percent-line").innerHTML =
+        `和你一样的人仅占 <b>${percent}%</b>`;
+
+      $("share-box").textContent = "“" + result.shareText + "”";
+      $("comment-box").textContent = result.comment;
+      $("radar-text").textContent = result.radarText;
+
+      const displayBars = bars || jitterRadar(result.radar);
+
+      $("spectrum").innerHTML = displayBars.map(b => `
+        <div class="dim-row">
+          <div class="dim-head">
+            <b>${b.name}</b>
+            <span>${b.display}</span>
+          </div>
+          <div class="dim-track">
+            <div class="dim-fill" style="background:${b.color};width:0" data-width="${b.width}%"></div>
+          </div>
+        </div>
+      `).join("");
+
+      $("analysis-box").innerHTML = (result.analysis || []).map(p => `<p>${p}</p>`).join("");
+
+      requestAnimationFrame(() => {
+        document.querySelectorAll(".dim-fill").forEach(el => {
+          el.style.width = el.dataset.width;
+        });
+      });
+    }
+
+    function restoreResultFromStorage() {
+      const token = window.linkValidator && window.linkValidator.token;
+      if (!token) return false;
+      try {
+        const saved = localStorage.getItem(getStorageKey(token));
+        if (!saved) return false;
+        const parsed = JSON.parse(saved);
+        const data = parsed.result || parsed;
+        if (!data || !data.resultName) return false;
+
+        window.__ywt_test_completed = true;
+        const result = {
+          id: data.resultId,
+          name: data.resultName,
+          attribute: data.attribute,
+          comment: data.comment,
+          radarText: data.radarText,
+          shareText: data.shareText,
+          analysis: data.analysis,
+          radar: data.radar
+        };
+        renderResult(result, data.completed, data.percent, data.bars);
+        setPage("result-page");
+        addPromotionLinkDelayed();
+        return true;
+      } catch (error) {
+        console.error("恢复测试结果失败:", error);
+        return false;
+      }
+    }
+
+    window.ywtRestoreResult = restoreResultFromStorage;
+
+    function goHome() {
+      if (window.linkValidator && typeof window.linkValidator.clearLocalResult === "function") {
+        window.linkValidator.clearLocalResult();
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      let token = urlParams.get("token");
+      if (!token && window.linkValidator && window.linkValidator.token) {
+        token = window.linkValidator.token;
+      }
+
+      if (token) {
+        const newUrlParams = new URLSearchParams();
+        newUrlParams.set("token", token);
+        newUrlParams.set("restart", "true");
+        if (urlParams.get("unlimited") === "true") {
+          newUrlParams.set("unlimited", "true");
+        }
+        window.location.href = window.location.pathname + "?" + newUrlParams.toString();
+        return;
+      }
+
+      window.__ywt_test_completed = false;
+      localStorage.removeItem(getCompletionFlagKey());
+      testStarted = false;
+      clearTimeout(nextTimer);
+      answers = {};
+      currentIndex = 0;
+      setPage("home-page");
+      startLiveStats();
+      addPromotionLinkDelayed();
+    }
+
+    $("start-btn").addEventListener("click", startTest);
+    $("prev-btn").addEventListener("click", prevQuestion);
+    $("home-btn").addEventListener("click", goHome);
+
+    startLiveStats();
+  </script>
+
+  <script src="/static/js/link-validator.js"></script>
+  <script>
+    (function () {
+      let validatorInstance = null;
+
+      if (typeof PsyTestValidator !== "undefined") {
+        PsyTestValidator.init(null, {
+          onSuccess: function (result, validator) {
+            console.log("SDK初始化成功，链接有效:", result);
+            validatorInstance = validator;
+            window.linkValidator = validator;
+            document.body.classList.remove("page-disabled");
+          },
+          onError: function (error) {
+            console.error("SDK初始化失败，链接无效:", error);
+            if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === "function") {
+              validatorInstance = window.PsyTestValidator.getInstance();
+              window.linkValidator = validatorInstance;
+            }
+            document.body.classList.remove("page-disabled");
+          },
+          onLoad: function (data) {
+            console.log("SDK加载完成回调:", data);
+            if (!validatorInstance) {
+              if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === "function") {
+                validatorInstance = window.PsyTestValidator.getInstance();
+              }
+              if (validatorInstance) {
+                window.linkValidator = validatorInstance;
+              }
+            }
+
+            setTimeout(function () {
+              if (typeof PsyTestValidator !== "undefined" && typeof PsyTestValidator.addPromotionLink === "function") {
+                PsyTestValidator.addPromotionLink();
+              }
+            }, 100);
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const isRestart = urlParams.get("restart") === "true";
+
+            if (isRestart) {
+              if (validatorInstance && validatorInstance.clearLocalResult) {
+                validatorInstance.clearLocalResult();
+              }
+              const restartToken = validatorInstance && validatorInstance.token;
+              if (restartToken) {
+                try {
+                  localStorage.removeItem("test_result_" + restartToken);
+                  localStorage.removeItem("ywt_test_completed_" + restartToken);
+                } catch (e) {}
+              }
+              window.__ywt_test_completed = false;
+              window.__ywt_retest_mode = true;
+              urlParams.delete("restart");
+              const newUrl = window.location.pathname + (urlParams.toString() ? "?" + urlParams.toString() : "");
+              window.history.replaceState({}, "", newUrl);
+              return;
+            }
+
+            if (data.valid && data.has_local_result) {
+              if (typeof window.ywtRestoreResult === "function") {
+                window.ywtRestoreResult();
+              }
+            }
+          }
+        });
+      } else {
+        console.error("验证SDK未加载");
+        document.body.classList.remove("page-disabled");
+      }
+    })();
+  </script>
+</body>
+</html>

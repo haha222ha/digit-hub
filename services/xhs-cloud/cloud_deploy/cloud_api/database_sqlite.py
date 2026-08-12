@@ -1783,3 +1783,58 @@ def update_member_keyword_request(item_id: int, *, status: str | None = None, ad
     ok = cur.rowcount > 0
     conn.close()
     return ok
+
+
+def register_user_account(username: str, password: str, email: str = "") -> dict:
+    username = (username or "").strip()
+    if len(username) < 3:
+        raise ValueError("用户名至少 3 个字符")
+    if len(password or "") < 6:
+        raise ValueError("密码至少 6 位")
+    conn = _conn()
+    c = conn.cursor()
+    c.execute("SELECT id FROM users WHERE username=?", (username,))
+    if c.fetchone():
+        conn.close()
+        raise ValueError("用户名已存在")
+    if email:
+        c.execute("SELECT id FROM users WHERE email=?", (email.strip(),))
+        if c.fetchone():
+            conn.close()
+            raise ValueError("邮箱已被使用")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    c.execute(
+        "INSERT INTO users (username, password_hash, email, created_at) VALUES (?,?,?,?)",
+        (username, _hash_password(password), (email or "").strip() or None, now),
+    )
+    uid = c.lastrowid
+    conn.commit()
+    conn.close()
+    return get_member_profile(uid) or {"id": uid, "username": username, "email": email}
+
+
+def get_auth_code_row(code: str) -> dict | None:
+    conn = _conn()
+    c = conn.cursor()
+    row = _fetch_auth_code(c, code)
+    conn.close()
+    if not row:
+        return None
+    return dict(row)
+
+
+def redeem_dist_quota_code(user_id: int, code: str, quota_amount: int) -> None:
+    conn = _conn()
+    c = conn.cursor()
+    row = _validate_auth_code_row(_fetch_auth_code(c, code))
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    c.execute(
+        "INSERT INTO auth_code_activations (auth_code_id, user_id, activated_at) VALUES (?,?,?)",
+        (row["id"], user_id, now),
+    )
+    c.execute(
+        "UPDATE auth_codes SET current_activations=current_activations+1, status='active' WHERE id=?",
+        (row["id"],),
+    )
+    conn.commit()
+    conn.close()

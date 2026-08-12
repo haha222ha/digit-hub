@@ -1,0 +1,1351 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="你体内藏着哪种危险人格？三十五题，照见你不愿承认的那一面。本测试纯属娱乐，不代表任何医学诊断。">
+<title>你体内藏着哪种危险人格？</title>
+<script src="/static/js/test-security.js"></script>
+<script>
+  if (typeof TestSecurity !== 'undefined') {
+    TestSecurity.enable();
+  }
+</script>
+<link rel="stylesheet" href="https://fonts.loli.net/css2?family=Noto+Serif+SC:wght@400;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Noto+Serif+SC:wght@400;700&display=swap"></noscript>
+<style>
+  :root{
+    --cream:#FCFAF7;
+    --cream-2:#F5EFE6;
+    --darkBerry:#42242E;
+    --warmBrown:#856647;
+    --cherry:#DB143C;
+    --cherry-soft:#E84A6B;
+    --peach:#FBE5DA;
+    --line:#E5D9C8;
+    --deep:#8B0000;
+    /* 人格主题色（默认病娇，结果页动态覆盖） */
+    --p-color:#8B2A4A;
+    --p-deep:#4A1020;
+    --p-soft:#C44A6E;
+    --p-grad1:#8B2A4A;
+    --p-grad2:#4A1020;
+    /* 淡主题底色（默认cream，结果页动态覆盖） */
+    --p-bg:#FCFAF7;
+    /* 卡片分类色 */
+    --c-base:#6B5B95;
+    --c-trigger:#D4761F;
+    --c-danger:#B91C1C;
+    --c-aware:#2A7A6E;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--p-bg);
+    color:var(--darkBerry);
+    font-family:'PingFang SC','Microsoft YaHei','Hiragino Sans GB',sans-serif;
+    line-height:1.7;
+    overflow-x:hidden;
+  }
+  .stage{max-width:440px;margin:0 auto;position:relative}
+  .page{display:none;min-height:100vh}
+  .page.active{display:block}
+  .hidden{display:none!important}
+
+  /* ========== 首页 ========== */
+  .home{padding:0 24px 60px;min-height:100vh;display:flex;flex-direction:column;justify-content:center;position:relative}
+  .home .seal{
+    position:absolute;top:28px;right:24px;
+    width:54px;height:54px;background:var(--cherry);color:#fff;
+    font-family:'Noto Serif SC','STKaiti','KaiTi',cursive;font-size:22px;
+    line-height:54px;text-align:center;border-radius:4px;
+    box-shadow:0 2px 12px rgba(219,20,60,.3);transform:rotate(6deg);
+  }
+  .home .kicker{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:12px;color:var(--warmBrown);letter-spacing:.4em;margin-bottom:24px}
+  .home h1{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:900;font-size:48px;line-height:1.2;letter-spacing:.04em;margin-bottom:8px;color:var(--darkBerry)}
+  .home h1 .ch{color:var(--cherry);position:relative;display:inline-block}
+  .home h1 .ch::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:8px;background:var(--peach);z-index:-1;border-radius:4px}
+  .home .sub{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:15px;color:var(--warmBrown);margin-bottom:32px;letter-spacing:.08em}
+  .home .intro{font-size:14px;color:var(--darkBerry);margin-bottom:14px;line-height:2;opacity:.85}
+  .home .intro em{color:var(--cherry);font-style:normal;font-weight:500}
+  .home .cta{display:inline-flex;align-items:center;gap:12px;padding:16px 40px;background:linear-gradient(135deg,var(--cherry),var(--cherry-soft));color:#fff;font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:700;font-size:16px;letter-spacing:.15em;border:none;border-radius:999px;box-shadow:0 8px 24px rgba(219,20,60,.28);cursor:pointer;transition:transform .25s,box-shadow .25s;margin-top:24px}
+  .home .cta:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(219,20,60,.36)}
+  .home .disc{margin-top:44px;font-size:11px;color:var(--warmBrown);letter-spacing:.1em;text-align:center;opacity:.7}
+
+  body.page-disabled{pointer-events:none;opacity:.6;cursor:not-allowed}
+  .welcome-footer,.report-footer{display:block!important;visibility:visible!important;width:100%;box-sizing:border-box}
+  .welcome-footer #link-validator-promotion-link,
+  .report-footer #link-validator-promotion-link{
+    width:100%;text-align:center;padding-top:12px;margin-top:12px;
+    border-top:1px solid var(--line);box-sizing:border-box;
+    display:block!important;visibility:visible!important;opacity:1!important;
+    font-size:12px;color:var(--warmBrown);line-height:1.6;
+  }
+  .result-sdk-foot{padding:0 24px 40px;text-align:center}
+  .result-sdk-foot .disc{margin-top:8px;font-size:11px;color:var(--warmBrown);letter-spacing:.1em;opacity:.7}
+
+  /* ========== 答题页 ========== */
+  .quiz{padding:0 24px 60px;min-height:100vh;display:flex;flex-direction:column}
+  .quiz-top{display:flex;justify-content:center;align-items:center;margin-bottom:20px;padding-top:16px}
+  .quiz-prog{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:14px;color:var(--cherry);font-weight:700}
+  .quiz-prog b{font-size:20px}
+  .bar{height:3px;background:var(--line);margin-bottom:44px;position:relative;border-radius:2px;overflow:hidden}
+  .bar i{position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,var(--cherry),var(--cherry-soft));border-radius:2px;transition:width .4s ease}
+  .q-eyebrow{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:12px;color:var(--cherry);letter-spacing:.2em;margin-bottom:10px}
+  .q-text{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:700;font-size:25px;line-height:1.5;margin-bottom:40px;color:var(--darkBerry)}
+  .opts{display:flex;flex-direction:column;gap:14px;flex:1}
+  .opt{background:#fff;border:1px solid var(--line);padding:18px 20px;color:var(--darkBerry);font-size:15px;line-height:1.5;cursor:pointer;display:flex;align-items:center;gap:16px;border-radius:14px;transition:all .25s;box-shadow:0 1px 3px rgba(66,36,46,.04)}
+  @media (hover:hover) and (pointer:fine){
+    .opt:hover{border-color:var(--cherry);box-shadow:0 4px 12px rgba(219,20,60,.12);transform:translateY(-1px)}
+  }
+  .opt:active{border-color:var(--cherry);box-shadow:0 4px 12px rgba(219,20,60,.12);transform:scale(.98)}
+  .opt .key{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:700;color:var(--cherry);font-size:16px;width:30px;height:30px;border:1px solid var(--cherry);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .25s}
+  .opt.selected{background:linear-gradient(135deg,#fff,var(--peach));border-color:var(--cherry);transform:scale(.98)}
+  .opt.selected .key{background:var(--cherry);color:#fff}
+  .quiz-cta{margin-top:32px;padding:14px;width:100%;background:#fff;color:var(--warmBrown);font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:500;text-align:center;letter-spacing:.15em;border-radius:999px;cursor:pointer;border:1px solid var(--line);font-size:14px;transition:all .25s}
+  .quiz-cta:hover:not(:disabled){border-color:var(--warmBrown);color:var(--darkBerry)}
+  .quiz-cta:disabled{opacity:.35;cursor:default;pointer-events:none}
+  .q-hint{margin-top:18px;text-align:center;font-size:12px;color:var(--warmBrown);opacity:.6;letter-spacing:.05em}
+
+  /* ========== 报告页 ========== */
+  .result{padding:0 24px 80px;min-height:100vh}
+  .result .r-title{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:13px;color:var(--warmBrown);letter-spacing:.25em;text-align:center;margin-bottom:6px;padding-top:24px}
+  .result .r-title-2{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:700;font-size:21px;text-align:center;margin-bottom:8px;color:var(--darkBerry)}
+  .result .r-title-2 .ch{color:var(--p-color)}
+  .brush{height:14px;margin:24px 0;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 14'><path d='M0,7 Q60,2 120,7 T240,7 T360,6 L400,7' stroke='%23DB143C' stroke-width='1.5' fill='none' opacity='.5'/><path d='M20,7 Q80,9 140,7 T260,7 T380,7' stroke='%23856647' stroke-width='1' fill='none' opacity='.4'/></svg>") center/100% 100% no-repeat}
+
+  /* 身份主卡（增强版） */
+  .hero{background:linear-gradient(160deg,var(--p-grad1) 0%,var(--p-grad2) 100%);border-radius:24px;padding:36px 26px;position:relative;overflow:hidden;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.15);color:#fff}
+  .hero::before{content:attr(data-char);position:absolute;font-family:'Noto Serif SC','STKaiti','KaiTi',cursive;font-size:180px;color:rgba(255,255,255,.08);right:-20px;bottom:-50px;line-height:1;pointer-events:none}
+  .hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+  .hero-tags{display:flex;flex-direction:column;gap:8px}
+  .tag-level{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.3);color:#fff;font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:700;font-size:13px;letter-spacing:.2em;padding:7px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.35)}
+  .tag-tier{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);color:#fff;font-size:13px;letter-spacing:.1em;padding:6px 14px;border-radius:999px;width:fit-content}
+  .hero-rank{text-align:right;flex-shrink:0}
+  .hero-rank .num{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:900;font-size:30px;line-height:1;color:#fff}
+  .hero-rank .lbl{font-size:12px;color:rgba(255,255,255,.65);letter-spacing:.1em;margin-top:4px}
+  .hero-name{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:900;font-size:58px;color:#fff;line-height:1;margin-bottom:8px;letter-spacing:.08em;text-shadow:0 2px 12px rgba(0,0,0,.2)}
+  .hero-sub{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:13px;color:rgba(255,255,255,.75);letter-spacing:.2em;margin-bottom:20px}
+  .hero-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .hero-chips .chip{background:rgba(255,255,255,.18);font-size:13px;padding:6px 15px;border-radius:999px;color:#fff}
+  .hero-quote{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-style:italic;font-size:17px;line-height:1.7;color:#fff;padding-top:16px;border-top:1px dashed rgba(255,255,255,.3)}
+
+  /* 稀缺卡（独立小卡） */
+  .scarce-card{background:#fff;border-radius:16px;padding:22px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(66,36,46,.06)}
+  .scarce-card .left{flex:1}
+  .scarce-card .num{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:900;font-size:34px;color:var(--p-color);line-height:1}
+  .scarce-card .num small{font-size:20px}
+  .scarce-card .lbl{font-size:13px;color:var(--warmBrown);margin-top:6px;letter-spacing:.05em}
+  .scarce-card .right{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:13px;color:var(--warmBrown);text-align:right;letter-spacing:.1em;line-height:1.6}
+  .scarce-card .right b{color:var(--p-color);font-size:16px}
+
+  /* section 标题 */
+  .sec-h{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:16px;font-weight:700;color:var(--darkBerry);letter-spacing:.05em;margin:32px 0 16px;display:flex;align-items:center;gap:10px}
+  .sec-h::before{content:"";width:4px;height:20px;background:var(--p-color);border-radius:2px}
+  .sec-h .en{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:11px;color:var(--warmBrown);letter-spacing:.2em;font-weight:400;margin-left:auto}
+
+  /* 雷达图卡 */
+  .radar-card{background:#fff;border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(66,36,46,.06)}
+  .radar-wrap{display:flex;justify-content:center}
+  .radar-wrap svg{width:340px;height:340px}
+  .radar-grid{stroke:#D4C4B0;fill:none;stroke-width:1}
+  .radar-axis{stroke:#D4C4B0;stroke-width:1}
+  .radar-data{fill:var(--p-fill);stroke:var(--p-color);stroke-width:2.5}
+  .radar-pt{fill:#fff;stroke:var(--p-color);stroke-width:2.5}
+  .radar-lbl{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:13px;fill:var(--darkBerry);font-weight:700}
+
+  /* 维度评分卡 */
+  .dims-card{background:#fff;border-radius:16px;padding:22px 24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(66,36,46,.06)}
+  .dim-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:15px}
+  .dim-row:last-child{margin-bottom:0}
+  .dim-row .nm{width:60px;color:var(--darkBerry);font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif}
+  .dim-row .track{flex:1;height:9px;background:var(--cream-2);border-radius:5px;overflow:hidden}
+  .dim-row .track i{display:block;height:100%;background:linear-gradient(90deg,var(--p-soft),var(--p-color));border-radius:5px}
+  .dim-row .track.peak i{background:linear-gradient(90deg,var(--p-color),var(--p-deep))}
+  .dim-row .val{width:48px;text-align:right;font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;color:var(--p-color);font-weight:700;font-size:14px}
+
+  /* 人格定位九宫格 */
+  .grid-card{background:#fff;border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(66,36,46,.06)}
+  .grid9{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+  .grid9 .cell{aspect-ratio:1;border-radius:10px;background:var(--cream-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px;text-align:center;position:relative;overflow:hidden}
+  .grid9 .cell .gname{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:15px;font-weight:700;color:var(--darkBerry)}
+  .grid9 .cell .grare{font-size:11px;color:var(--warmBrown);opacity:.7;letter-spacing:.05em}
+  .grid9 .cell.active{background:linear-gradient(135deg,var(--p-grad1),var(--p-grad2));box-shadow:0 4px 14px rgba(0,0,0,.2)}
+  .grid9 .cell.active .gname{color:#fff;font-size:17px}
+  .grid9 .cell.active .grare{color:rgba(255,255,255,.85);font-size:12px}
+  .grid9 .cell.active::after{content:"你";position:absolute;font-family:'Noto Serif SC','STKaiti','KaiTi',cursive;font-size:32px;color:rgba(255,255,255,.2)}
+  .grid-foot{margin-top:14px;font-size:13px;color:var(--warmBrown);text-align:center;letter-spacing:.05em}
+  .grid-foot b{color:var(--p-color)}
+
+  /* 危险档案卡组 */
+  .file-card{background:#fff;border-radius:16px;padding:22px 24px;margin-bottom:14px;box-shadow:0 2px 12px rgba(66,36,46,.06);border-left:4px solid var(--line);position:relative}
+  .file-card.base{border-left-color:var(--c-base)}
+  .file-card.trigger{border-left-color:var(--c-trigger)}
+  .file-card.danger{border-left-color:var(--c-danger)}
+  .file-card.aware{border-left-color:var(--c-aware)}
+  .file-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .file-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:900;font-size:16px;color:#fff;flex-shrink:0}
+  .file-card.base .file-icon{background:var(--c-base)}
+  .file-card.trigger .file-icon{background:var(--c-trigger)}
+  .file-card.danger .file-icon{background:var(--c-danger)}
+  .file-card.aware .file-icon{background:var(--c-aware)}
+  .file-title{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:700;font-size:17px;color:var(--darkBerry)}
+  .file-title .sub{font-size:12px;color:var(--warmBrown);font-weight:400;margin-left:6px;letter-spacing:.05em}
+  .file-body{font-size:15px;line-height:1.9;color:var(--darkBerry);opacity:.9}
+  .file-body p{margin-bottom:8px}
+  .file-body p:last-child{margin-bottom:0}
+  .file-body em{font-style:normal;color:var(--p-color);font-weight:500}
+  .file-quote{margin-top:12px;padding:14px 16px;background:var(--cream-2);border-radius:10px;font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-style:italic;font-size:15px;color:var(--darkBerry);line-height:1.7}
+
+  /* 完整分析 */
+  .analysis{margin-bottom:20px}
+  .analysis p{font-size:14px;line-height:2.1;color:var(--darkBerry);margin-bottom:16px;opacity:.88}
+  .radar-text{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-style:italic;font-size:19px;line-height:1.7;color:var(--p-color);padding:24px 20px;background:linear-gradient(135deg,#fff,var(--peach));border-radius:16px;margin-top:8px;text-align:center;position:relative}
+
+  /* 人格CP */
+  .cp{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+  .cp-card{background:#fff;border-radius:16px;padding:20px 22px;display:flex;align-items:flex-start;gap:14px;box-shadow:0 2px 12px rgba(66,36,46,.06);border-left:4px solid var(--line)}
+  .cp-card.match{border-left-color:#C9A961}
+  .cp-card.clash{border-left-color:var(--p-color)}
+  .cp-mark{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:13px;font-weight:700;letter-spacing:.15em;padding:6px 14px;flex-shrink:0;border-radius:999px}
+  .cp-card.match .cp-mark{background:#FFF4D6;color:#8C6D1F}
+  .cp-card.clash .cp-mark{background:var(--peach);color:var(--p-color)}
+  .cp-body .cp-name{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:700;font-size:18px;margin-bottom:4px;color:var(--darkBerry)}
+  .cp-body .cp-reason{font-size:14px;color:var(--warmBrown);line-height:1.6}
+
+  /* 成长处方 */
+  .rx-card{background:#fff;border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(66,36,46,.06)}
+  .rx-item{display:flex;gap:14px;margin-bottom:18px;position:relative}
+  .rx-item:last-child{margin-bottom:0}
+  .rx-item::before{content:"";position:absolute;left:15px;top:34px;bottom:-18px;width:2px;background:var(--cream-2)}
+  .rx-item:last-child::before{display:none}
+  .rx-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--p-color),var(--p-soft));color:#fff;font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1}
+  .rx-content{flex:1;padding-top:2px}
+  .rx-title{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:700;font-size:16px;color:var(--darkBerry);margin-bottom:4px}
+  .rx-desc{font-size:14px;color:var(--warmBrown);line-height:1.7}
+
+  /* 分享卡 */
+  .share-card{background:linear-gradient(160deg,var(--p-grad1) 0%,var(--p-grad2) 100%);color:#fff;padding:36px 26px;text-align:center;position:relative;margin-bottom:20px;border-radius:24px;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,.2)}
+  .share-card::before{content:attr(data-char);position:absolute;font-family:'Noto Serif SC','STKaiti','KaiTi',cursive;font-size:200px;color:rgba(255,255,255,.08);right:-30px;top:-40px;line-height:1;pointer-events:none}
+  .share-card .badge{display:inline-block;background:rgba(255,255,255,.2);color:#fff;font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:700;font-size:11px;letter-spacing:.25em;padding:6px 14px;margin-bottom:18px;border-radius:999px;border:1px solid rgba(255,255,255,.3)}
+  .share-card .sname{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:900;font-size:48px;margin-bottom:6px;letter-spacing:.1em}
+  .share-card .srate{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:12px;color:rgba(255,255,255,.75);margin-bottom:20px;letter-spacing:.1em}
+  .share-card .quote{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-style:italic;font-size:18px;line-height:1.7;padding:0 8px}
+  .share-card .foot{margin-top:20px;font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.2em;border-top:1px solid rgba(255,255,255,.15);padding-top:14px}
+
+  /* 按钮 */
+  .r-btns{display:flex;gap:12px;margin-top:8px}
+  .r-btn{flex:1;padding:15px;text-align:center;font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-weight:700;font-size:15px;cursor:pointer;letter-spacing:.15em;border-radius:999px;border:none}
+  .r-btn.primary{background:linear-gradient(135deg,var(--p-color),var(--p-soft));color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+  .r-btn.ghost{border:1px solid var(--warmBrown);color:var(--warmBrown);background:#fff}
+
+  /* loading */
+  .loading{display:none;position:fixed;inset:0;background:var(--cream);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+  .loading.show{display:flex}
+  .loading .spin{width:40px;height:40px;border:3px solid var(--peach);border-top-color:var(--cherry);border-radius:50%;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading .txt{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:14px;color:var(--warmBrown);letter-spacing:.1em}
+
+  /* 分享截图loading */
+  .share-loading{display:none;position:fixed;inset:0;background:rgba(252,250,247,.92);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+  .share-loading.show{display:flex}
+  .share-loading .spin{width:36px;height:36px;border:3px solid var(--peach);border-top-color:var(--cherry);border-radius:50%;animation:spin 1s linear infinite}
+  .share-loading .txt{font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:13px;color:var(--warmBrown);letter-spacing:.1em}
+
+  /* 分享图预览弹窗 */
+  .share-preview{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:300;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px}
+  .share-preview.show{display:flex}
+  .share-preview img{max-width:85%;max-height:65vh;border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.4)}
+  .share-preview .pv-tip{color:rgba(255,255,255,.85);font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:14px;letter-spacing:.1em;text-align:center}
+  .share-preview .pv-close{padding:12px 36px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:999px;font-family:'Noto Serif SC','Songti SC','STSong','SimSun',serif;font-size:14px;cursor:pointer;letter-spacing:.15em}
+  .share-preview .pv-close:active{background:rgba(255,255,255,.25)}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="page-disabled">
+<div class="stage">
+
+  <!-- 首页 -->
+  <section class="page active" id="home">
+    <div class="home">
+      <div class="seal">欲</div>
+      <div class="kicker">— 欲望簿 · 心镜 —</div>
+      <h1>你体内藏着<br>哪种<span class="ch">危险</span>人格？</h1>
+      <p class="sub">三十五题，照见你不愿承认的那一面</p>
+      <p class="intro">每个人心里，都藏着一点危险的小情绪。</p>
+      <p class="intro">它可能是偶尔冒出来的<em>占有欲</em>，也可能是忍了很久的<em>小脾气</em>，或者是表面没事、心里早就记账的小心思。</p>
+      <p class="intro">你以为的自己，和深夜独处时那个自己，真的是同一个人吗？</p>
+      <button class="cta" id="startBtn" type="button">开始照镜 ✦</button>
+      <div class="welcome-footer">
+        <p class="disc">本测试纯属娱乐，不代表任何医学诊断</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 答题页 -->
+  <section class="page" id="quiz">
+    <div class="quiz">
+      <div class="quiz-top">
+        <span class="quiz-prog"><b id="qCurrent">01</b> / 35</span>
+      </div>
+      <div class="bar"><i id="qBar"></i></div>
+      <div class="q-eyebrow" id="qEyebrow">第一问 · 情感修罗场</div>
+      <div class="q-text" id="qText"></div>
+      <div class="opts" id="qOpts"></div>
+      <button class="quiz-cta" id="qCta" onclick="prevQuestion()" disabled>‹ 上一题</button>
+      <p class="q-hint" id="qHint">选择后自动进入下一题</p>
+    </div>
+  </section>
+
+  <!-- 报告页 -->
+  <section class="page" id="result">
+    <div class="result" id="resultBody"></div>
+  </section>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spin"></div>
+    <div class="txt">正在生成你的危险人格报告…</div>
+  </div>
+
+  <!-- 分享截图Loading -->
+  <div class="share-loading" id="shareLoading">
+    <div class="spin"></div>
+    <div class="txt">正在生成分享图…</div>
+  </div>
+
+  <!-- 分享图预览 -->
+  <div class="share-preview" id="sharePreview">
+    <img id="sharePreviewImg" alt="分享图">
+    <div class="pv-tip">长按图片保存到相册</div>
+    <button class="pv-close" onclick="closeSharePreview()">关闭</button>
+  </div>
+
+</div>
+
+<script>
+// ============ 数据 ============
+const DIMS = ['dou_s','dou_m','yandere','schemer','self_punisher','controller','rampage','bpd','npd'];
+const DIM_NAMES = {dou_s:'抖S',dou_m:'抖M',yandere:'病娇',schemer:'腹黑怪',self_punisher:'自虐狂',controller:'控制狂',rampage:'暴走',bpd:'BPD',npd:'NPD'};
+
+const QUESTIONS = [
+  {t:'发现暧昧对象同时在和别人聊，你会？',c:'情感修罗场',o:['直接摊牌问清楚，不浪费时间','默默疏远，不点破，看ta怎么演','装不知道，继续观察，收集更多信息','立刻情绪上头，连环质问'],s:['dou_s','yandere','schemer','bpd']},
+  {t:'深夜前任突然发消息"在吗"，你会？',c:'情感修罗场',o:['已读不回，当没看见，我自己有节奏','试探对方到底想干什么','心跳加速，纠结半小时要不要回','直接回，聊到天亮，管他明天上不上班'],s:['controller','schemer','yandere','rampage']},
+  {t:'伴侣手机响了，对方不在身边，你会？',c:'情感修罗场',o:['当没看见，信任比什么都重要','忍不住想看一眼，手都伸过去了','记在心里，找机会验证一下','直接拿起来看，问心无愧'],s:['dou_s','bpd','schemer','rampage']},
+  {t:'发现伴侣出轨，你的第一反应？',c:'情感修罗场',o:['冷静收集证据，让对方付出代价','当面摊牌，要个说法，别想好过','表面原谅，慢慢折磨，让ta后悔','先反思是不是自己哪里没做好'],s:['npd','rampage','yandere','self_punisher']},
+  {t:'对象跟你冷战不说话，你会？',c:'情感修罗场',o:['比谁更能憋，看谁先开口','主动找对方谈，受不了这种气氛','假装没事，但每句话都带刺','先哭一场，然后想办法和好'],s:['dou_s','dou_m','yandere','self_punisher']},
+  {t:'朋友说"我觉得ta不喜欢你"，你会？',c:'情感修罗场',o:['嘴上说无所谓，心里已经难受了','反问朋友为什么这么觉得，要细节','表面笑嘻嘻，心里记上朋友一笔','当场炸毛，让朋友以后别瞎说'],s:['self_punisher','controller','schemer','rampage']},
+  {t:'暗恋很久的人突然官宣有对象了，你？',c:'情感修罗场',o:['默默祝福，然后消失在ta的世界里','疯狂复盘自己哪里不如那个人','表面祝福，暗中较劲，等机会','直接断联，痛快，别给自己留念想'],s:['self_punisher','bpd','yandere','rampage']},
+  {t:'看到朋友过得比你好，你心里第一反应？',c:'暗黑小念头',o:['真心替ta高兴，没有杂念','嘴上恭喜，心里有点酸','默默较劲，下次一定超过ta','表面恭喜，心里想"ta迟早翻车"'],s:['controller','dou_m','schemer','npd']},
+  {t:'别人倒霉的时候，你心里真实的反应？',c:'暗黑小念头',o:['心疼，想帮一把','表面同情，其实有点爽','冷静分析ta为什么倒霉','嘴上安慰，心里庆幸不是自己'],s:['dou_m','npd','dou_s','rampage']},
+  {t:'深夜独处时，脑子里最容易冒出什么念头？',c:'暗黑小念头',o:['复盘今天谁对自己不够好','想象如果失去某个人会怎样','计划明天怎么把事情掌握在手里','什么都不想，困了就睡'],s:['bpd','yandere','controller','rampage']},
+  {t:'你最享受哪种掌控感？',c:'暗黑小念头',o:['让喜欢的人离不开我','让所有人都听我的安排','掌握别人的秘密但不说','控制自己的情绪，不被任何人看穿'],s:['dou_m','controller','npd','dou_s']},
+  {t:'你最害怕被别人看穿什么？',c:'暗黑小念头',o:['其实我很需要被爱','其实我比表面上更在意','其实我在算计一切','其实我没有表面上那么强大'],s:['dou_m','npd','dou_s','self_punisher']},
+  {t:'聚会上有人当面阴阳你，你会？',c:'社交修罗场',o:['当场怼回去，一点面子不留','笑着回击，让对方下不来台','表面不动声色，记住这个人','假装没听懂，回去反复想'],s:['rampage','dou_s','schemer','self_punisher']},
+  {t:'朋友圈发现朋友在暗讽你，你会？',c:'社交修罗场',o:['直接在评论区问清楚','也发一条暗讽回去','截图存证，以后有用','假装没看见，心里难受一整天'],s:['controller','dou_m','npd','bpd']},
+  {t:'同事抢了你的功劳，你会？',c:'社交修罗场',o:['当众指出真相，谁也别想占便宜','私下找对方谈，要回功劳','表面让给ta，暗中布局让ta栽跟头','委屈接受，回去自己难受'],s:['rampage','controller','schemer','self_punisher']},
+  {t:'群里有人故意无视你的消息，你会？',c:'社交修罗场',o:['直接@对方，问ta看到了吗','再发一条，一定要被看到','记住这个场面，以后也不搭理ta','默默退群，不跟这种人耗'],s:['rampage','npd','schemer','self_punisher']},
+  {t:'如果能读心但只能读一个人，你会读谁？',c:'极限选择',o:['暗恋的人','伴侣','最强的对手','自己'],s:['yandere','dou_m','schemer','self_punisher']},
+  {t:'如果可以删掉一段记忆，你会删？',c:'极限选择',o:['最难堪的那次','最痛的那次分手','不删，痛苦让我清醒','所有让自己卑微的瞬间'],s:['npd','bpd','dou_s','yandere']},
+  {t:'如果只能拥有一种能力，你选？',c:'极限选择',o:['让所有人都喜欢我','看穿所有人的想法','让背叛我的人付出代价','永远不被伤害'],s:['npd','schemer','rampage','self_punisher']},
+  {t:'多年未见的老朋友约你见面，你会选哪里？',c:'生活倾向',o:['氛围不错的小酒吧','咖啡馆或奶茶店','直接约饭，边吃边聊','哪里都行，对方定就好'],s:['npd','schemer','bpd','rampage']},
+  {t:'你同意"爱情到最后都会变成亲情"这句话吗？',c:'情感观念',o:['同意，关系总会进入稳定期','不同意，爱就该一直有火花','没想法，遇到人再说','看情况，有的人会，有的人不会'],s:['controller','dou_s','yandere','self_punisher']},
+  {t:'你觉得缘分是？',c:'情感观念',o:['上天注定的','靠自己争取的','虚无缥缈的','无所谓，来了就接着'],s:['bpd','controller','npd','dou_m']},
+  {t:'如果可以给过去的自己一条建议，你会说什么？',c:'人生回溯',o:['一定要尽力学习，别浪费机会','不要太一意孤行，三思而后行','珍惜和家人在一起的时间','不要为了任何一个人而卑微'],s:['controller','yandere','dou_m','npd']},
+  {t:'如果有人借了你一笔小钱，后来忘记还了，你会？',c:'社交倾向',o:['会主动问，没什么不好意思的','不问，有点开不了口','偶尔侧面提醒一下','表面不说，但心里已经记账了'],s:['controller','dou_m','schemer','bpd']},
+  {t:'分手之后，你还能和前任做朋友吗？',c:'情感观念',o:['能，过去了就过去了','不能，没必要再联系','看情况，要看分得体不体面','视心情而定，我说了算'],s:['dou_s','self_punisher','yandere','npd']},
+  {t:'你和朋友发生冲突，你通常会？',c:'社交倾向',o:['马上摊牌，别憋着','冷处理，先让自己冷静','闷在心里，越想越难受','用玩笑化解，但心里未必真过去'],s:['dou_s','self_punisher','bpd','yandere']},
+  {t:'遇到喜欢的人，你会怎么做？',c:'情感倾向',o:['主动靠近，喜欢就别装','暗示等待，看对方有没有反应','静观其变，怕自己太主动','假装不在意，但其实一直观察'],s:['dou_s','yandere','self_punisher','schemer']},
+  {t:'工作或学习中犯错时，你会？',c:'自我反应',o:['承认问题，然后赶紧修正','先稳住场面，别让自己太难看','反复自责，觉得自己不该这样','表面没事，私下疯狂补救'],s:['controller','npd','self_punisher','bpd']},
+  {t:'面对突如其来的变化，你会？',c:'应变倾向',o:['立刻行动，先处理再说','拖一拖，看看事情会不会自己过去','想找人商量，不想一个人扛','表面随和，心里开始疯狂演算'],s:['rampage','dou_m','bpd','yandere']},
+  {t:'遇到陌生人搭讪，你会？',c:'社交倾向',o:['先观察对方目的，再决定态度','礼貌回应，但保持距离','下意识回避，有点不自在','直接开玩笑，把节奏带走'],s:['schemer','controller','bpd','rampage']},
+  {t:'在聚会中，你更倾向于？',c:'社交场景',o:['主导话题，让场子别冷','安静旁听，别人聊我就听','找一两个熟人小范围聊天','观察每个人的反应，心里默默打分'],s:['npd','dou_m','yandere','schemer']},
+  {t:'朋友背后议论你，你会？',c:'社交反应',o:['当面问清楚，别在背后搞事','假装没事，但心里会介意','先收集信息，看看到底谁说的','自省一下，是不是自己哪里做得不好'],s:['controller','dou_m','schemer','bpd']},
+  {t:'喜欢的东西被别人抢先拿走，你会？',c:'欲望反应',o:['强势争取，喜欢就要拿到','算了，反正也不是非要不可','暗中较劲，下次一定抢回来','直接炸毛，凭什么又是我错过'],s:['dou_s','self_punisher','schemer','rampage']},
+  {t:'你更喜欢哪种社交方式？',c:'社交偏好',o:['面对面聊，直接看反应','视频或语音，有距离但不冷淡','文字聊天，方便慢慢表达','独自活动，别人别太打扰我'],s:['dou_s','dou_m','yandere','npd']},
+  {t:'别人给你建议时，你通常会？',c:'态度倾向',o:['有道理就采纳','部分采纳，但保留自己的想法','不爱听，尤其是对方太自以为是的时候','表面听着，心里已经开始反驳'],s:['controller','yandere','npd','rampage']}
+];
+
+const PERSONAS = {
+  yandere:{name:'病娇',id:3,level:'S',levelText:'极度危险',rare:'2.8%',char:'欲',
+    rank:'#1',dangerIndex:95,tier:'潜伏态 · 第叁型',bg:'#FAEEF1',
+    attr:'病娇（主）+ 控制狂 + NPD（自恋型人格）',sub:'YANDERE · 第叁型',
+    comment:'爱得深、掌控得狠，顺便自带光环。',radarText:'你不是占有欲强，你只是无法接受自己不是唯一。',
+    shareText:'我可以对你很好，好到你再也接受不了别人。但你别让我发现你在看别人。',
+    subs:['controller','npd'],radar:[66,32,100,49,55,92,84,73,28],
+    cpMatch:{name:'抖 M',reason:'一个要占有，一个甘愿被占有，完美闭环'},
+    cpClash:{name:'暴走',reason:'你还在酝酿深情戏，人家已经掀桌了'},
+    analysis:'对喜欢的人，你的占有欲几乎病态，同时在生活中喜欢掌控一切。你自信、果断，有自己的规则和计划，别人总是你的背景板。感情和行动都带有强烈目的性。\n\n你不是那种随随便便喜欢一个人的类型。你一旦上心，就很难只是浅浅喜欢。你会在意对方的语气、回复速度、朋友圈动态、和谁走得近，甚至能从一点小细节里脑补出完整剧情。你嘴上可能还在装冷静，但心里早就开始拉警报。\n\n你的危险点在于：你很难接受"不确定"。模糊关系、忽冷忽热、没有明确回应，这些都会让你非常不舒服。你要的不是普通喜欢，而是明确的偏爱、确定的位置、被坚定选择的感觉。\n\n与此同时，你又不是完全卑微型人格。你有自信，也有骄傲。你可以很深情，但你也希望自己在关系里是特别的、被重视的、无法替代的。你不是想控制所有人，你只是很难忍受自己认真对待的人把你当成可有可无。',
+    dangerFile:{
+      base:'你不是那种随随便便喜欢一个人的类型。一旦上心，就很难只是浅浅喜欢。你会在意对方的语气、回复速度、朋友圈动态、和谁走得近，甚至能从一点小细节里脑补出完整剧情。\n\n嘴上可能还在装冷静，但心里早就开始拉警报。你自信、果断，有自己的规则和计划，别人总是你的背景板。',
+      trigger:'你很难接受"不确定"。以下场景会直接触发你的危险模式：模糊关系、忽冷忽热、没有明确回应；对方和异性走得近，哪怕只是正常社交；你发的消息被已读不回超过2小时；感觉自己不是对方的"唯一选择"。',
+      danger:'触发后，你的占有欲会几乎病态地爆发。你会同时上线控制欲和表演欲——表面不动声色，暗地里已经把对方的所有社交关系摸了一遍。\n\n你可以很深情，但你也希望自己在关系里是特别的、被重视的、无法替代的。你不是想控制所有人，你只是很难忍受自己认真对待的人把你当成可有可无。',
+      awareness:'你的危险点不在于"坏"，而在于把"在意"演变成了"控制"。你要的不是普通喜欢，而是明确的偏爱、确定的位置、被坚定选择的感觉。\n\n真正让你安全的关系，不是对方完全顺从，而是对方能主动给确定感——不用你追问，不用你试探。'
+    },
+    growth:[
+      {title:'把"试探"换成"表达"',desc:'与其用已读不回测试对方，不如直接说"我希望你回我快一点"。明确表达需求，比暗中考验更能筛选出对的人。'},
+      {title:'允许关系有"灰度"',desc:'不是所有关系都需要立刻明确。试着接受"我们正在了解彼此"这个中间态，而不是逼对方立刻给出"唯一"的承诺。'},
+      {title:'把占有欲转化成保护欲',desc:'同样的在意，"我要守住你"比"你不许走"更有力量。前者让你变成对方的港湾，后者只会让ta想逃。'}
+    ],
+    color:{p:'#8B2A4A',deep:'#4A1020',soft:'#C44A6E',g1:'#8B2A4A',g2:'#4A1020'}},
+  schemer:{name:'腹黑怪',id:4,level:'S',levelText:'极度危险',rare:'3.1%',char:'谋',
+    rank:'#2',dangerIndex:93,tier:'隐忍态 · 第肆型',bg:'#EAF2EE',
+    attr:'腹黑怪（主）+ 暴走人格 + 抖 S',sub:'SCHEMER · 第肆型',
+    comment:'冷面笑匠，一炸全场，别人永远猜不到下一步。',radarText:'你不是心眼多，你只是脑子没闲着。',
+    shareText:'我什么都知道，我只是喜欢看你演。你演得越好，我出手的时候越痛快。',
+    subs:['rampage','dou_s'],radar:[81,18,58,100,31,74,69,42,83],
+    cpMatch:{name:'抖 S',reason:'两个都精明，能玩到一起，互相欣赏'},
+    cpClash:{name:'暴走',reason:'你还没布局完，人家已经物理清场了'},
+    analysis:'你表面冷静，内心心机满满，偶尔暴走，行动力惊人。喜欢套路和策略，观察周围人一举一动，情绪爆发时无人能挡。你的存在总让人既害怕又好奇。\n\n你不是那种把情绪全写在脸上的人。很多时候，你看起来只是安静、礼貌、甚至有点好说话，但其实你一直在观察。谁是真心，谁在演，谁说话带刺，谁想占便宜，你心里都记得很清楚。\n\n你的危险点在于，你不一定当场反击。你更擅长先收集信息，再选择合适的时机出手。别人以为事情过去了，其实你只是暂时没动。你不是没脾气，你只是觉得没必要把底牌提前亮出来。\n\n但你也不是永远冷静。一旦有人反复挑战你的底线，你的暴走人格会突然上线。那时候你就不是阴阳怪气，而是直接让对方知道什么叫"别惹看起来很安静的人"。',
+    dangerFile:{
+      base:'你是一个天生擅长观察的人。你不是不会表达，而是你更喜欢先看清楚再说。你能从一个人的微表情、语气变化、用词习惯里读出很多信息。\n\n你记性好，尤其记得别人对你做过什么。你不是小心眼，只是你的档案库太齐全了。',
+      trigger:'你很难忍受"被欺骗"和"被当傻子"。以下场景会直接触发你的危险模式：有人当面撒谎还以为你不知道；你信任的人背地里说你坏话；有人试图利用你还装作无事发生；你精心维护的平衡被人粗暴打破。',
+      danger:'触发后，你不会当场翻脸，而是开始布局。你会装作什么都不知道，继续和对方正常交往，同时默默收集更多筹码。等到合适的时机，你会一击致命，让对方甚至不知道是怎么栽的。\n\n但如果对方反复挑衅，你的暴走人格会突然上线，直接物理清场。',
+      awareness:'你的危险点在于，你把"算计"当成了自我保护。你以为自己在防御，但其实你很多时候在进攻。\n\n你真正需要的安全感不是"掌控所有信息"，而是"允许自己不设防"。'
+    },
+    growth:[
+      {title:'把"记账"换成"翻篇"',desc:'不是每件事都需要秋后算账。试着给一些小冒犯设定"保质期"，过了就算了，你会发现心里的包袱轻很多。'},
+      {title:'试着直接说"我不舒服"',desc:'你习惯了用策略解决问题，但有些关系不需要策略。直接告诉对方"你这样做让我不舒服"，比暗中布局更能解决根本问题。'},
+      {title:'允许自己"看走眼"',desc:'你太怕被欺骗，所以对所有人都保持警惕。但不是所有人都值得你防备。试着给少数人一次"不设防"的机会，你会发现信任也是一种能力。'}
+    ],
+    color:{p:'#2A5C4A',deep:'#0F2A1F',soft:'#4A8B6E',g1:'#2A5C4A',g2:'#0F2A1F'}},
+  npd:{name:'NPD',id:9,level:'S',levelText:'极度危险',rare:'3.7%',char:'我',
+    rank:'#3',dangerIndex:91,tier:'聚光态 · 第玖型',bg:'#F2EDF5',
+    attr:'NPD（自恋型人格）（主）+ 抖 S + 腹黑怪',sub:'NARCISSIST · 第玖型',
+    comment:'全场瞩目，套路明明白白。',radarText:'你不是普通自信，你是自带主角镜头。',
+    shareText:'我不是爱表现，我只是确实比较亮眼。你看不看，我都在发光。',
+    subs:['dou_s','schemer'],radar:[87,11,59,82,24,73,100,38,52],
+    cpMatch:{name:'抖 M',reason:'需要崇拜型选手，刚好完美适配'},
+    cpClash:{name:'腹黑怪',reason:'你的表演在人家眼里全是破绽'},
+    analysis:'你自信满满，喜欢被关注，同时擅长掌控场面和关系。你在人际和感情中总是主角，别人往往成为你的配角。你精明、心机深沉，但魅力十足。\n\n你不是没有自知之明，恰恰相反，你太知道自己的优势在哪里。你知道自己什么时候有吸引力，知道怎样表达更容易被注意，也知道怎样在一群人里保持存在感。你不一定时时刻刻高调，但你不喜欢被忽视。\n\n你的危险点在于，你很在意评价，但又不愿意承认自己在意。别人夸你，你表面淡定，心里可能已经爽到开花；别人否定你，你嘴上说无所谓，心里已经开始给对方扣分。你可以接受建议，但不太接受那种居高临下的批评。\n\n你也很会经营自己的形象。无论是朋友圈、社交场合，还是亲密关系里，你都希望自己看起来是体面的、有魅力的、不落下风的。你不是单纯自恋，你是有意识地把自己放在主角位。',
+    dangerFile:{
+      base:'你天生就知道怎么让自己发光。你对自己的优势非常清楚，也知道怎样在一群人里保持存在感。\n\n你不需要别人教你如何展示自己，你自带聚光灯。你不是虚有其表，你确实有能力，只是你更喜欢被看见，而不是默默做事。',
+      trigger:'你很难忍受"被忽视"和"被否定"。以下场景会直接触发你的危险模式：有人当面否定你的能力或价值；你不是焦点，别人比你更受关注；你的付出没有得到应有的认可；有人当众让你下不来台。',
+      danger:'触发后，你不会示弱，而是加倍证明自己。你会更加高调地展示实力，用行动告诉所有人"我才是主角"。\n\n你可能在心里给否定你的人扣分，表面不动声色，暗地里找机会扳回一局。你不是记仇，你只是不允许自己的光环被质疑。',
+      awareness:'你的危险点在于，你把"被认可"等同于"被爱"。你以为越亮眼就越值得被爱。\n\n但真正的爱不是因为你发光才来，而是即使你暗淡了也不走。'
+    },
+    growth:[
+      {title:'试着"不发光"也能自在',desc:'不是每个场合都需要你当主角。试着在一些不重要的事情上"隐身"，你会发现不发光的时候，也能被温柔对待。'},
+      {title:'把"被认可"和"被爱"分开',desc:'被认可是因为你优秀，被爱是因为你是你。试着接受一种新的可能：有人爱你不是因为你好，只是因为你是你。'},
+      {title:'允许自己"不完美"被看见',desc:'你太习惯展示最好的一面，但偶尔让别人看到你的脆弱，不会让你掉价，反而会让你更像一个完整的人。'}
+    ],
+    color:{p:'#5C2A6E',deep:'#2A0F36',soft:'#8B4AA8',g1:'#5C2A6E',g2:'#2A0F36'}},
+  dou_s:{name:'抖 S',id:1,level:'A',levelText:'高危',rare:'8.2%',char:'控',
+    rank:'#4',dangerIndex:82,tier:'显性态 · 第壹型',bg:'#FBEAEC',
+    attr:'抖 S（主）+ 病娇 + 腹黑怪',sub:'DOU_S · 第壹型',
+    comment:'心里有条线，别人别乱碰，我全都看在眼里。',radarText:'你不是不好惹，你是只让值得的人靠近。',
+    shareText:'我脾气好是因为你还没碰到线。碰到了，我让你知道什么叫来不及后悔。',
+    subs:['yandere','schemer'],radar:[100,12,89,86,31,71,64,28,67],
+    cpMatch:{name:'抖 M',reason:'天生施受虐组合，一个想掌控一个甘愿被掌控'},
+    cpClash:{name:'腹黑怪',reason:'你刚出手，人家已经算好你下一步了'},
+    analysis:'你是一个有精神洁癖的人，对自己喜欢的人和事物有强烈掌控欲。生活中，你有自己的规则和节奏，暗地里精于心机，别人永远看不透你的底牌。你只对真正值得的人展现温柔，其余的全靠套路和智慧。\n\n在感情里，你不是那种轻易上头、随便交付真心的人。你会观察、会试探、会判断对方值不值得。一旦你真的认定一个人，你的占有欲和保护欲就会同时上线。嘴上可能很淡，心里却已经把边界画得清清楚楚：谁能靠近，谁该滚远，你比谁都明白。\n\n你不喜欢被别人安排，更讨厌有人对你指手画脚。别人以为你只是有点强势，其实你真正危险的地方在于：你能忍，但你不会忘；你能笑，但你不一定真的原谅。你很少无意义发疯，因为你更喜欢在合适的时机精准出手。\n\n你的危险感不是大吵大闹，而是"我表面没事，但我什么都知道"。别人如果真碰到你的底线，就会发现你不是没脾气，只是平时懒得浪费火力。',
+    dangerFile:{
+      base:'你是一个有精神洁癖的人，对自己认定的东西有强烈的领地意识。你有自己的规则和节奏，不喜欢别人越界。你不是冷漠，只是把热情留给了少数你认为值得的人。\n\n你观察力极强，别人以为你没在意，其实你什么都看在眼里。',
+      trigger:'你很难忍受"被冒犯"和"被无视"。以下场景会直接触发你的危险模式：有人当面质疑你的底线；你定的规则被人随意打破；你认真对待的人不把你当回事；有人在你面前耍小聪明还以为你没看穿。',
+      danger:'触发后，你不会大吵大闹，而是用最精准的方式让对方知道越界的代价。你会冷下来，眼神、语气、态度全变，让对方瞬间意识到不对。\n\n你可以很狠，但你的狠不是失控，而是清醒状态下的精准打击。',
+      awareness:'你的危险点在于，你把"规则"看得比"关系"重。当有人触碰你的底线，你会下意识切换到"惩罚模式"，而不是"沟通模式"。\n\n你真正需要的不是所有人都遵守你的规则，而是一个能理解你底线背后原因的人。'
+    },
+    growth:[
+      {title:'把"底线"说出来，而不是让别人猜',desc:'你的规则在别人眼里可能并不明显。试着在关系初期就坦诚表达"我介意什么"，比事后让对方付出代价更有效。'},
+      {title:'区分"冒犯"和"误解"',desc:'不是所有越界都是故意的。给别人一次解释的机会，你会发现有些事只是沟通不到位，而不是不尊重你。'},
+      {title:'允许自己偶尔"不计较"',desc:'不是每件事都值得你出手。把火力留给真正重要的事，你会发现生活轻松很多，别人也会更珍惜你认真的时候。'}
+    ],
+    color:{p:'#A82533',deep:'#5C1018',soft:'#DB143C',g1:'#A82533',g2:'#5C1018'}},
+  controller:{name:'控制狂',id:6,level:'A',levelText:'高危',rare:'9.5%',char:'掌',
+    rank:'#5',dangerIndex:79,tier:'主导态 · 第陆型',bg:'#F8F0E0',
+    attr:'控制狂（主）+ NPD（自恋型人格） + 抖 S',sub:'CONTROLLER · 第陆型',
+    comment:'掌控全场，顺便帅得不要不要的。',radarText:'你不是控制欲强，你只是受不了事情失控。',
+    shareText:'可以商量，但最后最好按我的来。不听也行，后果自负。',
+    subs:['npd','dou_s'],radar:[82,15,55,69,34,100,88,29,61],
+    cpMatch:{name:'抖 M',reason:'一个要掌控全场，一个甘愿配合'},
+    cpClash:{name:'暴走',reason:'你定的规则，人家一条都不认'},
+    analysis:'你喜欢掌控一切，做事有条不紊。自信爆棚，总觉得自己是主角，别人无法轻易干扰你的计划。你行动果断，原则明确，充满掌控感。\n\n你很讨厌混乱、拖延和不可控。无论是生活、关系、工作还是计划，你都希望事情能按逻辑推进。别人觉得差不多就行，但你不行。你要的是清楚、明确、可预判、最好还能按照你的节奏来。\n\n你的危险点在于，你的标准很高，而且不太容易被说服。你不是完全听不进建议，而是对方必须说得足够有逻辑、有价值。空口劝你、随便评价你、试图打乱你的安排，都会让你瞬间烦躁。\n\n你也有很强的自我认同感。你知道自己想要什么，也知道自己不想成为什么样的人。你不喜欢被动等待，更不喜欢别人替你决定。你可以温和，但不代表你会让出方向盘。',
+    dangerFile:{
+      base:'你是一个对"秩序"有强烈需求的人。你相信事情应该按计划走，关系应该有明确的规则，生活应该在你的掌控范围内。你不是霸道，你只是觉得失控的成本太高。\n\n你很有主见，执行力强，别人习惯听你的安排。',
+      trigger:'你很难忍受"失控"和"被否定"。以下场景会直接触发你的危险模式：你安排好的计划被人临时打乱；你的决定被当面反驳，尤其是公开场合；对方不按约定行事还觉得无所谓；你感受到自己在关系里逐渐失去主导权。',
+      danger:'触发后，你会收紧控制。你会更加强硬地坚持自己的方案，不允许任何人插手。你可能开始事无巨细地过问每一个环节，不让对方有任何自主空间。\n\n你的语气会变得不容商量，"听我的"变成口头禅。你不是不尊重别人，只是你觉得自己的方案永远最优。',
+      awareness:'你的危险点在于，你把"掌控"等同于"安全"。你以为越控制就越安全，但过度控制只会让身边的人窒息。\n\n你真正需要的安全感不是"一切按我的来"，而是"即使失控，我也能应对"。'
+    },
+    growth:[
+      {title:'练习"放权"',desc:'从小事开始让别人做决定：去哪吃饭、看什么电影、怎么安排周末。你会发现天没有塌，而且别人做主的时候你也能享受。'},
+      {title:'区分"建议"和"挑战"',desc:'别人提出不同意见不一定是挑战你的权威。试着先听完对方的逻辑，再决定接不接受，而不是第一时间反驳。'},
+      {title:'接受"不完美"也是一种结果',desc:'你的标准很高，但不是每件事都需要最优解。允许"差不多就行"的存在，你会发现生活轻松很多。'}
+    ],
+    color:{p:'#A8842A',deep:'#5C4810',soft:'#C9A961',g1:'#A8842A',g2:'#5C4810'}},
+  rampage:{name:'暴走',id:7,level:'A',levelText:'高危',rare:'11.3%',char:'燃',
+    rank:'#6',dangerIndex:76,tier:'爆发态 · 第柒型',bg:'#FCEDE3',
+    attr:'暴走人格（主）+ 抖 S + 控制狂',sub:'RAMPAGE · 第柒型',
+    comment:'说干就干，别挡我路，谁都挡不住我。',radarText:'你不是脾气差，你是忍不了低效和装傻。',
+    shareText:'我可以冷静，但你最好别逼我开大。开了就收不回来。',
+    subs:['dou_s','controller'],radar:[91,13,48,61,26,84,68,39,100],
+    cpMatch:{name:'抖 M',reason:'能承受你的暴脾气，不跟你硬刚'},
+    cpClash:{name:'腹黑怪',reason:'你炸完之后，人家冷静收尾让你更憋屈'},
+    analysis:'性格火爆、行动果断，喜欢掌控一切。一旦爆发，你的行动力惊人，高能量的存在让周围人不得不敬畏。你永远是场上的风暴中心。\n\n你不是那种喜欢慢慢耗的人。遇到问题，你更倾向于直接处理；遇到冲突，你也不太喜欢绕来绕去。你讨厌磨叽、讨厌装傻、讨厌别人明明有问题还假装无事发生。你要的是干脆，是痛快，是别浪费时间。\n\n你的危险点在于，你的情绪来得快，行动也快。别人还在思考怎么表达，你可能已经把话说出口了。你不是一定想伤人，只是你受不了憋着。你觉得有些事情就该当场说清楚，越拖越烦。\n\n但你也不是单纯冲动。你其实很有掌控欲，也很清楚自己想要什么。只是你的执行方式比较猛，像开了加速器。别人可能觉得你不好惹，但你自己知道：只要别踩线，你其实也没那么难相处。',
+    dangerFile:{
+      base:'你是一个能量很高的人，做什么事都快、狠、直接。你不喜欢绕弯子，觉得能一句话说清的事就别磨叽。\n\n你的行动力极强，别人还在犹豫的时候你已经出手了。你不是没脑子，你只是觉得想太多不如先做了再说。',
+      trigger:'你很难忍受"低效"和"装傻"。以下场景会直接触发你的危险模式：有人明明有问题却装作没事发生；你说了三遍对方还是磨叽不改；计划被拖拖拉拉的人耽误；有人当面阴阳怪气还装无辜。',
+      danger:'触发后，你会直接开炸。你的声音会变大，语速会变快，可能当场掀桌。你不会顾及场合和面子，有什么说什么，怎么痛快怎么来。\n\n你不是想伤人，你只是受不了憋着。炸完之后你可能也有点后悔，但当时真的控制不住。',
+      awareness:'你的危险点在于，你把"爆发"当成了唯一的表达方式。你以为只有炸了别人才会听，但其实炸完之后别人只是怕你，不是理解你。\n\n你真正需要的不是更大的火力，而是让别人在没有炸之前就听到你。'
+    },
+    growth:[
+      {title:'给自己装一个"3秒缓冲"',desc:'爆发之前深呼吸3秒，问自己"现在炸了能解决问题吗"。如果不能，先离开现场，等冷静了再处理。'},
+      {title:'学会"小声说重话"',desc:'不是音量大别人才会听。试着用平静的语气说出你的底线，你会发现这种力量比大吼更让人重视。'},
+      {title:'区分"该炸"和"不值当"',desc:'不是每件事都值得你开大。把火力留给真正重要的底线，日常小事学会"算了"，你会发现日子顺很多。'}
+    ],
+    color:{p:'#D45A2A',deep:'#7A2810',soft:'#E84A2A',g1:'#D45A2A',g2:'#7A2810'}},
+  bpd:{name:'BPD',id:8,level:'B',levelText:'潜在风险',rare:'12.6%',char:'潮',
+    rank:'#7',dangerIndex:64,tier:'潮汐态 · 第捌型',bg:'#F0EDF4',
+    attr:'BPD（边缘型人格）（主）+ 自虐狂 + 抖 M',sub:'BORDERLINE · 第捌型',
+    comment:'心像过山车，虐心又甜心。',radarText:'你不是情绪化，你只是太害怕自己不重要。',
+    shareText:'我不是作，我只是需要确定你真的在。你一犹豫，我就当你要走。',
+    subs:['self_punisher','dou_m'],radar:[36,88,76,44,93,52,27,100,23],
+    cpMatch:{name:'抖 S',reason:'需要给确定感的人，抖S刚好能给'},
+    cpClash:{name:'NPD',reason:'忽冷忽热会加重你的不稳定'},
+    analysis:'情绪起伏大、依赖感强，容易自我牺牲，也享受被掌控的微妙刺激。你在感情中真心投入，但时常小心翼翼，怕受伤，生活像一场情绪过山车。\n\n你对关系里的变化非常敏感。对方一句话少了点热情，回复慢了一点，语气不对一点，你都可能立刻察觉。你不是故意想太多，而是你的情绪雷达太灵了，灵到有时候连你自己都累。\n\n你的危险点在于，你很容易在"想靠近"和"怕受伤"之间反复横跳。你渴望被坚定选择，又害怕自己太认真会显得狼狈。你想要安全感，但有时候又会用试探、沉默、别扭来确认对方到底在不在乎。\n\n你不是不讲道理，只是情绪上来的时候，道理暂时没有那么好用。你可以很甜、很黏、很真诚，也可以突然陷入低落、敏感、胡思乱想。你真正想要的其实很简单：明确一点，稳定一点，别让我猜。',
+    dangerFile:{
+      base:'你的情绪雷达比常人灵敏十倍。别人一个微表情、一句话的语气变化，你都能捕捉到，而且会忍不住反复解读。你不是故意敏感，你的感受系统就是比别人开得更大。\n\n你的内心像潮汐，有时候平静温柔，有时候汹涌到自己也控制不住。',
+      trigger:'你很容易被"被抛弃感"击中。以下场景会直接触发你的危险模式：对方突然变冷淡，没有解释；你感觉自己在对方心里不再是"特别的"；对方和别人走得近，哪怕只是正常社交；对方犹豫、迟疑、态度模糊。',
+      danger:'触发后，你会在"极度黏人"和"先推开你"之间剧烈摆荡。前一秒还在拼命讨好，后一秒就突然冷暴力。\n\n你可能反复试探、反复确认"你到底在不在乎我"，用各种方式逼对方给出回应。你不是想作，你只是太害怕失去。',
+      awareness:'你的危险点在于，你把"被抛弃的恐惧"当成了关系的底色。你太害怕失去，所以先推开；太渴望确定，所以反复试探。\n\n但你真正需要的安全感，不是别人反复证明不会走，而是你自己相信自己值得被留下。'
+    },
+    growth:[
+      {title:'给情绪设一个"延迟阀"',desc:'情绪上头的时候不要立刻行动。给自己30分钟，去散步、听歌、做点别的事。你会发现很多"非做不可"的冲动，30分钟后就没那么强烈了。'},
+      {title:'把"试探"换成"提问"',desc:'与其用冷暴力测试对方在不在意，不如直接问"你今天是不是不太开心"。一次坦诚的对话，胜过十次暗中的试探。'},
+      {title:'建立"自我锚点"',desc:'你的情绪太容易跟着别人走，试着找到一些不依赖任何人的快乐：一个爱好、一项运动、一段独处的时光。当你可以让自己开心，就不需要别人来填满你。'}
+    ],
+    color:{p:'#7A6896',deep:'#4A3A5C',soft:'#8C7AA8',g1:'#8C7AA8',g2:'#4A3A5C'}},
+  dou_m:{name:'抖 M',id:2,level:'B',levelText:'潜在风险',rare:'15.8%',char:'依',
+    rank:'#8',dangerIndex:58,tier:'依附态 · 第贰型',bg:'#F5EAE6',
+    attr:'抖 M（主）+ 自虐狂 + BPD（边缘型人格）',sub:'DOU_M · 第贰型',
+    comment:'被掌控也甘之如饴，虐自己一点都不冤。',radarText:'你不是软弱，你只是太容易把感受放大。',
+    shareText:'我不是恋爱脑，我只是很容易被情绪拿捏。现在我发现，被拿捏也是一种瘾。',
+    subs:['self_punisher','bpd'],radar:[36,100,62,43,91,48,25,88,19],
+    cpMatch:{name:'抖 S',reason:'被掌控的快感，刚好有人接得住'},
+    cpClash:{name:'控制狂',reason:'被完全拿捏，连自我消耗的空间都没有'},
+    analysis:'你容易顺从和依赖他人，情绪波动明显。你在感情中深情投入，但也会自我牺牲。被掌控和挑战刺激你，你懂得从压力和微虐中获得奇妙满足感。\n\n你不是没有主见，只是很多时候你会下意识先照顾别人的情绪。别人一句话、一个态度变化，就可能让你想很多。你嘴上说"没事"，心里可能已经把所有细节翻来覆去复盘了三遍。你很容易为关系投入，也很容易在关系里消耗自己。\n\n你的危险点在于：你明明知道有些事情会让自己难受，却还是忍不住靠近。你对强烈情绪有一种奇怪的依赖感，平淡太久反而会觉得不真实。你不是喜欢痛苦，而是某些拉扯、在意、患得患失，会让你觉得"我还活着，我还在认真感受"。\n\n在别人眼里，你可能温柔、好说话、有点软。但真正了解你的人会知道，你内心的小剧场非常热闹。你可以为了喜欢的人降低姿态，也可以在积攒太久之后突然情绪决堤。',
+    dangerFile:{
+      base:'你天生对关系敏感，很容易把别人的情绪当成自己的事。你不是没有主见，而是你习惯先照顾别人的感受，再考虑自己。\n\n你对强烈情绪有一种奇怪的吸引力，平淡的关系反而让你觉得不真实。',
+      trigger:'你很容易被"冷"和"不确定"击中。以下场景会直接触发你的危险模式：对方突然变冷淡，没有解释；你感到自己在关系里是"多余的那个"；你的付出被当成理所当然；被忽视、被已读不回、被轻描淡写地带过。',
+      danger:'触发后，你不会攻击别人，但会开始攻击自己。你会反复想"是不是我不够好"，把所有问题往自己身上揽。\n\n你会更加卑微地付出，试图用更多的讨好换回对方的关注。你可能明知道这样不对，但就是停不下来。',
+      awareness:'你的危险点不在于伤害别人，而在于伤害自己。你把"被需要"等同于"被爱"，把"忍耐"当成"深情"。\n\n真正健康的关系不是你一味低头，而是有人愿意主动弯腰来接你。'
+    },
+    growth:[
+      {title:'学会区分"在意"和"上瘾"',desc:'真正在意你的人不会让你反复猜测自己的位置。如果一段关系让你越来越累，那不是深情，是消耗。'},
+      {title:'练习说"我不要"',desc:'从小事开始拒绝：不想去的局不去，不想帮的忙不帮。你会发现说"不"天不会塌，反而别人会更尊重你。'},
+      {title:'把给别人的温柔分一点给自己',desc:'你对所有人都很体贴，唯独对自己很苛刻。试着像照顾好朋友一样照顾自己，你值得被自己好好对待。'}
+    ],
+    color:{p:'#9A5C4E',deep:'#6B3A30',soft:'#D49A8C',g1:'#D49A8C',g2:'#9A5C4E'}},
+  self_punisher:{name:'自虐狂',id:5,level:'B',levelText:'潜在风险',rare:'18.4%',char:'忍',
+    rank:'#9',dangerIndex:55,tier:'内耗态 · 第伍型',bg:'#EDF0F3',
+    attr:'自虐狂（主）+ 抖 M + 病娇',sub:'SELF_PUNISHER · 第伍型',
+    comment:'自虐自嗨两不误，虐心又甜心。',radarText:'你不是自虐，你只是太会把难过咽下去。',
+    shareText:'我不是放不下，我是把难过当饭吃，还吃出了习惯。',
+    subs:['dou_m','yandere'],radar:[37,90,86,44,100,58,29,76,22],
+    cpMatch:{name:'病娇',reason:'一个愿打一个愿挨，虐心又甜心'},
+    cpClash:{name:'NPD',reason:'你的付出在对方眼里只是背景板'},
+    analysis:'你在生活中容易过度投入和自我牺牲，享受顺从与感情波动带来的刺激。你的情感丰富而敏感，默默承受压力，却从中获得独特满足感。\n\n你是那种很容易把事情往自己身上揽的人。关系出问题，你先想是不是自己不够好；工作学习出错，你先反复复盘哪里没做好；别人情绪不好，你也容易下意识觉得是不是自己哪里惹到对方。你不是没有脾气，只是习惯先消化自己。\n\n你的危险点在于，你对"忍耐"这件事太熟练了。你可以嘴上说没事，心里却已经难受到不行。你可以继续付出，继续照顾别人，继续表现得很正常，但内心早就默默扣血。\n\n感情里的你尤其容易上头。你一旦喜欢，就会很认真，很能忍，也很容易因为一点点回应开心很久。别人觉得你太敏感，但其实你只是太在乎。你并不是真的喜欢受伤，你只是太习惯用付出来证明自己值得被爱。',
+    dangerFile:{
+      base:'你是那种习惯把所有问题往自己身上揽的人。出了事，你第一反应不是"谁的错"，而是"我是不是哪里没做好"。\n\n你对别人的情绪变化极其敏感，别人一个皱眉就能让你反思半天。你不是没有脾气，你只是把脾气都咽下去了。',
+      trigger:'你很容易被"否定"和"冷暴力"击中。以下场景会直接触发你的危险模式：你认真做的事被轻描淡写地否定；你付出很多却得不到回应；对方用沉默代替沟通；你感觉到自己是"多余的""可替代的"。',
+      danger:'触发后，你不会反击，反而会更加用力地付出。你会觉得"一定是我做得不够好"，然后加倍讨好、加倍忍让、加倍自我消耗。\n\n你可以一边崩溃一边表现得若无其事，把所有难过都压在深夜独处的时候。你不是不痛，你只是太习惯了。',
+      awareness:'你的危险点在于，你把"自我牺牲"当成了爱的证明。你以为越能忍就越深情，越能扛就越值得。\n\n但真正的爱不是把自己耗尽，而是在关系里被看见、被接住。'
+    },
+    growth:[
+      {title:'停止为别人的情绪买单',desc:'别人不开心不一定是你的错。试着在自责之前先问自己"这真的是我的问题吗"，你会发现大部分时候并不是。'},
+      {title:'给付出设一个"止损线"',desc:'在关系里给自己定一个底线：如果连续三次付出都没有回应，就停下来。爱可以不求回报，但不该不求尊重。'},
+      {title:'把"我不配"换成"我值得"',desc:'你太习惯觉得自己不够好，但你能这么认真地爱一个人，本身就说明你心里的爱很丰沛。把这份丰沛先留一点给自己。'}
+    ],
+    color:{p:'#5A6B7F',deep:'#3A4858',soft:'#6E7F94',g1:'#6E7F94',g2:'#3A4858'}}
+};
+
+const YL = {
+  dou_s:['yandere','schemer'],dou_m:['self_punisher','bpd'],yandere:['controller','npd'],
+  schemer:['rampage','dou_s'],self_punisher:['dou_m','yandere'],controller:['npd','dou_s'],
+  npd:['dou_s','schemer'],bpd:['self_punisher','dou_m'],rampage:['dou_s','controller']
+};
+const JL = ['rampage','bpd','npd','controller','dou_s','yandere','schemer','self_punisher','dou_m'];
+const DIM_TO_KEY = {1:'dou_s',2:'dou_m',3:'yandere',4:'schemer',5:'self_punisher',6:'controller',7:'rampage',8:'bpd',9:'npd'};
+
+// 9型排位顺序（从#1到#9）
+const RANK_ORDER = ['yandere','schemer','npd','dou_s','controller','rampage','bpd','dou_m','self_punisher'];
+
+// 危险档案高亮关键词
+const DANGER_HL = {
+  yandere:{
+    base:['语气、回复速度、朋友圈动态、和谁走得近'],
+    trigger:['"不确定"'],
+    danger:['几乎病态','特别的、被重视的、无法替代的'],
+    awareness:['把"在意"演变成了"控制"','主动给确定感']
+  },
+  schemer:{
+    base:['微表情、语气变化、用词习惯','档案库太齐全了'],
+    trigger:['"被欺骗"','"被当傻子"'],
+    danger:['一击致命','物理清场'],
+    awareness:['"算计"当成了自我保护','允许自己不设防']
+  },
+  npd:{
+    base:['自带聚光灯'],
+    trigger:['"被忽视"','"被否定"'],
+    danger:['我才是主角','不允许自己的光环被质疑'],
+    awareness:['"被认可"等同于"被爱"','即使你暗淡了也不走']
+  },
+  dou_s:{
+    base:['精神洁癖','领地意识'],
+    trigger:['"被冒犯"','"被无视"'],
+    danger:['清醒状态下的精准打击'],
+    awareness:['"规则"看得比"关系"重','"惩罚模式"']
+  },
+  controller:{
+    base:['"秩序"','失控的成本太高'],
+    trigger:['"失控"','"被否定"'],
+    danger:['收紧控制','"听我的"'],
+    awareness:['"掌控"等同于"安全"','即使失控，我也能应对']
+  },
+  rampage:{
+    base:['快、狠、直接','行动力极强'],
+    trigger:['"低效"','"装傻"'],
+    danger:['直接开炸','怎么痛快怎么来'],
+    awareness:['"爆发"当成了唯一的表达方式']
+  },
+  bpd:{
+    base:['情绪雷达比常人灵敏十倍','像潮汐'],
+    trigger:['"被抛弃感"'],
+    danger:['"极度黏人"','"先推开你"','太害怕失去'],
+    awareness:['"被抛弃的恐惧"']
+  },
+  dou_m:{
+    base:['把别人的情绪当成自己的事','对强烈情绪有一种奇怪的吸引力'],
+    trigger:['"冷"','"不确定"'],
+    danger:['攻击自己','更加卑微地付出','停不下来'],
+    awareness:['"被需要"等同于"被爱"','"忍耐"当成"深情"']
+  },
+  self_punisher:{
+    base:['把所有问题往自己身上揽','把脾气都咽下去了'],
+    trigger:['"否定"','"冷暴力"'],
+    danger:['加倍讨好','加倍忍让','加倍自我消耗'],
+    awareness:['"自我牺牲"当成了爱的证明']
+  }
+};
+
+function hl(text, key, field){
+  const words = DANGER_HL[key]?.[field];
+  if(!words) return text;
+  let r = text;
+  words.forEach(w=>{
+    const esc = w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    r = r.replace(new RegExp(esc,'g'),`<em>${w}</em>`);
+  });
+  return r;
+}
+
+// ============ 状态 ============
+let currentQ = 0;
+let answers = {};
+let testStarted = false;
+
+function getStorageKey(token) {
+  return 'test_result_' + (token || (window.linkValidator && window.linkValidator.token) || 'local');
+}
+
+function getCompletionFlagKey() {
+  const token = window.linkValidator && window.linkValidator.token;
+  return 'dpt_test_completed_' + (token || '');
+}
+
+function addPromotionLinkDelayed() {
+  setTimeout(function () {
+    if (window.PsyTestValidator && typeof window.PsyTestValidator.addPromotionLink === 'function') {
+      window.PsyTestValidator.addPromotionLink();
+    }
+  }, 200);
+}
+
+async function waitForValidator() {
+  let waitCount = 0;
+  while (!window.linkValidator && waitCount < 30) {
+    await new Promise(function (resolve) { setTimeout(resolve, 100); });
+    waitCount++;
+    if (waitCount % 10 === 0 && window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+      const instance = window.PsyTestValidator.getInstance();
+      if (instance) {
+        window.linkValidator = instance;
+        break;
+      }
+    }
+  }
+  return window.linkValidator;
+}
+
+async function validateAndStartTest() {
+  const validator = await waitForValidator();
+  if (!validator) {
+    alert('验证SDK未初始化，无法开始测试。请刷新页面重试。');
+    return false;
+  }
+
+  let isValid = false;
+  if (typeof validator.validateForUserAction === 'function') {
+    try {
+      isValid = await validator.validateForUserAction();
+      if (!isValid || validator.valid === false) return false;
+    } catch (error) {
+      console.error('链接验证失败:', error);
+      validator.valid = false;
+      return false;
+    }
+  } else {
+    if (validator.valid === false) {
+      alert(validator.validationError || '测试链接无效，请检查链接是否正确');
+      return false;
+    }
+    isValid = validator.valid !== false;
+  }
+
+  if (!isValid || validator.valid === false) return false;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isRestart = urlParams.get('restart') === 'true' || window.__dpt_retest_mode === true;
+  if (!isRestart && !testStarted) {
+    try {
+      await validator.startTest();
+      testStarted = true;
+      console.log('测试开始记录成功');
+    } catch (error) {
+      console.error('记录测试开始失败:', error);
+      return false;
+    }
+  } else {
+    testStarted = true;
+    window.__dpt_retest_mode = false;
+    console.log('重新测试模式，跳过 startTest()');
+  }
+
+  return true;
+}
+
+function saveTestResult(testResult) {
+  const token = window.linkValidator && window.linkValidator.token;
+  if (!token) return;
+  try {
+    localStorage.setItem(getStorageKey(token), JSON.stringify({
+      token: token,
+      result: testResult,
+      timestamp: testResult.timestamp
+    }));
+  } catch (error) {
+    console.error('保存测试结果失败:', error);
+  }
+}
+
+// ============ 首页 -> 答题 ============
+async function startQuiz(){
+  const canStart = await validateAndStartTest();
+  if (!canStart) return;
+  currentQ = 0;
+  answers = {};
+  showPage('quiz');
+  renderQuestion();
+}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ============ 答题 ============
+let isTransitioning = false;
+
+function renderQuestion(){
+  const q = QUESTIONS[currentQ];
+  document.getElementById('qCurrent').textContent = String(currentQ+1).padStart(2,'0');
+  document.getElementById('qBar').style.width = ((currentQ+1)/35*100)+'%';
+  document.getElementById('qEyebrow').textContent = `第${cnNum(currentQ+1)}问 · ${q.c}`;
+  document.getElementById('qText').textContent = q.t;
+  const optsEl = document.getElementById('qOpts');
+  optsEl.innerHTML = '';
+  const keys = ['A','B','C','D'];
+  q.o.forEach((opt,i)=>{
+    const div = document.createElement('div');
+    div.className = 'opt';
+    if(answers[currentQ]===i) div.classList.add('selected');
+    div.innerHTML = `<span class="key">${keys[i]}</span>${opt}`;
+    div.onclick = ()=>selectOption(i);
+    optsEl.appendChild(div);
+  });
+  const cta = document.getElementById('qCta');
+  cta.disabled = currentQ===0;
+  const hint = document.getElementById('qHint');
+  if(currentQ===34){
+    hint.textContent = '选择后将自动生成报告';
+  } else {
+    hint.textContent = '选择后自动进入下一题';
+  }
+}
+
+function cnNum(n){
+  const arr=['一','二','三','四','五','六','七','八','九','十'];
+  if(n<=10) return arr[n-1];
+  return n;
+}
+
+function selectOption(i){
+  if(isTransitioning) return;
+  answers[currentQ] = i;
+  // 标记选中态
+  const optsEl = document.getElementById('qOpts');
+  Array.from(optsEl.children).forEach((el,idx)=>{
+    el.classList.toggle('selected', idx===i);
+  });
+  isTransitioning = true;
+  // 延迟自动跳转，让用户看到选中反馈
+  setTimeout(()=>{
+    isTransitioning = false;
+    if(currentQ < 34){
+      currentQ++;
+      renderQuestion();
+      window.scrollTo({top:0,behavior:'smooth'});
+    } else {
+      submitQuiz();
+    }
+  }, 380);
+}
+
+function nextQuestion(){
+  if(answers[currentQ]===undefined) return;
+  if(currentQ < 34){
+    currentQ++;
+    renderQuestion();
+  } else {
+    submitQuiz();
+  }
+}
+
+function prevQuestion(){
+  if(currentQ > 0){
+    currentQ--;
+    renderQuestion();
+  } else {
+    showPage('home');
+  }
+}
+
+// ============ 计分 ============
+function calculateResult(){
+  const scores = {};
+  DIMS.forEach(d=>scores[d]=0);
+  for(let i=0;i<35;i++){
+    if(answers[i]!==undefined){
+      const dim = QUESTIONS[i].s[answers[i]];
+      scores[dim] += 2;
+    }
+  }
+  // 找最高分
+  let maxScore = 0;
+  DIMS.forEach(d=>{if(scores[d]>maxScore) maxScore=scores[d]});
+  if(maxScore===0) return 'controller';
+  let winners = DIMS.filter(d=>scores[d]===maxScore);
+  if(winners.length===1) return winners[0];
+  // 平局：算关联分
+  let best = winners[0];
+  let bestRel = -1;
+  winners.forEach(w=>{
+    const rel = YL[w].reduce((sum,r)=>sum+scores[r],0);
+    if(rel > bestRel){ bestRel = rel; best = w; }
+  });
+  // 仍平则按JL优先级
+  const stillTie = winners.filter(w=>{
+    const rel = YL[w].reduce((sum,r)=>sum+scores[r],0);
+    return rel === bestRel;
+  });
+  if(stillTie.length > 1){
+    for(const d of JL){
+      if(stillTie.includes(d)) return d;
+    }
+  }
+  return best;
+}
+
+// 雷达抖动
+function jitterRadar(personaKey){
+  const persona = PERSONAS[personaKey];
+  const radar = [...persona.radar];
+  const mainIdx = DIMS.indexOf(personaKey);
+  const subs = persona.subs;
+  for(let i=0;i<9;i++){
+    if(radar[i]===100) continue;
+    if(subs.includes(DIMS[i])){
+      const j = (Math.random()-0.5)*0.2;
+      radar[i] = Math.min(95, Math.max(0, radar[i]*(1+j)));
+    } else {
+      const j = (Math.random()-0.5)*0.6;
+      radar[i] = Math.min(90, Math.max(0, radar[i]*(1+j)));
+    }
+    radar[i] = Math.round(radar[i]);
+  }
+  return radar;
+}
+
+// ============ 提交 -> 生成报告 ============
+function submitQuiz(){
+  document.getElementById('loading').classList.add('show');
+  setTimeout(async ()=>{
+    const resultKey = calculateResult();
+    const radar = jitterRadar(resultKey);
+    renderResult(resultKey, radar);
+
+    const persona = PERSONAS[resultKey];
+    const testResult = {
+      personaKey: resultKey,
+      personaName: persona && persona.name,
+      level: persona && persona.level,
+      rare: persona && persona.rare,
+      dangerIndex: persona && persona.dangerIndex,
+      radar: radar,
+      answers: answers,
+      timestamp: new Date().toISOString()
+    };
+    saveTestResult(testResult);
+
+    const completionFlagKey = getCompletionFlagKey();
+    const alreadyCompleted = window.__dpt_test_completed || localStorage.getItem(completionFlagKey) === 'true';
+    if (!alreadyCompleted && window.linkValidator) {
+      try {
+        window.__dpt_test_completed = true;
+        localStorage.setItem(completionFlagKey, 'true');
+        await window.linkValidator.completeTest(undefined, testResult);
+        console.log('测试完成记录成功');
+      } catch (error) {
+        console.error('记录测试完成失败:', error);
+        window.__dpt_test_completed = false;
+        localStorage.removeItem(completionFlagKey);
+      }
+    }
+
+    document.getElementById('loading').classList.remove('show');
+    showPage('result');
+    addPromotionLinkDelayed();
+  }, 1500);
+}
+
+// ============ 渲染报告 ============
+function renderResult(personaKey, savedRadar){
+  const persona = PERSONAS[personaKey];
+
+  // 设置主题色
+  const root = document.documentElement;
+  root.style.setProperty('--p-color', persona.color.p);
+  root.style.setProperty('--p-deep', persona.color.deep);
+  root.style.setProperty('--p-soft', persona.color.soft);
+  root.style.setProperty('--p-grad1', persona.color.g1);
+  root.style.setProperty('--p-grad2', persona.color.g2);
+  root.style.setProperty('--p-fill', persona.color.p+'2E');
+  root.style.setProperty('--p-bg', persona.bg);
+
+  const radar = savedRadar || jitterRadar(personaKey);
+  const levelBadge = persona.level==='S' ? '◆ S 级 · 极度危险' : persona.level==='A' ? '◆ A 级 · 高危' : '◆ B 级 · 潜在风险';
+
+  const dimLabels = DIMS.map(d=>DIM_NAMES[d]);
+  const radarSvg = buildRadarSvg(radar, dimLabels);
+
+  const analysisHtml = persona.analysis.split('\n\n').map(p=>`<p>${p}</p>`).join('');
+  const chipsHtml = [persona.name, ...persona.subs.map(s=>DIM_NAMES[s])].map(n=>`<span class="chip">${n}</span>`).join('');
+
+  const dimRowsHtml = DIMS.map((d,i)=>{
+    const val = radar[i];
+    const isPeak = val===100;
+    const display = isPeak ? '爆表' : val+'%';
+    return `<div class="dim-row"><span class="nm">${DIM_NAMES[d]}</span><div class="track${isPeak?' peak':''}"><i style="width:${val}%"></i></div><span class="val">${display}</span></div>`;
+  }).join('');
+
+  // 9宫格 - 按排位排列，当前人格高亮
+  const gridHtml = RANK_ORDER.map(key=>{
+    const p = PERSONAS[key];
+    const isActive = key === personaKey;
+    return `<div class="cell${isActive?' active':''}"><div class="gname">${p.name}</div><div class="grare">${p.rare}</div></div>`;
+  }).join('');
+
+  // "比XX%的人更危险" = 100% - 稀缺比例
+  const rareNum = parseFloat(persona.rare);
+  const moreDangerous = (100 - rareNum).toFixed(1).replace(/\.0$/,'');
+
+  // 危险档案（带高亮）
+  const df = persona.dangerFile;
+  const pKey = personaKey;
+  const baseParas = df.base.split('\n\n').map(p=>`<p>${hl(p,pKey,'base')}</p>`).join('');
+  // trigger: 按"："分割intro和列表项，列表项按"；"分割
+  const triggerParts = df.trigger.split('：');
+  const triggerIntro = hl(triggerParts[0],pKey,'trigger') + '：';
+  const triggerItemsStr = triggerParts[1] ? triggerParts[1].replace(/[。.]$/,'') : '';
+  const triggerItems = triggerItemsStr.split('；').map(s=>s.trim()).filter(s=>s);
+  const triggerHtml = `<p>${triggerIntro}</p><p>${triggerItems.map(s=>'· '+hl(s,pKey,'trigger')).join('<br>')}</p>`;
+  const dangerParas = df.danger.split('\n\n').map(p=>`<p>${hl(p,pKey,'danger')}</p>`).join('');
+  const awarenessParas = df.awareness.split('\n\n').map(p=>`<p>${hl(p,pKey,'awareness')}</p>`).join('');
+
+  // 成长处方
+  const growthHtml = persona.growth.map((g,i)=>`
+    <div class="rx-item">
+      <div class="rx-num">${i+1}</div>
+      <div class="rx-content">
+        <div class="rx-title">${g.title}</div>
+        <div class="rx-desc">${g.desc}</div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('resultBody').innerHTML = `
+    <div class="r-title">— 心镜照见 —</div>
+    <div class="r-title-2">你隐藏起来的<span class="ch">危险人格</span>居然是</div>
+    <div class="brush"></div>
+
+    <div class="hero" data-char="${persona.char}">
+      <div class="hero-top">
+        <div class="hero-tags">
+          <span class="tag-level">${levelBadge}</span>
+          <span class="tag-tier">${persona.tier}</span>
+        </div>
+        <div class="hero-rank">
+          <div class="num">${persona.rank}</div>
+          <div class="lbl">9型中排位</div>
+        </div>
+      </div>
+      <div class="hero-name">${persona.name}</div>
+      <div class="hero-sub">${persona.sub} · 仅 ${persona.rare} 的人是这种</div>
+      <div class="hero-chips">${chipsHtml}</div>
+      <div class="hero-quote">"${persona.comment}"</div>
+    </div>
+
+    <div class="scarce-card">
+      <div class="left">
+        <div class="num">${persona.rare.replace('%','<small>%</small>')}</div>
+        <div class="lbl">只有 ${persona.rare} 的人和你是同一种</div>
+      </div>
+      <div class="right">
+        危险指数<br><b>${persona.dangerIndex} / 100</b>
+      </div>
+    </div>
+
+    <div class="sec-h">危险人格雷达 <span class="en">DANGER RADAR</span></div>
+    <div class="radar-card">
+      <div class="radar-wrap">${radarSvg}</div>
+    </div>
+
+    <div class="sec-h">各维度评分 <span class="en">DIMENSIONS</span></div>
+    <div class="dims-card">${dimRowsHtml}</div>
+
+    <div class="sec-h">人格定位 <span class="en">POSITION</span></div>
+    <div class="grid-card">
+      <div class="grid9">${gridHtml}</div>
+      <div class="grid-foot">你在 <b>9 种危险人格</b> 中排第 <b>${persona.rank.replace('#','')}</b> 位 · 比 <b>${moreDangerous}%</b> 的人更危险</div>
+    </div>
+
+    <div class="sec-h">危险档案 <span class="en">DANGER FILE</span></div>
+
+    <div class="file-card base">
+      <div class="file-head">
+        <div class="file-icon">底</div>
+        <div class="file-title">你的危险底色<span class="sub">BASE</span></div>
+      </div>
+      <div class="file-body">${baseParas}</div>
+    </div>
+
+    <div class="file-card trigger">
+      <div class="file-head">
+        <div class="file-icon">触</div>
+        <div class="file-title">触发你的开关<span class="sub">TRIGGER</span></div>
+      </div>
+      <div class="file-body">${triggerHtml}</div>
+    </div>
+
+    <div class="file-card danger">
+      <div class="file-head">
+        <div class="file-icon">爆</div>
+        <div class="file-title">危险时刻的你<span class="sub">DANGER</span></div>
+      </div>
+      <div class="file-body">${dangerParas}</div>
+      <div class="file-quote">"${persona.shareText}"</div>
+    </div>
+
+    <div class="file-card aware">
+      <div class="file-head">
+        <div class="file-icon">觉</div>
+        <div class="file-title">自我觉察<span class="sub">AWARENESS</span></div>
+      </div>
+      <div class="file-body">${awarenessParas}</div>
+    </div>
+
+    <div class="sec-h">完整分析 <span class="en">ANALYSIS</span></div>
+    <div class="analysis">
+      ${analysisHtml}
+      <div class="radar-text">${persona.radarText}</div>
+    </div>
+
+    <div class="sec-h">人格羁绊 <span class="en">COMPATIBILITY</span></div>
+    <div class="cp">
+      <div class="cp-card match">
+        <span class="cp-mark">最搭</span>
+        <div class="cp-body">
+          <div class="cp-name">${persona.cpMatch.name}</div>
+          <div class="cp-reason">${persona.cpMatch.reason}</div>
+        </div>
+      </div>
+      <div class="cp-card clash">
+        <span class="cp-mark">天克</span>
+        <div class="cp-body">
+          <div class="cp-name">${persona.cpClash.name}</div>
+          <div class="cp-reason">${persona.cpClash.reason}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-h">成长处方 <span class="en">PRESCRIPTION</span></div>
+    <div class="rx-card">${growthHtml}</div>
+
+    <div class="sec-h">分享卡 <span class="en">SHARE</span></div>
+    <div class="share-card" data-char="${persona.char}">
+      <div class="badge">${levelBadge}</div>
+      <div class="sname">${persona.name}</div>
+      <div class="srate">仅 ${persona.rare} 的人是这种人格</div>
+      <div class="quote">"${persona.shareText}"</div>
+      <div class="foot">你体内藏着哪种危险人格 · 欲望簿</div>
+    </div>
+
+    <div class="r-btns">
+      <button class="r-btn primary" onclick="shareResult()">生成分享图 ✦</button>
+      <button class="r-btn ghost" id="restartBtn" type="button">重新照镜</button>
+    </div>
+    <div class="result-sdk-foot">
+      <p class="disc">本测试纯属娱乐，不代表任何医学诊断</p>
+      <div class="report-footer"></div>
+    </div>
+  `;
+
+  const restartBtn = document.getElementById('restartBtn');
+  if (restartBtn) {
+    restartBtn.addEventListener('click', restart);
+  }
+}
+
+// ============ 雷达SVG（9边形） ============
+function buildRadarSvg(values, labels){
+  const cx=170, cy=170, r=125;
+  const n=9;
+  let grid = '';
+  let axis = '';
+  let pts = [];
+  let lbls = '';
+
+  // 网格（3层9边形）
+  for(let layer=1;layer<=3;layer++){
+    const lr = r*layer/3;
+    let polyPts = [];
+    for(let i=0;i<n;i++){
+      const ang = (-90 + i*40) * Math.PI/180;
+      polyPts.push(`${(cx+lr*Math.cos(ang)).toFixed(1)},${(cy+lr*Math.sin(ang)).toFixed(1)}`);
+    }
+    grid += `<polygon class="radar-grid" points="${polyPts.join(' ')}"/>`;
+  }
+  // 9条轴线
+  for(let i=0;i<n;i++){
+    const ang = (-90 + i*40) * Math.PI/180;
+    axis += `<line class="radar-axis" x1="${cx}" y1="${cy}" x2="${(cx+r*Math.cos(ang)).toFixed(1)}" y2="${(cy+r*Math.sin(ang)).toFixed(1)}"/>`;
+  }
+  // 数据点
+  for(let i=0;i<n;i++){
+    const ang = (-90 + i*40) * Math.PI/180;
+    const val = values[i]/100;
+    const px = cx + r*val*Math.cos(ang);
+    const py = cy + r*val*Math.sin(ang);
+    pts.push(`${px.toFixed(1)},${py.toFixed(1)}`);
+  }
+  // 标签
+  for(let i=0;i<n;i++){
+    const ang = (-90 + i*40) * Math.PI/180;
+    const lx = cx + (r+24)*Math.cos(ang);
+    const ly = cy + (r+24)*Math.sin(ang)+5;
+    lbls += `<text class="radar-lbl" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle">${labels[i]}</text>`;
+  }
+
+  return `<svg viewBox="0 0 340 340">
+    ${grid}${axis}
+    <polygon class="radar-data" points="${pts.join(' ')}"/>
+    ${pts.map(p=>{const[x,y]=p.split(',');return `<circle class="radar-pt" cx="${x}" cy="${y}" r="4"/>`}).join('')}
+    ${lbls}
+  </svg>`;
+}
+
+// ============ 重新测试 ============
+function restart(){
+  if (window.linkValidator && typeof window.linkValidator.clearLocalResult === 'function') {
+    window.linkValidator.clearLocalResult();
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  let token = urlParams.get('token');
+  if (!token && window.linkValidator && window.linkValidator.token) {
+    token = window.linkValidator.token;
+  }
+
+  if (token) {
+    const newUrlParams = new URLSearchParams();
+    newUrlParams.set('token', token);
+    newUrlParams.set('restart', 'true');
+    if (urlParams.get('unlimited') === 'true') {
+      newUrlParams.set('unlimited', 'true');
+    }
+    window.location.href = window.location.pathname + '?' + newUrlParams.toString();
+    return;
+  }
+
+  window.__dpt_test_completed = false;
+  localStorage.removeItem(getCompletionFlagKey());
+  testStarted = false;
+  currentQ = 0;
+  answers = {};
+  document.documentElement.style.setProperty('--p-bg', '#FCFAF7');
+  showPage('home');
+  addPromotionLinkDelayed();
+}
+
+function restoreResultFromStorage() {
+  const token = window.linkValidator && window.linkValidator.token;
+  if (!token) return false;
+  try {
+    const saved = localStorage.getItem(getStorageKey(token));
+    if (!saved) return false;
+    const parsed = JSON.parse(saved);
+    const data = parsed.result || parsed;
+    if (!data || !data.personaKey || !PERSONAS[data.personaKey]) return false;
+
+    window.__dpt_test_completed = true;
+    renderResult(data.personaKey, data.radar);
+    showPage('result');
+    addPromotionLinkDelayed();
+    return true;
+  } catch (error) {
+    console.error('恢复测试结果失败:', error);
+    return false;
+  }
+}
+
+window.dptRestoreResult = restoreResultFromStorage;
+
+document.getElementById('startBtn').addEventListener('click', startQuiz);
+
+// ============ 分享卡片生成 ============
+function loadScript(url){
+  return new Promise((resolve,reject)=>{
+    if(document.querySelector(`script[src="${url}"]`)){ resolve(); return; }
+    const s = document.createElement('script');
+    s.src = url;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+function shareResult(){
+  const shareCard = document.querySelector('.share-card');
+  if(!shareCard){ return; }
+  const loading = document.getElementById('shareLoading');
+  loading.classList.add('show');
+  loadScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js').then(()=>{
+    return html2canvas(shareCard, {
+      scale: 2,
+      backgroundColor: null,
+      useCORS: true,
+      logging: false
+    });
+  }).then(canvas => {
+    loading.classList.remove('show');
+    const img = document.getElementById('sharePreviewImg');
+    img.src = canvas.toDataURL('image/png');
+    document.getElementById('sharePreview').classList.add('show');
+  }).catch(err => {
+    loading.classList.remove('show');
+    alert('截图生成失败，请手动截图分享');
+    console.error(err);
+  });
+}
+
+function closeSharePreview(){
+  document.getElementById('sharePreview').classList.remove('show');
+}
+</script>
+
+<script src="/static/js/link-validator.js"></script>
+<script>
+(function () {
+  var validatorInstance = null;
+
+  if (typeof PsyTestValidator !== 'undefined') {
+    PsyTestValidator.init(null, {
+      onSuccess: function (result, validator) {
+        console.log('SDK初始化成功，链接有效:', result);
+        validatorInstance = validator;
+        window.linkValidator = validator;
+        document.body.classList.remove('page-disabled');
+      },
+      onError: function (error) {
+        console.error('SDK初始化失败，链接无效:', error);
+        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+          validatorInstance = window.PsyTestValidator.getInstance();
+          window.linkValidator = validatorInstance;
+        }
+        document.body.classList.remove('page-disabled');
+      },
+      onLoad: function (data) {
+        console.log('SDK加载完成回调:', data);
+        if (!validatorInstance) {
+          if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+            validatorInstance = window.PsyTestValidator.getInstance();
+          }
+          if (validatorInstance) {
+            window.linkValidator = validatorInstance;
+          }
+        }
+
+        setTimeout(function () {
+          if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+            PsyTestValidator.addPromotionLink();
+          }
+        }, 100);
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var isRestart = urlParams.get('restart') === 'true';
+
+        if (isRestart) {
+          if (validatorInstance && validatorInstance.clearLocalResult) {
+            validatorInstance.clearLocalResult();
+          }
+          var restartToken = validatorInstance && validatorInstance.token;
+          if (restartToken) {
+            try {
+              localStorage.removeItem('test_result_' + restartToken);
+              localStorage.removeItem('dpt_test_completed_' + restartToken);
+            } catch (e) {}
+          }
+          window.__dpt_test_completed = false;
+          window.__dpt_retest_mode = true;
+          urlParams.delete('restart');
+          var newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+          window.history.replaceState({}, '', newUrl);
+          return;
+        }
+
+        if (data.valid && data.has_local_result) {
+          if (typeof window.dptRestoreResult === 'function') {
+            window.dptRestoreResult();
+          }
+        }
+      }
+    });
+  } else {
+    console.error('验证SDK未加载');
+    document.body.classList.remove('page-disabled');
+  }
+})();
+</script>
+</body>
+</html>

@@ -132,6 +132,30 @@ AUTH_PRODUCT_REGISTRY: dict[str, dict[str, Any]] = {
             },
         },
     },
+    "psy_dist": {
+        "label": "心理测评分销",
+        "description": "分销商额度码 · 生成测评链接",
+        "activate_path": "/admin/login",
+        "activate_query": "code={code}",
+        "skus": {
+            "quota_100": {
+                "label": "额度 100 次",
+                "plan_code": "psy_quota_100",
+                "duration_days": 365,
+                "max_activations": 1,
+                "summary": "100 次链接生成额度",
+                "quota_amount": 100,
+            },
+            "quota_500": {
+                "label": "额度 500 次",
+                "plan_code": "psy_quota_500",
+                "duration_days": 365,
+                "max_activations": 1,
+                "summary": "500 次链接生成额度",
+                "quota_amount": 500,
+            },
+        },
+    },
 }
 
 

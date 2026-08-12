@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>麋鹿·性偏好测试</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- 引入验证SDK -->
+    <script src="/static/js/link-validator.js"></script>
+</head>
+<body>
+    <!-- 欢迎页面 -->
+    <div class="welcome-container" id="welcomePage">
+        <!-- 标题卡片 -->
+        <div class="welcome-title-card">
+            <div class="welcome-title-icon">🦌</div>
+            <h1 class="welcome-main-title">麋鹿性偏好测试</h1>
+            <p class="welcome-subtitle">了解你的性格特征与行为模式</p>
+        </div>
+
+        <!-- 介绍卡片 -->
+        <div class="welcome-info-card">
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">🎯</span>
+                    <h3 class="welcome-section-title">测试目的</h3>
+                </div>
+                <p class="welcome-section-text">
+                    本测试是一个基于心理学理论的心理评估工具，旨在帮助您了解自己在情感关系中的性格特征、行为模式和倾向性。通过多维度的心理测量，全面分析您的个性特点，帮助您更好地认识自己，理解自己在人际关系中的表现方式。
+                </p>
+            </div>
+
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">📋</span>
+                    <h3 class="welcome-section-title">测试说明</h3>
+                </div>
+                <p class="welcome-section-text">
+                    本测试共包含70道题目，大约需要15-20分钟完成。题目涉及您在情感关系中的态度、价值观和行为倾向。请根据您的真实想法和实际行为，选择最符合您的选项。每题有5个选项，从"非常不认同"到"非常认同"，请诚实作答以获得准确的结果。
+                </p>
+            </div>
+
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">⚕️</span>
+                    <h3 class="welcome-section-title">重要提示</h3>
+                </div>
+                <p class="welcome-section-text">
+                    本测试结果仅供参考和自我了解，不能替代专业心理评估。测试旨在帮助您更好地认识自己，而非诊断工具。如果您在情感关系或心理方面遇到困扰，建议咨询专业的心理医生或心理咨询师。本测试基于心理学研究理论开发，所有内容均为学术性探讨。
+                </p>
+            </div>
+
+            <div class="welcome-notice">
+                开始测试即表示您已年满18周岁，并已阅读并同意上述所有说明。
+            </div>
+        </div>
+
+        <!-- 开始测试按钮 -->
+        <div class="welcome-footer">
+            <button class="welcome-start-button" id="welcomeStartButton">
+                开始测试
+            </button>
+            <p class="welcome-footer-note">
+                本测试基于心理学理论开发，结果仅供参考和自我了解使用。
+            </p>
+        </div>
+        
+        <!-- 推广链接容器（SDK会自动添加，放在最底部） -->
+        <div class="welcome-footer-promotion"></div>
+    </div>
+
+    <!-- 测试页面 -->
+    <div id="testPage" style="display: none;">
+        <div class="test-header">
+            <span class="test-title">麋鹿·性偏好测试</span>
+        </div>
+        <div class="test-container">
+        <div class="progress-bar-bg">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="question-info" id="questionInfo"></div>
+        <div class="question-title" id="questionTitle"></div>
+        <div class="options-list" id="optionsList"></div>
+        <div class="test-btns">
+            <button id="prevBtn" class="nav-btn">上一题</button>
+            <button id="nextBtn" class="nav-btn main-btn">下一题</button>
+        </div>
+    </div>
+    </div>
+    
+    <script>
+        // 初始化验证SDK
+        let linkValidator = null;
+        
+        // SDK加载完成后的回调
+        if (typeof PsyTestValidator !== 'undefined') {
+            // SDK已加载，直接初始化
+            initializeSDK();
+        } else {
+            // 等待SDK加载
+            window.addEventListener('load', function() {
+                if (typeof PsyTestValidator !== 'undefined') {
+                    initializeSDK();
+                } else {
+                    console.error('验证SDK未加载');
+                }
+            });
+        }
+        
+        async function initializeSDK() {
+            // 从URL获取token和unlimited参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const unlimited = urlParams.get('unlimited') === 'true';
+            const isRestart = urlParams.get('restart') === 'true';
+            
+            // 如果是重新测试，清除本地结果
+            if (isRestart && token) {
+                try {
+                    localStorage.removeItem('miluPreferenceResult');
+                    // 清除URL中的restart参数
+                    const newUrl = new URL(window.location);
+                    newUrl.searchParams.delete('restart');
+                    window.history.replaceState({}, '', newUrl);
+                } catch (error) {
+                    console.error('清除本地结果失败:', error);
+                }
+            }
+            
+            // 初始化SDK（注意：第一个参数是testCode字符串，第二个参数是options对象）
+            linkValidator = await PsyTestValidator.init('mpt', {
+                token: token || undefined,
+                unlimited: unlimited || false,
+                onSuccess: function(data, validator) {
+                    console.log('SDK初始化成功，链接有效:', data);
+                    // 确保window.linkValidator已设置
+                    if (validator) {
+                        window.linkValidator = validator;
+                    }
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败:', error);
+                    // 如果链接无效，显示错误信息
+                    if (error.message && error.message.includes('无效')) {
+                        alert(error.message);
+                    }
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    
+                    // 如果有本地结果且链接有效，自动跳转到结果页（SPA场景）
+                    if (data.valid && data.has_local_result) {
+                        try {
+                            const localResult = localStorage.getItem('miluPreferenceResult');
+                            if (localResult) {
+                                // 对于SPA，直接跳转到结果页
+                                window.location.href = 'result.html' + (token ? '?token=' + encodeURIComponent(token) : '');
+                                return;
+                            }
+                        } catch (error) {
+                            console.error('读取本地结果失败:', error);
+                        }
+                    }
+                    
+                    // 调用addPromotionLink确保推广链接显示（首页使用welcome-footer-promotion容器）
+                    setTimeout(() => {
+                        if (typeof PsyTestValidator.addPromotionLink === 'function') {
+                            PsyTestValidator.addPromotionLink();
+                        }
+                    }, 100);
+                }
+            });
+            
+            // 将linkValidator挂载到window对象，方便其他脚本使用
+            // SDK的init方法已经自动设置了window.linkValidator，但为了确保，这里再设置一次
+            if (linkValidator) {
+                window.linkValidator = linkValidator;
+            }
+        }
+    </script>
+    <script src="test.js"></script>
+    <script src="welcome.js"></script>
+</body>
+</html>
+
+

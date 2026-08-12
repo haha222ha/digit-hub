@@ -64,4 +64,7 @@ curl -fsS -H "Host: monitor.xhs365.cn" http://127.0.0.1/src/main.js 2>/dev/null 
 curl -fsS http://127.0.0.1:8080/api/v1/payment/plans 2>/dev/null \
   | python3 -c "import sys,json; d=json.load(sys.stdin); p=next((x for x in d.get('assess_plans',[]) if x.get('plan_code')=='assess_single'),{}); print('assess_single:', p.get('amount'), p.get('price_yuan'))" \
   || echo "(plans parse skip)"
+curl -fsS http://127.0.0.1:8080/api/tests/list 2>/dev/null \
+  | python3 -c "import sys,json; d=json.load(sys.stdin); t=(d.get('data') or {}).get('tests') or []; print('psy_dist_tests:', len(t))" \
+  || echo "(dist tests skip)"
 echo "DONE quick_update — users stay logged in; Workbench should not drop"

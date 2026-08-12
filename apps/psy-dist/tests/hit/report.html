@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="霍兰德职业兴趣测试 - 心理测评报告">
+    <meta name="keywords" content="霍兰德,职业兴趣测试,RIASEC,职业规划,心理测评报告">
+    <title>霍兰德职业兴趣测试报告</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/report.css">
+</head>
+<body>
+    <div class="report-container" id="app">
+        <!-- 加载提示 -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">正在生成报告...</div>
+        </div>
+
+        <!-- 1. Holland Code展示区 -->
+        <div class="holland-code-section" id="hollandCodeSection">
+            <div class="code-badge">您的Holland Code</div>
+            <div class="code-value" id="hollandCode">---</div>
+            <div class="code-types" id="codeTypes">
+                <!-- 主类型、次要类型、第三类型将通过JavaScript生成 -->
+            </div>
+            <div class="code-description" id="codeDescription">
+                <!-- 主类型描述将通过JavaScript生成 -->
+            </div>
+            <div class="code-date" id="codeDate">加载中...</div>
+        </div>
+
+        <!-- 2. 六维度职业兴趣分析 -->
+        <div class="dimensions-section" id="dimensionsSection">
+            <h2 class="section-title">
+                <span class="section-icon">📊</span>
+                六维度职业兴趣分析
+            </h2>
+            <p class="section-subtitle">了解您在六种职业类型上的兴趣强度</p>
+            <div class="dimensions-grid" id="dimensionsGrid">
+                <!-- 维度卡片将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 3. 组合类型解读 -->
+        <div class="combination-section" id="combinationSection">
+            <h2 class="section-title">
+                <span class="section-icon">💡</span>
+                您的组合类型解读
+            </h2>
+            <p class="section-subtitle">理解三种类型的组合优势</p>
+            <div class="combination-content" id="combinationContent">
+                <!-- 组合解读将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 4. 主要类型详细分析 -->
+        <div class="primary-type-section" id="primaryTypeSection">
+            <h2 class="section-title">
+                <span class="section-icon">⭐</span>
+                您的主要职业类型：<span id="primaryTypeName">加载中...</span>
+            </h2>
+            <p class="section-subtitle">深入了解您的职业兴趣特征</p>
+            <div class="type-details" id="typeDetails">
+                <!-- 类型详细分析将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 5. 适合的职业方向 -->
+        <div class="careers-section" id="careersSection">
+            <h2 class="section-title">
+                <span class="section-icon">💼</span>
+                适合您的职业方向
+            </h2>
+            <p class="section-subtitle">基于您的Holland Code推荐的职业领域</p>
+            <div class="careers-content" id="careersContent">
+                <!-- 职业推荐将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 6. 职业发展建议 -->
+        <div class="development-section" id="developmentSection">
+            <h2 class="section-title">
+                <span class="section-icon">🚀</span>
+                职业发展建议
+            </h2>
+            <p class="section-subtitle">为您的职业规划提供参考</p>
+            <div class="recommendations-list" id="recommendationsList">
+                <!-- 建议列表将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 7. 学习与发展路径 -->
+        <div class="learning-section" id="learningSection">
+            <h2 class="section-title">
+                <span class="section-icon">📚</span>
+                学习与发展路径
+            </h2>
+            <p class="section-subtitle">根据您的职业类型提供的发展建议</p>
+            <div class="learning-content" id="learningContent">
+                <!-- 学习路径内容将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 8. 典型职业详解 -->
+        <div class="careers-detail-section" id="careersDetailSection">
+            <h2 class="section-title">
+                <span class="section-icon">💼</span>
+                典型职业详解
+            </h2>
+            <p class="section-subtitle" id="careersDetailSubtitle">深入了解代表性职业</p>
+            <div class="careers-detail-grid" id="careersDetailGrid">
+                <!-- 典型职业卡片将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 9. 深度类型解读 -->
+        <div class="deep-analysis-section" id="deepAnalysisSection">
+            <h2 class="section-title">
+                <span class="section-icon">⭐</span>
+                深度类型解读
+            </h2>
+            <p class="section-subtitle" id="deepAnalysisSubtitle">全面了解您的特征</p>
+            <div class="deep-analysis-content" id="deepAnalysisContent">
+                <!-- 深度解读内容将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 10. 短期与长期发展路径 -->
+        <div class="development-path-section" id="developmentPathSection">
+            <h2 class="section-title">
+                <span class="section-icon">🎯</span>
+                职业发展路径规划
+            </h2>
+            <p class="section-subtitle">从现在到未来，您的成长之路</p>
+            <div class="development-path-content" id="developmentPathContent">
+                <!-- 发展路径内容将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 11. 常见问题 FAQ -->
+        <div class="faq-section" id="faqSection">
+            <h2 class="section-title">
+                <span class="section-icon">❓</span>
+                常见问题 FAQ
+            </h2>
+            <p class="section-subtitle">关于霍兰德测试的常见疑问解答</p>
+            <div class="faq-content" id="faqContent">
+                <!-- FAQ内容将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 12. 理解您的Holland Code -->
+        <div class="understanding-section" id="understandingSection">
+            <h2 class="section-title">
+                <span class="section-icon">💝</span>
+                理解您的Holland Code
+            </h2>
+            <div class="understanding-content" id="understandingContent">
+                <!-- 理解内容将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <!-- 底部说明 -->
+        <div class="report-footer-info" id="reportFooterInfo">
+            <!-- 底部信息将通过JavaScript生成 -->
+        </div>
+
+        <!-- 管理员注册引导 -->
+        <div class="admin-guide" id="adminGuide">
+            <!-- 管理员引导将通过JavaScript生成 -->
+        </div>
+
+        <!-- 底部操作区 -->
+        <div class="report-footer">
+            <button class="footer-button primary" id="restartButton">重新测试</button>
+        </div>
+    </div>
+
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init(null, {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (validatorInstance) {
+                            window.linkValidator = validatorInstance;
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+    
+    <!-- 导入数据模块 -->
+    <script type="module" src="js/report.js"></script>
+</body>
+</html>
+

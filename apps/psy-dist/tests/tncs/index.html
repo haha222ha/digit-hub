@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>童年创伤测验 - 你是否仍然被过去的经历所困扰？</title>
+    <meta name="description" content="通过我们的童年创伤测验，发现你早年经历对自身的影响，该测验旨在为愈合和个人成长指明道路。">
+    <meta name="keywords" content="人格测试, 人格, 童年, 家庭">
+    <link rel="stylesheet" href="style.css">
+    <!-- 引入安全工具库（必须在head中尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        /* 页面禁用样式 */
+        body.page-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            text-align: center;
+            font-size: 18px;
+            color: #f56c6c;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error-overlay p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body class="page-disabled">
+    <!-- 首页介绍部分 -->
+    <div class="welcome-container" id="splash">
+        <!-- 标题卡片 -->
+        <div class="welcome-title-card">
+            <div class="welcome-title-icon">🛡️</div>
+            <h1 class="welcome-main-title">童年创伤测验</h1>
+            <p class="welcome-subtitle">你是否仍然被过去的经历所困扰？</p>
+        </div>
+
+        <!-- 介绍卡片 -->
+        <div class="welcome-info-card">
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">🎯</span>
+                    <h3 class="welcome-section-title">测试目的</h3>
+                </div>
+                <p class="welcome-section-text">
+                    童年是一个人成长的关键时期，那些发生的事件可能会对他的情感和心理发展产生重大影响。了解你是否遇到过这样的挑战是迈向愈合和成长的第一步。这个测验包括六个关键维度，反映了各种形式的童年逆境。童年创伤测验充满了敏感和关怀，帮助你温和地探索你的过去。
+                </p>
+            </div>
+
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">📋</span>
+                    <h3 class="welcome-section-title">测试说明</h3>
+                </div>
+                <p class="welcome-section-text">
+                    请记住，这是一个自我发现的旅程，寻求知识和支持是一种力量。参加这个测验可能是你生命中新篇章的开始，在这里你可以承认你的过去，拥抱幸福和充实的未来。
+                </p>
+            </div>
+
+            <div class="welcome-section">
+                <div class="welcome-section-header">
+                    <span class="welcome-section-icon">⚕️</span>
+                    <h3 class="welcome-section-title">重要提示</h3>
+                </div>
+                <p class="welcome-section-text">
+                    测试可能会引起不适。请在测试过程中保持理性和谨慎。如果你感到任何不适，请立即停止。本测试结果仅供参考和自我了解，不能替代专业心理评估。如果您在心理方面遇到严重的困扰，建议咨询专业的心理医生或心理咨询师。
+                </p>
+            </div>
+
+            <div class="welcome-notice">
+                开始测试即表示您已阅读并同意上述所有说明。
+            </div>
+        </div>
+
+        <!-- 开始测试按钮 -->
+        <div class="welcome-footer">
+            <button class="welcome-start-button" id="start">
+                开始测试
+            </button>
+            <p class="welcome-footer-note">
+                本测试基于心理学理论开发，结果仅供参考和娱乐使用。
+            </p>
+        </div>
+    </div>
+
+    <!-- 题目容器 -->
+    <div id="question-view" style="display: none;">
+        <div class="test-header">
+            <span class="test-title">童年创伤测验</span>
+        </div>
+        <div class="test-container">
+            <div class="progress-bar-bg">
+                <div class="progress-bar" id="progress-bg"></div>
+            </div>
+            <div class="question-info" id="questionInfo"></div>
+            <ul class="question_view" id="collection"></ul>
+            <div class="test-btns">
+                <button id="back_button" class="nav-btn">上一题</button>
+                <button id="next_button" class="nav-btn main-btn" style="display: none;">下一题</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果展示容器 -->
+    <div class="main_view" id="result_details" style="display: none;">
+        <div id="snapshot-container">
+            <div id="qe-rslt-title">你在童年创伤测验中的分数是<span id="total-score">0</span>/600，详情如下：</div>
+            <div id="sexchart"></div>
+        </div>
+        
+        <!-- 结果分析内容 -->
+        <article id="tips_extra" style="margin-top: 30px;">
+            <div class="subtip submain">
+                <h2 class="extra-full">每个模块的详细介绍</h2>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="1">情绪虐待</h3>
+                <div class="h3-sub-score"><b id="score-A">0</b>/100</div>
+                <p>童年时期的情绪虐待的特点是父母或照顾者的行为模式可能严重干扰儿童的认知、情绪、心理或社会发展。这一维度探讨了言语攻击、威胁、持续批评，或更微妙的策略如操纵、忽视或拒绝给予关爱的存在。这一维度得分高可能表明，个人经历过创伤，影响到他们的自我价值、情绪健康以及与他人的关系。情绪虐待尤其隐蔽，因为它常常不被认识到，但它可能产生持久的影响，如难以形成安全和信任的关系、长期的自我怀疑以及情绪调节受损。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="2">身体虐待</h3>
+                <div class="h3-sub-score"><b id="score-B">0</b>/100</div>
+                <p>身体虐待涉及使用对儿童造成伤害的行为。这一维度评估照顾者或成年人打、烧或其他形式的身体伤害的经历。它不局限于导致身体痕迹的伤害，它还包括可能在内部留下更多伤疤而不是外部伤疤的有害行为。在这一维度得分高的个人可能会面临一系列问题，包括在关系中的信任、安全感，以及可能出现慢性身体疾病。身体虐待会导致攻击性或恐惧感增强、难以面对权威人物，并可能增加日后从事自我伤害或攻击行为的风险。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="3">性虐待</h3>
+                <div class="h3-sub-score"><b id="score-C">0</b>/100</div>
+                <p>性虐待包括成年人让儿童参与儿童无法理解或同意的任何性活动。这一维度衡量接触不恰当的抚摸、接触性行为或被迫参与性行为的情况。这一领域的高分数可能标志着潜在的创伤，可以以不同的形式表现出来，包括亲密关系问题、扭曲的自我形象以及复杂的情绪反应。儿童期性虐待的幸存者经常面临与信任、性和自尊有关的挑战，并可能面临再次受害或经历创伤后应激障碍等心理健康疾病风险增加。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="4">忽视</h3>
+                <div class="h3-sub-score"><b id="score-D">0</b>/100</div>
+                <p>忽视是指照顾者未能满足儿童的基本需求，包括食物、住所、衣服、教育和医疗保健。这一维度评估个人在成长过程中可能经历的忽视程度。显著的忽视会导致长期的心理和发展问题，因为基本需求是儿童成长的基础。儿童时期被忽视的成年人可能难以建立健康的自我照顾习惯，有依恋问题或挣扎于无价值感或被遗弃感。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="5">家庭功能失调</h3>
+                <div class="h3-sub-score"><b id="score-E">0</b>/100</div>
+                <p>家庭功能失调包括更广泛的家庭背景，包括家庭内的药物滥用、监禁、精神疾病和家庭暴力。这一维度试图了解这些因素如何导致混乱或不安全的家庭环境。这一领域的高水平可能表明经历过可能破坏儿童安全感和正常发展的事件。在失调家庭中成长的后果可能包括药物滥用风险增加、采用不良应对机制以及难以形成稳定、健康的关系。</p>
+            </div>
+            
+            <div class="subtip">
+                <h3 data-tip-id="6">系统性创伤</h3>
+                <div class="h3-sub-score"><b id="score-F">0</b>/100</div>
+                <p>系统性创伤涉及可能影响儿童的长期社会或社区问题，如贫困、歧视或生活在高犯罪地区。这一维度探讨了这些结构性因素对儿童安全感和归属感的影响。在系统性创伤下长大的儿童可能感到被边缘化、无能为力或绝望。他们可能难以参与社会，难以获得资源，或内化负面刻板印象，这会影响他们的长期生活轨迹和心理健康。</p>
+            </div>
+            
+            <div class="subtip submain">
+                <h2 class="extra-full">什么是"童年创伤测验"？</h2>
+                <p>"童年创伤测验"是一个评估工具，旨在帮助个人反思他们在童年时期的经历，以识别潜在的创伤性事件或情况。它探讨了一个人早期生活的各个方面，如家庭动态、虐待事件、忽视或任何其他可能对一个人的心理发展和幸福产生不利影响的经历。</p>
+            </div>
+            
+            <div class="subtip submain">
+                <h2 class="extra-full">如何解读我的"童年创伤测验"结果？</h2>
+                <p>当你收到"童年创伤测验"的结果时，请花时间阅读每个模块所附的详细介绍。这将让你更好地理解分数所表明的内容以及所提问题的背景。如果你在每个模块的得分都低于50分，通常情况下，这表明你在那些与童年创伤相关的领域可能没有重大问题。</p>
+                <p>然而，如果你发现任何模块的得分高于50分，这可能意味着你在童年时期在该领域经历过创伤。高于50分的分数可能表明这些经历可能会影响你的幸福感，谨慎考虑寻求心理学家的帮助是明智之举。</p>
+            </div>
+            
+            <div class="subtip submain">
+                <h2 class="extra-full">如果我是家长或老师，我可以使用童年创伤测试来判断我的孩子或学生是否有心理问题吗？</h2>
+                <p>作为家长或老师，你可以使用童年创伤测试来深入了解孩子可能表现出的某些行为或情绪问题。但是，这个测试不应该作为诊断心理问题的唯一手段。虽然它可以作为一个有益的起点，但必须明白它不能取代专业的评估。如果你怀疑孩子正在经历心理问题，重要的是要咨询合格的医疗服务提供者或儿童心理学家，他们可以进行全面的评估并提供必要的护理和干预。</p>
+            </div>
+        </article>
+        
+        <!-- 底部操作区（用于SDK添加推广链接） -->
+        <div class="report-footer" style="padding: 24px 20px; text-align: center; margin-top: 40px;">
+            <a class="again" href="javascript:void(0);" id="restart-btn" title="童年创伤测验 - 你是否仍然被过去的经历所困扰？">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="26">
+                    <g fill="#666" fill-rule="evenodd">
+                        <path d="M15 23a8 8 0 1 0 0-16V4A11 11 0 1 1 4 15h3c0 4 4 8 8 8Z"/>
+                        <path d="M16 0v11L7 6z"/>
+                    </g>
+                </svg>
+                再测一次
+            </a>
+        </div>
+    </div>
+
+    <!-- 错误提示容器 -->
+    <div id="errorOverlay" class="error-overlay" style="display: none;">
+        <p id="errorMessage"></p>
+    </div>
+
+    <!-- 启用安全功能（在本地开发环境会自动禁用，方便调试） -->
+    <script>
+        // 等待DOM加载完成后再启用安全功能
+        (function() {
+            function enableSecurity() {
+                if (typeof TestSecurity !== 'undefined') {
+                    TestSecurity.enable();
+                } else {
+                    console.error('[TestSecurity] 安全工具库未加载');
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', enableSecurity);
+            } else {
+                enableSecurity();
+            }
+        })();
+    </script>
+    
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init(null, {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                    // 页面启用
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    // 尝试获取实例，即使无效
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    // 确保 window.linkValidator 被设置（即使验证失败）
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    // 页面不禁用，允许用户看到页面内容
+                    document.body.classList.remove('page-disabled');
+                    const errorOverlay = document.getElementById('errorOverlay');
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    // 确保获取到validator实例
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (!validatorInstance && window.linkValidator) {
+                            validatorInstance = window.linkValidator;
+                        }
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                    
+                    // 调用addPromotionLink确保推广链接显示（首页使用welcome-footer容器）
+                    setTimeout(function() {
+                        if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                            PsyTestValidator.addPromotionLink();
+                        }
+                    }, 100);
+                    
+                    // 检查是否是重新测试（通过URL参数判断）
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const isRestart = urlParams.get('restart') === 'true';
+                    
+                    // 如果是重新测试，清除本地结果
+                    if (isRestart) {
+                        console.log('检测到重新测试参数，清除本地结果');
+                        try {
+                            localStorage.removeItem('trauma_test_result');
+                            // 如果使用了token保存，也清除
+                            if (validatorInstance && validatorInstance.token) {
+                                const token = validatorInstance.token;
+                                localStorage.removeItem('trauma_test_result_' + token);
+                            }
+                            // 清除SDK的本地结果
+                            if (window.linkValidator && typeof window.linkValidator.clearLocalResult === 'function') {
+                                window.linkValidator.clearLocalResult();
+                            }
+                            // 清除URL中的restart参数
+                            urlParams.delete('restart');
+                            const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                            window.history.replaceState({}, '', newUrl);
+                        } catch (error) {
+                            console.error('清除本地结果失败:', error);
+                        }
+                    }
+                    
+                    // 如果链接有效且有测试结果，显示结果页（SPA场景）
+                    if (data.valid && data.has_local_result && !isRestart) {
+                        try {
+                            // 优先从token对应的key获取结果
+                            let localResult = null;
+                            if (validatorInstance && validatorInstance.token) {
+                                const token = validatorInstance.token;
+                                localResult = localStorage.getItem('trauma_test_result_' + token);
+                            }
+                            // 如果还是没有，尝试从默认key获取（向后兼容）
+                            if (!localResult) {
+                                localResult = localStorage.getItem('trauma_test_result');
+                            }
+                            
+                            if (localResult) {
+                                // 对于SPA，直接显示结果页
+                                var resultData = JSON.parse(localResult);
+                                ocean = resultData.ocean || {};
+                                iq_value = JSON.stringify(ocean);
+                                
+                                $("#splash").hide();
+                                $("#question-view").hide();
+                                $("#result_details").show();
+                                
+                                calculateResult();
+                                
+                                // 确保tips_extra在雷达图下方
+                                var $sexchart = $("#sexchart");
+                                var $tipsExtra = $("#tips_extra");
+                                var $snapshotContainer = $("#snapshot-container");
+                                if ($sexchart.length && $tipsExtra.length && $snapshotContainer.length) {
+                                    $snapshotContainer.after($tipsExtra);
+                                }
+                                
+                                // 调用addPromotionLink确保推广链接显示（结果页使用report-footer容器）
+                                setTimeout(function() {
+                                    if (typeof PsyTestValidator !== 'undefined' && typeof PsyTestValidator.addPromotionLink === 'function') {
+                                        PsyTestValidator.addPromotionLink();
+                                    }
+                                }, 500);
+                                return;
+                            }
+                        } catch (error) {
+                            console.error('读取本地结果失败:', error);
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('验证SDK未加载');
+            // SDK未加载时，页面不禁用，允许查看
+            document.body.classList.remove('page-disabled');
+        }
+    </script>
+
+    <!-- JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/combine/npm/highcharts@12.2.0/highcharts.min.js,npm/highcharts@12.2.0/highcharts-more.js"></script>
+    <script src="questions-data.js"></script>
+    <script src="test.js"></script>
+</body>
+</html>
+

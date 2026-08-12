@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APT天赋潜能评估 - 发现你的特长</title>
+    <!-- 使用在线CDN资源，方便测试 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e6f7ff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+            touch-action: manipulation;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 100, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .page {
+            padding: 50px 40px;
+            display: none;
+            flex-direction: column;
+            min-height: 600px;
+        }
+
+        .active {
+            display: flex;
+        }
+
+        #welcome-page {
+            text-align: center;
+            background: linear-gradient(to bottom right, #ffffff, #f8fbff);
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.2);
+        }
+
+        .logo i {
+            font-size: 50px;
+            color: white;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .features {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .feature {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            width: 200px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature i {
+            font-size: 2.5rem;
+            color: #4facfe;
+            margin-bottom: 15px;
+        }
+
+        .feature h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .feature p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-prev {
+            background: white;
+            color: #4facfe;
+            border: 2px solid #4facfe;
+            padding: 14px 38px;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 16px 40px;
+        }
+
+        #test-page {
+            background: white;
+        }
+
+        .progress-container {
+            width: 100%;
+            background: #f0f8ff;
+            border-radius: 10px;
+            height: 12px;
+            margin-bottom: 40px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        .question-count {
+            text-align: right;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            padding: 20px;
+            background: #f8fdff;
+            border: 2px solid #e1f5fe;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .option:hover {
+            background: #e6f7ff;
+            border-color: #b3e5fc;
+            transform: translateY(-2px);
+        }
+
+        .option:active {
+            transform: scale(0.98);
+            background: #d1ecff;
+        }
+
+        .option.selected {
+            background: #d1ecff;
+            border-color: #4facfe;
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .option .index {
+            width: 30px;
+            height: 30px;
+            background: #4facfe;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .option.selected .index {
+            background: #00a8ff;
+            transform: scale(1.1);
+        }
+
+        .option .checkmark {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            color: #4facfe;
+            font-size: 1.2rem;
+            transition: opacity 0.3s ease;
+        }
+
+        .option.selected .checkmark {
+            opacity: 1;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        #result-page {
+            text-align: center;
+            background: linear-gradient(to bottom right, #ffffff, #f0f8ff);
+        }
+
+        .result-header {
+            margin-bottom: 30px;
+        }
+
+        .result-title {
+            font-size: 2.112rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .result-subtitle {
+            display: none;
+        }
+
+        .talent-radar-container {
+            width: 100%;
+            height: 560px;
+            margin: 0px 0 10px;
+            background: transparent;
+            border-radius: 20px;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: visible;
+        }
+
+        #talent-radar-chart {
+            width: 100%;
+            height: 100%;
+            min-height: 520px;
+        }
+
+        .result-summary {
+            margin: 5px 0 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            line-height: 1.6;
+            border-left: 4px solid #4facfe;
+            font-weight: bold;
+        }
+
+        .progress-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .talent-progress-container {
+            width: 100%;
+            margin: 0px 0 30px;
+        }
+
+        .talent-progress-item {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .talent-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .talent-score {
+            font-weight: bold;
+            color: #4facfe;
+            font-size: 1rem;
+            margin-left: 5px;
+        }
+
+        .progress-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .progress-bar-container {
+            width: 80%;
+            height: 20px;
+            background: #f0f8ff;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
+        }
+
+        .progress-value {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .talent-level {
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            min-width: 80px;
+            text-align: center;
+            color: #000000;
+        }
+
+        .level-expert {
+            background: linear-gradient(135deg, #4caf50, #8bc34a);
+            color: #000000;
+        }
+
+        .level-advanced {
+            background: linear-gradient(135deg, #2196f3, #03a9f4);
+            color: #000000;
+        }
+
+        .level-intermediate {
+            background: linear-gradient(135deg, #ff9800, #ffc107);
+            color: #000000;
+        }
+
+        .level-beginner {
+            background: linear-gradient(135deg, #f44336, #e91e63);
+            color: #000000;
+        }
+
+        .talent-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin-top: 8px;
+            padding: 8px 0;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .talent-high {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .talent-medium {
+            color: #ff9800;
+            font-weight: bold;
+        }
+
+        .talent-low {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .result-disclaimer {
+            text-align: center;
+            color: #666;
+            font-size: 1.08rem;
+            margin: 25px 0 15px;
+            line-height: 1.4;
+            opacity: 0.7;
+        }
+
+        .footer {
+            margin-top: auto;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            padding-top: 20px;
+        }
+
+        .report-footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-top: 32px;
+            padding: 24px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* 推广链接区域样式（SDK自动添加到.report-footer中） */
+        .report-footer #link-validator-promotion-link {
+            width: 100%;
+            text-align: center;
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            box-sizing: border-box;
+        }
+        
+        /* 首页推广链接样式（SDK自动添加到.welcome-footer中） */
+        .welcome-footer #link-validator-promotion-link {
+            width: 100%;
+            text-align: center;
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        /* 确保welcome-footer可见 */
+        .welcome-footer {
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4facfe;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .page {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .feature {
+                width: 100%;
+            }
+
+            .question-text {
+                font-size: 1.2rem;
+            }
+
+            .result-title {
+                font-size: 1.68rem;
+            }
+
+            .talent-radar-container {
+                height: 480px;
+                margin: 0px 0 8px;
+                padding: 10px;
+            }
+
+            #talent-radar-chart {
+                min-height: 440px;
+            }
+
+            .result-summary {
+                margin: 3px 0 12px;
+                padding: 12px;
+                font-size: 0.95rem;
+            }
+
+            .progress-title {
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+                text-align: center;
+            }
+
+            .progress-bar-container {
+                width: 70%;
+            }
+
+            .option {
+                padding: 18px 15px;
+                min-height: 70px;
+            }
+
+            .option .index {
+                width: 28px;
+                height: 28px;
+                font-size: 0.9rem;
+            }
+
+            .option .text {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page {
+                padding: 20px 15px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .feature {
+                padding: 15px;
+            }
+
+            .feature i {
+                font-size: 2rem;
+            }
+
+            .result-title {
+                font-size: 1.344rem;
+            }
+
+            .btn {
+                padding: 14px 30px;
+                font-size: 1rem;
+                min-height: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .talent-radar-container {
+                height: 400px;
+                margin: 0px 0 5px;
+                padding: 8px;
+            }
+
+            #talent-radar-chart {
+                min-height: 360px;
+            }
+
+            .result-summary {
+                margin: 2px 0 10px;
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .progress-title {
+                font-size: 1.32rem;
+                margin-bottom: 8px;
+                text-align: center;
+            }
+
+            .progress-bar-container {
+                width: 65%;
+            }
+
+            .option {
+                padding: 16px 12px;
+                min-height: 65px;
+            }
+
+            .navigation {
+                flex-direction: row;
+                justify-content: space-between;
+                gap: 10px;
+                margin-top: 20px;
+            }
+
+            .btn-prev, .btn-next {
+                width: 48%;
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .page {
+                padding: 15px 10px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .question-text {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+
+            .result-title {
+                font-size: 1.2rem;
+            }
+
+            .option {
+                padding: 14px 10px;
+                min-height: 60px;
+            }
+
+            .option .index {
+                width: 25px;
+                height: 25px;
+                font-size: 0.8rem;
+                margin-right: 10px;
+            }
+
+            .option .text {
+                font-size: 0.9rem;
+            }
+
+            .talent-radar-container {
+                height: 350px;
+                margin: 0px 0 3px;
+                padding: 5px;
+            }
+
+            #talent-radar-chart {
+                min-height: 300px;
+            }
+
+            .result-summary {
+                margin: 2px 0 8px;
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+
+            .progress-title {
+                font-size: 1.2rem;
+                margin-bottom: 8px;
+                text-align: center;
+            }
+
+            .progress-bar-container {
+                width: 60%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在分析您的天赋潜能，请稍候...</div>
+    </div>
+
+    <div class="container">
+        <div id="welcome-page" class="page active">
+            <div class="logo">
+                <i class="fas fa-star"></i>
+            </div>
+            <h1>APT天赋潜能评估系统</h1>
+            <p class="subtitle">基于心理学研究的标准化评估工具，科学识别个人核心能力优势</p>
+
+            <button id="welcome-start-btn" class="btn">开始评估</button>
+
+            <div class="features">
+                <div class="feature">
+                    <i class="fas fa-brain"></i>
+                    <h3>科学评估</h3>
+                    <p>基于认知心理学和人才发展理论的专业工具</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>多维分析</h3>
+                    <p>覆盖16个核心能力维度，全面评估个人潜能</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-lightbulb"></i>
+                    <h3>详细报告</h3>
+                    <p>生成详细的能力分析报告和发展建议</p>
+                </div>
+            </div>
+
+            <!-- 底部说明区域（用于SDK添加推广链接） -->
+            <div class="footer welcome-footer">
+                <p>评估结果基于心理学研究，供个人发展参考使用</p>
+                <p>专业人才评估建议咨询认证心理学专家</p>
+            </div>
+        </div>
+
+        <div id="test-page" class="page">
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="question-count" id="question-count">第 1 题 / 共 60 题</div>
+
+            <div class="question-text" id="question-text">
+                遇到尴尬场面时，我通常会想办法让气氛轻松点
+            </div>
+
+            <div class="options-container" id="options-container">
+                <div class="option" data-value="1">
+                    <div class="index">A</div>
+                    <div class="text">非常认同</div>
+                    <div class="checkmark"><i class="fas fa-check"></i></div>
+                </div>
+                <div class="option" data-value="2">
+                    <div class="index">B</div>
+                    <div class="text">比较认同</div>
+                    <div class="checkmark"><i class="fas fa-check"></i></div>
+                </div>
+                <div class="option" data-value="3">
+                    <div class="index">C</div>
+                    <div class="text">部分认同</div>
+                    <div class="checkmark"><i class="fas fa-check"></i></div>
+                </div>
+                <div class="option" data-value="4">
+                    <div class="index">D</div>
+                    <div class="text">不太认同</div>
+                    <div class="checkmark"><i class="fas fa-check"></i></div>
+                </div>
+                <div class="option" data-value="5">
+                    <div class="index">E</div>
+                    <div class="text">完全不认同</div>
+                    <div class="checkmark"><i class="fas fa-check"></i></div>
+                </div>
+            </div>
+
+            <div class="navigation">
+                <button id="prev-btn" class="btn btn-prev"><i class="fas fa-arrow-left"></i> 上一题</button>
+                <button id="next-btn" class="btn btn-next">下一题 <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div id="result-page" class="page">
+            <div class="result-header">
+                <h2 class="result-title">您的天赋潜能分析报告</h2>
+            </div>
+
+            <div class="talent-radar-container">
+                <div id="talent-radar-chart"></div>
+            </div>
+
+            <div id="result-summary" class="result-summary"></div>
+
+            <div class="progress-title">天赋潜能数值排序</div>
+
+            <div class="talent-progress-container" id="talent-progress-container">
+            </div>
+
+            <div class="result-disclaimer">*测试结果仅供参考，不作专业诊断使用</div>
+
+            <!-- 底部操作区（用于SDK添加推广链接） -->
+            <div class="report-footer">
+                <button id="restart-btn" class="btn"><i class="fas fa-redo"></i> 重新测试</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const talents = [
+                { id: 'humor', name: '幽默表达', icon: 'fas fa-smile', desc: '运用幽默缓解紧张、建立积极社交氛围的能力' },
+                { id: 'memory', name: '信息记忆', icon: 'fas fa-brain', desc: '有效存储和提取信息的知识管理能力' },
+                { id: 'empathy', name: '情感共鸣', icon: 'fas fa-heart', desc: '感知和理解他人情感状态的共情能力' },
+                { id: 'insight', name: '深度洞察', icon: 'fas fa-eye', desc: '透过现象发现本质问题的分析能力' },
+                { id: 'learning', name: '学习适应', icon: 'fas fa-graduation-cap', desc: '快速掌握新知识技能的适应能力' },
+                { id: 'leadership', name: '领导影响', icon: 'fas fa-users', desc: '引导团队达成目标的组织影响力' },
+                { id: 'creativity', name: '创新思维', icon: 'fas fa-lightbulb', desc: '产生新颖解决方案的创造性思维能力' },
+                { id: 'music', name: '音乐感知', icon: 'fas fa-music', desc: '对音乐元素的敏感度和表达能力' },
+                { id: 'logic', name: '逻辑推理', icon: 'fas fa-calculator', desc: '系统分析和推理的思维能力' },
+                { id: 'communication', name: '沟通表达', icon: 'fas fa-comments', desc: '清晰传递信息和观点的表达能力' },
+                { id: 'coordination', name: '身体协调', icon: 'fas fa-running', desc: '身体运动和控制的身体能力' },
+                { id: 'self_discipline', name: '自我管理', icon: 'fas fa-calendar-check', desc: '规划和控制个人行为的自律能力' },
+                { id: 'planning', name: '规划组织', icon: 'fas fa-tasks', desc: '制定和执行计划的组织能力' },
+                { id: 'focus', name: '专注持久', icon: 'fas fa-bullseye', desc: '维持注意力集中的持久能力' },
+                { id: 'imagination', name: '想象构思', icon: 'fas fa-cloud', desc: '构建心理图像和概念的想象能力' },
+                { id: 'adaptability', name: '应变调整', icon: 'fas fa-sync', desc: '适应变化调整策略的灵活能力' }
+            ];
+
+            const questions = [
+                { text: "遇到尴尬场面时，我通常会想办法让气氛轻松点", talents: ['humor', 'adaptability'] },
+                { text: "学新东西时，我喜欢用有趣的方法来帮助记忆", talents: ['humor', 'memory'] },
+                { text: "在团队合作中，我比较擅长活跃气氛", talents: ['humor', 'communication'] },
+                { text: "面对困难时，我习惯往好的方面想", talents: ['humor', 'adaptability'] },
+                { text: "我有创意时，喜欢用有趣的方式表达出来", talents: ['humor', 'creativity'] },
+                { text: "听音乐时，我能感受到音乐中的情感", talents: ['empathy', 'music'] },
+                { text: "我比较擅长记住别人的生日和重要事情", talents: ['memory', 'empathy'] },
+                { text: "我能很快察觉到别人的情绪变化", talents: ['empathy', 'insight'] },
+                { text: "朋友遇到困难时，我愿意倾听并提供帮助", talents: ['empathy', 'communication'] },
+                { text: "我能理解不同人的不同想法和感受", talents: ['empathy', 'insight'] },
+                { text: "学习新知识时，我能很快掌握要点", talents: ['learning', 'memory'] },
+                { text: "面对新环境，我能快速适应", talents: ['learning', 'adaptability'] },
+                { text: "我喜欢探索未知的领域", talents: ['learning', 'creativity'] },
+                { text: "遇到难题时，我喜欢分析问题的根本原因", talents: ['insight', 'logic'] },
+                { text: "我能从复杂信息中快速找到关键点", talents: ['insight', 'focus'] },
+                { text: "做决定前，我会考虑各种可能性", talents: ['insight', 'planning'] },
+                { text: "在团队中，我比较擅长协调大家的关系", talents: ['leadership', 'communication'] },
+                { text: "组织活动时，我能合理安排每个人的任务", talents: ['leadership', 'planning'] },
+                { text: "遇到突发情况，我能保持冷静并带领大家应对", talents: ['leadership', 'adaptability'] },
+                { text: "我能激励团队成员朝着共同目标努力", talents: ['leadership', 'communication'] },
+                { text: "我经常会有一些创新的想法", talents: ['creativity', 'imagination'] },
+                { text: "解决问题时，我喜欢尝试不同的方法", talents: ['creativity', 'adaptability'] },
+                { text: "我能把不同的想法组合成新的方案", talents: ['creativity', 'logic'] },
+                { text: "我对音乐节奏和旋律比较敏感", talents: ['music', 'focus'] },
+                { text: "我能通过音乐表达自己的情感", talents: ['music', 'empathy'] },
+                { text: "学习乐器或唱歌时，我进步比较快", talents: ['music', 'learning'] },
+                { text: "思考问题时，我喜欢按步骤分析", talents: ['logic', 'planning'] },
+                { text: "我能发现事情之间的逻辑关系", talents: ['logic', 'insight'] },
+                { text: "辩论时，我能清晰地表达自己的观点", talents: ['logic', 'communication'] },
+                { text: "与人交流时，我能清楚地表达自己的想法", talents: ['communication', 'logic'] },
+                { text: "我能根据不同的场合调整说话方式", talents: ['communication', 'adaptability'] },
+                { text: "演讲或汇报时，我比较自信", talents: ['communication', 'self_discipline'] },
+                { text: "学习舞蹈或运动时，我协调性比较好", talents: ['coordination', 'learning'] },
+                { text: "我能较好地控制身体的平衡", talents: ['coordination', 'focus'] },
+                { text: "动手操作时，我手眼协调能力不错", talents: ['coordination', 'memory'] },
+                { text: "我能坚持完成自己设定的目标", talents: ['self_discipline', 'focus'] },
+                { text: "即使遇到干扰，我也能保持专注", talents: ['self_discipline', 'adaptability'] },
+                { text: "我习惯按时完成计划中的任务", talents: ['self_discipline', 'planning'] },
+                { text: "做事前，我喜欢先制定详细的计划", talents: ['planning', 'logic'] },
+                { text: "我能合理安排时间，提高效率", talents: ['planning', 'self_discipline'] },
+                { text: "组织活动时，我能考虑到各种细节", talents: ['planning', 'memory'] },
+                { text: "工作时，我能长时间保持注意力集中", talents: ['focus', 'self_discipline'] },
+                { text: "即使环境嘈杂，我也能专心做事", talents: ['focus', 'adaptability'] },
+                { text: "我能快速进入工作状态", talents: ['focus', 'planning'] },
+                { text: "我经常在脑海中想象各种场景", talents: ['imagination', 'creativity'] },
+                { text: "听故事时，我能在脑中形成清晰的画面", talents: ['imagination', 'memory'] },
+                { text: "我能设想未来可能发生的各种情况", talents: ['imagination', 'planning'] },
+                { text: "面对变化，我能快速调整心态和策略", talents: ['adaptability', 'learning'] },
+                { text: "在新环境中，我能很快找到自己的位置", talents: ['adaptability', 'insight'] },
+                { text: "即使计划被打乱，我也能灵活应对", talents: ['adaptability', 'planning'] },
+                { text: "我喜欢用幽默的方式化解矛盾", talents: ['humor', 'communication'] },
+                { text: "我能记住很多细节信息", talents: ['memory', 'focus'] },
+                { text: "我能体会别人的感受，将心比心", talents: ['empathy', 'insight'] },
+                { text: "学习时，我能发现知识的内在规律", talents: ['insight', 'logic'] },
+                { text: "我能快速学会需要的技能", talents: ['learning', 'adaptability'] },
+                { text: "在团队中，我能发现每个人的特长", talents: ['leadership', 'empathy'] },
+                { text: "我能想出别人没想到的解决方案", talents: ['creativity', 'imagination'] },
+                { text: "我能分辨音乐中的细微差别", talents: ['music', 'focus'] },
+                { text: "思考时，我能保持清晰的逻辑", talents: ['logic', 'self_discipline'] },
+                { text: "我能用简单的话说明复杂的问题", talents: ['communication', 'insight'] }
+            ];
+
+            let currentQuestion = 0;
+            let userAnswers = new Array(questions.length).fill(null);
+            let userTalentScores = {};
+            let radarChart = null;
+
+            talents.forEach(talent => {
+                userTalentScores[talent.id] = {
+                    score: 0,
+                    count: 0,
+                    level: 'beginner',
+                    levelClass: 'level-beginner',
+                    levelText: '不太擅长',
+                    average: 0
+                };
+            });
+
+            const welcomePage = document.getElementById('welcome-page');
+            const testPage = document.getElementById('test-page');
+            const resultPage = document.getElementById('result-page');
+            const startBtn = document.getElementById('welcome-start-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const progressBar = document.getElementById('progress-bar');
+            const questionCount = document.getElementById('question-count');
+            const questionText = document.getElementById('question-text');
+            const optionsContainer = document.getElementById('options-container');
+            const talentProgressContainer = document.getElementById('talent-progress-container');
+            const resultSummary = document.getElementById('result-summary');
+            const loading = document.getElementById('loading');
+
+            function initializeEventListeners() {
+                if (startBtn) {
+                    startBtn.addEventListener('click', async function() {
+                        // 等待SDK初始化完成（最多等待3秒）
+                        let waitCount = 0;
+                        while (!window.linkValidator && waitCount < 30) {
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            waitCount++;
+                        }
+                        
+                        // 检查SDK是否初始化
+                        if (!window.linkValidator) {
+                            console.error('SDK未初始化，无法开始测试');
+                            alert('验证SDK未初始化，无法开始测试。请刷新页面重试。');
+                            return;
+                        }
+                        
+                        // 先验证链接有效性（如果无效会显示弹窗）
+                        let isValid = false;
+                        try {
+                            isValid = await window.linkValidator.validateForUserAction();
+                            if (!isValid) {
+                                // 验证失败，已显示弹窗，不继续
+                                return;
+                            }
+                        } catch (error) {
+                            console.error('验证链接失败:', error);
+                            // 验证失败，已显示弹窗，不继续
+                            return;
+                        }
+                        
+                        // 检查是否是重新测试（通过URL参数判断）
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const isRestart = urlParams.get('restart') === 'true';
+                        
+                        // 如果不是重新测试，调用startTest()记录测试开始
+                        if (!isRestart && !window.__apt_test_started) {
+                            try {
+                                window.__apt_test_started = true; // 标记已开始，避免重复调用
+                                await window.linkValidator.startTest();
+                                console.log('测试开始记录成功');
+                            } catch (error) {
+                                console.error('记录测试开始失败:', error);
+                                window.__apt_test_started = false; // 失败时重置标记，允许重试
+                                // 测试开始失败，不进入测试页面
+                                return;
+                            }
+                        } else if (isRestart) {
+                            console.log('重新测试模式，跳过startTest()调用，避免重复扣除次数');
+                            // 重新测试时，重置标记，允许再次开始
+                            window.__apt_test_started = false;
+                            window.__apt_test_completed = false;
+                        }
+                        
+                        if (welcomePage) welcomePage.classList.remove('active');
+                        if (testPage) testPage.classList.add('active');
+                        initTest();
+                    });
+
+                    startBtn.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
+                        this.click();
+                    });
+                }
+
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', function() {
+                        if (userAnswers[currentQuestion] === null) {
+                            alert("请选择一个答案");
+                            return;
+                        }
+
+                        if (currentQuestion < questions.length - 1) {
+                            currentQuestion++;
+                            updateQuestion();
+                            updateProgress();
+                        } else {
+                            showResults();
+                        }
+                    });
+
+                    nextBtn.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
+                        this.click();
+                    });
+                }
+
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', function() {
+                        if (currentQuestion > 0) {
+                            currentQuestion--;
+                            updateQuestion();
+                            updateProgress();
+                        }
+                    });
+
+                    prevBtn.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
+                        this.click();
+                    });
+                }
+
+                if (restartBtn) {
+                    restartBtn.addEventListener('click', function() {
+                        // 清除本地测试结果
+                        if (window.linkValidator && window.linkValidator.clearLocalResult) {
+                            window.linkValidator.clearLocalResult(); // apt是单视角测试
+                            console.log('已清除本地测试结果');
+                        }
+                        
+                        // 重置测试状态标记
+                        window.__apt_test_started = false;
+                        window.__apt_test_completed = false;
+                        
+                        // 添加restart参数到URL（如果需要）
+                        const urlParams = new URLSearchParams(window.location.search);
+                        urlParams.set('restart', 'true');
+                        const newUrl = window.location.pathname + '?' + urlParams.toString();
+                        window.history.replaceState({}, '', newUrl);
+                        
+                        if (resultPage) resultPage.classList.remove('active');
+                        if (welcomePage) welcomePage.classList.add('active');
+                        initTest();
+                    });
+
+                    restartBtn.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
+                        this.click();
+                    });
+                }
+            }
+
+            function initTest() {
+                userAnswers = new Array(questions.length).fill(null);
+                currentQuestion = 0;
+
+                talents.forEach(talent => {
+                    userTalentScores[talent.id] = {
+                        score: 0,
+                        count: 0,
+                        level: 'beginner',
+                        levelClass: 'level-beginner',
+                        levelText: '不太擅长',
+                        average: 0
+                    };
+                });
+
+                updateQuestion();
+                updateProgress();
+            }
+
+            function updateQuestion() {
+                if (currentQuestion >= questions.length) return;
+
+                const q = questions[currentQuestion];
+                if (questionText) questionText.textContent = q.text;
+                if (questionCount) questionCount.textContent = `第 ${currentQuestion + 1} 题 / 共 ${questions.length} 题`;
+
+                if (optionsContainer) {
+                    optionsContainer.innerHTML = '';
+                    const optionTexts = ["非常认同", "比较认同", "部分认同", "不太认同", "完全不认同"];
+
+                    optionTexts.forEach((text, index) => {
+                        const optionElement = document.createElement('div');
+                        optionElement.className = 'option';
+                        if (userAnswers[currentQuestion] === index + 1) {
+                            optionElement.classList.add('selected');
+                        }
+                        optionElement.dataset.value = index + 1;
+                        optionElement.innerHTML = `
+                            <div class="index">${String.fromCharCode(65 + index)}</div>
+                            <div class="text">${text}</div>
+                            <div class="checkmark"><i class="fas fa-check"></i></div>
+                        `;
+
+                        optionElement.addEventListener('click', () => selectOption(index + 1));
+
+                        optionElement.addEventListener('touchstart', function(e) {
+                            e.preventDefault();
+                            this.style.transform = 'scale(0.98)';
+                            this.style.background = '#d1ecff';
+                        });
+
+                        optionElement.addEventListener('touchend', function(e) {
+                            e.preventDefault();
+                            this.style.transform = '';
+                            this.style.background = '';
+                            this.click();
+                        });
+
+                        optionsContainer.appendChild(optionElement);
+                    });
+                }
+
+                if (prevBtn) prevBtn.disabled = currentQuestion === 0;
+                if (nextBtn) nextBtn.textContent = currentQuestion === questions.length - 1 ? '查看结果' : '下一题';
+            }
+
+            function selectOption(optionIndex) {
+                userAnswers[currentQuestion] = optionIndex;
+
+                document.querySelectorAll('.option').forEach((opt, idx) => {
+                    if (idx === optionIndex - 1) {
+                        opt.classList.add('selected');
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                });
+
+                setTimeout(() => {
+                    const q = questions[currentQuestion];
+                    if (q.talents) {
+                        q.talents.forEach(talentId => {
+                            if (userTalentScores[talentId]) {
+                                userTalentScores[talentId].score += (6 - optionIndex) * 2;
+                                userTalentScores[talentId].count += 1;
+                            }
+                        });
+                    }
+
+                    if (currentQuestion < questions.length - 1) {
+                        currentQuestion++;
+                        updateQuestion();
+                        updateProgress();
+                    } else {
+                        showResults();
+                    }
+                }, 150);
+            }
+
+            function calculateTalentLevels() {
+                talents.forEach(talent => {
+                    const scoreData = userTalentScores[talent.id];
+                    if (scoreData.count === 0) {
+                        scoreData.level = 'beginner';
+                        scoreData.levelClass = 'level-beginner';
+                        scoreData.levelText = '不太擅长';
+                        scoreData.average = 0;
+                        return;
+                    }
+
+                    const avgScore = scoreData.score / scoreData.count;
+                    scoreData.average = avgScore;
+
+                    if (avgScore >= 9) {
+                        scoreData.level = 'expert';
+                        scoreData.levelClass = 'level-expert';
+                        scoreData.levelText = '非常擅长';
+                    } else if (avgScore >= 7) {
+                        scoreData.level = 'advanced';
+                        scoreData.levelClass = 'level-advanced';
+                        scoreData.levelText = '比较擅长';
+                    } else if (avgScore >= 5) {
+                        scoreData.level = 'intermediate';
+                        scoreData.levelClass = 'level-intermediate';
+                        scoreData.levelText = '有些擅长';
+                    } else {
+                        scoreData.level = 'beginner';
+                        scoreData.levelClass = 'level-beginner';
+                        scoreData.levelText = '不太擅长';
+                    }
+                });
+            }
+
+            function updateProgress() {
+                const progress = ((currentQuestion + 1) / questions.length) * 100;
+                if (progressBar) progressBar.style.width = `${progress}%`;
+            }
+
+            async function showResults() {
+                if (loading) loading.style.display = 'flex';
+
+                if (testPage) testPage.classList.remove('active');
+
+                setTimeout(async () => {
+                    try {
+                        calculateTalentLevels();
+                        
+                        // 准备测试结果数据
+                        const testResult = {
+                            talents: talents.map(talent => ({
+                                id: talent.id,
+                                name: talent.name,
+                                score: userTalentScores[talent.id].average || 0,
+                                level: userTalentScores[talent.id].level,
+                                levelText: userTalentScores[talent.id].levelText
+                            })),
+                            answers: userAnswers,
+                            completedAt: new Date().toISOString()
+                        };
+                        
+                        // 记录测试完成（如果不是重新测试且未完成）
+                        if (!window.__apt_test_completed && window.linkValidator) {
+                            try {
+                                window.__apt_test_completed = true; // 标记已完成，避免重复调用
+                                await window.linkValidator.completeTest(undefined, testResult);
+                                console.log('测试完成记录成功');
+                            } catch (error) {
+                                console.error('记录测试完成失败:', error);
+                                // 即使记录失败，也继续显示结果
+                            }
+                        }
+                        
+                        renderTalentProgressBars();
+                        drawTalentRadar();
+                        displayResultSummary();
+
+                        if (resultPage) resultPage.classList.add('active');
+
+                        // 页面切换后，重新调用addPromotionLink，确保推广链接添加到可见的footer
+                        setTimeout(() => {
+                            if (window.linkValidator && typeof window.PsyTestValidator !== 'undefined' && window.PsyTestValidator.addPromotionLink) {
+                                window.PsyTestValidator.addPromotionLink();
+                            }
+                        }, 200);
+
+                        // 页面显示后延迟调整雷达图大小
+                        setTimeout(() => {
+                            if (radarChart) {
+                                radarChart.resize();
+                            }
+                        }, 100);
+                    } catch (error) {
+                        console.error('生成报告时出错:', error);
+                    } finally {
+                        if (loading) loading.style.display = 'none';
+                    }
+                }, 2000);
+            }
+
+            function renderTalentProgressBars() {
+                if (!talentProgressContainer) return;
+
+                talentProgressContainer.innerHTML = '';
+
+                const sortedTalents = [...talents].sort((a, b) => {
+                    return (userTalentScores[b.id].average || 0) - (userTalentScores[a.id].average || 0);
+                });
+
+                sortedTalents.forEach(talent => {
+                    const scoreData = userTalentScores[talent.id];
+                    const avgScore = scoreData.average || 0;
+                    const percentage = (avgScore / 10) * 100;
+
+                    const progressItem = document.createElement('div');
+                    progressItem.className = 'talent-progress-item';
+                    progressItem.innerHTML = `
+                        <div class="talent-name">
+                            <span>${talent.name}: <span class="talent-score">${avgScore.toFixed(1)}/10</span></span>
+                        </div>
+                        <div class="progress-wrapper">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: ${percentage}%"></div>
+                                <div class="progress-value">${percentage.toFixed(0)}%</div>
+                            </div>
+                            <div class="talent-level ${scoreData.levelClass}">${scoreData.levelText}</div>
+                        </div>
+                        <div class="talent-description">${talent.desc}</div>
+                    `;
+                    talentProgressContainer.appendChild(progressItem);
+                });
+            }
+
+            function displayResultSummary() {
+                if (!resultSummary) return;
+
+                const sortedTalents = [...talents].sort((a, b) => {
+                    return (userTalentScores[b.id].average || 0) - (userTalentScores[a.id].average || 0);
+                });
+
+                const allBelow5 = sortedTalents.every(talent => (userTalentScores[talent.id].average || 0) < 5);
+
+                let summaryText = '';
+                if (allBelow5) {
+                    summaryText = "没有发现您的明显最强天赋，所有能力维度得分均低于5分。";
+                } else {
+                    const topTwo = sortedTalents.slice(0, 2);
+                    const bottomTwo = sortedTalents.slice(-2);
+
+                    const getColorClass = (talent) => {
+                        const score = userTalentScores[talent.id].average || 0;
+                        if (score >= 7) return 'talent-high';
+                        if (score >= 5) return 'talent-medium';
+                        return 'talent-low';
+                    };
+
+                    summaryText = `您的天赋分析显示，您在<span class="${getColorClass(topTwo[0])}">${topTwo[0].name}</span>和<span class="${getColorClass(topTwo[1])}">${topTwo[1].name}</span>方面表现突出，这可能是您的核心优势领域。同时，建议关注较弱天赋<span class="${getColorClass(bottomTwo[0])}">${bottomTwo[0].name}</span>和<span class="${getColorClass(bottomTwo[1])}">${bottomTwo[1].name}</span>的进一步发展机会。`;
+                }
+
+                resultSummary.innerHTML = summaryText;
+            }
+
+            function drawTalentRadar() {
+                const chartDom = document.getElementById('talent-radar-chart');
+                if (!chartDom) return;
+
+                if (radarChart) {
+                    radarChart.dispose();
+                }
+
+                radarChart = echarts.init(chartDom);
+
+                const indicators = talents.map(talent => {
+                    let simplifiedName;
+                    if (talent.id === 'memory') {
+                        simplifiedName = '记忆';
+                    } else if (talent.id === 'insight') {
+                        simplifiedName = '洞察';
+                    } else if (talent.id === 'learning') {
+                        simplifiedName = '适应';
+                    } else {
+                        simplifiedName = talent.name.substring(0, 2);
+                    }
+                    return {
+                        name: simplifiedName,
+                        max: 10
+                    };
+                });
+
+                const values = talents.map(talent => {
+                    const scoreData = userTalentScores[talent.id];
+                    return scoreData.count > 0 ? scoreData.average : 0;
+                });
+
+                const option = {
+                    tooltip: {
+                        formatter: function(params) {
+                            const talentIndex = params.dataIndex;
+                            const fullTalentName = talents[talentIndex].name;
+                            const score = params.value;
+                            let level = '';
+                            let levelText = '';
+
+                            if (score >= 9) {
+                                level = '非常擅长';
+                                levelText = '9-10分';
+                            } else if (score >= 7) {
+                                level = '比较擅长';
+                                levelText = '7-9分';
+                            } else if (score >= 5) {
+                                level = '有些擅长';
+                                levelText = '5-7分';
+                            } else {
+                                level = '不太擅长';
+                                levelText = '0-5分';
+                            }
+
+                            return `${fullTalentName}<br/>得分: ${score.toFixed(1)}/10<br/>等级: ${level} (${levelText})`;
+                        }
+                    },
+                    radar: {
+                        indicator: indicators,
+                        radius: '80%',
+                        center: ['50%', '50%'],
+                        axisName: {
+                            color: '#2c3e50',
+                            fontSize: 15,
+                            fontWeight: 'bold',
+                            formatter: function(value) {
+                                if (window.innerWidth <= 480) {
+                                    const maxLength = 4;
+                                    if (value.length > maxLength) {
+                                        return value.substring(0, maxLength) + '\n' + value.substring(maxLength);
+                                    }
+                                }
+                                return value;
+                            }
+                        },
+                        splitArea: {
+                            show: true,
+                            areaStyle: {
+                                color: ['rgba(79, 172, 254, 0.1)', 'rgba(79, 172, 254, 0.05)']
+                            }
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: 'rgba(79, 172, 254, 0.3)',
+                                width: 2
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: 'rgba(79, 172, 254, 0.2)',
+                                width: 1
+                            }
+                        }
+                    },
+                    series: [{
+                        name: '能力得分',
+                        type: 'radar',
+                        data: [{
+                            value: values,
+                            name: '您的能力分布',
+                            label: {
+                                show: true,
+                                formatter: function(params) {
+                                    return params.value.toFixed(1);
+                                },
+                                color: '#1e88e5',
+                                fontSize: 12,
+                                fontWeight: 'bold',
+                                position: 'top'
+                            },
+                            areaStyle: {
+                                color: 'rgba(79, 172, 254, 0.3)'
+                            },
+                            lineStyle: {
+                                color: '#4facfe',
+                                width: 3
+                            },
+                            itemStyle: {
+                                color: '#4facfe',
+                                borderWidth: 2
+                            }
+                        }]
+                    }]
+                };
+
+                if (window.innerWidth <= 480) {
+                    option.radar.radius = '70%';
+                    option.radar.axisName.fontSize = 13;
+                }
+
+                radarChart.setOption(option);
+
+                // 立即调整大小以确保正确显示
+                setTimeout(() => {
+                    radarChart.resize();
+                }, 0);
+
+                radarChart.on('click', function(params) {
+                    if (params.componentType === 'series' && params.seriesType === 'radar') {
+                        const talentIndex = params.dataIndex;
+                        const fullTalentName = talents[talentIndex].name;
+                        const score = params.value;
+
+                        showCustomTooltip(fullTalentName, score, params.event.event);
+                    }
+                });
+
+                window.addEventListener('resize', function() {
+                    radarChart.resize();
+                    if (window.innerWidth <= 480) {
+                        option.radar.radius = '70%';
+                        option.radar.axisName.fontSize = 13;
+                    } else {
+                        option.radar.radius = '80%';
+                        option.radar.axisName.fontSize = 15;
+                    }
+                    radarChart.setOption(option);
+                });
+            }
+
+            function showCustomTooltip(talentName, score, event) {
+                const customTooltip = document.createElement('div');
+                customTooltip.className = 'custom-tooltip';
+                customTooltip.style.position = 'absolute';
+                customTooltip.style.background = 'rgba(255, 255, 255, 0.95)';
+                customTooltip.style.border = '1px solid #4facfe';
+                customTooltip.style.borderRadius = '8px';
+                customTooltip.style.padding = '10px 15px';
+                customTooltip.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                customTooltip.style.zIndex = '1000';
+                customTooltip.style.fontSize = '14px';
+                customTooltip.style.color = '#2c3e50';
+                customTooltip.style.maxWidth = '200px';
+                customTooltip.style.textAlign = 'center';
+                customTooltip.style.pointerEvents = 'none';
+                customTooltip.style.opacity = '0';
+                customTooltip.style.transition = 'opacity 0.3s ease';
+
+                customTooltip.innerHTML = `
+                    <div class="tooltip-title" style="font-weight: bold; margin-bottom: 5px; color: #4facfe;">${talentName}</div>
+                    <div class="tooltip-value" style="font-size: 16px; font-weight: 600;">${score.toFixed(1)}/10</div>
+                `;
+
+                document.body.appendChild(customTooltip);
+
+                const x = event.clientX + 10;
+                const y = event.clientY - 50;
+
+                customTooltip.style.left = x + 'px';
+                customTooltip.style.top = y + 'px';
+                customTooltip.style.opacity = '1';
+
+                setTimeout(() => {
+                    if (customTooltip.parentNode) {
+                        customTooltip.parentNode.removeChild(customTooltip);
+                    }
+                }, 3000);
+            }
+
+            initializeEventListeners();
+        });
+    </script>
+
+    <!-- 引入验证SDK（必需） -->
+    <script src="/static/js/link-validator.js"></script>
+    <script>
+        // 初始化验证SDK
+        let validatorInstance = null;
+        
+        if (typeof PsyTestValidator !== 'undefined') {
+            PsyTestValidator.init(null, {
+                onSuccess: function(result, validator) {
+                    console.log('SDK初始化成功，链接有效:', result);
+                    validatorInstance = validator;
+                    window.linkValidator = validator;
+                },
+                onError: function(error) {
+                    console.error('SDK初始化失败，链接无效:', error);
+                    if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                        validatorInstance = window.PsyTestValidator.getInstance();
+                    }
+                    if (validatorInstance) {
+                        window.linkValidator = validatorInstance;
+                    }
+                },
+                onLoad: function(data) {
+                    console.log('SDK加载完成回调:', data);
+                    if (!validatorInstance) {
+                        if (window.PsyTestValidator && typeof window.PsyTestValidator.getInstance === 'function') {
+                            validatorInstance = window.PsyTestValidator.getInstance();
+                        }
+                        if (validatorInstance) {
+                            window.linkValidator = validatorInstance;
+                        }
+                    }
+                    
+                    // 检查是否是重新测试（通过URL参数判断）
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const isRestart = urlParams.get('restart') === 'true';
+                    
+                    // 如果是重新测试，清除本地测试结果
+                    if (isRestart && validatorInstance && validatorInstance.clearLocalResult) {
+                        validatorInstance.clearLocalResult(); // apt是单视角测试
+                        // 清除restart参数（避免刷新后再次触发）
+                        urlParams.delete('restart');
+                        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                        window.history.replaceState({}, '', newUrl);
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
