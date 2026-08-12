@@ -128,8 +128,10 @@ ${GZIP_DIRECTIVES}
     # Vue / 测题静态资源必须走磁盘，不能 proxy 到 xhs-cloud /assets/
     location /assets/ {
         try_files \$uri =404;
-        # 仿站资源常原地改 hash 同名文件；禁止 immutable 长缓存，避免 CF/浏览器卡旧品牌文案
-        add_header Cache-Control "no-cache, must-revalidate";
+        # CF Browser Cache TTL 会把 no-cache 改成 max-age=14400；用 no-store + CDN 头尽量禁止边沿/浏览器长缓存
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header CDN-Cache-Control "no-store";
+        add_header Cloudflare-CDN-Cache-Control "no-store";
     }
     location /tests/ {
         try_files \$uri \$uri/ =404;
