@@ -1472,6 +1472,20 @@ def get_payment_order(order_no: str) -> dict | None:
     return _payment_order_row(row)
 
 
+def list_payment_orders_by_plan_prefix(prefix: str, *, limit: int = 100) -> list[dict]:
+    prefix = str(prefix or "").strip()
+    limit = max(1, min(int(limit), 500))
+    conn = _conn()
+    rows = conn.execute(
+        """SELECT * FROM payment_orders
+           WHERE plan_code LIKE ?
+           ORDER BY id DESC LIMIT ?""",
+        (f"{prefix}%", limit),
+    ).fetchall()
+    conn.close()
+    return [_payment_order_row(r) for r in rows if r]
+
+
 def expire_stale_payment_order(order_no: str) -> None:
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     conn = _conn()

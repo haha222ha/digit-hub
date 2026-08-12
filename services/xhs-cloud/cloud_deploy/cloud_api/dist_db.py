@@ -755,3 +755,183 @@ def create_unlimited_session(user_id: int, test_code: str) -> dict:
         conn.commit()
         conn.close()
     return {"token": token, "test_code": test_code, "user_id": user_id}
+
+
+def admin_dist_stats() -> dict:
+    """超管看板：分销商 / 链接 / 结果 / 额度订单汇总。"""
+    init_dist_tables()
+    from cloud_deploy.cloud_api import database as db
+
+    if _USE_PG:
+        from cloud_deploy.cloud_api.database_pg import _conn
+
+        conn = _conn()
+        c = conn.cursor()
+        c.execute("SELECT COUNT(*), COALESCE(SUM(quota),0), COALESCE(SUM(used_quota),0) FROM dist_distributors")
+        drow = c.fetchone()
+        c.execute("SELECT COUNT(*) FROM dist_links")
+        links_total = int(c.fetchone()[0])
+        c.execute("SELECT COUNT(*) FROM dist_links WHERE status='unused'")
+        links_unused = int(c.fetchone()[0])
+        c.execute("SELECT COUNT(*) FROM dist_links WHERE status='used'")
+        links_used = int(c.fetchone()[0])
+        c.execute("SELECT COUNT(*) FROM dist_links WHERE status='revoked'")
+        links_revoked = int(c.fetchone()[0])
+        c.execute("SELECT COUNT(*) FROM dist_test_results")
+        results_total = int(c.fetchone()[0])
+        c.execute(
+            """SELECT test_code, COUNT(*) FROM dist_links
+               GROUP BY test_code ORDER BY COUNT(*) DESC LIMIT 12"""
+        )
+        by_test = [{"test_code": r[0], "links": int(r[1])} for r in c.fetchall()]
+        conn.close()
+        distributors = int(drow[0] or 0)
+        quota_sum = int(drow[1] or 0)
+        used_sum = int(drow[2] or 0)
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute("SELECT COUNT(*), COALESCE(SUM(quota),0), COALESCE(SUM(used_quota),0) FROM dist_distributors")
+        drow = c.fetchone()
+        distributors = int(drow[0] or 0)
+        quota_sum = int(drow[1] or 0)
+        used_sum = int(drow[2] or 0)
+        c.execute("SELECT COUNT(*) FROM dist_links")
+        links_total = int(c.fetchone()[0])
+        c.execute("SELECT COUNT(*) FROM dist_links WHERE status='unused'")
+        links_unused = int(c.fetchone()[0])
+        c.execute("SELECT COUNT(*) FROM dist_links WHERE status='used'")
+        links_used = int(c.fetchone()[0])
+        c.execute("SELECT COUNT(*) FROM dist_links WHERE status='revoked'")
+        links_revoked = int(c.fetchone()[0])
+        c.execute("SELECT COUNT(*) FROM dist_test_results")
+        results_total = int(c.fetchone()[0])
+        c.execute(
+            """SELECT test_code, COUNT(*) AS n FROM dist_links
+               GROUP BY test_code ORDER BY n DESC LIMIT 12"""
+        )
+        by_test = [{"test_code": r[0], "links": int(r[1])} for r in c.fetchall()]
+        conn.close()
+
+    orders = db.list_payment_orders_by_plan_prefix("psy_quota", limit=200)
+    paid_orders = [o for o in orders if o.get("status") == "paid"]
+    return {
+        "distributors": distributors,
+        "quota_total": quota_sum,
+        "quota_used": used_sum,
+        "quota_remaining": max(0, quota_sum - used_sum),
+        "links_total": links_total,
+        "links_unused": links_unused,
+        "links_used": links_used,
+        "links_revoked": links_revoked,
+        "results_total": results_total,
+        "orders_total": len(orders),
+        "orders_paid": len(paid_orders),
+        "links_by_test": by_test,
+    }
+
+
+def admin_list_links(*, status: str | None = None, limit: int = 100) -> list[dict]:
+    init_dist_tables()
+    limit = max(1, min(int(limit), 500))
+    if _USE_PG:
+        from cloud_deploy.cloud_api.database_pg import _conn
+
+        conn = _conn()
+        c = conn.cursor()
+        if status:
+            c.execute(
+                """SELECT l.*, u.username FROM dist_links l
+                   LEFT JOIN users u ON u.id = l.user_id
+                   WHERE l.status=%s ORDER BY l.id DESC LIMIT %s""",
+                (status, limit),
+            )
+        else:
+            c.execute(
+                """SELECT l.*, u.username FROM dist_links l
+                   LEFT JOIN users u ON u.id = l.user_id
+                   ORDER BY l.id DESC LIMIT %s""",
+                (limit,),
+            )
+        rows = c.fetchall()
+        cols = [d[0] for d in c.description]
+        conn.close()
+        out = []
+        for row in rows:
+            data = dict(zip(cols, row))
+            item = _map_link(data)
+            item["username"] = data.get("username") or ""
+            item["user_id"] = data.get("user_id")
+            out.append(item)
+        return out
+
+    conn = _sqlite_conn()
+    c = conn.cursor()
+    if status:
+        c.execute(
+            """SELECT l.*, u.username FROM dist_links l
+               LEFT JOIN users u ON u.id = l.user_id
+               WHERE l.status=? ORDER BY l.id DESC LIMIT ?""",
+            (status, limit),
+        )
+    else:
+        c.execute(
+            """SELECT l.*, u.username FROM dist_links l
+               LEFT JOIN users u ON u.id = l.user_id
+               ORDER BY l.id DESC LIMIT ?""",
+            (limit,),
+        )
+    rows = c.fetchall()
+    conn.close()
+    out = []
+    for row in rows:
+        data = _row_dict(row) or {}
+        item = _map_link(data)
+        item["username"] = data.get("username") or ""
+        item["user_id"] = data.get("user_id")
+        out.append(item)
+    return out
+
+
+def admin_list_distributors(*, limit: int = 100) -> list[dict]:
+    init_dist_tables()
+    limit = max(1, min(int(limit), 500))
+    from cloud_deploy.cloud_api import database as db
+
+    if _USE_PG:
+        from cloud_deploy.cloud_api.database_pg import _conn
+
+        conn = _conn()
+        c = conn.cursor()
+        c.execute(
+            """SELECT d.*, u.username FROM dist_distributors d
+               JOIN users u ON u.id = d.user_id
+               ORDER BY d.user_id DESC LIMIT %s""",
+            (limit,),
+        )
+        rows = c.fetchall()
+        cols = [d[0] for d in c.description]
+        conn.close()
+        out = []
+        for row in rows:
+            data = dict(zip(cols, row))
+            profile = {"id": data.get("user_id"), "username": data.get("username") or ""}
+            out.append(_map_distributor(data, profile))
+        return out
+
+    conn = _sqlite_conn()
+    c = conn.cursor()
+    c.execute(
+        """SELECT d.*, u.username FROM dist_distributors d
+           JOIN users u ON u.id = d.user_id
+           ORDER BY d.user_id DESC LIMIT ?""",
+        (limit,),
+    )
+    rows = c.fetchall()
+    conn.close()
+    out = []
+    for row in rows:
+        data = _row_dict(row) or {}
+        profile = {"id": data.get("user_id"), "username": data.get("username") or ""}
+        out.append(_map_distributor(data, profile))
+    return out

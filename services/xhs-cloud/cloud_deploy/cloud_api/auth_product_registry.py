@@ -135,7 +135,7 @@ AUTH_PRODUCT_REGISTRY: dict[str, dict[str, Any]] = {
     "psy_dist": {
         "label": "心理测评分销",
         "description": "分销商额度码 · 生成测评链接",
-        "activate_path": "/admin/login",
+        "activate_path": os.environ.get("XHS_PSY_ORIGIN", "https://psy.xhs365.cn").rstrip("/") + "/login",
         "activate_query": "code={code}",
         "skus": {
             "quota_100": {

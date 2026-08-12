@@ -66,6 +66,17 @@ class DistApiTest(unittest.TestCase):
         methods = dist_ord.purchase_methods()
         self.assertIn("online_payment_available", methods)
 
+    def test_admin_dist_stats(self):
+        profile = db.register_user_account("distadmin1", "pass123456")
+        uid = int(profile["id"])
+        dist_db.ensure_distributor(uid, default_quota=5)
+        svc.generate_links(uid, "mbti", 1)
+        stats = dist_db.admin_dist_stats()
+        self.assertGreaterEqual(stats["distributors"], 1)
+        self.assertGreaterEqual(stats["links_total"], 1)
+        links = dist_db.admin_list_links(limit=10)
+        self.assertTrue(any(x.get("test_code") == "mbti" for x in links))
+
 
 if __name__ == "__main__":
     unittest.main()

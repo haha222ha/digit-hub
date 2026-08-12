@@ -87,6 +87,7 @@
 
     <div class="nav" id="mainNav">
       <button type="button" class="on" data-panel="codes">授权码</button>
+      <button type="button" data-panel="dist">心理分销</button>
       <button type="button" data-panel="feedback">用户反馈</button>
       <button type="button" data-panel="contact">客服微信</button>
       <button type="button" data-panel="status">系统状态</button>
@@ -136,6 +137,58 @@
             </tr></thead>
             <tbody id="codeRows"></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 心理分销（订单 / 链接统计） -->
+    <div id="panel-dist" class="panel">
+      <div class="grid card">
+        <div class="stat"><span>分销商</span><b id="dstDistributors">—</b></div>
+        <div class="stat"><span>剩余额度</span><b id="dstQuotaLeft">—</b></div>
+        <div class="stat"><span>链接总数</span><b id="dstLinks">—</b></div>
+        <div class="stat"><span>已完成测评</span><b id="dstResults">—</b></div>
+      </div>
+      <div class="card">
+        <div class="link-row">分销站：<a id="linkPsy" href="#" target="_blank" rel="noopener"></a>
+          <button class="ghost mini" id="copyPsy">复制</button></div>
+        <div class="link-row">管理台登录：<a id="linkPsyAdmin" href="#" target="_blank" rel="noopener"></a></div>
+        <p class="sub" style="margin:8px 0 0">已用额度 <b id="dstQuotaUsed">—</b> · 总额度 <b id="dstQuotaTotal">—</b> · 已付订单 <b id="dstOrdersPaid">—</b> / <b id="dstOrdersTotal">—</b></p>
+      </div>
+      <div class="card">
+        <div class="tabs" id="distTabs">
+          <button type="button" class="tab on" data-dt="orders">额度订单</button>
+          <button type="button" class="tab" data-dt="links">链接明细</button>
+          <button type="button" class="tab" data-dt="distributors">分销商</button>
+          <button type="button" class="tab" data-dt="bytest">测题分布</button>
+        </div>
+        <div id="dt-orders">
+          <div class="row"><button class="ghost" id="refreshDist">刷新</button></div>
+          <div style="overflow:auto"><table><thead><tr>
+            <th>订单号</th><th>套餐</th><th>额度</th><th>金额(分)</th><th>状态</th><th>渠道</th><th>创建</th><th>支付</th>
+          </tr></thead><tbody id="distOrderRows"></tbody></table></div>
+        </div>
+        <div id="dt-links" class="hidden">
+          <div class="row">
+            <select id="distLinkStatus" style="width:140px">
+              <option value="">全部状态</option>
+              <option value="unused">unused</option>
+              <option value="used">used</option>
+              <option value="revoked">revoked</option>
+            </select>
+            <button class="ghost" id="refreshDistLinks">刷新链接</button>
+          </div>
+          <div style="overflow:auto"><table><thead><tr>
+            <th>ID</th><th>测题</th><th>Token</th><th>分销商</th><th>使用</th><th>状态</th><th>创建</th><th>C端链接</th>
+          </tr></thead><tbody id="distLinkRows"></tbody></table></div>
+        </div>
+        <div id="dt-distributors" class="hidden">
+          <div style="overflow:auto"><table><thead><tr>
+            <th>用户</th><th>额度</th><th>已用</th><th>剩余</th><th>邀请码</th><th>状态</th>
+          </tr></thead><tbody id="distUserRows"></tbody></table></div>
+        </div>
+        <div id="dt-bytest" class="hidden">
+          <div style="overflow:auto"><table><thead><tr><th>测题</th><th>链接数</th></tr></thead><tbody id="distByTestRows"></tbody></table></div>
         </div>
       </div>
     </div>
@@ -247,6 +300,80 @@
       if (name === "feedback") loadFeedback();
       if (name === "contact") loadContact();
       if (name === "status") loadStatus();
+      if (name === "dist") loadDist();
+    }
+
+    function psyOrigin() {
+      return (portalLinks.psy_site || "https://psy.xhs365.cn").replace(/\/$/, "");
+    }
+
+    function distLinkUrl(testCode, token) {
+      return `${psyOrigin()}/test/${encodeURIComponent(testCode)}/${encodeURIComponent(token)}`;
+    }
+
+    function switchDistTab(name) {
+      document.querySelectorAll("#distTabs .tab").forEach((t) => t.classList.toggle("on", t.dataset.dt === name));
+      ["orders", "links", "distributors", "bytest"].forEach((k) => {
+        $("dt-" + k).classList.toggle("hidden", k !== name);
+      });
+    }
+
+    async function loadDist() {
+      const st = $("distLinkStatus")?.value || "";
+      const q = new URLSearchParams({ limit: "100" });
+      if (st) q.set("link_status", st);
+      const data = await api("/dist/overview?" + q);
+      const s = data.stats || {};
+      $("dstDistributors").textContent = s.distributors ?? "—";
+      $("dstQuotaLeft").textContent = s.quota_remaining ?? "—";
+      $("dstLinks").textContent = s.links_total ?? "—";
+      $("dstResults").textContent = s.results_total ?? "—";
+      $("dstQuotaUsed").textContent = s.quota_used ?? "—";
+      $("dstQuotaTotal").textContent = s.quota_total ?? "—";
+      $("dstOrdersPaid").textContent = s.orders_paid ?? "—";
+      $("dstOrdersTotal").textContent = s.orders_total ?? "—";
+      $("linkPsy").href = portalLinks.psy_site || "#";
+      $("linkPsy").textContent = portalLinks.psy_site || "—";
+      $("linkPsyAdmin").href = portalLinks.psy_admin || "#";
+      $("linkPsyAdmin").textContent = portalLinks.psy_admin || "—";
+
+      $("distOrderRows").innerHTML = (data.orders || []).map((o) => `<tr>
+        <td class="code">${o.order_no || "—"}</td>
+        <td>${o.package_name || "—"}</td>
+        <td>${o.quota_value ?? o.quota_amount ?? "—"}</td>
+        <td>${o.amount ?? "—"}</td>
+        <td><span class="tag ${o.status || ""}">${o.status || "—"}</span></td>
+        <td>${o.payment_method || "—"}</td>
+        <td>${fmtTime(o.created_at)}</td>
+        <td>${fmtTime(o.paid_at)}</td>
+      </tr>`).join("") || `<tr><td colspan="8">暂无额度订单</td></tr>`;
+
+      $("distLinkRows").innerHTML = (data.links || []).map((l) => {
+        const url = distLinkUrl(l.test_code, l.token);
+        return `<tr>
+          <td>${l.id}</td><td>${l.test_code}</td>
+          <td class="code">${(l.token || "").slice(0, 12)}…</td>
+          <td>${l.username || l.user_id || "—"}</td>
+          <td>${l.used_count}/${l.max_uses}</td>
+          <td><span class="tag ${l.status}">${l.status}</span></td>
+          <td>${fmtTime(l.created_at)}</td>
+          <td><button class="ghost mini" data-durl="${url}">复制</button></td>
+        </tr>`;
+      }).join("") || `<tr><td colspan="8">暂无链接</td></tr>`;
+      $("distLinkRows").querySelectorAll("[data-durl]").forEach((b) => {
+        b.onclick = () => navigator.clipboard.writeText(b.dataset.durl);
+      });
+
+      $("distUserRows").innerHTML = (data.distributors || []).map((u) => `<tr>
+        <td>${u.username || u.user_id}</td>
+        <td>${u.quota}</td><td>${u.used_quota}</td><td>${u.remaining_quota}</td>
+        <td class="code">${u.invite_code || "—"}</td>
+        <td><span class="tag ${u.status || "active"}">${u.status || "active"}</span></td>
+      </tr>`).join("") || `<tr><td colspan="6">暂无分销商</td></tr>`;
+
+      $("distByTestRows").innerHTML = (s.links_by_test || []).map((r) =>
+        `<tr><td>${r.test_code}</td><td>${r.links}</td></tr>`
+      ).join("") || `<tr><td colspan="2">暂无</td></tr>`;
     }
 
     document.querySelectorAll("#mainNav button").forEach((b) => {
@@ -485,6 +612,13 @@
     $("filterStatus").onchange = loadCodes;
     $("fbStatus").onchange = loadFeedback;
     $("kwStatus").onchange = loadKeywords;
+    $("refreshDist").onclick = loadDist;
+    $("refreshDistLinks").onclick = loadDist;
+    $("distLinkStatus").onchange = loadDist;
+    $("copyPsy").onclick = () => navigator.clipboard.writeText(portalLinks.psy_site || "");
+    document.querySelectorAll("#distTabs .tab").forEach((t) => {
+      t.onclick = () => switchDistTab(t.dataset.dt);
+    });
 
     (async function boot() {
       if (!token()) return;

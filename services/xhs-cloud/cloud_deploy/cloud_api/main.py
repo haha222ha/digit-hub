@@ -1039,6 +1039,30 @@ def portal_admin_list_codes(
     return {"items": items, "total": len(items)}
 
 
+@app.get("/api/v1/portal/admin/dist/overview")
+def portal_admin_dist_overview(
+    _admin: str = Depends(verify_admin_portal),
+    link_status: str | None = None,
+    limit: int = 100,
+):
+    from cloud_deploy.cloud_api.admin_portal_service import collect_dist_admin_payload
+
+    try:
+        return collect_dist_admin_payload(link_status=link_status, limit=limit)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"分销数据未就绪: {e}") from e
+
+
+@app.get("/api/v1/portal/admin/dist/stats")
+def portal_admin_dist_stats(_admin: str = Depends(verify_admin_portal)):
+    from cloud_deploy.cloud_api import dist_db
+
+    try:
+        return dist_db.admin_dist_stats()
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"分销统计失败: {e}") from e
+
+
 @app.post("/api/v1/portal/admin/auth-codes")
 def portal_admin_generate_codes(
     body: GenerateCodesBody,

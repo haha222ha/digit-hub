@@ -1999,6 +1999,25 @@ def get_payment_order(order_no: str) -> dict | None:
         conn.close()
 
 
+def list_payment_orders_by_plan_prefix(prefix: str, *, limit: int = 100) -> list[dict]:
+    prefix = str(prefix or "").strip()
+    limit = max(1, min(int(limit), 500))
+    conn = _conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as c:
+            c.execute("SET search_path TO xhs_monitor, public")
+            c.execute(
+                """SELECT * FROM payment_orders
+                   WHERE plan_code LIKE %s
+                   ORDER BY id DESC LIMIT %s""",
+                (f"{prefix}%", limit),
+            )
+            rows = c.fetchall()
+        return [_payment_order_row(r) for r in rows if r]
+    finally:
+        conn.close()
+
+
 def expire_stale_payment_order(order_no: str) -> None:
     conn = _conn()
     try:

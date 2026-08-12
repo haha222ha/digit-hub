@@ -66,6 +66,8 @@ def cloud_status_payload(*, health_ok: bool = True) -> dict:
         "assess_activate": f"{origin}/?api=live#/activate",
         "admin_console": f"{origin}/admin/",
         "insight_member": f"{origin}/member",
+        "psy_site": os.environ.get("XHS_PSY_ORIGIN", "https://psy.xhs365.cn").rstrip("/"),
+        "psy_admin": os.environ.get("XHS_PSY_ORIGIN", "https://psy.xhs365.cn").rstrip("/") + "/login",
     }
     for p in products:
         portal_links[f"{p['product']}_activate_template"] = p.get("activate_url_template", "")
@@ -94,4 +96,28 @@ def filter_auth_codes_by_product(items: list[dict], product: str | None) -> list
             filtered.append(it)
         elif want == "assess" and (it.get("plan_code") or "").startswith("assess"):
             filtered.append(it)
+        elif want == "psy_dist" and (it.get("plan_code") or "").startswith("psy_quota"):
+            filtered.append(it)
     return filtered
+
+
+def collect_dist_admin_payload(*, link_status: str | None = None, limit: int = 100) -> dict:
+    from cloud_deploy.cloud_api import database as db
+    from cloud_deploy.cloud_api import dist_db
+    from cloud_deploy.cloud_api.dist_orders import map_order_row
+    from cloud_deploy.cloud_api.payment_plans import get_plan
+
+    stats = dist_db.admin_dist_stats()
+    links = dist_db.admin_list_links(status=link_status or None, limit=limit)
+    distributors = dist_db.admin_list_distributors(limit=limit)
+    orders_raw = db.list_payment_orders_by_plan_prefix("psy_quota", limit=limit)
+    orders = []
+    for row in orders_raw:
+        plan = get_plan(row.get("plan_code") or "")
+        orders.append(map_order_row(row, plan))
+    return {
+        "stats": stats,
+        "links": links,
+        "distributors": distributors,
+        "orders": orders,
+    }

@@ -24,6 +24,17 @@ sudo certbot --nginx -d monitor.xhs365.cn --non-interactive --agree-tos -m admin
 
 3. 商户后台通知 URL：`https://monitor.xhs365.cn/api/v1/payment/notify/hwxun`
 
+### 心理分销 psy.xhs365.cn
+
+```bash
+# DNS: psy → 同 ECS IP（灰云）
+cd /opt/digit-hub && sudo git pull && sudo bash deploy/quick_update.sh
+sudo bash deploy/certbot_psy.sh
+sudo bash deploy/accept_psy_dist.sh
+```
+
+详见 `deploy/PSY_DIST_ACCEPTANCE.md`。
+
 ## 前端
 
 `http://47.239.181.111/?api=live` 或 `https://monitor.xhs365.cn/?api=live`
