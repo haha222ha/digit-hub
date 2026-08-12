@@ -527,6 +527,31 @@ def payment_claim_order(order_no: str, user: dict = Depends(current_user)):
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
+@app.post("/api/v1/payment/orders/{order_no}/guest-unlock")
+def payment_guest_unlock_order(order_no: str, body: DeviceAuthBody):
+    """游客支付后静默开通：授权码即账号与初始密码，无需手填注册表单。"""
+    try:
+        result = pay.guest_unlock_paid_order(order_no)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    token = issue_member_token(
+        result["membership"]["id"],
+        result["username"],
+        body.device_id,
+        body.device_label,
+    )
+    return member_auth_response({
+        "access_token": token,
+        "token_type": "bearer",
+        "membership": result["membership"],
+        "message": result["message"],
+        "username": result["username"],
+        "auth_code": result.get("auth_code") or "",
+        "login_hint": result.get("login_hint") or "",
+        "already_fulfilled": bool(result.get("already_fulfilled")),
+    })
+
+
 @app.post("/api/v1/payment/orders/{order_no}/complete")
 def payment_complete_order(order_no: str, body: PaymentCompleteBody):
     """支付成功后：新用户注册开通 / 老用户登录绑定（无需授权码）。"""

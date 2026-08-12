@@ -279,8 +279,14 @@ def get_order_public(order_no: str) -> dict | None:
             out["message"] = "支付成功，会员已生效"
             out["next_action"] = "none"
         else:
-            out["message"] = "支付成功，请设置账号或登录已有账号以完成开通"
-            out["next_action"] = "complete_account"
+            from cloud_deploy.cloud_api.payment_plans import is_assess_plan
+
+            if is_assess_plan(row["plan_code"]):
+                out["message"] = "支付成功，即将自动解锁完整报告"
+                out["next_action"] = "guest_unlock"
+            else:
+                out["message"] = "支付成功，请设置账号或登录已有账号以完成开通"
+                out["next_action"] = "complete_account"
     return out
 
 
@@ -352,6 +358,50 @@ def complete_paid_order(
         "message": msg,
         "username": profile.get("username") or username,
         "auth_code": code,
+    }
+
+
+def guest_unlock_paid_order(order_no: str) -> dict:
+    """游客支付后静默开通：授权码即账号，同码为初始密码（对标发卡网 / vuemonitor）。"""
+    row = db.get_payment_order(order_no)
+    if not row:
+        raise ValueError("订单不存在")
+    if row["status"] != "paid":
+        raise ValueError("订单尚未支付")
+
+    code = (row.get("auth_code") or "").strip()
+    if row.get("fulfilled_user_id"):
+        uid = int(row["fulfilled_user_id"])
+        profile = db.get_member_profile(uid) or {}
+        return {
+            "membership": profile,
+            "message": "权益已开通",
+            "username": profile.get("username") or "",
+            "auth_code": code,
+            "already_fulfilled": True,
+        }
+
+    if not code:
+        raise ValueError("订单处理中，请稍后刷新或联系客服")
+
+    username = code
+    password = code
+    from cloud_deploy.cloud_api.payment_plans import is_addon_plan
+
+    is_addon = is_addon_plan(row["plan_code"])
+    profile = db.register_with_auth_code(username, password, code)
+    msg = (
+        "定制分析订单已提交，请在 PC 端「使用说明」填写词库需求或联系客服"
+        if is_addon
+        else f"开通成功，完整报告已解锁（授权码即账号与密码，请妥善保存）"
+    )
+    db.mark_payment_order_fulfilled(order_no, int(profile["id"]))
+    return {
+        "membership": profile,
+        "message": msg,
+        "username": profile.get("username") or username,
+        "auth_code": code,
+        "login_hint": "授权码可作为账号与密码登录会员中心",
     }
 
 

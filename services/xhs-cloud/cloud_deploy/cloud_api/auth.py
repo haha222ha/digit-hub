@@ -269,16 +269,27 @@ def login_member_by_code(
     device_id: str,
     device_label: str = "",
 ) -> dict:
+    code = (auth_code or "").strip()
+    login_method = "auth_code"
     try:
-        profile = db.login_with_auth_code(auth_code)
+        profile = db.login_with_auth_code(code)
     except ValueError as e:
-        raise HTTPException(status_code=401, detail=str(e)) from e
+        msg = str(e)
+        if "尚未开通" not in msg:
+            raise HTTPException(status_code=401, detail=msg) from e
+        try:
+            profile = db.register_with_auth_code(code, code, code)
+            login_method = "auth_code_redeem"
+        except ValueError as e2:
+            raise HTTPException(status_code=400, detail=str(e2)) from e2
     token = issue_member_token(profile["id"], profile["username"], device_id, device_label)
     return {
         "access_token": token,
         "token_type": "bearer",
         "membership": profile,
-        "login_method": "auth_code",
+        "login_method": login_method,
+        "auth_code": code,
+        "login_hint": "授权码可作为账号与密码登录会员中心",
     }
 
 

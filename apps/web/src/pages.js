@@ -10,7 +10,7 @@ import {
 } from "./quiz/scoring.js";
 import { buildOptionOrders, displayOptions, exitModalHtml } from "./quiz/session.js";
 import { unlockAssessMock, clearSession, getEntitlements, DEMO_AUTH_CODE } from "./api/mock.js";
-import { activateWithAuthCode } from "./api/activate.js";
+import { activateWithAuthCode, saveGuestAuthCode, GUEST_CODE_KEY } from "./api/activate.js";
 import { api, isMockMode } from "./api/client.js";
 import { checkReportAccess, refreshEntitlementsFromProfile } from "./api/access.js";
 import { deviceId } from "./config.js";
@@ -620,6 +620,7 @@ function dimLabel(skin, id) {
 }
 
 export async function renderSoftResult(root, skinId, query) {
+  clearPayUiLock();
   const rid =
     new URLSearchParams(query).get("rid") || localStorage.getItem(`xinxiang_last_result_${skinId}`);
   const packed = rid ? loadResult(rid) : null;
@@ -703,10 +704,7 @@ export async function renderSoftResult(root, skinId, query) {
 
   const openDrawer = () => openPayDrawer(root, skinId, rid);
   const closeDrawer = () => {
-    clearPayPollTimer();
-    root.querySelector("#bd").classList.remove("open");
-    root.querySelector("#drawer")?.classList.remove("open", "pay-sheet-drawer");
-    document.body.style.overflow = "";
+    clearPayUiLock();
   };
 
   const goUnlock = () => {
@@ -750,6 +748,8 @@ export async function renderSoftResult(root, skinId, query) {
   const qs = new URLSearchParams(query);
   if (!unlocked && (qs.get("pay_wait") === "1" || loadPayWait()?.order_no)) {
     openPayWaitSheet(root, skinId, rid).catch(() => {});
+  } else if (!unlocked && qs.get("open_pay") === "1") {
+    openPayDrawer(root, skinId, rid).catch(() => {});
   }
 }
 
@@ -778,6 +778,33 @@ function clearPayPollTimer() {
     clearInterval(payPollTimer);
     payPollTimer = null;
   }
+}
+
+function clearPayUiLock() {
+  clearPayPollTimer();
+  document.body.style.overflow = "";
+  document.documentElement.style.overflow = "";
+  const bd = document.getElementById("bd");
+  const drawer = document.getElementById("drawer");
+  if (bd) bd.classList.remove("open");
+  if (drawer) drawer.classList.remove("open", "pay-sheet-drawer");
+}
+
+function saveGuestCredentials(res) {
+  saveGuestAuthCode(res?.auth_code);
+}
+
+async function guestUnlockPaidOrder(orderNo) {
+  const res = await api(`/api/v1/payment/orders/${orderNo}/guest-unlock`, {
+    method: "POST",
+    body: JSON.stringify({
+      device_id: deviceId(),
+      device_label: "browser",
+    }),
+  });
+  if (res.access_token) localStorage.setItem("xinxiang_token", res.access_token);
+  saveGuestCredentials(res);
+  return res;
 }
 
 function resolvePayDevice(channel) {
@@ -881,10 +908,7 @@ async function openPayWaitSheet(root, skinId, rid) {
     </div>
   `;
   const close = () => {
-    clearPayPollTimer();
-    bd.classList.remove("open");
-    drawer.classList.remove("open", "pay-sheet-drawer");
-    document.body.style.overflow = "";
+    clearPayUiLock();
   };
   drawer.querySelector("#close").onclick = close;
   drawer.querySelector("#close2").onclick = close;
@@ -1010,9 +1034,11 @@ async function openPayDrawer(root, skinId, rid) {
       ${multiPlan}
       <div class="pay-channel-stack" id="payChannels">${channelBtns}</div>
       <div id="payPanel"></div>
-      <details class="code-fold pay-code-fold">
-        <summary>已有购买码？点此输入授权码</summary>
-        <input class="field" id="code" placeholder="${isMockMode() ? DEMO_AUTH_CODE : "输入授权码"}" value="${
+      <p class="pay-path-divider muted">或</p>
+      <details class="code-fold pay-code-fold" open>
+        <summary>已有购买码（小红书 / 闲鱼 / 发卡网）</summary>
+        <p class="muted pay-code-hint">粘贴授权码即可解锁，无需再付款；码即账号与密码</p>
+        <input class="field" id="code" placeholder="${isMockMode() ? DEMO_AUTH_CODE : "XHS-XXXX-XXXX-XXXX"}" value="${
           isMockMode() ? DEMO_AUTH_CODE : ""
         }" />
         ${
@@ -1020,9 +1046,9 @@ async function openPayDrawer(root, skinId, rid) {
             ? `<p class="muted" style="margin:0;font-size:0.85rem">演示码已填好：<code>${DEMO_AUTH_CODE}</code></p>`
             : ""
         }
-        <button class="btn btn-primary btn-block" id="codeBtn">使用授权码登录解锁</button>
+        <button class="btn btn-primary btn-block" id="codeBtn">使用授权码解锁</button>
       </details>
-      <p class="pay-digital-note muted">支付成功即解锁本机完整报告；一次性数字内容，履约后不退款。</p>
+      <p class="pay-digital-note muted">在线支付成功后也会生成购买码，可换设备再次登录；数字内容履约后不退款。</p>
     </div>
   `;
 
@@ -1046,10 +1072,7 @@ async function openPayDrawer(root, skinId, rid) {
   });
 
   const closeDrawer = () => {
-    clearPayPollTimer();
-    bd.classList.remove("open");
-    drawer.classList.remove("open", "pay-sheet-drawer");
-    document.body.style.overflow = "";
+    clearPayUiLock();
   };
 
   drawer.querySelector("#close").onclick = closeDrawer;
@@ -1082,71 +1105,29 @@ async function openPayDrawer(root, skinId, rid) {
 
   drawer.querySelector("#codeBtn").onclick = async () => {
     const code = drawer.querySelector("#code").value.trim();
+    const btn = drawer.querySelector("#codeBtn");
+    btn.disabled = true;
+    const prev = btn.textContent;
+    btn.textContent = "验证中…";
     try {
-      await activateWithAuthCode(code);
+      const res = await activateWithAuthCode(code);
       closeDrawer();
       const ok = await checkReportAccess(skinId);
       if (ok) navigate(`/report/${rid}`);
-      else navigate(`/t/${skinId}/result?rid=${encodeURIComponent(rid)}`);
+      else {
+        const hint =
+          res.login_method === "auth_code_redeem"
+            ? "码已激活，权益已生效"
+            : "已登录，正在刷新权益…";
+        navigate(`/t/${skinId}/result?rid=${encodeURIComponent(rid)}&unlock_hint=${encodeURIComponent(hint)}`);
+      }
     } catch (e) {
       alert(e.message || "激活失败");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = prev;
     }
   };
-}
-
-async function completeAccountRegisterForm(panel, orderNo) {
-  return new Promise((resolve, reject) => {
-    panel.innerHTML = `
-      <div class="pay-wait-box">
-        <p><strong>支付成功</strong></p>
-        <p class="muted">设置账号以绑定本次购买的权益</p>
-        <div class="stack" id="registerForm">
-          <input class="field" id="regUser" placeholder="用户名（3–64 位）" autocomplete="username" maxlength="64" />
-          <input class="field" id="regPass" type="password" placeholder="密码（至少 6 位）" autocomplete="new-password" minlength="6" />
-          <p class="muted" id="regHint" style="margin:0;font-size:0.85rem"></p>
-          <button class="btn btn-primary btn-block" id="regSubmit">注册并开通</button>
-        </div>
-      </div>
-    `;
-    const hint = panel.querySelector("#regHint");
-    const submit = panel.querySelector("#regSubmit");
-    const run = async () => {
-      const username = panel.querySelector("#regUser").value.trim();
-      const password = panel.querySelector("#regPass").value;
-      if (username.length < 3 || username.length > 64) {
-        hint.textContent = "用户名需 3–64 位";
-        return;
-      }
-      if (password.length < 6) {
-        hint.textContent = "密码至少 6 位";
-        return;
-      }
-      submit.disabled = true;
-      hint.textContent = "注册中…";
-      try {
-        const res = await api(`/api/v1/payment/orders/${orderNo}/complete`, {
-          method: "POST",
-          body: JSON.stringify({
-            mode: "register",
-            username,
-            password,
-            device_id: deviceId(),
-            device_label: "browser",
-          }),
-        });
-        if (res.access_token) localStorage.setItem("xinxiang_token", res.access_token);
-        resolve();
-      } catch (e) {
-        submit.disabled = false;
-        hint.textContent = e.message || "注册失败，请重试";
-        reject(e);
-      }
-    };
-    submit.onclick = run;
-    panel.querySelector("#regPass").addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter") run();
-    });
-  });
 }
 
 function renderPayWaitPanel(order, payChannel, payurl) {
@@ -1177,9 +1158,9 @@ function renderPayWaitPanel(order, payChannel, payurl) {
 
 async function wirePayFulfillment(panel, order, skinId, rid) {
   let settled = false;
-  let awaitingRegister = false;
 
   const finishAfterPay = async () => {
+    clearPayUiLock();
     clearPendingPay();
     try {
       sessionStorage.removeItem("xinxiang_pay_wait");
@@ -1199,7 +1180,6 @@ async function wirePayFulfillment(panel, order, skinId, rid) {
 
   const fulfill = async () => {
     if (settled) return true;
-    if (awaitingRegister) return false;
     const st = await api(`/api/v1/payment/orders/${order.order_no}`);
     const statusEl = panel.querySelector("#payStatus");
     if (statusEl) statusEl.textContent = `状态：${st.status}`;
@@ -1207,25 +1187,9 @@ async function wirePayFulfillment(panel, order, skinId, rid) {
 
     clearPayPollTimer();
 
-    if (isMockMode()) {
-      await api(`/api/v1/payment/orders/${order.order_no}/complete`, {
-        method: "POST",
-        body: JSON.stringify({
-          mode: "register",
-          username: "mock_" + Date.now().toString(36),
-          password: "mockpass123",
-          device_id: deviceId(),
-          device_label: "browser",
-        }),
-      });
-    } else if (st.next_action === "complete_account") {
-      awaitingRegister = true;
-      try {
-        await completeAccountRegisterForm(panel, order.order_no);
-      } catch {
-        awaitingRegister = false;
-        return false;
-      }
+    if (st.next_action === "guest_unlock" || st.next_action === "complete_account") {
+      if (statusEl) statusEl.textContent = "支付成功，正在自动开通…";
+      await guestUnlockPaidOrder(order.order_no);
     } else if (localStorage.getItem("xinxiang_token")) {
       await api(`/api/v1/payment/orders/${order.order_no}/claim`, { method: "POST", body: "{}" });
     }
@@ -1340,6 +1304,7 @@ function animateBars(root) {
 }
 
 export async function renderFullReport(root, resultId) {
+  clearPayUiLock();
   const packed = loadResult(resultId);
   if (!packed) {
     root.innerHTML = `${topbar()}<main class="shell"><p>报告不存在</p></main>`;
@@ -1356,10 +1321,21 @@ export async function renderFullReport(root, resultId) {
   const chrome = resultChrome(pack, r);
   const narr = buildNarrative(skin, r, pack);
   const sections = r.full || [];
+  const guestCode = localStorage.getItem(GUEST_CODE_KEY) || "";
   root.innerHTML = `
     ${topbar()}
     <main class="shell report-shell tone-result">
       <p class="muted">${skin.title} · 完整报告 · ${pack.label}</p>
+      ${
+        guestCode
+          ? `<div class="guest-credential-card">
+              <p><strong>购买码已保存</strong></p>
+              <p class="muted" style="margin:0.35rem 0 0.5rem">账号与密码均为授权码，下次可在会员中心登录</p>
+              <code class="guest-code">${guestCode}</code>
+              <button class="btn btn-ghost btn-block" type="button" id="copyGuestCode">复制购买码</button>
+            </div>`
+          : ""
+      }
       ${narrativeHeroHtml(narr, chrome, pack, skin, r, { compactShare: true })}
       <nav class="result-toc" aria-label="报告目录">
         <a class="toc-anchor" href="#result-value">画像</a>
@@ -1421,6 +1397,17 @@ export async function renderFullReport(root, resultId) {
   wireA2hs(root);
   wireRetestBanner(root, packed.skinId, navigate);
   wireResultToc(root);
+  root.querySelector("#copyGuestCode")?.addEventListener("click", async () => {
+    const code = localStorage.getItem(GUEST_CODE_KEY) || "";
+    if (!code) return;
+    try {
+      await navigator.clipboard.writeText(code);
+      const btn = root.querySelector("#copyGuestCode");
+      if (btn) btn.textContent = "已复制";
+    } catch {
+      alert("复制失败，请手动复制购买码");
+    }
+  });
   root.querySelector("#shareBtn").onclick = () =>
     shareOrDownload({
       title: `${skin.title} · ${pack.label}`,
@@ -1548,21 +1535,31 @@ export async function renderActivate(root, query) {
   const params = new URLSearchParams(query);
   const initialCode = params.get("code")?.trim() || "";
   const catalog = await loadCatalog();
-  const featured = liveSkins(catalog)[0];
+  const live = liveSkins(catalog);
+  const featured = live[0];
   const nextPath = featured ? `/t/${featured.id}` : "/tests";
+  const recentSkin = live.find((skin) => localStorage.getItem(`xinxiang_last_result_${skin.id}`));
+  const recentRid = recentSkin ? localStorage.getItem(`xinxiang_last_result_${recentSkin.id}`) : "";
+  const payPath =
+    recentSkin && recentRid
+      ? `/t/${recentSkin.id}/result?rid=${encodeURIComponent(recentRid)}&open_pay=1`
+      : nextPath;
 
   root.innerHTML = `
     ${topbar("activate")}
     <main class="shell">
       <h1 class="page-title">激活授权码</h1>
-      <p class="muted">小红书 / 闲鱼购买后，在此激活即可解锁完整测评报告。</p>
+      <p class="muted">小红书 / 闲鱼 / 发卡网购买后，在此粘贴码即可解锁；也可先免费测题，结果页再在线支付。</p>
       <section class="section activate-box">
         <input class="field" id="code" placeholder="粘贴授权码" value="${initialCode.replace(/"/g, "&quot;")}" autocomplete="off" />
         <button class="btn btn-primary btn-block" id="activateBtn">立即激活</button>
+        <button class="btn btn-ghost btn-block" id="goPay">${
+          recentSkin ? "没有码？去支付解锁" : "没有码？先去测评"
+        }</button>
         <p class="muted" id="status" style="margin:12px 0 0"></p>
         <div id="successPanel" hidden>
           <p class="access-badge on"><span class="dot"></span>激活成功 · 权益已生效</p>
-          <p class="muted">建议截图保存授权码，换设备时可再次输入激活。</p>
+          <p class="muted">建议截图保存授权码（即账号与密码），换设备时可再次输入登录。</p>
           <button class="btn btn-ember btn-block" id="goTest">开始测评</button>
           <button class="btn btn-ghost btn-block" id="goAccount">查看会员中心</button>
         </div>
@@ -1593,6 +1590,7 @@ export async function renderActivate(root, query) {
   };
 
   activateBtn.onclick = runActivate;
+  root.querySelector("#goPay").onclick = () => navigate(payPath);
   root.querySelector("#goTest").onclick = () => navigate(nextPath);
   root.querySelector("#goAccount").onclick = () => navigate("/account");
 
@@ -1600,8 +1598,10 @@ export async function renderActivate(root, query) {
 }
 
 export async function renderAccount(root) {
+  clearPayUiLock();
   await refreshEntitlementsFromProfile().catch(() => null);
   const ent = getEntitlements();
+  const guestCode = localStorage.getItem(GUEST_CODE_KEY) || "";
   let profile = null;
   try {
     profile = await api("/api/v1/member/profile");
@@ -1621,6 +1621,16 @@ export async function renderAccount(root) {
         <p>测评完整报告：${assess.enabled || ent.assess_enabled ? "已开通" : "未开通"}</p>
         <p class="muted">月额度：${assess.quota_per_month ?? 0} · 皮肤：${(assess.skins || []).join(", ") || "—"}</p>
       </section>
+      ${
+        guestCode
+          ? `<section class="section guest-credential-card">
+              <h2>我的购买码</h2>
+              <p class="muted">账号与密码均为下方授权码，请妥善保存</p>
+              <code class="guest-code">${guestCode}</code>
+              <button class="btn btn-ghost btn-block" type="button" id="copyGuestCodeAcc">复制购买码</button>
+            </section>`
+          : ""
+      }
       <section class="section">
         <h2>快捷操作</h2>
         <div class="stack" style="margin-top:14px">
@@ -1642,6 +1652,17 @@ export async function renderAccount(root) {
   root.querySelector("#unlock")?.addEventListener("click", () => {
     unlockAssessMock({ plan_code: "assess_monthly", skins: ["*"] });
     renderAccount(root);
+  });
+  root.querySelector("#copyGuestCodeAcc")?.addEventListener("click", async () => {
+    const code = localStorage.getItem(GUEST_CODE_KEY) || "";
+    if (!code) return;
+    try {
+      await navigator.clipboard.writeText(code);
+      const btn = root.querySelector("#copyGuestCodeAcc");
+      if (btn) btn.textContent = "已复制";
+    } catch {
+      alert("复制失败，请手动复制");
+    }
   });
   root.querySelector("#codeBtn").onclick = async () => {
     const code = root.querySelector("#code").value.trim();

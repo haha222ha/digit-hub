@@ -203,11 +203,30 @@ export async function mockFetch(path, options = {}) {
   if (orderMatch && method === "GET") {
     const row = orders()[orderMatch[1]];
     if (!row) return { error: "not_found", status: 404, detail: "订单不存在" };
+    const plan = String(row.plan_code || "");
+    const isAssess = plan.startsWith("assess");
+    const next =
+      row.status === "paid" && !row.fulfilled
+        ? isAssess
+          ? "guest_unlock"
+          : "complete_account"
+        : "none";
     return {
       ...row,
-      next_action: row.status === "paid" && !row.fulfilled ? "complete_account" : "none",
+      next_action: next,
       message: row.status === "paid" ? "已支付" : "待支付",
     };
+  }
+
+  const guestUnlockMatch = bare.match(/^\/api\/v1\/payment\/orders\/([^/]+)\/guest-unlock$/);
+  if (guestUnlockMatch && method === "POST") {
+    const orderNo = guestUnlockMatch[1];
+    const mockCode = "MOCK-" + orderNo.slice(-8).toUpperCase();
+    const res = fulfillOrder(orderNo, mockCode);
+    res.auth_code = mockCode;
+    res.login_hint = "授权码可作为账号与密码登录会员中心";
+    localStorage.setItem("xinxiang_auth_code", mockCode);
+    return res;
   }
 
   const completeMatch = bare.match(/^\/api\/v1\/payment\/orders\/([^/]+)\/complete$/);

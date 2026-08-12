@@ -104,6 +104,7 @@ class PaymentFulfillTest(unittest.TestCase):
         self.assertEqual(pay.handle_hwxun_notify(params), "fail")
 
     def test_guest_order_claim_after_login(self):
+        db.insert_payment_order(
             order_no="XHSPTEST002",
             user_id=None,
             plan_code="monthly",
@@ -127,6 +128,39 @@ class PaymentFulfillTest(unittest.TestCase):
         result = pay.claim_paid_order("XHSPTEST002", uid)
         self.assertIn("membership", result)
         self.assertGreaterEqual(result["membership"]["days_remaining"], 30)
+
+    def test_guest_unlock_assess_order(self):
+        db.insert_payment_order(
+            order_no="XHSPTEST004",
+            user_id=None,
+            plan_code="assess_single",
+            duration_days=7,
+            amount="1.99",
+            channel="wxpay",
+            client_ip="127.0.0.1",
+            expires_at="2099-01-01 00:00:00",
+        )
+        params = {
+            "pid": "1001",
+            "trade_no": "GW126",
+            "out_trade_no": "XHSPTEST004",
+            "money": "1.99",
+            "trade_status": "TRADE_SUCCESS",
+        }
+        params["sign"] = _epay_sign(params, "test_pay_key")
+        pay.handle_hwxun_notify(params)
+        row = db.get_payment_order("XHSPTEST004")
+        self.assertEqual(row["status"], "paid")
+        self.assertTrue(row["auth_code"])
+        pub = pay.get_order_public("XHSPTEST004")
+        self.assertEqual(pub["next_action"], "guest_unlock")
+        result = pay.guest_unlock_paid_order("XHSPTEST004")
+        self.assertEqual(result["username"], row["auth_code"])
+        self.assertEqual(result["auth_code"], row["auth_code"])
+        row2 = db.get_payment_order("XHSPTEST004")
+        self.assertTrue(row2["fulfilled_user_id"])
+        profile = db.get_member_profile(int(row2["fulfilled_user_id"]))
+        self.assertTrue(profile.get("is_active"))
 
 
 if __name__ == "__main__":
