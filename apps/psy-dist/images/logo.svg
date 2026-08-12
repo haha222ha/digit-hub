@@ -1,31 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="心象测">
   <defs>
-    <!-- 使用最标准的线性渐变，确保 PS 完美读取 -->
-    <linearGradient id="psTeal" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#1E40AF" />
-      <stop offset="60%" stop-color="#0D9488" />
-      <stop offset="100%" stop-color="#10B981" />
+    <linearGradient id="xxTeal" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#134e4a"/>
+      <stop offset="55%" stop-color="#0f766e"/>
+      <stop offset="100%" stop-color="#14b8a6"/>
     </linearGradient>
-
-    <linearGradient id="psGold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FBBF24" />
-      <stop offset="100%" stop-color="#F59E0B" />
+    <linearGradient id="xxGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8c547"/>
+      <stop offset="100%" stop-color="#c9a227"/>
     </linearGradient>
   </defs>
-
-  <!-- 去掉了会导致 PS 报错空白的 filter 滤镜 -->
-  <g>
-    <!-- 外层迷宫虚线圆环 -->
-    <circle cx="100" cy="100" r="75" fill="none" stroke="url(#psTeal)" stroke-width="8" stroke-linecap="round" stroke-dasharray="50,20,35,15" />
-    
-    <!-- 内层迷宫实线圆环 -->
-    <circle cx="100" cy="100" r="45" fill="none" stroke="url(#psTeal)" stroke-width="6" stroke-linecap="round" stroke-dasharray="25,25" opacity="0.8" />
-    
-    <!-- 核心闪电 -->
-    <path d="M 105,45 L 75,95 L 102,95 L 90,145 L 125,85 L 98,85 Z" fill="url(#psGold)" />
-    
-    <!-- 装饰星芒 -->
-    <path d="M 155,60 L 157,65 L 162,67 L 157,69 L 155,74 L 153,69 L 148,67 L 153,65 Z" fill="#F59E0B" />
-    <circle cx="50" cy="145" r="4.5" fill="#10B981" opacity="0.6" />
-  </g>
+  <circle cx="100" cy="100" r="78" fill="none" stroke="url(#xxTeal)" stroke-width="7" stroke-linecap="round" stroke-dasharray="48 18 32 14"/>
+  <circle cx="100" cy="100" r="48" fill="none" stroke="url(#xxTeal)" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="22 22" opacity="0.85"/>
+  <path d="M106,42 L74,96 L102,96 L88,152 L128,86 L100,86 Z" fill="url(#xxGold)"/>
+  <path d="M156,58 L158,64 L164,66 L158,68 L156,74 L154,68 L148,66 L154,64 Z" fill="#c9a227"/>
+  <circle cx="48" cy="148" r="4" fill="#14b8a6" opacity="0.65"/>
 </svg>

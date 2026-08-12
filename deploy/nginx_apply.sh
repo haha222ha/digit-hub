@@ -166,6 +166,14 @@ ${GZIP_DIRECTIVES}
         add_header Cache-Control "no-store, no-cache, must-revalidate";
     }
 
+    # 心象测自有工作台（原生 SPA，替代仿站 Vue app.html）
+    location ^~ /console/ {
+        try_files \$uri \$uri/ /console/index.html;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header CDN-Cache-Control "no-store";
+        add_header Cloudflare-CDN-Cache-Control "no-store";
+    }
+
     location ~ ^/test/([^/]+)/([^/]+)$ {
         proxy_pass http://127.0.0.1:8080;
         proxy_set_header Host \$host;
@@ -174,10 +182,11 @@ ${GZIP_DIRECTIVES}
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
-    # 登录 / 注册 / 管理台等 → Vue SPA（app.html），避免再落到仿站首页
+    # 登录 / 注册 / 管理台等 → 新控制台；不再回落仿站 app.html
     location / {
-        try_files \$uri \$uri/ /app.html;
+        try_files \$uri \$uri/ /console/index.html;
         add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header Clear-Site-Data "\"cache\"";
     }
 
 ${PSY_API_LOCATIONS}

@@ -1,0 +1,29 @@
+:root {
+  --color-ink: #0b1c18;
+  --color-ink-soft: #243a34;
+  --color-paper: #f3f7f5;
+  --color-mist: #e7efec;
+  --color-brand: #0f766e;
+  --color-brand-bright: #14b8a6;
+  --color-accent-gold: #c9a227;
+  --color-success: #1f7a4d;
+  --color-warning: #b45309;
+  --color-danger: #b42318;
+  --color-line: rgba(15, 118, 110, 0.18);
+  --color-action-primary: #0f766e;
+  --font-display: "Noto Serif SC", "Songti SC", serif;
+  --font-body: "IBM Plex Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --shadow-soft: 0 12px 40px rgba(11, 28, 24, 0.08);
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
