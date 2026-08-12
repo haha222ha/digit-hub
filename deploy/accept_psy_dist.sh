@@ -32,17 +32,18 @@ assert len(t) >= 30, "tests catalog too small"
 PY
 
 echo "==> 3) register distributor ${USER}"
-curl -fsS -X POST "${API_ORIGIN}/api/auth/register" \
+curl -sS -X POST "${API_ORIGIN}/api/auth/register" \
   -H "Content-Type: application/json" \
   -d "{\"username\":\"${USER}\",\"password\":\"${PASS}\",\"email\":\"${USER}@example.com\"}" \
   >"${TMP}/reg.json"
-TOKEN="$(python3 - "${TMP}/reg.json" <<'PY'
+python3 - "${TMP}/reg.json" <<'PY'
 import json, sys
 d = json.load(open(sys.argv[1], encoding="utf-8"))
+print(d)
 assert d.get("code") == 200, d
-print((d.get("data") or {}).get("token") or "")
+assert (d.get("data") or {}).get("token"), d
 PY
-)"
+TOKEN="$(python3 -c "import json; d=json.load(open('${TMP}/reg.json',encoding='utf-8')); print(d['data']['token'])")"
 test -n "${TOKEN}"
 
 echo "==> 4) quota info"

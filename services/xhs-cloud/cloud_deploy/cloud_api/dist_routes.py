@@ -202,6 +202,8 @@ def compat_auth_register(body: DistRegisterBody, request: Request):
         return JSONResponse(_fail(str(e)), status_code=200)
     except HTTPException as e:
         return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    except Exception as e:
+        return JSONResponse(_fail(f"注册失败: {e}"), status_code=200)
     uid = int(res["membership"]["id"])
     user = svc.map_user_for_dist(uid)
     return _ok({"user": user, "token": res["access_token"]}, "注册成功")

@@ -12,6 +12,7 @@ from typing import Any
 from cloud_deploy.cloud_api.config import get_settings
 
 _USE_PG = os.environ.get("XHS_DATABASE_URL", "").startswith("postgres")
+_DIST_PG_READY = False
 
 
 def _now() -> str:
@@ -30,9 +31,28 @@ def _sqlite_conn():
     return conn
 
 
+def _pg_conn():
+    """业务表在 xhs_monitor schema；未 SET search_path 时 CREATE/FK 会失败。"""
+    import psycopg2.extras
+    conn = _pg_conn()
+    with conn.cursor() as c:
+        c.execute("SET search_path TO xhs_monitor, public")
+    return conn
+
+
+def _pg_cur(conn):
+    import psycopg2.extras
+
+    return conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+
 def init_dist_tables() -> None:
+    global _DIST_PG_READY
     if _USE_PG:
+        if _DIST_PG_READY:
+            return
         _init_dist_tables_pg()
+        _DIST_PG_READY = True
     else:
         _init_dist_tables_sqlite()
 
@@ -101,82 +121,85 @@ def _init_dist_tables_sqlite() -> None:
 
 
 def _init_dist_tables_pg() -> None:
-    from cloud_deploy.cloud_api.database_pg import _conn
-
-    conn = _conn()
-    c = conn.cursor()
-    c.execute(
-        """
-        CREATE TABLE IF NOT EXISTS dist_distributors (
-            user_id INTEGER PRIMARY KEY REFERENCES users(id),
-            quota INTEGER NOT NULL DEFAULT 0,
-            used_quota INTEGER NOT NULL DEFAULT 0,
-            invite_code TEXT UNIQUE,
-            role TEXT NOT NULL DEFAULT 'distributor',
-            status TEXT NOT NULL DEFAULT 'active',
-            created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    conn = _pg_conn()
+    try:
+        c = conn.cursor()
+        c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS dist_distributors (
+                user_id INTEGER PRIMARY KEY REFERENCES users(id),
+                quota INTEGER NOT NULL DEFAULT 0,
+                used_quota INTEGER NOT NULL DEFAULT 0,
+                invite_code TEXT UNIQUE,
+                role TEXT NOT NULL DEFAULT 'distributor',
+                status TEXT NOT NULL DEFAULT 'active',
+                created_at TIMESTAMP NOT NULL DEFAULT NOW()
+            )
+            """
         )
-        """
-    )
-    c.execute(
-        """
-        CREATE TABLE IF NOT EXISTS dist_links (
-            id SERIAL PRIMARY KEY,
-            token TEXT UNIQUE NOT NULL,
-            user_id INTEGER NOT NULL REFERENCES users(id),
-            test_code TEXT NOT NULL,
-            status TEXT NOT NULL DEFAULT 'unused',
-            used_count INTEGER NOT NULL DEFAULT 0,
-            max_uses INTEGER NOT NULL DEFAULT 3,
-            expires_at TIMESTAMP,
-            revoked_at TIMESTAMP,
-            created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS dist_links (
+                id SERIAL PRIMARY KEY,
+                token TEXT UNIQUE NOT NULL,
+                user_id INTEGER NOT NULL REFERENCES users(id),
+                test_code TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'unused',
+                used_count INTEGER NOT NULL DEFAULT 0,
+                max_uses INTEGER NOT NULL DEFAULT 3,
+                expires_at TIMESTAMP,
+                revoked_at TIMESTAMP,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW()
+            )
+            """
         )
-        """
-    )
-    c.execute(
-        """
-        CREATE TABLE IF NOT EXISTS dist_test_results (
-            id SERIAL PRIMARY KEY,
-            link_id INTEGER REFERENCES dist_links(id),
-            token TEXT NOT NULL,
-            test_code TEXT NOT NULL,
-            user_id INTEGER,
-            perspective TEXT,
-            result_data JSONB,
-            unlimited BOOLEAN NOT NULL DEFAULT FALSE,
-            completed_at TIMESTAMP NOT NULL DEFAULT NOW()
+        c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS dist_test_results (
+                id SERIAL PRIMARY KEY,
+                link_id INTEGER REFERENCES dist_links(id),
+                token TEXT NOT NULL,
+                test_code TEXT NOT NULL,
+                user_id INTEGER,
+                perspective TEXT,
+                result_data JSONB,
+                unlimited BOOLEAN NOT NULL DEFAULT FALSE,
+                completed_at TIMESTAMP NOT NULL DEFAULT NOW()
+            )
+            """
         )
-        """
-    )
-    c.execute(
-        """
-        CREATE TABLE IF NOT EXISTS dist_quota_logs (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER NOT NULL,
-            change_type TEXT NOT NULL,
-            amount INTEGER NOT NULL,
-            before_remaining INTEGER NOT NULL,
-            after_remaining INTEGER NOT NULL,
-            remark TEXT,
-            created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS dist_quota_logs (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                change_type TEXT NOT NULL,
+                amount INTEGER NOT NULL,
+                before_remaining INTEGER NOT NULL,
+                after_remaining INTEGER NOT NULL,
+                remark TEXT,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW()
+            )
+            """
         )
-        """
-    )
-    c.execute(
-        """
-        CREATE TABLE IF NOT EXISTS dist_unlimited_sessions (
-            token TEXT PRIMARY KEY,
-            user_id INTEGER NOT NULL,
-            test_code TEXT NOT NULL,
-            created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS dist_unlimited_sessions (
+                token TEXT PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                test_code TEXT NOT NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW()
+            )
+            """
         )
-        """
-    )
-    c.execute("CREATE INDEX IF NOT EXISTS idx_dist_links_token ON dist_links(token)")
-    c.execute("CREATE INDEX IF NOT EXISTS idx_dist_links_user ON dist_links(user_id)")
-    conn.commit()
-    conn.close()
+        c.execute("CREATE INDEX IF NOT EXISTS idx_dist_links_token ON dist_links(token)")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_dist_links_user ON dist_links(user_id)")
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def _row_dict(row) -> dict | None:
@@ -186,7 +209,9 @@ def _row_dict(row) -> dict | None:
         return dict(row)
     if hasattr(row, "keys"):
         return dict(row)
-    return dict(row)
+    if isinstance(row, dict):
+        return row
+    return None
 
 
 def ensure_distributor(user_id: int, *, default_quota: int = 5) -> dict:
@@ -195,26 +220,34 @@ def ensure_distributor(user_id: int, *, default_quota: int = 5) -> dict:
 
     profile = db.get_member_profile(user_id)
     if not profile:
-        conn = _sqlite_conn() if not _USE_PG else None
         if _USE_PG:
-            from cloud_deploy.cloud_api.database_pg import _conn
-
-            conn = _conn()
-        c = conn.cursor()
-        if _USE_PG:
+            conn = _pg_conn()
+            c = _pg_cur(conn)
             c.execute("SELECT id, username, email FROM users WHERE id=%s", (user_id,))
+            row = c.fetchone()
+            conn.close()
+            if not row:
+                raise ValueError("用户不存在")
+            rd = _row_dict(row) or {}
+            profile = {
+                "id": rd.get("id") or user_id,
+                "username": rd.get("username") or "",
+                "email": rd.get("email") or "",
+            }
         else:
+            conn = _sqlite_conn()
+            c = conn.cursor()
             c.execute("SELECT id, username, email FROM users WHERE id=?", (user_id,))
-        row = c.fetchone()
-        conn.close()
-        if not row:
-            raise ValueError("用户不存在")
-        rd = _row_dict(row)
-        profile = {
-            "id": rd.get("id") or user_id,
-            "username": rd.get("username") or "",
-            "email": rd.get("email") or "",
-        }
+            row = c.fetchone()
+            conn.close()
+            if not row:
+                raise ValueError("用户不存在")
+            rd = _row_dict(row) or {}
+            profile = {
+                "id": rd.get("id") or user_id,
+                "username": rd.get("username") or "",
+                "email": rd.get("email") or "",
+            }
     if _USE_PG:
         return _ensure_distributor_pg(user_id, default_quota=default_quota)
     conn = _sqlite_conn()
@@ -238,35 +271,42 @@ def ensure_distributor(user_id: int, *, default_quota: int = 5) -> dict:
 
 def _ensure_distributor_pg(user_id: int, *, default_quota: int) -> dict:
     from cloud_deploy.cloud_api import database as db
-    from cloud_deploy.cloud_api.database_pg import _conn
 
     profile = db.get_member_profile(user_id)
     if not profile:
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         c.execute("SELECT id, username, email FROM users WHERE id=%s", (user_id,))
         row = c.fetchone()
         conn.close()
         if not row:
             raise ValueError("用户不存在")
-        profile = {"id": row[0], "username": row[1], "email": row[2] or ""}
-    conn = _conn()
-    c = conn.cursor()
-    c.execute("SELECT * FROM dist_distributors WHERE user_id=%s", (user_id,))
-    row = c.fetchone()
-    if not row:
-        code = secrets.token_hex(4).upper()
-        c.execute(
-            """INSERT INTO dist_distributors (user_id, quota, used_quota, invite_code)
-               VALUES (%s,%s,0,%s) RETURNING *""",
-            (user_id, default_quota, code),
-        )
+        rd = _row_dict(row) or {}
+        profile = {
+            "id": rd.get("id") or user_id,
+            "username": rd.get("username") or "",
+            "email": rd.get("email") or "",
+        }
+    conn = _pg_conn()
+    try:
+        c = _pg_cur(conn)
+        c.execute("SELECT * FROM dist_distributors WHERE user_id=%s", (user_id,))
         row = c.fetchone()
-    cols = [d[0] for d in c.description] if c.description else []
-    conn.commit()
-    conn.close()
-    data = dict(zip(cols, row)) if row and cols else _row_dict(row)
-    return _map_distributor(data, profile)
+        if not row:
+            code = secrets.token_hex(4).upper()
+            c.execute(
+                """INSERT INTO dist_distributors (user_id, quota, used_quota, invite_code)
+                   VALUES (%s,%s,0,%s) RETURNING *""",
+                (user_id, default_quota, code),
+            )
+            row = c.fetchone()
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+    return _map_distributor(_row_dict(row), profile)
 
 
 def _map_distributor(dist: dict | None, profile: dict) -> dict:
@@ -294,10 +334,8 @@ def find_distributor_by_invite_code(invite_code: str) -> dict | None:
     if not code:
         return None
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         c.execute("SELECT * FROM dist_distributors WHERE UPPER(invite_code)=%s", (code,))
         row = c.fetchone()
         conn.close()
@@ -320,10 +358,8 @@ def get_distributor(user_id: int) -> dict | None:
     if not profile:
         return None
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         c.execute("SELECT * FROM dist_distributors WHERE user_id=%s", (user_id,))
         row = c.fetchone()
         conn.close()
@@ -348,10 +384,8 @@ def add_quota(user_id: int, amount: int, *, change_type: str, remark: str = "") 
         raise ValueError("额度必须大于 0")
     before = dist["remaining_quota"]
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         c.execute(
             "UPDATE dist_distributors SET quota = quota + %s WHERE user_id=%s",
             (amount, user_id),
@@ -391,10 +425,8 @@ def generate_links(user_id: int, test_code: str, count: int, *, max_uses: int = 
         raise ValueError("请选择测题")
     links: list[dict] = []
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         before = remaining
         for _ in range(count):
             token = _gen_token()
@@ -464,6 +496,8 @@ def _map_link(row: dict | None) -> dict:
 def _map_link_row(row, description) -> dict:
     if not row:
         return {}
+    if hasattr(row, "keys"):
+        return _map_link(dict(row))
     cols = [d[0] for d in description]
     return _map_link(dict(zip(cols, row)))
 
@@ -474,10 +508,8 @@ def get_link_by_token(token: str) -> dict | None:
     if not token:
         return None
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         c.execute("SELECT * FROM dist_links WHERE token=%s", (token,))
         row = c.fetchone()
         conn.close()
@@ -496,10 +528,8 @@ def get_unlimited_session(token: str) -> dict | None:
     if not token:
         return None
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         c.execute("SELECT * FROM dist_unlimited_sessions WHERE token=%s", (token,))
         row = c.fetchone()
         conn.close()
@@ -577,10 +607,8 @@ def complete_link_test(
     max_uses = int(link.get("max_uses") or 3)
     status = "used" if used >= max_uses else link.get("status") or "unused"
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         c.execute(
             "UPDATE dist_links SET used_count=%s, status=%s WHERE token=%s",
             (used, status, token),
@@ -627,10 +655,8 @@ def _insert_test_result(
 ) -> int:
     payload = json.dumps(result_data, ensure_ascii=False) if not isinstance(result_data, str) else result_data
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         c.execute(
             """INSERT INTO dist_test_results
                (link_id, token, test_code, user_id, perspective, result_data, unlimited)
@@ -659,10 +685,8 @@ def list_links(user_id: int, *, status: str | None = None, limit: int = 100) -> 
     init_dist_tables()
     limit = max(1, min(limit, 500))
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         if status:
             c.execute(
                 """SELECT * FROM dist_links WHERE user_id=%s AND status=%s
@@ -698,10 +722,8 @@ def list_links(user_id: int, *, status: str | None = None, limit: int = 100) -> 
 def revoke_link(user_id: int, link_id: int) -> dict:
     init_dist_tables()
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         c.execute(
             "UPDATE dist_links SET status='revoked', revoked_at=NOW() WHERE id=%s AND user_id=%s RETURNING *",
             (link_id, user_id),
@@ -735,10 +757,8 @@ def create_unlimited_session(user_id: int, test_code: str) -> dict:
     token = _gen_token()
     test_code = (test_code or "").strip()
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         c.execute(
             "INSERT INTO dist_unlimited_sessions (token, user_id, test_code) VALUES (%s,%s,%s)",
             (token, user_id, test_code),
@@ -763,10 +783,8 @@ def admin_dist_stats() -> dict:
     from cloud_deploy.cloud_api import database as db
 
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         c.execute("SELECT COUNT(*), COALESCE(SUM(quota),0), COALESCE(SUM(used_quota),0) FROM dist_distributors")
         drow = c.fetchone()
         c.execute("SELECT COUNT(*) FROM dist_links")
@@ -835,10 +853,8 @@ def admin_list_links(*, status: str | None = None, limit: int = 100) -> list[dic
     init_dist_tables()
     limit = max(1, min(int(limit), 500))
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         if status:
             c.execute(
                 """SELECT l.*, u.username FROM dist_links l
@@ -899,10 +915,8 @@ def admin_list_distributors(*, limit: int = 100) -> list[dict]:
     from cloud_deploy.cloud_api import database as db
 
     if _USE_PG:
-        from cloud_deploy.cloud_api.database_pg import _conn
-
-        conn = _conn()
-        c = conn.cursor()
+        conn = _pg_conn()
+        c = _pg_cur(conn)
         c.execute(
             """SELECT d.*, u.username FROM dist_distributors d
                JOIN users u ON u.id = d.user_id

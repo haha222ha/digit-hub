@@ -77,8 +77,8 @@ def _startup():
         from cloud_deploy.cloud_api.dist_db import init_dist_tables
 
         init_dist_tables()
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[startup] init_dist_tables failed: {e}", flush=True)
     try:
         from cloud_deploy.scripts.insight_llm_runtime import apply_admin_insight_llm
 
