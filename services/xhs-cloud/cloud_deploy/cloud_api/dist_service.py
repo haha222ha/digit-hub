@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""心理测评分销 · 业务层（灵博兼容 + xhs-cloud 底座）。"""
+"""心理测评分销 · 业务层（分销兼容 API + xhs-cloud 底座）。"""
 from __future__ import annotations
 
 import json

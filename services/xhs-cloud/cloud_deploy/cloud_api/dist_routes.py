@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""灵博分销 API 兼容路由（/api/* 与 /api/v1/dist/*）。"""
+"""心理测评分销 API 兼容路由（/api/* 与 /api/v1/dist/*）。"""
 from __future__ import annotations
 
 from typing import Any

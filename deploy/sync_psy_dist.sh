@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 同步灵博分销静态资源到 apps/psy-dist（开发机一次性或更新测题时用）
+# 同步心理分销静态资源到 apps/psy-dist（开发机一次性或更新测题时用）
 # Usage: bash deploy/sync_psy_dist.sh [SOURCE_PUBLIC_DIR]
 set -euo pipefail
 

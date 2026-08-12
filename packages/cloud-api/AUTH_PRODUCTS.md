@@ -41,6 +41,22 @@
 
 激活：`https://monitor.xhs365.cn/member?code={code}`
 
+### psy_dist（心理测评分销）
+
+| sku | plan_code | 说明 |
+|-----|-----------|------|
+| quota_100 | psy_quota_100 | 100 次链接额度 |
+| quota_500 | psy_quota_500 | 500 次链接额度 |
+
+- 分销后台：`https://psy.xhs365.cn/admin/`（或本地 `apps/psy-dist`）
+- C 端链接：`/test/{code}/{token}` → 36 套静态测题
+- API：`/api/links/*` 兼容分销 SDK；额度码兑换走 `auth_codes`
+
+```bash
+./venv/bin/python cloud_deploy/scripts/manage_auth_codes.py generate \
+  --product psy_dist --sku quota_100 --count 20 --export
+```
+
 ### faka / push（预留）
 
 已在 registry 占位，`reserved: true`，上线前不可发码。

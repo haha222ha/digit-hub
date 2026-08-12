@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""心理测评分销 · 订单桥接（灵博 Vue 管理台 ↔ xhs-cloud hwxun 支付）。"""
+"""心理测评分销 · 订单桥接（分销 Vue 管理台 ↔ xhs-cloud hwxun 支付）。"""
 from __future__ import annotations
 
 from cloud_deploy.cloud_api import database as db
