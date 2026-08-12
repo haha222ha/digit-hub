@@ -73,8 +73,24 @@ if [[ "$ok" -ne 1 ]]; then
 fi
 systemctl is-active xhs-cloud-api
 
-echo "==> smoke"
-curl -fsS -o /dev/null -w "health:%{http_code}\n" http://127.0.0.1:8080/api/v1/health
+echo "==> smoke (wait until :8080 answers)"
+health_ok=0
+for _ in $(seq 1 45); do
+  code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 2 http://127.0.0.1:8080/api/v1/health 2>/dev/null || true)"
+  if [[ "${code}" == "200" ]]; then
+    echo "health:200"
+    health_ok=1
+    break
+  fi
+  sleep 1
+done
+if [[ "${health_ok}" -ne 1 ]]; then
+  echo "ERROR: API health not ready on :8080"
+  systemctl status xhs-cloud-api --no-pager -l || true
+  journalctl -u xhs-cloud-api -n 60 --no-pager || true
+  ss -lntp 2>/dev/null | grep -E ':8080|:8000' || true
+  exit 1
+fi
 curl -fsS -H "Host: monitor.xhs365.cn" http://127.0.0.1/src/main.js 2>/dev/null | grep -q '/activate' \
   && echo "web_main.js: activate route OK" \
   || echo "WARN: nginx /src/main.js missing activate — hard-refresh browser or purge CDN"
