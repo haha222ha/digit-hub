@@ -13,9 +13,11 @@ from cloud_deploy.cloud_api import dist_orders as dist_ord
 from cloud_deploy.cloud_api import dist_db
 from cloud_deploy.cloud_api import dist_service as svc
 from cloud_deploy.cloud_api.auth import (
+    change_member_password,
     current_user,
     issue_member_token,
     login_member,
+    login_member_by_code,
     user_from_token,
 )
 from cloud_deploy.cloud_api.dist_db import init_dist_tables
@@ -84,6 +86,35 @@ class RevokeLinkBody(BaseModel):
 
 class UnlimitedStartBody(BaseModel):
     testCode: str
+
+
+class LoginCodeBody(BaseModel):
+    auth_code: str = Field(default="")
+    authCode: str = Field(default="")
+    code: str = Field(default="")
+
+
+class ChangePasswordBody(BaseModel):
+    new_password: str = Field(default="", min_length=0)
+    newPassword: str = Field(default="")
+    current_password: str = Field(default="")
+    currentPassword: str = Field(default="")
+
+
+class RecoverWithCodeBody(BaseModel):
+    auth_code: str = Field(default="")
+    authCode: str = Field(default="")
+    code: str = Field(default="")
+    new_password: str = Field(default="", min_length=0)
+    newPassword: str = Field(default="")
+
+
+def _pick_code(*vals: str) -> str:
+    for v in vals:
+        s = (v or "").strip()
+        if s:
+            return s
+    return ""
 
 
 def _dist_token(request: Request) -> dict:
@@ -209,6 +240,72 @@ def compat_auth_register(body: DistRegisterBody, request: Request):
     uid = int(res["membership"]["id"])
     user = svc.map_user_for_dist(uid)
     return _ok({"user": user, "token": res["access_token"]}, "注册成功")
+
+
+@compat_router.post("/api/auth/login-code")
+def compat_auth_login_code(body: LoginCodeBody, request: Request):
+    """授权码登录：码须已绑定到账号（如兑换额度时写入 activations）。"""
+    code = _pick_code(body.auth_code, body.authCode, body.code)
+    if len(code) < 8:
+        return JSONResponse(_fail("请输入有效授权码"), status_code=200)
+    device_id = request.headers.get("x-device-id") or "web:psy-dist"
+    try:
+        res = login_member_by_code(code, device_id, "psy-dist")
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    uid = int(res["membership"]["id"])
+    user = svc.map_user_for_dist(uid)
+    return _ok(
+        {
+            "user": user,
+            "token": res["access_token"],
+            "login_method": res.get("login_method") or "auth_code",
+            "login_hint": res.get("login_hint")
+            or "授权码登录成功，建议立即修改密码",
+        },
+        "授权码登录成功",
+    )
+
+
+@compat_router.post("/api/auth/change-password")
+def compat_auth_change_password(body: ChangePasswordBody, request: Request):
+    user = _dist_token(request)
+    new_pw = _pick_code(body.new_password, body.newPassword)
+    cur_pw = _pick_code(body.current_password, body.currentPassword) or None
+    if len(new_pw) < 6:
+        return JSONResponse(_fail("新密码至少 6 位"), status_code=200)
+    try:
+        change_member_password(int(user["id"]), new_pw, current_password=cur_pw)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    return _ok({"ok": True}, "密码已更新")
+
+
+@compat_router.post("/api/auth/recover-with-code")
+def compat_auth_recover_with_code(body: RecoverWithCodeBody, request: Request):
+    """忘记密码：授权码验证身份后直接设新密码（无需邮箱）。"""
+    code = _pick_code(body.auth_code, body.authCode, body.code)
+    new_pw = _pick_code(body.new_password, body.newPassword)
+    if len(code) < 8:
+        return JSONResponse(_fail("请输入有效授权码"), status_code=200)
+    if len(new_pw) < 6:
+        return JSONResponse(_fail("新密码至少 6 位"), status_code=200)
+    device_id = request.headers.get("x-device-id") or "web:psy-dist"
+    try:
+        res = login_member_by_code(code, device_id, "psy-dist")
+        uid = int(res["membership"]["id"])
+        change_member_password(uid, new_pw, current_password=None)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    user = svc.map_user_for_dist(uid)
+    return _ok(
+        {
+            "user": user,
+            "token": res["access_token"],
+            "message": "密码已重置，请使用新密码登录",
+        },
+        "密码已重置",
+    )
 
 
 @compat_router.get("/api/quota/info")

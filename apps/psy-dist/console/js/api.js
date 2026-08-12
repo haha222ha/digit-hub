@@ -61,10 +61,26 @@ export const api = {
       method: "POST",
       body: { usernameOrEmail, password },
     }),
+  loginCode: (auth_code) =>
+    request("/api/auth/login-code", {
+      method: "POST",
+      body: { auth_code },
+    }),
   register: (payload) =>
     request("/api/auth/register", {
       method: "POST",
       body: payload,
+    }),
+  recoverWithCode: (auth_code, new_password) =>
+    request("/api/auth/recover-with-code", {
+      method: "POST",
+      body: { auth_code, new_password },
+    }),
+  changePassword: (new_password, current_password = "") =>
+    request("/api/auth/change-password", {
+      method: "POST",
+      auth: true,
+      body: { new_password, current_password },
     }),
   testsList: () => request("/api/tests/list"),
   quotaInfo: () => request("/api/quota/info", { auth: true }),
@@ -94,5 +110,25 @@ export const api = {
       auth: true,
       body: { code },
     }),
-  packagesList: () => request("/api/admin/packages/list", { auth: true }),
+  packagesList: () => request("/api/admin/packages/list"),
+  purchaseMethods: () => request("/api/admin/payment/purchase-methods"),
+  createOrder: (packageId, paymentMethod = "wxpay") =>
+    request("/api/orders/create", {
+      method: "POST",
+      auth: true,
+      body: { packageId, payment_method: paymentMethod },
+    }),
+  orderDetail: (orderNo) => request(`/api/orders/${encodeURIComponent(orderNo)}`, { auth: true }),
+  startPay: (orderNo, paymentMethod = "wxpay") =>
+    request(`/api/orders/${encodeURIComponent(orderNo)}/pay`, {
+      method: "POST",
+      auth: true,
+      body: { payment_method: paymentMethod, device_type: "pc" },
+    }),
+  unlimitedStart: (testCode) =>
+    request("/api/admin/unlimited-test/start", {
+      method: "POST",
+      auth: true,
+      body: { testCode },
+    }),
 };
