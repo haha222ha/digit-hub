@@ -149,6 +149,23 @@ ${GZIP_DIRECTIVES}
         try_files \$uri =404;
     }
 
+    # 自有静态首页（不加载仿站 Vue Home）
+    location = / {
+        try_files /index.html =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header Clear-Site-Data "\"cache\"";
+    }
+    location = /index.html {
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header Clear-Site-Data "\"cache\"";
+    }
+    location = /home.css {
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+    location = /home.js {
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+
     location ~ ^/test/([^/]+)/([^/]+)$ {
         proxy_pass http://127.0.0.1:8080;
         proxy_set_header Host \$host;
@@ -157,11 +174,10 @@ ${GZIP_DIRECTIVES}
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
+    # 登录 / 注册 / 管理台等 → Vue SPA（app.html），避免再落到仿站首页
     location / {
-        try_files \$uri \$uri/ /index.html;
+        try_files \$uri \$uri/ /app.html;
         add_header Cache-Control "no-store, no-cache, must-revalidate";
-        # 强制丢掉本站旧 JS 缓存（曾把「灵博」卡在浏览器里）
-        add_header Clear-Site-Data "\"cache\"";
     }
 
 ${PSY_API_LOCATIONS}
