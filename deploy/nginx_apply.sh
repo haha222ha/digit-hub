@@ -61,6 +61,40 @@ API_ASSETS_LOCATIONS='    client_max_body_size 16m;
         proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_read_timeout 120s;
     }'
+# psy-dist：/assets/ 是 Vue 打包产物，禁止反代到 API（否则首页空白）
+PSY_API_LOCATIONS='    client_max_body_size 16m;
+
+    location /api/v1/auth/ {
+        limit_req zone=digit_hub_auth burst=5 nodelay;
+        client_max_body_size 16m;
+        proxy_pass http://127.0.0.1:8080/api/v1/auth/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 120s;
+    }
+
+    location = /api/v1/payment/orders {
+        limit_req zone=digit_hub_pay burst=3 nodelay;
+        client_max_body_size 16m;
+        proxy_pass http://127.0.0.1:8080/api/v1/payment/orders;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 120s;
+    }
+
+    location /api/ {
+        client_max_body_size 16m;
+        proxy_pass http://127.0.0.1:8080/api/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 120s;
+    }'
 # 精确匹配 + alias 单文件；禁止在该 location 内使用 index 指令（nginx 1.18 会拼成 index.htmlindex.html）
 ADMIN_LOCATIONS='    location = /admin {
         return 302 /admin/index.html;
@@ -76,98 +110,55 @@ ADMIN_LOCATIONS='    location = /admin {
         add_header Cache-Control "no-cache, must-revalidate";
     }'
 
-write_psy_dist_http_server() {
-  local outfile="${CONF_D}/psy.xhs365.cn.conf"
-  echo "==> write ${outfile} (:80 psy-dist SPA + tests)"
-  cat > "${outfile}" <<NGX
-server {
-    listen 80;
-    server_name ${PSY_DOMAIN};
-
-    ${MARKER}
-
-${GZIP_DIRECTIVES}
-
-    root ${PSY_DIST_ROOT};
-    index index.html;
-
-    location / {
-        try_files \$uri \$uri/ /index.html;
-        add_header Cache-Control "no-cache, must-revalidate";
-    }
-
-    location ~ ^/test/([^/]+)/([^/]+)$ {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-
-${API_ASSETS_LOCATIONS}
-}
-NGX
-}
-
-write_psy_dist_ssl_server() {
-  local ssl_extra="$1"
-  local outfile="${CONF_D}/psy.xhs365.cn.conf"
-  echo "==> write ${outfile} (:443 ssl + :80 redirect)"
-  cat > "${outfile}" <<NGX
-server {
-    listen 443 ssl http2;
-    server_name ${PSY_DOMAIN};
-    root ${PSY_DIST_ROOT};
-    index index.html;
-
-    ssl_certificate ${PSY_SSL_CERT};
-    ssl_certificate_key ${PSY_SSL_KEY};${ssl_extra}
-
-    ${MARKER}
-
-${GZIP_DIRECTIVES}
-
-    location / {
-        try_files \$uri \$uri/ /index.html;
-        add_header Cache-Control "no-cache, must-revalidate";
-    }
-
-    location ~ ^/test/([^/]+)/([^/]+)$ {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-
-${API_ASSETS_LOCATIONS}
-}
-
-server {
-    listen 80;
-    server_name ${PSY_DOMAIN};
-    return 301 https://\$host\$request_uri;
-}
-NGX
-}
-
 write_psy_dist_server() {
-  PSY_SSL_CERT="/etc/letsencrypt/live/${PSY_DOMAIN}/fullchain.pem"
-  PSY_SSL_KEY="/etc/letsencrypt/live/${PSY_DOMAIN}/privkey.pem"
-  local ssl_extra=""
-  if [[ -f "${PSY_SSL_CERT}" && -f "${PSY_SSL_KEY}" ]]; then
-    if [[ -f /etc/letsencrypt/options-ssl-nginx.conf ]]; then
-      ssl_extra="
-    include /etc/letsencrypt/options-ssl-nginx.conf;"
-    fi
-    if [[ -f /etc/letsencrypt/ssl-dhparams.pem ]]; then
-      ssl_extra="${ssl_extra}
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;"
-    fi
-    write_psy_dist_ssl_server "${ssl_extra}"
-  else
-    write_psy_dist_http_server
-  fi
+  local outfile="${CONF_D}/psy.xhs365.cn.conf"
+  echo "==> write ${outfile} (psy-dist SPA + tests; static /assets/)"
+  cat > "${outfile}" <<NGX
+server {
+    listen 80;
+    server_name ${PSY_DOMAIN};
+
+    ${MARKER}
+
+${GZIP_DIRECTIVES}
+
+    root ${PSY_DIST_ROOT};
+    index index.html;
+
+    # Vue / 测题静态资源必须走磁盘，不能 proxy 到 xhs-cloud /assets/
+    location /assets/ {
+        try_files \$uri =404;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+    location /tests/ {
+        try_files \$uri \$uri/ =404;
+    }
+    location /static/ {
+        try_files \$uri =404;
+    }
+    location /images/ {
+        try_files \$uri =404;
+    }
+    location /uploads/ {
+        try_files \$uri =404;
+    }
+
+    location ~ ^/test/([^/]+)/([^/]+)$ {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location / {
+        try_files \$uri \$uri/ /index.html;
+        add_header Cache-Control "no-cache, must-revalidate";
+    }
+
+${PSY_API_LOCATIONS}
+}
+NGX
 }
 
 write_web_server() {
