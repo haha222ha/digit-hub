@@ -1,19 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="ÃaK">
-  <!-- App / favicon plate version -->
-  <rect x="8" y="8" width="184" height="184" rx="44" fill="#0F766E"/>
-  <!-- left disk (lighter plate ink) -->
-  <circle cx="73" cy="100" r="42" fill="#CCFBF1" opacity="0.22"/>
-  <circle cx="127" cy="100" r="42" fill="#CCFBF1" opacity="0.22"/>
-  <!-- white lens -->
-  <path
-    fill="#FFFFFF"
-    d="M100 58.2
-       A42 42 0 0 0 100 141.8
-       A42 42 0 0 0 100 58.2 Z"/>
-  <!-- gold seed -->
-  <path
-    fill="#E8C547"
-    d="M100 88
-       C104.2 93.6 104.2 101.2 100 106.8
-       C95.8 101.2 95.8 93.6 100 88 Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="???">
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#0F766E"/>
+  <circle cx="24" cy="32" r="14" fill="#CCFBF1" fill-opacity="0.28"/>
+  <circle cx="40" cy="32" r="14" fill="#CCFBF1" fill-opacity="0.28"/>
+  <path fill="#FFFFFF" d="M32 18 A14 14 0 0 0 32 46 A14 14 0 0 0 32 18 Z"/>
+  <path fill="#E8C547" d="M32 27 C34.2 29.6 34.2 33.2 32 35.8 C29.8 33.2 29.8 29.6 32 27 Z"/>
 </svg>
