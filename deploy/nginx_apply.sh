@@ -145,6 +145,19 @@ ${GZIP_DIRECTIVES}
         add_header CDN-Cache-Control "no-store";
         add_header Cloudflare-CDN-Cache-Control "no-store";
     }
+    # 浏览器默认请求 /favicon.ico；禁止回落到 SPA HTML（否则标签页仍显示旧/源站图标）
+    location = /favicon.ico {
+        try_files /favicon.ico =404;
+        add_header Cache-Control "public, max-age=3600";
+        add_header CDN-Cache-Control "no-store";
+        add_header Cloudflare-CDN-Cache-Control "no-store";
+    }
+    location = /favicon.svg {
+        try_files /favicon.svg =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header CDN-Cache-Control "no-store";
+        add_header Cloudflare-CDN-Cache-Control "no-store";
+    }
     location /uploads/ {
         try_files \$uri =404;
     }
