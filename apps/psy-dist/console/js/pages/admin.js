@@ -9,23 +9,89 @@ const NAV = [
   { path: "/admin/unlimited-test", label: "免费测试" },
   { path: "/admin/purchase-quota", label: "购买额度" },
   { path: "/admin/redeem-quota", label: "兑换额度" },
+  { path: "/admin/invite-promotion", label: "邀请推广" },
   { path: "/admin/account-settings", label: "账户" },
 ];
 
+const SUPER_NAV = [
+  { path: "/super-admin/dashboard", label: "超管看板" },
+  { path: "/super-admin/users", label: "分销商" },
+  { path: "/super-admin/orders", label: "订单" },
+  { path: "/super-admin/invite-stats", label: "邀请统计" },
+  { path: "/super-admin/tests", label: "测题" },
+  { path: "/super-admin/quota-logs", label: "额度日志" },
+];
+
+function isSuper() {
+  return (getUser() || {}).role === "super_admin";
+}
+
 function shell(activePath, bodyChildren) {
   const user = getUser() || {};
+  const superUser = isSuper();
+  const topItems = [
+    ...NAV,
+    ...(superUser ? [{ path: "/super-admin/dashboard", label: "超管" }] : []),
+  ];
   const nav = el(
     "nav",
     { className: "topnav" },
-    NAV.map((item) =>
+    topItems.map((item) =>
       el("a", {
         href: item.path,
-        className: activePath.startsWith(item.path) ? "active" : "",
+        className: activePath.startsWith(item.path) || (item.path.startsWith("/super-admin") && activePath.startsWith("/super-admin")) ? "active" : "",
         text: item.label,
         onClick: (e) => linkClick(e, item.path),
       })
     )
   );
+
+  const sideLinks = activePath.startsWith("/super-admin")
+    ? [
+        el("p", { className: "side-label", text: "超级管理" }),
+        ...SUPER_NAV.map((item) =>
+          el("a", {
+            href: item.path,
+            className: `side-link${activePath.startsWith(item.path) ? " active" : ""}`,
+            text: item.label,
+            onClick: (e) => linkClick(e, item.path),
+          })
+        ),
+        el("p", { className: "side-label", text: "商家后台" }),
+        el("a", {
+          className: "side-link",
+          href: "/admin/dashboard",
+          text: "返回工作台",
+          onClick: (e) => linkClick(e, "/admin/dashboard"),
+        }),
+      ]
+    : [
+        el("p", { className: "side-label", text: "常用" }),
+        ...NAV.map((item) =>
+          el("a", {
+            href: item.path,
+            className: `side-link${activePath.startsWith(item.path) ? " active" : ""}`,
+            text: item.label,
+            onClick: (e) => linkClick(e, item.path),
+          })
+        ),
+        ...(superUser
+          ? [
+              el("p", { className: "side-label", text: "超管" }),
+              el("a", {
+                className: "side-link",
+                href: "/super-admin/dashboard",
+                text: "进入超管后台",
+                onClick: (e) => linkClick(e, "/super-admin/dashboard"),
+              }),
+            ]
+          : []),
+        el("p", { className: "side-label", text: "说明" }),
+        el("p", {
+          className: "side-note",
+          text: "C 端测完即出完整报告。额度用于生成分销链接。",
+        }),
+      ];
 
   return el("div", { className: "shell" }, [
     el("header", { className: "topbar" }, [
@@ -49,22 +115,7 @@ function shell(activePath, bodyChildren) {
       ]),
     ]),
     el("div", { className: "shell-body" }, [
-      el("aside", { className: "sidenav" }, [
-        el("p", { className: "side-label", text: "常用" }),
-        ...NAV.map((item) =>
-          el("a", {
-            href: item.path,
-            className: `side-link${activePath.startsWith(item.path) ? " active" : ""}`,
-            text: item.label,
-            onClick: (e) => linkClick(e, item.path),
-          })
-        ),
-        el("p", { className: "side-label", text: "说明" }),
-        el("p", {
-          className: "side-note",
-          text: "C 端测完即出完整报告。额度用于生成分销链接。",
-        }),
-      ]),
+      el("aside", { className: "sidenav" }, sideLinks),
       el("main", { className: "main" }, bodyChildren),
     ]),
   ]);
@@ -111,6 +162,14 @@ function quickActions() {
     }, [
       el("strong", { text: "购买额度" }),
       el("span", { text: "套餐下单，额度到账" }),
+    ]),
+    el("a", {
+      className: "quick-card",
+      href: "/admin/invite-promotion",
+      onClick: (e) => linkClick(e, "/admin/invite-promotion"),
+    }, [
+      el("strong", { text: "邀请推广" }),
+      el("span", { text: "邀请码链接，双方得额度" }),
     ]),
   ]);
 }
@@ -616,6 +675,104 @@ export async function renderAccount(root) {
     ])
   );
 }
+
+export async function renderInvite(root) {
+  const errHost = el("div");
+  let info = { invite_code: "", invite_url: "", total_invites: 0, total_rewards: 0 };
+  let records = [];
+  try {
+    info = (await api.inviteInfo()) || info;
+    const rec = await api.inviteRecords({ page: 1, perPage: 50 });
+    records = (rec && rec.records) || [];
+  } catch (err) {
+    errHost.append(flash("error", err.message || "加载邀请信息失败"));
+  }
+
+  const urlInput = el("input", { readonly: "true", value: info.invite_url || "" });
+  const copyBtn = el("button", {
+    className: "btn btn-primary",
+    type: "button",
+    text: "复制邀请链接",
+    style: "width:auto",
+    onClick: async () => {
+      const url = info.invite_url || "";
+      if (!url) {
+        errHost.replaceChildren(flash("error", "邀请链接为空"));
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(url);
+        errHost.replaceChildren(flash("ok", "已复制到剪贴板"));
+      } catch {
+        urlInput.select();
+        errHost.replaceChildren(flash("ok", "请手动复制上方链接"));
+      }
+    },
+  });
+
+  const rows =
+    records.length === 0
+      ? [el("p", { className: "muted", text: "暂无邀请记录。分享链接后，好友注册即可获得返利额度。" })]
+      : [
+          el("table", { className: "data-table" }, [
+            el("thead", {}, [
+              el("tr", {}, [
+                el("th", { text: "时间" }),
+                el("th", { text: "被邀请人" }),
+                el("th", { text: "返利额度" }),
+              ]),
+            ]),
+            el(
+              "tbody",
+              {},
+              records.map((r) =>
+                el("tr", {}, [
+                  el("td", { text: String(r.rewarded_at || "—") }),
+                  el("td", { text: r.invitee_username || "—" }),
+                  el("td", { text: r.reward_quota != null ? `+${r.reward_quota}` : "—" }),
+                ])
+              )
+            ),
+          ]),
+        ];
+
+  root.append(
+    shell("/admin/invite-promotion", [
+      el("h1", { className: "page-title", text: "邀请推广" }),
+      el("p", {
+        className: "page-lead",
+        text: "分享专属链接；好友注册后，双方各得 5 点起始奖励额度。",
+      }),
+      errHost,
+      el("div", { className: "stat-row cols-3" }, [
+        el("div", { className: "stat" }, [
+          el("div", { className: "k", text: "邀请人数" }),
+          el("div", { className: "v", text: String(info.total_invites || 0) }),
+        ]),
+        el("div", { className: "stat" }, [
+          el("div", { className: "k", text: "累计返利额度" }),
+          el("div", { className: "v", text: String(info.total_rewards || 0) }),
+        ]),
+        el("div", { className: "stat" }, [
+          el("div", { className: "k", text: "我的邀请码" }),
+          el("div", { className: "v", style: "font-size:1.2rem", text: info.invite_code || "—" }),
+        ]),
+      ]),
+      el("div", { className: "panel" }, [
+        el("h3", { text: "专属邀请链接" }),
+        el("div", { className: "field" }, [urlInput]),
+        el("div", { className: "row-actions" }, [copyBtn]),
+        el("p", {
+          className: "muted",
+          text: "也可让好友在注册页填写邀请码。注册奖励即时到账。",
+        }),
+      ]),
+      el("div", { className: "panel" }, [el("h3", { text: "邀请记录" }), ...rows]),
+    ])
+  );
+}
+
+export { shell, isSuper };
 
 export function requireAuth() {
   return Boolean(getToken());

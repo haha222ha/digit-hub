@@ -77,6 +77,10 @@ def _test_meta(test_code: str) -> dict | None:
 
 def map_user_for_dist(user_id: int) -> dict:
     dist = dist_db.ensure_distributor(user_id, default_quota=_DEFAULT_QUOTA)
+    username = (dist.get("username") or "").strip()
+    if username:
+        dist_db.ensure_super_role(user_id, username)
+        dist = dist_db.ensure_distributor(user_id, default_quota=_DEFAULT_QUOTA)
     return dist
 
 

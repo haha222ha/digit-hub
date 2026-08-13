@@ -10,8 +10,17 @@ import {
   renderUnlimited,
   renderPurchase,
   renderAccount,
+  renderInvite,
   requireAuth,
 } from "./pages/admin.js";
+import {
+  renderSaDashboard,
+  renderSaUsers,
+  renderSaOrders,
+  renderSaInviteStats,
+  renderSaTests,
+  renderSaQuotaLogs,
+} from "./pages/super-admin.js";
 
 const root = document.getElementById("app");
 
@@ -27,6 +36,16 @@ const ADMIN_PAGES = {
   "/admin/unlimited-test": renderUnlimited,
   "/admin/purchase-quota": renderPurchase,
   "/admin/account-settings": renderAccount,
+  "/admin/invite-promotion": renderInvite,
+};
+
+const SUPER_PAGES = {
+  "/super-admin/dashboard": renderSaDashboard,
+  "/super-admin/users": renderSaUsers,
+  "/super-admin/orders": renderSaOrders,
+  "/super-admin/invite-stats": renderSaInviteStats,
+  "/super-admin/tests": renderSaTests,
+  "/super-admin/quota-logs": renderSaQuotaLogs,
 };
 
 async function render(fullPath) {
@@ -43,13 +62,21 @@ async function render(fullPath) {
       navigate(`/login?redirect=${encodeURIComponent(path)}`, { replace: true });
       return;
     }
-    if (path === "/admin" || path === "/admin/" || path.startsWith("/super-admin")) {
+    if (path === "/admin" || path === "/admin/") {
       navigate("/admin/dashboard", { replace: true });
       return;
     }
-    const page = ADMIN_PAGES[path];
+    if (path === "/super-admin" || path === "/super-admin/") {
+      navigate("/super-admin/dashboard", { replace: true });
+      return;
+    }
+    const page = ADMIN_PAGES[path] || SUPER_PAGES[path];
     if (page) {
       await page(root);
+      return;
+    }
+    if (path.startsWith("/super-admin")) {
+      navigate("/super-admin/dashboard", { replace: true });
       return;
     }
     navigate("/admin/dashboard", { replace: true });

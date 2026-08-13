@@ -131,4 +131,43 @@ export const api = {
       auth: true,
       body: { testCode },
     }),
+  inviteInfo: () => request("/api/invite/info", { auth: true }),
+  inviteRecords: (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.page) q.set("page", String(params.page));
+    if (params.perPage || params.per_page) q.set("per_page", String(params.perPage || params.per_page));
+    const s = q.toString();
+    return request(`/api/invite/records${s ? `?${s}` : ""}`, { auth: true });
+  },
+  saDashboard: () => request("/api/super-admin/dashboard/stats", { auth: true }),
+  saUsers: (limit = 100) => request(`/api/super-admin/users/list?limit=${limit}`, { auth: true }),
+  saAdjustQuota: (userId, amount, remark = "") =>
+    request("/api/super-admin/users/adjust-quota", {
+      method: "POST",
+      auth: true,
+      body: { userId, amount, remark },
+    }),
+  saToggleStatus: (userId, status) =>
+    request("/api/super-admin/users/toggle-status", {
+      method: "POST",
+      auth: true,
+      body: { userId, status },
+    }),
+  saResetPassword: (userId, newPassword) =>
+    request("/api/super-admin/users/reset-password", {
+      method: "POST",
+      auth: true,
+      body: { userId, newPassword },
+    }),
+  saSetRole: (userId, role) =>
+    request("/api/super-admin/users/set-role", {
+      method: "POST",
+      auth: true,
+      body: { userId, role },
+    }),
+  saOrders: (limit = 100) => request(`/api/super-admin/orders?limit=${limit}`, { auth: true }),
+  saQuotaLogs: (limit = 100) => request(`/api/super-admin/quota-logs/list?limit=${limit}`, { auth: true }),
+  saInviteStats: () => request("/api/super-admin/invite-stats/list", { auth: true }),
+  saTests: () => request("/api/super-admin/tests/list", { auth: true }),
+  saPackages: () => request("/api/super-admin/packages/list", { auth: true }),
 };

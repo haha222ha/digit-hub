@@ -468,3 +468,211 @@ def compat_unlimited_validate(body: TokenBody):
         },
         "链接有效",
     )
+
+
+# ----- invite -----
+
+
+@compat_router.get("/api/invite/info")
+def compat_invite_info(request: Request):
+    user = _dist_token(request)
+    origin = str(request.base_url).rstrip("/")
+    # Cloudflare / reverse proxy may report http; prefer public origin when set
+    return _ok(dist_db.invite_info(user["id"], site_origin=origin), "ok")
+
+
+@compat_router.get("/api/invite/records")
+def compat_invite_records(request: Request, page: int = 1, per_page: int = 20, perPage: int = 0):
+    user = _dist_token(request)
+    pp = int(perPage or per_page or 20)
+    return _ok(dist_db.invite_records(user["id"], page=int(page or 1), per_page=pp), "ok")
+
+
+# ----- super-admin -----
+
+
+class AdjustQuotaBody(BaseModel):
+    user_id: int | None = None
+    userId: int | None = None
+    amount: int = 0
+    remark: str = ""
+
+
+class ToggleStatusBody(BaseModel):
+    user_id: int | None = None
+    userId: int | None = None
+    status: str = "active"
+
+
+class ResetPasswordBody(BaseModel):
+    user_id: int | None = None
+    userId: int | None = None
+    new_password: str = Field(default="")
+    newPassword: str = Field(default="")
+
+
+class SetRoleBody(BaseModel):
+    user_id: int | None = None
+    userId: int | None = None
+    role: str = "distributor"
+
+
+def _require_super(request: Request) -> tuple[dict, dict]:
+    user = _dist_token(request)
+    dist = svc.map_user_for_dist(int(user["id"]))
+    if (dist.get("role") or "") != "super_admin":
+        raise HTTPException(status_code=403, detail="需要超级管理员")
+    return user, dist
+
+
+@compat_router.get("/api/super-admin/dashboard/stats")
+def sa_dashboard_stats(request: Request):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    return _ok(dist_db.admin_dist_stats(), "ok")
+
+
+@compat_router.get("/api/super-admin/users/list")
+def sa_users_list(request: Request, limit: int = 100):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    users = dist_db.admin_list_distributors(limit=int(limit or 100))
+    return _ok({"users": users, "list": users, "total": len(users)}, "ok")
+
+
+@compat_router.post("/api/super-admin/users/adjust-quota")
+def sa_adjust_quota(body: AdjustQuotaBody, request: Request):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    uid = int(body.user_id or body.userId or 0)
+    amount = int(body.amount or 0)
+    if uid <= 0 or amount == 0:
+        return JSONResponse(_fail("请指定用户与非零额度"), status_code=200)
+    try:
+        dist = dist_db.adjust_quota(uid, amount, remark=body.remark or "")
+        return _ok({"user": dist}, "调额成功")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@compat_router.post("/api/super-admin/users/toggle-status")
+def sa_toggle_status(body: ToggleStatusBody, request: Request):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    uid = int(body.user_id or body.userId or 0)
+    if uid <= 0:
+        return JSONResponse(_fail("请指定用户"), status_code=200)
+    try:
+        return _ok({"user": dist_db.set_distributor_status(uid, body.status)}, "状态已更新")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@compat_router.post("/api/super-admin/users/reset-password")
+def sa_reset_password(body: ResetPasswordBody, request: Request):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    uid = int(body.user_id or body.userId or 0)
+    new_pw = _pick_code(body.new_password, body.newPassword)
+    if uid <= 0 or len(new_pw) < 6:
+        return JSONResponse(_fail("请指定用户且新密码至少 6 位"), status_code=200)
+    try:
+        change_member_password(uid, new_pw, current_password=None)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    return _ok({"ok": True}, "密码已重置")
+
+
+@compat_router.post("/api/super-admin/users/set-role")
+def sa_set_role(body: SetRoleBody, request: Request):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    uid = int(body.user_id or body.userId or 0)
+    if uid <= 0:
+        return JSONResponse(_fail("请指定用户"), status_code=200)
+    try:
+        return _ok({"user": dist_db.set_distributor_role(uid, body.role)}, "角色已更新")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@compat_router.get("/api/super-admin/orders")
+def sa_orders(request: Request, limit: int = 100):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    orders = dist_db.list_orders_admin(limit=int(limit or 100))
+    return _ok({"orders": orders, "list": orders, "total": len(orders)}, "ok")
+
+
+@compat_router.get("/api/super-admin/quota-logs/list")
+def sa_quota_logs(request: Request, limit: int = 100):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    logs = dist_db.list_quota_logs_admin(limit=int(limit or 100))
+    return _ok({"logs": logs, "list": logs, "total": len(logs)}, "ok")
+
+
+@compat_router.get("/api/super-admin/invite-stats/list")
+def sa_invite_stats(request: Request, limit: int = 100):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    return _ok(dist_db.admin_invite_overview(limit=int(limit or 100)), "ok")
+
+
+@compat_router.get("/api/super-admin/tests/list")
+def sa_tests_list(request: Request):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    tests = svc.list_tests()
+    return _ok({"tests": tests, "list": tests, "total": len(tests)}, "ok")
+
+
+@compat_router.get("/api/super-admin/packages/list")
+def sa_packages_list(request: Request):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    pkgs = svc.list_packages()
+    return _ok({"packages": pkgs, "list": pkgs, "total": len(pkgs)}, "ok")
+
+
+@compat_router.get("/api/admin/dashboard/stats")
+def admin_dashboard_stats(request: Request):
+    """分销商工作台简易统计（本人链接）。"""
+    user = _dist_token(request)
+    links = dist_db.list_links(user["id"], limit=500)
+    unused = sum(1 for l in links if (l.get("status") or "unused") == "unused")
+    used = sum(1 for l in links if l.get("status") == "used")
+    q = svc.quota_info(user["id"])
+    return _ok(
+        {
+            "remaining_quota": q.get("remaining_quota"),
+            "quota": q.get("quota"),
+            "used_quota": q.get("used_quota"),
+            "links_total": len(links),
+            "links_unused": unused,
+            "links_used": used,
+        },
+        "ok",
+    )

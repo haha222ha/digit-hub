@@ -131,6 +131,9 @@ export function renderRegister(root) {
     autocomplete: "new-password",
   });
   const invite = el("input", { autocomplete: "off" });
+  const params = new URLSearchParams(location.search);
+  const pre = (params.get("invite") || params.get("inviteCode") || "").trim();
+  if (pre) invite.value = pre;
   const btn = el("button", { className: "btn btn-primary", type: "submit", text: "创建账号" });
 
   box.append(

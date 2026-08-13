@@ -435,6 +435,52 @@ def add_quota(user_id: int, amount: int, *, change_type: str, remark: str = "") 
     return ensure_distributor(user_id)
 
 
+def adjust_quota(user_id: int, amount: int, *, remark: str = "") -> dict:
+    """超管调额：正数加额度，负数提高 used_quota（扣可用）。"""
+    amount = int(amount)
+    if amount == 0:
+        raise ValueError("调额不能为 0")
+    if amount > 0:
+        return add_quota(user_id, amount, change_type="admin_adjust", remark=remark or "超管调额")
+    init_dist_tables()
+    dist = ensure_distributor(user_id)
+    cut = abs(amount)
+    before = dist["remaining_quota"]
+    if before < cut:
+        raise ValueError("可用额度不足，无法扣减")
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute(
+            "UPDATE dist_distributors SET used_quota = used_quota + %s WHERE user_id=%s",
+            (cut, user_id),
+        )
+        c.execute(
+            """INSERT INTO dist_quota_logs
+               (user_id, change_type, amount, before_remaining, after_remaining, remark)
+               VALUES (%s,'admin_adjust',%s,%s,%s,%s)""",
+            (user_id, -cut, before, before - cut, remark or "超管扣额"),
+        )
+        conn.commit()
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            "UPDATE dist_distributors SET used_quota = used_quota + ? WHERE user_id=?",
+            (cut, user_id),
+        )
+        c.execute(
+            """INSERT INTO dist_quota_logs
+               (user_id, change_type, amount, before_remaining, after_remaining, remark, created_at)
+               VALUES (?,?,?,?,?,?,?)""",
+            (user_id, "admin_adjust", -cut, before, before - cut, remark or "超管扣额", _now()),
+        )
+        conn.commit()
+        conn.close()
+    return ensure_distributor(user_id)
+
+
 def generate_links(user_id: int, test_code: str, count: int, *, max_uses: int = 3) -> list[dict]:
     init_dist_tables()
     dist = ensure_distributor(user_id)
@@ -978,3 +1024,287 @@ def admin_list_distributors(*, limit: int = 100) -> list[dict]:
         profile = {"id": data.get("user_id"), "username": data.get("username") or ""}
         out.append(_map_distributor(data, profile))
     return out
+
+
+def _super_usernames() -> set[str]:
+    raw = (os.environ.get("PSY_DIST_SUPER_USERNAMES") or os.environ.get("XHS_DIST_SUPER_USERNAMES") or "admin").strip()
+    return {x.strip().lower() for x in raw.split(",") if x.strip()}
+
+
+def ensure_super_role(user_id: int, username: str) -> None:
+    """环境变量白名单用户自动升为 super_admin。"""
+    if (username or "").strip().lower() not in _super_usernames():
+        return
+    init_dist_tables()
+    if _USE_PG:
+        conn = _pg_conn()
+        try:
+            c = _pg_cur(conn)
+            c.execute(
+                "UPDATE dist_distributors SET role=%s WHERE user_id=%s AND role<>%s",
+                ("super_admin", int(user_id), "super_admin"),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+        return
+    conn = _sqlite_conn()
+    c = conn.cursor()
+    c.execute(
+        "UPDATE dist_distributors SET role=? WHERE user_id=? AND role<>?",
+        ("super_admin", int(user_id), "super_admin"),
+    )
+    conn.commit()
+    conn.close()
+
+
+def invite_info(user_id: int, site_origin: str = "") -> dict[str, Any]:
+    dist = ensure_distributor(int(user_id))
+    code = (dist.get("invite_code") or "").strip()
+    origin = (site_origin or os.environ.get("PSY_DIST_PUBLIC_ORIGIN") or "https://psy.xhs365.cn").rstrip("/")
+    invited = 0
+    reward = 0
+    if _USE_PG:
+        conn = _pg_conn()
+        try:
+            c = _pg_cur(conn)
+            c.execute(
+                "SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=%s AND change_type=%s",
+                (int(user_id), "invite"),
+            )
+            invited = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+            c.execute(
+                "SELECT COALESCE(SUM(amount),0) AS s FROM dist_quota_logs WHERE user_id=%s AND change_type=%s",
+                (int(user_id), "invite"),
+            )
+            reward = int((_row_dict(c.fetchone()) or {}).get("s") or 0)
+        finally:
+            conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            "SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=? AND change_type=?",
+            (int(user_id), "invite"),
+        )
+        invited = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        c.execute(
+            "SELECT COALESCE(SUM(amount),0) AS s FROM dist_quota_logs WHERE user_id=? AND change_type=?",
+            (int(user_id), "invite"),
+        )
+        reward = int((_row_dict(c.fetchone()) or {}).get("s") or 0)
+        conn.close()
+    return {
+        "invite_code": code,
+        "invite_url": f"{origin}/register?invite={code}" if code else "",
+        "total_invites": invited,
+        "total_rewards": reward,
+        "invited_count": invited,
+        "reward_quota_total": reward,
+        "reward_per_invite": 5,
+    }
+
+
+def invite_records(user_id: int, *, page: int = 1, per_page: int = 20) -> dict[str, Any]:
+    page = max(1, int(page or 1))
+    per_page = max(1, min(int(per_page or 20), 100))
+    offset = (page - 1) * per_page
+    total = 0
+    rows: list[dict[str, Any]] = []
+    if _USE_PG:
+        conn = _pg_conn()
+        try:
+            c = _pg_cur(conn)
+            c.execute(
+                "SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=%s AND change_type=%s",
+                (int(user_id), "invite"),
+            )
+            total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+            c.execute(
+                """SELECT id, amount, after_remaining, remark, created_at
+                   FROM dist_quota_logs
+                   WHERE user_id=%s AND change_type=%s
+                   ORDER BY id DESC LIMIT %s OFFSET %s""",
+                (int(user_id), "invite", per_page, offset),
+            )
+            rows = [_row_dict(r) or {} for r in c.fetchall()]
+        finally:
+            conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            "SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=? AND change_type=?",
+            (int(user_id), "invite"),
+        )
+        total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        c.execute(
+            """SELECT id, amount, after_remaining, remark, created_at
+               FROM dist_quota_logs
+               WHERE user_id=? AND change_type=?
+               ORDER BY id DESC LIMIT ? OFFSET ?""",
+            (int(user_id), "invite", per_page, offset),
+        )
+        rows = [_row_dict(r) or {} for r in c.fetchall()]
+        conn.close()
+    records = []
+    for r in rows:
+        remark = str(r.get("remark") or "")
+        invited_name = remark.replace("邀请 ", "").strip() if remark.startswith("邀请 ") else remark
+        records.append(
+            {
+                "id": r.get("id"),
+                "invitee_username": invited_name,
+                "invitee_email": "",
+                "redeem_quota": None,
+                "reward_quota": int(r.get("amount") or 0),
+                "rewarded_at": r.get("created_at"),
+                "remark": remark,
+            }
+        )
+    return {"records": records, "total": total, "page": page, "per_page": per_page}
+
+
+def set_distributor_role(user_id: int, role: str) -> dict[str, Any]:
+    role_in = (role or "distributor").strip().lower()
+    if role_in in ("user", "admin", "distributor"):
+        db_role = "distributor"
+    elif role_in in ("super_admin", "superadmin"):
+        db_role = "super_admin"
+    else:
+        raise ValueError("无效角色")
+    init_dist_tables()
+    if _USE_PG:
+        conn = _pg_conn()
+        try:
+            c = _pg_cur(conn)
+            c.execute("UPDATE dist_distributors SET role=%s WHERE user_id=%s", (db_role, int(user_id)))
+            conn.commit()
+        finally:
+            conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute("UPDATE dist_distributors SET role=? WHERE user_id=?", (db_role, int(user_id)))
+        conn.commit()
+        conn.close()
+    return ensure_distributor(int(user_id))
+
+
+def set_distributor_status(user_id: int, status: str) -> dict[str, Any]:
+    status = (status or "active").strip().lower()
+    if status not in ("active", "disabled", "banned"):
+        raise ValueError("无效状态")
+    init_dist_tables()
+    if _USE_PG:
+        conn = _pg_conn()
+        try:
+            c = _pg_cur(conn)
+            c.execute("UPDATE dist_distributors SET status=%s WHERE user_id=%s", (status, int(user_id)))
+            conn.commit()
+        finally:
+            conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute("UPDATE dist_distributors SET status=? WHERE user_id=?", (status, int(user_id)))
+        conn.commit()
+        conn.close()
+    return ensure_distributor(int(user_id))
+
+
+def admin_invite_overview(limit: int = 100) -> dict[str, Any]:
+    """全站邀请汇总（超管用）。"""
+    init_dist_tables()
+    limit = max(1, min(int(limit or 100), 500))
+    if _USE_PG:
+        conn = _pg_conn()
+        try:
+            c = _pg_cur(conn)
+            c.execute(
+                "SELECT COUNT(*) AS c, COALESCE(SUM(amount),0) AS s FROM dist_quota_logs WHERE change_type=%s",
+                ("invite",),
+            )
+            tot = _row_dict(c.fetchone()) or {}
+            c.execute(
+                """SELECT q.user_id, u.username, COUNT(*) AS invite_count, SUM(q.amount) AS reward_sum
+                   FROM dist_quota_logs q
+                   LEFT JOIN users u ON u.id = q.user_id
+                   WHERE q.change_type=%s
+                   GROUP BY q.user_id, u.username
+                   ORDER BY invite_count DESC LIMIT %s""",
+                ("invite", limit),
+            )
+            top = [_row_dict(r) or {} for r in c.fetchall()]
+        finally:
+            conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            "SELECT COUNT(*) AS c, COALESCE(SUM(amount),0) AS s FROM dist_quota_logs WHERE change_type=?",
+            ("invite",),
+        )
+        tot = _row_dict(c.fetchone()) or {}
+        c.execute(
+            """SELECT q.user_id, u.username, COUNT(*) AS invite_count, SUM(q.amount) AS reward_sum
+               FROM dist_quota_logs q
+               LEFT JOIN users u ON u.id = q.user_id
+               WHERE q.change_type=?
+               GROUP BY q.user_id
+               ORDER BY invite_count DESC LIMIT ?""",
+            ("invite", limit),
+        )
+        top = [_row_dict(r) or {} for r in c.fetchall()]
+        conn.close()
+    items = [
+        {
+            "user_id": r.get("user_id"),
+            "username": r.get("username") or "",
+            "invite_count": int(r.get("invite_count") or 0),
+            "reward_sum": int(r.get("reward_sum") or 0),
+        }
+        for r in top
+    ]
+    return {
+        "total_invite_events": int(tot.get("c") or 0),
+        "total_reward_quota": int(tot.get("s") or 0),
+        "list": items,
+        "top_inviters": items,
+    }
+
+
+def list_quota_logs_admin(limit: int = 100) -> list[dict[str, Any]]:
+    init_dist_tables()
+    limit = max(1, min(int(limit or 100), 500))
+    if _USE_PG:
+        conn = _pg_conn()
+        try:
+            c = _pg_cur(conn)
+            c.execute(
+                """SELECT q.*, u.username FROM dist_quota_logs q
+                   LEFT JOIN users u ON u.id = q.user_id
+                   ORDER BY q.id DESC LIMIT %s""",
+                (limit,),
+            )
+            return [_row_dict(r) or {} for r in c.fetchall()]
+        finally:
+            conn.close()
+    conn = _sqlite_conn()
+    c = conn.cursor()
+    c.execute(
+        """SELECT q.*, u.username FROM dist_quota_logs q
+           LEFT JOIN users u ON u.id = q.user_id
+           ORDER BY q.id DESC LIMIT ?""",
+        (limit,),
+    )
+    rows = c.fetchall()
+    conn.close()
+    return [_row_dict(r) or {} for r in rows]
+
+
+def list_orders_admin(limit: int = 100) -> list[dict[str, Any]]:
+    """额度购买订单（payment_orders / psy_quota*）。"""
+    from cloud_deploy.cloud_api import database as db
+
+    return db.list_payment_orders_by_plan_prefix("psy_quota", limit=max(1, min(int(limit or 100), 500)))
