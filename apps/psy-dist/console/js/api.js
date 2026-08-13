@@ -217,14 +217,6 @@ export const api = {
       auth: true,
       body: { payment_method: paymentMethod, device_type: "mobile" },
     }),
-  wechatJsapiBootstrap: (orderId) =>
-    request("/api/payment/wechat/jsapi/bootstrap", {
-      method: "POST",
-      auth: true,
-      body: { orderId },
-    }),
-  wechatJsapiStatus: (orderId) =>
-    request(`/api/payment/wechat/jsapi/status?orderId=${encodeURIComponent(orderId)}`, { auth: true }),
   unlimitedStart: (testCode) =>
     request("/api/admin/unlimited-test/start", {
       method: "POST",

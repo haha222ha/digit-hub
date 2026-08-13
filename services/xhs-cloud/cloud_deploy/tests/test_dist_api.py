@@ -2,7 +2,6 @@
 """心理测评分销 API 冒烟测试。"""
 from __future__ import annotations
 
-import json
 import os
 import sys
 import tempfile
@@ -141,31 +140,13 @@ class DistApiTest(unittest.TestCase):
         self.assertIn("summary", stats)
         self.assertIn("daily_trend", stats)
 
-    def test_parse_jsapi_params(self):
-        gw = {
-            "pay_info": json.dumps(
-                {
-                    "appId": "wx123",
-                    "timeStamp": "1234567890",
-                    "nonceStr": "abc",
-                    "package": "prepay_id=xxx",
-                    "signType": "MD5",
-                    "paySign": "SIGN",
-                }
-            )
-        }
-        parsed = dist_ord._parse_jsapi_params(gw)
-        self.assertEqual(parsed["appId"], "wx123")
-        self.assertEqual(parsed["paySign"], "SIGN")
-
-    def test_jsapi_bootstrap_redirect_fallback(self):
-        profile = db.register_user_account("payuser", "pass123456")
+    def test_start_pay_redirect_or_qrcode(self):
+        profile = db.register_user_account("payuser2", "pass123456")
         uid = int(profile["id"])
         dist_db.ensure_distributor(uid, default_quota=5)
-        os.environ["XHS_PAY_NOTIFY_BASE"] = "https://example.com/api/v1/payment/notify"
         from datetime import datetime, timedelta
 
-        order_no = "ORD_JSAPI_TEST"
+        order_no = "ORD_PAY_REDIRECT"
         db.insert_payment_order(
             order_no=order_no,
             user_id=uid,
@@ -176,11 +157,12 @@ class DistApiTest(unittest.TestCase):
             client_ip="127.0.0.1",
             expires_at=(datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S"),
         )
-        with patch("cloud_deploy.cloud_api.hwxun_pay.channel_merchant_credentials", side_effect=RuntimeError("no cred")):
-            boot = dist_ord.jsapi_bootstrap(order_no, uid, client_ip="127.0.0.1")
-        self.assertFalse(boot.get("paid"))
-        self.assertIn(boot.get("pay_type"), ("redirect", "jsapi"))
-        self.assertEqual(boot.get("orderId"), order_no)
+        with patch("cloud_deploy.cloud_api.hwxun_pay.build_epay_submit_url", return_value="https://pay.example/submit"), patch(
+            "cloud_deploy.cloud_api.payment_service._notify_url", return_value="https://example.com/notify"
+        ), patch("cloud_deploy.cloud_api.payment_service._return_url", return_value="https://example.com/return"):
+            out = dist_ord.start_pay(order_no, uid, payment_method="wxpay")
+        self.assertIn(out.get("pay_type"), ("redirect", "code_url"))
+        self.assertTrue(out.get("pay_data"))
 
 
 if __name__ == "__main__":

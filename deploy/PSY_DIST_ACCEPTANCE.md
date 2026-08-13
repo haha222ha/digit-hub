@@ -43,7 +43,7 @@ sudo bash /opt/digit-hub/deploy/accept_psy_dist.sh
 PSY_ORIGIN=https://psy.xhs365.cn sudo bash /opt/digit-hub/deploy/accept_psy_dist.sh
 ```
 
-覆盖：测题列表 → 注册分销商 → 查额度 → 生成链接 → validate/start/complete → 套餐/文档/购额方式 → 额度日志/测题结果/导出 → JSAPI bootstrap（可选 SUPER_TOKEN 验回调日志）。
+覆盖：测题列表 → 注册分销商 → 查额度 → 生成链接 → validate/start/complete → 套餐/文档/购额方式 → 额度日志/测题结果/导出 → 易支付跳转购额（与发卡网一致；可选 SUPER_TOKEN 验回调日志）。
 
 ### 人工（浏览器）
 

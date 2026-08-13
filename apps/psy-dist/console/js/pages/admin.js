@@ -1,5 +1,5 @@
 import { api, getUser, clearSession, getToken, setSession } from "../api.js";
-import { el, flash, clear, copyText, bindCopyButton, showToast, isWechatBrowser, openModal, openDrawer, invokeWechatPay } from "../ui.js";
+import { el, flash, clear, copyText, bindCopyButton, showToast, isWechatBrowser, openModal, openDrawer } from "../ui.js";
 import { navigate, linkClick } from "../router.js";
 
 const NAV = [
@@ -1017,7 +1017,7 @@ export async function renderPurchase(root) {
   const wechatTip = isWechatBrowser()
     ? el("p", {
         className: "wechat-tip",
-        text: "当前在微信内打开，将优先使用微信内支付流程。",
+        text: "当前在微信内打开，将跳转易支付收银台完成支付（与发卡网相同）。",
       })
     : null;
 
@@ -1034,11 +1034,11 @@ export async function renderPurchase(root) {
     ])
   );
 
-  async function pollPaid(orderNo, useJsapi = false) {
+  async function pollPaid(orderNo) {
     for (let i = 0; i < 16; i++) {
       await new Promise((r) => setTimeout(r, 2500));
       try {
-        const o = useJsapi ? await api.wechatJsapiStatus(orderNo) : await api.orderDetail(orderNo);
+        const o = await api.orderDetail(orderNo);
         const st = (o && (o.status || (o.order && o.order.status))) || "";
         if (o && o.paid) return true;
         if (st === "paid" || st === "fulfilled") return true;
@@ -1056,38 +1056,6 @@ export async function renderPurchase(root) {
   }
 
   async function runPay(orderNo, method) {
-    if (method === "wxpay" && isWechatBrowser()) {
-      const boot = await api.wechatJsapiBootstrap(orderNo);
-      if (boot && boot.paid) {
-        await afterPaySuccess();
-        return;
-      }
-      const jsapiParams = boot.jsapi_params || boot.jsapiParams;
-      if (boot.pay_type === "jsapi" && jsapiParams) {
-        try {
-          await invokeWechatPay(jsapiParams);
-          const ok = await pollPaid(orderNo, true);
-          if (ok) await afterPaySuccess();
-          else showToast("支付结果确认中，请稍后刷新工作台", "error");
-          return;
-        } catch (e) {
-          if ((e && e.message) === "cancel") {
-            showToast("已取消支付", "error");
-            return;
-          }
-          /* fall through to redirect */
-        }
-      }
-      const payUrl = boot.pay_url || boot.payUrl || "";
-      if (payUrl) {
-        host.prepend(flash("ok", `订单 ${orderNo} 正在跳转微信支付…`));
-        window.location.href = payUrl;
-        const ok = await pollPaid(orderNo, true);
-        if (ok) await afterPaySuccess();
-        else showToast("尚未检测到支付完成，请稍后刷新工作台", "error");
-        return;
-      }
-    }
     const pay = await api.startPay(orderNo, method);
     if (pay && pay.paid) {
       await afterPaySuccess();
@@ -1098,7 +1066,7 @@ export async function renderPurchase(root) {
       if (method === "wxpay" && isWechatBrowser()) window.location.href = payUrl;
       else window.open(payUrl, "_blank");
       host.prepend(flash("ok", `订单 ${orderNo} 已打开支付页，正在检测支付结果…`));
-      const ok = await pollPaid(orderNo, method === "wxpay" && isWechatBrowser());
+      const ok = await pollPaid(orderNo);
       if (ok) await afterPaySuccess();
       else showToast("尚未检测到支付完成。若已付款，请稍后刷新工作台", "error");
     } else {

@@ -146,24 +146,8 @@ assert "测题" in text or "test" in text.lower() or len(text) > 10
 print("test_results_export OK")
 PY
 
-echo "==> 8) wechat jsapi bootstrap/status (expect pending or redirect, not 500)"
-curl -sS -X POST "${API_ORIGIN}/api/payment/wechat/jsapi/bootstrap" \
-  -H "$(auth_hdr)" \
-  -H "Content-Type: application/json" \
-  -d '{"orderId":"NONEXIST_ORDER"}' >"${TMP}/jsapi.json" || true
-python3 - "${TMP}/jsapi.json" <<'PY'
-import json, sys
-raw = open(sys.argv[1], encoding="utf-8").read().strip()
-if not raw:
-    print("jsapi bootstrap: empty (skip)")
-    raise SystemExit(0)
-d = json.loads(raw)
-assert "code" in d, d
-print("jsapi bootstrap code:", d.get("code"))
-PY
-
 if [[ -n "${SUPER_TOKEN:-}" ]]; then
-  echo "==> 9) super-admin notify logs (SUPER_TOKEN)"
+  echo "==> 8) super-admin notify logs (SUPER_TOKEN)"
   curl -fsS "${API_ORIGIN}/api/super-admin/payment-notify-logs?page=1&perPage=5" \
     -H "Authorization: Bearer ${SUPER_TOKEN}" >"${TMP}/notify.json"
   python3 - "${TMP}/notify.json" <<'PY'
@@ -174,8 +158,8 @@ logs = (d.get("data") or {}).get("logs") or []
 print("payment_notify_logs:", len(logs))
 PY
 else
-  echo "==> 9) skip super-admin notify logs (set SUPER_TOKEN to enable)"
+  echo "==> 8) skip super-admin notify logs (set SUPER_TOKEN to enable)"
 fi
 
-echo "==> 10) C-end URL: ${PSY_ORIGIN}/test/7v7/${TOK}"
+echo "==> 9) C-end URL: ${PSY_ORIGIN}/test/7v7/${TOK}"
 echo "DONE accept_psy_dist — 浏览器打开上方链接完成做题验收"

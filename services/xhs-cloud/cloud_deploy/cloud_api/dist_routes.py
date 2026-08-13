@@ -460,34 +460,6 @@ def compat_orders_pay_html(order_no: str, body: OrderPayBody, request: Request):
         return HTMLResponse(f"<h1>{e}</h1>", status_code=400)
 
 
-@compat_router.post("/api/payment/wechat/jsapi/bootstrap")
-def compat_wechat_jsapi_bootstrap(body: dict, request: Request):
-    user = _dist_token(request)
-    order_id = str((body or {}).get("orderId") or (body or {}).get("order_no") or "").strip()
-    if not order_id:
-        return JSONResponse(_fail("请指定订单号"), status_code=200)
-    try:
-        from cloud_deploy.cloud_api.request_ip import resolve_client_ip
-
-        ip = resolve_client_ip(request) or "127.0.0.1"
-        data = dist_ord.jsapi_bootstrap(order_id, user["id"], client_ip=ip)
-        return _ok(data, "ok")
-    except ValueError as e:
-        return JSONResponse(_fail(str(e)), status_code=200)
-
-
-@compat_router.get("/api/payment/wechat/jsapi/status")
-def compat_wechat_jsapi_status(request: Request, orderId: str = "", order_no: str = ""):
-    user = _dist_token(request)
-    order_id = (orderId or order_no or "").strip()
-    if not order_id:
-        return JSONResponse(_fail("请指定订单号"), status_code=200)
-    try:
-        return _ok(dist_ord.jsapi_status(order_id, user["id"]), "ok")
-    except ValueError as e:
-        return JSONResponse(_fail(str(e)), status_code=200)
-
-
 @compat_router.post("/api/links/revoke")
 def compat_links_revoke(body: RevokeLinkBody, request: Request):
     user = _dist_token(request)
