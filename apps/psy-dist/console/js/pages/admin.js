@@ -107,7 +107,7 @@ function shell(activePath, bodyChildren) {
   return el("div", { className: "shell" }, [
     el("header", { className: "topbar" }, [
       el("a", { className: "brand", href: "/admin/dashboard", onClick: (e) => linkClick(e, "/admin/dashboard") }, [
-        el("img", { src: "/images/logo.svg", alt: "" }),
+        el("img", { src: "/images/logo.svg?v=5", alt: "" }),
         el("span", { text: "心象测" }),
       ]),
       nav,

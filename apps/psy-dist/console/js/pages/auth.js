@@ -5,7 +5,7 @@ import { navigate, linkClick } from "../router.js";
 function authShell(title, sub, formNode, footerLinks) {
   return el("div", { className: "auth-screen" }, [
     el("aside", { className: "auth-brand" }, [
-      el("img", { className: "mark", src: "/images/logo.svg", alt: "心象测" }),
+      el("img", { className: "mark", src: "/images/logo.svg?v=5", alt: "心象测" }),
       el("h1", { text: "心象测" }),
       el("p", {
         text: "商家工作台：生成测试链接、管理额度。忘记密码可用授权码找回，无需邮箱。",
