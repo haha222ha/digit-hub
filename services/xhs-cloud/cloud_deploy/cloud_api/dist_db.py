@@ -204,6 +204,16 @@ def _migrate_dist_schema() -> None:
             display_order INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL
         )""",
+        """CREATE TABLE IF NOT EXISTS dist_payment_notify_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_no TEXT NOT NULL DEFAULT '',
+            trade_status TEXT NOT NULL DEFAULT '',
+            verify_ok INTEGER NOT NULL DEFAULT 0,
+            response_text TEXT NOT NULL DEFAULT '',
+            client_ip TEXT NOT NULL DEFAULT '',
+            raw_params TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL
+        )""",
         "ALTER TABLE dist_links ADD COLUMN first_used_at TEXT",
         "ALTER TABLE dist_unlimited_sessions ADD COLUMN expires_at TEXT",
     ]
@@ -289,6 +299,16 @@ def _migrate_dist_schema() -> None:
             document_type TEXT NOT NULL DEFAULT 'link',
             package_id INTEGER NOT NULL DEFAULT 0,
             display_order INTEGER NOT NULL DEFAULT 0,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_payment_notify_logs (
+            id SERIAL PRIMARY KEY,
+            order_no TEXT NOT NULL DEFAULT '',
+            trade_status TEXT NOT NULL DEFAULT '',
+            verify_ok BOOLEAN NOT NULL DEFAULT FALSE,
+            response_text TEXT NOT NULL DEFAULT '',
+            client_ip TEXT NOT NULL DEFAULT '',
+            raw_params TEXT NOT NULL DEFAULT '',
             created_at TIMESTAMP NOT NULL DEFAULT NOW()
         )""",
     ]
@@ -1670,6 +1690,8 @@ def list_test_results_page(
     user_id: int,
     *,
     test_code: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
     page: int = 1,
     per_page: int = 20,
 ) -> dict:
@@ -1678,11 +1700,19 @@ def list_test_results_page(
     per_page = max(1, min(int(per_page or 20), 100))
     offset = (page - 1) * per_page
     tc = (test_code or "").strip() or None
+    sd = (start_date or "").strip() or None
+    ed = (end_date or "").strip() or None
     where = ["user_id=%s" if _USE_PG else "user_id=?"]
     params: list[Any] = [int(user_id)]
     if tc:
         where.append("test_code=%s" if _USE_PG else "test_code=?")
         params.append(tc)
+    if sd:
+        where.append("completed_at >= %s" if _USE_PG else "completed_at >= ?")
+        params.append(sd if len(sd) > 10 else f"{sd} 00:00:00")
+    if ed:
+        where.append("completed_at <= %s" if _USE_PG else "completed_at <= ?")
+        params.append(ed if len(ed) > 10 else f"{ed} 23:59:59")
     wh = " AND ".join(where)
     if _USE_PG:
         conn = _pg_conn()
@@ -1793,35 +1823,48 @@ def list_test_results_admin(
     }
 
 
-def list_quota_logs_page(user_id: int, *, page: int = 1, per_page: int = 20) -> dict:
+def list_quota_logs_page(
+    user_id: int,
+    *,
+    page: int = 1,
+    per_page: int = 20,
+    change_type: str | None = None,
+) -> dict:
     init_dist_tables()
     page = max(1, int(page or 1))
     per_page = max(1, min(int(per_page or 20), 100))
     offset = (page - 1) * per_page
     uid = int(user_id)
+    where = ["user_id=%s" if _USE_PG else "user_id=?"]
+    params: list[Any] = [uid]
+    ct = (change_type or "").strip()
+    if ct:
+        where.append("change_type=%s" if _USE_PG else "change_type=?")
+        params.append(ct)
+    wh = " AND ".join(where)
     if _USE_PG:
         conn = _pg_conn()
         c = _pg_cur(conn)
-        c.execute("SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=%s", (uid,))
+        c.execute(f"SELECT COUNT(*) AS c FROM dist_quota_logs WHERE {wh}", tuple(params))
         total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
         c.execute(
-            """SELECT id, change_type, amount, before_remaining, after_remaining, remark, created_at
-               FROM dist_quota_logs WHERE user_id=%s
+            f"""SELECT id, change_type, amount, before_remaining, after_remaining, remark, created_at
+               FROM dist_quota_logs WHERE {wh}
                ORDER BY id DESC LIMIT %s OFFSET %s""",
-            (uid, per_page, offset),
+            tuple(params + [per_page, offset]),
         )
         rows = [_row_dict(r) or {} for r in c.fetchall()]
         conn.close()
     else:
         conn = _sqlite_conn()
         c = conn.cursor()
-        c.execute("SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=?", (uid,))
+        c.execute(f"SELECT COUNT(*) AS c FROM dist_quota_logs WHERE {wh}", tuple(params))
         total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
         c.execute(
-            """SELECT id, change_type, amount, before_remaining, after_remaining, remark, created_at
-               FROM dist_quota_logs WHERE user_id=?
+            f"""SELECT id, change_type, amount, before_remaining, after_remaining, remark, created_at
+               FROM dist_quota_logs WHERE {wh}
                ORDER BY id DESC LIMIT ? OFFSET ?""",
-            (uid, per_page, offset),
+            tuple(params + [per_page, offset]),
         )
         rows = [_row_dict(r) or {} for r in c.fetchall()]
         conn.close()
@@ -2363,3 +2406,193 @@ def list_orders_admin(limit: int = 100) -> list[dict[str, Any]]:
     from cloud_deploy.cloud_api import database as db
 
     return db.list_payment_orders_by_plan_prefix("psy_quota", limit=max(1, min(int(limit or 100), 500)))
+
+
+def log_payment_notify(
+    params: dict[str, Any],
+    response_text: str,
+    *,
+    client_ip: str = "",
+    verify_ok: bool | None = None,
+) -> None:
+    import json
+
+    init_dist_tables()
+    order_no = str((params or {}).get("out_trade_no") or "").strip()
+    trade_status = str((params or {}).get("trade_status") or "").strip()
+    if verify_ok is None:
+        verify_ok = response_text == "success" and trade_status.upper() == "TRADE_SUCCESS"
+    raw = json.dumps(params or {}, ensure_ascii=False, default=str)
+    now = _now()
+    if _USE_PG:
+        conn = _pg_conn()
+        try:
+            c = _pg_cur(conn)
+            c.execute(
+                """INSERT INTO dist_payment_notify_logs
+                   (order_no, trade_status, verify_ok, response_text, client_ip, raw_params, created_at)
+                   VALUES (%s,%s,%s,%s,%s,%s,NOW())""",
+                (order_no, trade_status, bool(verify_ok), str(response_text or ""), client_ip or "", raw),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+        return
+    conn = _sqlite_conn()
+    c = conn.cursor()
+    c.execute(
+        """INSERT INTO dist_payment_notify_logs
+           (order_no, trade_status, verify_ok, response_text, client_ip, raw_params, created_at)
+           VALUES (?,?,?,?,?,?,?)""",
+        (order_no, trade_status, 1 if verify_ok else 0, str(response_text or ""), client_ip or "", raw, now),
+    )
+    conn.commit()
+    conn.close()
+
+
+def list_payment_notify_logs_page(
+    *,
+    page: int = 1,
+    per_page: int = 20,
+    order_no: str | None = None,
+    status: str | None = None,
+) -> dict[str, Any]:
+    init_dist_tables()
+    page = max(1, int(page or 1))
+    per_page = max(1, min(int(per_page or 20), 100))
+    offset = (page - 1) * per_page
+    where: list[str] = []
+    params: list[Any] = []
+    ono = (order_no or "").strip()
+    if ono:
+        where.append("order_no=%s" if _USE_PG else "order_no=?")
+        params.append(ono)
+    st = (status or "").strip().lower()
+    if st == "success":
+        where.append("verify_ok=%s" if _USE_PG else "verify_ok=?")
+        params.append(True if _USE_PG else 1)
+    elif st == "fail":
+        where.append("verify_ok=%s" if _USE_PG else "verify_ok=?")
+        params.append(False if _USE_PG else 0)
+    wh = (" WHERE " + " AND ".join(where)) if where else ""
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute(f"SELECT COUNT(*) AS c FROM dist_payment_notify_logs{wh}", tuple(params))
+        total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        c.execute(
+            f"""SELECT id, order_no, trade_status, verify_ok, response_text, client_ip, created_at
+                FROM dist_payment_notify_logs{wh}
+                ORDER BY id DESC LIMIT %s OFFSET %s""",
+            tuple(params + [per_page, offset]),
+        )
+        rows = [_row_dict(r) or {} for r in c.fetchall()]
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(f"SELECT COUNT(*) AS c FROM dist_payment_notify_logs{wh}", tuple(params))
+        total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        c.execute(
+            f"""SELECT id, order_no, trade_status, verify_ok, response_text, client_ip, created_at
+                FROM dist_payment_notify_logs{wh}
+                ORDER BY id DESC LIMIT ? OFFSET ?""",
+            tuple(params + [per_page, offset]),
+        )
+        rows = [_row_dict(r) or {} for r in c.fetchall()]
+        conn.close()
+    logs = []
+    for r in rows:
+        ok = bool(r.get("verify_ok"))
+        logs.append(
+            {
+                "id": r.get("id"),
+                "order_no": r.get("order_no") or "",
+                "trade_status": r.get("trade_status") or "",
+                "status": "success" if ok else "fail",
+                "verify_ok": ok,
+                "response_text": r.get("response_text") or "",
+                "client_ip": r.get("client_ip") or "",
+                "created_at": _fmt_ts(r.get("created_at")) or r.get("created_at"),
+            }
+        )
+    return {
+        "logs": logs,
+        "pagination": {
+            "page": page,
+            "perPage": per_page,
+            "total": total,
+            "totalPages": max(1, (total + per_page - 1) // per_page) if total else 0,
+        },
+    }
+
+
+def get_payment_notify_log(log_id: int) -> dict[str, Any] | None:
+    init_dist_tables()
+    lid = int(log_id or 0)
+    if lid <= 0:
+        return None
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute("SELECT * FROM dist_payment_notify_logs WHERE id=%s", (lid,))
+        row = _row_dict(c.fetchone())
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute("SELECT * FROM dist_payment_notify_logs WHERE id=?", (lid,))
+        row = _row_dict(c.fetchone())
+        conn.close()
+    if not row:
+        return None
+    ok = bool(row.get("verify_ok"))
+    return {
+        **row,
+        "status": "success" if ok else "fail",
+        "raw_body": row.get("raw_params") or "",
+        "created_at": _fmt_ts(row.get("created_at")) or row.get("created_at"),
+    }
+
+
+def get_operation_log(log_id: int) -> dict[str, Any] | None:
+    init_dist_tables()
+    lid = int(log_id or 0)
+    if lid <= 0:
+        return None
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute("SELECT * FROM dist_operation_logs WHERE id=%s", (lid,))
+        row = _row_dict(c.fetchone())
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute("SELECT * FROM dist_operation_logs WHERE id=?", (lid,))
+        row = _row_dict(c.fetchone())
+        conn.close()
+    if not row:
+        return None
+    row["created_at"] = _fmt_ts(row.get("created_at")) or row.get("created_at")
+    return row
+
+
+def list_operation_logs_export(limit: int = 5000) -> list[dict[str, Any]]:
+    init_dist_tables()
+    limit = max(1, min(int(limit or 5000), 10000))
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute("SELECT * FROM dist_operation_logs ORDER BY id DESC LIMIT %s", (limit,))
+        rows = [_row_dict(r) or {} for r in c.fetchall()]
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute("SELECT * FROM dist_operation_logs ORDER BY id DESC LIMIT ?", (limit,))
+        rows = [_row_dict(r) or {} for r in c.fetchall()]
+        conn.close()
+    for r in rows:
+        r["created_at"] = _fmt_ts(r.get("created_at")) or r.get("created_at")
+    return rows

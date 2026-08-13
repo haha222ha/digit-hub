@@ -1,5 +1,5 @@
 import { api, getUser, clearSession, getToken, setSession } from "../api.js";
-import { el, flash, clear, copyText, bindCopyButton } from "../ui.js";
+import { el, flash, clear, copyText, bindCopyButton, showToast, isWechatBrowser, openModal } from "../ui.js";
 import { navigate, linkClick } from "../router.js";
 
 const NAV = [
@@ -35,6 +35,7 @@ const SUPER_NAV = [
   { path: "/super-admin/config", label: "系统配置" },
   { path: "/super-admin/quota-logs", label: "额度日志" },
   { path: "/super-admin/operation-logs", label: "操作日志" },
+  { path: "/super-admin/payment-notify-logs", label: "支付回调" },
 ];
 
 function isSuper() {
@@ -180,6 +181,13 @@ function shell(activePath, bodyChildren) {
         el("img", { src: "/images/logo.svg?v=5", alt: "" }),
         el("span", { text: "心象测" }),
       ]),
+      el("button", {
+        className: "nav-toggle btn btn-ghost",
+        type: "button",
+        text: "菜单",
+        style: "width:auto;padding:6px 12px",
+        onClick: () => layout.classList.toggle("nav-open"),
+      }),
       nav,
       el("div", { className: "meta" }, [
         el("span", { text: user.username || "已登录" }),
@@ -735,7 +743,30 @@ export async function renderLinks(root) {
         });
         const copyBtn = el("button", { className: "btn btn-ghost", type: "button", text: "复制" });
         bindCopyButton(copyBtn, url);
-        const actions = el("div", { className: "row-actions" }, [copyBtn]);
+        const detailBtn = el("button", {
+          className: "btn btn-ghost",
+          type: "button",
+          text: "详情",
+          onClick: () => {
+            openModal("链接详情", [
+              el("dl", { className: "link-detail-grid" }, [
+                el("dt", { text: "测题" }),
+                el("dd", { text: code }),
+                el("dt", { text: "链接" }),
+                el("dd", { text: url }),
+                el("dt", { text: "状态" }),
+                el("dd", { text: statusLabel }),
+                el("dt", { text: "已用 / 剩余" }),
+                el("dd", { text: `${used} / 剩 ${remain}（上限 ${maxUses}）` }),
+                el("dt", { text: "有效期" }),
+                el("dd", { text: `${cd.text} · ${cd.hint}` }),
+                el("dt", { text: "创建时间" }),
+                el("dd", { text: String(link.created_at || link.createdAt || "—") }),
+              ]),
+            ]);
+          },
+        });
+        const actions = el("div", { className: "row-actions" }, [copyBtn, detailBtn]);
         if (status !== "revoked" && link.id) {
           actions.append(
             el("button", {
@@ -962,12 +993,28 @@ function renderPackageDocList(docs, packages) {
 }
 
 export async function renderPurchase(root) {
-  const host = el("div");
-  const payMethod = el("select");
-  payMethod.append(
-    el("option", { value: "wxpay", text: "微信支付" }),
-    el("option", { value: "alipay", text: "支付宝" })
-  );
+  const host = el("div", { className: "purchase-page" });
+  let selectedMethod = "wxpay";
+  const payWx = el("button", { className: "pay-method-btn active", type: "button", text: "微信支付" });
+  const payAli = el("button", { className: "pay-method-btn", type: "button", text: "支付宝" });
+  payWx.addEventListener("click", () => {
+    selectedMethod = "wxpay";
+    payWx.classList.add("active");
+    payAli.classList.remove("active");
+  });
+  payAli.addEventListener("click", () => {
+    selectedMethod = "alipay";
+    payAli.classList.add("active");
+    payWx.classList.remove("active");
+  });
+  const payMethods = el("div", { className: "pay-methods" }, [payWx, payAli]);
+  const wechatTip = isWechatBrowser()
+    ? el("p", {
+        className: "wechat-tip",
+        text: "当前在微信内打开，将优先使用微信内支付流程。",
+      })
+    : null;
+
   root.append(
     shell("/admin/purchase-quota", [
       el("h1", { className: "page-title", text: "购买额度" }),
@@ -975,19 +1022,19 @@ export async function renderPurchase(root) {
         className: "page-lead",
         text: "在线支付后额度自动到账。若你是被邀请注册，首购将给邀请人返利（默认购额 20%）。",
       }),
-      el("div", { className: "panel", style: "margin-bottom:16px" }, [
-        el("div", { className: "field" }, [el("label", { text: "支付方式" }), payMethod]),
-      ]),
+      payMethods,
+      wechatTip,
       host,
     ])
   );
 
-  async function pollPaid(orderNo) {
-    for (let i = 0; i < 12; i++) {
+  async function pollPaid(orderNo, useJsapi = false) {
+    for (let i = 0; i < 16; i++) {
       await new Promise((r) => setTimeout(r, 2500));
       try {
-        const o = await api.orderDetail(orderNo);
+        const o = useJsapi ? await api.wechatJsapiStatus(orderNo) : await api.orderDetail(orderNo);
         const st = (o && (o.status || (o.order && o.order.status))) || "";
+        if (o && o.paid) return true;
         if (st === "paid" || st === "fulfilled") return true;
       } catch {
         /* ignore */
@@ -996,6 +1043,80 @@ export async function renderPurchase(root) {
     return false;
   }
 
+  async function afterPaySuccess() {
+    showToast("支付成功，额度已到账");
+    await refreshSessionQuota();
+    navigate("/admin/dashboard");
+  }
+
+  async function runPay(orderNo, method) {
+    if (method === "wxpay" && isWechatBrowser()) {
+      const boot = await api.wechatJsapiBootstrap(orderNo);
+      if (boot && boot.paid) {
+        await afterPaySuccess();
+        return;
+      }
+      const payUrl = boot.pay_url || boot.payUrl || "";
+      if (payUrl) {
+        host.prepend(flash("ok", `订单 ${orderNo} 正在跳转微信支付…`));
+        window.location.href = payUrl;
+        const ok = await pollPaid(orderNo, true);
+        if (ok) await afterPaySuccess();
+        else showToast("尚未检测到支付完成，请稍后刷新工作台", "error");
+        return;
+      }
+    }
+    const pay = await api.startPay(orderNo, method);
+    if (pay && pay.paid) {
+      await afterPaySuccess();
+      return;
+    }
+    const payUrl = pay.pay_data || pay.pay_url || pay.code_url || "";
+    if (payUrl) {
+      if (method === "wxpay" && isWechatBrowser()) window.location.href = payUrl;
+      else window.open(payUrl, "_blank");
+      host.prepend(flash("ok", `订单 ${orderNo} 已打开支付页，正在检测支付结果…`));
+      const ok = await pollPaid(orderNo, method === "wxpay" && isWechatBrowser());
+      if (ok) await afterPaySuccess();
+      else showToast("尚未检测到支付完成。若已付款，请稍后刷新工作台", "error");
+    } else {
+      showToast("未获取到支付链接，请联系客服或改用兑换码", "error");
+    }
+  }
+
+  function openXianyuModal(cfg) {
+    const body = [];
+    if (cfg.xianyu_shop_qrcode) {
+      body.push(
+        el("img", {
+          src: cfg.xianyu_shop_qrcode,
+          alt: "闲鱼店铺二维码",
+          style: "max-width:220px;display:block;margin:0 auto 12px",
+        })
+      );
+    }
+    if (cfg.xianyu_shop_link) {
+      body.push(
+        el("p", {}, [
+          el("a", { href: cfg.xianyu_shop_link, target: "_blank", text: cfg.xianyu_shop_link }),
+        ])
+      );
+    }
+    body.push(
+      el("p", { className: "muted", text: "在闲鱼购码后，请到「兑换额度」输入授权码充值。" }),
+      el("a", {
+        className: "btn btn-primary",
+        href: "/admin/redeem-quota",
+        text: "去兑换额度",
+        style: "width:auto;display:inline-flex;margin-top:8px",
+        onClick: (e) => linkClick(e, "/admin/redeem-quota"),
+      })
+    );
+    openModal("闲鱼购码", body);
+  }
+
+  const PLAN_THEMES = ["blue", "orange", "purple"];
+
   try {
     const [pkgData, methods, cfg, docData] = await Promise.all([
       api.packagesList().catch(() => ({ packages: [] })),
@@ -1003,6 +1124,14 @@ export async function renderPurchase(root) {
       api.customerService().catch(() => ({})),
       api.packageDocuments().catch(() => ({ documents: [] })),
     ]);
+    if (!methods.wechat && !methods.alipay) payMethods.style.display = "none";
+    if (methods.wechat === false) payWx.disabled = true;
+    if (methods.alipay === false) payAli.disabled = true;
+    if (methods.alipay && !methods.wechat) {
+      selectedMethod = "alipay";
+      payAli.classList.add("active");
+      payWx.classList.remove("active");
+    }
     const packages = (pkgData && pkgData.packages) || [];
     const allDocs = (docData && (docData.documents || docData.list)) || [];
     const globalDocs = allDocs.filter((d) => Number(d.package_id ?? d.packageId ?? 0) === 0);
@@ -1026,83 +1155,76 @@ export async function renderPurchase(root) {
     host.append(
       el("p", {
         className: "muted",
-        text: `邀请返利比例：${rebate}%（仅被邀请用户的首次购额）。支付完成后可刷新工作台查看额度。`,
+        text: `邀请返利比例：${rebate}%（仅被邀请用户的首次购额）。`,
       })
     );
-    const grid = el("div", { className: "pkg-grid" });
-    for (const p of packages) {
+    const grid = el("div", { className: "plans-grid" });
+    packages.forEach((p, idx) => {
       const id = p.id || p.package_id || p.list_id;
       const pkgIds = packageDocIds(p);
       const cardDocs = allDocs.filter((d) => packageDocMatches(d, pkgIds));
       const name = p.name || p.title || `套餐 ${id}`;
-      const quota = p.quota_amount || p.quota || p.credits || "—";
-      const price = p.price_yuan != null ? p.price_yuan : p.price || p.amount || "—";
+      const quota = Number(p.quota_amount || p.quota || p.credits || 0);
+      const priceNum = Number(p.price_yuan != null ? p.price_yuan : p.price || p.amount || 0);
+      const theme = PLAN_THEMES[idx % PLAN_THEMES.length];
+      const features = (p.features && p.features.length ? p.features : [p.subtitle].filter(Boolean)) || [
+        "额度即时到账",
+        "支持生成测题链接",
+      ];
+      const unitPrice = quota > 0 && priceNum > 0 ? (priceNum / quota).toFixed(2) : null;
       const btn = el("button", {
         className: "btn btn-primary",
         type: "button",
         text: "立即支付",
-        style: "width:auto",
+        style: "width:100%",
       });
       btn.addEventListener("click", async () => {
         btn.disabled = true;
-        const method = payMethod.value || "wxpay";
+        const method = selectedMethod || "wxpay";
         try {
           const created = await api.createOrder(id, method);
           const order = (created && created.order) || created || {};
           const orderNo = order.order_no || order.orderNo;
           if (!orderNo) throw new Error("未返回订单号");
-          const pay = await api.startPay(orderNo, method);
-          if (pay && pay.paid) {
-            alert("支付成功，额度已到账");
-            navigate("/admin/dashboard");
-            return;
-          }
-          const payUrl = pay.pay_data || pay.pay_url || pay.code_url || "";
-          if (payUrl) {
-            window.open(payUrl, "_blank");
-            host.prepend(flash("ok", `订单 ${orderNo} 已打开支付页，正在检测支付结果…`));
-            const ok = await pollPaid(orderNo);
-            if (ok) {
-              alert("支付成功，额度已到账");
-              navigate("/admin/dashboard");
-            } else {
-              alert("尚未检测到支付完成。若已付款，请稍后刷新工作台；也可在兑换页用码充值。");
-            }
-          } else {
-            alert("订单已创建：" + orderNo + "。未获取到支付链接，请联系客服或改用兑换码。");
-          }
+          await runPay(orderNo, method);
         } catch (e) {
-          alert(e.message || "下单失败，请改用兑换码");
+          showToast(e.message || "下单失败，请改用兑换码", "error");
         } finally {
           btn.disabled = false;
         }
       });
-      grid.append(
-        el("div", { className: "pkg-card" }, [
-          el("h3", { text: name }),
-          el("p", { className: "pkg-quota", text: `${quota} 额度` }),
-          el("p", {
-            className: "pkg-price",
-            text: typeof price === "number" ? `¥ ${price}` : String(price),
-          }),
-          p.subtitle ? el("p", { className: "muted", text: p.subtitle }) : null,
-          cardDocs.length
-            ? el(
-                "ul",
-                { className: "pkg-doc-list pkg-doc-list--inline" },
-                cardDocs.map((d) => el("li", { className: "pkg-doc-item" }, [renderPackageDocLink(d)]))
-              )
-            : null,
-          btn,
-        ])
-      );
-    }
+      const cardChildren = [
+        p.recommended ? el("span", { className: "plan-tag", text: "推荐" }) : null,
+        el("h3", { className: "plan-name", text: name }),
+        p.subtitle ? el("p", { className: "plan-desc", text: p.subtitle }) : null,
+        el("div", { className: "plan-price-row" }, [
+          el("span", { className: "plan-price", text: `¥${priceNum}` }),
+          el("span", { className: "plan-quota", text: `${quota} 额度` }),
+        ]),
+        unitPrice ? el("p", { className: "plan-unit", text: `约 ¥${unitPrice}/额度` }) : null,
+        el("ul", { className: "plan-features" }, features.map((f) => el("li", { text: f }))),
+        cardDocs.length
+          ? el(
+              "ul",
+              { className: "pkg-doc-list pkg-doc-list--inline" },
+              cardDocs.map((d) => el("li", { className: "pkg-doc-item" }, [renderPackageDocLink(d)]))
+            )
+          : null,
+        btn,
+      ];
+      grid.append(el("div", { className: `plan-card theme-${theme}` }, cardChildren));
+    });
     host.append(grid);
     const globalPanel = renderPackageDocList(globalDocs, packages);
     if (globalPanel) host.append(globalPanel);
-    if (methods && (methods.xianyu || methods.offline)) {
+    if (methods && (methods.xianyu || methods.offline || cfg.xianyu_shop_link || cfg.xianyu_shop_qrcode)) {
       host.append(
-        el("p", { className: "muted", text: "也可通过闲鱼/线下方式购码后，在「兑换额度」使用。" })
+        el("button", {
+          className: "xianyu-link-btn",
+          type: "button",
+          text: "无法在线支付？去闲鱼购码",
+          onClick: () => openXianyuModal(cfg),
+        })
       );
     }
   } catch (e) {
@@ -1358,60 +1480,94 @@ export async function renderInvite(root) {
 
 export async function renderQuotaLogs(root) {
   const host = el("div", { className: "panel" });
+  const typeSel = el("select");
+  typeSel.append(el("option", { value: "", text: "全部类型" }));
+  for (const [val, label] of [
+    ["consume", "消耗"],
+    ["redeem", "兑换"],
+    ["purchase", "购买"],
+    ["refund", "退还"],
+    ["admin_adjust", "超管调额"],
+    ["invite_rebate", "邀请返利"],
+  ]) {
+    typeSel.append(el("option", { value: val, text: label }));
+  }
+  async function reload() {
+    clear(host);
+    host.append(el("p", { className: "muted", text: "加载中…" }));
+    try {
+      const data = await api.quotaLogs({
+        page: 1,
+        perPage: 50,
+        changeType: typeSel.value || undefined,
+      });
+      const logs = (data && data.logs) || [];
+      clear(host);
+      if (!logs.length) {
+        host.append(el("p", { className: "muted", text: "暂无额度日志" }));
+        return;
+      }
+      const typeLabel = {
+        consume: "消耗",
+        redeem: "兑换",
+        purchase: "购买",
+        refund: "退还",
+        admin_adjust: "超管调额",
+        invite_rebate: "邀请返利",
+      };
+      const table = el("table", { className: "data" });
+      table.append(
+        el("thead", {}, [
+          el("tr", {}, [
+            el("th", { text: "时间" }),
+            el("th", { text: "类型" }),
+            el("th", { text: "变动" }),
+            el("th", { text: "剩余" }),
+            el("th", { text: "备注" }),
+          ]),
+        ])
+      );
+      const tbody = el("tbody");
+      for (const row of logs) {
+        const amt = Number(row.amount || 0);
+        tbody.append(
+          el("tr", {}, [
+            el("td", { text: String(row.created_at || "—") }),
+            el("td", { text: typeLabel[row.change_type] || row.change_type || "—" }),
+            el("td", { text: `${amt >= 0 ? "+" : ""}${amt}` }),
+            el("td", { text: String(row.after_remaining ?? "—") }),
+            el("td", { text: row.remark || "—" }),
+          ])
+        );
+      }
+      table.append(tbody);
+      host.append(el("div", { className: "table-wrap" }, [table]));
+    } catch (e) {
+      clear(host);
+      host.append(flash("error", e.message || "加载失败"));
+    }
+  }
   root.append(
     shell("/admin/quota-logs", [
       el("h1", { className: "page-title", text: "额度日志" }),
       el("p", { className: "page-lead", text: "生成、兑换、撤销退还、购买等额度变动记录。" }),
+      el("div", { className: "filter-bar" }, [
+        el("div", { className: "field", style: "margin:0;min-width:180px" }, [
+          el("label", { text: "类型" }),
+          typeSel,
+        ]),
+        el("button", {
+          className: "btn btn-primary",
+          type: "button",
+          text: "筛选",
+          style: "width:auto",
+          onClick: () => reload(),
+        }),
+      ]),
       host,
     ])
   );
-  try {
-    const data = await api.quotaLogs({ page: 1, perPage: 50 });
-    const logs = (data && data.logs) || [];
-    clear(host);
-    if (!logs.length) {
-      host.append(el("p", { className: "muted", text: "暂无额度日志" }));
-      return;
-    }
-    const typeLabel = {
-      consume: "消耗",
-      redeem: "兑换",
-      purchase: "购买",
-      refund: "退还",
-      admin_adjust: "超管调额",
-      invite_rebate: "邀请返利",
-    };
-    const table = el("table", { className: "data" });
-    table.append(
-      el("thead", {}, [
-        el("tr", {}, [
-          el("th", { text: "时间" }),
-          el("th", { text: "类型" }),
-          el("th", { text: "变动" }),
-          el("th", { text: "剩余" }),
-          el("th", { text: "备注" }),
-        ]),
-      ])
-    );
-    const tbody = el("tbody");
-    for (const row of logs) {
-      const amt = Number(row.amount || 0);
-      tbody.append(
-        el("tr", {}, [
-          el("td", { text: String(row.created_at || "—") }),
-          el("td", { text: typeLabel[row.change_type] || row.change_type || "—" }),
-          el("td", { text: `${amt >= 0 ? "+" : ""}${amt}` }),
-          el("td", { text: String(row.after_remaining ?? "—") }),
-          el("td", { text: row.remark || "—" }),
-        ])
-      );
-    }
-    table.append(tbody);
-    host.append(el("div", { className: "table-wrap" }, [table]));
-  } catch (e) {
-    clear(host);
-    host.append(flash("error", e.message || "加载失败"));
-  }
+  await reload();
 }
 
 export async function renderTestResults(root) {
@@ -1428,12 +1584,45 @@ export async function renderTestResults(root) {
   }
   const filterBar = el("div", { className: "filter-bar" }, [
     el("div", { className: "field", style: "margin:0;min-width:180px" }, [el("label", { text: "测题" }), testSel]),
+    el("div", { className: "field", style: "margin:0;min-width:150px" }, [
+      el("label", { text: "开始日期" }),
+      el("input", { type: "date", id: "tr-start" }),
+    ]),
+    el("div", { className: "field", style: "margin:0;min-width:150px" }, [
+      el("label", { text: "结束日期" }),
+      el("input", { type: "date", id: "tr-end" }),
+    ]),
     el("button", {
       className: "btn btn-primary",
       type: "button",
       text: "筛选",
       style: "width:auto",
       onClick: () => reload(),
+    }),
+    el("button", {
+      className: "btn btn-ghost",
+      type: "button",
+      text: "导出 CSV",
+      style: "width:auto",
+      onClick: async () => {
+        try {
+          const startEl = document.getElementById("tr-start");
+          const endEl = document.getElementById("tr-end");
+          const { blob, filename } = await api.testResultsExport({
+            testCode: testSel.value || undefined,
+            startDate: startEl && startEl.value,
+            endDate: endEl && endEl.value,
+          });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(a.href);
+          showToast("导出成功");
+        } catch (e) {
+          showToast(e.message || "导出失败", "error");
+        }
+      },
     }),
   ]);
   root.append(
@@ -1448,8 +1637,12 @@ export async function renderTestResults(root) {
     clear(host);
     host.append(el("p", { className: "muted", text: "加载中…" }));
     try {
+      const startEl = document.getElementById("tr-start");
+      const endEl = document.getElementById("tr-end");
       const data = await api.testResults({
         testCode: testSel.value || undefined,
+        startDate: startEl && startEl.value,
+        endDate: endEl && endEl.value,
         page: 1,
         perPage: 50,
       });
@@ -1495,34 +1688,60 @@ export async function renderTestResults(root) {
 
 export async function renderAnnouncements(root) {
   const errHost = el("div");
+  const listHost = el("div");
   let items = [];
-  try {
-    const data = await api.announcementsList();
-    items = (data && (data.announcements || data.list)) || [];
-    await api.announcementsMarkAll().catch(() => {});
-  } catch (err) {
-    errHost.append(flash("error", err.message || "加载失败"));
+  async function load() {
+    clear(listHost);
+    try {
+      const data = await api.announcementsList();
+      items = (data && (data.announcements || data.list)) || [];
+      if (!items.length) {
+        listHost.append(el("p", { className: "muted", text: "暂无公告" }));
+        return;
+      }
+      listHost.append(
+        el(
+          "div",
+          { className: "stack" },
+          items.map((a) =>
+            el("div", { className: "panel" }, [
+              el("h3", { text: a.title || "公告" }),
+              el("p", { className: "muted", text: String(a.created_at || a.updated_at || "") }),
+              el("div", { html: String(a.content || "").replace(/\n/g, "<br/>") }),
+            ])
+          )
+        )
+      );
+    } catch (err) {
+      errHost.replaceChildren(flash("error", err.message || "加载失败"));
+    }
   }
   root.append(
     shell("/admin/announcements", [
       el("h1", { className: "page-title", text: "公告" }),
       el("p", { className: "page-lead", text: "平台通知与运营说明。" }),
+      el("div", { className: "row-actions", style: "margin-bottom:12px" }, [
+        el("button", {
+          className: "btn btn-ghost",
+          type: "button",
+          text: "全部标为已读",
+          style: "width:auto",
+          onClick: async () => {
+            try {
+              await api.announcementsMarkAll();
+              showToast("已全部标为已读");
+              document.querySelectorAll(".nav-badge").forEach((n) => n.setAttribute("hidden", "true"));
+            } catch (e) {
+              showToast(e.message || "操作失败", "error");
+            }
+          },
+        }),
+      ]),
       errHost,
-      items.length === 0
-        ? el("p", { className: "muted", text: "暂无公告" })
-        : el(
-            "div",
-            { className: "stack" },
-            items.map((a) =>
-              el("div", { className: "panel" }, [
-                el("h3", { text: a.title || "公告" }),
-                el("p", { className: "muted", text: String(a.created_at || a.updated_at || "") }),
-                el("div", { html: String(a.content || "").replace(/\n/g, "<br/>") }),
-              ])
-            )
-          ),
+      listHost,
     ])
   );
+  await load();
 }
 
 export async function renderHelp(root) {

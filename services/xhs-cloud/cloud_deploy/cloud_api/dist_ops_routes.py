@@ -491,11 +491,76 @@ def sa_pay_config(request: Request):
     return _ok(
         {
             "wxpay_configured": cfg.get("payment_wxpay_configured"),
+            "alipay_configured": cfg.get("payment_alipay_configured"),
+            "wechat_enabled": str(cfg.get("payment_wechat_enabled", "true")).lower() in ("1", "true", "yes"),
+            "alipay_enabled": str(cfg.get("payment_alipay_enabled", "true")).lower() in ("1", "true", "yes"),
+            "xianyu_fallback_enabled": str(cfg.get("payment_xianyu_fallback_enabled", "true")).lower()
+            in ("1", "true", "yes"),
             "notify_base": cfg.get("payment_notify_base"),
             "test_enabled": cfg.get("payment_test_enabled"),
-            "note": "支付密钥仅能通过服务器环境变量配置，控制台只读状态。",
+            "note": "支付密钥仅能通过服务器环境变量配置；此处可开关展示通道与闲鱼兜底。",
         }
     )
+
+
+@ops_router.post("/api/super-admin/payment-config")
+def sa_pay_config_save(body: dict, request: Request):
+    try:
+        user, dist = _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    payload = body or {}
+    mapped = {}
+    if "wechat_enabled" in payload:
+        mapped["payment_wechat_enabled"] = "true" if payload.get("wechat_enabled") else "false"
+    if "alipay_enabled" in payload:
+        mapped["payment_alipay_enabled"] = "true" if payload.get("alipay_enabled") else "false"
+    if "xianyu_fallback_enabled" in payload:
+        mapped["payment_xianyu_fallback_enabled"] = "true" if payload.get("xianyu_fallback_enabled") else "false"
+    dist_ops.update_payment_config(mapped)
+    a = _actor(user, dist)
+    dist_ops.log_op(
+        actor_user_id=a["id"],
+        actor_username=a["username"],
+        action="payment_config.update",
+        detail=mapped,
+    )
+    return sa_pay_config(request)
+
+
+@ops_router.get("/api/super-admin/payment-notify-logs")
+def sa_payment_notify_logs(
+    request: Request,
+    page: str = "1",
+    perPage: str = "20",
+    per_page: str = "",
+    orderNo: str = "",
+    order_no: str = "",
+    status: str = "",
+):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    data = dist_db.list_payment_notify_logs_page(
+        page=int(page or 1),
+        per_page=int(perPage or per_page or 20),
+        order_no=(orderNo or order_no or "").strip() or None,
+        status=(status or "").strip() or None,
+    )
+    return _ok(data)
+
+
+@ops_router.get("/api/super-admin/payment-notify-logs/{log_id}")
+def sa_payment_notify_log_detail(log_id: int, request: Request):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    row = dist_db.get_payment_notify_log(int(log_id))
+    if not row:
+        return JSONResponse(_fail("记录不存在"), status_code=200)
+    return _ok(row)
 
 
 @ops_router.get("/api/super-admin/operation-logs/list")
@@ -506,6 +571,51 @@ def sa_op_logs(request: Request, limit: int = 100):
         return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
     logs = dist_ops.list_operation_logs(limit=int(limit or 100))
     return _ok({"logs": logs, "list": logs, "total": len(logs)})
+
+
+@ops_router.get("/api/super-admin/operation-logs/export")
+def sa_op_logs_export(request: Request, limit: int = 5000):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    from fastapi.responses import Response
+    import csv
+    import io
+
+    logs = dist_db.list_operation_logs_export(limit=int(limit or 5000))
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["ID", "操作者", "动作", "目标", "详情", "时间"])
+    for row in logs:
+        writer.writerow(
+            [
+                row.get("id"),
+                row.get("actor_username") or row.get("actor_user_id") or "",
+                row.get("action") or "",
+                row.get("target_id") or "",
+                row.get("detail") or "",
+                row.get("created_at") or "",
+            ]
+        )
+    content = buf.getvalue().encode("utf-8-sig")
+    return Response(
+        content=content,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="operation_logs_export.csv"'},
+    )
+
+
+@ops_router.get("/api/super-admin/operation-logs/detail/{log_id}")
+def sa_op_log_detail(log_id: int, request: Request):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    row = dist_db.get_operation_log(int(log_id))
+    if not row:
+        return JSONResponse(_fail("记录不存在"), status_code=200)
+    return _ok(row)
 
 
 @ops_router.post("/api/super-admin/users/toggle-detailed-tutorial-access")

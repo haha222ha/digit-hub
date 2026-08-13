@@ -23,6 +23,45 @@ export function flash(type, message) {
   return el("div", { className: `flash flash-${type}`, text: message });
 }
 
+export function showToast(message, type = "ok") {
+  const node = el("div", { className: `toast toast-${type}`, text: message });
+  document.body.appendChild(node);
+  requestAnimationFrame(() => node.classList.add("show"));
+  setTimeout(() => {
+    node.classList.remove("show");
+    setTimeout(() => node.remove(), 320);
+  }, 3200);
+}
+
+export function isWechatBrowser() {
+  return /MicroMessenger/i.test(navigator.userAgent || "");
+}
+
+export function openModal(title, bodyChildren, { onClose } = {}) {
+  const backdrop = el("div", { className: "modal-backdrop" });
+  const closeBtn = el("button", {
+    className: "modal-close",
+    type: "button",
+    text: "×",
+    "aria-label": "关闭",
+  });
+  const panel = el("div", { className: "modal-panel" }, [
+    el("div", { className: "modal-header" }, [el("h3", { text: title }), closeBtn]),
+    el("div", { className: "modal-body" }, bodyChildren),
+  ]);
+  backdrop.append(panel);
+  function close() {
+    backdrop.remove();
+    if (onClose) onClose();
+  }
+  closeBtn.addEventListener("click", close);
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) close();
+  });
+  document.body.appendChild(backdrop);
+  return { close, backdrop };
+}
+
 /** 复制到剪贴板：优先 Clipboard API，失败则 textarea + execCommand。 */
 export async function copyText(text) {
   const value = String(text || "");

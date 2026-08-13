@@ -38,6 +38,23 @@ def _fail(message: str, code: int = 400) -> dict:
     return {"code": code, "message": message, "data": None}
 
 
+def _csv_response(rows: list[dict], columns: list[tuple[str, str]], filename: str) -> Response:
+    import csv
+    import io
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow([label for _, label in columns])
+    for row in rows:
+        writer.writerow([row.get(key, "") for key, _ in columns])
+    content = buf.getvalue().encode("utf-8-sig")
+    return Response(
+        content=content,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 class DistLoginBody(BaseModel):
     usernameOrEmail: str = Field(default="")
     username: str = Field(default="")
@@ -443,6 +460,34 @@ def compat_orders_pay_html(order_no: str, body: OrderPayBody, request: Request):
         return HTMLResponse(f"<h1>{e}</h1>", status_code=400)
 
 
+@compat_router.post("/api/payment/wechat/jsapi/bootstrap")
+def compat_wechat_jsapi_bootstrap(body: dict, request: Request):
+    user = _dist_token(request)
+    order_id = str((body or {}).get("orderId") or (body or {}).get("order_no") or "").strip()
+    if not order_id:
+        return JSONResponse(_fail("请指定订单号"), status_code=200)
+    try:
+        from cloud_deploy.cloud_api.request_ip import resolve_client_ip
+
+        ip = resolve_client_ip(request) or "127.0.0.1"
+        data = dist_ord.jsapi_bootstrap(order_id, user["id"], client_ip=ip)
+        return _ok(data, "ok")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@compat_router.get("/api/payment/wechat/jsapi/status")
+def compat_wechat_jsapi_status(request: Request, orderId: str = "", order_no: str = ""):
+    user = _dist_token(request)
+    order_id = (orderId or order_no or "").strip()
+    if not order_id:
+        return JSONResponse(_fail("请指定订单号"), status_code=200)
+    try:
+        return _ok(dist_ord.jsapi_status(order_id, user["id"]), "ok")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
 @compat_router.post("/api/links/revoke")
 def compat_links_revoke(body: RevokeLinkBody, request: Request):
     user = _dist_token(request)
@@ -581,12 +626,20 @@ def compat_redeem_history(request: Request, page: str = "1", perPage: str = "20"
 
 
 @compat_router.get("/api/admin/quota-logs/list")
-def compat_admin_quota_logs(request: Request, page: str = "1", perPage: str = "20", per_page: str = ""):
+def compat_admin_quota_logs(
+    request: Request,
+    page: str = "1",
+    perPage: str = "20",
+    per_page: str = "",
+    changeType: str = "",
+    change_type: str = "",
+):
     user = _dist_token(request)
     data = dist_db.list_quota_logs_page(
         user["id"],
         page=int(page or 1),
         per_page=int(perPage or per_page or 20),
+        change_type=(changeType or change_type or "").strip() or None,
     )
     return _ok(data, "ok")
 
@@ -599,15 +652,55 @@ def compat_admin_test_results(
     per_page: str = "",
     testCode: str = "",
     test_code: str = "",
+    startDate: str = "",
+    start_date: str = "",
+    endDate: str = "",
+    end_date: str = "",
 ):
     user = _dist_token(request)
     data = dist_db.list_test_results_page(
         user["id"],
         test_code=(testCode or test_code or "").strip() or None,
+        start_date=(startDate or start_date or "").strip() or None,
+        end_date=(endDate or end_date or "").strip() or None,
         page=int(page or 1),
         per_page=int(perPage or per_page or 20),
     )
     return _ok(data, "ok")
+
+
+@compat_router.get("/api/admin/test-results/export")
+def compat_admin_test_results_export(
+    request: Request,
+    testCode: str = "",
+    test_code: str = "",
+    startDate: str = "",
+    start_date: str = "",
+    endDate: str = "",
+    end_date: str = "",
+):
+    user = _dist_token(request)
+    data = dist_db.list_test_results_page(
+        user["id"],
+        test_code=(testCode or test_code or "").strip() or None,
+        start_date=(startDate or start_date or "").strip() or None,
+        end_date=(endDate or end_date or "").strip() or None,
+        page=1,
+        per_page=5000,
+    )
+    rows = data.get("results") or []
+    return _csv_response(
+        rows,
+        [
+            ("id", "ID"),
+            ("testCode", "测题"),
+            ("token", "Token"),
+            ("completedAt", "完成时间"),
+            ("perspective", "视角"),
+            ("unlimited", "免费测"),
+        ],
+        "test_results_export.csv",
+    )
 
 
 def _psy_uploads_dir() -> Path:
@@ -830,8 +923,40 @@ def sa_orders(request: Request, limit: int = 100):
         _require_super(request)
     except HTTPException as e:
         return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
-    orders = dist_db.list_orders_admin(limit=int(limit or 100))
+    raw = dist_db.list_orders_admin(limit=int(limit or 100))
+    from cloud_deploy.cloud_api.payment_plans import get_plan
+
+    orders = []
+    for row in raw:
+        plan = get_plan(row.get("plan_code") or "") or {}
+        orders.append(dist_ord.map_order_row(row, plan))
     return _ok({"orders": orders, "list": orders, "total": len(orders)}, "ok")
+
+
+@compat_router.get("/api/super-admin/orders/export")
+def sa_orders_export(request: Request, limit: int = 2000):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    raw = dist_db.list_orders_admin(limit=int(limit or 2000))
+    from cloud_deploy.cloud_api.payment_plans import get_plan
+
+    rows = [dist_ord.map_order_row(row, get_plan(row.get("plan_code") or "") or {}) for row in raw]
+    return _csv_response(
+        rows,
+        [
+            ("order_no", "订单号"),
+            ("package_name", "套餐"),
+            ("amount", "金额(分)"),
+            ("quota_amount", "额度"),
+            ("status", "状态"),
+            ("payment_method", "支付方式"),
+            ("created_at", "创建时间"),
+            ("paid_at", "支付时间"),
+        ],
+        "orders_export.csv",
+    )
 
 
 @compat_router.get("/api/super-admin/test-results/list")

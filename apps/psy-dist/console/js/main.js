@@ -35,6 +35,7 @@ import {
   renderSaConfig,
   renderSaQuotaLogs,
   renderSaOpLogs,
+  renderSaPaymentNotifyLogs,
 } from "./pages/super-admin.js";
 
 const root = document.getElementById("app");
@@ -76,6 +77,7 @@ const SUPER_PAGES = {
   "/super-admin/config": renderSaConfig,
   "/super-admin/quota-logs": renderSaQuotaLogs,
   "/super-admin/operation-logs": renderSaOpLogs,
+  "/super-admin/payment-notify-logs": renderSaPaymentNotifyLogs,
 };
 
 async function render(fullPath) {

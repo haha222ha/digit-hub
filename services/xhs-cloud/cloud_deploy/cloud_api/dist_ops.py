@@ -106,6 +106,9 @@ _DEFAULT_CONFIG = {
     "tutorial_unlock_min_price_yuan": "59",
     "tutorial_unlock_min_redeem_quota": "300",
     "tutorial_unlocked": "false",
+    "payment_wechat_enabled": "true",
+    "payment_alipay_enabled": "true",
+    "payment_xianyu_fallback_enabled": "true",
 }
 
 
@@ -132,11 +135,24 @@ def get_config() -> dict[str, Any]:
         conn.close()
     # 支付通道状态（只读环境信息，密钥不回传）
     out["payment_wxpay_configured"] = bool(
-        os.environ.get("XHS_HWXUN_PID") or os.environ.get("HWXUN_PID")
+        os.environ.get("XHS_PAY_PID")
+        or os.environ.get("XHS_HWXUN_PID")
+        or os.environ.get("HWXUN_PID")
     )
+    out["payment_alipay_configured"] = bool(os.environ.get("XHS_PAY_ALIPAY_PID"))
     out["payment_notify_base"] = (os.environ.get("XHS_PAY_NOTIFY_BASE") or "").rstrip("/")
     out["payment_test_enabled"] = os.environ.get("XHS_PSY_PAY_TEST", "").strip() in ("1", "true", "yes")
     return out
+
+
+def update_payment_config(payload: dict[str, Any]) -> dict[str, Any]:
+    allowed = {
+        "payment_wechat_enabled",
+        "payment_alipay_enabled",
+        "payment_xianyu_fallback_enabled",
+    }
+    body = {k: payload[k] for k in allowed if k in (payload or {})}
+    return update_config(body) if body else get_config()
 
 
 def update_config(payload: dict[str, Any]) -> dict[str, Any]:

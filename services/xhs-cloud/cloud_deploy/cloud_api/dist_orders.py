@@ -157,27 +157,70 @@ def start_pay(order_key: str, user_id: int, *, payment_method: str = "wxpay", de
 
 def purchase_methods() -> dict:
     from cloud_deploy.cloud_api.hwxun_pay import channel_merchant_credentials
+    from cloud_deploy.cloud_api import dist_ops
 
-    wechat = False
-    alipay = False
+    cfg = dist_ops.get_config()
+
+    def _on(key: str) -> bool:
+        return str(cfg.get(key) or "true").strip().lower() in ("1", "true", "yes")
+
+    wechat_env = False
+    alipay_env = False
     try:
         channel_merchant_credentials("wxpay")
-        wechat = True
+        wechat_env = True
     except RuntimeError:
-        wechat = False
+        wechat_env = False
     try:
         channel_merchant_credentials("alipay")
-        alipay = True
+        alipay_env = True
     except RuntimeError:
-        alipay = False
+        alipay_env = False
+    wechat = wechat_env and _on("payment_wechat_enabled")
+    alipay = alipay_env and _on("payment_alipay_enabled")
     online = wechat or alipay
+    xianyu = _on("payment_xianyu_fallback_enabled") and bool(
+        (cfg.get("xianyu_shop_link") or "").strip() or (cfg.get("xianyu_shop_qrcode") or "").strip()
+    )
     return {
         "wechat": wechat,
         "alipay": alipay,
         "wechat_available": wechat,
         "alipay_available": alipay,
         "online_payment_available": online,
-        "any_purchase_available": online,
+        "any_purchase_available": online or xianyu,
         "mock_mode": not online,
-        "xianyu_fallback_enabled": False,
+        "xianyu_fallback_enabled": xianyu,
+        "xianyu": xianyu,
+        "offline": xianyu,
     }
+
+
+def jsapi_bootstrap(order_key: str, user_id: int, *, client_ip: str = "127.0.0.1") -> dict:
+    detail = get_order_for_user(order_key, user_id)
+    order = detail["order"]
+    row = db.get_payment_order(order["order_no"])
+    if not row:
+        raise ValueError("订单不存在")
+    if row.get("status") == "paid":
+        return {"paid": True, "status": "paid", "order": order}
+    row = {**row, "channel": "wxpay"}
+    payurl, qrcode = _payurl_for_row(row)
+    return {
+        "paid": False,
+        "status": "pending",
+        "order": order,
+        "orderId": order["order_no"],
+        "pay_type": "redirect",
+        "pay_url": payurl,
+        "code_url": qrcode,
+        "mock": False,
+    }
+
+
+def jsapi_status(order_key: str, user_id: int) -> dict:
+    detail = get_order_for_user(order_key, user_id)
+    order = detail["order"]
+    st = order.get("status") or "pending"
+    paid = st == "paid"
+    return {"status": st, "paid": paid, "order": order, "orderId": order.get("order_no")}

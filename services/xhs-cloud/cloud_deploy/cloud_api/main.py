@@ -615,7 +615,15 @@ async def payment_notify_hwxun(request: Request):
         params = dict(form)
     else:
         params = dict(request.query_params)
+    from cloud_deploy.cloud_api import dist_db
+    from cloud_deploy.cloud_api.request_ip import resolve_client_ip
+
+    client_ip = resolve_client_ip(request)
     result = pay.handle_hwxun_notify(params)
+    try:
+        dist_db.log_payment_notify(params, result, client_ip=client_ip)
+    except Exception:
+        pass
     return PlainTextResponse(result)
 
 

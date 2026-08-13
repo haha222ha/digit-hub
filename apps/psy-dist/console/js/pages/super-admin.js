@@ -1,5 +1,5 @@
 import { api, getUser } from "../api.js";
-import { el, flash } from "../ui.js";
+import { el, flash, openModal } from "../ui.js";
 import { navigate } from "../router.js";
 import { shell, isSuper } from "./admin.js";
 
@@ -240,35 +240,70 @@ export async function renderSaUsers(root) {
 export async function renderSaOrders(root) {
   if (!guard()) return;
   const errHost = el("div");
-  let orders = [];
-  try {
-    const data = await api.saOrders(200);
-    orders = (data && (data.orders || data.list)) || [];
-  } catch (err) {
-    errHost.append(flash("error", err.message || "加载失败"));
+  const listHost = el("div");
+  async function reload() {
+    try {
+      const data = await api.saOrders(200);
+      const orders = (data && (data.orders || data.list)) || [];
+      listHost.replaceChildren(
+        orders.length === 0
+          ? el("p", { className: "muted", text: "暂无订单" })
+          : table(
+              ["订单号", "套餐", "金额", "额度", "状态", "支付方式", "时间"],
+              orders.map((o) =>
+                el("tr", {}, [
+                  el("td", { text: o.order_no || o.id || "—" }),
+                  el("td", { text: o.package_name || o.plan_code || "—" }),
+                  el("td", {
+                    text: o.amount != null ? `¥${(Number(o.amount) / 100).toFixed(2)}` : "—",
+                  }),
+                  el("td", { text: String(o.quota_amount ?? o.quota_value ?? "—") }),
+                  el("td", { text: o.status || "—" }),
+                  el("td", { text: o.payment_method || "—" }),
+                  el("td", { text: String(o.paid_at || o.created_at || "—") }),
+                ])
+              )
+            )
+      );
+    } catch (err) {
+      errHost.replaceChildren(flash("error", err.message || "加载失败"));
+    }
   }
   root.append(
     shell("/super-admin/orders", [
       el("h1", { className: "page-title", text: "额度订单" }),
+      el("div", { className: "row-actions", style: "margin-bottom:12px" }, [
+        el("button", {
+          className: "btn btn-ghost",
+          type: "button",
+          text: "导出 CSV",
+          style: "width:auto",
+          onClick: async () => {
+            try {
+              const { blob, filename } = await api.saOrdersExport();
+              const a = document.createElement("a");
+              a.href = URL.createObjectURL(blob);
+              a.download = filename;
+              a.click();
+              URL.revokeObjectURL(a.href);
+            } catch (e) {
+              alert(e.message || "导出失败");
+            }
+          },
+        }),
+        el("button", {
+          className: "btn btn-primary",
+          type: "button",
+          text: "刷新",
+          style: "width:auto",
+          onClick: reload,
+        }),
+      ]),
       errHost,
-      orders.length === 0
-        ? el("p", { className: "muted", text: "暂无订单" })
-        : table(
-            ["订单号", "用户", "套餐/金额", "状态", "时间"],
-            orders.map((o) =>
-              el("tr", {}, [
-                el("td", { text: o.order_no || o.id || "—" }),
-                el("td", { text: String(o.user_id || o.username || "—") }),
-                el("td", {
-                  text: `${o.plan_code || "—"} · ¥${o.amount ?? o.pay_amount ?? "—"}`,
-                }),
-                el("td", { text: o.status || "—" }),
-                el("td", { text: String(o.created_at || o.paid_at || "—") }),
-              ])
-            )
-          ),
+      listHost,
     ])
   );
+  await reload();
 }
 
 export async function renderSaPaymentStats(root) {
@@ -324,10 +359,45 @@ export async function renderSaPaymentStats(root) {
       ]),
       el("p", {
         className: "muted",
-        text: "支付密钥（商户 PID/KEY）仅服务器环境变量可改；此处只读状态。",
+        text: "支付密钥（商户 PID/KEY）仅服务器环境变量可改；下方可开关展示通道与闲鱼兜底。",
       }),
+      el("div", { className: "panel", id: "sa-pay-config-host" }),
     ])
   );
+  const cfgHost = root.querySelector("#sa-pay-config-host");
+  if (cfgHost) {
+    const wxOn = el("input", { type: "checkbox", checked: cfg.wechat_enabled !== false ? "true" : undefined });
+    const aliOn = el("input", { type: "checkbox", checked: cfg.alipay_enabled !== false ? "true" : undefined });
+    const xyOn = el("input", {
+      type: "checkbox",
+      checked: cfg.xianyu_fallback_enabled !== false ? "true" : undefined,
+    });
+    const saveBtn = el("button", {
+      className: "btn btn-primary",
+      type: "button",
+      text: "保存支付展示配置",
+      style: "width:auto",
+    });
+    saveBtn.addEventListener("click", async () => {
+      try {
+        await api.saPaymentConfigSave({
+          wechat_enabled: wxOn.checked,
+          alipay_enabled: aliOn.checked,
+          xianyu_fallback_enabled: xyOn.checked,
+        });
+        alert("已保存");
+      } catch (e) {
+        alert(e.message || "保存失败");
+      }
+    });
+    cfgHost.append(
+      el("h3", { text: "通道展示开关" }),
+      el("label", { style: "display:block;margin:8px 0" }, [wxOn, " 展示微信支付"]),
+      el("label", { style: "display:block;margin:8px 0" }, [aliOn, " 展示支付宝"]),
+      el("label", { style: "display:block;margin:8px 0" }, [xyOn, " 启用闲鱼购码兜底"]),
+      saveBtn
+    );
+  }
 }
 
 export async function renderSaPackages(root) {
@@ -1118,9 +1188,34 @@ export async function renderSaPackageDocs(root) {
   const listHost = el("div");
   const title = el("input", { required: "true", placeholder: "文档标题" });
   const url = el("input", { placeholder: "文档链接 URL" });
-  const pkgId = el("input", { type: "number", value: "0", placeholder: "套餐ID（0=通用）" });
+  const pkgId = el("select");
+  pkgId.append(el("option", { value: "0", text: "0 · 通用（全部套餐）" }));
   const order = el("input", { type: "number", value: "0" });
   let editId = null;
+
+  async function loadPackageOptions() {
+    try {
+      const data = await api.saPackages();
+      const packages = (data && (data.packages || data.list)) || [];
+      for (const p of packages) {
+        const id = p.id ?? p.package_id ?? p.list_id;
+        if (id == null) continue;
+        const label = `${id} · ${p.name || p.title || p.plan_code || "套餐"}`;
+        pkgId.append(el("option", { value: String(id), text: label }));
+      }
+    } catch {
+      /* 保留通用选项即可 */
+    }
+  }
+
+  function setPkgId(val) {
+    const v = String(val ?? 0);
+    if ([...pkgId.options].some((o) => o.value === v)) pkgId.value = v;
+    else {
+      pkgId.append(el("option", { value: v, text: `${v} · 自定义 ID` }));
+      pkgId.value = v;
+    }
+  }
   async function reload() {
     try {
       const data = await api.saPackageDocs();
@@ -1151,7 +1246,7 @@ export async function renderSaPackageDocs(root) {
                         editId = d.id;
                         title.value = d.title || "";
                         url.value = d.document_url || "";
-                        pkgId.value = String(d.package_id ?? d.packageId ?? 0);
+                        setPkgId(d.package_id ?? d.packageId ?? 0);
                         order.value = String(d.display_order ?? 0);
                       },
                     }),
@@ -1183,7 +1278,7 @@ export async function renderSaPackageDocs(root) {
     el("h3", { text: editId ? `编辑文档 #${editId}` : "新增套餐文档" }),
     el("div", { className: "field" }, [el("label", { text: "标题" }), title]),
     el("div", { className: "field" }, [el("label", { text: "链接" }), url]),
-    el("div", { className: "field" }, [el("label", { text: "套餐 ID" }), pkgId]),
+    el("div", { className: "field" }, [el("label", { text: "关联套餐" }), pkgId]),
     el("div", { className: "field" }, [el("label", { text: "排序" }), order]),
     el("div", { className: "row-actions" }, [
       el("button", { className: "btn btn-primary", type: "submit", text: "保存", style: "width:auto" }),
@@ -1197,6 +1292,7 @@ export async function renderSaPackageDocs(root) {
           title.value = "";
           url.value = "";
           pkgId.value = "0";
+          setPkgId(0);
           order.value = "0";
         },
       }),
@@ -1216,7 +1312,7 @@ export async function renderSaPackageDocs(root) {
       editId = null;
       title.value = "";
       url.value = "";
-      pkgId.value = "0";
+      setPkgId(0);
       order.value = "0";
       await reload();
     } catch (err) {
@@ -1229,6 +1325,150 @@ export async function renderSaPackageDocs(root) {
       el("p", { className: "page-lead", text: "购买页/帮助页可引用的套餐说明文档链接。" }),
       errHost,
       form,
+      listHost,
+    ])
+  );
+  await loadPackageOptions();
+  await reload();
+}
+
+export async function renderSaPaymentNotifyLogs(root) {
+  if (!guard()) return;
+  const errHost = el("div");
+  const listHost = el("div", { className: "panel" });
+  const orderInput = el("input", { placeholder: "订单号" });
+  const statusSel = el("select");
+  statusSel.append(
+    el("option", { value: "", text: "全部状态" }),
+    el("option", { value: "success", text: "成功" }),
+    el("option", { value: "fail", text: "失败" })
+  );
+  let page = 1;
+
+  async function showDetail(id) {
+    try {
+      const row = await api.saPaymentNotifyLogDetail(id);
+      openModal(`回调 #${id}`, [
+        el("p", { className: "muted", text: `订单：${row.order_no || "—"} · ${row.created_at || ""}` }),
+        el("p", { text: `状态：${row.status || (row.verify_ok ? "success" : "fail")}` }),
+        el("p", { text: `交易状态：${row.trade_status || "—"}` }),
+        el("p", { text: `客户端 IP：${row.client_ip || "—"}` }),
+        el("p", { text: `响应：${row.response_text || "—"}` }),
+        el("pre", {
+          style: "white-space:pre-wrap;word-break:break-all;font-size:12px;background:#f5f7fa;padding:12px;border-radius:8px;max-height:360px;overflow:auto",
+          text: row.raw_body || row.raw_params || "（无原始参数）",
+        }),
+      ]);
+    } catch (e) {
+      errHost.replaceChildren(flash("error", e.message || "加载详情失败"));
+    }
+  }
+
+  async function reload() {
+    clear(listHost);
+    listHost.append(el("p", { className: "muted", text: "加载中…" }));
+    try {
+      const data = await api.saPaymentNotifyLogs({
+        page,
+        perPage: 30,
+        orderNo: orderInput.value.trim() || undefined,
+        status: statusSel.value || undefined,
+      });
+      const logs = (data && data.logs) || [];
+      const pag = (data && data.pagination) || {};
+      clear(listHost);
+      if (!logs.length) {
+        listHost.append(el("p", { className: "muted", text: "暂无支付回调记录" }));
+        return;
+      }
+      const tableEl = table(
+        ["ID", "订单号", "状态", "交易状态", "IP", "时间", "操作"],
+        logs.map((r) =>
+          el("tr", {}, [
+            el("td", { text: String(r.id) }),
+            el("td", { text: r.order_no || "—" }),
+            el("td", { text: r.status || (r.verify_ok ? "success" : "fail") }),
+            el("td", { text: r.trade_status || "—" }),
+            el("td", { text: r.client_ip || "—" }),
+            el("td", { text: String(r.created_at || "—") }),
+            el("td", {}, [
+              el("button", {
+                className: "btn btn-ghost",
+                type: "button",
+                text: "详情",
+                style: "width:auto;padding:4px 8px",
+                onClick: () => showDetail(r.id),
+              }),
+            ]),
+          ])
+        )
+      );
+      listHost.append(el("div", { className: "table-wrap" }, [tableEl]));
+      const totalPages = Number(pag.totalPages || 1);
+      if (totalPages > 1) {
+        listHost.append(
+          el("div", { className: "row-actions", style: "margin-top:12px" }, [
+            el("button", {
+              className: "btn btn-ghost",
+              type: "button",
+              text: "上一页",
+              style: "width:auto",
+              disabled: page <= 1 ? "true" : undefined,
+              onClick: () => {
+                if (page > 1) {
+                  page -= 1;
+                  reload();
+                }
+              },
+            }),
+            el("span", { className: "muted", text: `${page} / ${totalPages}` }),
+            el("button", {
+              className: "btn btn-ghost",
+              type: "button",
+              text: "下一页",
+              style: "width:auto",
+              disabled: page >= totalPages ? "true" : undefined,
+              onClick: () => {
+                if (page < totalPages) {
+                  page += 1;
+                  reload();
+                }
+              },
+            }),
+          ])
+        );
+      }
+    } catch (e) {
+      clear(listHost);
+      listHost.append(flash("error", e.message || "加载失败"));
+    }
+  }
+
+  root.append(
+    shell("/super-admin/payment-notify-logs", [
+      el("h1", { className: "page-title", text: "支付回调日志" }),
+      el("p", { className: "page-lead", text: "hwxun 异步通知记录，用于排查支付到账问题。" }),
+      errHost,
+      el("div", { className: "filter-bar" }, [
+        el("div", { className: "field", style: "margin:0;min-width:200px" }, [
+          el("label", { text: "订单号" }),
+          orderInput,
+        ]),
+        el("div", { className: "field", style: "margin:0;min-width:140px" }, [
+          el("label", { text: "状态" }),
+          statusSel,
+        ]),
+        el("button", {
+          className: "btn btn-primary",
+          type: "button",
+          text: "筛选",
+          style: "width:auto",
+          onClick: () => {
+            page = 1;
+            reload();
+          },
+        }),
+      ]),
       listHost,
     ])
   );
@@ -1281,6 +1521,26 @@ export async function renderSaOpLogs(root) {
   root.append(
     shell("/super-admin/operation-logs", [
       el("h1", { className: "page-title", text: "操作日志" }),
+      el("div", { className: "row-actions", style: "margin-bottom:12px" }, [
+        el("button", {
+          className: "btn btn-ghost",
+          type: "button",
+          text: "导出 CSV",
+          style: "width:auto",
+          onClick: async () => {
+            try {
+              const { blob, filename } = await api.saOpLogsExport();
+              const a = document.createElement("a");
+              a.href = URL.createObjectURL(blob);
+              a.download = filename;
+              a.click();
+              URL.revokeObjectURL(a.href);
+            } catch (e) {
+              alert(e.message || "导出失败");
+            }
+          },
+        }),
+      ]),
       errHost,
       logs.length === 0
         ? el("p", { className: "muted", text: "暂无记录" })

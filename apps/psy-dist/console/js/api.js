@@ -167,16 +167,39 @@ export const api = {
     const q = new URLSearchParams();
     if (params.page) q.set("page", String(params.page));
     if (params.perPage || params.per_page) q.set("perPage", String(params.perPage || params.per_page));
+    if (params.changeType || params.change_type) q.set("changeType", params.changeType || params.change_type);
     const s = q.toString();
     return request(`/api/admin/quota-logs/list${s ? `?${s}` : ""}`, { auth: true });
   },
   testResults: (params = {}) => {
     const q = new URLSearchParams();
     if (params.testCode || params.test_code) q.set("testCode", params.testCode || params.test_code);
+    if (params.startDate || params.start_date) q.set("startDate", params.startDate || params.start_date);
+    if (params.endDate || params.end_date) q.set("endDate", params.endDate || params.end_date);
     if (params.page) q.set("page", String(params.page));
     if (params.perPage || params.per_page) q.set("perPage", String(params.perPage || params.per_page));
     const s = q.toString();
     return request(`/api/admin/test-results/list${s ? `?${s}` : ""}`, { auth: true });
+  },
+  testResultsExport: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.testCode || params.test_code) q.set("testCode", params.testCode || params.test_code);
+    if (params.startDate || params.start_date) q.set("startDate", params.startDate || params.start_date);
+    if (params.endDate || params.end_date) q.set("endDate", params.endDate || params.end_date);
+    const s = q.toString();
+    const headers = { Accept: "*/*" };
+    const t = getToken();
+    if (t) headers.Authorization = `Bearer ${t}`;
+    const res = await fetch(`/api/admin/test-results/export${s ? `?${s}` : ""}`, {
+      headers,
+      credentials: "same-origin",
+    });
+    if (!res.ok) throw new Error(`导出失败 (${res.status})`);
+    const cd = res.headers.get("content-disposition") || "";
+    let filename = "test_results_export.csv";
+    const m = cd.match(/filename="?([^"]+)"?/i);
+    if (m) filename = m[1];
+    return { blob: await res.blob(), filename };
   },
   packagesList: () => request("/api/admin/packages/list"),
   packageDocuments: () => request("/api/admin/package-documents/list", { auth: true }),
@@ -192,8 +215,16 @@ export const api = {
     request(`/api/orders/${encodeURIComponent(orderNo)}/pay`, {
       method: "POST",
       auth: true,
-      body: { payment_method: paymentMethod, device_type: "pc" },
+      body: { payment_method: paymentMethod, device_type: "mobile" },
     }),
+  wechatJsapiBootstrap: (orderId) =>
+    request("/api/payment/wechat/jsapi/bootstrap", {
+      method: "POST",
+      auth: true,
+      body: { orderId },
+    }),
+  wechatJsapiStatus: (orderId) =>
+    request(`/api/payment/wechat/jsapi/status?orderId=${encodeURIComponent(orderId)}`, { auth: true }),
   unlimitedStart: (testCode) =>
     request("/api/admin/unlimited-test/start", {
       method: "POST",
@@ -261,6 +292,18 @@ export const api = {
       body: { userId, role },
     }),
   saOrders: (limit = 100) => request(`/api/super-admin/orders?limit=${limit}`, { auth: true }),
+  saOrdersExport: async () => {
+    const headers = { Accept: "*/*" };
+    const t = getToken();
+    if (t) headers.Authorization = `Bearer ${t}`;
+    const res = await fetch("/api/super-admin/orders/export", { headers, credentials: "same-origin" });
+    if (!res.ok) throw new Error(`导出失败 (${res.status})`);
+    const cd = res.headers.get("content-disposition") || "";
+    let filename = "orders_export.csv";
+    const m = cd.match(/filename="?([^"]+)"?/i);
+    if (m) filename = m[1];
+    return { blob: await res.blob(), filename };
+  },
   saQuotaLogs: (limit = 100) => request(`/api/super-admin/quota-logs/list?limit=${limit}`, { auth: true }),
   saTestResults: (params = {}) => {
     const q = new URLSearchParams();
@@ -320,7 +363,32 @@ export const api = {
     request("/api/super-admin/redeem-codes/revoke", { method: "POST", auth: true, body: { code } }),
   saPaymentStats: () => request("/api/super-admin/payment-stats", { auth: true }),
   saPaymentConfig: () => request("/api/super-admin/payment-config", { auth: true }),
+  saPaymentConfigSave: (payload) =>
+    request("/api/super-admin/payment-config", { method: "POST", auth: true, body: payload }),
+  saPaymentNotifyLogs: (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.page) q.set("page", String(params.page));
+    if (params.perPage || params.per_page) q.set("perPage", String(params.perPage || params.per_page));
+    if (params.orderNo || params.order_no) q.set("orderNo", params.orderNo || params.order_no);
+    if (params.status) q.set("status", params.status);
+    const s = q.toString();
+    return request(`/api/super-admin/payment-notify-logs${s ? `?${s}` : ""}`, { auth: true });
+  },
+  saPaymentNotifyLogDetail: (id) =>
+    request(`/api/super-admin/payment-notify-logs/${id}`, { auth: true }),
   saOpLogs: (limit = 100) => request(`/api/super-admin/operation-logs/list?limit=${limit}`, { auth: true }),
+  saOpLogsExport: async () => {
+    const headers = { Accept: "*/*" };
+    const t = getToken();
+    if (t) headers.Authorization = `Bearer ${t}`;
+    const res = await fetch("/api/super-admin/operation-logs/export", { headers, credentials: "same-origin" });
+    if (!res.ok) throw new Error(`导出失败 (${res.status})`);
+    const cd = res.headers.get("content-disposition") || "";
+    let filename = "operation_logs_export.csv";
+    const m = cd.match(/filename="?([^"]+)"?/i);
+    if (m) filename = m[1];
+    return { blob: await res.blob(), filename };
+  },
   announcementsList: () => request("/api/announcements/list", { auth: true }),
   announcementsUnread: () => request("/api/announcements/unread-count", { auth: true }),
   announcementsMarkAll: () =>
