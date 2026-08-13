@@ -1,5 +1,5 @@
 import { api, getUser, clearSession, getToken } from "../api.js";
-import { el, flash, clear } from "../ui.js";
+import { el, flash, clear, copyText, bindCopyButton } from "../ui.js";
 import { navigate, linkClick } from "../router.js";
 
 const NAV = [
@@ -316,17 +316,9 @@ export async function renderGenerate(root) {
       const list = el("div", { className: "link-list" });
       for (const link of links) {
         const url = `${location.origin}/test/${link.test_code || select.value}/${link.token}`;
-        list.append(
-          el("div", { className: "link-item" }, [
-            el("code", { text: url }),
-            el("button", {
-              className: "btn btn-ghost",
-              type: "button",
-              text: "复制",
-              onClick: async () => navigator.clipboard.writeText(url),
-            }),
-          ])
-        );
+        const copyBtn = el("button", { className: "btn btn-ghost", type: "button", text: "复制" });
+        bindCopyButton(copyBtn, url);
+        list.append(el("div", { className: "link-item" }, [el("code", { text: url }), copyBtn]));
       }
       resultHost.append(list);
     } catch (err) {
@@ -407,14 +399,9 @@ export async function renderLinks(root) {
       const statusLabel =
         { unused: "未使用", used: "已使用", expired: "已过期", revoked: "已撤销" }[status] || status;
       const tagClass = status === "unused" ? "tag-ok" : status === "revoked" || status === "expired" ? "tag-warn" : "tag";
-      const actions = el("div", { className: "row-actions" }, [
-        el("button", {
-          className: "btn btn-ghost",
-          type: "button",
-          text: "复制",
-          onClick: async () => navigator.clipboard.writeText(url),
-        }),
-      ]);
+      const copyBtn = el("button", { className: "btn btn-ghost", type: "button", text: "复制" });
+      bindCopyButton(copyBtn, url);
+      const actions = el("div", { className: "row-actions" }, [copyBtn]);
       if (status !== "revoked" && link.id) {
         actions.append(
           el("button", {
@@ -483,15 +470,12 @@ export async function renderUnlimited(root) {
       const code = session.test_code || select.value;
       const url = `${location.origin}/tests/${code}/index.html?unlimited=true&token=${encodeURIComponent(token)}`;
       resultHost.append(flash("ok", "已开启免费测试会话"));
+      const copyBtn = el("button", { className: "btn btn-ghost", type: "button", text: "复制" });
+      bindCopyButton(copyBtn, url);
       resultHost.append(
         el("div", { className: "link-item" }, [
           el("code", { text: url }),
-          el("button", {
-            className: "btn btn-ghost",
-            type: "button",
-            text: "复制",
-            onClick: async () => navigator.clipboard.writeText(url),
-          }),
+          copyBtn,
           el("a", { className: "btn btn-primary", href: url, target: "_blank", text: "打开测试", style: "width:auto" }),
         ])
       );
@@ -775,11 +759,12 @@ export async function renderInvite(root) {
         return;
       }
       try {
-        await navigator.clipboard.writeText(url);
+        await copyText(url);
         errHost.replaceChildren(flash("ok", "已复制到剪贴板"));
       } catch {
+        urlInput.focus();
         urlInput.select();
-        errHost.replaceChildren(flash("ok", "请手动复制上方链接"));
+        errHost.replaceChildren(flash("error", "自动复制失败，请手动全选上方链接复制"));
       }
     },
   });
