@@ -5,6 +5,7 @@ import base64
 import hashlib
 import hmac
 import json
+import os
 import time
 from typing import Any
 
@@ -270,6 +271,16 @@ def login_member_by_code(
     device_label: str = "",
 ) -> dict:
     code = (auth_code or "").strip()
+    from cloud_deploy.cloud_api.payment_plans import is_psy_dist_plan
+
+    # 额度兑换码不得用于登录/找回（U4）
+    row = db.get_auth_code_row(code)
+    if row and is_psy_dist_plan(str(row.get("plan_code") or "")):
+        raise HTTPException(
+            status_code=400,
+            detail="该码为分销额度兑换码，请在控制台「兑换额度」使用，不能用于登录",
+        )
+
     login_method = "auth_code"
     try:
         profile = db.login_with_auth_code(code)
@@ -277,6 +288,7 @@ def login_member_by_code(
         msg = str(e)
         if "尚未开通" not in msg:
             raise HTTPException(status_code=401, detail=msg) from e
+        # 未激活码：会员码可开通；额度码已在上方拦截
         try:
             profile = db.register_with_auth_code(code, code, code)
             login_method = "auth_code_redeem"
@@ -344,20 +356,52 @@ def register_dist_user(
     invite_code: str = "",
     device_id: str,
     device_label: str = "psy-dist",
+    client_ip: str = "",
 ) -> dict:
     from cloud_deploy.cloud_api import dist_db
+
+    # U1: 保留用户名
+    if dist_db.is_reserved_username(username):
+        raise ValueError("该用户名为系统保留，请更换")
+
+    # U2: 简易注册限频（同 IP 每小时最多 5 次）
+    _check_register_rate(client_ip or device_id or "")
 
     profile = db.register_user_account(username, password, email=email)
     uid = int(profile["id"])
     dist_db.ensure_distributor(uid)
+    # U2: 注册只绑定邀请人，不发额度；首购时再返利
     if invite_code:
         inviter = dist_db.find_distributor_by_invite_code(invite_code)
         if inviter:
-            dist_db.add_quota(int(inviter["user_id"]), 5, change_type="invite", remark=f"邀请 {username}")
-            dist_db.add_quota(uid, 5, change_type="invite_bonus", remark="注册邀请奖励")
+            inviter_uid = int(inviter["user_id"])
+            if inviter_uid != uid:
+                dist_db.set_inviter(uid, inviter_uid)
     token = issue_member_token(uid, profile.get("username") or username, device_id, device_label)
     return {
         "access_token": token,
         "token_type": "bearer",
         "membership": profile,
     }
+
+
+_REGISTER_HITS: dict[str, list[float]] = {}
+
+
+def _check_register_rate(key: str) -> None:
+    import time
+
+    k = (key or "unknown").strip() or "unknown"
+    now = time.time()
+    window = 3600.0
+    limit = int(os.environ.get("XHS_DIST_REGISTER_RATE_PER_HOUR", "5") or 5)
+    bucket = [t for t in _REGISTER_HITS.get(k, []) if now - t < window]
+    if len(bucket) >= max(1, limit):
+        raise ValueError("注册过于频繁，请稍后再试")
+    bucket.append(now)
+    _REGISTER_HITS[k] = bucket
+    # 粗略清理
+    if len(_REGISTER_HITS) > 5000:
+        stale = [kk for kk, vv in _REGISTER_HITS.items() if not vv or now - vv[-1] > window]
+        for kk in stale[:1000]:
+            _REGISTER_HITS.pop(kk, None)

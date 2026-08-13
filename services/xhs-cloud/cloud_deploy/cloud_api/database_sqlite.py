@@ -1539,14 +1539,25 @@ def mark_payment_order_paid_force(
     return ok
 
 
-def mark_payment_order_fulfilled(order_no: str, user_id: int) -> None:
+def mark_payment_order_fulfilled(order_no: str, user_id: int) -> bool:
+    """幂等认领履约：仅当尚未 fulfilled 时写入。返回是否本次写入成功。"""
     conn = _conn()
-    conn.execute(
-        "UPDATE payment_orders SET fulfilled_user_id=? WHERE order_no=?",
+    cur = conn.execute(
+        "UPDATE payment_orders SET fulfilled_user_id=? WHERE order_no=? AND fulfilled_user_id IS NULL",
         (user_id, order_no),
     )
+    ok = cur.rowcount > 0
+    if not ok:
+        # 已由同一用户履约则视为成功；被他人占用则仍 False
+        row = conn.execute(
+            "SELECT fulfilled_user_id FROM payment_orders WHERE order_no=?",
+            (order_no,),
+        ).fetchone()
+        if row and row["fulfilled_user_id"] is not None and int(row["fulfilled_user_id"]) == int(user_id):
+            ok = True
     conn.commit()
     conn.close()
+    return ok
 
 
 def mark_payment_order_fulfill_error(order_no: str, *, error: str) -> None:
@@ -1805,6 +1816,15 @@ def register_user_account(username: str, password: str, email: str = "") -> dict
         raise ValueError("用户名至少 3 个字符")
     if len(password or "") < 6:
         raise ValueError("密码至少 6 位")
+    try:
+        from cloud_deploy.cloud_api import dist_db
+
+        if dist_db.is_reserved_username(username):
+            raise ValueError("该用户名为系统保留，请更换")
+    except ValueError:
+        raise
+    except Exception:
+        pass
     conn = _conn()
     c = conn.cursor()
     c.execute("SELECT id FROM users WHERE username=?", (username,))

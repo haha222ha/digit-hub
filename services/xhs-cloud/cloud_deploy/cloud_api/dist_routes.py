@@ -221,6 +221,7 @@ def compat_auth_login(body: DistLoginBody, request: Request):
 @compat_router.post("/api/auth/register")
 def compat_auth_register(body: DistRegisterBody, request: Request):
     from cloud_deploy.cloud_api.auth import register_dist_user
+    from cloud_deploy.cloud_api.request_ip import resolve_client_ip
 
     try:
         res = register_dist_user(
@@ -230,6 +231,7 @@ def compat_auth_register(body: DistRegisterBody, request: Request):
             invite_code=body.inviteCode,
             device_id=request.headers.get("x-device-id") or "web:psy-dist",
             device_label="psy-dist",
+            client_ip=resolve_client_ip(request) or "",
         )
     except ValueError as e:
         return JSONResponse(_fail(str(e)), status_code=200)
@@ -446,16 +448,24 @@ def compat_links_list(request: Request, status: str = "", page: str = "1", perPa
 
 @compat_router.post("/api/admin/unlimited-test/start")
 def compat_unlimited_start(body: UnlimitedStartBody, request: Request):
-    user = _dist_token(request)
-    session = dist_db.create_unlimited_session(user["id"], body.testCode)
-    return _ok(session, "无限测模式已开启")
+    try:
+        _user, dist = _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    session = dist_db.create_unlimited_session(int(dist["id"] or _user["id"]), body.testCode)
+    return _ok(session, "无限测模式已开启（仅超管，24小时内有效）")
 
 
 @compat_router.post("/api/admin/unlimited-test/validate")
-def compat_unlimited_validate(body: TokenBody):
+def compat_unlimited_validate(body: TokenBody, request: Request):
+    # 须登录；普通分销商也可校验自己开的…但现仅超管可开，故任意登录用户持 token 即可验
+    try:
+        _dist_token(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
     session = dist_db.get_unlimited_session(body.token)
     if not session:
-        return _ok({"valid": False, "message": "无效 token"}, "链接无效")
+        return _ok({"valid": False, "message": "无限测 token 无效或已过期"}, "链接无效")
     meta = svc.list_tests()
     test = next((t for t in meta if t["test_code"] == session.get("test_code")), None)
     return _ok(
@@ -464,6 +474,7 @@ def compat_unlimited_validate(body: TokenBody):
             "message": "无限测试模式",
             "unlimited": True,
             "testCode": session.get("test_code"),
+            "expiresAt": session.get("expires_at"),
             "is_dual_perspective": bool(test and test.get("is_dual_perspective")),
         },
         "链接有效",

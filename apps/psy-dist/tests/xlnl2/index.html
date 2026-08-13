@@ -1334,10 +1334,8 @@
                         }
                     } catch (error) {
                         console.error('记录测试完成失败:', error);
-                        if (window.linkValidator) {
-                            window.linkValidator.valid = true;
-                        }
                         window.__xlnl2_test_completed = false;
+                        // 失败时不强制 valid=true，避免绕过服务端解锁
                     }
                 }
             },

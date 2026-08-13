@@ -135,7 +135,9 @@ def redeem_quota_code(user_id: int, code: str) -> dict:
     code = (code or "").strip()
     if not code:
         raise ValueError("请输入兑换码")
-    dist_db.ensure_distributor(user_id, default_quota=_DEFAULT_QUOTA)
+    dist = dist_db.ensure_distributor(user_id, default_quota=_DEFAULT_QUOTA)
+    if (dist.get("status") or "active") != "active":
+        raise ValueError("账号已停用，无法兑换额度")
     from cloud_deploy.cloud_api.payment_plans import get_plan, is_psy_dist_plan
 
     row = db.get_auth_code_row(code)
@@ -169,6 +171,9 @@ def generate_links(user_id: int, test_code: str, count: int) -> dict:
     meta = _test_meta(test_code)
     if not meta:
         raise ValueError("测试项目不存在")
+    dist = dist_db.ensure_distributor(user_id)
+    if (dist.get("status") or "active") != "active":
+        raise ValueError("账号已停用，无法生成链接")
     links = dist_db.generate_links(user_id, test_code, count, max_uses=_link_max_uses())
     return {"links": links, "generatedCount": len(links), "rule": link_rule_summary()}
 

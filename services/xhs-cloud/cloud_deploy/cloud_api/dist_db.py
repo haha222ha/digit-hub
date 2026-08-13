@@ -196,11 +196,13 @@ def _migrate_dist_schema() -> None:
             PRIMARY KEY (user_id, announcement_id)
         )""",
         "ALTER TABLE dist_links ADD COLUMN first_used_at TEXT",
+        "ALTER TABLE dist_unlimited_sessions ADD COLUMN expires_at TEXT",
     ]
     stmts_pg = [
         "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS inviter_user_id INTEGER",
         "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS detailed_tutorial_access BOOLEAN NOT NULL DEFAULT FALSE",
         "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS first_used_at TIMESTAMP",
+        "ALTER TABLE dist_unlimited_sessions ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP",
         """CREATE TABLE IF NOT EXISTS dist_announcements (
             id SERIAL PRIMARY KEY,
             title TEXT NOT NULL,
@@ -726,12 +728,47 @@ def get_distributor(user_id: int) -> dict | None:
     return _map_distributor(_row_dict(row), profile)
 
 
+def has_quota_log_remark(user_id: int, *, change_type: str, remark: str) -> bool:
+    """按 remark 查是否已入账（用于支付履约幂等）。"""
+    init_dist_tables()
+    uid = int(user_id)
+    ct = (change_type or "").strip()
+    rm = (remark or "").strip()
+    if not ct or not rm:
+        return False
+    if _USE_PG:
+        conn = _pg_conn()
+        try:
+            c = _pg_cur(conn)
+            c.execute(
+                "SELECT 1 FROM dist_quota_logs WHERE user_id=%s AND change_type=%s AND remark=%s LIMIT 1",
+                (uid, ct, rm),
+            )
+            return c.fetchone() is not None
+        finally:
+            conn.close()
+    conn = _sqlite_conn()
+    c = conn.cursor()
+    c.execute(
+        "SELECT 1 FROM dist_quota_logs WHERE user_id=? AND change_type=? AND remark=? LIMIT 1",
+        (uid, ct, rm),
+    )
+    ok = c.fetchone() is not None
+    conn.close()
+    return ok
+
+
 def add_quota(user_id: int, amount: int, *, change_type: str, remark: str = "") -> dict:
     init_dist_tables()
     dist = ensure_distributor(user_id)
     amount = int(amount)
     if amount <= 0:
         raise ValueError("额度必须大于 0")
+    # 订单履约幂等：同 remark 不重复加额
+    if remark and change_type in ("purchase", "invite_rebate") and has_quota_log_remark(
+        user_id, change_type=change_type, remark=remark
+    ):
+        return ensure_distributor(user_id)
     before = dist["remaining_quota"]
     if _USE_PG:
         conn = _pg_conn()
@@ -920,8 +957,10 @@ def _set_link_status(token: str, status: str) -> None:
     conn.close()
 
 
-def _link_access_error(link: dict) -> str | None:
-    """返回不可用原因；可用则 None。含首次开测后过期、次数用尽、长期未激活。"""
+def _link_access_error(link: dict, *, for_complete: bool = False) -> str | None:
+    """返回不可用原因；可用则 None。含首次开测后过期、次数用尽、长期未激活。
+    for_complete=True 时不因 used_count>=max 拒绝（最后一次 start 后仍允许交卷存结果）。
+    """
     status = (link.get("status") or "unused").strip()
     if status == "revoked":
         return "链接无效或已撤销"
@@ -930,7 +969,7 @@ def _link_access_error(link: dict) -> str | None:
     policy = resolve_link_policy()
     used = int(link.get("used_count") or 0)
     max_uses = int(link.get("max_uses") or policy["max_uses"] or 3)
-    if used >= max_uses:
+    if not for_complete and used >= max_uses:
         if status != "used":
             _set_link_status(str(link.get("token") or ""), "used")
         return "链接使用次数已达上限"
@@ -939,7 +978,6 @@ def _link_access_error(link: dict) -> str | None:
     if expires_at and now > expires_at:
         _set_link_status(str(link.get("token") or ""), "expired")
         return "链接已过期（首次开测后的有效期已结束）"
-    # 长期未首次开测：清死链（默认 90 天）
     idle_days = int(policy.get("idle_days") or 0)
     first_used = _parse_ts(link.get("first_used_at"))
     created = _parse_ts(link.get("created_at"))
@@ -989,13 +1027,56 @@ def get_unlimited_session(token: str) -> dict | None:
         c.execute("SELECT * FROM dist_unlimited_sessions WHERE token=%s", (token,))
         row = c.fetchone()
         conn.close()
-        return _row_dict(row)
-    conn = _sqlite_conn()
-    c = conn.cursor()
-    c.execute("SELECT * FROM dist_unlimited_sessions WHERE token=?", (token,))
-    row = c.fetchone()
-    conn.close()
-    return _row_dict(row)
+        data = _row_dict(row)
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute("SELECT * FROM dist_unlimited_sessions WHERE token=?", (token,))
+        row = c.fetchone()
+        conn.close()
+        data = _row_dict(row)
+    if not data:
+        return None
+    exp = _parse_ts(data.get("expires_at"))
+    if exp and _now_dt() > exp:
+        return None
+    return data
+
+
+def create_unlimited_session(user_id: int, test_code: str, *, hours: int = 24) -> dict:
+    """创建无限测会话（调用方须已做超管鉴权）。默认 24h 过期。"""
+    init_dist_tables()
+    token = _gen_token()
+    test_code = (test_code or "").strip()
+    hours = max(1, min(int(hours or 24), 168))
+    exp_s = _fmt_ts(_now_dt() + timedelta(hours=hours))
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute(
+            """INSERT INTO dist_unlimited_sessions (token, user_id, test_code, expires_at)
+               VALUES (%s,%s,%s,%s)""",
+            (token, user_id, test_code, exp_s),
+        )
+        conn.commit()
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            """INSERT INTO dist_unlimited_sessions (token, user_id, test_code, created_at, expires_at)
+               VALUES (?,?,?,?,?)""",
+            (token, user_id, test_code, _now(), exp_s),
+        )
+        conn.commit()
+        conn.close()
+    return {
+        "token": token,
+        "test_code": test_code,
+        "user_id": user_id,
+        "expires_at": exp_s,
+        "expiresAt": exp_s,
+    }
 
 
 def validate_link_token(token: str) -> dict:
@@ -1026,10 +1107,10 @@ def validate_link_token(token: str) -> dict:
 
 
 def start_link_test(token: str) -> dict:
-    """首次开测时写入 first_used_at / expires_at；返回 SDK 兼容字段。"""
+    """首次开测写入有效期；每次 start 原子 +1 used_count（防跳过 complete 白嫖复测）。"""
     unlimited = get_unlimited_session(token)
     if unlimited:
-        return {"success": True, "unlimited": True}
+        return {"success": True, "unlimited": True, "expiresAt": unlimited.get("expires_at")}
     link = get_link_by_token(token)
     if not link:
         raise ValueError("链接无效")
@@ -1039,45 +1120,69 @@ def start_link_test(token: str) -> dict:
 
     policy = resolve_link_policy()
     first_used = _parse_ts(link.get("first_used_at"))
-    expires_at = _parse_ts(link.get("expires_at"))
-    activated = False
+    hours = int(policy.get("expire_hours") or 0)
+    now = _now_dt()
+    first_s = _fmt_ts(first_used) if first_used else _fmt_ts(now)
+    exp_s = _fmt_ts(link.get("expires_at"))
     if not first_used:
-        now = _now_dt()
-        first_used = now
-        hours = int(policy.get("expire_hours") or 0)
-        expires_at = (now + timedelta(hours=hours)) if hours > 0 else None
-        first_s = _fmt_ts(first_used)
-        exp_s = _fmt_ts(expires_at)
-        if _USE_PG:
-            conn = _pg_conn()
-            c = _pg_cur(conn)
-            c.execute(
-                """UPDATE dist_links
-                   SET first_used_at=%s, expires_at=%s
-                   WHERE token=%s AND first_used_at IS NULL""",
-                (first_s, exp_s, token),
-            )
-            conn.commit()
+        exp_s = _fmt_ts((now + timedelta(hours=hours)) if hours > 0 else None)
+
+    # 原子：写首次时间 + used_count+1，且 used_count < max_uses
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute(
+            """UPDATE dist_links
+               SET first_used_at = COALESCE(first_used_at, %s),
+                   expires_at = COALESCE(expires_at, %s),
+                   used_count = used_count + 1,
+                   status = CASE
+                     WHEN used_count + 1 >= max_uses THEN 'used'
+                     ELSE status
+                   END
+               WHERE token=%s
+                 AND status NOT IN ('revoked', 'expired')
+                 AND used_count < max_uses
+               RETURNING *""",
+            (first_s, exp_s, token),
+        )
+        row = c.fetchone()
+        conn.commit()
+        conn.close()
+        if not row:
+            raise ValueError("链接使用次数已达上限或已失效")
+        link = _map_link(_row_dict(row))
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            """UPDATE dist_links
+               SET first_used_at = COALESCE(NULLIF(first_used_at, ''), ?),
+                   expires_at = COALESCE(NULLIF(expires_at, ''), ?),
+                   used_count = used_count + 1,
+                   status = CASE
+                     WHEN used_count + 1 >= max_uses THEN 'used'
+                     ELSE status
+                   END
+               WHERE token=?
+                 AND status NOT IN ('revoked', 'expired')
+                 AND used_count < max_uses""",
+            (first_s, exp_s, token),
+        )
+        if c.rowcount <= 0:
             conn.close()
-        else:
-            conn = _sqlite_conn()
-            c = conn.cursor()
-            c.execute(
-                """UPDATE dist_links
-                   SET first_used_at=?, expires_at=?
-                   WHERE token=? AND (first_used_at IS NULL OR first_used_at='')""",
-                (first_s, exp_s, token),
-            )
-            conn.commit()
-            conn.close()
-        activated = True
-        link = get_link_by_token(token) or link
+            raise ValueError("链接使用次数已达上限或已失效")
+        conn.commit()
+        c.execute("SELECT * FROM dist_links WHERE token=?", (token,))
+        link = _map_link(_row_dict(c.fetchone()))
+        conn.close()
 
     return {
         "success": True,
         "unlimited": False,
-        "activated": activated,
-        "expiresAt": link.get("expires_at") or _fmt_ts(expires_at),
+        "activated": not bool(first_used),
+        "usedCount": int(link.get("used_count") or 0),
+        "expiresAt": link.get("expires_at"),
         "link": link,
     }
 
@@ -1107,44 +1212,19 @@ def complete_link_test(
             "unlimited": True,
             "resultSaved": result_id is not None,
             "resultId": result_id,
+            "reportUnlocked": True,
         }
     link = get_link_by_token(token)
     if not link:
         raise ValueError("链接无效")
-    # 未走过 start 时补写首次开测时钟，避免只调 complete 绕过有效期
-    if not _parse_ts(link.get("first_used_at")):
+    # 未 start 过则先 start（会消耗一次次数）
+    if int(link.get("used_count") or 0) <= 0 or not _parse_ts(link.get("first_used_at")):
         start_link_test(token)
         link = get_link_by_token(token) or link
-    err = _link_access_error(link)
+    err = _link_access_error(link, for_complete=True)
     if err:
         raise ValueError(err)
 
-    used = int(link.get("used_count") or 0) + 1
-    max_uses = int(link.get("max_uses") or resolve_link_policy()["max_uses"] or 3)
-    status = "used" if used >= max_uses else (link.get("status") or "unused")
-    if status == "unused" and _parse_ts(link.get("first_used_at")):
-        # 已开测但未用尽：保持 unused，便于列表区分「未开测」与「使用中」——源站亦如此
-        status = "unused"
-    if used >= max_uses:
-        status = "used"
-    if _USE_PG:
-        conn = _pg_conn()
-        c = _pg_cur(conn)
-        c.execute(
-            "UPDATE dist_links SET used_count=%s, status=%s WHERE token=%s",
-            (used, status, token),
-        )
-        conn.commit()
-        conn.close()
-    else:
-        conn = _sqlite_conn()
-        c = conn.cursor()
-        c.execute(
-            "UPDATE dist_links SET used_count=?, status=? WHERE token=?",
-            (used, status, token),
-        )
-        conn.commit()
-        conn.close()
     if result_data is not None:
         result_id = _insert_test_result(
             link_id=link.get("id"),
@@ -1158,10 +1238,11 @@ def complete_link_test(
     refreshed = get_link_by_token(token) or link
     return {
         "success": True,
-        "usedCount": used,
+        "usedCount": int(refreshed.get("used_count") or 0),
         "unlimited": False,
         "resultSaved": result_id is not None,
         "resultId": result_id,
+        "reportUnlocked": True,
         "expiresAt": refreshed.get("expires_at"),
         "link": refreshed,
     }
@@ -1274,31 +1355,6 @@ def revoke_link(user_id: int, link_id: int) -> dict:
     out = _map_link(_row_dict(c.fetchone()))
     conn.close()
     return out
-
-
-def create_unlimited_session(user_id: int, test_code: str) -> dict:
-    init_dist_tables()
-    token = _gen_token()
-    test_code = (test_code or "").strip()
-    if _USE_PG:
-        conn = _pg_conn()
-        c = _pg_cur(conn)
-        c.execute(
-            "INSERT INTO dist_unlimited_sessions (token, user_id, test_code) VALUES (%s,%s,%s)",
-            (token, user_id, test_code),
-        )
-        conn.commit()
-        conn.close()
-    else:
-        conn = _sqlite_conn()
-        c = conn.cursor()
-        c.execute(
-            "INSERT INTO dist_unlimited_sessions (token, user_id, test_code, created_at) VALUES (?,?,?,?)",
-            (token, user_id, test_code, _now()),
-        )
-        conn.commit()
-        conn.close()
-    return {"token": token, "test_code": test_code, "user_id": user_id}
 
 
 def admin_dist_stats() -> dict:
@@ -1487,13 +1543,45 @@ def admin_list_distributors(*, limit: int = 100) -> list[dict]:
 
 
 def _super_usernames() -> set[str]:
-    raw = (os.environ.get("PSY_DIST_SUPER_USERNAMES") or os.environ.get("XHS_DIST_SUPER_USERNAMES") or "admin").strip()
+    """超管用户名白名单。默认空（禁止自动提权）；须显式配置 PSY_DIST_SUPER_USERNAMES。"""
+    raw = (os.environ.get("PSY_DIST_SUPER_USERNAMES") or os.environ.get("XHS_DIST_SUPER_USERNAMES") or "").strip()
     return {x.strip().lower() for x in raw.split(",") if x.strip()}
 
 
+_RESERVED_USERNAMES = frozenset(
+    {
+        "admin",
+        "administrator",
+        "root",
+        "super",
+        "superadmin",
+        "super_admin",
+        "system",
+        "support",
+        "official",
+        "xinxiang",
+        "psy",
+    }
+)
+
+
+def is_reserved_username(username: str) -> bool:
+    name = (username or "").strip().lower()
+    if not name:
+        return True
+    if name in _RESERVED_USERNAMES:
+        return True
+    if name.startswith("admin") and len(name) <= 12:
+        return True
+    return False
+
+
 def ensure_super_role(user_id: int, username: str) -> None:
-    """环境变量白名单用户自动升为 super_admin。"""
-    if (username or "").strip().lower() not in _super_usernames():
+    """仅当用户名在显式环境白名单中时，升为 super_admin。默认白名单为空。"""
+    allowed = _super_usernames()
+    if not allowed:
+        return
+    if (username or "").strip().lower() not in allowed:
         return
     init_dist_tables()
     if _USE_PG:
@@ -1522,46 +1610,61 @@ def invite_info(user_id: int, site_origin: str = "") -> dict[str, Any]:
     dist = ensure_distributor(int(user_id))
     code = (dist.get("invite_code") or "").strip()
     origin = (site_origin or os.environ.get("PSY_DIST_PUBLIC_ORIGIN") or "https://psy.xhs365.cn").rstrip("/")
-    invited = 0
-    reward = 0
+    # 统计：绑定人数 + 首购返利（注册不再发 +5）
+    rebate_count = 0
+    rebate_sum = 0
+    bound = 0
     if _USE_PG:
         conn = _pg_conn()
         try:
             c = _pg_cur(conn)
             c.execute(
-                "SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=%s AND change_type=%s",
-                (int(user_id), "invite"),
+                "SELECT COUNT(*) AS c FROM dist_distributors WHERE inviter_user_id=%s",
+                (int(user_id),),
             )
-            invited = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+            bound = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
             c.execute(
-                "SELECT COALESCE(SUM(amount),0) AS s FROM dist_quota_logs WHERE user_id=%s AND change_type=%s",
-                (int(user_id), "invite"),
+                "SELECT COUNT(*) AS c, COALESCE(SUM(amount),0) AS s FROM dist_quota_logs WHERE user_id=%s AND change_type=%s",
+                (int(user_id), "invite_rebate"),
             )
-            reward = int((_row_dict(c.fetchone()) or {}).get("s") or 0)
+            row = _row_dict(c.fetchone()) or {}
+            rebate_count = int(row.get("c") or 0)
+            rebate_sum = int(row.get("s") or 0)
         finally:
             conn.close()
     else:
         conn = _sqlite_conn()
         c = conn.cursor()
         c.execute(
-            "SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=? AND change_type=?",
-            (int(user_id), "invite"),
+            "SELECT COUNT(*) AS c FROM dist_distributors WHERE inviter_user_id=?",
+            (int(user_id),),
         )
-        invited = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        bound = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
         c.execute(
-            "SELECT COALESCE(SUM(amount),0) AS s FROM dist_quota_logs WHERE user_id=? AND change_type=?",
-            (int(user_id), "invite"),
+            "SELECT COUNT(*) AS c, COALESCE(SUM(amount),0) AS s FROM dist_quota_logs WHERE user_id=? AND change_type=?",
+            (int(user_id), "invite_rebate"),
         )
-        reward = int((_row_dict(c.fetchone()) or {}).get("s") or 0)
+        row = _row_dict(c.fetchone()) or {}
+        rebate_count = int(row.get("c") or 0)
+        rebate_sum = int(row.get("s") or 0)
         conn.close()
+    percent = 20
+    try:
+        from cloud_deploy.cloud_api import dist_ops
+
+        percent = int(float(dist_ops.get_config().get("invite_rebate_percent") or 20))
+    except Exception:
+        percent = 20
     return {
         "invite_code": code,
         "invite_url": f"{origin}/register?invite={code}" if code else "",
-        "total_invites": invited,
-        "total_rewards": reward,
-        "invited_count": invited,
-        "reward_quota_total": reward,
-        "reward_per_invite": 5,
+        "total_invites": bound,
+        "total_rewards": rebate_sum,
+        "invited_count": bound,
+        "reward_quota_total": rebate_sum,
+        "reward_per_invite": 0,
+        "invite_rebate_percent": percent,
+        "rebate_count": rebate_count,
     }
 
 
@@ -1571,13 +1674,14 @@ def invite_records(user_id: int, *, page: int = 1, per_page: int = 20) -> dict[s
     offset = (page - 1) * per_page
     total = 0
     rows: list[dict[str, Any]] = []
+    change_type = "invite_rebate"
     if _USE_PG:
         conn = _pg_conn()
         try:
             c = _pg_cur(conn)
             c.execute(
                 "SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=%s AND change_type=%s",
-                (int(user_id), "invite"),
+                (int(user_id), change_type),
             )
             total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
             c.execute(
@@ -1585,7 +1689,7 @@ def invite_records(user_id: int, *, page: int = 1, per_page: int = 20) -> dict[s
                    FROM dist_quota_logs
                    WHERE user_id=%s AND change_type=%s
                    ORDER BY id DESC LIMIT %s OFFSET %s""",
-                (int(user_id), "invite", per_page, offset),
+                (int(user_id), change_type, per_page, offset),
             )
             rows = [_row_dict(r) or {} for r in c.fetchall()]
         finally:
@@ -1595,7 +1699,7 @@ def invite_records(user_id: int, *, page: int = 1, per_page: int = 20) -> dict[s
         c = conn.cursor()
         c.execute(
             "SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=? AND change_type=?",
-            (int(user_id), "invite"),
+            (int(user_id), change_type),
         )
         total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
         c.execute(
@@ -1603,18 +1707,17 @@ def invite_records(user_id: int, *, page: int = 1, per_page: int = 20) -> dict[s
                FROM dist_quota_logs
                WHERE user_id=? AND change_type=?
                ORDER BY id DESC LIMIT ? OFFSET ?""",
-            (int(user_id), "invite", per_page, offset),
+            (int(user_id), change_type, per_page, offset),
         )
         rows = [_row_dict(r) or {} for r in c.fetchall()]
         conn.close()
     records = []
     for r in rows:
         remark = str(r.get("remark") or "")
-        invited_name = remark.replace("邀请 ", "").strip() if remark.startswith("邀请 ") else remark
         records.append(
             {
                 "id": r.get("id"),
-                "invitee_username": invited_name,
+                "invitee_username": remark,
                 "invitee_email": "",
                 "redeem_quota": None,
                 "reward_quota": int(r.get("amount") or 0),

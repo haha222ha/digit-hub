@@ -2082,16 +2082,27 @@ def mark_payment_order_paid_force(
         conn.close()
 
 
-def mark_payment_order_fulfilled(order_no: str, user_id: int) -> None:
+def mark_payment_order_fulfilled(order_no: str, user_id: int) -> bool:
+    """幂等认领履约：仅当尚未 fulfilled 时写入。返回是否本次/已由同用户履约成功。"""
     conn = _conn()
     try:
-        with conn.cursor() as c:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as c:
             c.execute("SET search_path TO xhs_monitor, public")
             c.execute(
-                "UPDATE payment_orders SET fulfilled_user_id=%s WHERE order_no=%s",
+                "UPDATE payment_orders SET fulfilled_user_id=%s WHERE order_no=%s AND fulfilled_user_id IS NULL",
                 (user_id, order_no),
             )
+            ok = c.rowcount > 0
+            if not ok:
+                c.execute(
+                    "SELECT fulfilled_user_id FROM payment_orders WHERE order_no=%s",
+                    (order_no,),
+                )
+                row = c.fetchone()
+                if row and row.get("fulfilled_user_id") is not None and int(row["fulfilled_user_id"]) == int(user_id):
+                    ok = True
         conn.commit()
+        return ok
     finally:
         conn.close()
 
@@ -2432,6 +2443,15 @@ def register_user_account(username: str, password: str, email: str = "") -> dict
         raise ValueError("用户名至少 3 个字符")
     if len(password or "") < 6:
         raise ValueError("密码至少 6 位")
+    try:
+        from cloud_deploy.cloud_api import dist_db
+
+        if dist_db.is_reserved_username(username):
+            raise ValueError("该用户名为系统保留，请更换")
+    except ValueError:
+        raise
+    except Exception:
+        pass
     conn = _conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as c:

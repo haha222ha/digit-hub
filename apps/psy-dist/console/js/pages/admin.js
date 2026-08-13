@@ -823,7 +823,7 @@ export async function renderInvite(root) {
         el("div", { className: "row-actions" }, [copyBtn]),
         el("p", {
           className: "muted",
-          text: "也可让好友在注册页填写邀请码。注册奖励即时到账；首购返利在支付成功后自动发放。",
+          text: "也可让好友在注册页填写邀请码。注册仅绑定邀请关系；好友首次购额成功后，按配置比例自动发放首购返利。",
         }),
       ]),
       el("div", { className: "panel" }, [el("h3", { text: "邀请记录" }), ...rows]),

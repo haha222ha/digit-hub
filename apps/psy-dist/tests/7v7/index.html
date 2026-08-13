@@ -609,17 +609,6 @@ async function persistAndComplete(payload) {
         token = new URLSearchParams(window.location.search).get('token') || ('local_' + Date.now());
     }
 
-    try {
-        localStorage.setItem(getStorageKey(token), JSON.stringify({
-            token: token,
-            result: payload,
-            timestamp: new Date().toISOString()
-        }));
-        localStorage.setItem(RESULT_KEY, JSON.stringify(payload));
-    } catch (error) {
-        console.error('保存到localStorage失败:', error);
-    }
-
     if (window.linkValidator && !window.__7v7_test_completed) {
         try {
             window.__7v7_test_completed = true;
@@ -627,13 +616,35 @@ async function persistAndComplete(payload) {
             console.log('测试完成记录成功', completeResult);
             if (completeResult && completeResult.success !== false) {
                 window.linkValidator.valid = true;
+                try {
+                    localStorage.setItem(getStorageKey(token), JSON.stringify({
+                        token: token,
+                        result: payload,
+                        timestamp: new Date().toISOString()
+                    }));
+                    localStorage.setItem(RESULT_KEY, JSON.stringify(payload));
+                } catch (error) {
+                    console.error('保存到localStorage失败:', error);
+                }
+            } else {
+                window.__7v7_test_completed = false;
             }
         } catch (error) {
             console.error('记录测试完成失败:', error);
-            if (window.linkValidator) {
-                window.linkValidator.valid = true;
-            }
             window.__7v7_test_completed = false;
+            // 失败时不落本地、不强制 valid，避免绕过服务端解锁
+        }
+    } else if (!window.linkValidator) {
+        // 无校验器（本地预览）：仍可落本地
+        try {
+            localStorage.setItem(getStorageKey(token), JSON.stringify({
+                token: token,
+                result: payload,
+                timestamp: new Date().toISOString()
+            }));
+            localStorage.setItem(RESULT_KEY, JSON.stringify(payload));
+        } catch (error) {
+            console.error('保存到localStorage失败:', error);
         }
     }
 }

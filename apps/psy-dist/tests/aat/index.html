@@ -2355,12 +2355,8 @@
                                 }
                             } catch (error) {
                                 console.error('记录测试完成失败:', error);
-                                // 测试完成记录失败不影响显示结果，只记录错误
-                                // 但确保valid状态不被改变，避免触发不必要的弹窗
-                                if (window.linkValidator) {
-                                    window.linkValidator.valid = true;
-                                }
                                 window.__aat_test_completed = false; // 失败时重置标记，允许重试
+                                // 失败时不强制 valid=true，避免绕过服务端解锁
                             }
                         }
                         

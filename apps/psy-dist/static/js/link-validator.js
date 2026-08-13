@@ -1357,14 +1357,11 @@
         // 标准化视角类型（partner -> other）
         const normalizedPerspective = normalizePerspective(perspective);
 
-        // 先保存测试结果到localStorage（无论是否成功调用API都要保存）
-        // 保存时使用原始perspective（保持前端友好）
-        if (resultData) {
-          this.saveResultToLocalStorage(resultData, perspective);
-        }
-
-        // 无限测试模式不需要调用 complete-test 接口（不消耗额度）
+        // 无限测试模式：不消耗额度，成功后才落本地结果（防跳过 complete 刷报告）
         if (this.unlimited) {
+          if (resultData) {
+            this.saveResultToLocalStorage(resultData, perspective);
+          }
           console.log('无限测试模式：跳过测试完成记录（不消耗额度）');
           return {
             success: true,
@@ -1373,8 +1370,12 @@
           };
         }
 
-        // 普通模式：调用测试完成接口（传递标准化后的perspective）
+        // 普通模式：先完成服务端记次/解锁，成功后再写 localStorage
         const result = await completeTest(this.token, normalizedPerspective, resultData);
+
+        if (resultData) {
+          this.saveResultToLocalStorage(resultData, perspective);
+        }
         
         // 更新链接信息（如果返回了）
         if (result.link) {
@@ -1400,7 +1401,7 @@
 
         return result;
       } catch (error) {
-        // 测试完成失败，显示错误提示
+        // 测试完成失败，显示错误提示；不落本地结果，避免未解锁仍看报告
         const errorMessage = error.message || '测试完成失败，请稍后再试';
         console.error('测试完成失败:', errorMessage);
         
@@ -1410,8 +1411,6 @@
           // window.location.href = '/';
         });
         
-        // 注意：即使API调用失败，结果也已经保存到localStorage
-        // 所以仍然可以显示结果页面
         throw error;
       }
     }

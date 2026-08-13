@@ -475,6 +475,37 @@ def handle_hwxun_notify(params: dict) -> str:
     if not row:
         return "fail"
     if row["status"] == "paid":
+        # 已支付但未履约：允许网关重试补发（尤其是额度订单）
+        if row.get("fulfilled_user_id"):
+            return "success"
+        from cloud_deploy.cloud_api.payment_plans import is_psy_dist_plan
+
+        if is_psy_dist_plan(row["plan_code"]) and row.get("user_id"):
+            try:
+                from cloud_deploy.cloud_api import dist_service
+
+                dist_service.fulfill_quota_from_payment(int(row["user_id"]), row["plan_code"], order_no)
+                if not db.mark_payment_order_fulfilled(order_no, int(row["user_id"])):
+                    # 并发下可能已被同用户标记
+                    refreshed = db.get_payment_order(order_no) or {}
+                    if refreshed.get("fulfilled_user_id"):
+                        return "success"
+                    return "fail"
+                return "success"
+            except Exception as e:
+                logger.exception(
+                    "psy_dist quota fulfill retry failed order_no=%s user_id=%s",
+                    order_no,
+                    row.get("user_id"),
+                )
+                try:
+                    db.mark_payment_order_fulfill_error(
+                        order_no,
+                        error=f"psy_dist_retry_failed: {type(e).__name__}: {e}",
+                    )
+                except Exception:
+                    pass
+                return "fail"
         return "success"
     if f"{float(row['amount']):.2f}" != f"{float(money):.2f}":
         return "fail"
@@ -499,26 +530,32 @@ def handle_hwxun_notify(params: dict) -> str:
         if not ok:
             return "fail"
         user_id = row.get("user_id")
-        if user_id:
-            try:
-                from cloud_deploy.cloud_api import dist_service
+        if not user_id:
+            return "fail"
+        try:
+            from cloud_deploy.cloud_api import dist_service
 
-                dist_service.fulfill_quota_from_payment(int(user_id), row["plan_code"], order_no)
-                db.mark_payment_order_fulfilled(order_no, int(user_id))
-            except Exception as e:
-                logger.exception(
-                    "psy_dist quota fulfill failed order_no=%s user_id=%s",
+            dist_service.fulfill_quota_from_payment(int(user_id), row["plan_code"], order_no)
+            if not db.mark_payment_order_fulfilled(order_no, int(user_id)):
+                refreshed = db.get_payment_order(order_no) or {}
+                if refreshed.get("fulfilled_user_id"):
+                    return "success"
+                return "fail"
+            return "success"
+        except Exception as e:
+            logger.exception(
+                "psy_dist quota fulfill failed order_no=%s user_id=%s",
+                order_no,
+                user_id,
+            )
+            try:
+                db.mark_payment_order_fulfill_error(
                     order_no,
-                    user_id,
+                    error=f"psy_dist_failed: {type(e).__name__}: {e}",
                 )
-                try:
-                    db.mark_payment_order_fulfill_error(
-                        order_no,
-                        error=f"psy_dist_failed: {type(e).__name__}: {e}",
-                    )
-                except Exception:
-                    pass
-        return "success"
+            except Exception:
+                pass
+            return "fail"
 
     note = _payment_fulfillment_note(order_no, ch, row["plan_code"])
     codes = db.generate_auth_codes(
@@ -567,6 +604,7 @@ def handle_hwxun_notify(params: dict) -> str:
                     logger.exception(
                         "mark_payment_order_fulfill_error failed order_no=%s", order_no
                     )
+                return "fail"
         else:
             try:
                 db.fulfill_addon_order(int(user_id), auth_code, row["plan_code"])
@@ -587,4 +625,5 @@ def handle_hwxun_notify(params: dict) -> str:
                     logger.exception(
                         "mark_payment_order_fulfill_error failed order_no=%s", order_no
                     )
+                return "fail"
     return "success"
