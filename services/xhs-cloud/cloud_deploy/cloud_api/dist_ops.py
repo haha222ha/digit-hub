@@ -99,10 +99,7 @@ _DEFAULT_CONFIG = {
     "xianyu_shop_link": "",
     "xianyu_shop_qrcode": "",
     "link_max_uses": "3",
-    "link_expire_hours": "72",
-    "expire_type": "custom_days",
-    "expire_days": "3",
-    "link_idle_days": "90",
+    "link_expire_hours": "24",
     "wecom_webhook": "",
     "site_name": "心象测",
     "invite_rebate_percent": "20",
@@ -964,6 +961,53 @@ def payment_stats() -> dict:
         "month_revenue": _sum(month_rows)["revenue"],
         "today_paid_order_count": _sum(today_rows)["paid_order_count"],
         "today_unpaid_order_count": _sum(today_rows)["unpaid_order_count"],
+        "fulfillment_alerts": fulfillment_alerts(limit=30),
+    }
+
+
+def _parse_order_meta(raw) -> dict:
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, str) and raw.strip():
+        try:
+            import json
+
+            data = json.loads(raw)
+            return data if isinstance(data, dict) else {}
+        except Exception:
+            return {}
+    return {}
+
+
+def fulfillment_alerts(*, limit: int = 30) -> dict:
+    """已支付但未履约 / 履约失败（needs_manual_fulfill）告警列表。"""
+    from cloud_deploy.cloud_api import database as db
+
+    orders = db.list_payment_orders_by_plan_prefix("psy_quota", limit=500)
+    unfulfilled: list[dict] = []
+    errors: list[dict] = []
+    for o in orders:
+        if (o.get("status") or "") != "paid":
+            continue
+        meta = _parse_order_meta(o.get("meta_json"))
+        item = {
+            "order_no": o.get("order_no"),
+            "user_id": o.get("user_id"),
+            "plan_code": o.get("plan_code"),
+            "amount": o.get("amount"),
+            "paid_at": o.get("paid_at") or o.get("created_at"),
+            "fulfill_error": (meta.get("fulfill_error") or "")[:200],
+        }
+        if meta.get("needs_manual_fulfill"):
+            errors.append(item)
+        elif not o.get("fulfilled_user_id"):
+            unfulfilled.append(item)
+    lim = max(1, min(int(limit or 30), 100))
+    return {
+        "unfulfilled_count": len(unfulfilled),
+        "fulfill_error_count": len(errors),
+        "unfulfilled": unfulfilled[:lim],
+        "fulfill_errors": errors[:lim],
     }
 
 

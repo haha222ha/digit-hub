@@ -37,11 +37,16 @@ function isSuper() {
   return (getUser() || {}).role === "super_admin";
 }
 
+function merchantNav() {
+  return NAV.filter((item) => item.path !== "/admin/unlimited-test" || isSuper());
+}
+
 function shell(activePath, bodyChildren) {
   const user = getUser() || {};
   const superUser = isSuper();
+  const navItems = merchantNav();
   const topItems = [
-    ...NAV,
+    ...navItems,
     ...(superUser ? [{ path: "/super-admin/dashboard", label: "超管" }] : []),
   ];
   const nav = el(
@@ -78,7 +83,7 @@ function shell(activePath, bodyChildren) {
       ]
     : [
         el("p", { className: "side-label", text: "常用" }),
-        ...NAV.map((item) =>
+        ...navItems.map((item) =>
           el("a", {
             href: item.path,
             className: `side-link${activePath.startsWith(item.path) ? " active" : ""}`,
@@ -141,7 +146,7 @@ async function loadQuota() {
 }
 
 function quickActions() {
-  return el("div", { className: "quick-grid" }, [
+  const cards = [
     el("a", {
       className: "quick-card",
       href: "/admin/generate-link",
@@ -156,16 +161,22 @@ function quickActions() {
       onClick: (e) => linkClick(e, "/admin/link-management"),
     }, [
       el("strong", { text: "链接管理" }),
-      el("span", { text: "复制 / 撤销 / 查看状态" }),
+      el("span", { text: "已用/剩余 · 有效期" }),
     ]),
-    el("a", {
-      className: "quick-card",
-      href: "/admin/unlimited-test",
-      onClick: (e) => linkClick(e, "/admin/unlimited-test"),
-    }, [
-      el("strong", { text: "免费测试" }),
-      el("span", { text: "不耗额度，体验全流程" }),
-    ]),
+  ];
+  if (isSuper()) {
+    cards.push(
+      el("a", {
+        className: "quick-card",
+        href: "/admin/unlimited-test",
+        onClick: (e) => linkClick(e, "/admin/unlimited-test"),
+      }, [
+        el("strong", { text: "免费测试" }),
+        el("span", { text: "超管专用，不耗额度" }),
+      ])
+    );
+  }
+  cards.push(
     el("a", {
       className: "quick-card",
       href: "/admin/purchase-quota",
@@ -180,9 +191,10 @@ function quickActions() {
       onClick: (e) => linkClick(e, "/admin/invite-promotion"),
     }, [
       el("strong", { text: "邀请推广" }),
-      el("span", { text: "邀请码链接，双方得额度" }),
-    ]),
-  ]);
+      el("span", { text: "好友首购后按比例返利" }),
+    ])
+  );
+  return el("div", { className: "quick-grid" }, cards);
 }
 
 export async function renderDashboard(root) {
@@ -236,11 +248,15 @@ export async function renderDashboard(root) {
       el("div", { className: "panel tip-panel" }, [
         el("h3", { text: "使用提示" }),
         el("ul", { className: "tip-list" }, [
-          el("li", { text: "生成链接会消耗额度；免费测试不消耗额度。" }),
-          el("li", { text: "链接规则：客户首次开测后 3 天内可复测 3 次（以系统配置为准）。" }),
+          el("li", {
+            text: isSuper()
+              ? "生成链接会消耗额度；超管「免费测试」不消耗额度。"
+              : "生成链接会消耗额度；免费测试仅超管可用。",
+          }),
+          el("li", { text: "链接规则：客户首次开测后计时，默认 3 天内可复测 3 次（以系统配置为准）。开测即扣 1 次。" }),
           el("li", { text: "用户打开分销链接测完即可看完整报告，不分墙。" }),
-          el("li", { text: "忘记密码：登录页「忘记密码」→ 授权码验证后改密（无需邮箱）。" }),
-          el("li", { text: "兑换额度码后，该码也可用于授权码登录找回。" }),
+          el("li", { text: "分销额度兑换码只能在「兑换额度」使用，不能登录或找回密码。" }),
+          el("li", { text: "邀请好友：注册只绑定关系；好友首次购额成功后按比例返利。" }),
         ]),
       ]),
     ])
@@ -351,12 +367,32 @@ export async function renderGenerate(root) {
   );
 }
 
+function formatLinkCountdown(link) {
+  const first = link.first_used_at || link.firstUsedAt || "";
+  const exp = link.expires_at || link.expiresAt || "";
+  if (!first) return { text: "尚未开测", hint: "客户首次点开始后计时", tone: "muted" };
+  if (!exp) return { text: "已开测", hint: first, tone: "" };
+  const raw = String(exp).trim().replace(" ", "T");
+  const t = Date.parse(raw);
+  if (!Number.isFinite(t)) return { text: String(exp), hint: "到期时间", tone: "" };
+  const ms = t - Date.now();
+  if (ms <= 0) return { text: "已到期", hint: exp, tone: "warn" };
+  const totalH = Math.floor(ms / 3600000);
+  const d = Math.floor(totalH / 24);
+  const h = totalH % 24;
+  const text = d >= 1 ? `剩余 ${d} 天 ${h} 小时` : `剩余 ${Math.max(1, totalH)} 小时`;
+  return { text, hint: `到期 ${exp}`, tone: d < 1 ? "warn" : "ok" };
+}
+
 export async function renderLinks(root) {
   const host = el("div", { className: "panel" });
   root.append(
     shell("/admin/link-management", [
       el("h1", { className: "page-title", text: "链接管理" }),
-      el("p", { className: "page-lead", text: "查看、复制或撤销已生成的测试链接。" }),
+      el("p", {
+        className: "page-lead",
+        text: "查看已用/剩余次数与开测后倒计时。开测即扣 1 次；默认 3 天内最多 3 次。",
+      }),
       host,
     ])
   );
@@ -370,10 +406,17 @@ export async function renderLinks(root) {
       return;
     }
     const unused = links.filter((l) => (l.status || "unused") === "unused").length;
+    const active = links.filter((l) => {
+      const used = Number(l.used_count ?? l.usedCount ?? 0);
+      const maxUses = Number(l.max_uses ?? l.maxUses ?? 3);
+      const st = l.status || "unused";
+      return st !== "revoked" && st !== "expired" && used < maxUses;
+    }).length;
     host.append(
       el("div", { className: "mini-stats" }, [
         el("span", { text: `共 ${links.length} 条` }),
-        el("span", { text: `未使用 ${unused}` }),
+        el("span", { text: `未开测 ${unused}` }),
+        el("span", { text: `仍可用 ${active}` }),
       ])
     );
     const table = el("table", { className: "data" });
@@ -382,7 +425,8 @@ export async function renderLinks(root) {
         el("tr", {}, [
           el("th", { text: "测题" }),
           el("th", { text: "链接" }),
-          el("th", { text: "次数" }),
+          el("th", { text: "已用 / 剩余" }),
+          el("th", { text: "有效期" }),
           el("th", { text: "状态" }),
           el("th", { text: "操作" }),
         ]),
@@ -394,11 +438,16 @@ export async function renderLinks(root) {
       const code = link.test_code || "";
       const url = `${location.origin}/test/${code}/${token}`;
       const status = link.status || "unused";
-      const used = link.used_count ?? link.usedCount ?? 0;
-      const maxUses = link.max_uses ?? link.maxUses ?? 3;
+      const used = Number(link.used_count ?? link.usedCount ?? 0);
+      const maxUses = Number(link.max_uses ?? link.maxUses ?? 3);
+      const remain = Math.max(0, maxUses - used);
       const statusLabel =
         { unused: "未使用", used: "已使用", expired: "已过期", revoked: "已撤销" }[status] || status;
       const tagClass = status === "unused" ? "tag-ok" : status === "revoked" || status === "expired" ? "tag-warn" : "tag";
+      const usesClass = remain <= 0 ? "tag tag-warn" : remain === 1 ? "tag tag-warn" : "tag tag-ok";
+      const cd = formatLinkCountdown(link);
+      const cdClass =
+        cd.tone === "warn" ? "tag tag-warn" : cd.tone === "ok" ? "tag tag-ok" : "tag";
       const copyBtn = el("button", { className: "btn btn-ghost", type: "button", text: "复制" });
       bindCopyButton(copyBtn, url);
       const actions = el("div", { className: "row-actions" }, [copyBtn]);
@@ -424,7 +473,18 @@ export async function renderLinks(root) {
         el("tr", {}, [
           el("td", { text: code }),
           el("td", {}, [el("div", { className: "url-cell", text: url })]),
-          el("td", { text: `${used}/${maxUses}` }),
+          el("td", {}, [
+            el("div", { className: "link-metric" }, [
+              el("span", { className: usesClass, text: `${used} / 剩 ${remain}` }),
+              el("span", { className: "muted small", text: `上限 ${maxUses}` }),
+            ]),
+          ]),
+          el("td", {}, [
+            el("div", { className: "link-metric" }, [
+              el("span", { className: cdClass, text: cd.text }),
+              el("span", { className: "muted small", text: cd.hint }),
+            ]),
+          ]),
           el("td", {}, [el("span", { className: `tag ${tagClass}`, text: statusLabel })]),
           el("td", {}, [actions]),
         ])
@@ -439,6 +499,15 @@ export async function renderLinks(root) {
 }
 
 export async function renderUnlimited(root) {
+  if (!isSuper()) {
+    root.append(
+      shell("/admin/dashboard", [
+        el("h1", { className: "page-title", text: "免费测试" }),
+        flash("error", "免费测试仅超级管理员可用。普通商家请购买或兑换额度后生成链接。"),
+      ])
+    );
+    return;
+  }
   const errHost = el("div");
   const select = el("select", { required: "true" });
   select.append(el("option", { value: "", text: "请选择测评项目" }));

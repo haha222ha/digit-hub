@@ -355,6 +355,37 @@ textarea {
   font-size: 0.82rem;
 }
 
+.link-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.muted.small,
+.small.muted {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.alert-panel {
+  border: 1px solid #f0c9a0;
+  background: #fff8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.alert-panel h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.alert-panel.ok {
+  border-color: #b7e0d0;
+  background: #f3fbf7;
+}
+
 .pkg-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

@@ -8,7 +8,7 @@ function authShell(title, sub, formNode, footerLinks) {
       el("img", { className: "mark", src: "/images/logo.svg?v=5", alt: "心象测" }),
       el("h1", { text: "心象测" }),
       el("p", {
-        text: "商家工作台：生成测试链接、管理额度。忘记密码可用授权码找回，无需邮箱。",
+        text: "商家工作台：生成测试链接、管理额度。额度兑换码仅用于充值，不能当登录码。",
       }),
     ]),
     el("section", { className: "auth-panel" }, [
@@ -76,13 +76,17 @@ export function renderLogin(root) {
         }
       });
     } else {
-      const code = el("input", { required: "true", autocomplete: "off", placeholder: "已绑定账号的授权码/额度码" });
+      const code = el("input", {
+        required: "true",
+        autocomplete: "off",
+        placeholder: "会员授权码（不是分销额度兑换码）",
+      });
       const btn = el("button", { className: "btn btn-primary", type: "submit", text: "授权码登录" });
       box.append(
         errHost,
         el("p", {
           className: "muted",
-          text: "使用你兑换过的额度授权码登录。登录后请到「账户」修改密码。",
+          text: "仅支持已绑定账号的会员授权码。分销「额度兑换码」不能登录，请登录后到「兑换额度」。",
         }),
         el("div", { className: "field" }, [el("label", { text: "授权码" }), code]),
         btn
@@ -108,7 +112,7 @@ export function renderLogin(root) {
   paint();
   const wrap = el("div", {}, [modeHost, formHost]);
   root.append(
-    authShell("登录工作台", "支持账号密码，或授权码登录后改密。", wrap, [
+    authShell("登录工作台", "优先用账号密码。分销额度兑换码请到登录后「兑换额度」使用。", wrap, [
       el("a", { href: "/register", text: "注册账号", onClick: (e) => linkClick(e, "/register") }),
       el("a", {
         href: "/reset-password",
@@ -138,10 +142,13 @@ export function renderRegister(root) {
 
   box.append(
     errHost,
-    el("p", { className: "muted", text: "无需绑定邮箱。忘记密码时，用已兑换的授权码即可找回并改密。" }),
+    el("p", {
+      className: "muted",
+      text: "无需绑定邮箱。请牢记密码；分销额度兑换码只能充值，不能用来登录或找回。",
+    }),
     el("div", { className: "field" }, [el("label", { text: "用户名（3–50 字）" }), username]),
     el("div", { className: "field" }, [el("label", { text: "密码（至少 6 位）" }), password]),
-    el("div", { className: "field" }, [el("label", { text: "邀请码（可选）" }), invite]),
+    el("div", { className: "field" }, [el("label", { text: "邀请码（可选，仅绑定关系）" }), invite]),
     btn
   );
 
@@ -166,7 +173,7 @@ export function renderRegister(root) {
   });
 
   root.append(
-    authShell("注册商家账号", "注册即送起始额度，立刻可生成测试链接。", box, [
+    authShell("注册商家账号", "注册即送少量试用额度；邀请奖励在好友首次购额后按比例返还。", box, [
       el("a", { href: "/login", text: "已有账号？登录", onClick: (e) => linkClick(e, "/login") }),
       el("a", { href: "/", text: "返回首页" }),
     ])
@@ -185,9 +192,9 @@ export function renderReset(root) {
     errHost,
     el("p", {
       className: "muted",
-      text: "输入你曾兑换过的授权码/额度码，验证通过后直接设置新密码（无需邮箱）。",
+      text: "请输入已绑定账号的会员授权码。分销额度兑换码无法找回密码，请到控制台「兑换额度」。",
     }),
-    el("div", { className: "field" }, [el("label", { text: "授权码" }), code]),
+    el("div", { className: "field" }, [el("label", { text: "会员授权码" }), code]),
     el("div", { className: "field" }, [el("label", { text: "新密码" }), pw]),
     el("div", { className: "field" }, [el("label", { text: "确认新密码" }), pw2]),
     btn
@@ -214,7 +221,7 @@ export function renderReset(root) {
   });
 
   root.append(
-    authShell("授权码找回密码", "与心象测统一授权码体系一致：码即身份凭证。", box, [
+    authShell("授权码找回密码", "仅会员授权码可用；额度兑换码请登录后兑换。", box, [
       el("a", { href: "/login", text: "返回登录", onClick: (e) => linkClick(e, "/login") }),
       el("a", { href: "/", text: "首页" }),
     ])
