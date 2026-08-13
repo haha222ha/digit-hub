@@ -127,6 +127,10 @@ export const api = {
     const q = new URLSearchParams();
     if (params.status) q.set("status", params.status);
     if (params.testCode || params.test_code) q.set("testCode", params.testCode || params.test_code);
+    if (params.startDate || params.start_date) q.set("startDate", params.startDate || params.start_date);
+    if (params.endDate || params.end_date) q.set("endDate", params.endDate || params.end_date);
+    if (params.sortBy || params.sort_by) q.set("sortBy", params.sortBy || params.sort_by);
+    if (params.sortOrder || params.sort_order) q.set("sortOrder", params.sortOrder || params.sort_order);
     if (params.page) q.set("page", String(params.page));
     if (params.perPage || params.per_page) q.set("perPage", String(params.perPage || params.per_page));
     const s = q.toString();
@@ -158,6 +162,21 @@ export const api = {
     if (params.perPage || params.per_page) q.set("perPage", String(params.perPage || params.per_page));
     const s = q.toString();
     return request(`/api/quota/redeem-history${s ? `?${s}` : ""}`, { auth: true });
+  },
+  quotaLogs: (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.page) q.set("page", String(params.page));
+    if (params.perPage || params.per_page) q.set("perPage", String(params.perPage || params.per_page));
+    const s = q.toString();
+    return request(`/api/admin/quota-logs/list${s ? `?${s}` : ""}`, { auth: true });
+  },
+  testResults: (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.testCode || params.test_code) q.set("testCode", params.testCode || params.test_code);
+    if (params.page) q.set("page", String(params.page));
+    if (params.perPage || params.per_page) q.set("perPage", String(params.perPage || params.per_page));
+    const s = q.toString();
+    return request(`/api/admin/test-results/list${s ? `?${s}` : ""}`, { auth: true });
   },
   packagesList: () => request("/api/admin/packages/list"),
   purchaseMethods: () => request("/api/admin/payment/purchase-methods"),
@@ -242,6 +261,26 @@ export const api = {
     }),
   saOrders: (limit = 100) => request(`/api/super-admin/orders?limit=${limit}`, { auth: true }),
   saQuotaLogs: (limit = 100) => request(`/api/super-admin/quota-logs/list?limit=${limit}`, { auth: true }),
+  saTestResults: (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.userId || params.user_id) q.set("userId", String(params.userId || params.user_id));
+    if (params.testCode || params.test_code) q.set("testCode", params.testCode || params.test_code);
+    if (params.page) q.set("page", String(params.page));
+    if (params.perPage || params.per_page) q.set("perPage", String(params.perPage || params.per_page));
+    const s = q.toString();
+    return request(`/api/super-admin/test-results/list${s ? `?${s}` : ""}`, { auth: true });
+  },
+  saToggleTutorial: (userId, enabled) =>
+    request("/api/super-admin/users/toggle-detailed-tutorial-access", {
+      method: "POST",
+      auth: true,
+      body: { userId, enabled },
+    }),
+  saPackageDocs: () => request("/api/super-admin/package-documents/list", { auth: true }),
+  saPackageDocSave: (payload) =>
+    request("/api/super-admin/package-documents/save", { method: "POST", auth: true, body: payload }),
+  saPackageDocDelete: (id) =>
+    request(`/api/super-admin/package-documents/delete/${id}`, { method: "POST", auth: true }),
   saInviteStats: () => request("/api/super-admin/invite-stats/list", { auth: true }),
   saTests: () => request("/api/super-admin/tests/list", { auth: true }),
   saTestSave: (payload) =>
@@ -287,5 +326,6 @@ export const api = {
     request("/api/announcements/mark-all-read", { method: "POST", auth: true, body: {} }),
   customerService: () => request("/api/config/customer-service", { auth: true }),
   tutorialsList: () => request("/api/tutorials/list", { auth: true }),
+  tutorialsGuide: () => request("/api/tutorials/guide", { auth: true }),
   helpDocsList: () => request("/api/help-documents/list", { auth: true }),
 };

@@ -6,6 +6,8 @@ const NAV = [
   { path: "/admin/dashboard", label: "工作台" },
   { path: "/admin/generate-link", label: "生成链接" },
   { path: "/admin/link-management", label: "链接管理" },
+  { path: "/admin/test-results", label: "测题结果" },
+  { path: "/admin/quota-logs", label: "额度日志" },
   { path: "/admin/unlimited-test", label: "免费测试" },
   { path: "/admin/purchase-quota", label: "购买额度" },
   { path: "/admin/redeem-quota", label: "兑换额度" },
@@ -25,9 +27,11 @@ const SUPER_NAV = [
   { path: "/super-admin/redeem-codes", label: "兑换码" },
   { path: "/super-admin/invite-stats", label: "邀请统计" },
   { path: "/super-admin/tests", label: "测题" },
+  { path: "/super-admin/test-results", label: "测题结果" },
   { path: "/super-admin/announcements", label: "公告" },
   { path: "/super-admin/tutorials", label: "教程" },
   { path: "/super-admin/help-docs", label: "帮助文档" },
+  { path: "/super-admin/package-documents", label: "套餐文档" },
   { path: "/super-admin/config", label: "系统配置" },
   { path: "/super-admin/quota-logs", label: "额度日志" },
   { path: "/super-admin/operation-logs", label: "操作日志" },
@@ -535,11 +539,24 @@ export async function renderLinks(root) {
   for (const n of [20, 50, 100]) {
     perPageSel.append(el("option", { value: String(n), text: `${n}/页` }));
   }
+  const startDate = el("input", { type: "date" });
+  const endDate = el("input", { type: "date" });
+  const sortSel = el("select");
+  sortSel.append(
+    el("option", { value: "createdAt:DESC", text: "创建时间 ↓" }),
+    el("option", { value: "createdAt:ASC", text: "创建时间 ↑" }),
+    el("option", { value: "testCode:ASC", text: "测题 A-Z" }),
+    el("option", { value: "status:ASC", text: "状态" }),
+    el("option", { value: "usedCount:DESC", text: "使用次数 ↓" })
+  );
   const applyBtn = el("button", { className: "btn btn-primary", type: "button", text: "筛选", style: "width:auto" });
   const exportBtn = el("button", { className: "btn btn-ghost", type: "button", text: "导出筛选结果", style: "width:auto" });
   filterBar.append(
     el("div", { className: "field", style: "margin:0;min-width:140px" }, [el("label", { text: "状态" }), statusSel]),
     el("div", { className: "field", style: "margin:0;min-width:180px" }, [el("label", { text: "测题" }), testSel]),
+    el("div", { className: "field", style: "margin:0;min-width:130px" }, [el("label", { text: "开始日期" }), startDate]),
+    el("div", { className: "field", style: "margin:0;min-width:130px" }, [el("label", { text: "结束日期" }), endDate]),
+    el("div", { className: "field", style: "margin:0;min-width:140px" }, [el("label", { text: "排序" }), sortSel]),
     el("div", { className: "field", style: "margin:0;min-width:100px" }, [el("label", { text: "每页" }), perPageSel]),
     el("div", { className: "row-actions", style: "align-items:flex-end" }, [applyBtn, exportBtn])
   );
@@ -560,9 +577,14 @@ export async function renderLinks(root) {
   let selected = new Set();
 
   function filters() {
+    const [sortBy, sortOrder] = (sortSel.value || "createdAt:DESC").split(":");
     return {
       status: statusSel.value || undefined,
       testCode: testSel.value || undefined,
+      startDate: startDate.value || undefined,
+      endDate: endDate.value || undefined,
+      sortBy,
+      sortOrder,
       perPage: perPageSel.value || "20",
       page: String(page),
     };
@@ -802,9 +824,14 @@ export async function renderLinks(root) {
     reload();
   });
   exportBtn.addEventListener("click", () => {
+    const f = filters();
     doExport({
-      status: statusSel.value || undefined,
-      testCode: testSel.value || undefined,
+      status: f.status,
+      testCode: f.testCode,
+      startDate: f.startDate,
+      endDate: f.endDate,
+      sortBy: f.sortBy,
+      sortOrder: f.sortOrder,
     });
   });
   await reload();
@@ -1266,6 +1293,143 @@ export async function renderInvite(root) {
   );
 }
 
+export async function renderQuotaLogs(root) {
+  const host = el("div", { className: "panel" });
+  root.append(
+    shell("/admin/quota-logs", [
+      el("h1", { className: "page-title", text: "额度日志" }),
+      el("p", { className: "page-lead", text: "生成、兑换、撤销退还、购买等额度变动记录。" }),
+      host,
+    ])
+  );
+  try {
+    const data = await api.quotaLogs({ page: 1, perPage: 50 });
+    const logs = (data && data.logs) || [];
+    clear(host);
+    if (!logs.length) {
+      host.append(el("p", { className: "muted", text: "暂无额度日志" }));
+      return;
+    }
+    const typeLabel = {
+      consume: "消耗",
+      redeem: "兑换",
+      purchase: "购买",
+      refund: "退还",
+      admin_adjust: "超管调额",
+      invite_rebate: "邀请返利",
+    };
+    const table = el("table", { className: "data" });
+    table.append(
+      el("thead", {}, [
+        el("tr", {}, [
+          el("th", { text: "时间" }),
+          el("th", { text: "类型" }),
+          el("th", { text: "变动" }),
+          el("th", { text: "剩余" }),
+          el("th", { text: "备注" }),
+        ]),
+      ])
+    );
+    const tbody = el("tbody");
+    for (const row of logs) {
+      const amt = Number(row.amount || 0);
+      tbody.append(
+        el("tr", {}, [
+          el("td", { text: String(row.created_at || "—") }),
+          el("td", { text: typeLabel[row.change_type] || row.change_type || "—" }),
+          el("td", { text: `${amt >= 0 ? "+" : ""}${amt}` }),
+          el("td", { text: String(row.after_remaining ?? "—") }),
+          el("td", { text: row.remark || "—" }),
+        ])
+      );
+    }
+    table.append(tbody);
+    host.append(el("div", { className: "table-wrap" }, [table]));
+  } catch (e) {
+    clear(host);
+    host.append(flash("error", e.message || "加载失败"));
+  }
+}
+
+export async function renderTestResults(root) {
+  const host = el("div", { className: "panel" });
+  const testSel = el("select");
+  testSel.append(el("option", { value: "", text: "全部测题" }));
+  try {
+    const td = await api.testsList();
+    for (const t of (td && td.tests) || []) {
+      testSel.append(el("option", { value: t.test_code, text: t.test_name || t.test_code }));
+    }
+  } catch {
+    /* ignore */
+  }
+  const filterBar = el("div", { className: "filter-bar" }, [
+    el("div", { className: "field", style: "margin:0;min-width:180px" }, [el("label", { text: "测题" }), testSel]),
+    el("button", {
+      className: "btn btn-primary",
+      type: "button",
+      text: "筛选",
+      style: "width:auto",
+      onClick: () => reload(),
+    }),
+  ]);
+  root.append(
+    shell("/admin/test-results", [
+      el("h1", { className: "page-title", text: "测题结果" }),
+      el("p", { className: "page-lead", text: "客户完成测评的记录（按你的分销链接归属）。" }),
+      filterBar,
+      host,
+    ])
+  );
+  async function reload() {
+    clear(host);
+    host.append(el("p", { className: "muted", text: "加载中…" }));
+    try {
+      const data = await api.testResults({
+        testCode: testSel.value || undefined,
+        page: 1,
+        perPage: 50,
+      });
+      const results = (data && data.results) || [];
+      clear(host);
+      if (!results.length) {
+        host.append(el("p", { className: "muted", text: "暂无测题结果" }));
+        return;
+      }
+      const table = el("table", { className: "data" });
+      table.append(
+        el("thead", {}, [
+          el("tr", {}, [
+            el("th", { text: "完成时间" }),
+            el("th", { text: "测题" }),
+            el("th", { text: "Token" }),
+            el("th", { text: "视角" }),
+            el("th", { text: "类型" }),
+          ]),
+        ])
+      );
+      const tbody = el("tbody");
+      for (const r of results) {
+        tbody.append(
+          el("tr", {}, [
+            el("td", { text: String(r.completed_at || r.completedAt || "—") }),
+            el("td", { text: r.test_code || r.testCode || "—" }),
+            el("td", {}, [el("div", { className: "url-cell", text: r.token || "—" })]),
+            el("td", { text: r.perspective || "—" }),
+            el("td", { text: r.unlimited ? "免费测" : "分销链接" }),
+          ])
+        );
+      }
+      table.append(tbody);
+      host.append(el("div", { className: "table-wrap" }, [table]));
+    } catch (e) {
+      clear(host);
+      host.append(flash("error", e.message || "加载失败"));
+    }
+  }
+  await reload();
+}
+
 export async function renderAnnouncements(root) {
   const errHost = el("div");
   let items = [];
@@ -1301,14 +1465,15 @@ export async function renderAnnouncements(root) {
 export async function renderHelp(root) {
   const errHost = el("div");
   let docs = [];
-  let tuts = [];
+  let guide = { unlocked: false, platforms: [], threshold_hint: "" };
   try {
-    const [d, t] = await Promise.all([api.helpDocsList(), api.tutorialsList()]);
+    const [d, g] = await Promise.all([api.helpDocsList(), api.tutorialsGuide()]);
     docs = (d && (d.documents || d.list)) || [];
-    tuts = (t && (t.tutorials || t.list)) || [];
+    guide = g || guide;
   } catch (err) {
     errHost.append(flash("error", err.message || "加载失败"));
   }
+  const platforms = guide.platforms || [];
   root.append(
     shell("/admin/help", [
       el("h1", { className: "page-title", text: "帮助中心" }),
@@ -1327,31 +1492,38 @@ export async function renderHelp(root) {
               ])
             )
           ),
-      el("h2", { className: "section-h", text: "教程" }),
-      tuts.length === 0
-        ? el("p", { className: "muted", text: "暂无教程" })
-        : el(
-            "div",
-            { className: "stack" },
-            tuts.map((t) =>
-              el("div", { className: "panel" }, [
-                el("h3", { text: t.title || "教程" }),
-                el("p", { className: "muted", text: t.description || "" }),
-                t.tutorial_link
-                  ? el("a", {
-                      href: t.tutorial_link,
-                      target: "_blank",
-                      text: "打开教程链接",
-                      className: "btn btn-primary",
-                      style: "width:auto",
-                    })
-                  : null,
-                t.access_password
-                  ? el("p", { className: "muted", text: `访问密码：${t.access_password}` })
-                  : null,
-              ])
-            )
-          ),
+      el("h2", { className: "section-h", text: "平台教程" }),
+      !guide.unlocked
+        ? el("div", { className: "panel" }, [
+            el("p", { className: "muted", text: guide.threshold_hint || "完成指定购额或兑换额度后可解锁详细教程链接。" }),
+            platforms.length
+              ? el("p", { className: "muted", text: `已展示 ${platforms.length} 个平台标题，链接与密码解锁后可见。` })
+              : el("p", { className: "muted", text: "暂无教程" }),
+          ])
+        : platforms.length === 0
+          ? el("p", { className: "muted", text: "暂无教程" })
+          : el(
+              "div",
+              { className: "stack" },
+              platforms.map((t) =>
+                el("div", { className: "panel" }, [
+                  el("h3", { text: t.title || "教程" }),
+                  el("p", { className: "muted", text: t.description || "" }),
+                  t.tutorial_link
+                    ? el("a", {
+                        href: t.tutorial_link,
+                        target: "_blank",
+                        text: "打开教程链接",
+                        className: "btn btn-primary",
+                        style: "width:auto",
+                      })
+                    : null,
+                  t.access_password
+                    ? el("p", { className: "muted", text: `访问密码：${t.access_password}` })
+                    : null,
+                ])
+              )
+            ),
     ])
   );
 }

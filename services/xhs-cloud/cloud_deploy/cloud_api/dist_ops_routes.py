@@ -82,10 +82,7 @@ def announcements_mark_all(request: Request):
 def admin_config_get(request: Request):
     _token_user(request)
     cfg = dist_ops.get_config()
-    from cloud_deploy.cloud_api import dist_service
-
-    rule = dist_service.link_rule_summary()
-    # 商家：客服 + 链接规则（只读展示）
+    # 商家只看客服相关
     return _ok(
         {
             "customer_service_wechat": cfg.get("customer_service_wechat"),
@@ -96,11 +93,6 @@ def admin_config_get(request: Request):
             "xianyu_shop_qrcode": cfg.get("xianyu_shop_qrcode"),
             "site_name": cfg.get("site_name"),
             "invite_rebate_percent": cfg.get("invite_rebate_percent"),
-            "link_max_uses": rule.get("link_max_uses"),
-            "link_expire_hours": rule.get("link_expire_hours"),
-            "link_idle_days": rule.get("link_idle_days"),
-            "expire_text": rule.get("expire_text"),
-            "rule_text": rule.get("rule_text"),
         }
     )
 
@@ -110,6 +102,12 @@ def tutorials_public(request: Request):
     _token_user(request)
     items = dist_ops.list_tutorials(published_only=True)
     return _ok({"tutorials": items, "list": items})
+
+
+@ops_router.get("/api/tutorials/guide")
+def tutorials_guide(request: Request):
+    user = _token_user(request)
+    return _ok(dist_ops.tutorial_guide(int(user["id"])), "获取教程指导成功")
 
 
 @ops_router.get("/api/help-documents/list")
@@ -516,4 +514,53 @@ def sa_tut_access(body: dict, request: Request):
     row = dist_ops.set_tutorial_access(uid, enabled)
     a = _actor(user, dist)
     dist_ops.log_op(actor_user_id=a["id"], actor_username=a["username"], action="user.tutorial_access", target_id=str(uid), detail={"enabled": enabled})
-    return _ok({"user": row})
+    return _ok({"user": row, "detailed_tutorial_access": bool(row.get("detailed_tutorial_access"))})
+
+
+@ops_router.get("/api/super-admin/package-documents/list")
+def sa_package_docs_list(request: Request):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    docs = dist_ops.list_package_documents()
+    return _ok({"documents": docs, "list": docs, "total": len(docs)})
+
+
+@ops_router.post("/api/super-admin/package-documents/save")
+def sa_package_docs_save(body: dict, request: Request):
+    try:
+        user, dist = _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    try:
+        row = dist_ops.save_package_document(body or {})
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+    a = _actor(user, dist)
+    dist_ops.log_op(
+        actor_user_id=a["id"],
+        actor_username=a["username"],
+        action="package_document.save",
+        target_id=str(row.get("id")),
+        detail=body,
+    )
+    return _ok(row, "保存成功")
+
+
+@ops_router.post("/api/super-admin/package-documents/delete/{doc_id}")
+@ops_router.delete("/api/super-admin/package-documents/delete/{doc_id}")
+def sa_package_docs_delete(doc_id: int, request: Request):
+    try:
+        user, dist = _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    dist_ops.delete_package_document(int(doc_id))
+    a = _actor(user, dist)
+    dist_ops.log_op(
+        actor_user_id=a["id"],
+        actor_username=a["username"],
+        action="package_document.delete",
+        target_id=str(doc_id),
+    )
+    return _ok(None, "已删除")

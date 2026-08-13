@@ -195,6 +195,15 @@ def _migrate_dist_schema() -> None:
             read_at TEXT NOT NULL,
             PRIMARY KEY (user_id, announcement_id)
         )""",
+        """CREATE TABLE IF NOT EXISTS dist_package_documents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            document_url TEXT NOT NULL DEFAULT '',
+            document_type TEXT NOT NULL DEFAULT 'link',
+            package_id INTEGER NOT NULL DEFAULT 0,
+            display_order INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        )""",
         "ALTER TABLE dist_links ADD COLUMN first_used_at TEXT",
         "ALTER TABLE dist_unlimited_sessions ADD COLUMN expires_at TEXT",
     ]
@@ -272,6 +281,15 @@ def _migrate_dist_schema() -> None:
             announcement_id INTEGER NOT NULL,
             read_at TIMESTAMP NOT NULL DEFAULT NOW(),
             PRIMARY KEY (user_id, announcement_id)
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_package_documents (
+            id SERIAL PRIMARY KEY,
+            title TEXT NOT NULL,
+            document_url TEXT NOT NULL DEFAULT '',
+            document_type TEXT NOT NULL DEFAULT 'link',
+            package_id INTEGER NOT NULL DEFAULT 0,
+            display_order INTEGER NOT NULL DEFAULT 0,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW()
         )""",
     ]
     if _USE_PG:
@@ -1286,11 +1304,31 @@ def _insert_test_result(
     return int(rid)
 
 
+def _link_sort_clause(sort_by: str | None, sort_order: str | None) -> str:
+    col_map = {
+        "id": "id",
+        "created_at": "created_at",
+        "createdat": "created_at",
+        "test_code": "test_code",
+        "testcode": "test_code",
+        "status": "status",
+        "used_count": "used_count",
+        "usedcount": "used_count",
+    }
+    col = col_map.get((sort_by or "").strip().lower().replace("-", "_"), "id")
+    order = "ASC" if (sort_order or "").strip().upper() == "ASC" else "DESC"
+    return f"{col} {order}"
+
+
 def list_links_page(
     user_id: int,
     *,
     status: str | None = None,
     test_code: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    sort_by: str | None = None,
+    sort_order: str | None = None,
     page: int = 1,
     per_page: int = 20,
 ) -> dict:
@@ -1301,6 +1339,8 @@ def list_links_page(
     offset = (page - 1) * per_page
     st = (status or "").strip() or None
     tc = (test_code or "").strip() or None
+    sd = (start_date or "").strip()[:10] or None
+    ed = (end_date or "").strip()[:10] or None
     where = ["user_id=%s" if _USE_PG else "user_id=?"]
     params: list[Any] = [int(user_id)]
     if st:
@@ -1309,14 +1349,27 @@ def list_links_page(
     if tc:
         where.append("test_code=%s" if _USE_PG else "test_code=?")
         params.append(tc)
+    if sd:
+        if _USE_PG:
+            where.append("created_at >= %s::date")
+        else:
+            where.append("date(created_at) >= date(?)")
+        params.append(sd)
+    if ed:
+        if _USE_PG:
+            where.append("created_at < (%s::date + INTERVAL '1 day')")
+        else:
+            where.append("date(created_at) <= date(?)")
+        params.append(ed)
     wh = " AND ".join(where)
+    order_sql = _link_sort_clause(sort_by, sort_order)
     if _USE_PG:
         conn = _pg_conn()
         c = _pg_cur(conn)
         c.execute(f"SELECT COUNT(*) AS c FROM dist_links WHERE {wh}", tuple(params))
         total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
         c.execute(
-            f"SELECT * FROM dist_links WHERE {wh} ORDER BY id DESC LIMIT %s OFFSET %s",
+            f"SELECT * FROM dist_links WHERE {wh} ORDER BY {order_sql} LIMIT %s OFFSET %s",
             tuple(params + [per_page, offset]),
         )
         rows = c.fetchall()
@@ -1327,7 +1380,7 @@ def list_links_page(
         c.execute(f"SELECT COUNT(*) AS c FROM dist_links WHERE {wh}", tuple(params))
         total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
         c.execute(
-            f"SELECT * FROM dist_links WHERE {wh} ORDER BY id DESC LIMIT ? OFFSET ?",
+            f"SELECT * FROM dist_links WHERE {wh} ORDER BY {order_sql} LIMIT ? OFFSET ?",
             tuple(params + [per_page, offset]),
         )
         rows = c.fetchall()
@@ -1543,6 +1596,10 @@ def export_links_rows(
     link_ids: list[int] | None = None,
     status: str | None = None,
     test_code: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    sort_by: str | None = None,
+    sort_order: str | None = None,
 ) -> list[dict]:
     """导出用：指定 ids 或按筛选拉全量（上限 5000）。"""
     init_dist_tables()
@@ -1550,7 +1607,6 @@ def export_links_rows(
     st = (status or "").strip() or None
     tc = (test_code or "").strip() or None
     if ids:
-        # 仅本人 + 指定 id
         ph = ",".join(["%s" if _USE_PG else "?"] * len(ids))
         sql = f"SELECT * FROM dist_links WHERE user_id={'%s' if _USE_PG else '?'} AND id IN ({ph}) ORDER BY id DESC"
         params = [int(user_id)] + ids
@@ -1567,12 +1623,21 @@ def export_links_rows(
             rows = c.fetchall()
             conn.close()
         return [_map_link(_row_dict(r)) for r in rows]
-    # 全量/筛选导出
     all_links: list[dict] = []
     page_i = 1
     total = 0
     while page_i <= 50:
-        page = list_links_page(user_id, status=st, test_code=tc, page=page_i, per_page=100)
+        page = list_links_page(
+            user_id,
+            status=st,
+            test_code=tc,
+            start_date=start_date,
+            end_date=end_date,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            page=page_i,
+            per_page=100,
+        )
         total = int(page.get("total") or 0)
         batch = page.get("links") or []
         if not batch:
@@ -1582,6 +1647,206 @@ def export_links_rows(
             break
         page_i += 1
     return all_links[:5000]
+
+
+def _map_test_result(row: dict | None) -> dict:
+    row = row or {}
+    completed = _fmt_ts(row.get("completed_at")) or row.get("completed_at")
+    return {
+        "id": row.get("id"),
+        "link_id": row.get("link_id"),
+        "token": row.get("token"),
+        "test_code": row.get("test_code"),
+        "testCode": row.get("test_code"),
+        "user_id": row.get("user_id"),
+        "perspective": row.get("perspective"),
+        "unlimited": bool(row.get("unlimited")),
+        "completed_at": completed,
+        "completedAt": completed,
+    }
+
+
+def list_test_results_page(
+    user_id: int,
+    *,
+    test_code: str | None = None,
+    page: int = 1,
+    per_page: int = 20,
+) -> dict:
+    init_dist_tables()
+    page = max(1, int(page or 1))
+    per_page = max(1, min(int(per_page or 20), 100))
+    offset = (page - 1) * per_page
+    tc = (test_code or "").strip() or None
+    where = ["user_id=%s" if _USE_PG else "user_id=?"]
+    params: list[Any] = [int(user_id)]
+    if tc:
+        where.append("test_code=%s" if _USE_PG else "test_code=?")
+        params.append(tc)
+    wh = " AND ".join(where)
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute(f"SELECT COUNT(*) AS c FROM dist_test_results WHERE {wh}", tuple(params))
+        total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        c.execute(
+            f"""SELECT id, link_id, token, test_code, user_id, perspective, unlimited, completed_at
+                FROM dist_test_results WHERE {wh}
+                ORDER BY id DESC LIMIT %s OFFSET %s""",
+            tuple(params + [per_page, offset]),
+        )
+        rows = [_map_test_result(_row_dict(r)) for r in c.fetchall()]
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(f"SELECT COUNT(*) AS c FROM dist_test_results WHERE {wh}", tuple(params))
+        total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        c.execute(
+            f"""SELECT id, link_id, token, test_code, user_id, perspective, unlimited, completed_at
+                FROM dist_test_results WHERE {wh}
+                ORDER BY id DESC LIMIT ? OFFSET ?""",
+            tuple(params + [per_page, offset]),
+        )
+        rows = [_map_test_result(_row_dict(r)) for r in c.fetchall()]
+        conn.close()
+    return {
+        "results": rows,
+        "pagination": {
+            "page": page,
+            "perPage": per_page,
+            "total": total,
+            "totalPages": max(1, (total + per_page - 1) // per_page) if total else 0,
+        },
+    }
+
+
+def list_test_results_admin(
+    *,
+    user_id: int | None = None,
+    test_code: str | None = None,
+    page: int = 1,
+    per_page: int = 20,
+) -> dict:
+    init_dist_tables()
+    page = max(1, int(page or 1))
+    per_page = max(1, min(int(per_page or 20), 100))
+    offset = (page - 1) * per_page
+    where: list[str] = []
+    params: list[Any] = []
+    if user_id:
+        where.append("r.user_id=%s" if _USE_PG else "r.user_id=?")
+        params.append(int(user_id))
+    tc = (test_code or "").strip() or None
+    if tc:
+        where.append("r.test_code=%s" if _USE_PG else "r.test_code=?")
+        params.append(tc)
+    wh = (" WHERE " + " AND ".join(where)) if where else ""
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute(f"SELECT COUNT(*) AS c FROM dist_test_results r{wh}", tuple(params))
+        total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        c.execute(
+            f"""SELECT r.id, r.link_id, r.token, r.test_code, r.user_id, r.perspective, r.unlimited,
+                       r.completed_at, u.username
+                FROM dist_test_results r
+                LEFT JOIN users u ON u.id = r.user_id
+                {wh}
+                ORDER BY r.id DESC LIMIT %s OFFSET %s""",
+            tuple(params + [per_page, offset]),
+        )
+        rows = []
+        for r in c.fetchall():
+            item = _map_test_result(_row_dict(r))
+            item["username"] = (_row_dict(r) or {}).get("username")
+            rows.append(item)
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(f"SELECT COUNT(*) AS c FROM dist_test_results r{wh}", tuple(params))
+        total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        c.execute(
+            f"""SELECT r.id, r.link_id, r.token, r.test_code, r.user_id, r.perspective, r.unlimited,
+                       r.completed_at, u.username
+                FROM dist_test_results r
+                LEFT JOIN users u ON u.id = r.user_id
+                {wh}
+                ORDER BY r.id DESC LIMIT ? OFFSET ?""",
+            tuple(params + [per_page, offset]),
+        )
+        rows = []
+        for r in c.fetchall():
+            item = _map_test_result(_row_dict(r))
+            item["username"] = (_row_dict(r) or {}).get("username")
+            rows.append(item)
+        conn.close()
+    return {
+        "results": rows,
+        "pagination": {
+            "page": page,
+            "perPage": per_page,
+            "total": total,
+            "totalPages": max(1, (total + per_page - 1) // per_page) if total else 0,
+        },
+    }
+
+
+def list_quota_logs_page(user_id: int, *, page: int = 1, per_page: int = 20) -> dict:
+    init_dist_tables()
+    page = max(1, int(page or 1))
+    per_page = max(1, min(int(per_page or 20), 100))
+    offset = (page - 1) * per_page
+    uid = int(user_id)
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute("SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=%s", (uid,))
+        total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        c.execute(
+            """SELECT id, change_type, amount, before_remaining, after_remaining, remark, created_at
+               FROM dist_quota_logs WHERE user_id=%s
+               ORDER BY id DESC LIMIT %s OFFSET %s""",
+            (uid, per_page, offset),
+        )
+        rows = [_row_dict(r) or {} for r in c.fetchall()]
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute("SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=?", (uid,))
+        total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        c.execute(
+            """SELECT id, change_type, amount, before_remaining, after_remaining, remark, created_at
+               FROM dist_quota_logs WHERE user_id=?
+               ORDER BY id DESC LIMIT ? OFFSET ?""",
+            (uid, per_page, offset),
+        )
+        rows = [_row_dict(r) or {} for r in c.fetchall()]
+        conn.close()
+    logs = []
+    for r in rows:
+        logs.append(
+            {
+                "id": r.get("id"),
+                "change_type": r.get("change_type") or "",
+                "amount": int(r.get("amount") or 0),
+                "before_remaining": r.get("before_remaining"),
+                "after_remaining": r.get("after_remaining"),
+                "remark": r.get("remark") or "",
+                "created_at": _fmt_ts(r.get("created_at")) or r.get("created_at"),
+            }
+        )
+    return {
+        "logs": logs,
+        "pagination": {
+            "page": page,
+            "perPage": per_page,
+            "total": total,
+            "totalPages": max(1, (total + per_page - 1) // per_page) if total else 0,
+        },
+    }
 
 
 def admin_dist_stats() -> dict:

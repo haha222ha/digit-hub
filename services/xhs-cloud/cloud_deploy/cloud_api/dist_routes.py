@@ -94,6 +94,14 @@ class LinksExportBody(BaseModel):
     status: str | None = None
     testCode: str | None = None
     test_code: str | None = None
+    startDate: str | None = None
+    start_date: str | None = None
+    endDate: str | None = None
+    end_date: str | None = None
+    sortBy: str | None = None
+    sort_by: str | None = None
+    sortOrder: str | None = None
+    sort_order: str | None = None
 
 
 class UnlimitedStartBody(BaseModel):
@@ -472,6 +480,14 @@ def compat_links_list(
     per_page: str = "",
     testCode: str = "",
     test_code: str = "",
+    startDate: str = "",
+    start_date: str = "",
+    endDate: str = "",
+    end_date: str = "",
+    sortBy: str = "",
+    sort_by: str = "",
+    sortOrder: str = "",
+    sort_order: str = "",
 ):
     user = _dist_token(request)
     pp = int(perPage or per_page or 20)
@@ -481,6 +497,10 @@ def compat_links_list(
         user["id"],
         status=(status or "").strip() or None,
         test_code=tc,
+        start_date=(startDate or start_date or "").strip() or None,
+        end_date=(endDate or end_date or "").strip() or None,
+        sort_by=(sortBy or sort_by or "").strip() or None,
+        sort_order=(sortOrder or sort_order or "").strip() or None,
         page=pg,
         per_page=pp,
     )
@@ -508,6 +528,10 @@ def compat_links_export(body: LinksExportBody, request: Request):
         link_ids=body.linkIds,
         status=(body.status or "").strip() or None,
         test_code=tc,
+        start_date=(body.startDate or body.start_date or "").strip() or None,
+        end_date=(body.endDate or body.end_date or "").strip() or None,
+        sort_by=(body.sortBy or body.sort_by or "").strip() or None,
+        sort_order=(body.sortOrder or body.sort_order or "").strip() or None,
     )
     lines = ["测试代码\t分销链接\t状态"]
     for l in links:
@@ -550,6 +574,36 @@ def compat_redeem_history(request: Request, page: str = "1", perPage: str = "20"
     user = _dist_token(request)
     data = dist_db.list_redeem_history(
         user["id"],
+        page=int(page or 1),
+        per_page=int(perPage or per_page or 20),
+    )
+    return _ok(data, "ok")
+
+
+@compat_router.get("/api/admin/quota-logs/list")
+def compat_admin_quota_logs(request: Request, page: str = "1", perPage: str = "20", per_page: str = ""):
+    user = _dist_token(request)
+    data = dist_db.list_quota_logs_page(
+        user["id"],
+        page=int(page or 1),
+        per_page=int(perPage or per_page or 20),
+    )
+    return _ok(data, "ok")
+
+
+@compat_router.get("/api/admin/test-results/list")
+def compat_admin_test_results(
+    request: Request,
+    page: str = "1",
+    perPage: str = "20",
+    per_page: str = "",
+    testCode: str = "",
+    test_code: str = "",
+):
+    user = _dist_token(request)
+    data = dist_db.list_test_results_page(
+        user["id"],
+        test_code=(testCode or test_code or "").strip() or None,
         page=int(page or 1),
         per_page=int(perPage or per_page or 20),
     )
@@ -778,6 +832,32 @@ def sa_orders(request: Request, limit: int = 100):
         return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
     orders = dist_db.list_orders_admin(limit=int(limit or 100))
     return _ok({"orders": orders, "list": orders, "total": len(orders)}, "ok")
+
+
+@compat_router.get("/api/super-admin/test-results/list")
+def sa_test_results(
+    request: Request,
+    page: str = "1",
+    perPage: str = "20",
+    per_page: str = "",
+    testCode: str = "",
+    test_code: str = "",
+    userId: str = "",
+    user_id: str = "",
+):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    uid_raw = (userId or user_id or "").strip()
+    uid = int(uid_raw) if uid_raw.isdigit() else None
+    data = dist_db.list_test_results_admin(
+        user_id=uid,
+        test_code=(testCode or test_code or "").strip() or None,
+        page=int(page or 1),
+        per_page=int(perPage or per_page or 20),
+    )
+    return _ok(data, "ok")
 
 
 @compat_router.get("/api/super-admin/quota-logs/list")

@@ -142,16 +142,18 @@ export async function renderSaUsers(root) {
   function paint() {
     listHost.replaceChildren(
       table(
-        ["ID", "用户名", "角色", "状态", "剩余额度", "操作"],
+        ["ID", "用户名", "角色", "状态", "剩余额度", "教程", "操作"],
         users.map((u) => {
           const uid = u.user_id || u.id;
           const adjustInput = el("input", { type: "number", placeholder: "±额度", style: "width:80px" });
+          const tutOn = Boolean(u.detailed_tutorial_access);
           return el("tr", {}, [
             el("td", { text: String(uid) }),
             el("td", { text: u.username || "—" }),
             el("td", { text: u.role || "—" }),
             el("td", { text: u.status || "—" }),
             el("td", { text: String(u.remaining_quota ?? "—") }),
+            el("td", { text: tutOn ? "已解锁" : "未解锁" }),
             el("td", {}, [
               el("div", { className: "row-actions", style: "flex-wrap:wrap;gap:6px" }, [
                 adjustInput,
@@ -181,6 +183,20 @@ export async function renderSaUsers(root) {
                     const next = (u.status || "active") === "active" ? "disabled" : "active";
                     try {
                       await api.saToggleStatus(uid, next);
+                      await reload();
+                    } catch (err) {
+                      errHost.replaceChildren(flash("error", err.message || "失败"));
+                    }
+                  },
+                }),
+                el("button", {
+                  className: "btn btn-ghost",
+                  type: "button",
+                  text: tutOn ? "关教程" : "开教程",
+                  style: "width:auto;padding:6px 10px",
+                  onClick: async () => {
+                    try {
+                      await api.saToggleTutorial(uid, !tutOn);
                       await reload();
                     } catch (err) {
                       errHost.replaceChildren(flash("error", err.message || "失败"));
@@ -872,6 +888,13 @@ export async function renderSaConfig(root) {
     customer_service_response_time: el("input", { value: cfg.customer_service_response_time || "" }),
     customer_service_qrcode: el("input", { value: cfg.customer_service_qrcode || "", placeholder: "二维码图片 URL，或下方上传" }),
     xianyu_shop_link: el("input", { value: cfg.xianyu_shop_link || "" }),
+    xianyu_shop_qrcode: el("input", { value: cfg.xianyu_shop_qrcode || "", placeholder: "闲鱼二维码 URL，或下方上传" }),
+    tutorial_unlock_min_price_yuan: el("input", { type: "number", value: cfg.tutorial_unlock_min_price_yuan || "59" }),
+    tutorial_unlock_min_redeem_quota: el("input", { type: "number", value: cfg.tutorial_unlock_min_redeem_quota || "300" }),
+    tutorial_unlocked: el("select", {}, [
+      el("option", { value: "false", text: "否（按门槛解锁）" }),
+      el("option", { value: "true", text: "是（全员解锁）" }),
+    ]),
     link_max_uses: el("input", { type: "number", value: cfg.link_max_uses || "3" }),
     link_expire_hours: el("input", { type: "number", value: cfg.link_expire_hours || "24" }),
     wecom_webhook: el("input", { value: cfg.wecom_webhook || "" }),
@@ -884,10 +907,19 @@ export async function renderSaConfig(root) {
     customer_service_response_time: "响应说明",
     customer_service_qrcode: "客服二维码 URL",
     xianyu_shop_link: "闲鱼链接",
+    xianyu_shop_qrcode: "闲鱼二维码 URL",
+    tutorial_unlock_min_price_yuan: "教程解锁最低购额(元)",
+    tutorial_unlock_min_redeem_quota: "教程解锁最低兑换额度",
+    tutorial_unlocked: "教程全员解锁",
     link_max_uses: "链接默认可用次数",
     link_expire_hours: "链接有效小时",
     wecom_webhook: "企微 Webhook",
   };
+  fields.tutorial_unlocked.value = ["1", "true", "yes"].includes(
+    String(cfg.tutorial_unlocked || "false").toLowerCase()
+  )
+    ? "true"
+    : "false";
   const preview = el("img", {
     src: cfg.customer_service_qrcode || "",
     alt: "客服二维码预览",
@@ -925,6 +957,43 @@ export async function renderSaConfig(root) {
   fileInput.addEventListener("change", () => {
     if (fileInput.files && fileInput.files[0]) uploadBtn.click();
   });
+  const xyPreview = el("img", {
+    src: cfg.xianyu_shop_qrcode || "",
+    alt: "闲鱼二维码预览",
+    style: `max-width:180px;margin-top:8px;${cfg.xianyu_shop_qrcode ? "" : "display:none"}`,
+  });
+  const xyFileInput = el("input", { type: "file", accept: "image/png,image/jpeg,image/gif,image/webp" });
+  const xyUploadBtn = el("button", {
+    className: "btn btn-ghost",
+    type: "button",
+    text: "上传闲鱼二维码",
+    style: "width:auto",
+  });
+  xyUploadBtn.addEventListener("click", async () => {
+    const f = xyFileInput.files && xyFileInput.files[0];
+    if (!f) {
+      xyFileInput.click();
+      return;
+    }
+    try {
+      xyUploadBtn.disabled = true;
+      const data = await api.uploadImage(f);
+      const url = (data && data.url) || "";
+      if (!url) throw new Error("未返回图片地址");
+      fields.xianyu_shop_qrcode.value = url;
+      xyPreview.src = url;
+      xyPreview.style.display = "";
+      errHost.replaceChildren(flash("ok", "闲鱼二维码上传成功，请再点「保存配置」"));
+    } catch (err) {
+      errHost.replaceChildren(flash("error", err.message || "上传失败"));
+    } finally {
+      xyUploadBtn.disabled = false;
+      xyFileInput.value = "";
+    }
+  });
+  xyFileInput.addEventListener("change", () => {
+    if (xyFileInput.files && xyFileInput.files[0]) xyUploadBtn.click();
+  });
   const form = el("form", { className: "panel" }, [
     ...Object.keys(fields).map((k) => el("div", { className: "field" }, [el("label", { text: labels[k] }), fields[k]])),
     el("div", { className: "field" }, [
@@ -932,6 +1001,11 @@ export async function renderSaConfig(root) {
       el("p", { className: "muted", text: "上传后自动填入上方 URL（保存到 /uploads/），再点保存配置生效。" }),
       el("div", { className: "row-actions" }, [fileInput, uploadBtn]),
       preview,
+    ]),
+    el("div", { className: "field" }, [
+      el("label", { text: "闲鱼店铺二维码上传" }),
+      el("div", { className: "row-actions" }, [xyFileInput, xyUploadBtn]),
+      xyPreview,
     ]),
     el("div", { className: "row-actions" }, [
       el("button", { className: "btn btn-primary", type: "submit", text: "保存配置", style: "width:auto" }),
@@ -974,6 +1048,191 @@ export async function renderSaConfig(root) {
       form,
     ])
   );
+}
+
+export async function renderSaTestResults(root) {
+  if (!guard()) return;
+  const errHost = el("div");
+  const host = el("div");
+  const userFilter = el("input", { type: "number", placeholder: "用户ID（可选）", style: "width:120px" });
+  const testFilter = el("input", { placeholder: "测题 code（可选）" });
+  async function reload() {
+    try {
+      const data = await api.saTestResults({
+        userId: userFilter.value || undefined,
+        testCode: testFilter.value.trim() || undefined,
+        page: 1,
+        perPage: 50,
+      });
+      const results = (data && data.results) || [];
+      clear(host);
+      if (!results.length) {
+        host.append(el("p", { className: "muted", text: "暂无测题结果" }));
+        return;
+      }
+      host.append(
+        table(
+          ["时间", "用户", "测题", "Token", "视角", "类型"],
+          results.map((r) =>
+            el("tr", {}, [
+              el("td", { text: String(r.completed_at || r.completedAt || "—") }),
+              el("td", { text: r.username || String(r.user_id || "—") }),
+              el("td", { text: r.test_code || r.testCode || "—" }),
+              el("td", {}, [el("div", { className: "url-cell", text: r.token || "—" })]),
+              el("td", { text: r.perspective || "—" }),
+              el("td", { text: r.unlimited ? "免费测" : "分销" }),
+            ])
+          )
+        )
+      );
+    } catch (err) {
+      clear(host);
+      host.append(flash("error", err.message || "加载失败"));
+    }
+  }
+  root.append(
+    shell("/super-admin/test-results", [
+      el("h1", { className: "page-title", text: "全站测题结果" }),
+      el("p", { className: "page-lead", text: "所有分销商链接/免费测的完成记录。" }),
+      errHost,
+      el("div", { className: "filter-bar" }, [
+        el("div", { className: "field", style: "margin:0" }, [el("label", { text: "用户ID" }), userFilter]),
+        el("div", { className: "field", style: "margin:0" }, [el("label", { text: "测题" }), testFilter]),
+        el("button", {
+          className: "btn btn-primary",
+          type: "button",
+          text: "筛选",
+          style: "width:auto",
+          onClick: reload,
+        }),
+      ]),
+      host,
+    ])
+  );
+  await reload();
+}
+
+export async function renderSaPackageDocs(root) {
+  if (!guard()) return;
+  const errHost = el("div");
+  const listHost = el("div");
+  const title = el("input", { required: "true", placeholder: "文档标题" });
+  const url = el("input", { placeholder: "文档链接 URL" });
+  const pkgId = el("input", { type: "number", value: "0", placeholder: "套餐ID（0=通用）" });
+  const order = el("input", { type: "number", value: "0" });
+  let editId = null;
+  async function reload() {
+    try {
+      const data = await api.saPackageDocs();
+      const docs = (data && (data.documents || data.list)) || [];
+      listHost.replaceChildren(
+        docs.length === 0
+          ? el("p", { className: "muted", text: "暂无套餐文档" })
+          : table(
+              ["ID", "标题", "链接", "套餐ID", "排序", "操作"],
+              docs.map((d) =>
+                el("tr", {}, [
+                  el("td", { text: String(d.id) }),
+                  el("td", { text: d.title || "—" }),
+                  el("td", {}, [
+                    d.document_url
+                      ? el("a", { href: d.document_url, target: "_blank", text: "打开" })
+                      : el("span", { text: "—" }),
+                  ]),
+                  el("td", { text: String(d.package_id ?? d.packageId ?? 0) }),
+                  el("td", { text: String(d.display_order ?? 0) }),
+                  el("td", {}, [
+                    el("button", {
+                      className: "btn btn-ghost",
+                      type: "button",
+                      text: "编辑",
+                      style: "width:auto;padding:4px 8px",
+                      onClick: () => {
+                        editId = d.id;
+                        title.value = d.title || "";
+                        url.value = d.document_url || "";
+                        pkgId.value = String(d.package_id ?? d.packageId ?? 0);
+                        order.value = String(d.display_order ?? 0);
+                      },
+                    }),
+                    el("button", {
+                      className: "btn btn-ghost",
+                      type: "button",
+                      text: "删除",
+                      style: "width:auto;padding:4px 8px",
+                      onClick: async () => {
+                        if (!confirm("确认删除？")) return;
+                        try {
+                          await api.saPackageDocDelete(d.id);
+                          await reload();
+                        } catch (err) {
+                          errHost.replaceChildren(flash("error", err.message || "失败"));
+                        }
+                      },
+                    }),
+                  ]),
+                ])
+              )
+            )
+      );
+    } catch (err) {
+      errHost.replaceChildren(flash("error", err.message || "加载失败"));
+    }
+  }
+  const form = el("form", { className: "panel" }, [
+    el("h3", { text: editId ? `编辑文档 #${editId}` : "新增套餐文档" }),
+    el("div", { className: "field" }, [el("label", { text: "标题" }), title]),
+    el("div", { className: "field" }, [el("label", { text: "链接" }), url]),
+    el("div", { className: "field" }, [el("label", { text: "套餐 ID" }), pkgId]),
+    el("div", { className: "field" }, [el("label", { text: "排序" }), order]),
+    el("div", { className: "row-actions" }, [
+      el("button", { className: "btn btn-primary", type: "submit", text: "保存", style: "width:auto" }),
+      el("button", {
+        className: "btn btn-ghost",
+        type: "button",
+        text: "清空",
+        style: "width:auto",
+        onClick: () => {
+          editId = null;
+          title.value = "";
+          url.value = "";
+          pkgId.value = "0";
+          order.value = "0";
+        },
+      }),
+    ]),
+  ]);
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      await api.saPackageDocSave({
+        id: editId || undefined,
+        title: title.value.trim(),
+        document_url: url.value.trim(),
+        package_id: Number(pkgId.value || 0),
+        display_order: Number(order.value || 0),
+      });
+      errHost.replaceChildren(flash("ok", "已保存"));
+      editId = null;
+      title.value = "";
+      url.value = "";
+      pkgId.value = "0";
+      order.value = "0";
+      await reload();
+    } catch (err) {
+      errHost.replaceChildren(flash("error", err.message || "失败"));
+    }
+  });
+  root.append(
+    shell("/super-admin/package-documents", [
+      el("h1", { className: "page-title", text: "套餐文档" }),
+      el("p", { className: "page-lead", text: "购买页/帮助页可引用的套餐说明文档链接。" }),
+      errHost,
+      form,
+      listHost,
+    ])
+  );
+  await reload();
 }
 
 export async function renderSaQuotaLogs(root) {

@@ -103,6 +103,9 @@ _DEFAULT_CONFIG = {
     "wecom_webhook": "",
     "site_name": "心象测",
     "invite_rebate_percent": "20",
+    "tutorial_unlock_min_price_yuan": "59",
+    "tutorial_unlock_min_redeem_quota": "300",
+    "tutorial_unlocked": "false",
 }
 
 
@@ -1077,3 +1080,172 @@ def set_tutorial_access(user_id: int, enabled: bool) -> dict:
         conn.commit()
         conn.close()
     return dist_db.ensure_distributor(int(user_id))
+
+
+def _tutorial_globally_unlocked(cfg: dict | None = None) -> bool:
+    cfg = cfg or get_config()
+    return str(cfg.get("tutorial_unlocked") or "").strip().lower() in ("1", "true", "yes")
+
+
+def tutorial_guide(user_id: int) -> dict[str, Any]:
+    dist = dist_db.ensure_distributor(int(user_id))
+    cfg = get_config()
+    role = (dist.get("role") or "").strip()
+    unlocked = (
+        role == "super_admin"
+        or bool(dist.get("detailed_tutorial_access"))
+        or _tutorial_globally_unlocked(cfg)
+    )
+    items = list_tutorials(published_only=True)
+    platforms: list[dict[str, Any]] = []
+    for p in items:
+        base = {
+            "id": p.get("id"),
+            "title": p.get("title"),
+            "description": p.get("description"),
+            "display_order": p.get("display_order"),
+            "platform_color": p.get("platform_color"),
+        }
+        if unlocked:
+            base["tutorial_link"] = p.get("tutorial_link") or ""
+            base["access_password"] = p.get("access_password") or ""
+        platforms.append(base)
+    min_price = cfg.get("tutorial_unlock_min_price_yuan") or "59"
+    min_redeem = cfg.get("tutorial_unlock_min_redeem_quota") or "300"
+    return {
+        "unlocked": unlocked,
+        "platforms": platforms,
+        "threshold_hint": f"购买 ¥{min_price} 以上套餐或兑换 {min_redeem} 额度以上可解锁详细教程",
+    }
+
+
+def maybe_unlock_tutorial(
+    user_id: int,
+    *,
+    redeem_quota: int | None = None,
+    purchase_yuan: float | None = None,
+) -> None:
+    if _tutorial_globally_unlocked():
+        return
+    dist = dist_db.ensure_distributor(int(user_id))
+    if bool(dist.get("detailed_tutorial_access")) or (dist.get("role") or "") == "super_admin":
+        return
+    cfg = get_config()
+    min_redeem = int(float(cfg.get("tutorial_unlock_min_redeem_quota") or 300))
+    min_price = float(cfg.get("tutorial_unlock_min_price_yuan") or 59)
+    unlock = False
+    if redeem_quota is not None and int(redeem_quota) >= min_redeem:
+        unlock = True
+    if purchase_yuan is not None and float(purchase_yuan) >= min_price:
+        unlock = True
+    if unlock:
+        set_tutorial_access(int(user_id), True)
+
+
+# ----- package documents -----
+
+
+def list_package_documents() -> list[dict[str, Any]]:
+    dist_db.init_dist_tables()
+    if _use_pg():
+        conn = _conn()
+        try:
+            c = _cur(conn)
+            c.execute("SELECT * FROM dist_package_documents ORDER BY display_order ASC, id DESC")
+            return [_row(r) for r in c.fetchall()]
+        finally:
+            conn.close()
+    conn = _conn()
+    c = conn.cursor()
+    c.execute("SELECT * FROM dist_package_documents ORDER BY display_order ASC, id DESC")
+    rows = [_row(r) for r in c.fetchall()]
+    conn.close()
+    return rows
+
+
+def save_package_document(payload: dict[str, Any]) -> dict[str, Any]:
+    dist_db.init_dist_tables()
+    p = payload or {}
+    title = (p.get("title") or "").strip()
+    if not title:
+        raise ValueError("请输入文档标题")
+    doc_url = (p.get("document_url") or p.get("documentUrl") or "").strip()
+    doc_type = (p.get("document_type") or p.get("documentType") or "link").strip() or "link"
+    package_id = int(p.get("package_id") or p.get("packageId") or 0)
+    display_order = int(p.get("display_order") or p.get("displayOrder") or 0)
+    doc_id = p.get("id")
+    if doc_id:
+        if _use_pg():
+            conn = _conn()
+            try:
+                c = _cur(conn)
+                c.execute(
+                    """UPDATE dist_package_documents
+                       SET title=%s, document_url=%s, document_type=%s, package_id=%s, display_order=%s
+                       WHERE id=%s RETURNING *""",
+                    (title, doc_url, doc_type, package_id, display_order, int(doc_id)),
+                )
+                row = c.fetchone()
+                conn.commit()
+                return _row(row) or {}
+            finally:
+                conn.close()
+        conn = _conn()
+        c = conn.cursor()
+        c.execute(
+            """UPDATE dist_package_documents
+               SET title=?, document_url=?, document_type=?, package_id=?, display_order=?
+               WHERE id=?""",
+            (title, doc_url, doc_type, package_id, display_order, int(doc_id)),
+        )
+        conn.commit()
+        c.execute("SELECT * FROM dist_package_documents WHERE id=?", (int(doc_id),))
+        row = _row(c.fetchone()) or {}
+        conn.close()
+        return row
+    if _use_pg():
+        conn = _conn()
+        try:
+            c = _cur(conn)
+            c.execute(
+                """INSERT INTO dist_package_documents
+                   (title, document_url, document_type, package_id, display_order)
+                   VALUES (%s,%s,%s,%s,%s) RETURNING *""",
+                (title, doc_url, doc_type, package_id, display_order),
+            )
+            row = c.fetchone()
+            conn.commit()
+            return _row(row) or {}
+        finally:
+            conn.close()
+    conn = _conn()
+    c = conn.cursor()
+    c.execute(
+        """INSERT INTO dist_package_documents
+           (title, document_url, document_type, package_id, display_order, created_at)
+           VALUES (?,?,?,?,?,?)""",
+        (title, doc_url, doc_type, package_id, display_order, _now()),
+    )
+    conn.commit()
+    c.execute("SELECT * FROM dist_package_documents ORDER BY id DESC LIMIT 1")
+    row = _row(c.fetchone()) or {}
+    conn.close()
+    return row
+
+
+def delete_package_document(doc_id: int) -> None:
+    dist_db.init_dist_tables()
+    if _use_pg():
+        conn = _conn()
+        try:
+            c = _cur(conn)
+            c.execute("DELETE FROM dist_package_documents WHERE id=%s", (int(doc_id),))
+            conn.commit()
+        finally:
+            conn.close()
+        return
+    conn = _conn()
+    c = conn.cursor()
+    c.execute("DELETE FROM dist_package_documents WHERE id=?", (int(doc_id),))
+    conn.commit()
+    conn.close()

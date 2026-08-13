@@ -14,35 +14,6 @@ _DEFAULT_QUOTA = int(os.environ.get("XHS_DIST_DEFAULT_QUOTA", "5"))
 _LINK_MAX_USES = int(os.environ.get("XHS_DIST_LINK_MAX_USES", "3"))
 
 
-def _link_max_uses() -> int:
-    try:
-        return int(dist_db.resolve_link_policy().get("max_uses") or _LINK_MAX_USES)
-    except Exception:
-        return _LINK_MAX_USES
-
-
-def link_rule_summary() -> dict:
-    """给分销商控制台展示的链接规则文案。"""
-    policy = dist_db.resolve_link_policy()
-    hours = int(policy.get("expire_hours") or 0)
-    max_uses = int(policy.get("max_uses") or 3)
-    idle_days = int(policy.get("idle_days") or 0)
-    if hours <= 0:
-        expire_text = "永久有效（直至次数用尽）"
-    elif hours % 24 == 0:
-        days = hours // 24
-        expire_text = f"首次开测后 {days} 天"
-    else:
-        expire_text = f"首次开测后 {hours} 小时"
-    return {
-        "link_max_uses": str(max_uses),
-        "link_expire_hours": str(hours),
-        "link_idle_days": str(idle_days),
-        "expire_text": expire_text,
-        "rule_text": f"{expire_text}内可复测 {max_uses} 次",
-    }
-
-
 def _resolve_catalog_path() -> Path:
     """digit-hub monorepo 与 ECS /opt/xhs-cloud 双布局均可找到 catalog。"""
     env = (os.environ.get("XHS_PSY_DIST_CATALOG") or "").strip()
@@ -135,9 +106,7 @@ def redeem_quota_code(user_id: int, code: str) -> dict:
     code = (code or "").strip()
     if not code:
         raise ValueError("请输入兑换码")
-    dist = dist_db.ensure_distributor(user_id, default_quota=_DEFAULT_QUOTA)
-    if (dist.get("status") or "active") != "active":
-        raise ValueError("账号已停用，无法兑换额度")
+    dist_db.ensure_distributor(user_id, default_quota=_DEFAULT_QUOTA)
     from cloud_deploy.cloud_api.payment_plans import get_plan, is_psy_dist_plan
 
     row = db.get_auth_code_row(code)
@@ -164,6 +133,12 @@ def redeem_quota_code(user_id: int, code: str) -> dict:
         raise ValueError("兑换码配置异常，请联系管理员")
     db.redeem_dist_quota_code(user_id, code, quota_amount)
     dist = dist_db.add_quota(user_id, quota_amount, change_type="redeem", remark=f"兑换码 {code}")
+    try:
+        from cloud_deploy.cloud_api import dist_ops
+
+        dist_ops.maybe_unlock_tutorial(user_id, redeem_quota=quota_amount)
+    except Exception:
+        pass
     return {"added": quota_amount, "quota": dist["quota"], "remaining_quota": dist["remaining_quota"]}
 
 
@@ -171,11 +146,8 @@ def generate_links(user_id: int, test_code: str, count: int) -> dict:
     meta = _test_meta(test_code)
     if not meta:
         raise ValueError("测试项目不存在")
-    dist = dist_db.ensure_distributor(user_id)
-    if (dist.get("status") or "active") != "active":
-        raise ValueError("账号已停用，无法生成链接")
-    links = dist_db.generate_links(user_id, test_code, count, max_uses=_link_max_uses())
-    return {"links": links, "generatedCount": len(links), "rule": link_rule_summary()}
+    links = dist_db.generate_links(user_id, test_code, count, max_uses=_LINK_MAX_USES)
+    return {"links": links, "generatedCount": len(links)}
 
 
 def validate_token(token: str, test_code: str | None = None) -> dict:
@@ -190,7 +162,8 @@ def validate_token(token: str, test_code: str | None = None) -> dict:
 
 
 def start_test(token: str) -> dict:
-    return dist_db.start_link_test(token)
+    dist_db.start_link_test(token)
+    return {"success": True}
 
 
 def complete_test(token: str, *, result_data: Any = None, perspective: str | None = None) -> dict:
@@ -214,6 +187,13 @@ def fulfill_quota_from_payment(user_id: int, plan_code: str, order_no: str) -> N
     if amount <= 0:
         return
     dist_db.add_quota(user_id, amount, change_type="purchase", remark=f"订单 {order_no}")
+    try:
+        from cloud_deploy.cloud_api import dist_ops
+
+        price_yuan = float(plan.get("price_yuan") or plan.get("amount") or 0)
+        dist_ops.maybe_unlock_tutorial(user_id, purchase_yuan=price_yuan)
+    except Exception:
+        pass
     try:
         dist_db.apply_first_purchase_invite_rebate(user_id, amount, order_no)
     except Exception:
