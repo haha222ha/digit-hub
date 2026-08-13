@@ -1,0 +1,119 @@
+{
+  "name": "xhs-shipping-assistant",
+  "version": "1.0.0",
+  "description": "小红书发货助手 - 自动发货/客服回复/订单管理",
+  "main": "dist-electron/main.js",
+  "author": "YourCompany",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "build:electron": "npm run build && electron-builder",
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "npm run build && electron-builder",
+    "electron:build:win": "npm run build && electron-builder --win --x64",
+    "electron:build:mac": "npm run build && electron-builder --mac",
+    "electron:rebuild": "electron-rebuild -f -w better-sqlite3",
+    "license:generate-key": "ts-node server/generate-key.ts",
+    "license:generate": "ts-node server/generate-license.ts",
+    "license:verify": "ts-node server/verify-license.ts"
+  },
+  "build": {
+    "appId": "com.yourcompany.xhs-shipping-assistant",
+    "productName": "小红书发货助手",
+    "copyright": "Copyright © 2026 YourCompany",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "resources/**/*",
+      "server/public_key.pem",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "node_modules/better-sqlite3/build/Release/better_sqlite3.node",
+        "to": "better_sqlite3.node"
+      }
+    ],
+    "asarUnpack": [
+      "**/*.{node,dll}"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "小红书发货助手-${version}-win-x64.${ext}",
+      "verifyUpdateCodeSignature": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "小红书发货助手",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.business"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "build/icon.png",
+      "category": "Office"
+    },
+    "publish": {
+      "provider": "generic",
+      "url": "https://your-update-server.com/xhs-updates/"
+    }
+  },
+  "dependencies": {
+    "axios": "^1.7.0",
+    "better-sqlite3": "^11.3.0",
+    "bufferutil": "^4.1.0",
+    "electron-log": "^5.1.1",
+    "electron-store": "^8.2.0",
+    "electron-updater": "^6.2.0",
+    "element-plus": "^2.8.0",
+    "express": "^4.19.0",
+    "pinia": "^2.2.0",
+    "systeminformation": "^5.22.0",
+    "utf-8-validate": "^6.0.6",
+    "uuid": "^10.0.0",
+    "vue": "^3.4.0",
+    "vue-router": "^4.4.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.7.2",
+    "@types/better-sqlite3": "^7.6.10",
+    "@types/express": "^4.17.21",
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.5.10",
+    "@vitejs/plugin-vue": "^5.1.0",
+    "concurrently": "^8.2.0",
+    "electron": "^30.5.1",
+    "electron-builder": "^24.13.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.3.0",
+    "vite-plugin-electron": "^0.28.0",
+    "vite-plugin-electron-renderer": "^0.14.0",
+    "vue-tsc": "^2.0.0",
+    "wait-on": "^7.2.0"
+  }
+}

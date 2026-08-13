@@ -1,0 +1,40 @@
+appId: com.xhs.shipping-assistant
+productName: 小红书发货助手
+copyright: Copyright © 2024
+
+directories:
+  output: release
+  buildResources: resources
+
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - resources/**/*
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/icon.ico
+  artifactName: ${productName}-${version}-setup.${ext}
+
+nsis:
+  oneClick: false
+  perMachine: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: 小红书发货助手
+  uninstallDisplayName: 小红书发货助手
+
+extraResources:
+  - from: server/
+    to: server/
+    filter:
+      - "*.js"
+      - "*.json"
+
+publish:
+  provider: generic
+  url: https://your-update-server.com/releases

@@ -1,0 +1,35 @@
+# 依赖
+node_modules/
+package-lock.json
+
+# 构建产物
+dist/
+dist-electron/
+release/
+
+# 日志
+Logs/
+*.log
+
+# 数据库
+*.db
+*.db-journal
+
+# RSA 密钥（不要提交到 Git！）
+server/private_key.pem
+server/public_key.pem
+server/license_*.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 环境变量
+.env
+.env.local
