@@ -540,8 +540,11 @@ def sa_users_list(request: Request, limit: int = 100):
         _require_super(request)
     except HTTPException as e:
         return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
-    users = dist_db.admin_list_distributors(limit=int(limit or 100))
-    return _ok({"users": users, "list": users, "total": len(users)}, "ok")
+    try:
+        users = dist_db.admin_list_distributors(limit=int(limit or 100))
+        return _ok({"users": users, "list": users, "total": len(users)}, "ok")
+    except Exception as e:
+        return JSONResponse(_fail(f"加载分销商失败: {e}"), status_code=200)
 
 
 @compat_router.post("/api/super-admin/users/adjust-quota")

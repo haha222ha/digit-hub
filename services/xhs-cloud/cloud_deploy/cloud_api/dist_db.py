@@ -503,8 +503,14 @@ def _ensure_distributor_pg(user_id: int, *, default_quota: int) -> dict:
 
 def _map_distributor(dist: dict | None, profile: dict) -> dict:
     dist = dist or {}
-    quota = int(dist.get("quota") or 0)
-    used = int(dist.get("used_quota") or 0)
+    try:
+        quota = int(dist.get("quota") or 0)
+    except (TypeError, ValueError):
+        quota = 0
+    try:
+        used = int(dist.get("used_quota") or 0)
+    except (TypeError, ValueError):
+        used = 0
     # 前端 SPA 仅认 admin / super_admin；distributor 需映射为 admin 才能进后台
     raw_role = str(dist.get("role") or "distributor").strip().lower()
     if raw_role in ("super_admin", "superadmin"):
@@ -1205,11 +1211,10 @@ def admin_list_links(*, status: str | None = None, limit: int = 100) -> list[dic
                 (limit,),
             )
         rows = c.fetchall()
-        cols = [d[0] for d in c.description]
         conn.close()
         out = []
         for row in rows:
-            data = dict(zip(cols, row))
+            data = _row_dict(row) or {}
             item = _map_link(data)
             item["username"] = data.get("username") or ""
             item["user_id"] = data.get("user_id")
@@ -1247,32 +1252,34 @@ def admin_list_links(*, status: str | None = None, limit: int = 100) -> list[dic
 def admin_list_distributors(*, limit: int = 100) -> list[dict]:
     init_dist_tables()
     limit = max(1, min(int(limit), 500))
-    from cloud_deploy.cloud_api import database as db
 
     if _USE_PG:
         conn = _pg_conn()
         c = _pg_cur(conn)
         c.execute(
-            """SELECT d.*, u.username FROM dist_distributors d
-               JOIN users u ON u.id = d.user_id
+            """SELECT d.*, u.username, u.email FROM dist_distributors d
+               LEFT JOIN users u ON u.id = d.user_id
                ORDER BY d.user_id DESC LIMIT %s""",
             (limit,),
         )
         rows = c.fetchall()
-        cols = [d[0] for d in c.description]
         conn.close()
         out = []
         for row in rows:
-            data = dict(zip(cols, row))
-            profile = {"id": data.get("user_id"), "username": data.get("username") or ""}
+            data = _row_dict(row) or {}
+            profile = {
+                "id": data.get("user_id"),
+                "username": data.get("username") or "",
+                "email": data.get("email") or "",
+            }
             out.append(_map_distributor(data, profile))
         return out
 
     conn = _sqlite_conn()
     c = conn.cursor()
     c.execute(
-        """SELECT d.*, u.username FROM dist_distributors d
-           JOIN users u ON u.id = d.user_id
+        """SELECT d.*, u.username, u.email FROM dist_distributors d
+           LEFT JOIN users u ON u.id = d.user_id
            ORDER BY d.user_id DESC LIMIT ?""",
         (limit,),
     )
@@ -1281,7 +1288,11 @@ def admin_list_distributors(*, limit: int = 100) -> list[dict]:
     out = []
     for row in rows:
         data = _row_dict(row) or {}
-        profile = {"id": data.get("user_id"), "username": data.get("username") or ""}
+        profile = {
+            "id": data.get("user_id"),
+            "username": data.get("username") or "",
+            "email": data.get("email") or "",
+        }
         out.append(_map_distributor(data, profile))
     return out
 
