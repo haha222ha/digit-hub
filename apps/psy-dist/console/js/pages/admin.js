@@ -328,10 +328,51 @@ export async function renderGenerate(root) {
       const n = Math.min(50, Math.max(1, Number(count.value) || 1));
       const data = await api.generateLinks(select.value, n);
       const links = (data && data.links) || [];
-      resultHost.append(flash("ok", `已生成 ${links.length} 条链接`));
+      const urls = links.map(
+        (link) => `${location.origin}/test/${link.test_code || select.value}/${link.token}`
+      );
+      resultHost.append(flash("ok", `已生成 ${links.length} 条链接（可一键复制到自动发卡）`));
+
+      const bulkBar = el("div", { className: "row-actions", style: "margin:12px 0;flex-wrap:wrap;gap:8px" });
+      const copyAllBtn = el("button", {
+        className: "btn btn-primary",
+        type: "button",
+        text: `复制全部（${urls.length}）`,
+      });
+      const exportBtn = el("button", {
+        className: "btn btn-ghost",
+        type: "button",
+        text: "导出 TXT",
+      });
+      const hint = el("span", {
+        className: "muted",
+        text: "每行一条链接，适合粘贴到自动发卡 / Excel",
+      });
+      bindCopyButton(copyAllBtn, () => urls.join("\n"), {
+        okText: `已复制 ${urls.length} 条`,
+      });
+      exportBtn.addEventListener("click", () => {
+        const blob = new Blob([urls.join("\n") + (urls.length ? "\n" : "")], {
+          type: "text/plain;charset=utf-8",
+        });
+        const a = document.createElement("a");
+        const stamp = new Date().toISOString().slice(0, 19).replace(/[-:T]/g, "");
+        a.href = URL.createObjectURL(blob);
+        a.download = `psy_links_${select.value || "batch"}_${stamp}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+        exportBtn.textContent = "已下载";
+        setTimeout(() => {
+          exportBtn.textContent = "导出 TXT";
+        }, 1500);
+      });
+      bulkBar.append(copyAllBtn, exportBtn, hint);
+      resultHost.append(bulkBar);
+
       const list = el("div", { className: "link-list" });
-      for (const link of links) {
-        const url = `${location.origin}/test/${link.test_code || select.value}/${link.token}`;
+      for (const url of urls) {
         const copyBtn = el("button", { className: "btn btn-ghost", type: "button", text: "复制" });
         bindCopyButton(copyBtn, url);
         list.append(el("div", { className: "link-item" }, [el("code", { text: url }), copyBtn]));
@@ -419,6 +460,43 @@ export async function renderLinks(root) {
         el("span", { text: `仍可用 ${active}` }),
       ])
     );
+
+    const pageUrls = links.map((link) => {
+      const token = link.token || "";
+      const code = link.test_code || "";
+      return `${location.origin}/test/${code}/${token}`;
+    });
+    const bulk = el("div", { className: "row-actions", style: "margin:0 0 12px;flex-wrap:wrap;gap:8px" });
+    const copyPageBtn = el("button", {
+      className: "btn btn-primary",
+      type: "button",
+      text: `复制本页全部（${pageUrls.length}）`,
+    });
+    const exportPageBtn = el("button", {
+      className: "btn btn-ghost",
+      type: "button",
+      text: "导出本页 TXT",
+    });
+    bindCopyButton(copyPageBtn, () => pageUrls.join("\n"), {
+      okText: `已复制 ${pageUrls.length} 条`,
+    });
+    exportPageBtn.addEventListener("click", () => {
+      const blob = new Blob([pageUrls.join("\n") + "\n"], { type: "text/plain;charset=utf-8" });
+      const a = document.createElement("a");
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[-:T]/g, "");
+      a.href = URL.createObjectURL(blob);
+      a.download = `psy_links_page_${stamp}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    });
+    bulk.append(
+      copyPageBtn,
+      exportPageBtn,
+      el("span", { className: "muted", text: "每行一条，可直接导入发卡工具" })
+    );
+    host.append(bulk);
     const table = el("table", { className: "data" });
     table.append(
       el("thead", {}, [
