@@ -62,6 +62,69 @@ export function openModal(title, bodyChildren, { onClose } = {}) {
   return { close, backdrop };
 }
 
+/** 右侧抽屉（移动端自底部滑出） */
+export function openDrawer(title, bodyChildren, { onClose } = {}) {
+  const backdrop = el("div", { className: "drawer-backdrop" });
+  const closeBtn = el("button", {
+    className: "drawer-close",
+    type: "button",
+    text: "×",
+    "aria-label": "关闭",
+  });
+  const panel = el("div", { className: "drawer-panel" }, [
+    el("div", { className: "drawer-header" }, [el("h3", { text: title }), closeBtn]),
+    el("div", { className: "drawer-body" }, bodyChildren),
+  ]);
+  backdrop.append(panel);
+  function close() {
+    backdrop.classList.remove("show");
+    setTimeout(() => {
+      backdrop.remove();
+      if (onClose) onClose();
+    }, 280);
+  }
+  closeBtn.addEventListener("click", close);
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) close();
+  });
+  document.body.appendChild(backdrop);
+  requestAnimationFrame(() => backdrop.classList.add("show"));
+  return { close, backdrop };
+}
+
+/** 微信内 JSAPI 调起支付；无 WeixinJSBridge 时 reject。 */
+export function invokeWechatPay(params) {
+  const p = params || {};
+  const payload = {
+    appId: p.appId || p.appid,
+    timeStamp: String(p.timeStamp || p.timestamp || ""),
+    nonceStr: p.nonceStr || p.nonce_str || "",
+    package: p.package || p.prepay_id || "",
+    signType: p.signType || p.sign_type || "MD5",
+    paySign: p.paySign || p.pay_sign || "",
+  };
+  if (!payload.appId || !payload.paySign || !payload.package) {
+    return Promise.reject(new Error("缺少 JSAPI 支付参数"));
+  }
+  return new Promise((resolve, reject) => {
+    function invoke() {
+      const bridge = window.WeixinJSBridge;
+      if (!bridge || typeof bridge.invoke !== "function") {
+        reject(new Error("WeixinJSBridge 不可用"));
+        return;
+      }
+      bridge.invoke("getBrandWCPayRequest", payload, (res) => {
+        const msg = (res && res.err_msg) || "";
+        if (msg === "get_brand_wcpay_request:ok") resolve(res);
+        else if (msg === "get_brand_wcpay_request:cancel") reject(new Error("cancel"));
+        else reject(new Error(msg || "调起微信支付失败"));
+      });
+    }
+    if (typeof window.WeixinJSBridge !== "undefined") invoke();
+    else document.addEventListener("WeixinJSBridgeReady", invoke, false);
+  });
+}
+
 /** 复制到剪贴板：优先 Clipboard API，失败则 textarea + execCommand。 */
 export async function copyText(text) {
   const value = String(text || "");

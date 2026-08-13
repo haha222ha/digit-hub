@@ -196,6 +196,43 @@ def purchase_methods() -> dict:
     }
 
 
+def _parse_jsapi_params(gw: dict) -> dict | None:
+    """从 hwxun mapi 响应中提取 WeixinJSBridge 参数（若网关支持）。"""
+    import json
+
+    if not isinstance(gw, dict):
+        return None
+    candidates: list[dict] = []
+    for key in ("jsapi_params", "jsapi", "pay_info", "payInfo", "data"):
+        raw = gw.get(key)
+        if isinstance(raw, dict):
+            candidates.append(raw)
+        elif isinstance(raw, str) and raw.strip():
+            try:
+                parsed = json.loads(raw)
+            except Exception:
+                continue
+            if isinstance(parsed, dict):
+                candidates.append(parsed)
+    for data in candidates:
+        app_id = data.get("appId") or data.get("appid") or data.get("app_id")
+        pay_sign = data.get("paySign") or data.get("pay_sign")
+        pkg = data.get("package") or data.get("prepay_id") or data.get("prepayId")
+        ts = data.get("timeStamp") or data.get("timestamp") or data.get("time_stamp")
+        nonce = data.get("nonceStr") or data.get("nonce_str") or data.get("noncestr")
+        sign_type = data.get("signType") or data.get("sign_type") or "MD5"
+        if app_id and pay_sign and pkg and ts and nonce:
+            return {
+                "appId": str(app_id),
+                "timeStamp": str(ts),
+                "nonceStr": str(nonce),
+                "package": str(pkg),
+                "signType": str(sign_type),
+                "paySign": str(pay_sign),
+            }
+    return None
+
+
 def jsapi_bootstrap(order_key: str, user_id: int, *, client_ip: str = "127.0.0.1") -> dict:
     detail = get_order_for_user(order_key, user_id)
     order = detail["order"]
@@ -204,8 +241,46 @@ def jsapi_bootstrap(order_key: str, user_id: int, *, client_ip: str = "127.0.0.1
         raise ValueError("订单不存在")
     if row.get("status") == "paid":
         return {"paid": True, "status": "paid", "order": order}
-    row = {**row, "channel": "wxpay"}
-    payurl, qrcode = _payurl_for_row(row)
+
+    plan = get_plan(row.get("plan_code") or "") or {}
+    goods_name = f"心理分销-{plan.get('label') or '额度'}"
+    payurl = ""
+    qrcode = ""
+    jsapi_params = None
+    try:
+        from cloud_deploy.cloud_api.hwxun_pay import channel_merchant_credentials, create_epay_order
+
+        channel_merchant_credentials("wxpay")
+        gw = create_epay_order(
+            channel="wxpay",
+            out_trade_no=row["order_no"],
+            amount=str(row.get("amount") or "0"),
+            name=goods_name,
+            notify_url=pay._notify_url(),
+            clientip=client_ip or "127.0.0.1",
+            device="wechat",
+        )
+        jsapi_params = _parse_jsapi_params(gw)
+        payurl = str(gw.get("payurl") or gw.get("pay_url") or "").strip()
+        qrcode = str(gw.get("qrcode") or gw.get("code_url") or "").strip()
+    except Exception:
+        try:
+            payurl, qrcode = _payurl_for_row({**row, "channel": "wxpay"})
+        except Exception:
+            payurl, qrcode = "", ""
+
+    if jsapi_params:
+        return {
+            "paid": False,
+            "status": "pending",
+            "order": order,
+            "orderId": order["order_no"],
+            "pay_type": "jsapi",
+            "jsapi_params": jsapi_params,
+            "pay_url": payurl,
+            "code_url": qrcode,
+            "mock": False,
+        }
     return {
         "paid": False,
         "status": "pending",

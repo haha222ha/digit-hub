@@ -2,10 +2,12 @@
 """心理测评分销 API 冒烟测试。"""
 from __future__ import annotations
 
+import json
 import os
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if ROOT not in sys.path:
@@ -17,6 +19,8 @@ bootstrap()
 
 from cloud_deploy.cloud_api import database as db
 from cloud_deploy.cloud_api import dist_db
+from cloud_deploy.cloud_api import dist_ops
+from cloud_deploy.cloud_api import dist_orders as dist_ord
 from cloud_deploy.cloud_api import dist_service as svc
 
 
@@ -58,8 +62,6 @@ class DistApiTest(unittest.TestCase):
         self.assertEqual(done.get("usedCount"), 1)
 
     def test_dist_order_package_mapping(self):
-        from cloud_deploy.cloud_api import dist_orders as dist_ord
-
         pkg = dist_ord.get_package(1)
         self.assertIsNotNone(pkg)
         self.assertEqual(pkg["plan_code"], "psy_quota_100")
@@ -76,6 +78,109 @@ class DistApiTest(unittest.TestCase):
         self.assertGreaterEqual(stats["links_total"], 1)
         links = dist_db.admin_list_links(limit=10)
         self.assertTrue(any(x.get("test_code") == "mbti" for x in links))
+
+    def test_payment_notify_log_list(self):
+        dist_db.log_payment_notify(
+            {"out_trade_no": "ORD_TEST_1", "trade_status": "TRADE_SUCCESS"},
+            "success",
+            client_ip="127.0.0.1",
+            verify_ok=True,
+        )
+        dist_db.log_payment_notify(
+            {"out_trade_no": "ORD_TEST_2", "trade_status": "TRADE_FAIL"},
+            "fail",
+            client_ip="127.0.0.1",
+            verify_ok=False,
+        )
+        page = dist_db.list_payment_notify_logs_page(page=1, per_page=10)
+        logs = page.get("logs") or []
+        self.assertGreaterEqual(len(logs), 2)
+        ok_logs = dist_db.list_payment_notify_logs_page(page=1, per_page=10, status="success")
+        self.assertTrue(all(x.get("status") == "success" for x in ok_logs.get("logs") or []))
+        detail = dist_db.get_payment_notify_log(int(logs[0]["id"]))
+        self.assertIsNotNone(detail)
+        self.assertIn("raw_body", detail)
+
+    def test_package_documents_roundtrip(self):
+        row = dist_ops.save_package_document(
+            {
+                "title": "测试文档",
+                "document_url": "https://example.com/doc",
+                "package_id": 0,
+                "display_order": 1,
+            }
+        )
+        self.assertTrue(row.get("id"))
+        docs = dist_ops.list_package_documents()
+        self.assertTrue(any(d.get("title") == "测试文档" for d in docs))
+
+    def test_quota_logs_change_type_filter(self):
+        profile = db.register_user_account("qloguser", "pass123456")
+        uid = int(profile["id"])
+        dist_db.ensure_distributor(uid, default_quota=5)
+        dist_db.add_quota(uid, 3, change_type="redeem", remark="test-redeem")
+        dist_db.add_quota(uid, 2, change_type="purchase", remark="test-purchase")
+        all_logs = dist_db.list_quota_logs_page(uid, page=1, per_page=20)
+        self.assertGreaterEqual(len(all_logs.get("logs") or []), 2)
+        redeem_logs = dist_db.list_quota_logs_page(uid, page=1, per_page=20, change_type="redeem")
+        self.assertTrue(all(x.get("change_type") == "redeem" for x in redeem_logs.get("logs") or []))
+
+    def test_test_results_date_filter(self):
+        profile = db.register_user_account("tresultuser", "pass123456")
+        uid = int(profile["id"])
+        dist_db.ensure_distributor(uid, default_quota=5)
+        links = svc.generate_links(uid, "7v7", 1)
+        token = links["links"][0]["token"]
+        svc.start_test(token)
+        svc.complete_test(token, result_data={"score": 1})
+        data = dist_db.list_test_results_page(uid, page=1, per_page=10, test_code="7v7")
+        self.assertGreaterEqual(len(data.get("results") or []), 1)
+
+    def test_payment_stats_range(self):
+        stats = dist_ops.payment_stats_range("2020-01-01", "2099-12-31")
+        self.assertIn("summary", stats)
+        self.assertIn("daily_trend", stats)
+
+    def test_parse_jsapi_params(self):
+        gw = {
+            "pay_info": json.dumps(
+                {
+                    "appId": "wx123",
+                    "timeStamp": "1234567890",
+                    "nonceStr": "abc",
+                    "package": "prepay_id=xxx",
+                    "signType": "MD5",
+                    "paySign": "SIGN",
+                }
+            )
+        }
+        parsed = dist_ord._parse_jsapi_params(gw)
+        self.assertEqual(parsed["appId"], "wx123")
+        self.assertEqual(parsed["paySign"], "SIGN")
+
+    def test_jsapi_bootstrap_redirect_fallback(self):
+        profile = db.register_user_account("payuser", "pass123456")
+        uid = int(profile["id"])
+        dist_db.ensure_distributor(uid, default_quota=5)
+        os.environ["XHS_PAY_NOTIFY_BASE"] = "https://example.com/api/v1/payment/notify"
+        from datetime import datetime, timedelta
+
+        order_no = "ORD_JSAPI_TEST"
+        db.insert_payment_order(
+            order_no=order_no,
+            user_id=uid,
+            plan_code="psy_quota_100",
+            duration_days=0,
+            amount="9.90",
+            channel="wxpay",
+            client_ip="127.0.0.1",
+            expires_at=(datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S"),
+        )
+        with patch("cloud_deploy.cloud_api.hwxun_pay.channel_merchant_credentials", side_effect=RuntimeError("no cred")):
+            boot = dist_ord.jsapi_bootstrap(order_no, uid, client_ip="127.0.0.1")
+        self.assertFalse(boot.get("paid"))
+        self.assertIn(boot.get("pay_type"), ("redirect", "jsapi"))
+        self.assertEqual(boot.get("orderId"), order_no)
 
 
 if __name__ == "__main__":

@@ -309,6 +309,7 @@ export async function renderSaOrders(root) {
 export async function renderSaPaymentStats(root) {
   if (!guard()) return;
   const errHost = el("div");
+  const rangeHost = el("div");
   let stats = {};
   let cfg = {};
   try {
@@ -317,6 +318,70 @@ export async function renderSaPaymentStats(root) {
     errHost.append(flash("error", err.message || "加载失败"));
   }
   const ratio = stats.payment_method_ratio || [];
+  const startInput = el("input", { type: "date" });
+  const endInput = el("input", { type: "date" });
+  const today = new Date();
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  endInput.value = today.toISOString().slice(0, 10);
+  startInput.value = monthStart.toISOString().slice(0, 10);
+
+  async function loadRange() {
+    clear(rangeHost);
+    rangeHost.append(el("p", { className: "muted", text: "加载区间统计…" }));
+    try {
+      const data = await api.saPaymentStatsRange({
+        startDate: startInput.value,
+        endDate: endInput.value,
+      });
+      const summary = (data && data.summary) || {};
+      const trend = (data && data.daily_trend) || [];
+      const rangeRatio = (data && data.payment_method_ratio) || [];
+      clear(rangeHost);
+      rangeHost.append(
+        el("h3", { text: `区间统计 ${data.start_date || startInput.value} ~ ${data.end_date || endInput.value}` }),
+        el("div", { className: "stat-row cols-2", style: "margin-bottom:12px" }, [
+          el("div", { className: "stat" }, [
+            el("div", { className: "k", text: "区间营收" }),
+            el("div", { className: "v", text: `¥${summary.revenue ?? 0}` }),
+          ]),
+          el("div", { className: "stat" }, [
+            el("div", { className: "k", text: "已付订单" }),
+            el("div", { className: "v", text: String(summary.paid_order_count ?? 0) }),
+          ]),
+        ]),
+        rangeRatio.length
+          ? table(
+              ["支付方式", "笔数"],
+              rangeRatio.map((r) =>
+                el("tr", {}, [
+                  el("td", { text: r.method || "—" }),
+                  el("td", { text: String(r.count || 0) }),
+                ])
+              )
+            )
+          : el("p", { className: "muted", text: "该区间暂无已付订单" }),
+        trend.length
+          ? el("div", { style: "margin-top:12px" }, [
+              el("h4", { text: "日趋势" }),
+              table(
+                ["日期", "营收", "已付笔数"],
+                trend.map((r) =>
+                  el("tr", {}, [
+                    el("td", { text: r.date || "—" }),
+                    el("td", { text: `¥${r.revenue ?? 0}` }),
+                    el("td", { text: String(r.paid_order_count ?? 0) }),
+                  ])
+                )
+              ),
+            ])
+          : null
+      );
+    } catch (e) {
+      clear(rangeHost);
+      rangeHost.append(flash("error", e.message || "加载区间统计失败"));
+    }
+  }
+
   root.append(
     shell("/super-admin/payment-stats", [
       el("h1", { className: "page-title", text: "支付统计" }),
@@ -356,6 +421,27 @@ export async function renderSaPaymentStats(root) {
                 ])
               )
             ),
+      ]),
+      el("div", { className: "panel" }, [
+        el("h3", { text: "区间统计" }),
+        el("div", { className: "filter-bar" }, [
+          el("div", { className: "field", style: "margin:0;min-width:150px" }, [
+            el("label", { text: "开始日期" }),
+            startInput,
+          ]),
+          el("div", { className: "field", style: "margin:0;min-width:150px" }, [
+            el("label", { text: "结束日期" }),
+            endInput,
+          ]),
+          el("button", {
+            className: "btn btn-primary",
+            type: "button",
+            text: "查询",
+            style: "width:auto",
+            onClick: () => loadRange(),
+          }),
+        ]),
+        rangeHost,
       ]),
       el("p", {
         className: "muted",
@@ -398,6 +484,7 @@ export async function renderSaPaymentStats(root) {
       saveBtn
     );
   }
+  await loadRange();
 }
 
 export async function renderSaPackages(root) {

@@ -1,5 +1,5 @@
 import { api, getUser, clearSession, getToken, setSession } from "../api.js";
-import { el, flash, clear, copyText, bindCopyButton, showToast, isWechatBrowser, openModal } from "../ui.js";
+import { el, flash, clear, copyText, bindCopyButton, showToast, isWechatBrowser, openModal, openDrawer, invokeWechatPay } from "../ui.js";
 import { navigate, linkClick } from "../router.js";
 
 const NAV = [
@@ -203,6 +203,10 @@ function shell(activePath, bodyChildren) {
         }),
       ]),
     ]),
+    el("div", {
+      className: "nav-scrim",
+      onClick: () => layout.classList.remove("nav-open"),
+    }),
     el("div", { className: "shell-body" }, [
       el("aside", { className: "sidenav" }, sideLinks),
       el("main", { className: "main" }, bodyChildren),
@@ -748,7 +752,7 @@ export async function renderLinks(root) {
           type: "button",
           text: "详情",
           onClick: () => {
-            openModal("链接详情", [
+            openDrawer("链接详情", [
               el("dl", { className: "link-detail-grid" }, [
                 el("dt", { text: "测题" }),
                 el("dd", { text: code }),
@@ -762,6 +766,8 @@ export async function renderLinks(root) {
                 el("dd", { text: `${cd.text} · ${cd.hint}` }),
                 el("dt", { text: "创建时间" }),
                 el("dd", { text: String(link.created_at || link.createdAt || "—") }),
+                el("dt", { text: "链接 ID" }),
+                el("dd", { text: String(link.id || "—") }),
               ]),
             ]);
           },
@@ -1056,6 +1062,22 @@ export async function renderPurchase(root) {
         await afterPaySuccess();
         return;
       }
+      const jsapiParams = boot.jsapi_params || boot.jsapiParams;
+      if (boot.pay_type === "jsapi" && jsapiParams) {
+        try {
+          await invokeWechatPay(jsapiParams);
+          const ok = await pollPaid(orderNo, true);
+          if (ok) await afterPaySuccess();
+          else showToast("支付结果确认中，请稍后刷新工作台", "error");
+          return;
+        } catch (e) {
+          if ((e && e.message) === "cancel") {
+            showToast("已取消支付", "error");
+            return;
+          }
+          /* fall through to redirect */
+        }
+      }
       const payUrl = boot.pay_url || boot.payUrl || "";
       if (payUrl) {
         host.prepend(flash("ok", `订单 ${orderNo} 正在跳转微信支付…`));
@@ -1173,10 +1195,9 @@ export async function renderPurchase(root) {
       ];
       const unitPrice = quota > 0 && priceNum > 0 ? (priceNum / quota).toFixed(2) : null;
       const btn = el("button", {
-        className: "btn btn-primary",
+        className: `plan-buy-btn theme-${theme}`,
         type: "button",
         text: "立即支付",
-        style: "width:100%",
       });
       btn.addEventListener("click", async () => {
         btn.disabled = true;
@@ -1194,15 +1215,35 @@ export async function renderPurchase(root) {
         }
       });
       const cardChildren = [
-        p.recommended ? el("span", { className: "plan-tag", text: "推荐" }) : null,
-        el("h3", { className: "plan-name", text: name }),
-        p.subtitle ? el("p", { className: "plan-desc", text: p.subtitle }) : null,
-        el("div", { className: "plan-price-row" }, [
-          el("span", { className: "plan-price", text: `¥${priceNum}` }),
-          el("span", { className: "plan-quota", text: `${quota} 额度` }),
+        p.recommended ? el("span", { className: `plan-tag theme-${theme}`, text: "推荐" }) : null,
+        el("div", { className: "plan-head" }, [
+          el("h3", { className: "plan-name", text: name }),
+          p.subtitle ? el("p", { className: "plan-desc", text: p.subtitle }) : null,
         ]),
-        unitPrice ? el("p", { className: "plan-unit", text: `约 ¥${unitPrice}/额度` }) : null,
-        el("ul", { className: "plan-features" }, features.map((f) => el("li", { text: f }))),
+        el("div", { className: "plan-price-desktop" }, [
+          el("div", { className: "plan-price-row" }, [
+            el("span", { className: "plan-price", text: `¥${priceNum}` }),
+            el("span", { className: `plan-quota theme-${theme}`, text: `${quota} 额度` }),
+          ]),
+          unitPrice ? el("p", { className: `plan-unit theme-${theme}`, text: `约 ¥${unitPrice}/额度` }) : null,
+        ]),
+        el("div", { className: "plan-price-mobile" }, [
+          el("div", { className: "plan-mobile-row" }, [
+            el("div", { className: "plan-mobile-col" }, [
+              el("p", { className: "plan-mobile-label", text: "套餐价格" }),
+              el("p", { className: "plan-price", text: `¥${priceNum}` }),
+            ]),
+            unitPrice
+              ? el("span", { className: "plan-discount-pill", text: `¥${unitPrice}/额度` })
+              : el("span", { className: "plan-arrow", text: "→" }),
+            el("div", { className: "plan-mobile-col plan-mobile-col--right" }, [
+              el("p", { className: "plan-mobile-label", text: "获得额度" }),
+              el("p", { className: `plan-quota-lg theme-${theme}`, text: `${quota}` }),
+              el("p", { className: "plan-mobile-suffix", text: "额度" }),
+            ]),
+          ]),
+        ]),
+        el("ul", { className: "plan-features plan-features--desktop" }, features.map((f) => el("li", { text: f }))),
         cardDocs.length
           ? el(
               "ul",

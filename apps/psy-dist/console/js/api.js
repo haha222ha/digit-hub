@@ -362,6 +362,13 @@ export const api = {
   saRedeemRevoke: (code) =>
     request("/api/super-admin/redeem-codes/revoke", { method: "POST", auth: true, body: { code } }),
   saPaymentStats: () => request("/api/super-admin/payment-stats", { auth: true }),
+  saPaymentStatsRange: (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.startDate || params.start_date) q.set("start_date", params.startDate || params.start_date);
+    if (params.endDate || params.end_date) q.set("end_date", params.endDate || params.end_date);
+    const s = q.toString();
+    return request(`/api/super-admin/payment-stats/range${s ? `?${s}` : ""}`, { auth: true });
+  },
   saPaymentConfig: () => request("/api/super-admin/payment-config", { auth: true }),
   saPaymentConfigSave: (payload) =>
     request("/api/super-admin/payment-config", { method: "POST", auth: true, body: payload }),
