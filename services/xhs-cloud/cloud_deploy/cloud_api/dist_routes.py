@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+import os
+import time
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel, Field
 
 from cloud_deploy.cloud_api import database as db
@@ -81,7 +85,15 @@ class OrderPayBody(BaseModel):
 
 
 class RevokeLinkBody(BaseModel):
-    linkId: int
+    linkId: int | None = None
+    linkIds: list[int] | None = None
+
+
+class LinksExportBody(BaseModel):
+    linkIds: list[int] | None = None
+    status: str | None = None
+    testCode: str | None = None
+    test_code: str | None = None
 
 
 class UnlimitedStartBody(BaseModel):
@@ -426,34 +438,170 @@ def compat_orders_pay_html(order_no: str, body: OrderPayBody, request: Request):
 @compat_router.post("/api/links/revoke")
 def compat_links_revoke(body: RevokeLinkBody, request: Request):
     user = _dist_token(request)
+    ids = list(body.linkIds or [])
+    if body.linkId is not None:
+        ids.append(int(body.linkId))
+    # 去重保序
+    seen: set[int] = set()
+    uniq: list[int] = []
+    for i in ids:
+        try:
+            ii = int(i)
+        except Exception:
+            continue
+        if ii in seen:
+            continue
+        seen.add(ii)
+        uniq.append(ii)
     try:
-        link = dist_db.revoke_link(user["id"], body.linkId)
-        return _ok({"link": link}, "链接已撤销")
+        out = dist_db.revoke_links(user["id"], uniq)
+        msg = "链接已撤销"
+        if int(out.get("refundedQuota") or 0) > 0:
+            msg = f"撤销成功，退还 {out['refundedQuota']} 个额度"
+        return _ok(out, msg)
     except ValueError as e:
         return JSONResponse(_fail(str(e)), status_code=200)
 
 
 @compat_router.get("/api/links/list")
-def compat_links_list(request: Request, status: str = "", page: str = "1", perPage: str = "20"):
+def compat_links_list(
+    request: Request,
+    status: str = "",
+    page: str = "1",
+    perPage: str = "20",
+    per_page: str = "",
+    testCode: str = "",
+    test_code: str = "",
+):
     user = _dist_token(request)
-    links = dist_db.list_links(user["id"], status=status or None, limit=int(perPage or 20))
+    pp = int(perPage or per_page or 20)
+    pg = int(page or 1)
+    tc = (testCode or test_code or "").strip() or None
+    data = dist_db.list_links_page(
+        user["id"],
+        status=(status or "").strip() or None,
+        test_code=tc,
+        page=pg,
+        per_page=pp,
+    )
+    total = int(data.get("total") or 0)
     return _ok(
         {
-            "links": links,
-            "pagination": {"page": int(page or 1), "perPage": int(perPage or 20), "total": len(links)},
+            "links": data.get("links") or [],
+            "pagination": {
+                "page": int(data.get("page") or pg),
+                "perPage": int(data.get("per_page") or pp),
+                "total": total,
+                "totalPages": max(1, (total + pp - 1) // pp) if total else 0,
+            },
         },
         "获取链接列表成功",
     )
 
 
+@compat_router.post("/api/links/export")
+def compat_links_export(body: LinksExportBody, request: Request):
+    user = _dist_token(request)
+    tc = (body.testCode or body.test_code or "").strip() or None
+    links = dist_db.export_links_rows(
+        user["id"],
+        link_ids=body.linkIds,
+        status=(body.status or "").strip() or None,
+        test_code=tc,
+    )
+    lines = ["测试代码\t分销链接\t状态"]
+    for l in links:
+        code = l.get("test_code") or ""
+        token = l.get("token") or ""
+        st = l.get("status") or ""
+        lines.append(f"{code}\t/test/{code}/{token}\t{st}")
+    blob = "\n".join(lines) + ("\n" if lines else "")
+    headers = {
+        "Content-Disposition": 'attachment; filename="links_export.txt"',
+        "Cache-Control": "no-store",
+    }
+    return Response(content=blob.encode("utf-8"), media_type="text/plain; charset=utf-8", headers=headers)
+
+
+def _require_unlimited_access(request: Request) -> tuple[dict, dict]:
+    """超管始终可开；商家剩余额度 > 10 可开免费测。"""
+    user = _dist_token(request)
+    dist = svc.map_user_for_dist(int(user["id"]))
+    if (dist.get("role") or "") == "super_admin":
+        return user, dist
+    rem = int(dist.get("remaining_quota") or 0)
+    if rem > 10:
+        return user, dist
+    raise HTTPException(status_code=403, detail="剩余额度需大于 10 才能使用免费测试，请先购买或兑换额度")
+
+
 @compat_router.post("/api/admin/unlimited-test/start")
 def compat_unlimited_start(body: UnlimitedStartBody, request: Request):
     try:
-        _user, dist = _require_super(request)
+        _user, dist = _require_unlimited_access(request)
     except HTTPException as e:
         return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
     session = dist_db.create_unlimited_session(int(dist["id"] or _user["id"]), body.testCode)
-    return _ok(session, "无限测模式已开启（仅超管，24小时内有效）")
+    return _ok(session, "免费测试已开启（24小时内有效）")
+
+
+@compat_router.get("/api/quota/redeem-history")
+def compat_redeem_history(request: Request, page: str = "1", perPage: str = "20", per_page: str = ""):
+    user = _dist_token(request)
+    data = dist_db.list_redeem_history(
+        user["id"],
+        page=int(page or 1),
+        per_page=int(perPage or per_page or 20),
+    )
+    return _ok(data, "ok")
+
+
+def _psy_uploads_dir() -> Path:
+    env = (os.environ.get("PSY_DIST_UPLOAD_DIR") or "").strip()
+    if env:
+        return Path(env)
+    # 生产默认与 nginx /uploads/ 同源
+    prod = Path("/opt/digit-hub/apps/psy-dist/uploads")
+    if prod.parent.is_dir() or prod.is_dir():
+        return prod
+    # 本地 digit-hub 树：.../services/xhs-cloud/cloud_deploy/cloud_api → 上 4 级到 digit-hub
+    here = Path(__file__).resolve()
+    try:
+        return here.parents[4] / "apps" / "psy-dist" / "uploads"
+    except Exception:
+        return Path("uploads")
+
+
+@compat_router.post("/api/upload/image")
+async def compat_upload_image(request: Request, file: UploadFile = File(...)):
+    """上传图片（客服微信二维码等）→ /uploads/..."""
+    try:
+        _dist_token(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    if not file.filename:
+        return JSONResponse(_fail("缺少上传文件"), status_code=200)
+    raw = await file.read()
+    if not raw:
+        return JSONResponse(_fail("上传文件为空"), status_code=200)
+    if len(raw) > 5 * 1024 * 1024:
+        return JSONResponse(_fail("图片超过 5MB 限制"), status_code=200)
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if ext not in (".png", ".jpg", ".jpeg", ".gif", ".webp"):
+        return JSONResponse(_fail("仅支持 png/jpg/jpeg/gif/webp"), status_code=200)
+    uploads = _psy_uploads_dir()
+    try:
+        uploads.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        return JSONResponse(_fail(f"无法创建上传目录: {e}"), status_code=200)
+    name = f"file-{int(time.time() * 1000)}-{os.getpid()}{ext}"
+    save_path = uploads / name
+    try:
+        save_path.write_bytes(raw)
+    except Exception as e:
+        return JSONResponse(_fail(f"保存失败: {e}"), status_code=200)
+    url = f"/uploads/{name}"
+    return _ok({"url": url, "filename": name, "size": len(raw)}, "上传成功")
 
 
 @compat_router.post("/api/admin/unlimited-test/validate")

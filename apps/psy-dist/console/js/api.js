@@ -55,6 +55,39 @@ async function request(path, { method = "GET", body, auth = false } = {}) {
   return data ? data.data : null;
 }
 
+async function requestBlob(path, { method = "POST", body, auth = false } = {}) {
+  const headers = { Accept: "*/*" };
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  if (auth) {
+    const t = getToken();
+    if (t) headers.Authorization = `Bearer ${t}`;
+  }
+  const res = await fetch(path, {
+    method,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+    credentials: "same-origin",
+  });
+  const ct = (res.headers.get("content-type") || "").toLowerCase();
+  if (ct.includes("application/json")) {
+    let data = null;
+    try {
+      data = await res.json();
+    } catch {
+      data = null;
+    }
+    throw new Error((data && data.message) || "导出失败");
+  }
+  if (!res.ok) {
+    throw new Error(`导出失败 (${res.status})`);
+  }
+  const cd = res.headers.get("content-disposition") || "";
+  let filename = "links_export.txt";
+  const m = cd.match(/filename="?([^"]+)"?/i);
+  if (m) filename = m[1];
+  return { blob: await res.blob(), filename };
+}
+
 export const api = {
   login: (usernameOrEmail, password) =>
     request("/api/auth/login", {
@@ -93,8 +126,9 @@ export const api = {
   linksList: (params = {}) => {
     const q = new URLSearchParams();
     if (params.status) q.set("status", params.status);
+    if (params.testCode || params.test_code) q.set("testCode", params.testCode || params.test_code);
     if (params.page) q.set("page", String(params.page));
-    if (params.perPage) q.set("perPage", String(params.perPage));
+    if (params.perPage || params.per_page) q.set("perPage", String(params.perPage || params.per_page));
     const s = q.toString();
     return request(`/api/links/list${s ? `?${s}` : ""}`, { auth: true });
   },
@@ -102,14 +136,29 @@ export const api = {
     request("/api/links/revoke", {
       method: "POST",
       auth: true,
-      body: { linkId },
+      body: { linkIds: [linkId] },
     }),
+  revokeLinks: (linkIds) =>
+    request("/api/links/revoke", {
+      method: "POST",
+      auth: true,
+      body: { linkIds },
+    }),
+  exportLinks: (payload = {}) =>
+    requestBlob("/api/links/export", { method: "POST", auth: true, body: payload }),
   redeem: (code) =>
     request("/api/quota/redeem", {
       method: "POST",
       auth: true,
       body: { code },
     }),
+  redeemHistory: (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.page) q.set("page", String(params.page));
+    if (params.perPage || params.per_page) q.set("perPage", String(params.perPage || params.per_page));
+    const s = q.toString();
+    return request(`/api/quota/redeem-history${s ? `?${s}` : ""}`, { auth: true });
+  },
   packagesList: () => request("/api/admin/packages/list"),
   purchaseMethods: () => request("/api/admin/payment/purchase-methods"),
   createOrder: (packageId, paymentMethod = "wxpay") =>
@@ -131,6 +180,32 @@ export const api = {
       auth: true,
       body: { testCode },
     }),
+  uploadImage: async (file) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    const headers = { Accept: "application/json" };
+    const t = getToken();
+    if (t) headers.Authorization = `Bearer ${t}`;
+    const res = await fetch("/api/upload/image", {
+      method: "POST",
+      headers,
+      body: fd,
+      credentials: "same-origin",
+    });
+    let data = null;
+    try {
+      data = await res.json();
+    } catch {
+      data = null;
+    }
+    if (!res.ok && (!data || data.code === undefined)) {
+      throw new Error((data && data.message) || `上传失败 (${res.status})`);
+    }
+    if (data && data.code !== undefined && data.code !== 200) {
+      throw new Error(data.message || "上传失败");
+    }
+    return data ? data.data : null;
+  },
   inviteInfo: () => request("/api/invite/info", { auth: true }),
   inviteRecords: (params = {}) => {
     const q = new URLSearchParams();
@@ -207,10 +282,10 @@ export const api = {
   saPaymentConfig: () => request("/api/super-admin/payment-config", { auth: true }),
   saOpLogs: (limit = 100) => request(`/api/super-admin/operation-logs/list?limit=${limit}`, { auth: true }),
   announcementsList: () => request("/api/announcements/list", { auth: true }),
+  announcementsUnread: () => request("/api/announcements/unread-count", { auth: true }),
   announcementsMarkAll: () =>
     request("/api/announcements/mark-all-read", { method: "POST", auth: true, body: {} }),
   customerService: () => request("/api/config/customer-service", { auth: true }),
-  adminConfigGet: () => request("/api/admin/config/get", { auth: true }),
   tutorialsList: () => request("/api/tutorials/list", { auth: true }),
   helpDocsList: () => request("/api/help-documents/list", { auth: true }),
 };

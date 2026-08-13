@@ -1286,75 +1286,302 @@ def _insert_test_result(
     return int(rid)
 
 
-def list_links(user_id: int, *, status: str | None = None, limit: int = 100) -> list[dict]:
+def list_links_page(
+    user_id: int,
+    *,
+    status: str | None = None,
+    test_code: str | None = None,
+    page: int = 1,
+    per_page: int = 20,
+) -> dict:
+    """真分页链接列表。返回 {links, total, page, per_page}。"""
     init_dist_tables()
-    limit = max(1, min(limit, 500))
+    page = max(1, int(page or 1))
+    per_page = max(1, min(int(per_page or 20), 100))
+    offset = (page - 1) * per_page
+    st = (status or "").strip() or None
+    tc = (test_code or "").strip() or None
+    where = ["user_id=%s" if _USE_PG else "user_id=?"]
+    params: list[Any] = [int(user_id)]
+    if st:
+        where.append("status=%s" if _USE_PG else "status=?")
+        params.append(st)
+    if tc:
+        where.append("test_code=%s" if _USE_PG else "test_code=?")
+        params.append(tc)
+    wh = " AND ".join(where)
     if _USE_PG:
         conn = _pg_conn()
         c = _pg_cur(conn)
-        if status:
-            c.execute(
-                """SELECT * FROM dist_links WHERE user_id=%s AND status=%s
-                   ORDER BY id DESC LIMIT %s""",
-                (user_id, status, limit),
-            )
-        else:
-            c.execute(
-                "SELECT * FROM dist_links WHERE user_id=%s ORDER BY id DESC LIMIT %s",
-                (user_id, limit),
-            )
+        c.execute(f"SELECT COUNT(*) AS c FROM dist_links WHERE {wh}", tuple(params))
+        total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        c.execute(
+            f"SELECT * FROM dist_links WHERE {wh} ORDER BY id DESC LIMIT %s OFFSET %s",
+            tuple(params + [per_page, offset]),
+        )
         rows = c.fetchall()
         conn.close()
-        return [_map_link(_row_dict(r)) for r in rows]
-    conn = _sqlite_conn()
-    c = conn.cursor()
-    if status:
-        c.execute(
-            """SELECT * FROM dist_links WHERE user_id=? AND status=?
-               ORDER BY id DESC LIMIT ?""",
-            (user_id, status, limit),
-        )
     else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(f"SELECT COUNT(*) AS c FROM dist_links WHERE {wh}", tuple(params))
+        total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
         c.execute(
-            "SELECT * FROM dist_links WHERE user_id=? ORDER BY id DESC LIMIT ?",
-            (user_id, limit),
+            f"SELECT * FROM dist_links WHERE {wh} ORDER BY id DESC LIMIT ? OFFSET ?",
+            tuple(params + [per_page, offset]),
         )
-    rows = c.fetchall()
-    conn.close()
-    return [_map_link(_row_dict(r)) for r in rows]
+        rows = c.fetchall()
+        conn.close()
+    links = [_map_link(_row_dict(r)) for r in rows]
+    return {"links": links, "total": total, "page": page, "per_page": per_page}
+
+
+def list_links(
+    user_id: int,
+    *,
+    status: str | None = None,
+    test_code: str | None = None,
+    limit: int = 100,
+) -> list[dict]:
+    """兼容旧调用：返回最多 limit 条（无 offset）。"""
+    limit = max(1, min(int(limit or 100), 500))
+    return list_links_page(
+        user_id, status=status, test_code=test_code, page=1, per_page=limit
+    )["links"]
+
+
+def revoke_links(user_id: int, link_ids: list[int]) -> dict:
+    """批量撤销。未开测（used_count==0）退还 1 额度（used_quota-1）。"""
+    init_dist_tables()
+    ensure_distributor(user_id)
+    ids = [int(x) for x in (link_ids or []) if x is not None]
+    if not ids:
+        raise ValueError("请选择要撤销的链接")
+    revoked: list[dict] = []
+    refunded = 0
+    now = _now()
+    uid = int(user_id)
+
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        try:
+            c.execute(
+                "SELECT quota, used_quota FROM dist_distributors WHERE user_id=%s FOR UPDATE",
+                (uid,),
+            )
+            drow = _row_dict(c.fetchone()) or {}
+            rem = int(drow.get("quota") or 0) - int(drow.get("used_quota") or 0)
+            for lid in ids:
+                c.execute(
+                    "SELECT * FROM dist_links WHERE id=%s AND user_id=%s FOR UPDATE",
+                    (lid, uid),
+                )
+                row = c.fetchone()
+                if not row:
+                    continue
+                link = _row_dict(row) or {}
+                if (link.get("status") or "") == "revoked":
+                    continue
+                do_refund = int(link.get("used_count") or 0) == 0
+                c.execute(
+                    "UPDATE dist_links SET status='revoked', revoked_at=NOW() WHERE id=%s RETURNING *",
+                    (lid,),
+                )
+                out_row = c.fetchone()
+                if do_refund:
+                    before = rem
+                    c.execute(
+                        """UPDATE dist_distributors
+                           SET used_quota = GREATEST(0, used_quota - 1)
+                           WHERE user_id=%s""",
+                        (uid,),
+                    )
+                    rem = before + 1
+                    c.execute(
+                        """INSERT INTO dist_quota_logs
+                           (user_id, change_type, amount, before_remaining, after_remaining, remark)
+                           VALUES (%s,'refund',1,%s,%s,%s)""",
+                        (uid, before, rem, "撤销未使用链接退还额度"),
+                    )
+                    refunded += 1
+                if out_row:
+                    revoked.append(_map_link(_row_dict(out_row)))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        try:
+            c.execute("SELECT quota, used_quota FROM dist_distributors WHERE user_id=?", (uid,))
+            drow = _row_dict(c.fetchone()) or {}
+            rem = int(drow.get("quota") or 0) - int(drow.get("used_quota") or 0)
+            for lid in ids:
+                c.execute("SELECT * FROM dist_links WHERE id=? AND user_id=?", (lid, uid))
+                row = c.fetchone()
+                if not row:
+                    continue
+                link = _row_dict(row) or {}
+                if (link.get("status") or "") == "revoked":
+                    continue
+                do_refund = int(link.get("used_count") or 0) == 0
+                c.execute(
+                    "UPDATE dist_links SET status='revoked', revoked_at=? WHERE id=?",
+                    (now, lid),
+                )
+                if do_refund:
+                    before = rem
+                    c.execute(
+                        """UPDATE dist_distributors
+                           SET used_quota = CASE WHEN used_quota > 0 THEN used_quota - 1 ELSE 0 END
+                           WHERE user_id=?""",
+                        (uid,),
+                    )
+                    rem = before + 1
+                    c.execute(
+                        """INSERT INTO dist_quota_logs
+                           (user_id, change_type, amount, before_remaining, after_remaining, remark, created_at)
+                           VALUES (?,?,?,?,?,?,?)""",
+                        (uid, "refund", 1, before, rem, "撤销未使用链接退还额度", now),
+                    )
+                    refunded += 1
+                c.execute("SELECT * FROM dist_links WHERE id=?", (lid,))
+                out_row = c.fetchone()
+                if out_row:
+                    revoked.append(_map_link(_row_dict(out_row)))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    return {
+        "revokedCount": len(revoked),
+        "refundedQuota": refunded,
+        "links": revoked,
+    }
 
 
 def revoke_link(user_id: int, link_id: int) -> dict:
-    init_dist_tables()
+    out = revoke_links(user_id, [int(link_id)])
+    if not out["links"]:
+        raise ValueError("链接不存在")
+    return out["links"][0]
+
+
+def list_redeem_history(user_id: int, *, page: int = 1, per_page: int = 20) -> dict:
+    """兑换记录：change_type=redeem。"""
+    page = max(1, int(page or 1))
+    per_page = max(1, min(int(per_page or 20), 100))
+    offset = (page - 1) * per_page
+    change_type = "redeem"
     if _USE_PG:
         conn = _pg_conn()
         c = _pg_cur(conn)
         c.execute(
-            "UPDATE dist_links SET status='revoked', revoked_at=NOW() WHERE id=%s AND user_id=%s RETURNING *",
-            (link_id, user_id),
+            "SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=%s AND change_type=%s",
+            (int(user_id), change_type),
         )
-        row = c.fetchone()
-        conn.commit()
+        total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        c.execute(
+            """SELECT id, amount, before_remaining, after_remaining, remark, created_at
+               FROM dist_quota_logs
+               WHERE user_id=%s AND change_type=%s
+               ORDER BY id DESC LIMIT %s OFFSET %s""",
+            (int(user_id), change_type, per_page, offset),
+        )
+        rows = [_row_dict(r) or {} for r in c.fetchall()]
         conn.close()
-        if not row:
-            raise ValueError("链接不存在")
-        return _map_link(_row_dict(row))
-    conn = _sqlite_conn()
-    c = conn.cursor()
-    c.execute("SELECT * FROM dist_links WHERE id=? AND user_id=?", (link_id, user_id))
-    row = c.fetchone()
-    if not row:
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            "SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=? AND change_type=?",
+            (int(user_id), change_type),
+        )
+        total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        c.execute(
+            """SELECT id, amount, before_remaining, after_remaining, remark, created_at
+               FROM dist_quota_logs
+               WHERE user_id=? AND change_type=?
+               ORDER BY id DESC LIMIT ? OFFSET ?""",
+            (int(user_id), change_type, per_page, offset),
+        )
+        rows = [_row_dict(r) or {} for r in c.fetchall()]
         conn.close()
-        raise ValueError("链接不存在")
-    c.execute(
-        "UPDATE dist_links SET status='revoked', revoked_at=? WHERE id=?",
-        (_now(), link_id),
-    )
-    conn.commit()
-    c.execute("SELECT * FROM dist_links WHERE id=?", (link_id,))
-    out = _map_link(_row_dict(c.fetchone()))
-    conn.close()
-    return out
+    logs = []
+    for r in rows:
+        logs.append(
+            {
+                "id": r.get("id"),
+                "amount": int(r.get("amount") or 0),
+                "before_remaining": r.get("before_remaining"),
+                "after_remaining": r.get("after_remaining"),
+                "remark": r.get("remark") or "",
+                "created_at": _fmt_ts(r.get("created_at")) or r.get("created_at"),
+                "change_type": "redeem",
+            }
+        )
+    return {
+        "logs": logs,
+        "pagination": {
+            "page": page,
+            "perPage": per_page,
+            "total": total,
+            "totalPages": max(1, (total + per_page - 1) // per_page) if total else 0,
+        },
+    }
+
+
+def export_links_rows(
+    user_id: int,
+    *,
+    link_ids: list[int] | None = None,
+    status: str | None = None,
+    test_code: str | None = None,
+) -> list[dict]:
+    """导出用：指定 ids 或按筛选拉全量（上限 5000）。"""
+    init_dist_tables()
+    ids = [int(x) for x in (link_ids or []) if x is not None]
+    st = (status or "").strip() or None
+    tc = (test_code or "").strip() or None
+    if ids:
+        # 仅本人 + 指定 id
+        ph = ",".join(["%s" if _USE_PG else "?"] * len(ids))
+        sql = f"SELECT * FROM dist_links WHERE user_id={'%s' if _USE_PG else '?'} AND id IN ({ph}) ORDER BY id DESC"
+        params = [int(user_id)] + ids
+        if _USE_PG:
+            conn = _pg_conn()
+            c = _pg_cur(conn)
+            c.execute(sql, tuple(params))
+            rows = c.fetchall()
+            conn.close()
+        else:
+            conn = _sqlite_conn()
+            c = conn.cursor()
+            c.execute(sql, tuple(params))
+            rows = c.fetchall()
+            conn.close()
+        return [_map_link(_row_dict(r)) for r in rows]
+    # 全量/筛选导出
+    all_links: list[dict] = []
+    page_i = 1
+    total = 0
+    while page_i <= 50:
+        page = list_links_page(user_id, status=st, test_code=tc, page=page_i, per_page=100)
+        total = int(page.get("total") or 0)
+        batch = page.get("links") or []
+        if not batch:
+            break
+        all_links.extend(batch)
+        if len(all_links) >= min(total, 5000) or len(batch) < 100:
+            break
+        page_i += 1
+    return all_links[:5000]
 
 
 def admin_dist_stats() -> dict:

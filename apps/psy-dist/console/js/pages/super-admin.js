@@ -870,7 +870,7 @@ export async function renderSaConfig(root) {
     customer_service_wechat: el("input", { value: cfg.customer_service_wechat || "" }),
     customer_service_hours: el("input", { value: cfg.customer_service_hours || "" }),
     customer_service_response_time: el("input", { value: cfg.customer_service_response_time || "" }),
-    customer_service_qrcode: el("input", { value: cfg.customer_service_qrcode || "", placeholder: "二维码图片 URL" }),
+    customer_service_qrcode: el("input", { value: cfg.customer_service_qrcode || "", placeholder: "二维码图片 URL，或下方上传" }),
     xianyu_shop_link: el("input", { value: cfg.xianyu_shop_link || "" }),
     link_max_uses: el("input", { type: "number", value: cfg.link_max_uses || "3" }),
     link_expire_hours: el("input", { type: "number", value: cfg.link_expire_hours || "24" }),
@@ -888,8 +888,51 @@ export async function renderSaConfig(root) {
     link_expire_hours: "链接有效小时",
     wecom_webhook: "企微 Webhook",
   };
+  const preview = el("img", {
+    src: cfg.customer_service_qrcode || "",
+    alt: "客服二维码预览",
+    style: `max-width:180px;margin-top:8px;${cfg.customer_service_qrcode ? "" : "display:none"}`,
+  });
+  const fileInput = el("input", { type: "file", accept: "image/png,image/jpeg,image/gif,image/webp" });
+  const uploadBtn = el("button", {
+    className: "btn btn-ghost",
+    type: "button",
+    text: "上传客服二维码",
+    style: "width:auto",
+  });
+  uploadBtn.addEventListener("click", async () => {
+    const f = fileInput.files && fileInput.files[0];
+    if (!f) {
+      fileInput.click();
+      return;
+    }
+    try {
+      uploadBtn.disabled = true;
+      const data = await api.uploadImage(f);
+      const url = (data && data.url) || "";
+      if (!url) throw new Error("未返回图片地址");
+      fields.customer_service_qrcode.value = url;
+      preview.src = url;
+      preview.style.display = "";
+      errHost.replaceChildren(flash("ok", "上传成功，请再点「保存配置」"));
+    } catch (err) {
+      errHost.replaceChildren(flash("error", err.message || "上传失败"));
+    } finally {
+      uploadBtn.disabled = false;
+      fileInput.value = "";
+    }
+  });
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files && fileInput.files[0]) uploadBtn.click();
+  });
   const form = el("form", { className: "panel" }, [
     ...Object.keys(fields).map((k) => el("div", { className: "field" }, [el("label", { text: labels[k] }), fields[k]])),
+    el("div", { className: "field" }, [
+      el("label", { text: "客服微信二维码上传" }),
+      el("p", { className: "muted", text: "上传后自动填入上方 URL（保存到 /uploads/），再点保存配置生效。" }),
+      el("div", { className: "row-actions" }, [fileInput, uploadBtn]),
+      preview,
+    ]),
     el("div", { className: "row-actions" }, [
       el("button", { className: "btn btn-primary", type: "submit", text: "保存配置", style: "width:auto" }),
       el("button", {

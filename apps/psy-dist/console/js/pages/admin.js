@@ -1,4 +1,4 @@
-import { api, getUser, clearSession, getToken } from "../api.js";
+import { api, getUser, clearSession, getToken, setSession } from "../api.js";
 import { el, flash, clear, copyText, bindCopyButton } from "../ui.js";
 import { navigate, linkClick } from "../router.js";
 
@@ -10,7 +10,7 @@ const NAV = [
   { path: "/admin/purchase-quota", label: "购买额度" },
   { path: "/admin/redeem-quota", label: "兑换额度" },
   { path: "/admin/invite-promotion", label: "邀请推广" },
-  { path: "/admin/announcements", label: "公告" },
+  { path: "/admin/announcements", label: "公告", badge: "announcements" },
   { path: "/admin/help", label: "帮助" },
   { path: "/admin/customer-service", label: "客服" },
   { path: "/admin/account-settings", label: "账户" },
@@ -37,8 +37,59 @@ function isSuper() {
   return (getUser() || {}).role === "super_admin";
 }
 
+function remainingQuota() {
+  const u = getUser() || {};
+  return Number(u.remaining_quota ?? u.remainingQuota ?? 0);
+}
+
+/** 超管始终可；商家剩余额度 > 10 可免费测 */
+function canUnlimited() {
+  return isSuper() || remainingQuota() > 10;
+}
+
 function merchantNav() {
-  return NAV.filter((item) => item.path !== "/admin/unlimited-test" || isSuper());
+  return NAV.filter((item) => item.path !== "/admin/unlimited-test" || canUnlimited());
+}
+
+function navLabelNode(item) {
+  if (!item.badge) return item.label;
+  const badge = el("span", { className: "nav-badge", hidden: "true" });
+  badge.dataset.badge = item.badge;
+  return el("span", { className: "nav-label-wrap" }, [
+    el("span", { text: item.label }),
+    badge,
+  ]);
+}
+
+function applyNavBadges(rootEl, counts) {
+  if (!rootEl || !counts) return;
+  rootEl.querySelectorAll("[data-badge]").forEach((node) => {
+    const key = node.getAttribute("data-badge");
+    const n = Number(counts[key] || 0);
+    if (n > 0) {
+      node.hidden = false;
+      node.textContent = n > 99 ? "99+" : String(n);
+    } else {
+      node.hidden = true;
+      node.textContent = "";
+    }
+  });
+}
+
+async function refreshSessionQuota() {
+  try {
+    const q = await api.quotaInfo();
+    if (!q) return;
+    const u = getUser() || {};
+    setSession(getToken(), {
+      ...u,
+      remaining_quota: q.remaining_quota,
+      quota: q.quota,
+      used_quota: q.used_quota,
+    });
+  } catch {
+    /* ignore */
+  }
 }
 
 function shell(activePath, bodyChildren) {
@@ -53,12 +104,19 @@ function shell(activePath, bodyChildren) {
     "nav",
     { className: "topnav" },
     topItems.map((item) =>
-      el("a", {
-        href: item.path,
-        className: activePath.startsWith(item.path) || (item.path.startsWith("/super-admin") && activePath.startsWith("/super-admin")) ? "active" : "",
-        text: item.label,
-        onClick: (e) => linkClick(e, item.path),
-      })
+      el(
+        "a",
+        {
+          href: item.path,
+          className:
+            activePath.startsWith(item.path) ||
+            (item.path.startsWith("/super-admin") && activePath.startsWith("/super-admin"))
+              ? "active"
+              : "",
+          onClick: (e) => linkClick(e, item.path),
+        },
+        [navLabelNode(item)]
+      )
     )
   );
 
@@ -84,12 +142,15 @@ function shell(activePath, bodyChildren) {
     : [
         el("p", { className: "side-label", text: "常用" }),
         ...navItems.map((item) =>
-          el("a", {
-            href: item.path,
-            className: `side-link${activePath.startsWith(item.path) ? " active" : ""}`,
-            text: item.label,
-            onClick: (e) => linkClick(e, item.path),
-          })
+          el(
+            "a",
+            {
+              href: item.path,
+              className: `side-link${activePath.startsWith(item.path) ? " active" : ""}`,
+              onClick: (e) => linkClick(e, item.path),
+            },
+            [navLabelNode(item)]
+          )
         ),
         ...(superUser
           ? [
@@ -109,7 +170,7 @@ function shell(activePath, bodyChildren) {
         }),
       ];
 
-  return el("div", { className: "shell" }, [
+  const layout = el("div", { className: "shell" }, [
     el("header", { className: "topbar" }, [
       el("a", { className: "brand", href: "/admin/dashboard", onClick: (e) => linkClick(e, "/admin/dashboard") }, [
         el("img", { src: "/images/logo.svg?v=5", alt: "" }),
@@ -135,7 +196,18 @@ function shell(activePath, bodyChildren) {
       el("main", { className: "main" }, bodyChildren),
     ]),
   ]);
+
+  api.announcementsUnread()
+    .then((data) => {
+      const n = Number((data && (data.unread ?? data.count ?? data.unread_count)) || 0);
+      applyNavBadges(layout, { announcements: n });
+    })
+    .catch(() => {});
+
+  return layout;
 }
+
+export { shell, isSuper, canUnlimited };
 
 async function loadQuota() {
   try {
@@ -164,7 +236,7 @@ function quickActions() {
       el("span", { text: "已用/剩余 · 有效期" }),
     ]),
   ];
-  if (isSuper()) {
+  if (canUnlimited()) {
     cards.push(
       el("a", {
         className: "quick-card",
@@ -172,7 +244,7 @@ function quickActions() {
         onClick: (e) => linkClick(e, "/admin/unlimited-test"),
       }, [
         el("strong", { text: "免费测试" }),
-        el("span", { text: "超管专用，不耗额度" }),
+        el("span", { text: isSuper() ? "超管专用，不耗额度" : "额度>10 可用，不耗额度" }),
       ])
     );
   }
@@ -199,13 +271,25 @@ function quickActions() {
 
 export async function renderDashboard(root) {
   const quota = await loadQuota();
+  try {
+    const u = getUser() || {};
+    setSession(getToken(), {
+      ...u,
+      remaining_quota: quota.remaining_quota,
+      quota: quota.quota,
+      used_quota: quota.used_quota,
+    });
+  } catch {
+    /* ignore */
+  }
   let linkStats = { total: 0, unused: 0, used: 0 };
   try {
-    const data = await api.linksList({ perPage: "100" });
-    const links = (data && data.links) || [];
-    linkStats.total = links.length;
-    linkStats.unused = links.filter((l) => (l.status || "unused") === "unused").length;
-    linkStats.used = links.filter((l) => l.status === "used").length;
+    const data = await api.linksList({ perPage: "1" });
+    linkStats.total = Number((data && data.pagination && data.pagination.total) || 0);
+    const usedData = await api.linksList({ status: "used", perPage: "1" });
+    const unusedData = await api.linksList({ status: "unused", perPage: "1" });
+    linkStats.used = Number((usedData && usedData.pagination && usedData.pagination.total) || 0);
+    linkStats.unused = Number((unusedData && unusedData.pagination && unusedData.pagination.total) || 0);
   } catch {
     /* ignore */
   }
@@ -251,8 +335,9 @@ export async function renderDashboard(root) {
           el("li", {
             text: isSuper()
               ? "生成链接会消耗额度；超管「免费测试」不消耗额度。"
-              : "生成链接会消耗额度；免费测试仅超管可用。",
+              : "生成链接会消耗额度；剩余额度 > 10 时可使用「免费测试」（不耗额度）。",
           }),
+          el("li", { text: "未开测链接撤销会退还额度；已开测仅作废不退额。" }),
           el("li", { text: "链接规则：客户首次开测后计时，默认 3 天内可复测 3 次（以系统配置为准）。开测即扣 1 次。" }),
           el("li", { text: "用户打开分销链接测完即可看完整报告，不分墙。" }),
           el("li", { text: "分销额度兑换码只能在「兑换额度」使用，不能登录或找回密码。" }),
@@ -427,161 +512,314 @@ function formatLinkCountdown(link) {
 
 export async function renderLinks(root) {
   const host = el("div", { className: "panel" });
+  const filterBar = el("div", { className: "filter-bar" });
+  const statusSel = el("select");
+  statusSel.append(
+    el("option", { value: "", text: "全部状态" }),
+    el("option", { value: "unused", text: "未使用" }),
+    el("option", { value: "used", text: "已使用" }),
+    el("option", { value: "expired", text: "已过期" }),
+    el("option", { value: "revoked", text: "已撤销" })
+  );
+  const testSel = el("select");
+  testSel.append(el("option", { value: "", text: "全部测题" }));
+  try {
+    const td = await api.testsList();
+    for (const t of (td && td.tests) || []) {
+      testSel.append(el("option", { value: t.test_code, text: `${t.test_name || t.test_code}` }));
+    }
+  } catch {
+    /* ignore */
+  }
+  const perPageSel = el("select");
+  for (const n of [20, 50, 100]) {
+    perPageSel.append(el("option", { value: String(n), text: `${n}/页` }));
+  }
+  const applyBtn = el("button", { className: "btn btn-primary", type: "button", text: "筛选", style: "width:auto" });
+  const exportBtn = el("button", { className: "btn btn-ghost", type: "button", text: "导出筛选结果", style: "width:auto" });
+  filterBar.append(
+    el("div", { className: "field", style: "margin:0;min-width:140px" }, [el("label", { text: "状态" }), statusSel]),
+    el("div", { className: "field", style: "margin:0;min-width:180px" }, [el("label", { text: "测题" }), testSel]),
+    el("div", { className: "field", style: "margin:0;min-width:100px" }, [el("label", { text: "每页" }), perPageSel]),
+    el("div", { className: "row-actions", style: "align-items:flex-end" }, [applyBtn, exportBtn])
+  );
+
   root.append(
     shell("/admin/link-management", [
       el("h1", { className: "page-title", text: "链接管理" }),
       el("p", {
         className: "page-lead",
-        text: "查看已用/剩余次数与开测后倒计时。开测即扣 1 次；默认 3 天内最多 3 次。",
+        text: "真分页 + 筛选。未开测撤销会退还额度；已开测仅作废不退额。",
       }),
+      filterBar,
       host,
     ])
   );
 
-  try {
-    const data = await api.linksList({ perPage: "50" });
-    const links = (data && data.links) || [];
-    clear(host);
-    if (!links.length) {
-      host.append(el("div", { className: "empty", text: "还没有链接。去「生成链接」创建第一条。" }));
-      return;
-    }
-    const unused = links.filter((l) => (l.status || "unused") === "unused").length;
-    const active = links.filter((l) => {
-      const used = Number(l.used_count ?? l.usedCount ?? 0);
-      const maxUses = Number(l.max_uses ?? l.maxUses ?? 3);
-      const st = l.status || "unused";
-      return st !== "revoked" && st !== "expired" && used < maxUses;
-    }).length;
-    host.append(
-      el("div", { className: "mini-stats" }, [
-        el("span", { text: `共 ${links.length} 条` }),
-        el("span", { text: `未开测 ${unused}` }),
-        el("span", { text: `仍可用 ${active}` }),
-      ])
-    );
+  let page = 1;
+  let selected = new Set();
 
-    const pageUrls = links.map((link) => {
-      const token = link.token || "";
-      const code = link.test_code || "";
-      return `${location.origin}/test/${code}/${token}`;
-    });
-    const bulk = el("div", { className: "row-actions", style: "margin:0 0 12px;flex-wrap:wrap;gap:8px" });
-    const copyPageBtn = el("button", {
-      className: "btn btn-primary",
-      type: "button",
-      text: `复制本页全部（${pageUrls.length}）`,
-    });
-    const exportPageBtn = el("button", {
-      className: "btn btn-ghost",
-      type: "button",
-      text: "导出本页 TXT",
-    });
-    bindCopyButton(copyPageBtn, () => pageUrls.join("\n"), {
-      okText: `已复制 ${pageUrls.length} 条`,
-    });
-    exportPageBtn.addEventListener("click", () => {
-      const blob = new Blob([pageUrls.join("\n") + "\n"], { type: "text/plain;charset=utf-8" });
+  function filters() {
+    return {
+      status: statusSel.value || undefined,
+      testCode: testSel.value || undefined,
+      perPage: perPageSel.value || "20",
+      page: String(page),
+    };
+  }
+
+  async function doExport(payload) {
+    try {
+      const { blob, filename } = await api.exportLinks(payload);
       const a = document.createElement("a");
-      const stamp = new Date().toISOString().slice(0, 19).replace(/[-:T]/g, "");
       a.href = URL.createObjectURL(blob);
-      a.download = `psy_links_page_${stamp}.txt`;
+      a.download = filename || "links_export.txt";
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(a.href);
-    });
-    bulk.append(
-      copyPageBtn,
-      exportPageBtn,
-      el("span", { className: "muted", text: "每行一条，可直接导入发卡工具" })
-    );
-    host.append(bulk);
-    const table = el("table", { className: "data" });
-    table.append(
-      el("thead", {}, [
-        el("tr", {}, [
-          el("th", { text: "测题" }),
-          el("th", { text: "链接" }),
-          el("th", { text: "已用 / 剩余" }),
-          el("th", { text: "有效期" }),
-          el("th", { text: "状态" }),
-          el("th", { text: "操作" }),
-        ]),
-      ])
-    );
-    const tbody = el("tbody");
-    for (const link of links) {
-      const token = link.token || "";
-      const code = link.test_code || "";
-      const url = `${location.origin}/test/${code}/${token}`;
-      const status = link.status || "unused";
-      const used = Number(link.used_count ?? link.usedCount ?? 0);
-      const maxUses = Number(link.max_uses ?? link.maxUses ?? 3);
-      const remain = Math.max(0, maxUses - used);
-      const statusLabel =
-        { unused: "未使用", used: "已使用", expired: "已过期", revoked: "已撤销" }[status] || status;
-      const tagClass = status === "unused" ? "tag-ok" : status === "revoked" || status === "expired" ? "tag-warn" : "tag";
-      const usesClass = remain <= 0 ? "tag tag-warn" : remain === 1 ? "tag tag-warn" : "tag tag-ok";
-      const cd = formatLinkCountdown(link);
-      const cdClass =
-        cd.tone === "warn" ? "tag tag-warn" : cd.tone === "ok" ? "tag tag-ok" : "tag";
-      const copyBtn = el("button", { className: "btn btn-ghost", type: "button", text: "复制" });
-      bindCopyButton(copyBtn, url);
-      const actions = el("div", { className: "row-actions" }, [copyBtn]);
-      if (status !== "revoked" && link.id) {
-        actions.append(
-          el("button", {
-            className: "btn btn-ghost",
-            type: "button",
-            text: "撤销",
-            onClick: async () => {
-              if (!confirm("确认撤销该链接？")) return;
-              try {
-                await api.revokeLink(link.id);
-                navigate("/admin/link-management", { replace: true });
-              } catch (e) {
-                alert(e.message || "撤销失败");
-              }
-            },
-          })
-        );
-      }
-      tbody.append(
-        el("tr", {}, [
-          el("td", { text: code }),
-          el("td", {}, [el("div", { className: "url-cell", text: url })]),
-          el("td", {}, [
-            el("div", { className: "link-metric" }, [
-              el("span", { className: usesClass, text: `${used} / 剩 ${remain}` }),
-              el("span", { className: "muted small", text: `上限 ${maxUses}` }),
-            ]),
-          ]),
-          el("td", {}, [
-            el("div", { className: "link-metric" }, [
-              el("span", { className: cdClass, text: cd.text }),
-              el("span", { className: "muted small", text: cd.hint }),
-            ]),
-          ]),
-          el("td", {}, [el("span", { className: `tag ${tagClass}`, text: statusLabel })]),
-          el("td", {}, [actions]),
+    } catch (e) {
+      alert(e.message || "导出失败");
+    }
+  }
+
+  async function reload() {
+    clear(host);
+    host.append(el("p", { className: "muted", text: "加载中…" }));
+    selected = new Set();
+    try {
+      const data = await api.linksList(filters());
+      const links = (data && data.links) || [];
+      const pag = (data && data.pagination) || {};
+      const total = Number(pag.total || 0);
+      const perPage = Number(pag.perPage || perPageSel.value || 20);
+      const totalPages = Number(pag.totalPages || Math.max(1, Math.ceil(total / perPage) || 1));
+      page = Number(pag.page || page);
+      clear(host);
+
+      host.append(
+        el("div", { className: "mini-stats" }, [
+          el("span", { text: `共 ${total} 条` }),
+          el("span", { text: `第 ${page}/${Math.max(1, totalPages)} 页` }),
         ])
       );
+
+      if (!links.length) {
+        host.append(el("div", { className: "empty", text: total ? "本页无数据" : "还没有链接。去「生成链接」创建第一条。" }));
+        return;
+      }
+
+      const pageUrls = links.map((link) => {
+        const token = link.token || "";
+        const code = link.test_code || "";
+        return `${location.origin}/test/${code}/${token}`;
+      });
+      const bulk = el("div", { className: "row-actions", style: "margin:0 0 12px;flex-wrap:wrap;gap:8px" });
+      const copyPageBtn = el("button", {
+        className: "btn btn-primary",
+        type: "button",
+        text: `复制本页（${pageUrls.length}）`,
+      });
+      const batchRevokeBtn = el("button", {
+        className: "btn btn-ghost",
+        type: "button",
+        text: "批量撤销所选",
+      });
+      const exportSelBtn = el("button", {
+        className: "btn btn-ghost",
+        type: "button",
+        text: "导出所选",
+      });
+      bindCopyButton(copyPageBtn, () => pageUrls.join("\n"), { okText: `已复制 ${pageUrls.length} 条` });
+      batchRevokeBtn.addEventListener("click", async () => {
+        const ids = [...selected];
+        if (!ids.length) {
+          alert("请先勾选要撤销的链接");
+          return;
+        }
+        const unusedN = links.filter((l) => ids.includes(l.id) && Number(l.used_count ?? l.usedCount ?? 0) === 0).length;
+        const tip =
+          unusedN > 0
+            ? `确定撤销选中的 ${ids.length} 条？其中 ${unusedN} 条未开测将退还额度。`
+            : `确定撤销选中的 ${ids.length} 条？`;
+        if (!confirm(tip)) return;
+        try {
+          const out = await api.revokeLinks(ids);
+          const rf = Number((out && out.refundedQuota) || 0);
+          alert(rf > 0 ? `已撤销 ${out.revokedCount} 条，退还 ${rf} 额度` : `已撤销 ${out.revokedCount || ids.length} 条`);
+          await refreshSessionQuota();
+          await reload();
+        } catch (e) {
+          alert(e.message || "批量撤销失败");
+        }
+      });
+      exportSelBtn.addEventListener("click", () => {
+        const ids = [...selected];
+        if (!ids.length) {
+          alert("请先勾选");
+          return;
+        }
+        doExport({ linkIds: ids });
+      });
+      bulk.append(copyPageBtn, batchRevokeBtn, exportSelBtn);
+      host.append(bulk);
+
+      const checkAll = el("input", { type: "checkbox" });
+      checkAll.addEventListener("change", () => {
+        selected = new Set();
+        tbody.querySelectorAll('input[data-link-id]').forEach((cb) => {
+          cb.checked = checkAll.checked;
+          if (checkAll.checked) selected.add(Number(cb.getAttribute("data-link-id")));
+        });
+      });
+
+      const table = el("table", { className: "data" });
+      table.append(
+        el("thead", {}, [
+          el("tr", {}, [
+            el("th", {}, [checkAll]),
+            el("th", { text: "测题" }),
+            el("th", { text: "链接" }),
+            el("th", { text: "已用 / 剩余" }),
+            el("th", { text: "有效期" }),
+            el("th", { text: "状态" }),
+            el("th", { text: "操作" }),
+          ]),
+        ])
+      );
+      const tbody = el("tbody");
+      for (const link of links) {
+        const token = link.token || "";
+        const code = link.test_code || "";
+        const url = `${location.origin}/test/${code}/${token}`;
+        const status = link.status || "unused";
+        const used = Number(link.used_count ?? link.usedCount ?? 0);
+        const maxUses = Number(link.max_uses ?? link.maxUses ?? 3);
+        const remain = Math.max(0, maxUses - used);
+        const statusLabel =
+          { unused: "未使用", used: "已使用", expired: "已过期", revoked: "已撤销" }[status] || status;
+        const tagClass =
+          status === "unused" ? "tag-ok" : status === "revoked" || status === "expired" ? "tag-warn" : "tag";
+        const usesClass = remain <= 0 ? "tag tag-warn" : remain === 1 ? "tag tag-warn" : "tag tag-ok";
+        const cd = formatLinkCountdown(link);
+        const cdClass = cd.tone === "warn" ? "tag tag-warn" : cd.tone === "ok" ? "tag tag-ok" : "tag";
+        const cb = el("input", { type: "checkbox" });
+        if (link.id) cb.setAttribute("data-link-id", String(link.id));
+        if (status === "revoked") cb.disabled = true;
+        cb.addEventListener("change", () => {
+          if (!link.id) return;
+          if (cb.checked) selected.add(link.id);
+          else selected.delete(link.id);
+        });
+        const copyBtn = el("button", { className: "btn btn-ghost", type: "button", text: "复制" });
+        bindCopyButton(copyBtn, url);
+        const actions = el("div", { className: "row-actions" }, [copyBtn]);
+        if (status !== "revoked" && link.id) {
+          actions.append(
+            el("button", {
+              className: "btn btn-ghost",
+              type: "button",
+              text: "撤销",
+              onClick: async () => {
+                const tip =
+                  used === 0
+                    ? `确定撤销？未开测将退还 1 个额度。`
+                    : `确定撤销该链接？（已开测不退额度）`;
+                if (!confirm(tip)) return;
+                try {
+                  const out = await api.revokeLink(link.id);
+                  const rf = Number((out && out.refundedQuota) || 0);
+                  if (rf > 0) alert(`撤销成功，退还 ${rf} 额度`);
+                  await refreshSessionQuota();
+                  await reload();
+                } catch (e) {
+                  alert(e.message || "撤销失败");
+                }
+              },
+            })
+          );
+        }
+        tbody.append(
+          el("tr", {}, [
+            el("td", {}, [cb]),
+            el("td", { text: code }),
+            el("td", {}, [el("div", { className: "url-cell", text: url })]),
+            el("td", {}, [
+              el("div", { className: "link-metric" }, [
+                el("span", { className: usesClass, text: `${used} / 剩 ${remain}` }),
+                el("span", { className: "muted small", text: `上限 ${maxUses}` }),
+              ]),
+            ]),
+            el("td", {}, [
+              el("div", { className: "link-metric" }, [
+                el("span", { className: cdClass, text: cd.text }),
+                el("span", { className: "muted small", text: cd.hint }),
+              ]),
+            ]),
+            el("td", {}, [el("span", { className: `tag ${tagClass}`, text: statusLabel })]),
+            el("td", {}, [actions]),
+          ])
+        );
+      }
+      table.append(tbody);
+      host.append(el("div", { className: "table-wrap" }, [table]));
+
+      const pager = el("div", { className: "row-actions", style: "margin-top:12px;flex-wrap:wrap;gap:8px" });
+      const prev = el("button", {
+        className: "btn btn-ghost",
+        type: "button",
+        text: "上一页",
+        disabled: page <= 1 ? "true" : undefined,
+      });
+      const next = el("button", {
+        className: "btn btn-ghost",
+        type: "button",
+        text: "下一页",
+        disabled: page >= totalPages ? "true" : undefined,
+      });
+      prev.addEventListener("click", () => {
+        if (page > 1) {
+          page -= 1;
+          reload();
+        }
+      });
+      next.addEventListener("click", () => {
+        if (page < totalPages) {
+          page += 1;
+          reload();
+        }
+      });
+      pager.append(prev, el("span", { className: "muted", text: `${page} / ${Math.max(1, totalPages)}` }), next);
+      host.append(pager);
+    } catch (e) {
+      clear(host);
+      host.append(flash("error", e.message || "加载失败"));
     }
-    table.append(tbody);
-    host.append(el("div", { className: "table-wrap" }, [table]));
-  } catch (e) {
-    clear(host);
-    host.append(flash("error", e.message || "加载失败"));
   }
+
+  applyBtn.addEventListener("click", () => {
+    page = 1;
+    reload();
+  });
+  exportBtn.addEventListener("click", () => {
+    doExport({
+      status: statusSel.value || undefined,
+      testCode: testSel.value || undefined,
+    });
+  });
+  await reload();
 }
 
 export async function renderUnlimited(root) {
-  if (!isSuper()) {
+  await refreshSessionQuota();
+  if (!canUnlimited()) {
     root.append(
       shell("/admin/dashboard", [
         el("h1", { className: "page-title", text: "免费测试" }),
-        flash("error", "免费测试仅超级管理员可用。普通商家请购买或兑换额度后生成链接。"),
+        flash(
+          "error",
+          `剩余额度需大于 10 才能使用免费测试（当前 ${remainingQuota()}）。请先购买或兑换额度；超管不受此限。`
+        ),
       ])
     );
     return;
@@ -601,7 +839,12 @@ export async function renderUnlimited(root) {
   const btn = el("button", { className: "btn btn-primary", type: "submit", text: "开启免费测试", style: "width:auto" });
   const form = el("form", { className: "panel" }, [
     errHost,
-    el("p", { className: "muted", text: "免费测试不消耗额度，适合自己体验或演示给客户看。" }),
+    el("p", {
+      className: "muted",
+      text: isSuper()
+        ? "超管免费测试不消耗额度，适合自己体验或演示。"
+        : "剩余额度 > 10 时可开启免费测试（不耗额度），适合自己体验或演示给客户看。",
+    }),
     el("div", { className: "field" }, [el("label", { text: "测评项目" }), select]),
     el("div", { className: "row-actions" }, [btn]),
     resultHost,
@@ -779,17 +1022,58 @@ export async function renderPurchase(root) {
 
 export async function renderRedeem(root) {
   const errHost = el("div");
+  const historyHost = el("div", { className: "panel" });
   const input = el("input", { required: "true", placeholder: "输入额度授权码" });
   const btn = el("button", { className: "btn btn-primary", type: "submit", text: "兑换", style: "width:auto" });
   const form = el("form", { className: "panel" }, [
     errHost,
     el("p", {
       className: "muted",
-      text: "兑换成功后，该授权码会绑定到你的账号，也可用于「授权码登录 / 找回密码」。",
+      text: "兑换成功后额度立即到账。额度码仅用于兑换，不能登录。",
     }),
     el("div", { className: "field" }, [el("label", { text: "兑换码" }), input]),
     el("div", { className: "row-actions" }, [btn]),
   ]);
+
+  async function loadHistory() {
+    clear(historyHost);
+    historyHost.append(el("h3", { text: "兑换记录" }));
+    try {
+      const data = await api.redeemHistory({ page: 1, perPage: 20 });
+      const logs = (data && data.logs) || [];
+      if (!logs.length) {
+        historyHost.append(el("p", { className: "muted", text: "暂无兑换记录" }));
+        return;
+      }
+      const table = el("table", { className: "data" });
+      table.append(
+        el("thead", {}, [
+          el("tr", {}, [
+            el("th", { text: "时间" }),
+            el("th", { text: "增加额度" }),
+            el("th", { text: "兑换后剩余" }),
+            el("th", { text: "备注" }),
+          ]),
+        ])
+      );
+      const tbody = el("tbody");
+      for (const row of logs) {
+        tbody.append(
+          el("tr", {}, [
+            el("td", { text: String(row.created_at || "—") }),
+            el("td", { text: `+${row.amount ?? 0}` }),
+            el("td", { text: String(row.after_remaining ?? "—") }),
+            el("td", { text: row.remark || "—" }),
+          ])
+        );
+      }
+      table.append(tbody);
+      historyHost.append(el("div", { className: "table-wrap" }, [table]));
+    } catch (e) {
+      historyHost.append(flash("error", e.message || "加载兑换记录失败"));
+    }
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     errHost.replaceChildren();
@@ -800,6 +1084,8 @@ export async function renderRedeem(root) {
         flash("ok", `兑换成功，增加 ${data.added ?? ""} 额度。剩余 ${data.remaining_quota ?? "—"}`)
       );
       input.value = "";
+      await refreshSessionQuota();
+      await loadHistory();
     } catch (err) {
       errHost.append(flash("error", err.message || "兑换失败"));
     } finally {
@@ -812,8 +1098,10 @@ export async function renderRedeem(root) {
       el("h1", { className: "page-title", text: "兑换额度" }),
       el("p", { className: "page-lead", text: "使用授权码为账户充入测试额度。" }),
       form,
+      historyHost,
     ])
   );
+  await loadHistory();
 }
 
 export async function renderAccount(root) {
@@ -977,8 +1265,6 @@ export async function renderInvite(root) {
     ])
   );
 }
-
-export { shell, isSuper };
 
 export async function renderAnnouncements(root) {
   const errHost = el("div");
