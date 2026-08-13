@@ -53,9 +53,185 @@ def init_dist_tables() -> None:
         if _DIST_PG_READY:
             return
         _init_dist_tables_pg()
+        _migrate_dist_schema()
         _DIST_PG_READY = True
     else:
         _init_dist_tables_sqlite()
+        _migrate_dist_schema()
+
+
+def _migrate_dist_schema() -> None:
+    """增量列与运营表（幂等）。"""
+    stmts_sqlite = [
+        "ALTER TABLE dist_distributors ADD COLUMN inviter_user_id INTEGER",
+        "ALTER TABLE dist_distributors ADD COLUMN detailed_tutorial_access INTEGER NOT NULL DEFAULT 0",
+        """CREATE TABLE IF NOT EXISTS dist_announcements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL DEFAULT '',
+            is_published INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_tutorials (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL DEFAULT '',
+            tutorial_link TEXT NOT NULL DEFAULT '',
+            access_password TEXT NOT NULL DEFAULT '',
+            platform_color TEXT NOT NULL DEFAULT '#0f766e',
+            display_order INTEGER NOT NULL DEFAULT 0,
+            is_published INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_help_documents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL DEFAULT '',
+            category TEXT NOT NULL DEFAULT 'general',
+            display_order INTEGER NOT NULL DEFAULT 0,
+            is_published INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_site_config (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL DEFAULT '',
+            updated_at TEXT NOT NULL
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_packages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            plan_code TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            price_yuan REAL NOT NULL,
+            quota_amount INTEGER NOT NULL,
+            subtitle TEXT NOT NULL DEFAULT '',
+            is_enabled INTEGER NOT NULL DEFAULT 1,
+            display_order INTEGER NOT NULL DEFAULT 0,
+            recommended INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_operation_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            actor_user_id INTEGER,
+            actor_username TEXT,
+            action TEXT NOT NULL,
+            target_type TEXT,
+            target_id TEXT,
+            detail TEXT,
+            created_at TEXT NOT NULL
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_test_overrides (
+            test_code TEXT PRIMARY KEY,
+            is_enabled INTEGER NOT NULL DEFAULT 1,
+            is_hot INTEGER,
+            display_order INTEGER,
+            updated_at TEXT NOT NULL
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_announcement_reads (
+            user_id INTEGER NOT NULL,
+            announcement_id INTEGER NOT NULL,
+            read_at TEXT NOT NULL,
+            PRIMARY KEY (user_id, announcement_id)
+        )""",
+    ]
+    stmts_pg = [
+        "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS inviter_user_id INTEGER",
+        "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS detailed_tutorial_access BOOLEAN NOT NULL DEFAULT FALSE",
+        """CREATE TABLE IF NOT EXISTS dist_announcements (
+            id SERIAL PRIMARY KEY,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL DEFAULT '',
+            is_published BOOLEAN NOT NULL DEFAULT TRUE,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_tutorials (
+            id SERIAL PRIMARY KEY,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL DEFAULT '',
+            tutorial_link TEXT NOT NULL DEFAULT '',
+            access_password TEXT NOT NULL DEFAULT '',
+            platform_color TEXT NOT NULL DEFAULT '#0f766e',
+            display_order INTEGER NOT NULL DEFAULT 0,
+            is_published BOOLEAN NOT NULL DEFAULT TRUE,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_help_documents (
+            id SERIAL PRIMARY KEY,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL DEFAULT '',
+            category TEXT NOT NULL DEFAULT 'general',
+            display_order INTEGER NOT NULL DEFAULT 0,
+            is_published BOOLEAN NOT NULL DEFAULT TRUE,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_site_config (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL DEFAULT '',
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_packages (
+            id SERIAL PRIMARY KEY,
+            plan_code TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            price_yuan DOUBLE PRECISION NOT NULL,
+            quota_amount INTEGER NOT NULL,
+            subtitle TEXT NOT NULL DEFAULT '',
+            is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+            display_order INTEGER NOT NULL DEFAULT 0,
+            recommended BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_operation_logs (
+            id SERIAL PRIMARY KEY,
+            actor_user_id INTEGER,
+            actor_username TEXT,
+            action TEXT NOT NULL,
+            target_type TEXT,
+            target_id TEXT,
+            detail TEXT,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_test_overrides (
+            test_code TEXT PRIMARY KEY,
+            is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+            is_hot BOOLEAN,
+            display_order INTEGER,
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_announcement_reads (
+            user_id INTEGER NOT NULL,
+            announcement_id INTEGER NOT NULL,
+            read_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            PRIMARY KEY (user_id, announcement_id)
+        )""",
+    ]
+    if _USE_PG:
+        conn = _pg_conn()
+        try:
+            c = conn.cursor()
+            for sql in stmts_pg:
+                try:
+                    c.execute(sql)
+                except Exception:
+                    pass
+            conn.commit()
+        finally:
+            conn.close()
+        return
+    conn = _sqlite_conn()
+    c = conn.cursor()
+    for sql in stmts_sqlite:
+        try:
+            c.execute(sql)
+        except Exception:
+            pass
+    conn.commit()
+    conn.close()
 
 
 def _init_dist_tables_sqlite() -> None:
@@ -346,6 +522,7 @@ def _map_distributor(dist: dict | None, profile: dict) -> dict:
         "used_quota": used,
         "remaining_quota": max(0, quota - used),
         "invite_code": dist.get("invite_code") or "",
+        "inviter_user_id": dist.get("inviter_user_id"),
         "detailed_tutorial_access": bool(dist.get("detailed_tutorial_access")),
     }
 
@@ -370,6 +547,89 @@ def find_distributor_by_invite_code(invite_code: str) -> dict | None:
     row = c.fetchone()
     conn.close()
     return _row_dict(row)
+
+
+def set_inviter(user_id: int, inviter_user_id: int) -> None:
+    """绑定邀请人（仅首次）。"""
+    init_dist_tables()
+    uid = int(user_id)
+    iid = int(inviter_user_id)
+    if uid <= 0 or iid <= 0 or uid == iid:
+        return
+    if _USE_PG:
+        conn = _pg_conn()
+        try:
+            c = _pg_cur(conn)
+            c.execute(
+                "UPDATE dist_distributors SET inviter_user_id=%s WHERE user_id=%s AND inviter_user_id IS NULL",
+                (iid, uid),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+        return
+    conn = _sqlite_conn()
+    c = conn.cursor()
+    c.execute(
+        "UPDATE dist_distributors SET inviter_user_id=? WHERE user_id=? AND inviter_user_id IS NULL",
+        (iid, uid),
+    )
+    conn.commit()
+    conn.close()
+
+
+def count_purchase_logs(user_id: int) -> int:
+    init_dist_tables()
+    if _USE_PG:
+        conn = _pg_conn()
+        try:
+            c = _pg_cur(conn)
+            c.execute(
+                "SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=%s AND change_type=%s",
+                (int(user_id), "purchase"),
+            )
+            return int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+        finally:
+            conn.close()
+    conn = _sqlite_conn()
+    c = conn.cursor()
+    c.execute(
+        "SELECT COUNT(*) AS c FROM dist_quota_logs WHERE user_id=? AND change_type=?",
+        (int(user_id), "purchase"),
+    )
+    n = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
+    conn.close()
+    return n
+
+
+def apply_first_purchase_invite_rebate(buyer_user_id: int, quota_amount: int, order_no: str) -> dict | None:
+    """首购返利：邀请人获得购额 N%（默认 20%，可配置）。在 purchase 入账之后调用。"""
+    init_dist_tables()
+    buyer = ensure_distributor(int(buyer_user_id))
+    inviter_id = buyer.get("inviter_user_id")
+    if not inviter_id:
+        return None
+    # purchase 已写入后，恰好 1 条 = 首购
+    if count_purchase_logs(int(buyer_user_id)) != 1:
+        return None
+    q = int(quota_amount or 0)
+    percent = 20
+    try:
+        from cloud_deploy.cloud_api import dist_ops
+
+        percent = int(float(dist_ops.get_config().get("invite_rebate_percent") or 20))
+    except Exception:
+        percent = 20
+    percent = max(0, min(percent, 100))
+    rebate = max(1, q * percent // 100) if q > 0 and percent > 0 else 0
+    if rebate <= 0:
+        return None
+    return add_quota(
+        int(inviter_id),
+        rebate,
+        change_type="invite_rebate",
+        remark=f"首购返利{percent}% 订单 {order_no} 买家{buyer_user_id}",
+    )
 
 
 def get_distributor(user_id: int) -> dict | None:

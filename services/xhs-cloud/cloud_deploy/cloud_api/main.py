@@ -47,6 +47,7 @@ from cloud_deploy.cloud_api.admin_portal_auth import (
 from cloud_deploy.cloud_api.config import get_settings
 from cloud_deploy.cloud_api.dist_routes import compat_router as dist_compat_router
 from cloud_deploy.cloud_api.dist_routes import router as dist_router
+from cloud_deploy.cloud_api.dist_ops_routes import ops_router as dist_ops_router
 from cloud_deploy.cloud_api import payment_service as pay
 from cloud_deploy.cloud_api.request_ip import public_ipv4_for_pay, resolve_client_ip
 from cloud_deploy.cloud_api.email_service import smtp_configured
@@ -67,6 +68,7 @@ app.include_router(advisor_member_router)
 app.include_router(advisor_internal_router)
 app.include_router(dist_router)
 app.include_router(dist_compat_router)
+app.include_router(dist_ops_router)
 
 
 @app.on_event("startup")
@@ -77,6 +79,9 @@ def _startup():
         from cloud_deploy.cloud_api.dist_db import init_dist_tables
 
         init_dist_tables()
+        from cloud_deploy.cloud_api import dist_ops
+
+        dist_ops.sync_db_plans_into_registry()
     except Exception as e:
         print(f"[startup] init_dist_tables failed: {e}", flush=True)
     try:

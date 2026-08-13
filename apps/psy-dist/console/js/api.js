@@ -169,5 +169,47 @@ export const api = {
   saQuotaLogs: (limit = 100) => request(`/api/super-admin/quota-logs/list?limit=${limit}`, { auth: true }),
   saInviteStats: () => request("/api/super-admin/invite-stats/list", { auth: true }),
   saTests: () => request("/api/super-admin/tests/list", { auth: true }),
+  saTestSave: (payload) =>
+    request("/api/super-admin/tests/save", { method: "POST", auth: true, body: payload }),
+  saTestReorder: (items) =>
+    request("/api/super-admin/tests/update-order", { method: "POST", auth: true, body: { items } }),
   saPackages: () => request("/api/super-admin/packages/list", { auth: true }),
+  saPackageSave: (payload) =>
+    request("/api/super-admin/packages/save", { method: "POST", auth: true, body: payload }),
+  saPackageDelete: (key) =>
+    request(`/api/super-admin/packages/delete/${encodeURIComponent(key)}`, { method: "POST", auth: true }),
+  saConfigGet: () => request("/api/super-admin/config/get", { auth: true }),
+  saConfigUpdate: (payload) =>
+    request("/api/super-admin/config/update", { method: "POST", auth: true, body: payload }),
+  saConfigTestWecom: () =>
+    request("/api/super-admin/config/test-wecom-webhook", { method: "POST", auth: true, body: {} }),
+  saAnnouncements: () => request("/api/super-admin/announcements/list", { auth: true }),
+  saAnnouncementSave: (payload) =>
+    request("/api/super-admin/announcements/save", { method: "POST", auth: true, body: payload }),
+  saAnnouncementDelete: (id) =>
+    request(`/api/super-admin/announcements/delete/${id}`, { method: "POST", auth: true }),
+  saTutorials: () => request("/api/super-admin/tutorials/list", { auth: true }),
+  saTutorialSave: (payload) =>
+    request("/api/super-admin/tutorials/save", { method: "POST", auth: true, body: payload }),
+  saTutorialDelete: (id) =>
+    request(`/api/super-admin/tutorials/delete/${id}`, { method: "POST", auth: true }),
+  saHelpDocs: () => request("/api/super-admin/help-documents/list", { auth: true }),
+  saHelpSave: (payload) =>
+    request("/api/super-admin/help-documents/save", { method: "POST", auth: true, body: payload }),
+  saHelpDelete: (id) =>
+    request(`/api/super-admin/help-documents/delete/${id}`, { method: "POST", auth: true }),
+  saRedeemList: (limit = 100) => request(`/api/super-admin/redeem-codes/list?limit=${limit}`, { auth: true }),
+  saRedeemGenerate: (payload) =>
+    request("/api/super-admin/redeem-codes/generate", { method: "POST", auth: true, body: payload }),
+  saRedeemRevoke: (code) =>
+    request("/api/super-admin/redeem-codes/revoke", { method: "POST", auth: true, body: { code } }),
+  saPaymentStats: () => request("/api/super-admin/payment-stats", { auth: true }),
+  saPaymentConfig: () => request("/api/super-admin/payment-config", { auth: true }),
+  saOpLogs: (limit = 100) => request(`/api/super-admin/operation-logs/list?limit=${limit}`, { auth: true }),
+  announcementsList: () => request("/api/announcements/list", { auth: true }),
+  announcementsMarkAll: () =>
+    request("/api/announcements/mark-all-read", { method: "POST", auth: true, body: {} }),
+  customerService: () => request("/api/config/customer-service", { auth: true }),
+  tutorialsList: () => request("/api/tutorials/list", { auth: true }),
+  helpDocsList: () => request("/api/help-documents/list", { auth: true }),
 };

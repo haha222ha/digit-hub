@@ -11,15 +11,26 @@ import {
   renderPurchase,
   renderAccount,
   renderInvite,
+  renderAnnouncements,
+  renderHelp,
+  renderCustomerService,
   requireAuth,
 } from "./pages/admin.js";
 import {
   renderSaDashboard,
   renderSaUsers,
   renderSaOrders,
+  renderSaPaymentStats,
+  renderSaPackages,
+  renderSaRedeem,
   renderSaInviteStats,
   renderSaTests,
+  renderSaAnnouncements,
+  renderSaTutorials,
+  renderSaHelpDocs,
+  renderSaConfig,
   renderSaQuotaLogs,
+  renderSaOpLogs,
 } from "./pages/super-admin.js";
 
 const root = document.getElementById("app");
@@ -37,15 +48,26 @@ const ADMIN_PAGES = {
   "/admin/purchase-quota": renderPurchase,
   "/admin/account-settings": renderAccount,
   "/admin/invite-promotion": renderInvite,
+  "/admin/announcements": renderAnnouncements,
+  "/admin/help": renderHelp,
+  "/admin/customer-service": renderCustomerService,
 };
 
 const SUPER_PAGES = {
   "/super-admin/dashboard": renderSaDashboard,
   "/super-admin/users": renderSaUsers,
   "/super-admin/orders": renderSaOrders,
+  "/super-admin/payment-stats": renderSaPaymentStats,
+  "/super-admin/packages": renderSaPackages,
+  "/super-admin/redeem-codes": renderSaRedeem,
   "/super-admin/invite-stats": renderSaInviteStats,
   "/super-admin/tests": renderSaTests,
+  "/super-admin/announcements": renderSaAnnouncements,
+  "/super-admin/tutorials": renderSaTutorials,
+  "/super-admin/help-docs": renderSaHelpDocs,
+  "/super-admin/config": renderSaConfig,
   "/super-admin/quota-logs": renderSaQuotaLogs,
+  "/super-admin/operation-logs": renderSaOpLogs,
 };
 
 async function render(fullPath) {

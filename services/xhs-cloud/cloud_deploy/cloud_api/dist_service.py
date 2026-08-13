@@ -46,10 +46,10 @@ def _load_catalog() -> dict:
     return {"tests": []}
 
 
-def list_tests() -> list[dict]:
+def list_tests(*, include_disabled: bool = False) -> list[dict]:
     raw = _load_catalog().get("tests") or []
     out = []
-    for t in raw:
+    for i, t in enumerate(raw):
         code = t.get("code") or t.get("test_code")
         if not code:
             continue
@@ -62,10 +62,19 @@ def list_tests() -> list[dict]:
                 "is_enabled": True,
                 "is_hot": bool(t.get("hot")),
                 "is_dual_perspective": bool(t.get("dual_perspective")),
+                "display_order": i + 1,
                 "page_path": f"/tests/{code}/index.html",
             }
         )
-    return out
+    try:
+        from cloud_deploy.cloud_api import dist_ops
+
+        out = dist_ops.apply_test_overrides(out)
+    except Exception:
+        pass
+    if include_disabled:
+        return out
+    return [t for t in out if t.get("is_enabled", True)]
 
 
 def _test_meta(test_code: str) -> dict | None:
@@ -159,34 +168,26 @@ def fulfill_quota_from_payment(user_id: int, plan_code: str, order_no: str) -> N
     from cloud_deploy.cloud_api.payment_plans import get_plan
 
     plan = get_plan(plan_code) or {}
+    # DB 套餐覆盖额度
+    try:
+        from cloud_deploy.cloud_api import dist_ops
+
+        ov = dist_ops.get_package_by_plan(plan_code)
+        if ov and int(ov.get("quota_amount") or 0) > 0:
+            plan = {**plan, "quota_amount": int(ov["quota_amount"])}
+    except Exception:
+        pass
     amount = int(plan.get("quota_amount") or 0)
     if amount <= 0:
         return
     dist_db.add_quota(user_id, amount, change_type="purchase", remark=f"订单 {order_no}")
+    try:
+        dist_db.apply_first_purchase_invite_rebate(user_id, amount, order_no)
+    except Exception:
+        pass
 
 
 def list_packages() -> list[dict]:
-    from cloud_deploy.cloud_api.payment_plans import list_psy_dist_plans
+    from cloud_deploy.cloud_api import dist_ops
 
-    out = []
-    for i, p in enumerate(list_psy_dist_plans(), start=1):
-        price_yuan = float(p.get("price_yuan") or p.get("amount") or 0)
-        features = (p.get("summary") or "").split("·")
-        features = [x.strip() for x in features if x.strip()]
-        out.append(
-            {
-                "id": i,
-                "name": p["label"],
-                "price": int(round(price_yuan * 100)),
-                "quota": int(p.get("quota_amount") or 0),
-                "quota_amount": int(p.get("quota_amount") or 0),
-                "is_enabled": True,
-                "display_order": i,
-                "created_at": "2026-01-01T00:00:00Z",
-                "subtitle": p.get("summary") or "",
-                "features": features or [p.get("summary") or ""],
-                "plan_code": p["plan_code"],
-                "recommended": bool(p.get("recommended")),
-            }
-        )
-    return out
+    return dist_ops.list_packages_merged()

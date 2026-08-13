@@ -4,18 +4,40 @@ from __future__ import annotations
 
 from cloud_deploy.cloud_api import database as db
 from cloud_deploy.cloud_api import payment_service as pay
-from cloud_deploy.cloud_api.payment_plans import get_plan, list_psy_dist_plans
+from cloud_deploy.cloud_api.payment_plans import get_plan
 
 
 def _packages_index() -> dict[int, dict]:
+    from cloud_deploy.cloud_api import dist_ops
+
     out: dict[int, dict] = {}
-    for i, p in enumerate(list_psy_dist_plans(), start=1):
-        out[i] = {**p, "id": i}
+    for p in dist_ops.list_packages_merged(include_disabled=False):
+        pid = int(p.get("list_id") or p.get("id") or 0)
+        if pid:
+            out[pid] = {
+                **p,
+                "id": pid,
+                "label": p.get("name") or p.get("label") or p.get("plan_code"),
+                "amount": str(p.get("price_yuan") if p.get("price_yuan") is not None else p.get("amount") or "0"),
+                "quota_amount": int(p.get("quota_amount") or p.get("quota") or 0),
+            }
     return out
 
 
 def get_package(package_id: int) -> dict | None:
-    return _packages_index().get(int(package_id))
+    from cloud_deploy.cloud_api import dist_ops
+
+    pkg = dist_ops.get_package_by_id(int(package_id))
+    if not pkg:
+        return _packages_index().get(int(package_id))
+    return {
+        **pkg,
+        "id": int(pkg.get("list_id") or pkg.get("id") or package_id),
+        "label": pkg.get("name") or pkg.get("label") or pkg.get("plan_code"),
+        "amount": str(pkg.get("price_yuan") if pkg.get("price_yuan") is not None else pkg.get("amount") or "0"),
+        "quota_amount": int(pkg.get("quota_amount") or pkg.get("quota") or 0),
+        "plan_code": pkg.get("plan_code"),
+    }
 
 
 def _yuan_to_cents(amount: str | float) -> int:

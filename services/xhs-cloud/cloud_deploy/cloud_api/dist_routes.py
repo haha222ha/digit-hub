@@ -637,26 +637,6 @@ def sa_invite_stats(request: Request, limit: int = 100):
     return _ok(dist_db.admin_invite_overview(limit=int(limit or 100)), "ok")
 
 
-@compat_router.get("/api/super-admin/tests/list")
-def sa_tests_list(request: Request):
-    try:
-        _require_super(request)
-    except HTTPException as e:
-        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
-    tests = svc.list_tests()
-    return _ok({"tests": tests, "list": tests, "total": len(tests)}, "ok")
-
-
-@compat_router.get("/api/super-admin/packages/list")
-def sa_packages_list(request: Request):
-    try:
-        _require_super(request)
-    except HTTPException as e:
-        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
-    pkgs = svc.list_packages()
-    return _ok({"packages": pkgs, "list": pkgs, "total": len(pkgs)}, "ok")
-
-
 @compat_router.get("/api/admin/dashboard/stats")
 def admin_dashboard_stats(request: Request):
     """分销商工作台简易统计（本人链接）。"""

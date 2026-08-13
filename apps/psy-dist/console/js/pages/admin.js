@@ -10,6 +10,9 @@ const NAV = [
   { path: "/admin/purchase-quota", label: "购买额度" },
   { path: "/admin/redeem-quota", label: "兑换额度" },
   { path: "/admin/invite-promotion", label: "邀请推广" },
+  { path: "/admin/announcements", label: "公告" },
+  { path: "/admin/help", label: "帮助" },
+  { path: "/admin/customer-service", label: "客服" },
   { path: "/admin/account-settings", label: "账户" },
 ];
 
@@ -17,9 +20,17 @@ const SUPER_NAV = [
   { path: "/super-admin/dashboard", label: "超管看板" },
   { path: "/super-admin/users", label: "分销商" },
   { path: "/super-admin/orders", label: "订单" },
+  { path: "/super-admin/payment-stats", label: "支付统计" },
+  { path: "/super-admin/packages", label: "套餐" },
+  { path: "/super-admin/redeem-codes", label: "兑换码" },
   { path: "/super-admin/invite-stats", label: "邀请统计" },
   { path: "/super-admin/tests", label: "测题" },
+  { path: "/super-admin/announcements", label: "公告" },
+  { path: "/super-admin/tutorials", label: "教程" },
+  { path: "/super-admin/help-docs", label: "帮助文档" },
+  { path: "/super-admin/config", label: "系统配置" },
   { path: "/super-admin/quota-logs", label: "额度日志" },
+  { path: "/super-admin/operation-logs", label: "操作日志" },
 ];
 
 function isSuper() {
@@ -486,18 +497,44 @@ export async function renderUnlimited(root) {
 
 export async function renderPurchase(root) {
   const host = el("div");
+  const payMethod = el("select");
+  payMethod.append(
+    el("option", { value: "wxpay", text: "微信支付" }),
+    el("option", { value: "alipay", text: "支付宝" })
+  );
   root.append(
     shell("/admin/purchase-quota", [
       el("h1", { className: "page-title", text: "购买额度" }),
-      el("p", { className: "page-lead", text: "选择套餐下单。若暂不可在线支付，可用兑换码充值。" }),
+      el("p", {
+        className: "page-lead",
+        text: "在线支付后额度自动到账。若你是被邀请注册，首购将给邀请人返利（默认购额 20%）。",
+      }),
+      el("div", { className: "panel", style: "margin-bottom:16px" }, [
+        el("div", { className: "field" }, [el("label", { text: "支付方式" }), payMethod]),
+      ]),
       host,
     ])
   );
 
+  async function pollPaid(orderNo) {
+    for (let i = 0; i < 12; i++) {
+      await new Promise((r) => setTimeout(r, 2500));
+      try {
+        const o = await api.orderDetail(orderNo);
+        const st = (o && (o.status || (o.order && o.order.status))) || "";
+        if (st === "paid" || st === "fulfilled") return true;
+      } catch {
+        /* ignore */
+      }
+    }
+    return false;
+  }
+
   try {
-    const [pkgData, methods] = await Promise.all([
+    const [pkgData, methods, cfg] = await Promise.all([
       api.packagesList().catch(() => ({ packages: [] })),
       api.purchaseMethods().catch(() => ({})),
+      api.customerService().catch(() => ({})),
     ]);
     const packages = (pkgData && pkgData.packages) || [];
     if (!packages.length) {
@@ -516,26 +553,34 @@ export async function renderPurchase(root) {
       );
       return;
     }
+    const rebate = cfg.invite_rebate_percent || "20";
+    host.append(
+      el("p", {
+        className: "muted",
+        text: `邀请返利比例：${rebate}%（仅被邀请用户的首次购额）。支付完成后可刷新工作台查看额度。`,
+      })
+    );
     const grid = el("div", { className: "pkg-grid" });
     for (const p of packages) {
-      const id = p.id || p.package_id;
+      const id = p.id || p.package_id || p.list_id;
       const name = p.name || p.title || `套餐 ${id}`;
       const quota = p.quota_amount || p.quota || p.credits || "—";
-      const price = p.price_yuan || p.price || p.amount || "—";
+      const price = p.price_yuan != null ? p.price_yuan : p.price || p.amount || "—";
       const btn = el("button", {
         className: "btn btn-primary",
         type: "button",
-        text: "购买",
+        text: "立即支付",
         style: "width:auto",
       });
       btn.addEventListener("click", async () => {
         btn.disabled = true;
+        const method = payMethod.value || "wxpay";
         try {
-          const created = await api.createOrder(id, "wxpay");
+          const created = await api.createOrder(id, method);
           const order = (created && created.order) || created || {};
           const orderNo = order.order_no || order.orderNo;
           if (!orderNo) throw new Error("未返回订单号");
-          const pay = await api.startPay(orderNo, "wxpay");
+          const pay = await api.startPay(orderNo, method);
           if (pay && pay.paid) {
             alert("支付成功，额度已到账");
             navigate("/admin/dashboard");
@@ -544,9 +589,16 @@ export async function renderPurchase(root) {
           const payUrl = pay.pay_data || pay.pay_url || pay.code_url || "";
           if (payUrl) {
             window.open(payUrl, "_blank");
-            alert("已打开支付页，完成后请刷新工作台查看额度。");
+            host.prepend(flash("ok", `订单 ${orderNo} 已打开支付页，正在检测支付结果…`));
+            const ok = await pollPaid(orderNo);
+            if (ok) {
+              alert("支付成功，额度已到账");
+              navigate("/admin/dashboard");
+            } else {
+              alert("尚未检测到支付完成。若已付款，请稍后刷新工作台；也可在兑换页用码充值。");
+            }
           } else {
-            alert("订单已创建：" + orderNo + "。请按提示完成支付，或联系客服。");
+            alert("订单已创建：" + orderNo + "。未获取到支付链接，请联系客服或改用兑换码。");
           }
         } catch (e) {
           alert(e.message || "下单失败，请改用兑换码");
@@ -558,14 +610,20 @@ export async function renderPurchase(root) {
         el("div", { className: "pkg-card" }, [
           el("h3", { text: name }),
           el("p", { className: "pkg-quota", text: `${quota} 额度` }),
-          el("p", { className: "pkg-price", text: typeof price === "number" ? `¥ ${price}` : String(price) }),
+          el("p", {
+            className: "pkg-price",
+            text: typeof price === "number" ? `¥ ${price}` : String(price),
+          }),
+          p.subtitle ? el("p", { className: "muted", text: p.subtitle }) : null,
           btn,
         ])
       );
     }
     host.append(grid);
     if (methods && (methods.xianyu || methods.offline)) {
-      host.append(el("p", { className: "muted", text: "也可通过闲鱼/线下方式购码后，在「兑换额度」使用。" }));
+      host.append(
+        el("p", { className: "muted", text: "也可通过闲鱼/线下方式购码后，在「兑换额度」使用。" })
+      );
     }
   } catch (e) {
     host.append(flash("error", e.message || "加载套餐失败"));
@@ -741,7 +799,7 @@ export async function renderInvite(root) {
       el("h1", { className: "page-title", text: "邀请推广" }),
       el("p", {
         className: "page-lead",
-        text: "分享专属链接；好友注册后，双方各得 5 点起始奖励额度。",
+        text: "分享专属链接：好友注册双方各得 5 点额度；好友首次购买额度时，你再获购额 20% 返利。",
       }),
       errHost,
       el("div", { className: "stat-row cols-3" }, [
@@ -764,7 +822,7 @@ export async function renderInvite(root) {
         el("div", { className: "row-actions" }, [copyBtn]),
         el("p", {
           className: "muted",
-          text: "也可让好友在注册页填写邀请码。注册奖励即时到账。",
+          text: "也可让好友在注册页填写邀请码。注册奖励即时到账；首购返利在支付成功后自动发放。",
         }),
       ]),
       el("div", { className: "panel" }, [el("h3", { text: "邀请记录" }), ...rows]),
@@ -773,6 +831,143 @@ export async function renderInvite(root) {
 }
 
 export { shell, isSuper };
+
+export async function renderAnnouncements(root) {
+  const errHost = el("div");
+  let items = [];
+  try {
+    const data = await api.announcementsList();
+    items = (data && (data.announcements || data.list)) || [];
+    await api.announcementsMarkAll().catch(() => {});
+  } catch (err) {
+    errHost.append(flash("error", err.message || "加载失败"));
+  }
+  root.append(
+    shell("/admin/announcements", [
+      el("h1", { className: "page-title", text: "公告" }),
+      el("p", { className: "page-lead", text: "平台通知与运营说明。" }),
+      errHost,
+      items.length === 0
+        ? el("p", { className: "muted", text: "暂无公告" })
+        : el(
+            "div",
+            { className: "stack" },
+            items.map((a) =>
+              el("div", { className: "panel" }, [
+                el("h3", { text: a.title || "公告" }),
+                el("p", { className: "muted", text: String(a.created_at || a.updated_at || "") }),
+                el("div", { html: String(a.content || "").replace(/\n/g, "<br/>") }),
+              ])
+            )
+          ),
+    ])
+  );
+}
+
+export async function renderHelp(root) {
+  const errHost = el("div");
+  let docs = [];
+  let tuts = [];
+  try {
+    const [d, t] = await Promise.all([api.helpDocsList(), api.tutorialsList()]);
+    docs = (d && (d.documents || d.list)) || [];
+    tuts = (t && (t.tutorials || t.list)) || [];
+  } catch (err) {
+    errHost.append(flash("error", err.message || "加载失败"));
+  }
+  root.append(
+    shell("/admin/help", [
+      el("h1", { className: "page-title", text: "帮助中心" }),
+      el("p", { className: "page-lead", text: "使用说明与平台教程。" }),
+      errHost,
+      el("h2", { className: "section-h", text: "文档" }),
+      docs.length === 0
+        ? el("p", { className: "muted", text: "暂无帮助文档" })
+        : el(
+            "div",
+            { className: "stack" },
+            docs.map((d) =>
+              el("div", { className: "panel" }, [
+                el("h3", { text: d.title || "文档" }),
+                el("div", { html: String(d.content || "").replace(/\n/g, "<br/>") }),
+              ])
+            )
+          ),
+      el("h2", { className: "section-h", text: "教程" }),
+      tuts.length === 0
+        ? el("p", { className: "muted", text: "暂无教程" })
+        : el(
+            "div",
+            { className: "stack" },
+            tuts.map((t) =>
+              el("div", { className: "panel" }, [
+                el("h3", { text: t.title || "教程" }),
+                el("p", { className: "muted", text: t.description || "" }),
+                t.tutorial_link
+                  ? el("a", {
+                      href: t.tutorial_link,
+                      target: "_blank",
+                      text: "打开教程链接",
+                      className: "btn btn-primary",
+                      style: "width:auto",
+                    })
+                  : null,
+                t.access_password
+                  ? el("p", { className: "muted", text: `访问密码：${t.access_password}` })
+                  : null,
+              ])
+            )
+          ),
+    ])
+  );
+}
+
+export async function renderCustomerService(root) {
+  const errHost = el("div");
+  let cfg = {};
+  try {
+    cfg = (await api.customerService()) || {};
+  } catch (err) {
+    errHost.append(flash("error", err.message || "加载失败"));
+  }
+  root.append(
+    shell("/admin/customer-service", [
+      el("h1", { className: "page-title", text: "客服" }),
+      el("p", { className: "page-lead", text: "遇到问题可联系平台客服。" }),
+      errHost,
+      el("div", { className: "stat-row cols-3" }, [
+        el("div", { className: "stat" }, [
+          el("div", { className: "k", text: "微信" }),
+          el("div", { className: "v", style: "font-size:1.1rem", text: cfg.customer_service_wechat || "—" }),
+        ]),
+        el("div", { className: "stat" }, [
+          el("div", { className: "k", text: "服务时间" }),
+          el("div", { className: "v", style: "font-size:1rem", text: cfg.customer_service_hours || "—" }),
+        ]),
+        el("div", { className: "stat" }, [
+          el("div", { className: "k", text: "响应" }),
+          el("div", {
+            className: "v",
+            style: "font-size:1rem",
+            text: cfg.customer_service_response_time || "—",
+          }),
+        ]),
+      ]),
+      cfg.customer_service_qrcode
+        ? el("div", { className: "panel" }, [
+            el("h3", { text: "客服二维码" }),
+            el("img", { src: cfg.customer_service_qrcode, alt: "客服二维码", style: "max-width:220px" }),
+          ])
+        : null,
+      cfg.xianyu_shop_link
+        ? el("div", { className: "panel" }, [
+            el("h3", { text: "闲鱼店铺" }),
+            el("a", { href: cfg.xianyu_shop_link, target: "_blank", text: cfg.xianyu_shop_link }),
+          ])
+        : null,
+    ])
+  );
+}
 
 export function requireAuth() {
   return Boolean(getToken());
