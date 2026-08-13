@@ -179,6 +179,7 @@ export const api = {
     return request(`/api/admin/test-results/list${s ? `?${s}` : ""}`, { auth: true });
   },
   packagesList: () => request("/api/admin/packages/list"),
+  packageDocuments: () => request("/api/admin/package-documents/list", { auth: true }),
   purchaseMethods: () => request("/api/admin/payment/purchase-methods"),
   createOrder: (packageId, paymentMethod = "wxpay") =>
     request("/api/orders/create", {

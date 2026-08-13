@@ -117,6 +117,13 @@ def help_public(request: Request):
     return _ok({"documents": items, "list": items})
 
 
+@ops_router.get("/api/admin/package-documents/list")
+def admin_package_docs_list(request: Request):
+    _token_user(request)
+    docs = dist_ops.list_package_documents()
+    return _ok({"documents": docs, "list": docs, "total": len(docs)})
+
+
 # ----- super-admin config -----
 
 

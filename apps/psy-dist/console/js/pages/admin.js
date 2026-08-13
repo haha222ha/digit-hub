@@ -912,6 +912,55 @@ export async function renderUnlimited(root) {
   );
 }
 
+function packageDocIds(pkg) {
+  const ids = [];
+  const id = pkg.id ?? pkg.package_id ?? pkg.list_id;
+  if (id != null) ids.push(Number(id));
+  if (pkg.db_id != null) ids.push(Number(pkg.db_id));
+  return ids;
+}
+
+function packageDocMatches(doc, pkgIds) {
+  const pid = Number(doc.package_id ?? doc.packageId ?? 0);
+  if (pid === 0) return false;
+  return pkgIds.includes(pid);
+}
+
+function renderPackageDocLink(doc) {
+  const title = doc.title || "文档";
+  const url = (doc.document_url || doc.documentUrl || "").trim();
+  if (!url) return el("span", { className: "pkg-doc-title", text: title });
+  return el("a", {
+    className: "pkg-doc-link",
+    href: url,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    text: title,
+  });
+}
+
+function renderPackageDocList(docs, packages) {
+  if (!docs.length) return null;
+  const pkgMap = new Map();
+  for (const p of packages) {
+    const label = p.name || p.title || "套餐";
+    for (const id of packageDocIds(p)) pkgMap.set(id, label);
+  }
+  const list = el("ul", { className: "pkg-doc-list" });
+  for (const d of docs) {
+    const pid = Number(d.package_id ?? d.packageId ?? 0);
+    const tag =
+      pid > 0
+        ? el("span", { className: "pkg-doc-tag muted", text: pkgMap.get(pid) || `套餐 #${pid}` })
+        : null;
+    list.append(el("li", { className: "pkg-doc-item" }, [renderPackageDocLink(d), tag]));
+  }
+  return el("div", { className: "panel pkg-doc-panel" }, [
+    el("h3", { text: "套餐说明文档" }),
+    list,
+  ]);
+}
+
 export async function renderPurchase(root) {
   const host = el("div");
   const payMethod = el("select");
@@ -948,12 +997,15 @@ export async function renderPurchase(root) {
   }
 
   try {
-    const [pkgData, methods, cfg] = await Promise.all([
+    const [pkgData, methods, cfg, docData] = await Promise.all([
       api.packagesList().catch(() => ({ packages: [] })),
       api.purchaseMethods().catch(() => ({})),
       api.customerService().catch(() => ({})),
+      api.packageDocuments().catch(() => ({ documents: [] })),
     ]);
     const packages = (pkgData && pkgData.packages) || [];
+    const allDocs = (docData && (docData.documents || docData.list)) || [];
+    const globalDocs = allDocs.filter((d) => Number(d.package_id ?? d.packageId ?? 0) === 0);
     if (!packages.length) {
       host.append(
         el("div", { className: "panel" }, [
@@ -980,6 +1032,8 @@ export async function renderPurchase(root) {
     const grid = el("div", { className: "pkg-grid" });
     for (const p of packages) {
       const id = p.id || p.package_id || p.list_id;
+      const pkgIds = packageDocIds(p);
+      const cardDocs = allDocs.filter((d) => packageDocMatches(d, pkgIds));
       const name = p.name || p.title || `套餐 ${id}`;
       const quota = p.quota_amount || p.quota || p.credits || "—";
       const price = p.price_yuan != null ? p.price_yuan : p.price || p.amount || "—";
@@ -1032,11 +1086,20 @@ export async function renderPurchase(root) {
             text: typeof price === "number" ? `¥ ${price}` : String(price),
           }),
           p.subtitle ? el("p", { className: "muted", text: p.subtitle }) : null,
+          cardDocs.length
+            ? el(
+                "ul",
+                { className: "pkg-doc-list pkg-doc-list--inline" },
+                cardDocs.map((d) => el("li", { className: "pkg-doc-item" }, [renderPackageDocLink(d)]))
+              )
+            : null,
           btn,
         ])
       );
     }
     host.append(grid);
+    const globalPanel = renderPackageDocList(globalDocs, packages);
+    if (globalPanel) host.append(globalPanel);
     if (methods && (methods.xianyu || methods.offline)) {
       host.append(
         el("p", { className: "muted", text: "也可通过闲鱼/线下方式购码后，在「兑换额度」使用。" })
