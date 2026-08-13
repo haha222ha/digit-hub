@@ -2291,7 +2291,7 @@ def set_distributor_role(user_id: int, role: str) -> dict[str, Any]:
 
 def set_distributor_status(user_id: int, status: str) -> dict[str, Any]:
     status = (status or "active").strip().lower()
-    if status not in ("active", "disabled", "banned"):
+    if status not in ("active", "disabled", "banned", "deleted"):
         raise ValueError("无效状态")
     init_dist_tables()
     if _USE_PG:
@@ -2309,6 +2309,86 @@ def set_distributor_status(user_id: int, status: str) -> dict[str, Any]:
         conn.commit()
         conn.close()
     return ensure_distributor(int(user_id))
+
+
+def delete_distributor(user_id: int) -> dict[str, Any]:
+    """软删除分销商（不可登录，数据保留）。"""
+    dist = ensure_distributor(int(user_id))
+    if (dist.get("role") or "") == "super_admin":
+        raise ValueError("不能删除超级管理员")
+    return set_distributor_status(int(user_id), "deleted")
+
+
+def merchant_dashboard_trends(user_id: int, *, days: int = 7) -> dict[str, Any]:
+    """近 N 日链接生成 / 测题完成趋势（商家工作台）。"""
+    from datetime import date, timedelta
+
+    init_dist_tables()
+    days = max(1, min(int(days or 7), 30))
+    today = date.today()
+    start = today - timedelta(days=days - 1)
+    labels = [(start + timedelta(days=i)).isoformat() for i in range(days)]
+    link_counts = {d: 0 for d in labels}
+    test_counts = {d: 0 for d in labels}
+    start_s = start.isoformat()
+    uid = int(user_id)
+
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute(
+            """SELECT to_char(created_at, 'YYYY-MM-DD') AS d, COUNT(*) AS n
+               FROM dist_links WHERE user_id=%s AND created_at::date >= %s::date
+               GROUP BY to_char(created_at, 'YYYY-MM-DD')""",
+            (uid, start_s),
+        )
+        for row in c.fetchall():
+            r = _row_dict(row) or {}
+            d = str(r.get("d") or "")
+            if d in link_counts:
+                link_counts[d] = int(r.get("n") or 0)
+        c.execute(
+            """SELECT to_char(completed_at, 'YYYY-MM-DD') AS d, COUNT(*) AS n
+               FROM dist_test_results WHERE user_id=%s AND completed_at::date >= %s::date
+               GROUP BY to_char(completed_at, 'YYYY-MM-DD')""",
+            (uid, start_s),
+        )
+        for row in c.fetchall():
+            r = _row_dict(row) or {}
+            d = str(r.get("d") or "")
+            if d in test_counts:
+                test_counts[d] = int(r.get("n") or 0)
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            """SELECT date(created_at) AS d, COUNT(*) AS n
+               FROM dist_links WHERE user_id=? AND date(created_at) >= ?
+               GROUP BY date(created_at)""",
+            (uid, start_s),
+        )
+        for row in c.fetchall():
+            d = str(row[0] or "")
+            if d in link_counts:
+                link_counts[d] = int(row[1] or 0)
+        c.execute(
+            """SELECT date(completed_at) AS d, COUNT(*) AS n
+               FROM dist_test_results WHERE user_id=? AND date(completed_at) >= ?
+               GROUP BY date(completed_at)""",
+            (uid, start_s),
+        )
+        for row in c.fetchall():
+            d = str(row[0] or "")
+            if d in test_counts:
+                test_counts[d] = int(row[1] or 0)
+        conn.close()
+
+    return {
+        "days": labels,
+        "links_daily": [link_counts.get(d, 0) for d in labels],
+        "tests_daily": [test_counts.get(d, 0) for d in labels],
+    }
 
 
 def admin_invite_overview(limit: int = 100) -> dict[str, Any]:
@@ -2576,6 +2656,67 @@ def get_operation_log(log_id: int) -> dict[str, Any] | None:
         return None
     row["created_at"] = _fmt_ts(row.get("created_at")) or row.get("created_at")
     return row
+
+
+def list_payment_notify_logs_export(
+    *,
+    limit: int = 5000,
+    order_no: str | None = None,
+    status: str | None = None,
+) -> list[dict[str, Any]]:
+    init_dist_tables()
+    limit = max(1, min(int(limit or 5000), 10000))
+    where: list[str] = []
+    params: list[Any] = []
+    ono = (order_no or "").strip()
+    if ono:
+        where.append("order_no=%s" if _USE_PG else "order_no=?")
+        params.append(ono)
+    st = (status or "").strip().lower()
+    if st == "success":
+        where.append("verify_ok=%s" if _USE_PG else "verify_ok=?")
+        params.append(True if _USE_PG else 1)
+    elif st == "fail":
+        where.append("verify_ok=%s" if _USE_PG else "verify_ok=?")
+        params.append(False if _USE_PG else 0)
+    wh = (" WHERE " + " AND ".join(where)) if where else ""
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute(
+            f"""SELECT id, order_no, trade_status, verify_ok, response_text, client_ip, created_at
+                FROM dist_payment_notify_logs{wh}
+                ORDER BY id DESC LIMIT %s""",
+            tuple(params + [limit]),
+        )
+        rows = [_row_dict(r) or {} for r in c.fetchall()]
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            f"""SELECT id, order_no, trade_status, verify_ok, response_text, client_ip, created_at
+                FROM dist_payment_notify_logs{wh}
+                ORDER BY id DESC LIMIT ?""",
+            tuple(params + [limit]),
+        )
+        rows = [_row_dict(r) or {} for r in c.fetchall()]
+        conn.close()
+    out = []
+    for r in rows:
+        ok = bool(r.get("verify_ok"))
+        out.append(
+            {
+                "id": r.get("id"),
+                "order_no": r.get("order_no") or "",
+                "trade_status": r.get("trade_status") or "",
+                "status": "success" if ok else "fail",
+                "response_text": r.get("response_text") or "",
+                "client_ip": r.get("client_ip") or "",
+                "created_at": _fmt_ts(r.get("created_at")) or r.get("created_at"),
+            }
+        )
+    return out
 
 
 def list_operation_logs_export(limit: int = 5000) -> list[dict[str, Any]]:

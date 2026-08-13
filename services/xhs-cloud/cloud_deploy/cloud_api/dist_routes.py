@@ -162,6 +162,13 @@ def _dist_token(request: Request) -> dict:
     return user_from_token(token)
 
 
+def _assert_dist_can_login(user_id: int) -> None:
+    dist = dist_db.ensure_distributor(int(user_id))
+    st = (dist.get("status") or "active").strip().lower()
+    if st in ("deleted", "disabled", "banned"):
+        raise HTTPException(status_code=403, detail="账号已停用或已删除，请联系管理员")
+
+
 @compat_router.get("/test/{test_code}/{token}", response_class=HTMLResponse)
 def compat_test_iframe_shell(test_code: str, token: str):
     """C 端分销入口：iframe 壳内嵌 /tests/{code}/index.html?token=..."""
@@ -250,6 +257,10 @@ def compat_auth_login(body: DistLoginBody, request: Request):
     except HTTPException as e:
         return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
     uid = int(res["membership"]["id"])
+    try:
+        _assert_dist_can_login(uid)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
     user = svc.map_user_for_dist(uid)
     token = res["access_token"]
     return _ok({"user": user, "token": token}, "登录成功")
@@ -277,6 +288,10 @@ def compat_auth_register(body: DistRegisterBody, request: Request):
     except Exception as e:
         return JSONResponse(_fail(f"注册失败: {e}"), status_code=200)
     uid = int(res["membership"]["id"])
+    try:
+        _assert_dist_can_login(uid)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
     user = svc.map_user_for_dist(uid)
     return _ok({"user": user, "token": res["access_token"]}, "注册成功")
 
@@ -293,6 +308,10 @@ def compat_auth_login_code(body: LoginCodeBody, request: Request):
     except HTTPException as e:
         return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
     uid = int(res["membership"]["id"])
+    try:
+        _assert_dist_can_login(uid)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
     user = svc.map_user_for_dist(uid)
     return _ok(
         {
@@ -795,6 +814,11 @@ class SetRoleBody(BaseModel):
     role: str = "distributor"
 
 
+class DeleteUserBody(BaseModel):
+    user_id: int | None = None
+    userId: int | None = None
+
+
 def _require_super(request: Request) -> tuple[dict, dict]:
     user = _dist_token(request)
     dist = svc.map_user_for_dist(int(user["id"]))
@@ -889,6 +913,34 @@ def sa_set_role(body: SetRoleBody, request: Request):
         return JSONResponse(_fail(str(e)), status_code=200)
 
 
+@compat_router.post("/api/super-admin/users/delete")
+def sa_delete_user(body: DeleteUserBody, request: Request):
+    try:
+        user, dist = _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    uid = int(body.user_id or body.userId or 0)
+    if uid <= 0:
+        return JSONResponse(_fail("请指定用户"), status_code=200)
+    if int(user["id"]) == uid:
+        return JSONResponse(_fail("不能删除当前登录账号"), status_code=200)
+    try:
+        row = dist_db.delete_distributor(uid)
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+    from cloud_deploy.cloud_api import dist_ops
+
+    a = {"id": int(user["id"]), "username": dist.get("username") or user.get("username") or ""}
+    dist_ops.log_op(
+        actor_user_id=a["id"],
+        actor_username=a["username"],
+        action="user.delete",
+        target_id=str(uid),
+        detail={"status": "deleted"},
+    )
+    return _ok({"user": row}, "用户已删除")
+
+
 @compat_router.get("/api/super-admin/orders")
 def sa_orders(request: Request, limit: int = 100):
     try:
@@ -978,12 +1030,14 @@ def sa_invite_stats(request: Request, limit: int = 100):
 
 @compat_router.get("/api/admin/dashboard/stats")
 def admin_dashboard_stats(request: Request):
-    """分销商工作台简易统计（本人链接）。"""
+    """分销商工作台简易统计（本人链接 + 近 7 日趋势）。"""
     user = _dist_token(request)
-    links = dist_db.list_links(user["id"], limit=500)
+    uid = int(user["id"])
+    links = dist_db.list_links(uid, limit=500)
     unused = sum(1 for l in links if (l.get("status") or "unused") == "unused")
     used = sum(1 for l in links if l.get("status") == "used")
-    q = svc.quota_info(user["id"])
+    q = svc.quota_info(uid)
+    trends = dist_db.merchant_dashboard_trends(uid, days=7)
     return _ok(
         {
             "remaining_quota": q.get("remaining_quota"),
@@ -992,6 +1046,7 @@ def admin_dashboard_stats(request: Request):
             "links_total": len(links),
             "links_unused": unused,
             "links_used": used,
+            "trends": trends,
         },
         "ok",
     )

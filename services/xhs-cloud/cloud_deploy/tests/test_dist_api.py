@@ -164,6 +164,28 @@ class DistApiTest(unittest.TestCase):
         self.assertIn(out.get("pay_type"), ("redirect", "code_url"))
         self.assertTrue(out.get("pay_data"))
 
+    def test_merchant_dashboard_trends(self):
+        profile = db.register_user_account("dashuser", "pass123456")
+        uid = int(profile["id"])
+        dist_db.ensure_distributor(uid, default_quota=10)
+        svc.generate_links(uid, "7v7", 2)
+        trends = dist_db.merchant_dashboard_trends(uid, days=7)
+        self.assertEqual(len(trends.get("days") or []), 7)
+        self.assertEqual(len(trends.get("links_daily") or []), 7)
+        self.assertGreaterEqual(sum(trends.get("links_daily") or []), 2)
+
+    def test_delete_distributor_soft(self):
+        profile = db.register_user_account("deluser", "pass123456")
+        uid = int(profile["id"])
+        dist_db.ensure_distributor(uid, default_quota=5)
+        row = dist_db.delete_distributor(uid)
+        self.assertEqual(row.get("status"), "deleted")
+
+    def test_payment_notify_logs_export(self):
+        dist_db.init_dist_tables()
+        rows = dist_db.list_payment_notify_logs_export(limit=10)
+        self.assertIsInstance(rows, list)
+
 
 if __name__ == "__main__":
     unittest.main()

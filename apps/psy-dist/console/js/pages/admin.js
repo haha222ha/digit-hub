@@ -299,15 +299,24 @@ export async function renderDashboard(root) {
     /* ignore */
   }
   let linkStats = { total: 0, unused: 0, used: 0 };
+  let trends = null;
   try {
-    const data = await api.linksList({ perPage: "1" });
-    linkStats.total = Number((data && data.pagination && data.pagination.total) || 0);
-    const usedData = await api.linksList({ status: "used", perPage: "1" });
-    const unusedData = await api.linksList({ status: "unused", perPage: "1" });
-    linkStats.used = Number((usedData && usedData.pagination && usedData.pagination.total) || 0);
-    linkStats.unused = Number((unusedData && unusedData.pagination && unusedData.pagination.total) || 0);
+    const dash = await api.adminDashboardStats();
+    linkStats.total = Number(dash?.links_total || 0);
+    linkStats.unused = Number(dash?.links_unused || 0);
+    linkStats.used = Number(dash?.links_used || 0);
+    trends = dash?.trends || null;
   } catch {
-    /* ignore */
+    try {
+      const data = await api.linksList({ perPage: "1" });
+      linkStats.total = Number((data && data.pagination && data.pagination.total) || 0);
+      const usedData = await api.linksList({ status: "used", perPage: "1" });
+      const unusedData = await api.linksList({ status: "unused", perPage: "1" });
+      linkStats.used = Number((usedData && usedData.pagination && usedData.pagination.total) || 0);
+      linkStats.unused = Number((unusedData && unusedData.pagination && unusedData.pagination.total) || 0);
+    } catch {
+      /* ignore */
+    }
   }
 
   let testCount = 0;
@@ -317,6 +326,40 @@ export async function renderDashboard(root) {
   } catch {
     /* ignore */
   }
+
+  const trendPanel = trends && trends.days && trends.days.length
+    ? el("div", { className: "panel trend-panel" }, [
+        el("h3", { text: "近 7 日趋势" }),
+        el("div", { className: "trend-legend" }, [
+          el("span", { className: "trend-legend-item trend-legend-links", text: "新建链接" }),
+          el("span", { className: "trend-legend-item trend-legend-tests", text: "测题完成" }),
+        ]),
+        el(
+          "div",
+          { className: "trend-chart" },
+          trends.days.map((day, idx) => {
+            const linksN = Number((trends.links_daily || [])[idx] || 0);
+            const testsN = Number((trends.tests_daily || [])[idx] || 0);
+            const max = Math.max(1, ...((trends.links_daily || []).concat(trends.tests_daily || [])).map(Number));
+            return el("div", { className: "trend-col" }, [
+              el("div", { className: "trend-bars" }, [
+                el("div", {
+                  className: "trend-bar trend-bar-links",
+                  style: `height:${Math.round((linksN / max) * 100)}%`,
+                  title: `链接 ${linksN}`,
+                }),
+                el("div", {
+                  className: "trend-bar trend-bar-tests",
+                  style: `height:${Math.round((testsN / max) * 100)}%`,
+                  title: `测题 ${testsN}`,
+                }),
+              ]),
+              el("div", { className: "trend-label", text: day.slice(5) }),
+            ]);
+          })
+        ),
+      ])
+    : null;
 
   root.append(
     shell("/admin/dashboard", [
@@ -343,6 +386,7 @@ export async function renderDashboard(root) {
           el("div", { className: "v", text: String(testCount) }),
         ]),
       ]),
+      trendPanel,
       el("h2", { className: "section-h", text: "快捷入口" }),
       quickActions(),
       el("div", { className: "panel tip-panel" }, [
@@ -451,6 +495,7 @@ export async function renderGenerate(root) {
       });
       bindCopyButton(copyAllBtn, () => urls.join("\n"), {
         okText: `已复制 ${urls.length} 条`,
+        onOk: () => showToast(`已复制 ${urls.length} 条链接`),
       });
       exportBtn.addEventListener("click", () => {
         const blob = new Blob([urls.join("\n") + (urls.length ? "\n" : "")], {
@@ -1056,12 +1101,28 @@ export async function renderPurchase(root) {
   }
 
   async function runPay(orderNo, method) {
-    const pay = await api.startPay(orderNo, method);
+    const isPc = !isWechatBrowser();
+    const pay = await api.startPay(orderNo, method, isPc ? "pc" : "mobile");
     if (pay && pay.paid) {
       await afterPaySuccess();
       return;
     }
-    const payUrl = pay.pay_data || pay.pay_url || pay.code_url || "";
+    const payType = (pay && (pay.pay_type || pay.payType)) || "";
+    const codeUrl =
+      payType === "code_url"
+        ? (pay && (pay.pay_data || pay.code_url || "")) || ""
+        : (pay && pay.code_url) || "";
+    const payUrl =
+      payType === "redirect"
+        ? (pay && (pay.pay_data || pay.pay_url || "")) || ""
+        : (pay && (pay.pay_data || pay.pay_url)) || "";
+    if (codeUrl && isPc && method === "wxpay" && payType === "code_url") {
+      openPayQrModal(orderNo, codeUrl);
+      const ok = await pollPaid(orderNo);
+      if (ok) await afterPaySuccess();
+      else showToast("尚未检测到支付完成。若已付款，请稍后刷新工作台", "error");
+      return;
+    }
     if (payUrl) {
       if (method === "wxpay" && isWechatBrowser()) window.location.href = payUrl;
       else window.open(payUrl, "_blank");
@@ -1072,6 +1133,27 @@ export async function renderPurchase(root) {
     } else {
       showToast("未获取到支付链接，请联系客服或改用兑换码", "error");
     }
+  }
+
+  function openPayQrModal(orderNo, codeUrl) {
+    const qrSrc = `/api/v1/payment/qrcode?data=${encodeURIComponent(codeUrl)}`;
+    const qrImg = el("img", {
+      src: qrSrc,
+      alt: "微信支付二维码",
+      style: "display:block;width:240px;height:240px;margin:0 auto 12px;border-radius:8px",
+    });
+    openModal("微信扫码支付", [
+      qrImg,
+      el("p", { className: "muted", text: "请使用微信扫一扫完成支付（易支付通道），支付成功后额度自动到账。" }),
+      el("p", { className: "muted", text: `订单号：${orderNo}` }),
+      el("a", {
+        className: "btn btn-ghost",
+        href: qrSrc,
+        download: `pay_${orderNo}.png`,
+        text: "保存二维码",
+        style: "width:auto;display:inline-flex;margin-top:8px",
+      }),
+    ]);
   }
 
   function openXianyuModal(cfg) {
@@ -1501,19 +1583,27 @@ export async function renderQuotaLogs(root) {
   ]) {
     typeSel.append(el("option", { value: val, text: label }));
   }
+  let page = 1;
+  let totalPages = 1;
+  const perPage = 20;
   async function reload() {
     clear(host);
     host.append(el("p", { className: "muted", text: "加载中…" }));
     try {
       const data = await api.quotaLogs({
-        page: 1,
-        perPage: 50,
+        page,
+        perPage,
         changeType: typeSel.value || undefined,
       });
       const logs = (data && data.logs) || [];
+      const pag = (data && data.pagination) || {};
+      const total = Number(pag.total || 0);
+      totalPages = Number(pag.totalPages || Math.max(1, Math.ceil(total / perPage) || 1));
+      page = Number(pag.page || page);
       clear(host);
       if (!logs.length) {
-        host.append(el("p", { className: "muted", text: "暂无额度日志" }));
+        host.append(el("p", { className: "muted", text: total ? "本页无数据" : "暂无额度日志" }));
+        if (totalPages > 1) appendPager();
         return;
       }
       const typeLabel = {
@@ -1524,6 +1614,12 @@ export async function renderQuotaLogs(root) {
         admin_adjust: "超管调额",
         invite_rebate: "邀请返利",
       };
+      host.append(
+        el("div", { className: "mini-stats" }, [
+          el("span", { text: `共 ${total} 条` }),
+          el("span", { text: `第 ${page}/${Math.max(1, totalPages)} 页` }),
+        ])
+      );
       const table = el("table", { className: "data" });
       table.append(
         el("thead", {}, [
@@ -1551,10 +1647,43 @@ export async function renderQuotaLogs(root) {
       }
       table.append(tbody);
       host.append(el("div", { className: "table-wrap" }, [table]));
+      appendPager();
     } catch (e) {
       clear(host);
       host.append(flash("error", e.message || "加载失败"));
     }
+  }
+  function appendPager() {
+    if (totalPages <= 1) return;
+    const pager = el("div", { className: "row-actions", style: "margin-top:12px;flex-wrap:wrap;gap:8px" });
+    pager.append(
+      el("button", {
+        className: "btn btn-ghost",
+        type: "button",
+        text: "上一页",
+        disabled: page <= 1 ? "true" : undefined,
+        onClick: () => {
+          if (page > 1) {
+            page -= 1;
+            reload();
+          }
+        },
+      }),
+      el("span", { className: "muted", text: `${page} / ${totalPages}` }),
+      el("button", {
+        className: "btn btn-ghost",
+        type: "button",
+        text: "下一页",
+        disabled: page >= totalPages ? "true" : undefined,
+        onClick: () => {
+          if (page < totalPages) {
+            page += 1;
+            reload();
+          }
+        },
+      })
+    );
+    host.append(pager);
   }
   root.append(
     shell("/admin/quota-logs", [
@@ -1570,7 +1699,10 @@ export async function renderQuotaLogs(root) {
           type: "button",
           text: "筛选",
           style: "width:auto",
-          onClick: () => reload(),
+          onClick: () => {
+            page = 1;
+            reload();
+          },
         }),
       ]),
       host,
@@ -1606,7 +1738,7 @@ export async function renderTestResults(root) {
       type: "button",
       text: "筛选",
       style: "width:auto",
-      onClick: () => reload(),
+      id: "tr-filter-btn",
     }),
     el("button", {
       className: "btn btn-ghost",
@@ -1642,6 +1774,9 @@ export async function renderTestResults(root) {
       host,
     ])
   );
+  let page = 1;
+  let totalPages = 1;
+  const perPage = 20;
   async function reload() {
     clear(host);
     host.append(el("p", { className: "muted", text: "加载中…" }));
@@ -1652,15 +1787,56 @@ export async function renderTestResults(root) {
         testCode: testSel.value || undefined,
         startDate: startEl && startEl.value,
         endDate: endEl && endEl.value,
-        page: 1,
-        perPage: 50,
+        page,
+        perPage,
       });
       const results = (data && data.results) || [];
+      const pag = (data && data.pagination) || {};
+      const total = Number(pag.total || 0);
+      totalPages = Number(pag.totalPages || Math.max(1, Math.ceil(total / perPage) || 1));
+      page = Number(pag.page || page);
       clear(host);
       if (!results.length) {
-        host.append(el("p", { className: "muted", text: "暂无测题结果" }));
+        host.append(el("p", { className: "muted", text: total ? "本页无数据" : "暂无测题结果" }));
+        if (totalPages > 1) {
+          host.append(
+            el("div", { className: "row-actions", style: "margin-top:12px" }, [
+              el("button", {
+                className: "btn btn-ghost",
+                type: "button",
+                text: "上一页",
+                disabled: page <= 1 ? "true" : undefined,
+                onClick: () => {
+                  if (page > 1) {
+                    page -= 1;
+                    reload();
+                  }
+                },
+              }),
+              el("span", { className: "muted", text: `${page} / ${totalPages}` }),
+              el("button", {
+                className: "btn btn-ghost",
+                type: "button",
+                text: "下一页",
+                disabled: page >= totalPages ? "true" : undefined,
+                onClick: () => {
+                  if (page < totalPages) {
+                    page += 1;
+                    reload();
+                  }
+                },
+              }),
+            ])
+          );
+        }
         return;
       }
+      host.append(
+        el("div", { className: "mini-stats" }, [
+          el("span", { text: `共 ${total} 条` }),
+          el("span", { text: `第 ${page}/${Math.max(1, totalPages)} 页` }),
+        ])
+      );
       const table = el("table", { className: "data" });
       table.append(
         el("thead", {}, [
@@ -1687,10 +1863,48 @@ export async function renderTestResults(root) {
       }
       table.append(tbody);
       host.append(el("div", { className: "table-wrap" }, [table]));
+      if (totalPages > 1) {
+        host.append(
+          el("div", { className: "row-actions", style: "margin-top:12px" }, [
+            el("button", {
+              className: "btn btn-ghost",
+              type: "button",
+              text: "上一页",
+              disabled: page <= 1 ? "true" : undefined,
+              onClick: () => {
+                if (page > 1) {
+                  page -= 1;
+                  reload();
+                }
+              },
+            }),
+            el("span", { className: "muted", text: `${page} / ${totalPages}` }),
+            el("button", {
+              className: "btn btn-ghost",
+              type: "button",
+              text: "下一页",
+              disabled: page >= totalPages ? "true" : undefined,
+              onClick: () => {
+                if (page < totalPages) {
+                  page += 1;
+                  reload();
+                }
+              },
+            }),
+          ])
+        );
+      }
     } catch (e) {
       clear(host);
       host.append(flash("error", e.message || "加载失败"));
     }
+  }
+  const filterBtn = filterBar.querySelector("#tr-filter-btn");
+  if (filterBtn) {
+    filterBtn.addEventListener("click", () => {
+      page = 1;
+      reload();
+    });
   }
   await reload();
 }
@@ -1698,12 +1912,29 @@ export async function renderTestResults(root) {
 export async function renderAnnouncements(root) {
   const errHost = el("div");
   const listHost = el("div");
-  let items = [];
+
+  async function refreshNavBadge() {
+    try {
+      const data = await api.announcementsUnread();
+      const n = Number((data && (data.count ?? data.unread)) || 0);
+      document.querySelectorAll(".nav-badge").forEach((node) => {
+        if (n > 0) {
+          node.textContent = String(n);
+          node.removeAttribute("hidden");
+        } else {
+          node.setAttribute("hidden", "true");
+        }
+      });
+    } catch {
+      /* ignore */
+    }
+  }
+
   async function load() {
     clear(listHost);
     try {
       const data = await api.announcementsList();
-      items = (data && (data.announcements || data.list)) || [];
+      const items = (data && (data.announcements || data.list)) || [];
       if (!items.length) {
         listHost.append(el("p", { className: "muted", text: "暂无公告" }));
         return;
@@ -1712,13 +1943,35 @@ export async function renderAnnouncements(root) {
         el(
           "div",
           { className: "stack" },
-          items.map((a) =>
-            el("div", { className: "panel" }, [
-              el("h3", { text: a.title || "公告" }),
+          items.map((a) => {
+            const read = Boolean(a.is_read || a.isRead);
+            const panel = el("div", { className: `panel${read ? " is-read" : ""}` }, [
+              el("div", { className: "row-actions", style: "justify-content:space-between;align-items:flex-start;margin-bottom:8px" }, [
+                el("h3", { text: a.title || "公告", style: "margin:0" }),
+                read
+                  ? el("span", { className: "muted", text: "已读" })
+                  : el("button", {
+                      className: "btn btn-ghost",
+                      type: "button",
+                      text: "标为已读",
+                      style: "width:auto;padding:4px 10px",
+                      onClick: async () => {
+                        try {
+                          await api.announcementsMarkRead(a.id);
+                          showToast("已标为已读");
+                          await load();
+                          await refreshNavBadge();
+                        } catch (e) {
+                          showToast(e.message || "操作失败", "error");
+                        }
+                      },
+                    }),
+              ]),
               el("p", { className: "muted", text: String(a.created_at || a.updated_at || "") }),
               el("div", { html: String(a.content || "").replace(/\n/g, "<br/>") }),
-            ])
-          )
+            ]);
+            return panel;
+          })
         )
       );
     } catch (err) {
@@ -1739,7 +1992,8 @@ export async function renderAnnouncements(root) {
             try {
               await api.announcementsMarkAll();
               showToast("已全部标为已读");
-              document.querySelectorAll(".nav-badge").forEach((n) => n.setAttribute("hidden", "true"));
+              await load();
+              await refreshNavBadge();
             } catch (e) {
               showToast(e.message || "操作失败", "error");
             }

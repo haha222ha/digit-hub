@@ -211,11 +211,11 @@ export const api = {
       body: { packageId, payment_method: paymentMethod },
     }),
   orderDetail: (orderNo) => request(`/api/orders/${encodeURIComponent(orderNo)}`, { auth: true }),
-  startPay: (orderNo, paymentMethod = "wxpay") =>
+  startPay: (orderNo, paymentMethod = "wxpay", deviceType = "mobile") =>
     request(`/api/orders/${encodeURIComponent(orderNo)}/pay`, {
       method: "POST",
       auth: true,
-      body: { payment_method: paymentMethod, device_type: "mobile" },
+      body: { payment_method: paymentMethod, device_type: deviceType },
     }),
   unlimitedStart: (testCode) =>
     request("/api/admin/unlimited-test/start", {
@@ -276,6 +276,12 @@ export const api = {
       method: "POST",
       auth: true,
       body: { userId, newPassword },
+    }),
+  saDeleteUser: (userId) =>
+    request("/api/super-admin/users/delete", {
+      method: "POST",
+      auth: true,
+      body: { userId },
     }),
   saSetRole: (userId, role) =>
     request("/api/super-admin/users/set-role", {
@@ -375,7 +381,27 @@ export const api = {
   },
   saPaymentNotifyLogDetail: (id) =>
     request(`/api/super-admin/payment-notify-logs/${id}`, { auth: true }),
+  saPaymentNotifyExport: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.orderNo || params.order_no) q.set("orderNo", params.orderNo || params.order_no);
+    if (params.status) q.set("status", params.status);
+    const s = q.toString();
+    const headers = { Accept: "*/*" };
+    const t = getToken();
+    if (t) headers.Authorization = `Bearer ${t}`;
+    const res = await fetch(`/api/super-admin/payment-notify-logs/export${s ? `?${s}` : ""}`, {
+      headers,
+      credentials: "same-origin",
+    });
+    if (!res.ok) throw new Error(`导出失败 (${res.status})`);
+    const cd = res.headers.get("content-disposition") || "";
+    let filename = "payment_notify_logs_export.csv";
+    const m = cd.match(/filename="?([^"]+)"?/i);
+    if (m) filename = m[1];
+    return { blob: await res.blob(), filename };
+  },
   saOpLogs: (limit = 100) => request(`/api/super-admin/operation-logs/list?limit=${limit}`, { auth: true }),
+  saOpLogDetail: (id) => request(`/api/super-admin/operation-logs/detail/${id}`, { auth: true }),
   saOpLogsExport: async () => {
     const headers = { Accept: "*/*" };
     const t = getToken();
@@ -390,8 +416,11 @@ export const api = {
   },
   announcementsList: () => request("/api/announcements/list", { auth: true }),
   announcementsUnread: () => request("/api/announcements/unread-count", { auth: true }),
+  announcementsMarkRead: (id) =>
+    request("/api/announcements/mark-read", { method: "POST", auth: true, body: { id } }),
   announcementsMarkAll: () =>
     request("/api/announcements/mark-all-read", { method: "POST", auth: true, body: {} }),
+  adminDashboardStats: () => request("/api/admin/dashboard/stats", { auth: true }),
   customerService: () => request("/api/config/customer-service", { auth: true }),
   tutorialsList: () => request("/api/tutorials/list", { auth: true }),
   tutorialsGuide: () => request("/api/tutorials/guide", { auth: true }),

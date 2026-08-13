@@ -123,7 +123,7 @@ export async function copyText(text) {
 }
 
 /** 按钮点击复制：成功时短暂改文案，失败 alert。 */
-export function bindCopyButton(btn, getText, { okText = "已复制", failPrefix = "复制失败" } = {}) {
+export function bindCopyButton(btn, getText, { okText = "已复制", failPrefix = "复制失败", onOk } = {}) {
   if (!btn) return;
   const original = btn.textContent || "复制";
   btn.addEventListener("click", async (e) => {
@@ -132,6 +132,7 @@ export function bindCopyButton(btn, getText, { okText = "已复制", failPrefix 
     const text = typeof getText === "function" ? getText() : getText;
     try {
       await copyText(text);
+      if (onOk) onOk();
       btn.textContent = okText;
       btn.disabled = true;
       setTimeout(() => {

@@ -52,8 +52,9 @@ def _actor(user: dict, dist: dict) -> dict:
 @ops_router.get("/api/announcements/list")
 def announcements_list(request: Request):
     user = _token_user(request)
-    items = dist_ops.list_announcements(published_only=True)
-    return _ok({"announcements": items, "list": items, "unread": dist_ops.announcement_unread_count(user["id"])})
+    items = dist_ops.announcements_for_user(user["id"])
+    unread = sum(1 for a in items if not a.get("is_read"))
+    return _ok({"announcements": items, "list": items, "unread": unread})
 
 
 @ops_router.get("/api/announcements/unread-count")
@@ -561,6 +562,50 @@ def sa_payment_notify_log_detail(log_id: int, request: Request):
     if not row:
         return JSONResponse(_fail("记录不存在"), status_code=200)
     return _ok(row)
+
+
+@ops_router.get("/api/super-admin/payment-notify-logs/export")
+def sa_payment_notify_logs_export(
+    request: Request,
+    limit: int = 5000,
+    orderNo: str = "",
+    order_no: str = "",
+    status: str = "",
+):
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    from fastapi.responses import Response
+    import csv
+    import io
+
+    logs = dist_db.list_payment_notify_logs_export(
+        limit=int(limit or 5000),
+        order_no=(orderNo or order_no or "").strip() or None,
+        status=(status or "").strip() or None,
+    )
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["ID", "订单号", "交易状态", "验证结果", "响应", "客户端IP", "时间"])
+    for row in logs:
+        writer.writerow(
+            [
+                row.get("id"),
+                row.get("order_no") or "",
+                row.get("trade_status") or "",
+                row.get("status") or "",
+                row.get("response_text") or "",
+                row.get("client_ip") or "",
+                row.get("created_at") or "",
+            ]
+        )
+    content = buf.getvalue().encode("utf-8-sig")
+    return Response(
+        content=content,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="payment_notify_logs_export.csv"'},
+    )
 
 
 @ops_router.get("/api/super-admin/operation-logs/list")

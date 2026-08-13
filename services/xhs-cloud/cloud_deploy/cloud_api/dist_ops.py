@@ -560,6 +560,38 @@ def delete_announcement(aid: int) -> None:
     conn.close()
 
 
+def _read_announcement_ids(user_id: int) -> set[int]:
+    dist_db.init_dist_tables()
+    uid = int(user_id)
+    if _use_pg():
+        conn = _conn()
+        try:
+            c = _cur(conn)
+            c.execute(
+                "SELECT announcement_id FROM dist_announcement_reads WHERE user_id=%s",
+                (uid,),
+            )
+            return {int((_row(r) or {}).get("announcement_id") or 0) for r in c.fetchall()}
+        finally:
+            conn.close()
+    conn = _conn()
+    c = conn.cursor()
+    c.execute("SELECT announcement_id FROM dist_announcement_reads WHERE user_id=?", (uid,))
+    ids = {int(r[0]) for r in c.fetchall() if r and r[0] is not None}
+    conn.close()
+    return ids
+
+
+def announcements_for_user(user_id: int) -> list[dict]:
+    read_ids = _read_announcement_ids(user_id)
+    out: list[dict] = []
+    for item in list_announcements(published_only=True):
+        row = dict(item)
+        row["is_read"] = int(row.get("id") or 0) in read_ids
+        out.append(row)
+    return out
+
+
 def announcement_unread_count(user_id: int) -> int:
     pubs = list_announcements(published_only=True)
     if not pubs:

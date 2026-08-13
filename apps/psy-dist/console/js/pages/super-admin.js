@@ -219,6 +219,24 @@ export async function renderSaUsers(root) {
                     }
                   },
                 }),
+                (u.role || "") !== "super_admin" && (u.status || "") !== "deleted"
+                  ? el("button", {
+                      className: "btn btn-ghost",
+                      type: "button",
+                      text: "删除",
+                      style: "width:auto;padding:6px 10px;color:var(--danger,#c0392b)",
+                      onClick: async () => {
+                        if (!confirm(`软删除用户 ${u.username || uid}？删除后不可登录。`)) return;
+                        try {
+                          await api.saDeleteUser(uid);
+                          errHost.replaceChildren(flash("ok", "已删除"));
+                          await reload();
+                        } catch (err) {
+                          errHost.replaceChildren(flash("error", err.message || "失败"));
+                        }
+                      },
+                    })
+                  : null,
               ]),
             ]),
           ]);
@@ -229,7 +247,7 @@ export async function renderSaUsers(root) {
   root.append(
     shell("/super-admin/users", [
       el("h1", { className: "page-title", text: "分销商管理" }),
-      el("p", { className: "page-lead", text: "调额、启停、重置密码。超管也可由 PSY_DIST_SUPER_USERNAMES 指定。" }),
+      el("p", { className: "page-lead", text: "调额、启停、重置密码、软删除。超管也可由 PSY_DIST_SUPER_USERNAMES 指定。" }),
       errHost,
       listHost,
     ])
@@ -588,43 +606,103 @@ export async function renderSaRedeem(root) {
   sku.append(el("option", { value: "quota_100", text: "100 额度" }), el("option", { value: "quota_500", text: "500 额度" }));
   const note = el("input", { placeholder: "备注（可选）" });
   const genOut = el("div");
+  const statusFilter = el("select");
+  statusFilter.append(
+    el("option", { value: "", text: "全部状态" }),
+    el("option", { value: "unused", text: "未使用" }),
+    el("option", { value: "used", text: "已使用" }),
+    el("option", { value: "revoked", text: "已吊销" })
+  );
+  let allCodes = [];
+
+  function filteredCodes() {
+    const st = statusFilter.value;
+    if (!st) return allCodes;
+    return allCodes.filter((c) => (c.status || "") === st);
+  }
 
   async function reload() {
-    const data = await api.saRedeemList(100);
-    const codes = (data && (data.codes || data.list)) || [];
+    const data = await api.saRedeemList(500);
+    allCodes = (data && (data.codes || data.list)) || [];
+    const codes = filteredCodes();
     listHost.replaceChildren(
-      table(
-        ["码", "套餐", "状态", "激活", "操作"],
-        codes.map((c) =>
-          el("tr", {}, [
-            el("td", { text: c.code || "—" }),
-            el("td", { text: c.plan_code || "—" }),
-            el("td", { text: c.status || "—" }),
-            el("td", { text: `${c.current_activations ?? 0}/${c.max_activations ?? 1}` }),
-            el("td", {}, [
-              (c.status || "") !== "revoked"
-                ? el("button", {
-                    className: "btn btn-ghost",
-                    type: "button",
-                    text: "吊销",
-                    style: "width:auto;padding:6px 10px",
-                    onClick: async () => {
-                      if (!confirm(`吊销 ${c.code}？`)) return;
-                      try {
-                        await api.saRedeemRevoke(c.code);
-                        await reload();
-                      } catch (err) {
-                        errHost.replaceChildren(flash("error", err.message || "失败"));
-                      }
-                    },
-                  })
-                : el("span", { className: "muted", text: "已吊销" }),
-            ]),
-          ])
-        )
-      )
+      el("div", { className: "row-actions", style: "margin-bottom:12px;flex-wrap:wrap;gap:8px" }, [
+        el("div", { className: "field", style: "margin:0;min-width:140px" }, [
+          el("label", { text: "状态筛选" }),
+          statusFilter,
+        ]),
+        el("button", {
+          className: "btn btn-ghost",
+          type: "button",
+          text: "刷新",
+          style: "width:auto;align-self:flex-end",
+          onClick: reload,
+        }),
+        el("button", {
+          className: "btn btn-ghost",
+          type: "button",
+          text: "导出当前列表 CSV",
+          style: "width:auto;align-self:flex-end",
+          onClick: () => {
+            const rows = filteredCodes();
+            const lines = ["code,plan_code,status,activations"];
+            for (const c of rows) {
+              lines.push(
+                [
+                  c.code || "",
+                  c.plan_code || "",
+                  c.status || "",
+                  `${c.current_activations ?? 0}/${c.max_activations ?? 1}`,
+                ]
+                  .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+                  .join(",")
+              );
+            }
+            const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "redeem_codes_export.csv";
+            a.click();
+            URL.revokeObjectURL(a.href);
+          },
+        }),
+        el("span", { className: "muted", style: "align-self:center", text: `显示 ${codes.length} / ${allCodes.length} 条` }),
+      ]),
+      codes.length === 0
+        ? el("p", { className: "muted", text: "暂无兑换码" })
+        : table(
+            ["码", "套餐", "状态", "激活", "操作"],
+            codes.map((c) =>
+              el("tr", {}, [
+                el("td", { text: c.code || "—" }),
+                el("td", { text: c.plan_code || "—" }),
+                el("td", { text: c.status || "—" }),
+                el("td", { text: `${c.current_activations ?? 0}/${c.max_activations ?? 1}` }),
+                el("td", {}, [
+                  (c.status || "") !== "revoked"
+                    ? el("button", {
+                        className: "btn btn-ghost",
+                        type: "button",
+                        text: "吊销",
+                        style: "width:auto;padding:6px 10px",
+                        onClick: async () => {
+                          if (!confirm(`吊销 ${c.code}？`)) return;
+                          try {
+                            await api.saRedeemRevoke(c.code);
+                            await reload();
+                          } catch (err) {
+                            errHost.replaceChildren(flash("error", err.message || "失败"));
+                          }
+                        },
+                      })
+                    : el("span", { className: "muted", text: "已吊销" }),
+                ]),
+              ])
+            )
+          )
     );
   }
+  statusFilter.addEventListener("change", () => reload());
 
   const form = el("form", { className: "panel" }, [
     el("h3", { text: "批量生成兑换码" }),
@@ -644,12 +722,31 @@ export async function renderSaRedeem(root) {
         note: note.value.trim(),
       });
       const codes = (res && res.codes) || [];
+      const codeLines = codes.map((c) => (typeof c === "string" ? c : c.code)).filter(Boolean);
+      const copyBtn = el("button", {
+        className: "btn btn-ghost",
+        type: "button",
+        text: "复制全部",
+        style: "width:auto;margin-top:8px",
+      });
+      copyBtn.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(codeLines.join("\n"));
+          copyBtn.textContent = "已复制";
+          setTimeout(() => {
+            copyBtn.textContent = "复制全部";
+          }, 1500);
+        } catch {
+          alert("复制失败，请手动复制");
+        }
+      });
       genOut.replaceChildren(
-        flash("ok", `已生成 ${codes.length} 个`),
+        flash("ok", `已生成 ${codeLines.length} 个`),
         el("pre", {
           style: "white-space:pre-wrap;word-break:break-all;background:#f4f7f6;padding:12px;border-radius:8px",
-          text: codes.join("\n"),
-        })
+          text: codeLines.join("\n"),
+        }),
+        copyBtn
       );
       await reload();
     } catch (err) {
@@ -660,7 +757,7 @@ export async function renderSaRedeem(root) {
   root.append(
     shell("/super-admin/redeem-codes", [
       el("h1", { className: "page-title", text: "兑换码" }),
-      el("p", { className: "page-lead", text: "批量生成 / 吊销额度授权码（psy_dist）。" }),
+      el("p", { className: "page-lead", text: "批量生成 / 吊销 / 筛选导出额度授权码（psy_dist）。" }),
       errHost,
       form,
       listHost,
@@ -1211,37 +1308,99 @@ export async function renderSaTestResults(root) {
   if (!guard()) return;
   const errHost = el("div");
   const host = el("div");
-  const userFilter = el("input", { type: "number", placeholder: "用户ID（可选）", style: "width:120px" });
+  const userFilter = el("select");
+  userFilter.append(el("option", { value: "", text: "全部用户" }));
   const testFilter = el("input", { placeholder: "测题 code（可选）" });
+  let page = 1;
+  let totalPages = 1;
+  const perPage = 20;
+
+  try {
+    const usersData = await api.saUsers(300);
+    for (const u of (usersData && (usersData.users || usersData.list)) || []) {
+      const uid = u.user_id || u.id;
+      if (!uid) continue;
+      userFilter.append(
+        el("option", {
+          value: String(uid),
+          text: `${uid} · ${u.username || "—"}`,
+        })
+      );
+    }
+  } catch {
+    /* ignore */
+  }
+
   async function reload() {
     try {
       const data = await api.saTestResults({
         userId: userFilter.value || undefined,
         testCode: testFilter.value.trim() || undefined,
-        page: 1,
-        perPage: 50,
+        page,
+        perPage,
       });
       const results = (data && data.results) || [];
+      const pag = (data && data.pagination) || {};
+      const total = Number(pag.total || 0);
+      totalPages = Number(pag.totalPages || Math.max(1, Math.ceil(total / perPage) || 1));
+      page = Number(pag.page || page);
       clear(host);
       if (!results.length) {
-        host.append(el("p", { className: "muted", text: "暂无测题结果" }));
-        return;
-      }
-      host.append(
-        table(
-          ["时间", "用户", "测题", "Token", "视角", "类型"],
-          results.map((r) =>
-            el("tr", {}, [
-              el("td", { text: String(r.completed_at || r.completedAt || "—") }),
-              el("td", { text: r.username || String(r.user_id || "—") }),
-              el("td", { text: r.test_code || r.testCode || "—" }),
-              el("td", {}, [el("div", { className: "url-cell", text: r.token || "—" })]),
-              el("td", { text: r.perspective || "—" }),
-              el("td", { text: r.unlimited ? "免费测" : "分销" }),
-            ])
+        host.append(el("p", { className: "muted", text: total ? "本页无数据" : "暂无测题结果" }));
+      } else {
+        host.append(
+          el("div", { className: "mini-stats", style: "margin-bottom:8px" }, [
+            el("span", { text: `共 ${total} 条` }),
+            el("span", { text: `第 ${page}/${Math.max(1, totalPages)} 页` }),
+          ]),
+          table(
+            ["时间", "用户", "测题", "Token", "视角", "类型"],
+            results.map((r) =>
+              el("tr", {}, [
+                el("td", { text: String(r.completed_at || r.completedAt || "—") }),
+                el("td", { text: r.username || String(r.user_id || "—") }),
+                el("td", { text: r.test_code || r.testCode || "—" }),
+                el("td", {}, [el("div", { className: "url-cell", text: r.token || "—" })]),
+                el("td", { text: r.perspective || "—" }),
+                el("td", { text: r.unlimited ? "免费测" : "分销" }),
+              ])
+            )
           )
-        )
-      );
+        );
+      }
+      if (totalPages > 1) {
+        host.append(
+          el("div", { className: "row-actions", style: "margin-top:12px" }, [
+            el("button", {
+              className: "btn btn-ghost",
+              type: "button",
+              text: "上一页",
+              style: "width:auto",
+              disabled: page <= 1 ? "true" : undefined,
+              onClick: () => {
+                if (page > 1) {
+                  page -= 1;
+                  reload();
+                }
+              },
+            }),
+            el("span", { className: "muted", text: `${page} / ${totalPages}` }),
+            el("button", {
+              className: "btn btn-ghost",
+              type: "button",
+              text: "下一页",
+              style: "width:auto",
+              disabled: page >= totalPages ? "true" : undefined,
+              onClick: () => {
+                if (page < totalPages) {
+                  page += 1;
+                  reload();
+                }
+              },
+            }),
+          ])
+        );
+      }
     } catch (err) {
       clear(host);
       host.append(flash("error", err.message || "加载失败"));
@@ -1253,14 +1412,20 @@ export async function renderSaTestResults(root) {
       el("p", { className: "page-lead", text: "所有分销商链接/免费测的完成记录。" }),
       errHost,
       el("div", { className: "filter-bar" }, [
-        el("div", { className: "field", style: "margin:0" }, [el("label", { text: "用户ID" }), userFilter]),
+        el("div", { className: "field", style: "margin:0;min-width:200px" }, [
+          el("label", { text: "用户" }),
+          userFilter,
+        ]),
         el("div", { className: "field", style: "margin:0" }, [el("label", { text: "测题" }), testFilter]),
         el("button", {
           className: "btn btn-primary",
           type: "button",
           text: "筛选",
           style: "width:auto",
-          onClick: reload,
+          onClick: () => {
+            page = 1;
+            reload();
+          },
         }),
       ]),
       host,
@@ -1555,6 +1720,27 @@ export async function renderSaPaymentNotifyLogs(root) {
             reload();
           },
         }),
+        el("button", {
+          className: "btn btn-ghost",
+          type: "button",
+          text: "导出 CSV",
+          style: "width:auto",
+          onClick: async () => {
+            try {
+              const { blob, filename } = await api.saPaymentNotifyExport({
+                orderNo: orderInput.value.trim() || undefined,
+                status: statusSel.value || undefined,
+              });
+              const a = document.createElement("a");
+              a.href = URL.createObjectURL(blob);
+              a.download = filename;
+              a.click();
+              URL.revokeObjectURL(a.href);
+            } catch (e) {
+              alert(e.message || "导出失败");
+            }
+          },
+        }),
       ]),
       listHost,
     ])
@@ -1598,13 +1784,61 @@ export async function renderSaQuotaLogs(root) {
 export async function renderSaOpLogs(root) {
   if (!guard()) return;
   const errHost = el("div");
-  let logs = [];
-  try {
-    const data = await api.saOpLogs(200);
-    logs = (data && (data.logs || data.list)) || [];
-  } catch (err) {
-    errHost.append(flash("error", err.message || "加载失败"));
+  const listHost = el("div");
+
+  async function showDetail(id) {
+    try {
+      const row = await api.saOpLogDetail(id);
+      const detailText =
+        typeof row.detail === "string"
+          ? row.detail
+          : JSON.stringify(row.detail || row, null, 2);
+      openModal(`操作日志 #${id}`, [
+        el("p", { className: "muted", text: `${row.action || "—"} · ${row.created_at || ""}` }),
+        el("pre", {
+          style: "white-space:pre-wrap;word-break:break-all;background:#f4f7f6;padding:12px;border-radius:8px;max-height:60vh;overflow:auto",
+          text: detailText,
+        }),
+      ]);
+    } catch (e) {
+      alert(e.message || "加载详情失败");
+    }
   }
+
+  async function reload() {
+    try {
+      const data = await api.saOpLogs(200);
+      const logs = (data && (data.logs || data.list)) || [];
+      listHost.replaceChildren(
+        logs.length === 0
+          ? el("p", { className: "muted", text: "暂无记录" })
+          : table(
+              ["时间", "操作者", "动作", "目标", "详情", ""],
+              logs.map((r) =>
+                el("tr", {}, [
+                  el("td", { text: String(r.created_at || "—") }),
+                  el("td", { text: r.actor_username || String(r.actor_user_id || "—") }),
+                  el("td", { text: r.action || "—" }),
+                  el("td", { text: `${r.target_type || ""} ${r.target_id || ""}`.trim() || "—" }),
+                  el("td", { text: String(r.detail || "").slice(0, 80) }),
+                  el("td", {}, [
+                    el("button", {
+                      className: "btn btn-ghost",
+                      type: "button",
+                      text: "详情",
+                      style: "width:auto;padding:4px 8px",
+                      onClick: () => showDetail(r.id),
+                    }),
+                  ]),
+                ])
+              )
+            )
+      );
+    } catch (err) {
+      listHost.replaceChildren(flash("error", err.message || "加载失败"));
+    }
+  }
+
   root.append(
     shell("/super-admin/operation-logs", [
       el("h1", { className: "page-title", text: "操作日志" }),
@@ -1629,20 +1863,8 @@ export async function renderSaOpLogs(root) {
         }),
       ]),
       errHost,
-      logs.length === 0
-        ? el("p", { className: "muted", text: "暂无记录" })
-        : table(
-            ["时间", "操作者", "动作", "目标", "详情"],
-            logs.map((r) =>
-              el("tr", {}, [
-                el("td", { text: String(r.created_at || "—") }),
-                el("td", { text: r.actor_username || String(r.actor_user_id || "—") }),
-                el("td", { text: r.action || "—" }),
-                el("td", { text: `${r.target_type || ""} ${r.target_id || ""}`.trim() || "—" }),
-                el("td", { text: String(r.detail || "").slice(0, 80) }),
-              ])
-            )
-          ),
+      listHost,
     ])
   );
+  await reload();
 }
