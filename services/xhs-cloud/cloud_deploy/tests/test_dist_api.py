@@ -186,6 +186,15 @@ class DistApiTest(unittest.TestCase):
         rows = dist_db.list_payment_notify_logs_export(limit=10)
         self.assertIsInstance(rows, list)
 
+    def test_homepage_stats(self):
+        data = svc.homepage_stats()
+        self.assertIn("tests", data)
+        self.assertIn("stats", data)
+        self.assertGreaterEqual(len(data.get("tests") or []), 1)
+        stats = data.get("stats") or {}
+        self.assertIn("tests_catalog", stats)
+        self.assertIn("links_total", stats)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -248,6 +248,11 @@ def compat_tests_list():
     return dist_tests_list_v1()
 
 
+@compat_router.get("/api/stats/homepage")
+def compat_homepage_stats():
+    return _ok(svc.homepage_stats(), "获取首页数据成功")
+
+
 @compat_router.post("/api/auth/login")
 def compat_auth_login(body: DistLoginBody, request: Request):
     username = (body.usernameOrEmail or body.username or "").strip()

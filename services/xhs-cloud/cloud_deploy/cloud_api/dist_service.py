@@ -62,6 +62,7 @@ def list_tests(*, include_disabled: bool = False) -> list[dict]:
                 "is_enabled": True,
                 "is_hot": bool(t.get("hot")),
                 "is_dual_perspective": bool(t.get("dual_perspective")),
+                "show_on_homepage": True,
                 "display_order": i + 1,
                 "page_path": f"/tests/{code}/index.html",
             }
@@ -75,6 +76,32 @@ def list_tests(*, include_disabled: bool = False) -> list[dict]:
     if include_disabled:
         return out
     return [t for t in out if t.get("is_enabled", True)]
+
+
+def homepage_stats() -> dict[str, Any]:
+    """C 端营销首页：展示测题 + 公开统计。"""
+    all_tests = list_tests()
+    homepage_tests = [t for t in all_tests if t.get("show_on_homepage", True)]
+    counts = dist_db.public_homepage_counts()
+    site_name = "心象测"
+    try:
+        from cloud_deploy.cloud_api import dist_ops
+
+        site_name = (dist_ops.get_config().get("site_name") or site_name).strip() or site_name
+    except Exception:
+        pass
+    return {
+        "site_name": site_name,
+        "tests": homepage_tests,
+        "total": len(homepage_tests),
+        "stats": {
+            "tests_catalog": len(all_tests),
+            "tests_homepage": len(homepage_tests),
+            "links_total": int(counts.get("links_total") or 0),
+            "completions_total": int(counts.get("completions_total") or 0),
+            "merchants_total": int(counts.get("merchants_total") or 0),
+        },
+    }
 
 
 def _test_meta(test_code: str) -> dict | None:

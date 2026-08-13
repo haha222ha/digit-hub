@@ -893,6 +893,10 @@ def apply_test_overrides(tests: list[dict]) -> list[dict]:
                 item["is_hot"] = bool(o.get("is_hot"))
             if o.get("display_order") is not None:
                 item["display_order"] = int(o.get("display_order"))
+            if o.get("show_on_homepage") is not None:
+                item["show_on_homepage"] = bool(o.get("show_on_homepage"))
+        if item.get("show_on_homepage") is None:
+            item["show_on_homepage"] = True
         out.append(item)
     out.sort(key=lambda x: (int(x.get("display_order") or 9999), str(x.get("test_code"))))
     return out
@@ -905,17 +909,22 @@ def save_test_override(payload: dict) -> dict:
         raise ValueError("test_code 必填")
     is_enabled = None if payload.get("is_enabled") is None else (1 if payload.get("is_enabled") else 0)
     is_hot = None if payload.get("is_hot") is None else (1 if payload.get("is_hot") else 0)
+    show_home = payload.get("show_on_homepage")
+    if show_home is None:
+        show_home = payload.get("showOnHomepage")
+    show_on_homepage = None if show_home is None else (1 if show_home else 0)
     display_order = payload.get("display_order")
     if _use_pg():
         conn = _conn()
         try:
             c = _cur(conn)
             c.execute(
-                """INSERT INTO dist_test_overrides (test_code, is_enabled, is_hot, display_order, updated_at)
-                   VALUES (%s,%s,%s,%s,NOW())
+                """INSERT INTO dist_test_overrides (test_code, is_enabled, is_hot, show_on_homepage, display_order, updated_at)
+                   VALUES (%s,%s,%s,%s,%s,NOW())
                    ON CONFLICT (test_code) DO UPDATE SET
                      is_enabled=COALESCE(EXCLUDED.is_enabled, dist_test_overrides.is_enabled),
                      is_hot=COALESCE(EXCLUDED.is_hot, dist_test_overrides.is_hot),
+                     show_on_homepage=COALESCE(EXCLUDED.show_on_homepage, dist_test_overrides.show_on_homepage),
                      display_order=COALESCE(EXCLUDED.display_order, dist_test_overrides.display_order),
                      updated_at=NOW()
                    RETURNING *""",
@@ -923,6 +932,7 @@ def save_test_override(payload: dict) -> dict:
                     code,
                     None if is_enabled is None else bool(is_enabled),
                     None if is_hot is None else bool(is_hot),
+                    None if show_on_homepage is None else bool(show_on_homepage),
                     None if display_order is None else int(display_order),
                 ),
             )
@@ -939,16 +949,17 @@ def save_test_override(payload: dict) -> dict:
     if exist:
         en = exist.get("is_enabled") if is_enabled is None else is_enabled
         hot = exist.get("is_hot") if is_hot is None else is_hot
+        home = exist.get("show_on_homepage") if show_on_homepage is None else show_on_homepage
         order = exist.get("display_order") if display_order is None else int(display_order)
         c.execute(
-            """UPDATE dist_test_overrides SET is_enabled=?, is_hot=?, display_order=?, updated_at=? WHERE test_code=?""",
-            (en, hot, order, now, code),
+            """UPDATE dist_test_overrides SET is_enabled=?, is_hot=?, show_on_homepage=?, display_order=?, updated_at=? WHERE test_code=?""",
+            (en, hot, home, order, now, code),
         )
     else:
         c.execute(
-            """INSERT INTO dist_test_overrides (test_code, is_enabled, is_hot, display_order, updated_at)
-               VALUES (?,?,?,?,?)""",
-            (code, 1 if is_enabled is None else is_enabled, is_hot, display_order, now),
+            """INSERT INTO dist_test_overrides (test_code, is_enabled, is_hot, show_on_homepage, display_order, updated_at)
+               VALUES (?,?,?,?,?,?)""",
+            (code, 1 if is_enabled is None else is_enabled, is_hot, 1 if show_on_homepage is None else show_on_homepage, display_order, now),
         )
     c.execute("SELECT * FROM dist_test_overrides WHERE test_code=?", (code,))
     row = _row(c.fetchone())
@@ -965,6 +976,7 @@ def update_test_orders(items: list[dict]) -> None:
                 "display_order": it.get("display_order") or it.get("order"),
                 "is_enabled": it.get("is_enabled"),
                 "is_hot": it.get("is_hot"),
+                "show_on_homepage": it.get("show_on_homepage"),
             }
         )
 

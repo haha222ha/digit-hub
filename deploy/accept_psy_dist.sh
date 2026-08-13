@@ -33,6 +33,25 @@ print("psy_dist_tests:", len(t))
 assert len(t) >= 30, "tests catalog too small"
 PY
 
+echo "==> 2b) homepage stats API"
+curl -fsS "${API_ORIGIN}/api/stats/homepage" >"${TMP}/home.json"
+python3 - "${TMP}/home.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+assert d.get("code") == 200, d
+data = d.get("data") or {}
+tests = data.get("tests") or []
+stats = data.get("stats") or {}
+print("homepage_tests:", len(tests), "catalog:", stats.get("tests_catalog"))
+assert len(tests) >= 1
+assert "links_total" in stats
+PY
+
+if curl -fsSI --max-time 10 "${PSY_ORIGIN}/" 2>/dev/null | head -n 1 | grep -q "200"; then
+  echo "==> 2c) marketing home HTML"
+  curl -fsS "${PSY_ORIGIN}/" | grep -q 'id="test-grid"' && echo "static homepage OK"
+fi
+
 echo "==> 3) register distributor ${USER}"
 curl -sS -X POST "${API_ORIGIN}/api/auth/register" \
   -H "Content-Type: application/json" \

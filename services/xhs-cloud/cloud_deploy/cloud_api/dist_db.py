@@ -216,12 +216,14 @@ def _migrate_dist_schema() -> None:
         )""",
         "ALTER TABLE dist_links ADD COLUMN first_used_at TEXT",
         "ALTER TABLE dist_unlimited_sessions ADD COLUMN expires_at TEXT",
+        "ALTER TABLE dist_test_overrides ADD COLUMN show_on_homepage INTEGER NOT NULL DEFAULT 1",
     ]
     stmts_pg = [
         "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS inviter_user_id INTEGER",
         "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS detailed_tutorial_access BOOLEAN NOT NULL DEFAULT FALSE",
         "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS first_used_at TIMESTAMP",
         "ALTER TABLE dist_unlimited_sessions ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP",
+        "ALTER TABLE dist_test_overrides ADD COLUMN IF NOT EXISTS show_on_homepage BOOLEAN NOT NULL DEFAULT TRUE",
         """CREATE TABLE IF NOT EXISTS dist_announcements (
             id SERIAL PRIMARY KEY,
             title TEXT NOT NULL,
@@ -2388,6 +2390,42 @@ def merchant_dashboard_trends(user_id: int, *, days: int = 7) -> dict[str, Any]:
         "days": labels,
         "links_daily": [link_counts.get(d, 0) for d in labels],
         "tests_daily": [test_counts.get(d, 0) for d in labels],
+    }
+
+
+def public_homepage_counts() -> dict[str, int]:
+    """C 端营销首页公开统计（不含敏感信息）。"""
+    init_dist_tables()
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute("SELECT COUNT(*) AS n FROM dist_links")
+        links_total = int(_pg_scalar(c.fetchone(), "n") or 0)
+        c.execute("SELECT COUNT(*) AS n FROM dist_test_results")
+        completions_total = int(_pg_scalar(c.fetchone(), "n") or 0)
+        c.execute(
+            """SELECT COUNT(*) AS n FROM dist_distributors
+               WHERE COALESCE(status, 'active') NOT IN ('deleted', 'banned')"""
+        )
+        merchants_total = int(_pg_scalar(c.fetchone(), "n") or 0)
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute("SELECT COUNT(*) FROM dist_links")
+        links_total = int(c.fetchone()[0] or 0)
+        c.execute("SELECT COUNT(*) FROM dist_test_results")
+        completions_total = int(c.fetchone()[0] or 0)
+        c.execute(
+            """SELECT COUNT(*) FROM dist_distributors
+               WHERE COALESCE(status, 'active') NOT IN ('deleted', 'banned')"""
+        )
+        merchants_total = int(c.fetchone()[0] or 0)
+        conn.close()
+    return {
+        "links_total": links_total,
+        "completions_total": completions_total,
+        "merchants_total": merchants_total,
     }
 
 

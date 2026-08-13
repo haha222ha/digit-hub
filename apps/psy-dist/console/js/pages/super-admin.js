@@ -822,19 +822,21 @@ export async function renderSaTests(root) {
     const tests = (data && (data.tests || data.list)) || [];
     listHost.replaceChildren(
       table(
-        ["代码", "名称", "题量", "启用", "热门", "排序", "操作"],
+        ["代码", "名称", "题量", "启用", "热门", "首页", "排序", "操作"],
         tests.map((t) => {
           const orderInput = el("input", {
             type: "number",
             value: String(t.display_order ?? ""),
             style: "width:70px",
           });
+          const onHome = t.show_on_homepage !== false;
           return el("tr", {}, [
             el("td", { text: t.test_code || "—" }),
             el("td", { text: t.test_name || "—" }),
             el("td", { text: String(t.question_count ?? "—") }),
             el("td", { text: t.is_enabled ? "是" : "否" }),
             el("td", { text: t.is_hot ? "是" : "" }),
+            el("td", { text: onHome ? "是" : "否" }),
             el("td", {}, [orderInput]),
             el("td", {}, [
               el("div", { className: "row-actions", style: "gap:6px;flex-wrap:wrap" }, [
@@ -860,6 +862,20 @@ export async function renderSaTests(root) {
                   onClick: async () => {
                     try {
                       await api.saTestSave({ test_code: t.test_code, is_hot: !t.is_hot });
+                      await reload();
+                    } catch (err) {
+                      errHost.replaceChildren(flash("error", err.message || "失败"));
+                    }
+                  },
+                }),
+                el("button", {
+                  className: "btn btn-ghost",
+                  type: "button",
+                  text: onHome ? "下首页" : "上首页",
+                  style: "width:auto;padding:6px 10px",
+                  onClick: async () => {
+                    try {
+                      await api.saTestSave({ test_code: t.test_code, show_on_homepage: !onHome });
                       await reload();
                     } catch (err) {
                       errHost.replaceChildren(flash("error", err.message || "失败"));
@@ -894,7 +910,7 @@ export async function renderSaTests(root) {
   root.append(
     shell("/super-admin/tests", [
       el("h1", { className: "page-title", text: "测题管理" }),
-      el("p", { className: "page-lead", text: "启停 / 热门 / 排序写入覆盖表，不改静态文件。" }),
+      el("p", { className: "page-lead", text: "启停 / 热门 / 首页展示 / 排序写入覆盖表，不改静态文件。" }),
       errHost,
       listHost,
     ])

@@ -2,13 +2,26 @@ import { api, setSession } from "../api.js";
 import { el, flash } from "../ui.js";
 import { navigate, linkClick } from "../router.js";
 
+function goMarketingHome(e) {
+  if (e) e.preventDefault();
+  location.assign("/");
+}
+
 function authShell(title, sub, formNode, footerLinks) {
   return el("div", { className: "auth-screen" }, [
     el("aside", { className: "auth-brand" }, [
-      el("img", { className: "mark", src: "/images/logo.svg?v=5", alt: "心象测" }),
-      el("h1", { text: "心象测" }),
+      el("a", { className: "auth-brand-link", href: "/", onClick: goMarketingHome }, [
+        el("img", { className: "mark", src: "/images/logo.svg?v=5", alt: "心象测" }),
+        el("h1", { text: "心象测" }),
+      ]),
       el("p", {
         text: "商家工作台：生成测试链接、管理额度。额度兑换码仅用于充值，不能当登录码。",
+      }),
+      el("a", {
+        className: "auth-home-link",
+        href: "/",
+        text: "← 返回营销首页",
+        onClick: goMarketingHome,
       }),
     ]),
     el("section", { className: "auth-panel" }, [
