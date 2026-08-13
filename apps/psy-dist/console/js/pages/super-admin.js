@@ -823,8 +823,10 @@ export async function renderSaConfig(root) {
     customer_service_response_time: el("input", { value: cfg.customer_service_response_time || "" }),
     customer_service_qrcode: el("input", { value: cfg.customer_service_qrcode || "", placeholder: "二维码图片 URL" }),
     xianyu_shop_link: el("input", { value: cfg.xianyu_shop_link || "" }),
-    link_max_uses: el("input", { type: "number", value: cfg.link_max_uses || "3" }),
-    link_expire_hours: el("input", { type: "number", value: cfg.link_expire_hours || "24" }),
+    link_max_uses: el("input", { type: "number", value: cfg.link_max_uses || "3", min: "1" }),
+    link_expire_hours: el("input", { type: "number", value: cfg.link_expire_hours || "72", min: "0" }),
+    expire_days: el("input", { type: "number", value: cfg.expire_days || "3", min: "1" }),
+    link_idle_days: el("input", { type: "number", value: cfg.link_idle_days || "90", min: "0" }),
     wecom_webhook: el("input", { value: cfg.wecom_webhook || "" }),
   };
   const labels = {
@@ -835,8 +837,10 @@ export async function renderSaConfig(root) {
     customer_service_response_time: "响应说明",
     customer_service_qrcode: "客服二维码 URL",
     xianyu_shop_link: "闲鱼链接",
-    link_max_uses: "链接默认可用次数",
-    link_expire_hours: "链接有效小时",
+    link_max_uses: "链接可复测次数（默认3）",
+    link_expire_hours: "首次开测后有效小时（默认72=3天）",
+    expire_days: "有效天数（与小时二选一展示，保存时以小时为准）",
+    link_idle_days: "生成后未开测作废天数（默认90，0=关闭）",
     wecom_webhook: "企微 Webhook",
   };
   const form = el("form", { className: "panel" }, [
@@ -867,9 +871,16 @@ export async function renderSaConfig(root) {
     e.preventDefault();
     const payload = {};
     for (const k of Object.keys(fields)) payload[k] = fields[k].value;
+    // 若填了有效天数，同步为小时（源站 custom_days 逻辑）
+    const days = Number(payload.expire_days);
+    if (Number.isFinite(days) && days > 0) {
+      payload.expire_type = "custom_days";
+      payload.link_expire_hours = String(Math.round(days * 24));
+      fields.link_expire_hours.value = payload.link_expire_hours;
+    }
     try {
       await api.saConfigUpdate(payload);
-      errHost.replaceChildren(flash("ok", "已保存"));
+      errHost.replaceChildren(flash("ok", "已保存（首次开测后计时生效）"));
     } catch (err) {
       errHost.replaceChildren(flash("error", err.message || "失败"));
     }

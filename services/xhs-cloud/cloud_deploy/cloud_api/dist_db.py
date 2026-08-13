@@ -6,7 +6,7 @@ import json
 import os
 import secrets
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from cloud_deploy.cloud_api.config import get_settings
@@ -17,6 +17,66 @@ _DIST_PG_READY = False
 
 def _now() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def _now_dt() -> datetime:
+    return datetime.now()
+
+
+def _parse_ts(val: Any) -> datetime | None:
+    if val is None or val == "":
+        return None
+    if isinstance(val, datetime):
+        return val.replace(tzinfo=None) if val.tzinfo else val
+    text = str(val).strip().replace("T", " ").replace("Z", "")
+    if "+" in text[10:]:
+        text = text.split("+")[0].strip()
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(text[:26], fmt)
+        except ValueError:
+            continue
+    return None
+
+
+def _fmt_ts(val: Any) -> str | None:
+    if val is None or val == "":
+        return None
+    if isinstance(val, datetime):
+        return val.strftime("%Y-%m-%d %H:%M:%S")
+    parsed = _parse_ts(val)
+    return parsed.strftime("%Y-%m-%d %H:%M:%S") if parsed else str(val)
+
+
+def resolve_link_policy() -> dict[str, Any]:
+    """链接策略：首次开测后 N 小时内最多 M 次（默认 72h / 3 次，对标源站）。"""
+    max_uses = int(os.environ.get("XHS_DIST_LINK_MAX_USES", "3") or 3)
+    expire_hours = int(os.environ.get("XHS_DIST_LINK_EXPIRE_HOURS", "72") or 72)
+    idle_days = int(os.environ.get("XHS_DIST_LINK_IDLE_DAYS", "90") or 90)
+    try:
+        from cloud_deploy.cloud_api import dist_ops
+
+        cfg = dist_ops.get_config()
+        if cfg.get("link_max_uses") not in (None, ""):
+            max_uses = max(1, int(float(cfg["link_max_uses"])))
+        expire_type = (cfg.get("expire_type") or "").strip() or "custom_days"
+        if expire_type == "permanent":
+            expire_hours = 0
+        elif expire_type == "24hours":
+            expire_hours = 24
+        elif expire_type == "custom_days" and cfg.get("expire_days") not in (None, ""):
+            expire_hours = max(1, int(float(cfg["expire_days"])) * 24)
+        elif cfg.get("link_expire_hours") not in (None, ""):
+            expire_hours = max(0, int(float(cfg["link_expire_hours"])))
+        if cfg.get("link_idle_days") not in (None, ""):
+            idle_days = max(0, int(float(cfg["link_idle_days"])))
+    except Exception:
+        pass
+    return {
+        "max_uses": max(1, max_uses),
+        "expire_hours": max(0, expire_hours),
+        "idle_days": max(0, idle_days),
+    }
 
 
 def _gen_token() -> str:
@@ -135,10 +195,12 @@ def _migrate_dist_schema() -> None:
             read_at TEXT NOT NULL,
             PRIMARY KEY (user_id, announcement_id)
         )""",
+        "ALTER TABLE dist_links ADD COLUMN first_used_at TEXT",
     ]
     stmts_pg = [
         "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS inviter_user_id INTEGER",
         "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS detailed_tutorial_access BOOLEAN NOT NULL DEFAULT FALSE",
+        "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS first_used_at TIMESTAMP",
         """CREATE TABLE IF NOT EXISTS dist_announcements (
             id SERIAL PRIMARY KEY,
             title TEXT NOT NULL,
@@ -815,17 +877,76 @@ def generate_links(user_id: int, test_code: str, count: int, *, max_uses: int = 
 
 def _map_link(row: dict | None) -> dict:
     row = row or {}
-    return {
+    expires_at = _fmt_ts(row.get("expires_at"))
+    first_used_at = _fmt_ts(row.get("first_used_at"))
+    created_at = _fmt_ts(row.get("created_at")) or row.get("created_at")
+    used_count = int(row.get("used_count") or 0)
+    max_uses = int(row.get("max_uses") or 3)
+    out = {
         "id": row.get("id"),
         "token": row.get("token"),
         "user_id": row.get("user_id"),
         "test_code": row.get("test_code"),
         "status": row.get("status") or "unused",
-        "used_count": int(row.get("used_count") or 0),
-        "max_uses": int(row.get("max_uses") or 3),
-        "expires_at": row.get("expires_at"),
-        "created_at": row.get("created_at"),
+        "used_count": used_count,
+        "max_uses": max_uses,
+        "expires_at": expires_at,
+        "first_used_at": first_used_at,
+        "created_at": created_at,
+        # SDK / 源站兼容字段
+        "usedCount": used_count,
+        "maxUses": max_uses,
+        "expiresAt": expires_at,
+        "firstUsedAt": first_used_at,
     }
+    return out
+
+
+def _set_link_status(token: str, status: str) -> None:
+    token = (token or "").strip()
+    if not token:
+        return
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute("UPDATE dist_links SET status=%s WHERE token=%s", (status, token))
+        conn.commit()
+        conn.close()
+        return
+    conn = _sqlite_conn()
+    c = conn.cursor()
+    c.execute("UPDATE dist_links SET status=? WHERE token=?", (status, token))
+    conn.commit()
+    conn.close()
+
+
+def _link_access_error(link: dict) -> str | None:
+    """返回不可用原因；可用则 None。含首次开测后过期、次数用尽、长期未激活。"""
+    status = (link.get("status") or "unused").strip()
+    if status == "revoked":
+        return "链接无效或已撤销"
+    if status == "expired":
+        return "链接已过期"
+    policy = resolve_link_policy()
+    used = int(link.get("used_count") or 0)
+    max_uses = int(link.get("max_uses") or policy["max_uses"] or 3)
+    if used >= max_uses:
+        if status != "used":
+            _set_link_status(str(link.get("token") or ""), "used")
+        return "链接使用次数已达上限"
+    now = _now_dt()
+    expires_at = _parse_ts(link.get("expires_at"))
+    if expires_at and now > expires_at:
+        _set_link_status(str(link.get("token") or ""), "expired")
+        return "链接已过期（首次开测后的有效期已结束）"
+    # 长期未首次开测：清死链（默认 90 天）
+    idle_days = int(policy.get("idle_days") or 0)
+    first_used = _parse_ts(link.get("first_used_at"))
+    created = _parse_ts(link.get("created_at"))
+    if idle_days > 0 and not first_used and created and now > created + timedelta(days=idle_days):
+        _set_link_status(str(link.get("token") or ""), "expired")
+        return "链接已过期（长期未使用）"
+    return None
 
 
 def _map_link_row(row, description) -> dict:
@@ -887,26 +1008,78 @@ def validate_link_token(token: str) -> dict:
             "testCode": unlimited.get("test_code"),
         }
     link = get_link_by_token(token)
-    if not link or link.get("status") == "revoked":
+    if not link:
         return {"valid": False, "message": "链接无效或已撤销"}
+    err = _link_access_error(link)
+    if err:
+        # 刷新状态后的最新 link
+        link = get_link_by_token(token) or link
+        return {"valid": False, "message": err, "link": link}
     return {
         "valid": True,
         "message": "链接有效",
         "link": link,
         "unlimited": False,
         "testCode": link.get("test_code"),
+        "expiresAt": link.get("expires_at"),
     }
 
 
-def start_link_test(token: str) -> None:
+def start_link_test(token: str) -> dict:
+    """首次开测时写入 first_used_at / expires_at；返回 SDK 兼容字段。"""
     unlimited = get_unlimited_session(token)
     if unlimited:
-        return
+        return {"success": True, "unlimited": True}
     link = get_link_by_token(token)
-    if not link or link.get("status") == "revoked":
+    if not link:
         raise ValueError("链接无效")
-    if int(link.get("used_count") or 0) >= int(link.get("max_uses") or 3):
-        raise ValueError("链接使用次数已达上限")
+    err = _link_access_error(link)
+    if err:
+        raise ValueError(err)
+
+    policy = resolve_link_policy()
+    first_used = _parse_ts(link.get("first_used_at"))
+    expires_at = _parse_ts(link.get("expires_at"))
+    activated = False
+    if not first_used:
+        now = _now_dt()
+        first_used = now
+        hours = int(policy.get("expire_hours") or 0)
+        expires_at = (now + timedelta(hours=hours)) if hours > 0 else None
+        first_s = _fmt_ts(first_used)
+        exp_s = _fmt_ts(expires_at)
+        if _USE_PG:
+            conn = _pg_conn()
+            c = _pg_cur(conn)
+            c.execute(
+                """UPDATE dist_links
+                   SET first_used_at=%s, expires_at=%s
+                   WHERE token=%s AND first_used_at IS NULL""",
+                (first_s, exp_s, token),
+            )
+            conn.commit()
+            conn.close()
+        else:
+            conn = _sqlite_conn()
+            c = conn.cursor()
+            c.execute(
+                """UPDATE dist_links
+                   SET first_used_at=?, expires_at=?
+                   WHERE token=? AND (first_used_at IS NULL OR first_used_at='')""",
+                (first_s, exp_s, token),
+            )
+            conn.commit()
+            conn.close()
+        activated = True
+        link = get_link_by_token(token) or link
+
+    return {
+        "success": True,
+        "unlimited": False,
+        "activated": activated,
+        "expiresAt": link.get("expires_at") or _fmt_ts(expires_at),
+        "link": link,
+    }
 
 
 def complete_link_test(
@@ -936,11 +1109,24 @@ def complete_link_test(
             "resultId": result_id,
         }
     link = get_link_by_token(token)
-    if not link or link.get("status") == "revoked":
+    if not link:
         raise ValueError("链接无效")
+    # 未走过 start 时补写首次开测时钟，避免只调 complete 绕过有效期
+    if not _parse_ts(link.get("first_used_at")):
+        start_link_test(token)
+        link = get_link_by_token(token) or link
+    err = _link_access_error(link)
+    if err:
+        raise ValueError(err)
+
     used = int(link.get("used_count") or 0) + 1
-    max_uses = int(link.get("max_uses") or 3)
-    status = "used" if used >= max_uses else link.get("status") or "unused"
+    max_uses = int(link.get("max_uses") or resolve_link_policy()["max_uses"] or 3)
+    status = "used" if used >= max_uses else (link.get("status") or "unused")
+    if status == "unused" and _parse_ts(link.get("first_used_at")):
+        # 已开测但未用尽：保持 unused，便于列表区分「未开测」与「使用中」——源站亦如此
+        status = "unused"
+    if used >= max_uses:
+        status = "used"
     if _USE_PG:
         conn = _pg_conn()
         c = _pg_cur(conn)
@@ -969,12 +1155,15 @@ def complete_link_test(
             result_data=result_data,
             unlimited=False,
         )
+    refreshed = get_link_by_token(token) or link
     return {
         "success": True,
         "usedCount": used,
         "unlimited": False,
         "resultSaved": result_id is not None,
         "resultId": result_id,
+        "expiresAt": refreshed.get("expires_at"),
+        "link": refreshed,
     }
 
 

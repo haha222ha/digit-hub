@@ -237,6 +237,7 @@ export async function renderDashboard(root) {
         el("h3", { text: "使用提示" }),
         el("ul", { className: "tip-list" }, [
           el("li", { text: "生成链接会消耗额度；免费测试不消耗额度。" }),
+          el("li", { text: "链接规则：客户首次开测后 3 天内可复测 3 次（以系统配置为准）。" }),
           el("li", { text: "用户打开分销链接测完即可看完整报告，不分墙。" }),
           el("li", { text: "忘记密码：登录页「忘记密码」→ 授权码验证后改密（无需邮箱）。" }),
           el("li", { text: "兑换额度码后，该码也可用于授权码登录找回。" }),
@@ -254,6 +255,13 @@ export async function renderGenerate(root) {
   const count = el("input", { type: "number", min: "1", max: "50", value: "1", required: "true" });
   const resultHost = el("div");
   const btn = el("button", { className: "btn btn-primary", type: "submit", text: "生成链接", style: "width:auto" });
+  let ruleText = "首次开测后 3 天内可复测 3 次";
+  try {
+    const cfg = await api.adminConfigGet();
+    if (cfg && cfg.rule_text) ruleText = cfg.rule_text;
+  } catch (_) {
+    /* ignore */
+  }
 
   try {
     const data = await api.testsList();
@@ -279,6 +287,10 @@ export async function renderGenerate(root) {
       className: "muted",
       text: `当前剩余额度：${quota.remaining_quota ?? "—"}。建议先生成 1 条体验。`,
     }),
+    el("div", { className: "panel tip-panel", style: "margin:12px 0;padding:12px" }, [
+      el("strong", { text: "测试次数和有效期：" }),
+      el("span", { text: ` ${ruleText}。生成时不开始计时，客户第一次点「开始测试」后起算。` }),
+    ]),
     el("div", { className: "row-actions" }, [
       btn,
       el("a", {
@@ -378,6 +390,7 @@ export async function renderLinks(root) {
         el("tr", {}, [
           el("th", { text: "测题" }),
           el("th", { text: "链接" }),
+          el("th", { text: "次数" }),
           el("th", { text: "状态" }),
           el("th", { text: "操作" }),
         ]),
@@ -389,9 +402,11 @@ export async function renderLinks(root) {
       const code = link.test_code || "";
       const url = `${location.origin}/test/${code}/${token}`;
       const status = link.status || "unused";
+      const used = link.used_count ?? link.usedCount ?? 0;
+      const maxUses = link.max_uses ?? link.maxUses ?? 3;
       const statusLabel =
         { unused: "未使用", used: "已使用", expired: "已过期", revoked: "已撤销" }[status] || status;
-      const tagClass = status === "unused" ? "tag-ok" : status === "revoked" ? "tag-warn" : "tag";
+      const tagClass = status === "unused" ? "tag-ok" : status === "revoked" || status === "expired" ? "tag-warn" : "tag";
       const actions = el("div", { className: "row-actions" }, [
         el("button", {
           className: "btn btn-ghost",
@@ -422,6 +437,7 @@ export async function renderLinks(root) {
         el("tr", {}, [
           el("td", { text: code }),
           el("td", {}, [el("div", { className: "url-cell", text: url })]),
+          el("td", { text: `${used}/${maxUses}` }),
           el("td", {}, [el("span", { className: `tag ${tagClass}`, text: statusLabel })]),
           el("td", {}, [actions]),
         ])

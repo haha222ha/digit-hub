@@ -210,6 +210,7 @@ export const api = {
   announcementsMarkAll: () =>
     request("/api/announcements/mark-all-read", { method: "POST", auth: true, body: {} }),
   customerService: () => request("/api/config/customer-service", { auth: true }),
+  adminConfigGet: () => request("/api/admin/config/get", { auth: true }),
   tutorialsList: () => request("/api/tutorials/list", { auth: true }),
   helpDocsList: () => request("/api/help-documents/list", { auth: true }),
 };

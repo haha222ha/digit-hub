@@ -82,7 +82,10 @@ def announcements_mark_all(request: Request):
 def admin_config_get(request: Request):
     _token_user(request)
     cfg = dist_ops.get_config()
-    # 商家只看客服相关
+    from cloud_deploy.cloud_api import dist_service
+
+    rule = dist_service.link_rule_summary()
+    # 商家：客服 + 链接规则（只读展示）
     return _ok(
         {
             "customer_service_wechat": cfg.get("customer_service_wechat"),
@@ -93,6 +96,11 @@ def admin_config_get(request: Request):
             "xianyu_shop_qrcode": cfg.get("xianyu_shop_qrcode"),
             "site_name": cfg.get("site_name"),
             "invite_rebate_percent": cfg.get("invite_rebate_percent"),
+            "link_max_uses": rule.get("link_max_uses"),
+            "link_expire_hours": rule.get("link_expire_hours"),
+            "link_idle_days": rule.get("link_idle_days"),
+            "expire_text": rule.get("expire_text"),
+            "rule_text": rule.get("rule_text"),
         }
     )
 

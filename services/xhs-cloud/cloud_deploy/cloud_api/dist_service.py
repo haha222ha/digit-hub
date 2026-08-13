@@ -14,6 +14,35 @@ _DEFAULT_QUOTA = int(os.environ.get("XHS_DIST_DEFAULT_QUOTA", "5"))
 _LINK_MAX_USES = int(os.environ.get("XHS_DIST_LINK_MAX_USES", "3"))
 
 
+def _link_max_uses() -> int:
+    try:
+        return int(dist_db.resolve_link_policy().get("max_uses") or _LINK_MAX_USES)
+    except Exception:
+        return _LINK_MAX_USES
+
+
+def link_rule_summary() -> dict:
+    """给分销商控制台展示的链接规则文案。"""
+    policy = dist_db.resolve_link_policy()
+    hours = int(policy.get("expire_hours") or 0)
+    max_uses = int(policy.get("max_uses") or 3)
+    idle_days = int(policy.get("idle_days") or 0)
+    if hours <= 0:
+        expire_text = "永久有效（直至次数用尽）"
+    elif hours % 24 == 0:
+        days = hours // 24
+        expire_text = f"首次开测后 {days} 天"
+    else:
+        expire_text = f"首次开测后 {hours} 小时"
+    return {
+        "link_max_uses": str(max_uses),
+        "link_expire_hours": str(hours),
+        "link_idle_days": str(idle_days),
+        "expire_text": expire_text,
+        "rule_text": f"{expire_text}内可复测 {max_uses} 次",
+    }
+
+
 def _resolve_catalog_path() -> Path:
     """digit-hub monorepo 与 ECS /opt/xhs-cloud 双布局均可找到 catalog。"""
     env = (os.environ.get("XHS_PSY_DIST_CATALOG") or "").strip()
@@ -140,8 +169,8 @@ def generate_links(user_id: int, test_code: str, count: int) -> dict:
     meta = _test_meta(test_code)
     if not meta:
         raise ValueError("测试项目不存在")
-    links = dist_db.generate_links(user_id, test_code, count, max_uses=_LINK_MAX_USES)
-    return {"links": links, "generatedCount": len(links)}
+    links = dist_db.generate_links(user_id, test_code, count, max_uses=_link_max_uses())
+    return {"links": links, "generatedCount": len(links), "rule": link_rule_summary()}
 
 
 def validate_token(token: str, test_code: str | None = None) -> dict:
@@ -156,8 +185,7 @@ def validate_token(token: str, test_code: str | None = None) -> dict:
 
 
 def start_test(token: str) -> dict:
-    dist_db.start_link_test(token)
-    return {"success": True}
+    return dist_db.start_link_test(token)
 
 
 def complete_test(token: str, *, result_data: Any = None, perspective: str | None = None) -> dict:
