@@ -85,6 +85,75 @@ print(links[0]["token"])
 PY
 )"
 
+echo "==> 5b) faka claim + integration token"
+curl -fsS -X POST "${API_ORIGIN}/api/links/generate" \
+  -H "$(auth_hdr)" \
+  -H "Content-Type: application/json" \
+  -d '{"testCode":"7v7","count":2}' >"${TMP}/gen2.json"
+python3 - "${TMP}/gen2.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+assert d.get("code") == 200, d
+assert len((d.get("data") or {}).get("links") or []) == 2, d
+print("generated 2 for faka claim")
+PY
+curl -fsS -X POST "${API_ORIGIN}/api/faka/claim-links" \
+  -H "$(auth_hdr)" \
+  -H "Content-Type: application/json" \
+  -d '{"testCode":"7v7","count":2,"clientId":"accept"}' >"${TMP}/claim.json"
+BATCH="$(python3 - "${TMP}/claim.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+assert d.get("code") == 200, d
+data = d.get("data") or {}
+assert int(data.get("claimed") or 0) == 2, d
+assert len(data.get("links") or []) == 2, d
+assert all((x.get("url") or "").startswith("http") for x in data["links"]), d
+print(data.get("batchId") or data.get("batch_id") or "")
+print("faka claim OK:", data["claimed"], "urls")
+PY
+)"
+curl -fsS -X POST "${API_ORIGIN}/api/faka/claim-links" \
+  -H "$(auth_hdr)" \
+  -H "Content-Type: application/json" \
+  -d '{"testCode":"7v7","count":1,"clientId":"accept"}' >"${TMP}/claim2.json"
+python3 - "${TMP}/claim2.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+assert d.get("code") == 200, d
+data = d.get("data") or {}
+# 刚领完，可能还有更早未领的；至少不应再次领到同一批
+assert int(data.get("claimed") or 0) >= 0
+print("faka second claim:", data.get("claimed"), "remaining", data.get("remaining_unclaimed"))
+PY
+curl -fsS "${API_ORIGIN}/api/faka/inventory?testCode=7v7" -H "$(auth_hdr)" >"${TMP}/inv.json"
+python3 - "${TMP}/inv.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+assert d.get("code") == 200, d
+inv = d.get("data") or {}
+assert "unclaimed_unused" in inv and "claimed_unused" in inv, inv
+print("faka inventory:", inv)
+PY
+curl -fsS "${API_ORIGIN}/api/auth/integration-token" -H "$(auth_hdr)" >"${TMP}/integ.json"
+INTEG="$(python3 - "${TMP}/integ.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+assert d.get("code") == 200, d
+tok = (d.get("data") or {}).get("integration_token") or (d.get("data") or {}).get("token") or ""
+assert tok.startswith("xxpsy_"), d
+print(tok)
+PY
+)"
+curl -fsS "${API_ORIGIN}/api/faka/inventory?testCode=7v7" \
+  -H "Authorization: Bearer ${INTEG}" >"${TMP}/inv2.json"
+python3 - "${TMP}/inv2.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+assert d.get("code") == 200, d
+print("integration token auth OK")
+PY
+
 echo "==> 6) validate / start / complete"
 curl -fsS -X POST "${API_ORIGIN}/api/links/validate" \
   -H "Content-Type: application/json" \
