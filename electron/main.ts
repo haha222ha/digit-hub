@@ -597,9 +597,12 @@ function createMainWindow() {
       }
       await shopContextService.initializePhase2(shopId)
       logger.info('[Login] 登录保活成功，已进入客服工作台')
+      // 当前店也必须拉起隐藏客服聊天页（发码依赖 XhsRim）；不能只给「其它店」开
+      // 注意：同一卖家多开客服窗会互踢下线，故只开当前店
+      void ensureShopImWindow(shopId, { show: false })
       for (const shop of storageService.listShops()) {
-        if (shop.id && shop.id !== shopId && storageService.getShopCookies(shop.id)) {
-          void ensureShopImWindow(shop.id, { show: false })
+        if (shop.id && shop.id !== shopId) {
+          void destroyShopImWindow(shop.id)
         }
       }
       // 已登录：主界面进发货管理；客服 BrowserView 收到后台（仍可轮询）
@@ -969,7 +972,25 @@ async function createShopImWindow(shopId: string, show: boolean): Promise<Browse
     logger.warn(`[KefuBrowser] 店铺 ${shopId} 加载聊天页失败: ${err}`)
   }
   autoShipService?.bindImWebContents(win.webContents, shopId)
-  logger.info(`[KefuBrowser] 已就绪 shop=${shopId} show=${show} partition=${partitionForShop(shopId)}`)
+
+  // 登录态不过则弹出客服窗，让人补登（隐藏窗常没有 XhsRim）
+  try {
+    await new Promise((r) => setTimeout(r, 2000))
+    const logged = await autoLoginService.checkLoginStatus(win.webContents)
+    const url = win.webContents.getURL() || ''
+    const onLogin = /\/login/i.test(url)
+    if (!logged || onLogin) {
+      logger.warn(`[KefuBrowser] 店铺 ${shopId} 客服未就绪，弹出窗口补登 url=${url.slice(0, 90)}`)
+      win.setSkipTaskbar(false)
+      win.show()
+      win.focus()
+      kefuWindow = win
+    }
+  } catch (e) {
+    logger.warn(`[KefuBrowser] 店铺 ${shopId} 登录探测失败: ${e}`)
+  }
+
+  logger.info(`[KefuBrowser] 已就绪 shop=${shopId} show=${show || win.isVisible()} partition=${partitionForShop(shopId)}`)
   return win
 }
 

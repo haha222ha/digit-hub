@@ -412,13 +412,24 @@ export class AutoShipService {
       return
     }
     if (this.storage.existsOrderDelivery(order.order_id)) {
-      // Mock 假成功：清掉占位，允许真发；其它流水留给 retry
-      const rows = this.storage.getOrderDeliveries(order.order_id) as Array<{ send_status?: string }>
+      // Mock 假成功 / 卡住的 sending·fail：清占位后允许重试；成功则上面已 return
+      const rows = this.storage.getOrderDeliveries(order.order_id) as Array<{
+        send_status?: string
+        updated_at?: string
+      }>
       const onlyMock =
         rows.length > 0 && rows.every((r) => String(r.send_status || '') === 'mock_success')
-      if (onlyMock) {
+      const stuck =
+        rows.length > 0 &&
+        rows.every((r) => {
+          const st = String(r.send_status || '')
+          return st === 'fail' || st === 'pending' || st === 'sending'
+        })
+      if (onlyMock || stuck) {
         this.storage.clearOrderDelivery(order.order_id)
-        this.logger.warn(`[AutoShip] 清除 mock_success 占位，准备真发: ${order.order_id}`)
+        this.logger.warn(
+          `[AutoShip] 清除未成功发码占位，准备重试: ${order.order_id} mock=${onlyMock} stuck=${stuck}`
+        )
       } else {
         return
       }
@@ -746,7 +757,10 @@ export class AutoShipService {
       }
     }
 
-    const wcReady = await this.waitForImReady(shopId, 25000)
+    // 给隐藏客服页一点时间注入 XhsRim（刚 load 完常未就绪）
+    await this.sleep(1500)
+
+    const wcReady = await this.waitForImReady(shopId, 35000)
     if (!wcReady) {
       return { success: false, error: `店铺 ${shopId} 监测/IM WebContents 未绑定` }
     }
@@ -813,9 +827,34 @@ export class AutoShipService {
         await this.sleep(500)
       }
       if (!hasRim) {
+        // 弹出该店客服窗，等待人工/自动登录后 XhsRim 出现
+        try {
+          const { BrowserWindow: BW } = require('electron')
+          const owner = BW.fromWebContents(wc)
+          if (owner && !owner.isDestroyed()) {
+            owner.setSkipTaskbar(false)
+            owner.show()
+            owner.focus()
+            this.logger.warn(`[AutoShip] XhsRim 未就绪，已弹出客服窗 shop=${shopId}，等待登录…`)
+          }
+        } catch {
+          /* ignore */
+        }
+        const extraDeadline = Date.now() + 90000
+        while (Date.now() < extraDeadline) {
+          hasRim = !!(await wc
+            .executeJavaScript(
+              `!!(window.XhsRim && typeof window.XhsRim.sendTextMsg === 'function')`
+            )
+            .catch(() => false))
+          if (hasRim) break
+          await this.sleep(1000)
+        }
+      }
+      if (!hasRim) {
         return {
           success: false,
-          error: `店铺 ${shopId} XhsRim 未就绪：请保持该店客服聊天页已登录（可手动打开一次客服页）`
+          error: `店铺 ${shopId} XhsRim 未就绪：请在弹出的客服页完成登录后重试`
         }
       }
 
@@ -867,14 +906,28 @@ export class AutoShipService {
 
   private async waitForImReady(shopId: string, timeoutMs = 20000): Promise<WebContents | null> {
     const deadline = Date.now() + timeoutMs
+    let reloaded = false
     while (Date.now() < deadline) {
       const wc = this.getShipWc(shopId)
       if (wc && !wc.isDestroyed()) {
-        const url = wc.getURL() || ''
+        let url = wc.getURL() || ''
+        if (!url.includes('/cstools/chat') && url.includes('walle.xiaohongshu.com') && !reloaded) {
+          reloaded = true
+          await withTimeout(
+            wc.loadURL('https://walle.xiaohongshu.com/cstools/chat') as any,
+            20000,
+            null
+          )
+          await this.sleep(1200)
+          if (this.injectService) {
+            await this.injectService.injectScriptAsync(wc, 'im-send').catch(() => false)
+          }
+          url = wc.getURL() || ''
+        }
         if (url.includes('walle.xiaohongshu.com') && !url.includes('/login')) {
           const ok = await wc
             .executeJavaScript(
-              `!!(window.__xhsAssistant && window.__xhsAssistant.im && window.__xhsAssistant.im.deliverByOrderSn && window.__xhsAssistant.im.hasXhsRim && window.__xhsAssistant.im.hasXhsRim())`
+              `!!(window.XhsRim && typeof window.XhsRim.sendTextMsg === 'function' && window.__xhsAssistant && window.__xhsAssistant.im && window.__xhsAssistant.im.deliverByOrderSn)`
             )
             .catch(() => false)
           if (ok) return wc
