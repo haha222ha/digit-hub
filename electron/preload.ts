@@ -133,6 +133,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // 商品同步
   syncGoodsList: () => ipcRenderer.invoke('goods:sync'),
   openArkMerchant: () => ipcRenderer.invoke('goods:open-ark'),
+  getCachedGoods: (shopId?: string) => ipcRenderer.invoke('goods:get-cached', shopId),
+  clearCachedGoods: (shopId?: string) => ipcRenderer.invoke('goods:clear-cached', shopId),
   onGoodsSyncResult: (callback: (result: { success: boolean; goods: any[]; error?: string }) => void) => {
     const handler = (_event: any, result: any) => callback(result)
     ipcRenderer.on('goods:sync-result', handler)

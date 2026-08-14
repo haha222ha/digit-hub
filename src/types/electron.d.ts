@@ -116,6 +116,8 @@ export interface ElectronAPI {
   // 商品同步
   syncGoodsList(): Promise<{ success: boolean; goods: Array<{ itemId: string; title: string; noteId?: string; price?: string; stock?: string; image?: string; variant?: string }>; error?: string }>
   openArkMerchant(): Promise<{ success: boolean; error?: string }>
+  getCachedGoods(shopId?: string): Promise<{ goods: Array<{ itemId: string; title: string; noteId?: string; price?: string; stock?: string; image?: string; variant?: string }>; syncedAt?: string }>
+  clearCachedGoods(shopId?: string): Promise<boolean>
   onGoodsSyncResult(callback: (result: { success: boolean; goods: any[]; error?: string }) => void): () => void
 
   getAutoShipProcessedCount(): Promise<number>

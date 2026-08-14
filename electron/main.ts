@@ -1014,6 +1014,12 @@ function setupIPC() {
   // 同步千帆后台商品列表（对标阿奇锁 getGoodsNoteList）
   ipcMain.handle('goods:sync', async () => autoShipService.syncGoodsList())
   ipcMain.handle('goods:open-ark', () => autoShipService.openArkMerchantWindow())
+  ipcMain.handle('goods:get-cached', (_event, shopId?: string) =>
+    storageService.getSyncedGoods(shopId || 'default'))
+  ipcMain.handle('goods:clear-cached', (_event, shopId?: string) => {
+    storageService.saveSyncedGoods(shopId || 'default', [])
+    return true
+  })
 
   ipcMain.handle('reply:list', (_event, shopId: string) => storageService.getReplyRules(shopId, true))
   ipcMain.handle('reply:add', (_event, rule) => {

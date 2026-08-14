@@ -4,10 +4,11 @@
  * - 订单源：fulfillment/order/page 轮询（不依赖阿奇云 WS）
  * - 发货：inject im-send.js → search_customer → getChatInfo → sendTextMsg
  */
-import { WebContents } from 'electron'
+import { BrowserWindow, WebContents, session } from 'electron'
 import { StorageService } from './storage.service'
 import { LoggerService } from './logger.service'
 import { MockService } from './mock.service'
+import type { InjectService } from './inject.service'
 import {
   buildMessages,
   renderTemplate,
@@ -15,11 +16,60 @@ import {
   type TemplateContext
 } from './template.service'
 import { randomUUID } from 'crypto'
+import { encrypt } from '../utils/crypto'
+
+/** 阿奇锁商品笔记列表页（有 accessToken + _webmsxyw） */
+const ARK_GOODS_NOTE_LIST_URL = 'https://ark.xiaohongshu.com/app-note/note-list'
+const SESSION_PARTITION = 'persist:main'
+
+function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    let done = false
+    const t = setTimeout(() => {
+      if (!done) {
+        done = true
+        resolve(fallback)
+      }
+    }, ms)
+    p.then(
+      (v) => {
+        if (!done) {
+          done = true
+          clearTimeout(t)
+          resolve(v)
+        }
+      },
+      () => {
+        if (!done) {
+          done = true
+          clearTimeout(t)
+          resolve(fallback)
+        }
+      }
+    )
+  })
+}
+
+function isArkLoginUrl(url: string): boolean {
+  if (!url) return true
+  const u = url.toLowerCase()
+  if (u.includes('customer.xiaohongshu.com')) return true
+  if (u.includes('/ark/login')) return true
+  if (u.includes('ark.xiaohongshu.com') && /\/login(\?|$|\/)/.test(u)) return true
+  if (u.includes('walle.xiaohongshu.com') && u.includes('/login')) return true
+  return false
+}
+
+function isArkAuthedUrl(url: string): boolean {
+  if (!url || !url.includes('ark.xiaohongshu.com')) return false
+  return !isArkLoginUrl(url)
+}
 
 export class AutoShipService {
   private storage: StorageService
   private logger: LoggerService
   private mock: MockService
+  private injectService: InjectService | null = null
   private monitorInterval: NodeJS.Timeout | null = null
   private processedOrders: Set<string> = new Set()
   private isShipping = false
@@ -32,11 +82,16 @@ export class AutoShipService {
   private static readonly DEFAULT_POLL_INTERVAL = 30_000
   /** 退避上限：60 秒 */
   private static readonly MAX_POLL_BACKOFF = 60_000
+  private goodsSyncWindow: BrowserWindow | null = null
 
   constructor(storage: StorageService, logger: LoggerService, mock: MockService) {
     this.storage = storage
     this.logger = logger
     this.mock = mock
+  }
+
+  setInjectService(inject: InjectService) {
+    this.injectService = inject
   }
 
   bindWebContents(wc: WebContents) {
@@ -464,31 +519,329 @@ export class AutoShipService {
     }
   }
 
+  private arkWatcherAttached = false
+  private arkSyncInFlight = false
+  private pendingSyncWaiters: Array<(r: { success: boolean; goods: any[]; error?: string }) => void> = []
+
   /**
    * 同步千帆后台商品列表（对标阿奇锁 getGoodsNoteList）
-   * 通过 /api/edith/goods-note/list 拉取商品，供前端下拉选择绑定
+   * 登录成功后：存 Cookie → 拉商品 → 关窗 → 通知前端
    */
   async syncGoodsList(): Promise<{ success: boolean; goods: any[]; error?: string }> {
-    const wc = this.monitorWebContents
-    if (!wc || wc.isDestroyed()) {
-      return { success: false, goods: [], error: '未绑定浏览器视图，请先登录千帆后台' }
-    }
     try {
-      const goods = await wc.executeJavaScript(`
-        window.__xhsAssistant && window.__xhsAssistant.goods && window.__xhsAssistant.goods.fetchGoodsList
-          ? window.__xhsAssistant.goods.fetchGoodsList().catch(function(e){ return { __error: String(e&&e.message||e) }; })
-          : Promise.resolve({ __error: '商品同步脚本未注入，请在千帆后台页面刷新后重试' })
-      `)
-      if (goods && goods.__error) {
-        return { success: false, goods: [], error: goods.__error }
-      }
-      if (!Array.isArray(goods)) {
-        return { success: false, goods: [], error: '商品列表返回异常' }
-      }
-      this.logger.info(`[AutoShip] 同步商品列表成功: ${goods.length} 个商品`)
-      return { success: true, goods }
+      return await this.syncGoodsListViaArkWindow()
     } catch (err: any) {
       return { success: false, goods: [], error: err.message || String(err) }
+    }
+  }
+
+  /** 打开商家后台窗；登录成功后自动同步商品、存 Cookie、关窗 */
+  openArkMerchantWindow(): { success: boolean; error?: string } {
+    try {
+      const win = this.ensureArkGoodsWindow(true)
+      this.attachArkAutoSyncWatcher(win)
+      win.loadURL(ARK_GOODS_NOTE_LIST_URL).catch((e) => {
+        this.logger.warn('[AutoShip] 打开商家页失败: ' + e)
+      })
+      return { success: true }
+    } catch (err: any) {
+      return { success: false, error: err.message || String(err) }
+    }
+  }
+
+  private async executeFetchGoodsList(
+    wc: WebContents
+  ): Promise<{ success: boolean; goods: any[]; error?: string }> {
+    await this.seedArkAccessToken(wc)
+    await this.injectService?.injectScriptAsync(wc, 'goods-sync')
+
+    const goods = await withTimeout(
+      wc.executeJavaScript(`
+      (function(){
+        if (!window.__xhsAssistant || !window.__xhsAssistant.goods || !window.__xhsAssistant.goods.fetchGoodsList) {
+          return Promise.resolve({ __error: '商品同步脚本未注入' });
+        }
+        return window.__xhsAssistant.goods.fetchGoodsList().catch(function(e){
+          return { __error: String(e && e.message || e) };
+        });
+      })()
+    `),
+      60000,
+      { __error: '拉取商品超时' }
+    )
+
+    if (goods && (goods as any).__error) {
+      return { success: false, goods: [], error: (goods as any).__error }
+    }
+    if (!Array.isArray(goods)) {
+      return { success: false, goods: [], error: '商品列表返回异常' }
+    }
+    this.storage.saveSyncedGoods('default', goods)
+    this.logger.info('[AutoShip] 同步商品列表成功: ' + goods.length + ' 个商品（已落库缓存）')
+    return { success: true, goods }
+  }
+
+  private ensureArkGoodsWindow(show: boolean): BrowserWindow {
+    if (this.goodsSyncWindow && !this.goodsSyncWindow.isDestroyed()) {
+      if (show) {
+        this.goodsSyncWindow.show()
+        this.goodsSyncWindow.focus()
+      }
+      return this.goodsSyncWindow
+    }
+
+    const win = new BrowserWindow({
+      show,
+      width: 1280,
+      height: 800,
+      title: '千帆商家后台（商品同步）',
+      autoHideMenuBar: true,
+      webPreferences: {
+        partition: SESSION_PARTITION,
+        nodeIntegration: false,
+        contextIsolation: true,
+        webSecurity: false
+      }
+    })
+    this.goodsSyncWindow = win
+    win.on('closed', () => {
+      if (this.goodsSyncWindow === win) this.goodsSyncWindow = null
+      this.arkWatcherAttached = false
+      this.arkSyncInFlight = false
+    })
+    return win
+  }
+
+  /** 导航离开登录页后自动：存 Cookie → 同步商品 → 关窗 → 通知前端 */
+  private attachArkAutoSyncWatcher(win: BrowserWindow) {
+    if (this.arkWatcherAttached || win.isDestroyed()) return
+    this.arkWatcherAttached = true
+    const wc = win.webContents
+
+    const trySync = async (reason: string) => {
+      if (win.isDestroyed() || this.arkSyncInFlight) return
+      const url = wc.getURL()
+      if (!isArkAuthedUrl(url)) {
+        if (isArkLoginUrl(url)) {
+          win.setTitle('请登录千帆商家后台 — 登录成功后将自动同步')
+        }
+        return
+      }
+
+      const hasTok = await this.probeArkHasToken(wc)
+      if (!hasTok) {
+        this.logger.info(
+          '[AutoShip] 商家页已离开登录但尚无 token(' + reason + '): ' + url.slice(0, 100)
+        )
+        return
+      }
+
+      this.arkSyncInFlight = true
+      try {
+        this.logger.info('[AutoShip] 检测到商家已登录(' + reason + ')，开始同步')
+        win.setTitle('登录成功 — 正在保存会话并同步商品…')
+        await new Promise((r) => setTimeout(r, 1200))
+        if (win.isDestroyed()) return
+
+        if (!wc.getURL().includes('app-note')) {
+          await withTimeout(wc.loadURL(ARK_GOODS_NOTE_LIST_URL) as any, 25000, null)
+          await new Promise((r) => setTimeout(r, 2000))
+        }
+
+        await this.saveArkCookies('default', wc)
+        const result = await this.executeFetchGoodsList(wc)
+        this.resolveArkSyncWaiters(result)
+
+        try {
+          const { BrowserWindow: BW } = require('electron')
+          for (const w of BW.getAllWindows()) {
+            if (!w.isDestroyed()) w.webContents.send('goods:sync-result', result)
+          }
+        } catch {
+          /* ignore */
+        }
+
+        if (result.success) {
+          win.setTitle('同步成功（' + result.goods.length + '）— 即将关闭')
+          setTimeout(() => {
+            try {
+              if (!win.isDestroyed()) win.close()
+            } catch {
+              /* ignore */
+            }
+          }, 1000)
+        } else {
+          win.setTitle('同步失败 — 可刷新后重试')
+          this.logger.warn('[AutoShip] 自动同步失败: ' + result.error)
+        }
+      } catch (e: any) {
+        this.logger.error('[AutoShip] 自动同步异常:', e)
+        this.resolveArkSyncWaiters({
+          success: false,
+          goods: [],
+          error: String((e && e.message) || e)
+        })
+      } finally {
+        this.arkSyncInFlight = false
+      }
+    }
+
+    wc.on('did-navigate', (_e: any, url: string) => {
+      this.logger.info('[AutoShip] did-navigate: ' + String(url).slice(0, 120))
+      void trySync('did-navigate')
+    })
+    wc.on('did-navigate-in-page', () => {
+      void trySync('in-page')
+    })
+    wc.on('did-finish-load', () => {
+      void trySync('finish-load')
+    })
+    const poll = setInterval(() => {
+      if (win.isDestroyed()) {
+        clearInterval(poll)
+        return
+      }
+      void trySync('poll')
+    }, 2000)
+    win.on('closed', () => clearInterval(poll))
+  }
+
+  private resolveArkSyncWaiters(result: { success: boolean; goods: any[]; error?: string }) {
+    const list = this.pendingSyncWaiters.splice(0)
+    for (const fn of list) {
+      try {
+        fn(result)
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
+  private waitForArkSyncResult(
+    win: BrowserWindow,
+    timeoutMs: number
+  ): Promise<{ success: boolean; goods: any[]; error?: string } | null> {
+    return new Promise((resolve) => {
+      let settled = false
+      const finish = (r: { success: boolean; goods: any[]; error?: string } | null) => {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
+        try {
+          win.removeListener('closed', onClosed)
+        } catch {
+          /* ignore */
+        }
+        resolve(r)
+      }
+      const timer = setTimeout(() => finish(null), timeoutMs)
+      this.pendingSyncWaiters.push((r) => finish(r))
+      const onClosed = () => finish(null)
+      win.once('closed', onClosed)
+    })
+  }
+
+  private async syncGoodsListViaArkWindow(): Promise<{
+    success: boolean
+    goods: any[]
+    error?: string
+  }> {
+    const win = this.ensureArkGoodsWindow(true)
+    this.attachArkAutoSyncWatcher(win)
+    const wc = win.webContents
+
+    this.logger.info('[AutoShip] 打开千帆商品页: ' + ARK_GOODS_NOTE_LIST_URL)
+    win.setTitle('千帆商家后台 — 登录后将自动同步')
+    await withTimeout(wc.loadURL(ARK_GOODS_NOTE_LIST_URL) as any, 30000, null)
+    await new Promise((r) => setTimeout(r, 800))
+
+    const result = await this.waitForArkSyncResult(win, 300000)
+    if (result) return result
+
+    return {
+      success: false,
+      goods: [],
+      error: '等待商家登录/同步超时。请在商家窗口完成登录，成功后会自动同步并关闭窗口'
+    }
+  }
+
+  private async probeArkHasToken(wc: WebContents): Promise<boolean> {
+    await this.seedArkAccessToken(wc)
+    const v = await withTimeout(
+      wc.executeJavaScript(`
+        (function(){
+          try {
+            var t = localStorage.getItem('accessToken') || localStorage.getItem('access_token') || '';
+            return !!(t && t.length >= 8);
+          } catch(e) { return false; }
+        })()
+      `),
+      3000,
+      false
+    )
+    return !!v
+  }
+
+  private async seedArkAccessToken(wc: WebContents): Promise<void> {
+    try {
+      const ses = session.fromPartition(SESSION_PARTITION)
+      const cookies = await ses.cookies.get({})
+      let token = ''
+      for (const c of cookies) {
+        const n = c.name || ''
+        const v = String(c.value || '')
+        if (v.length < 8) continue
+        if (/access[-_]?token/i.test(n)) {
+          token = v
+          break
+        }
+      }
+      await withTimeout(
+        wc.executeJavaScript(
+          '(function(tokenFromMain){ try { var pick = localStorage.getItem("accessToken") || localStorage.getItem("access_token") || sessionStorage.getItem("accessToken") || ""; if (!pick) { for (var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(!k) continue; if(/access|token|auth/i.test(k)){ var vv=localStorage.getItem(k)||""; if(vv && vv.length>=8 && !/undefined|null|not_found/i.test(vv)){ pick=vv; break; } } } } if (!pick && tokenFromMain) pick = tokenFromMain; if (pick) { localStorage.setItem("accessToken", pick); return true; } } catch(e){} return false; })(' +
+            JSON.stringify(token) +
+            ')'
+        ),
+        4000,
+        false
+      )
+    } catch (e) {
+      this.logger.warn('[AutoShip] seedArkAccessToken 失败: ' + e)
+    }
+  }
+
+  private async saveArkCookies(shopId: string, wc: WebContents): Promise<void> {
+    try {
+      const ses = session.fromPartition(SESSION_PARTITION)
+      const cookies = await ses.cookies.get({})
+      const xhsCookies = cookies.filter(
+        (c) => c.domain?.includes('xiaohongshu.com') || c.domain?.includes('xhscdn.com')
+      )
+      const lsSnapshot = await withTimeout(
+        wc.executeJavaScript(`(function(){ var out={}; try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(!k) continue; if(!/token|auth|user|seller|bUserId/i.test(k)) continue; var v=localStorage.getItem(k); if(v && v.length>=4 && v.length<8000) out[k]=v; } }catch(e){} return out; })()`) as Promise<
+          Record<string, string>
+        >,
+        4000,
+        {} as Record<string, string>
+      )
+      const encrypted = encrypt(
+        JSON.stringify({
+          cookies: xhsCookies,
+          localStorage: lsSnapshot,
+          savedAt: Date.now(),
+          pageUrl: wc.getURL(),
+          kind: 'ark'
+        })
+      )
+      this.storage.saveShopCookies(shopId + '__ark', encrypted)
+      this.logger.info(
+        '[AutoShip] 商家 Cookie 已保存: count=' +
+          xhsCookies.length +
+          ', ls=' +
+          (Object.keys(lsSnapshot || {}).join(',') || '-')
+      )
+    } catch (e) {
+      this.logger.warn('[AutoShip] 保存商家 Cookie 失败: ' + e)
     }
   }
 
@@ -558,5 +911,13 @@ export class AutoShipService {
     this.processedOrders.clear()
     this.monitorWebContents = null
     this.imWebContents = null
+    if (this.goodsSyncWindow && !this.goodsSyncWindow.isDestroyed()) {
+      try {
+        this.goodsSyncWindow.destroy()
+      } catch {
+        /* ignore */
+      }
+    }
+    this.goodsSyncWindow = null
   }
 }

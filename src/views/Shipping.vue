@@ -24,7 +24,7 @@
               打开商家登录
             </el-button>
             <span v-if="goodsList.length > 0" class="hint-text">
-              已同步 {{ goodsList.length }} 个商品，点下方「绑卡」导入激活码
+              已同步 {{ goodsList.length }} 个商品{{ goodsSyncedAt ? `（${goodsSyncedAt}）` : '' }}，点下方「绑卡」导入激活码；切换标签也会保留
             </span>
             <span v-else class="hint-text">
               客服登录≠商家后台；先「打开商家登录」或点同步后在弹出窗登录
@@ -339,6 +339,7 @@ const orderQuery = ref({ orderId: '', status: '' })
 
 const syncingGoods = ref(false)
 const goodsList = ref<Array<{ itemId: string; title: string; noteId?: string; price?: string; stock?: string; image?: string; variant?: string }>>([])
+const goodsSyncedAt = ref('')
 const selectedGoods = ref('')
 /** 绑卡：保存绑定后自动打开卡密导入 */
 const pendingOpenCardsAfterSave = ref(false)
@@ -467,6 +468,30 @@ const insertVar = (v: string) => {
   bindingForm.value.deliverContent += v
 }
 
+const applyGoodsCache = (goods: typeof goodsList.value, syncedAt?: string) => {
+  goodsList.value = Array.isArray(goods) ? goods : []
+  if (syncedAt) {
+    const t = Date.parse(syncedAt)
+    goodsSyncedAt.value = Number.isFinite(t)
+      ? new Date(t).toLocaleString('zh-CN', { hour12: false })
+      : syncedAt
+  } else if (goodsList.value.length) {
+    goodsSyncedAt.value = goodsSyncedAt.value || ''
+  } else {
+    goodsSyncedAt.value = ''
+  }
+}
+
+const loadCachedGoods = async () => {
+  if (!window.electronAPI?.getCachedGoods) return
+  try {
+    const cached = await window.electronAPI.getCachedGoods(SHOP_ID)
+    if (cached?.goods?.length) applyGoodsCache(cached.goods, cached.syncedAt)
+  } catch {
+    /* ignore */
+  }
+}
+
 const loadData = async () => {
   if (!window.electronAPI) return
   bindings.value = await window.electronAPI.listProductBindings(SHOP_ID)
@@ -508,8 +533,8 @@ const syncGoods = async () => {
   try {
     const res = await window.electronAPI.syncGoodsList()
     if (res?.success) {
-      goodsList.value = res.goods || []
-      ElMessage.success(`同步成功，共 ${goodsList.value.length} 个商品`)
+      applyGoodsCache(res.goods || [], new Date().toISOString())
+      ElMessage.success(`同步成功，共 ${goodsList.value.length} 个商品（已保存）`)
       if (goodsList.value.length === 0) {
         ElMessage.info('店铺暂无商品笔记，可手动添加商品 ID 后绑卡')
       }
@@ -806,12 +831,13 @@ onMounted(async () => {
   if (window.electronAPI) {
     const config = await window.electronAPI.getAllConfig() as Record<string, unknown>
     autoShipEnabled.value = !!config.autoShipEnabled
+    await loadCachedGoods()
     await loadData()
     offGoodsSync = window.electronAPI.onGoodsSyncResult((res) => {
       if (res?.success) {
-        goodsList.value = res.goods || []
+        applyGoodsCache(res.goods || [], new Date().toISOString())
         syncingGoods.value = false
-        ElMessage.success(`同步成功，共 ${goodsList.value.length} 个商品`)
+        ElMessage.success(`同步成功，共 ${goodsList.value.length} 个商品（已保存）`)
       } else if (res?.error) {
         syncingGoods.value = false
         ElMessage.warning({ message: res.error, duration: 8000 })

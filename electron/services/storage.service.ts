@@ -744,6 +744,21 @@ export class StorageService {
     ).all(bindingId, limit, offset)
   }
 
+  /** 缓存千帆同步的商品列表（切页/重开不丢） */
+  saveSyncedGoods(shopId: string, goods: unknown[]): void {
+    const sid = (shopId || 'default').trim() || 'default'
+    const list = Array.isArray(goods) ? goods : []
+    this.set(`synced_goods:${sid}`, { goods: list, syncedAt: new Date().toISOString() })
+    this.logger.info(`[Storage] 已缓存同步商品: shop=${sid}, count=${list.length}`)
+  }
+
+  getSyncedGoods(shopId: string): { goods: any[]; syncedAt?: string } {
+    const sid = (shopId || 'default').trim() || 'default'
+    const raw = this.get<{ goods?: any[]; syncedAt?: string }>(`synced_goods:${sid}`)
+    if (!raw || !Array.isArray(raw.goods)) return { goods: [] }
+    return { goods: raw.goods, syncedAt: raw.syncedAt }
+  }
+
   // ==================== 订单发货记录（对标阿奇锁 OrderImMsg，防重核心）====================
 
   /**
