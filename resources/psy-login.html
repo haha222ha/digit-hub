@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>心象测对接登录</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --brand: #0f766e;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --line: rgba(15, 118, 110, 0.2);
+        --bg: #f8fafc;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        background: linear-gradient(160deg, #ecfeff 0%, #f8fafc 45%, #fff 100%);
+        color: var(--ink);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .card {
+        width: 100%;
+        max-width: 380px;
+        background: rgba(255,255,255,.96);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 22px 20px 18px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+      }
+      h1 { margin: 0 0 6px; font-size: 1.25rem; }
+      .lead { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+      label { display: block; font-size: 0.85rem; margin: 0 0 6px; color: var(--muted); }
+      input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+      }
+      .row { display: flex; gap: 8px; margin-top: 4px; }
+      button {
+        flex: 1;
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .primary { background: var(--brand); color: #fff; }
+      .ghost { background: #f1f5f9; color: var(--ink); }
+      .msg { min-height: 1.2em; margin: 8px 0 0; font-size: 0.86rem; color: #b45309; }
+      .msg.ok { color: var(--brand); }
+      .hint { margin-top: 14px; font-size: 0.8rem; color: var(--muted); line-height: 1.45; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>心象测对接</h1>
+      <p class="lead">仅用于获取长久对接 Token，不会打开完整后台。</p>
+      <label>云端地址</label>
+      <input id="baseUrl" value="https://psy.xhs365.cn" />
+      <label>商家账号</label>
+      <input id="username" autocomplete="username" placeholder="用户名" />
+      <label>密码</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="密码" />
+      <div class="row">
+        <button class="primary" id="loginBtn" type="button">登录并保存 Token</button>
+        <button class="ghost" id="closeBtn" type="button">关闭</button>
+      </div>
+      <p class="msg" id="msg"></p>
+      <p class="hint">也可在主界面粘贴账户设置里的对接 Token（xxpsy_…）。Token 会加密保存在本机。</p>
+    </div>
+    <script>
+      const $ = (id) => document.getElementById(id)
+      const msg = $('msg')
+      async function boot() {
+        try {
+          const st = await window.psyLoginAPI?.status?.()
+          if (st?.baseUrl) $('baseUrl').value = st.baseUrl
+          if (st?.username) $('username').value = st.username
+          if (st?.hasToken) {
+            msg.className = 'msg ok'
+            msg.textContent = '本机已有对接 Token，可重新登录覆盖。'
+          }
+        } catch (_) {}
+      }
+      $('loginBtn').onclick = async () => {
+        msg.className = 'msg'
+        msg.textContent = '登录中…'
+        $('loginBtn').disabled = true
+        try {
+          const res = await window.psyLoginAPI.login({
+            baseUrl: $('baseUrl').value.trim(),
+            username: $('username').value.trim(),
+            password: $('password').value
+          })
+          if (!res?.success) {
+            msg.textContent = res?.message || '登录失败'
+            return
+          }
+          msg.className = 'msg ok'
+          msg.textContent = '已保存对接 Token，窗口即将关闭'
+          setTimeout(() => window.psyLoginAPI.close(), 700)
+        } catch (e) {
+          msg.textContent = e?.message || '登录失败'
+        } finally {
+          $('loginBtn').disabled = false
+        }
+      }
+      $('closeBtn').onclick = () => window.psyLoginAPI?.close?.()
+      boot()
+    </script>
+  </body>
+</html>

@@ -736,6 +736,12 @@ const claimFromCloud = async () => {
     return
   }
   if (!window.electronAPI?.psyClaimIntoPool) return
+  const st = await window.electronAPI.psyStatus?.()
+  if (!st?.hasToken) {
+    ElMessage.info('请先登录心象测获取对接 Token')
+    await window.electronAPI.psyOpenLoginWindow?.()
+    return
+  }
   claiming.value = true
   try {
     const row = bindings.value.find((b) => b.id === cardBindingId.value)

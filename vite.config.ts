@@ -52,6 +52,17 @@ export default defineConfig({
             }
           }
         }
+      },
+      {
+        entry: 'electron/psy-login-preload.ts',
+        vite: {
+          build: {
+            outDir: 'dist-electron',
+            rollupOptions: {
+              external: ['electron']
+            }
+          }
+        }
       }
     ]),
     electronRenderer()

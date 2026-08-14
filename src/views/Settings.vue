@@ -53,26 +53,28 @@
         <el-form-item label="云端地址">
           <el-input v-model="psyForm.baseUrl" placeholder="https://psy.xhs365.cn" style="width: 320px" />
         </el-form-item>
-        <el-form-item label="商家账号">
-          <el-input v-model="psyForm.username" placeholder="心象测用户名" style="width: 200px; margin-right: 8px" />
-          <el-input v-model="psyForm.password" type="password" show-password placeholder="密码" style="width: 160px" />
-        </el-form-item>
-        <el-form-item label="或粘贴 Token">
-          <el-input v-model="psyForm.token" type="password" show-password placeholder="可选：直接粘贴商家 JWT" style="width: 360px" />
+        <el-form-item label="对接 Token">
+          <el-input
+            v-model="psyForm.token"
+            type="password"
+            show-password
+            placeholder="粘贴账户设置里的 xxpsy_… 对接 Token"
+            style="width: 360px"
+          />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :loading="psyBusy" @click="savePsyLogin">登录并保存</el-button>
-          <el-button @click="savePsyTokenOnly">仅保存 Token/地址</el-button>
-          <el-button @click="clearPsyAuth">退出心象测</el-button>
+          <el-button type="primary" @click="openPsyLoginWindow">打开登录窗口获取 Token</el-button>
+          <el-button @click="savePsyTokenOnly">保存 Token/地址</el-button>
+          <el-button @click="clearPsyAuth">清除本地 Token</el-button>
           <span class="form-tip" style="margin-left: 12px">
-            {{ psyStatus.hasToken ? `已登录：${psyStatus.username || 'token'}` : '未登录' }}
+            {{ psyStatus.hasToken ? `已保存：${psyStatus.username || '对接 Token'}` : '未配置' }}
           </span>
         </el-form-item>
         <el-alert
           type="info"
           :closable="false"
           show-icon
-          title="发货页「链接卡密」可按测题从云端领取已生成链接；已领取标记在云端，避免重复导入。"
+          title="不会打开心象测完整后台。登录窗口只用于拿长久对接 Token 并加密存本地；也可从心象测「账户设置」复制 Token。"
           style="margin-bottom: 16px"
         />
 
@@ -175,14 +177,24 @@ const savePsyLogin = async () => {
   }
 }
 
+const openPsyLoginWindow = async () => {
+  await window.electronAPI?.psySetConfig?.({ baseUrl: psyForm.value.baseUrl })
+  await window.electronAPI?.psyOpenLoginWindow?.()
+}
+
 const savePsyTokenOnly = async () => {
   if (!window.electronAPI?.psySetConfig) return
+  const tok = psyForm.value.token.trim()
+  if (tok && !tok.startsWith('xxpsy_') && tok.split('.').length !== 3) {
+    ElMessage.warning('请粘贴 xxpsy_ 开头的对接 Token，或有效 JWT')
+    return
+  }
   await window.electronAPI.psySetConfig({
     baseUrl: psyForm.value.baseUrl,
-    token: psyForm.value.token,
+    token: tok,
     username: psyForm.value.username
   })
-  ElMessage.success('已保存心象测配置')
+  ElMessage.success('已保存心象测对接配置')
   psyForm.value.token = ''
   await refreshPsyStatus()
 }
@@ -261,6 +273,10 @@ onMounted(async () => {
       if (saved.hasPassword) mainLogin.value.password = '********'
     }
     await refreshPsyStatus()
+    window.electronAPI.onPsyAuthUpdated?.((st) => {
+      psyStatus.value = st
+      ElMessage.success('心象测对接 Token 已更新')
+    })
   }
 })
 </script>

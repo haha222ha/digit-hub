@@ -76,7 +76,9 @@ export interface ElectronAPI {
   psyStatus(): Promise<{ configured: boolean; baseUrl: string; username: string; hasToken: boolean }>
   psySetConfig(opts: { baseUrl?: string; token?: string; username?: string }): Promise<boolean>
   psyClearAuth(): Promise<boolean>
-  psyLogin(username: string, password: string): Promise<{ success: boolean; message?: string; username?: string }>
+  psyLogin(username: string, password: string): Promise<{ success: boolean; message?: string; username?: string; token?: string }>
+  psyOpenLoginWindow(): Promise<boolean>
+  psyEnsureIntegrationToken(): Promise<{ success: boolean; token?: string; message?: string }>
   psyListTests(): Promise<{ success: boolean; tests: Array<{ test_code: string; test_name?: string; name?: string }>; message?: string }>
   psyInventory(testCode: string): Promise<{
     success: boolean
@@ -102,6 +104,7 @@ export interface ElectronAPI {
     batchId?: string
   }>
   psyReleaseBatch(batchId: string): Promise<{ success: boolean; released?: number; message?: string }>
+  onPsyAuthUpdated(callback: (status: { configured: boolean; baseUrl: string; username: string; hasToken: boolean }) => void): () => void
 
   // 订单发卡管理
   getOrderDeliveries(filter: { shopId?: string; status?: string; limit?: number; offset?: number }): Promise<{ items: OrderDelivery[]; total: number }>

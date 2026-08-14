@@ -109,11 +109,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('psy:set-config', opts),
   psyClearAuth: () => ipcRenderer.invoke('psy:clear-auth'),
   psyLogin: (username: string, password: string) => ipcRenderer.invoke('psy:login', username, password),
+  psyOpenLoginWindow: () => ipcRenderer.invoke('psy:open-login-window'),
+  psyEnsureIntegrationToken: () => ipcRenderer.invoke('psy:ensure-integration-token'),
   psyListTests: () => ipcRenderer.invoke('psy:list-tests'),
   psyInventory: (testCode: string) => ipcRenderer.invoke('psy:inventory', testCode),
   psyClaimIntoPool: (bindingId: number, testCode: string, count: number, productId?: string) =>
     ipcRenderer.invoke('psy:claim-into-pool', bindingId, testCode, count, productId),
   psyReleaseBatch: (batchId: string) => ipcRenderer.invoke('psy:release-batch', batchId),
+  onPsyAuthUpdated: (callback: (status: any) => void) => {
+    const handler = (_event: any, data: any) => callback(data)
+    ipcRenderer.on('psy-auth-updated', handler)
+    return () => ipcRenderer.removeListener('psy-auth-updated', handler)
+  },
 
   // 订单发卡管理
   getOrderDeliveries: (filter: { shopId?: string; status?: string; limit?: number; offset?: number }) =>

@@ -113,7 +113,7 @@ export class PsyCloudService {
     return body
   }
 
-  async login(username: string, password: string): Promise<{ success: boolean; message?: string; username?: string }> {
+  async login(username: string, password: string): Promise<{ success: boolean; message?: string; username?: string; token?: string }> {
     const user = (username || '').trim()
     if (!user || !password) return { success: false, message: '请输入用户名和密码' }
     try {
@@ -122,14 +122,31 @@ export class PsyCloudService {
         body: JSON.stringify({ username: user, password, usernameOrEmail: user })
       })
       const data = unwrapData(body)
-      const token = String(data?.token || '').trim()
+      // 优先长久对接 token；否则退回会话 JWT（兼容旧云端）
+      const integ = String(data?.integration_token || data?.api_token || '').trim()
+      const session = String(data?.token || '').trim()
+      const token = integ || session
       if (!token) return { success: false, message: '登录成功但未返回 token' }
       this.setConfig({ token, username: user })
-      this.logger.info(`[PsyCloud] 登录成功 user=${user}`)
-      return { success: true, username: user }
+      this.logger.info(`[PsyCloud] 登录成功 user=${user} via=${integ ? 'integration_token' : 'session_jwt'}`)
+      return { success: true, username: user, token }
     } catch (e: any) {
       this.logger.warn(`[PsyCloud] 登录失败: ${e?.message || e}`)
       return { success: false, message: e?.message || '登录失败' }
+    }
+  }
+
+  /** 已有会话 JWT 时，拉取/确保长久对接 token 并落盘 */
+  async ensureIntegrationToken(): Promise<{ success: boolean; token?: string; message?: string }> {
+    try {
+      const body = await this.request('/api/auth/integration-token')
+      const data = unwrapData(body)
+      const token = String(data?.integration_token || data?.token || '').trim()
+      if (!token) return { success: false, message: '未返回对接 token' }
+      this.setConfig({ token })
+      return { success: true, token }
+    } catch (e: any) {
+      return { success: false, message: e?.message || '获取对接 token 失败' }
     }
   }
 

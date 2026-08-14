@@ -53,6 +53,7 @@ const XHS_START_URL = XHS_LOGIN_URL
 // ==================== 全局服务实例 ====================
 let mainWindow: BrowserWindow | null = null
 let kefuWindow: BrowserWindow | null = null
+let psyLoginWindow: BrowserWindow | null = null
 let xhsBrowserView: BrowserView | null = null
 let deviceService: DeviceService
 let licenseService: LicenseService
@@ -936,6 +937,55 @@ function setupIPC() {
   })
   ipcMain.handle('psy:login', async (_event, username: string, password: string) =>
     psyCloudService.login(username, password))
+  ipcMain.handle('psy:ensure-integration-token', async () => psyCloudService.ensureIntegrationToken())
+  ipcMain.handle('psy:open-login-window', async () => {
+    if (psyLoginWindow && !psyLoginWindow.isDestroyed()) {
+      psyLoginWindow.show()
+      psyLoginWindow.focus()
+      return true
+    }
+    psyLoginWindow = new BrowserWindow({
+      width: 420,
+      height: 520,
+      resizable: false,
+      maximizable: false,
+      minimizable: true,
+      title: '心象测对接登录',
+      parent: mainWindow || undefined,
+      modal: !!mainWindow,
+      show: false,
+      autoHideMenuBar: true,
+      webPreferences: {
+        preload: join(__dirname, 'psy-login-preload.js'),
+        contextIsolation: true,
+        nodeIntegration: false,
+        sandbox: false
+      }
+    })
+    psyLoginWindow.on('closed', () => {
+      psyLoginWindow = null
+    })
+    await psyLoginWindow.loadFile(join(__dirname, '../resources/psy-login.html'))
+    psyLoginWindow.show()
+    psyLoginWindow.focus()
+    return true
+  })
+  ipcMain.handle('psy:login-window', async (_event, payload: { baseUrl?: string; username: string; password: string }) => {
+    if (payload?.baseUrl) psyCloudService.setConfig({ baseUrl: payload.baseUrl })
+    const res = await psyCloudService.login(payload?.username || '', payload?.password || '')
+    if (res.success && res.token && !String(res.token).startsWith('xxpsy_')) {
+      // 旧云端只返回会话 JWT 时，再拉一次长久对接 token
+      await psyCloudService.ensureIntegrationToken()
+    }
+    if (res.success) {
+      mainWindow?.webContents.send('psy-auth-updated', psyCloudService.getStatus())
+    }
+    return res
+  })
+  ipcMain.handle('psy:close-login-window', () => {
+    if (psyLoginWindow && !psyLoginWindow.isDestroyed()) psyLoginWindow.close()
+    return true
+  })
   ipcMain.handle('psy:list-tests', async () => psyCloudService.listTests())
   ipcMain.handle('psy:inventory', async (_event, testCode: string) => psyCloudService.inventory(testCode))
   ipcMain.handle(
