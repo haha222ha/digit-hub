@@ -8,6 +8,7 @@ import { BrowserWindow, WebContents, session } from 'electron'
 import { StorageService } from './storage.service'
 import { LoggerService } from './logger.service'
 import { MockService } from './mock.service'
+import { partitionForShop, currentShopId } from '../utils/shop-partition'
 import type { InjectService } from './inject.service'
 import {
   buildMessages,
@@ -21,7 +22,6 @@ import type { PsyCloudService } from './psy-cloud.service'
 
 /** 阿奇锁商品笔记列表页（有 accessToken + _webmsxyw） */
 const ARK_GOODS_NOTE_LIST_URL = 'https://ark.xiaohongshu.com/app-note/note-list'
-const SESSION_PARTITION = 'persist:main'
 
 function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
   return new Promise((resolve) => {
@@ -78,6 +78,8 @@ export class AutoShipService {
   private monitorWebContents: WebContents | null = null
   /** 优先用客服聊天页 WebContents（有 XhsRim） */
   private imWebContents: WebContents | null = null
+  private monitorByShop = new Map<string, WebContents>()
+  private imByShop = new Map<string, WebContents>()
   /** 轮询退避计数（失败时指数退避） */
   private pollBackoff = 0
   /** 默认轮询间隔：30 秒（内部接口，避免风控/限流） */
@@ -100,16 +102,20 @@ export class AutoShipService {
     this.psyCloud = svc
   }
 
-  bindWebContents(wc: WebContents) {
+  bindWebContents(wc: WebContents, shopId?: string) {
+    const sid = shopId || currentShopId()
     this.monitorWebContents = wc
-    this.logger.info('[AutoShip] 已绑定监测 WebContents')
+    this.monitorByShop.set(sid, wc)
+    this.logger.info(`[AutoShip] 已绑定监测 WebContents shop=${sid}`)
     this.startPolling()
   }
 
   /** 绑定客服 IM 页（/cstools/chat），虚拟发货走这里 */
-  bindImWebContents(wc: WebContents) {
+  bindImWebContents(wc: WebContents, shopId?: string) {
+    const sid = shopId || currentShopId()
     this.imWebContents = wc
-    this.logger.info('[AutoShip] 已绑定 IM WebContents（虚拟发货通道）')
+    this.imByShop.set(sid, wc)
+    this.logger.info(`[AutoShip] 已绑定 IM WebContents shop=${sid}`)
   }
 
   /** @deprecated 使用 bindWebContents */
@@ -117,13 +123,14 @@ export class AutoShipService {
     this.bindWebContents(window.webContents)
   }
 
-  private getShipWc(): WebContents | null {
-    const im = this.imWebContents
+  private getShipWc(shopId?: string): WebContents | null {
+    const sid = shopId || currentShopId()
+    const im = this.imByShop.get(sid) || (sid === currentShopId() ? this.imWebContents : null)
     if (im && !im.isDestroyed()) {
       const url = im.getURL()
       if (url.includes('walle.xiaohongshu.com')) return im
     }
-    const mon = this.monitorWebContents
+    const mon = this.monitorByShop.get(sid) || (sid === currentShopId() ? this.monitorWebContents : null)
     if (mon && !mon.isDestroyed()) return mon
     return null
   }
@@ -164,8 +171,15 @@ export class AutoShipService {
    * 主动轮询待发货订单（fulfillment API，对标阿奇锁 getOrderDetailGoodsId）
    */
   private async pollOrders(): Promise<void> {
+    const shopIds = new Set<string>([currentShopId(), ...this.monitorByShop.keys(), ...this.imByShop.keys()])
+    for (const shopId of shopIds) {
+      await this.pollOrdersForShop(shopId)
+    }
+  }
+
+  private async pollOrdersForShop(shopId: string): Promise<void> {
     if (this.isShipping) return
-    const wc = this.getShipWc()
+    const wc = this.getShipWc(shopId)
     if (!wc) return
     const url = wc.getURL()
     if (!url.includes('walle.xiaohongshu.com') && !url.includes('ark.xiaohongshu.com')) return
@@ -181,18 +195,16 @@ export class AutoShipService {
       `)
 
       if (orders && orders.__error) {
-        this.logger.warn(`[AutoShip] fetchPendingOrders: ${orders.__error}`)
-        // 失败退避：3s → 6s → 12s → 封顶 60s
+        this.logger.warn(`[AutoShip] fetchPendingOrders shop=${shopId}: ${orders.__error}`)
         this.pollBackoff = Math.min((this.pollBackoff || 3000) * 2, AutoShipService.MAX_POLL_BACKOFF)
         return
       }
       if (!Array.isArray(orders)) return
 
-      // 成功，重置退避
       this.pollBackoff = 0
 
       for (const order of orders) {
-        await this.handleNewOrder(order)
+        await this.handleNewOrder({ ...order, shop_id: shopId, source: order.source || 'poll' })
       }
       this.cleanupProcessed()
     } catch {
@@ -207,41 +219,37 @@ export class AutoShipService {
     status?: string
     order_time?: string
     source?: string
+    shop_id?: string
+    shopId?: string
   }): Promise<void> {
     if (!order || !order.order_id) return
 
-    // 不依赖千帆后台订单状态：唯一发货依据 = 该订单是否已在 order_delivery 发过卡密
-    // （下方 existsOrderDelivery 持久化判重是唯一门槛）
-
+    const shopId = String(order.shop_id || order.shopId || currentShopId())
     this.logger.info(
-      `[AutoShip] 收到新订单: orderId=${order.order_id}, productId=${order.product_id || 'N/A'}, source=${order.source || '-'}`
+      `[AutoShip] 收到新订单: shop=${shopId} orderId=${order.order_id}, productId=${order.product_id || 'N/A'}, source=${order.source || '-'}`
     )
 
     let productId = order.product_id || ''
     if (!productId) {
-      productId = (await this.resolveProductId(order.order_id)) || ''
+      productId = (await this.resolveProductId(order.order_id, shopId)) || ''
     }
     if (!productId) {
       this.logger.warn(`[AutoShip] 订单缺少 product_id，跳过: ${order.order_id}`)
       return
     }
     order.product_id = productId
+    order.shop_id = shopId
 
-    // 探针订单同步到云端（自助领链接依赖）
     if (this.psyCloud?.getToken()) {
       void this.psyCloud.syncOrders([{ order_id: order.order_id, product_id: productId }])
     }
 
-    const shopId = (global as any).currentShopId || 'default'
-
-    // 幂等拦截：数据库唯一索引兜底（对标阿奇锁 GetByTidAsync + IdNo 唯一索引）
-    // 无论内存 processedOrders 是否丢失（崩溃/重启），这里都能阻止重复发货
-    if (this.storage.existsOrderDelivery(order.order_id)) {
-      this.logger.info(`[AutoShip] 订单已处理过，跳过（持久化判重）: ${order.order_id}`)
+    if (this.storage.existsOrderDelivery(order.order_id, shopId)) {
+      this.logger.info(`[AutoShip] 订单已处理过，跳过（本店判重）: ${shopId} ${order.order_id}`)
       return
     }
-    if (this.processedOrders.has(order.order_id)) {
-      this.logger.info(`[AutoShip] 订单已处理过，跳过（内存判重）: ${order.order_id}`)
+    if (this.processedOrders.has(`${shopId}:${order.order_id}`)) {
+      this.logger.info(`[AutoShip] 订单已处理过，跳过（内存判重）: ${shopId} ${order.order_id}`)
       return
     }
 
@@ -249,7 +257,7 @@ export class AutoShipService {
     try {
       const success = await this.processShipment(shopId, order)
       if (success) {
-        this.processedOrders.add(order.order_id)
+        this.processedOrders.add(`${shopId}:${order.order_id}`)
         this.logger.info(`[AutoShip] 订单发货成功: ${order.order_id}`)
       } else {
         this.logger.warn(`[AutoShip] 订单发货失败: ${order.order_id}`)
@@ -261,8 +269,8 @@ export class AutoShipService {
     }
   }
 
-  private async resolveProductId(orderId: string): Promise<string | null> {
-    const wc = this.getShipWc()
+  private async resolveProductId(orderId: string, shopId?: string): Promise<string | null> {
+    const wc = this.getShipWc(shopId)
     if (!wc) return null
     try {
       const orders = await wc.executeJavaScript(`
@@ -281,12 +289,22 @@ export class AutoShipService {
   private async processShipment(shopId: string, order: any): Promise<boolean> {
     const binding = this.storage.getProductBinding(shopId, order.product_id)
     if (!binding) {
-      this.logger.warn(`[AutoShip] 未找到商品绑定: productId=${order.product_id}`)
+      this.logger.warn(`[AutoShip] 未找到本店商品绑定: shop=${shopId} productId=${order.product_id}`)
       this.storage.addShipLog({
         shopId,
         orderId: order.order_id,
         status: 'no_binding',
-        errorMsg: `未绑定商品: ${order.product_id}`
+        errorMsg: `本店未绑定该商品: ${order.product_id}（禁止跨店发卡）`
+      })
+      return false
+    }
+    if (String(binding.shop_id || shopId) !== String(shopId)) {
+      this.logger.error(`[AutoShip] 拒绝跨店发卡: orderShop=${shopId} bindingShop=${binding.shop_id}`)
+      this.storage.addShipLog({
+        shopId,
+        orderId: order.order_id,
+        status: 'cross_shop_blocked',
+        errorMsg: `绑定店铺 ${binding.shop_id} 与登录店铺 ${shopId} 不一致`
       })
       return false
     }
@@ -333,7 +351,7 @@ export class AutoShipService {
 
     // 预检查：若任一消息需要卡密但卡密池为空，提前失败（避免半途才发现）
     let cardForOrder: string | null = null
-    let cardConsumed = false
+    let cardLocked = false
     let cloudAllocatedUrl: string | null = null
 
     // 链接卡密：先问云端幂等分配，避免与自助领取双花
@@ -352,9 +370,7 @@ export class AutoShipService {
       }
       cloudAllocatedUrl = alloc.url
       cardForOrder = alloc.url
-      // 本地同 URL 标 used（没有则只走 order_delivery，不双扣）
       const marked = this.storage.markCardUrlUsed(binding.id, alloc.url, order.order_id)
-      cardConsumed = marked
       this.logger.info(
         `[AutoShip] 云端分配 URL order=${order.order_id} already=${!!alloc.already} localMarked=${marked}`
       )
@@ -387,9 +403,8 @@ export class AutoShipService {
           return false
         }
         cardForOrder = card
-        cardConsumed = true
-      } else if (needCard && cloudAllocatedUrl && !cardConsumed) {
-        // 云端已分配但本地无同 URL：仍用云端 URL 发货，不 lock 本地另一张
+        cardLocked = true
+      } else if (needCard && cloudAllocatedUrl) {
         cardForOrder = cloudAllocatedUrl
       }
 
@@ -416,12 +431,11 @@ export class AutoShipService {
         this.logger.info(`[AutoShip][Mock] 模拟发货[${i + 1}/${msgTotal}]: ${finalContent.substring(0, 20)}...`)
         shipResult = { success: true, trackingNumber: finalContent.substring(0, 50) }
       } else {
-        shipResult = await this.executeRealShip(order.order_id, finalContent, msg.type)
+        shipResult = await this.executeRealShip(shopId, order.order_id, finalContent, msg.type)
       }
 
       if (shipResult.success) {
-        // 确认卡密（三段式第二步）
-        if (cardConsumed) this.storage.confirmCard(order.order_id)
+        if (cardLocked) this.storage.confirmCard(order.order_id)
         // 回填真实买家 UID（对标阿奇锁 UpdateUidByTidAsync）：
         // 优先用 IM 层 search_customer 找到的 buyerId，订单 buyer_info 兜底
         const realBuyerUid = shipResult.buyerId || buyerUid || ''
@@ -437,10 +451,9 @@ export class AutoShipService {
         })
         this.logger.info(`[AutoShip] 消息发送成功 [${i + 1}/${msgTotal}]: ${order.order_id}`)
       } else {
-        // 回滚卡密（三段式第三步）
-        if (cardConsumed) {
+        if (cardLocked) {
           this.storage.rollbackCard(order.order_id)
-          cardConsumed = false
+          cardLocked = false
         }
         this.storage.updateDeliveryStatus(msgGuid, 'fail', { errorMsg: shipResult.error || 'IM 发货失败' })
         this.storage.addShipLog({
@@ -494,11 +507,12 @@ export class AutoShipService {
    * 真实虚拟发货：IM 发消息给买家（对标阿奇锁 JsIMSend）
    */
   private async executeRealShip(
+    shopId: string,
     orderId: string,
     content: string,
     type: 'text' | 'image' | 'video' | 'note' = 'text'
   ): Promise<{ success: boolean; trackingNumber?: string; buyerId?: string; error?: string }> {
-    const wc = this.getShipWc()
+    const wc = this.getShipWc(shopId)
     if (!wc) {
       return { success: false, error: '监测/IM WebContents 未绑定' }
     }
@@ -917,7 +931,7 @@ export class AutoShipService {
         cardConsumed = true
       }
 
-      const shipResult = await this.executeRealShip(item.order_id, content, type)
+      const shipResult = await this.executeRealShip(item.shop_id || currentShopId(), item.order_id, content, type)
       if (shipResult.success) {
         if (cardConsumed) this.storage.confirmCard(item.order_id)
         this.storage.updateDeliveryStatus(item.msg_guid, 'success', {

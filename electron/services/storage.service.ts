@@ -181,7 +181,7 @@ export class StorageService {
       CREATE INDEX IF NOT EXISTS idx_product_bindings_pid ON product_bindings(product_id);
       CREATE INDEX IF NOT EXISTS idx_card_pool_binding ON card_pool(binding_id);
       CREATE INDEX IF NOT EXISTS idx_card_pool_status ON card_pool(status);
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_order ON order_delivery(order_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_shop_order ON order_delivery(shop_id, order_id);
       CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_guid ON order_delivery(msg_guid);
     `)
 
@@ -203,6 +203,33 @@ export class StorageService {
       `ALTER TABLE card_pool ADD COLUMN order_id TEXT`,
       `ALTER TABLE card_pool ADD COLUMN used_at TEXT`,
     ]
+    try {
+      this.db.exec('DROP INDEX IF EXISTS idx_order_delivery_order')
+    } catch {
+      /* 旧库全局 order_id 唯一索引：跨店会误伤，改为 (shop_id, order_id) */
+    }
+    try {
+      this.db.exec(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_shop_order ON order_delivery(shop_id, order_id)'
+      )
+    } catch {
+      /* ignore */
+    }
+    try {
+      this.db.exec(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_product_bindings_shop_pid ON product_bindings(shop_id, product_id)'
+      )
+    } catch {
+      /* 若已有重复绑定则跳过，查询仍按 shop_id+product_id */
+    }
+    if (!this.getShopConfig('default')) {
+      this.saveShopConfig('default', {
+        shopName: '默认店铺',
+        autoShipEnabled: true,
+        autoReplyEnabled: false
+      })
+    }
+
     for (const sql of bindingAlters) {
       try {
         this.db.exec(sql)
@@ -424,6 +451,34 @@ export class StorageService {
       'SELECT cookie_data FROM shop_cookies WHERE shop_id = ? ORDER BY saved_at DESC LIMIT 1'
     ).get(shopId) as any
     return row ? row.cookie_data : null
+  }
+
+  deleteShopCookies(shopId: string): void {
+    this.db.prepare('DELETE FROM shop_cookies WHERE shop_id = ?').run(shopId)
+  }
+
+  getActiveShopId(): string {
+    return String(this.get<string>('currentShopId') || 'default')
+  }
+
+  setActiveShopId(shopId: string): void {
+    this.set('currentShopId', shopId || 'default')
+  }
+
+  listShops(): Array<{ id: string; name: string; sellerId?: string }> {
+    const rows = this.getAllShopConfigs()
+    return rows.map((r: any) => ({
+      id: String(r.shop_id || ''),
+      name: String(r.shop_name || r.config?.shopName || r.shop_id || '未命名店铺'),
+      sellerId: String(r.config?.xhsSellerId || r.config?.sellerId || '')
+    })).filter((s) => s.id)
+  }
+
+  deleteShop(shopId: string): boolean {
+    if (!shopId || shopId === 'default') return false
+    this.db.prepare('DELETE FROM shop_cookies WHERE shop_id = ?').run(shopId)
+    this.db.prepare('DELETE FROM shop_config WHERE shop_id = ?').run(shopId)
+    return true
   }
 
   // ==================== 子账号管理（对标原版 SubAccount）====================
@@ -848,7 +903,13 @@ export class StorageService {
   /**
    * 订单是否已存在发货记录（处理前判重，对标 GetByTidAsync）
    */
-  existsOrderDelivery(orderId: string): boolean {
+  existsOrderDelivery(orderId: string, shopId?: string): boolean {
+    if (shopId) {
+      const row = this.db.prepare(
+        'SELECT id FROM order_delivery WHERE order_id = ? AND shop_id = ? LIMIT 1'
+      ).get(orderId, shopId)
+      return !!row
+    }
     const row = this.db.prepare(
       'SELECT id FROM order_delivery WHERE order_id = ? LIMIT 1'
     ).get(orderId)

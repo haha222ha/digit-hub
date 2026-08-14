@@ -160,6 +160,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('reship:set-config', shopId, config),
 
   initShopPhase2: (shopId: string, shopName?: string) => ipcRenderer.invoke('shop:init-phase2', shopId, shopName),
+  listShops: () => ipcRenderer.invoke('shop:list'),
+  addShop: () => ipcRenderer.invoke('shop:add'),
+  switchShop: (shopId: string) => ipcRenderer.invoke('shop:switch', shopId),
+  logoutShop: () => ipcRenderer.invoke('shop:logout'),
+  onShopChanged: (callback: (data: { currentId: string; shops: Array<{ id: string; name: string }> }) => void) => {
+    const handler = (_event: any, data: any) => callback(data)
+    ipcRenderer.on('shop:changed', handler)
+    return () => ipcRenderer.removeListener('shop:changed', handler)
+  },
   openKefuWindow: () => ipcRenderer.invoke('kefu:open'),
 
   browserLoad: (url: string) => ipcRenderer.invoke('browser:load', url),

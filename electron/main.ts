@@ -17,6 +17,7 @@ import { AutoReshipService } from './services/autoreship.service'
 import { ShopContextService } from './services/shop-context.service'
 import { PsyCloudService } from './services/psy-cloud.service'
 import { ensureSingleInstance } from './utils/singleton'
+import { currentShopId, DEFAULT_SHOP_ID, newShopId, partitionForShop } from './utils/shop-partition'
 import { CHROME_UA, applyElectronStealthFlags } from './constants/browser-env'
 import { bindEvaNedbIpc, invokeDb } from './eva-nedb'
 
@@ -55,6 +56,8 @@ let mainWindow: BrowserWindow | null = null
 let kefuWindow: BrowserWindow | null = null
 let psyLoginWindow: BrowserWindow | null = null
 let xhsBrowserView: BrowserView | null = null
+const shopViews = new Map<string, BrowserView>()
+const preparedPartitions = new Set<string>()
 let deviceService: DeviceService
 let licenseService: LicenseService
 let storageService: StorageService
@@ -439,15 +442,7 @@ async function initialize() {
 
   wsService = new WebSocketService(logger, storageService)
   injectService = new InjectService(logger)
-  injectService.setupRequestInterception()
-
-  // 使用 Chrome UA，避免 Electron 标识导致登录组件不渲染
-  const xhsSession = session.fromPartition('persist:main')
-  xhsSession.setUserAgent(CHROME_UA)
-  // 对标官方千帆：edith 请求补 Origin（SSO 插件依赖）
-  setupXhsSessionRequestHooks(xhsSession)
-  // Eva IPC：页面会 invoke('handle-invoke-method', ...)，缺 handler 会抛错打断客服初始化
-  setupEvaIpcStubs()
+  injectService.setupRequestInterception('persist:main')
 
   autoLoginService = new AutoLoginService(logger, storageService, injectService)
   injectService.setCsaHttpOkHandler((url) => {
@@ -504,8 +499,10 @@ async function initialize() {
   ;(global as any).autoShipService = autoShipService
   ;(global as any).autoReshipService = autoReshipService
   ;(global as any).mockService = mockService
-  ;(global as any).currentShopId = 'default'
+  ;(global as any).currentShopId = storageService.getActiveShopId() || DEFAULT_SHOP_ID
   ;(global as any).openLoginAssistWindow = openLoginAssistWindow
+  prepareShopPartition(currentShopId())
+  setupEvaIpcStubs()
 
   wsService.start()
   logger.info('初始化完成')
@@ -552,9 +549,9 @@ function createMainWindow() {
     mainWindow?.webContents.send('navigate', '/browser')
 
     // 保活：优先注入已存 Cookie → 直接进工作台；失效才打开客服登录页（永不默认打开 ark）
-    const shopId = (global as any).currentShopId || 'default'
+    const shopId = currentShopId()
     await showAndLoadXhs('about:blank')
-    autoShipService.bindWebContents(xhsBrowserView!.webContents)
+    autoShipService.bindWebContents(xhsBrowserView!.webContents, shopId)
     autoReshipService.bindWebContents(xhsBrowserView!.webContents)
 
     let ok = false
@@ -625,13 +622,33 @@ function createMainWindow() {
  * - webSecurity:false → 允许 walle 页请求 eva.xiaohongshu.com（客服列表依赖）
  * - nodeIntegration:true → Eva 内 require("electron") 可用
  */
-function getXhsWebPreferences() {
+function prepareShopPartition(shopId?: string) {
+  const part = partitionForShop(shopId)
+  if (preparedPartitions.has(part)) return part
+  preparedPartitions.add(part)
+  const ses = session.fromPartition(part)
+  ses.setUserAgent(CHROME_UA)
+  setupXhsSessionRequestHooks(ses)
+  injectService?.setupRequestInterception(part)
+  return part
+}
+
+function emitShopChanged() {
+  const sid = currentShopId()
+  const shops = storageService?.listShops?.() || []
+  mainWindow?.webContents.send('shop:changed', {
+    currentId: sid,
+    shops
+  })
+}
+
+function getXhsWebPreferences(shopId?: string) {
   return {
     preload: join(__dirname, 'xhs-preload.js'),
     nodeIntegration: true,
     contextIsolation: false,
     webSecurity: false,
-    partition: 'persist:main',
+    partition: partitionForShop(shopId),
     sandbox: false,
     backgroundThrottling: false
   }
@@ -691,6 +708,15 @@ function setupEvaIpcStubs() {
     }
     ipcMain.handle(ch, async (_event, ...args) => {
       logger?.info(`[EvaIPC] ${ch} args=${JSON.stringify(args).slice(0, 120)}`)
+      const blob = JSON.stringify(args || []).toLowerCase()
+      if (/logout|signout|退出/.test(blob)) {
+        void logoutCurrentShop()
+        return true
+      }
+      if (/addaccount|addshop|addtab|newclient|添加多账号|添加账号/.test(blob)) {
+        void addShopAccount()
+        return true
+      }
       if (ch === 'invoke-current-win-function') {
         const fn = String(args[0] || '')
         if (fn === 'minimize') mainWindow?.minimize()
@@ -706,16 +732,78 @@ function setupEvaIpcStubs() {
   }
 }
 
-function createXhsBrowserView(): BrowserView {
-  if (xhsBrowserView) return xhsBrowserView
-
-  xhsBrowserView = new BrowserView({
-    webPreferences: getXhsWebPreferences()
+function createXhsBrowserView(shopId?: string): BrowserView {
+  const sid = shopId || currentShopId()
+  const existing = shopViews.get(sid)
+  if (existing) {
+    xhsBrowserView = existing
+    return existing
+  }
+  prepareShopPartition(sid)
+  const view = new BrowserView({
+    webPreferences: getXhsWebPreferences(sid)
   })
-  xhsBrowserView.webContents.setUserAgent(CHROME_UA)
+  view.webContents.setUserAgent(CHROME_UA)
+  bindXhsBrowserViewEvents(view)
+  shopViews.set(sid, view)
+  xhsBrowserView = view
+  autoShipService?.bindWebContents(view.webContents, sid)
+  autoReshipService?.bindWebContents(view.webContents)
+  return view
+}
 
-  bindXhsBrowserViewEvents(xhsBrowserView)
-  return xhsBrowserView
+async function switchToShop(shopId: string): Promise<boolean> {
+  const sid = String(shopId || DEFAULT_SHOP_ID).trim() || DEFAULT_SHOP_ID
+  if (mainWindow && xhsBrowserView) {
+    try {
+      mainWindow.removeBrowserView(xhsBrowserView)
+    } catch {
+      /* ignore */
+    }
+  }
+  ;(global as any).currentShopId = sid
+  storageService.setActiveShopId(sid)
+  const view = createXhsBrowserView(sid)
+  if (mainWindow) {
+    mainWindow.addBrowserView(view)
+    updateBrowserViewBounds()
+  }
+  autoShipService?.bindWebContents(view.webContents, sid)
+  autoReshipService?.bindWebContents(view.webContents)
+  wsService?.reconnectKefu()
+  emitShopChanged()
+  logger.info(`[Shop] 已切换店铺 ${sid} partition=${partitionForShop(sid)}`)
+  return true
+}
+
+async function addShopAccount(): Promise<{ success: boolean; shopId?: string; message?: string }> {
+  const limit = Math.max(1, Number(licenseService.getShopLimit() || 1))
+  const shops = storageService.listShops()
+  if (shops.length >= limit) {
+    return { success: false, message: `当前授权最多 ${limit} 个店铺，无法再添加` }
+  }
+  const id = newShopId()
+  storageService.saveShopConfig(id, {
+    shopName: `店铺 ${shops.length + 1}`,
+    autoShipEnabled: true,
+    autoReplyEnabled: false
+  })
+  autoLoginService.clearLogoutHold(id)
+  await switchToShop(id)
+  await showAndLoadXhs(XHS_LOGIN_URL)
+  mainWindow?.webContents.send('navigate', '/browser')
+  logger.info(`[Shop] 已添加店铺 ${id}，请用该店客服账号登录`)
+  return { success: true, shopId: id }
+}
+
+async function logoutCurrentShop(): Promise<boolean> {
+  const sid = currentShopId()
+  await autoLoginService.clearShopSession(sid)
+  await showAndLoadXhs(XHS_LOGIN_URL)
+  mainWindow?.webContents.send('navigate', '/browser')
+  emitShopChanged()
+  logger.info(`[Shop] 已退出店铺 ${sid}`)
+  return true
 }
 
 function createKefuWindow() {
@@ -738,7 +826,7 @@ function createKefuWindow() {
   kefuWindow.webContents.on('dom-ready', () => injectService?.injectOnDomReady(kefuWindow!.webContents))
   kefuWindow.webContents.on('did-finish-load', async () => {
     injectService?.injectScripts(kefuWindow!.webContents)
-    autoShipService?.bindImWebContents(kefuWindow!.webContents)
+    autoShipService?.bindImWebContents(kefuWindow!.webContents, currentShopId())
     const shopId = (global as any).currentShopId || 'default'
     const isLoggedIn = await autoLoginService.checkLoginStatus(kefuWindow!.webContents)
     if (!isLoggedIn) {
@@ -914,7 +1002,7 @@ function setupIPC() {
 
   ipcMain.handle('product:add-binding', (_event, binding) => {
     const id = storageService.addProductBinding(binding)
-    void psyCloudService.syncBindingsFromLocal('default')
+    void psyCloudService.syncBindingsFromLocal(currentShopId())
     return id
   })
   ipcMain.handle('product:get-binding', (_event, shopId: string, productId: string) =>
@@ -923,7 +1011,7 @@ function setupIPC() {
     storageService.getAllProductBindings(shopId))
   ipcMain.handle('product:update-binding', (_event, id: number, updates) => {
     const ok = storageService.updateProductBinding(id, updates)
-    void psyCloudService.syncBindingsFromLocal('default')
+    void psyCloudService.syncBindingsFromLocal(currentShopId())
     return ok
   })
   ipcMain.handle('product:delete-binding', (_event, id: number) => storageService.deleteProductBinding(id))
@@ -987,7 +1075,7 @@ function setupIPC() {
     }
     if (res.success) {
       mainWindow?.webContents.send('psy-auth-updated', psyCloudService.getStatus())
-      void psyCloudService.syncBindingsFromLocal('default')
+      void psyCloudService.syncBindingsFromLocal(currentShopId())
     }
     return res
   })
@@ -1003,7 +1091,7 @@ function setupIPC() {
       psyCloudService.claimIntoPool(bindingId, testCode, count, productId)
   )
   ipcMain.handle('psy:release-batch', async (_event, batchId: string) => psyCloudService.releaseBatch(batchId))
-  ipcMain.handle('psy:sync-bindings', async () => psyCloudService.syncBindingsFromLocal('default'))
+  ipcMain.handle('psy:sync-bindings', async () => psyCloudService.syncBindingsFromLocal(currentShopId()))
   ipcMain.handle('psy:order-claim-url', () => psyCloudService.getOrderClaimUrl())
 
   // 订单发卡管理（对标阿奇锁 OrderImMsgController）
@@ -1047,6 +1135,26 @@ function setupIPC() {
     return true
   })
 
+  ipcMain.handle('shop:list', () => ({
+    currentId: currentShopId(),
+    shops: storageService.listShops(),
+    limit: licenseService.getShopLimit()
+  }))
+  ipcMain.handle('shop:add', async () => addShopAccount())
+  ipcMain.handle('shop:switch', async (_event, shopId: string) => {
+    const ok = await switchToShop(String(shopId || DEFAULT_SHOP_ID))
+    const view = shopViews.get(currentShopId())
+    if (view) {
+      const url = view.webContents.getURL()
+      if (!url || url === 'about:blank') {
+        const injected = await autoLoginService.loadAndInjectCookies(currentShopId())
+        await view.webContents.loadURL(injected ? XHS_DASHBOARD_URL : XHS_LOGIN_URL)
+      }
+    }
+    mainWindow?.webContents.send('navigate', '/browser')
+    return ok
+  })
+  ipcMain.handle('shop:logout', async () => logoutCurrentShop())
   ipcMain.handle('shop:init-phase2', async (_event, shopId: string, shopName?: string) => {
     await shopContextService.initializePhase2(shopId, shopName)
     return true

@@ -136,8 +136,10 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { SubAccount } from '../types/electron'
+import { useShopStore } from '../stores/shop'
 
-const SHOP_ID = 'default'
+const shopStore = useShopStore()
+const SHOP_ID = () => shopStore.currentId
 
 const settings = ref({
   autoStart: false,
@@ -254,16 +256,16 @@ const saveMainLogin = async () => {
     return
   }
   const pwd = mainLogin.value.password === '********' ? '' : mainLogin.value.password
-  await window.electronAPI?.saveMainLogin(SHOP_ID, mainLogin.value.email, pwd)
+  await window.electronAPI?.saveMainLogin(SHOP_ID(), mainLogin.value.email, pwd)
   ElMessage.success('客服邮箱账号已保存（用于自动登录）')
 }
 
 const triggerAutoLogin = async () => {
   if (mainLogin.value.email) {
     const pwd = mainLogin.value.password === '********' ? '' : mainLogin.value.password
-    await window.electronAPI?.saveMainLogin(SHOP_ID, mainLogin.value.email, pwd)
+    await window.electronAPI?.saveMainLogin(SHOP_ID(), mainLogin.value.email, pwd)
   }
-  const ok = await window.electronAPI?.autoLogin(SHOP_ID)
+  const ok = await window.electronAPI?.autoLogin(SHOP_ID())
   ElMessage.info(ok ? '自动登录成功' : '自动登录未完成，请到「浏览器」页手动登录后点保存登录')
   logs.value = (await window.electronAPI?.getLogs(200)) || logs.value
 }
@@ -274,12 +276,12 @@ const addSubAccount = async () => {
     return
   }
   await window.electronAPI?.addSubAccount({
-    shopId: SHOP_ID,
+    shopId: SHOP_ID(),
     username: subForm.value.username,
     password: subForm.value.password
   })
   subForm.value = { username: '', password: '' }
-  subAccounts.value = await window.electronAPI!.getSubAccounts(SHOP_ID)
+  subAccounts.value = await window.electronAPI!.getSubAccounts(SHOP_ID())
   ElMessage.success('子账号已添加')
 }
 
@@ -308,9 +310,9 @@ onMounted(async () => {
   if (window.electronAPI) {
     const config = await window.electronAPI.getAllConfig()
     Object.assign(settings.value, config)
-    subAccounts.value = await window.electronAPI.getSubAccounts(SHOP_ID)
+    subAccounts.value = await window.electronAPI.getSubAccounts(SHOP_ID())
     logs.value = await window.electronAPI.getLogs(200)
-    const saved = await window.electronAPI.getMainLogin?.(SHOP_ID)
+    const saved = await window.electronAPI.getMainLogin?.(SHOP_ID())
     if (saved?.email) {
       mainLogin.value.email = saved.email
       if (saved.hasPassword) mainLogin.value.password = '********'

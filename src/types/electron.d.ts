@@ -137,6 +137,11 @@ export interface ElectronAPI {
   setReshipConfig(shopId: string, config: { enabled: boolean; retryIntervalMs?: number }): Promise<boolean>
 
   initShopPhase2(shopId: string, shopName?: string): Promise<boolean>
+  listShops(): Promise<{ currentId: string; shops: Array<{ id: string; name: string }>; limit: number }>
+  addShop(): Promise<{ success: boolean; shopId?: string; message?: string }>
+  switchShop(shopId: string): Promise<boolean>
+  logoutShop(): Promise<boolean>
+  onShopChanged(callback: (data: { currentId: string; shops: Array<{ id: string; name: string }> }) => void): () => void
   openKefuWindow(): Promise<boolean>
 
   browserLoad(url: string): Promise<boolean>
