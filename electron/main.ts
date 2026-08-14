@@ -466,7 +466,8 @@ async function initialize() {
   }
   crashRecoveryService = new CrashRecoveryService(logger)
   mockService = new MockService(logger)
-  if (process.env.NODE_ENV === 'development' || process.env.XHS_MOCK === 'true') {
+  // 仅显式 XHS_MOCK=true 才开模拟发货；开发模式默认真发，避免台账假 success
+  if (process.env.XHS_MOCK === 'true') {
     mockService.setEnabled(true)
   }
 

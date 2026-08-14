@@ -5,9 +5,17 @@
  * 暴露：window.__xhsAssistant.im
  */
 (function () {
-  // 版本号变更时允许热更新（全量台账模式）
-  var SCRIPT_VER = 'order-ledger-v1'
-  if (window.__xhsImSendReady === SCRIPT_VER) return
+  // 版本号变更或桥不完整时允许热更新
+  var SCRIPT_VER = 'order-ledger-v2'
+  if (
+    window.__xhsImSendReady === SCRIPT_VER &&
+    window.__xhsAssistant &&
+    window.__xhsAssistant.im &&
+    typeof window.__xhsAssistant.im.deliverByOrderSn === 'function' &&
+    typeof window.__xhsAssistant.im.fetchPendingOrders === 'function'
+  ) {
+    return
+  }
   window.__xhsImSendReady = SCRIPT_VER
 
   function getAccessToken() {

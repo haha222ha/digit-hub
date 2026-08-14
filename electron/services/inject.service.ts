@@ -191,8 +191,23 @@ export class InjectService {
     return this.injectedScripts.get(scriptName)
   }
 
-  /** 同步注入并等待完成（商品同步隐藏窗用） */
+  /** 同步注入并等待完成；开发期每次从磁盘重读，避免热更后仍用旧脚本 */
   async injectScriptAsync(webContents: WebContents, scriptName: string): Promise<boolean> {
+    try {
+      const scriptsDir = join(__dirname, '../resources/inject-scripts')
+      const fileMap: Record<string, string> = {
+        'im-send': 'im-send.js',
+        'goods-sync': 'goods-sync.js',
+        'api-interceptor': 'api-interceptor.js'
+      }
+      const file = fileMap[scriptName]
+      if (file) {
+        const content = readFileSync(join(scriptsDir, file), 'utf8')
+        this.injectedScripts.set(scriptName, content)
+      }
+    } catch {
+      /* keep cached */
+    }
     const script = this.injectedScripts.get(scriptName)
     if (!script || webContents.isDestroyed()) return false
     try {

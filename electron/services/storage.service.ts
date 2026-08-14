@@ -1292,7 +1292,7 @@ export class StorageService {
   }
 
   /**
-   * 是否已发码成功（台账判重 SSOT：无视千帆订单状态）
+   * 是否已真实发码成功（mock_success 不算，需真发 IM）
    */
   hasShippedCode(orderId: string): boolean {
     const row = this.db
@@ -1303,6 +1303,12 @@ export class StorageService {
       )
       .get(orderId)
     return !!row
+  }
+
+  /** 清除某订单发货占位（用于 Mock 假成功后重跑真发） */
+  clearOrderDelivery(orderId: string): number {
+    const r = this.db.prepare('DELETE FROM order_delivery WHERE order_id = ?').run(orderId)
+    return r.changes
   }
 
   /**

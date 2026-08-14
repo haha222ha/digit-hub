@@ -149,10 +149,22 @@ export class AutoShipService {
 
   private getShipWc(shopId?: string): WebContents | null {
     const sid = shopId || currentShopId()
-    const im = this.imByShop.get(sid) || (sid === currentShopId() ? this.imWebContents : null)
-    if (im && !im.isDestroyed()) {
-      const url = im.getURL()
-      if (url.includes('walle.xiaohongshu.com')) return im
+    const pickReady = (wc: WebContents | null | undefined) => {
+      if (!wc || wc.isDestroyed()) return null
+      const url = wc.getURL() || ''
+      if (url.includes('walle.xiaohongshu.com') && !url.includes('/login')) return wc
+      return null
+    }
+    const im = pickReady(this.imByShop.get(sid) || (sid === currentShopId() ? this.imWebContents : null))
+    if (im) return im
+    // 同商家多 partition：绑定店 IM 未就绪时，回落任意已登录客服页（避免假失败）
+    for (const wc of this.imByShop.values()) {
+      const hit = pickReady(wc)
+      if (hit) return hit
+    }
+    if (this.imWebContents) {
+      const hit = pickReady(this.imWebContents)
+      if (hit) return hit
     }
     const mon = this.monitorByShop.get(sid) || (sid === currentShopId() ? this.monitorWebContents : null)
     if (mon && !mon.isDestroyed()) return mon
@@ -262,16 +274,20 @@ export class AutoShipService {
     for (const s of this.storage.listShops()) {
       if (s.id) shopIds.add(s.id)
     }
-    for (const shopId of shopIds) {
+    // 有真实店铺时不要再用 default 重复拉同一批订单（会导致假店先占台账）
+    const real = [...shopIds].filter((id) => id && id !== 'default')
+    const pollList = real.length > 0 ? real : [...shopIds]
+    const seenOrderIds = new Set<string>()
+    for (const shopId of pollList) {
       const hasSession = !!this.storage.getShopCookies(shopId) || this.imByShop.has(shopId)
       if (hasSession && this.ensureImSession) {
         await this.ensureImSession(shopId).catch(() => false)
       }
-      await this.pollOrdersForShop(shopId)
+      await this.pollOrdersForShop(shopId, seenOrderIds)
     }
   }
 
-  private async pollOrdersForShop(shopId: string): Promise<void> {
+  private async pollOrdersForShop(shopId: string, seenOrderIds?: Set<string>): Promise<void> {
     const wc = await this.ensureOrderPollWc(shopId)
     if (!wc) {
       this.logger.warn(`[AutoShip] 轮询跳过：无 WebContents shop=${shopId}`)
@@ -330,6 +346,11 @@ export class AutoShipService {
         `[AutoShip] 轮询命中 ${orders.length} 单(全量) shop=${shopId} host=${orders[0]?.host || '-'}`
       )
       for (const order of orders) {
+        const oid = String(order.order_id || '')
+        if (oid && seenOrderIds) {
+          if (seenOrderIds.has(oid)) continue
+          seenOrderIds.add(oid)
+        }
         await this.handleNewOrder({ ...order, shop_id: shopId, source: order.source || 'poll' })
       }
       this.cleanupProcessed()
@@ -352,12 +373,18 @@ export class AutoShipService {
   }): Promise<void> {
     if (!order || !order.order_id) return
 
-    const shopId = String(order.shop_id || order.shopId || currentShopId())
+    let shopId = String(order.shop_id || order.shopId || currentShopId())
     let productId = order.product_id || ''
     if (!productId) {
       productId = (await this.resolveProductId(order.order_id, shopId)) || ''
     }
     order.product_id = productId
+
+    // 绑定表上的店铺优先（避免 default 假店占坑）
+    const bindingEarly = productId ? this.storage.getProductBinding(productId) : null
+    if (bindingEarly?.shop_id) {
+      shopId = String(bindingEarly.shop_id)
+    }
     order.shop_id = shopId
 
     // 1) 全量入台账（无视千帆状态）
@@ -379,14 +406,22 @@ export class AutoShipService {
       void this.psyCloud.syncOrders([{ order_id: order.order_id, product_id: productId }])
     }
 
-    // 2) 只跟本地「是否已发码」比对；失败单交给 retry 任务，不在此重复占位
+    // 2) 只跟本地「是否已真实发码」比对
     if (this.storage.hasShippedCode(order.order_id)) {
       this.logger.info(`[AutoShip] 台账已发码，跳过: ${order.order_id}`)
       return
     }
     if (this.storage.existsOrderDelivery(order.order_id)) {
-      // 已有发货流水但未成功 → 留给 retryFailedDeliveries，避免重复 claim
-      return
+      // Mock 假成功：清掉占位，允许真发；其它流水留给 retry
+      const rows = this.storage.getOrderDeliveries(order.order_id) as Array<{ send_status?: string }>
+      const onlyMock =
+        rows.length > 0 && rows.every((r) => String(r.send_status || '') === 'mock_success')
+      if (onlyMock) {
+        this.storage.clearOrderDelivery(order.order_id)
+        this.logger.warn(`[AutoShip] 清除 mock_success 占位，准备真发: ${order.order_id}`)
+      } else {
+        return
+      }
     }
     if (this.processedOrders.has(`${shopId}:${order.order_id}`)) {
       return
@@ -394,6 +429,22 @@ export class AutoShipService {
 
     if (!productId) {
       this.logger.warn(`[AutoShip] 订单缺 product_id，仅入台账: ${order.order_id}`)
+      return
+    }
+
+    // 3) 绑定时间门禁：绑定之前的订单只入台账，不补发（防历史单重复发码）
+    if (bindingEarly?.created_at && order.order_time) {
+      const orderTs = this.parseTimeToTs(order.order_time, 'cn')
+      const bindingTs = this.parseTimeToTs(bindingEarly.created_at, 'utc')
+      if (orderTs !== null && bindingTs !== null && orderTs < bindingTs) {
+        this.logger.info(
+          `[AutoShip] 订单早于绑定时间，仅入台账不发码: order=${order.order_id}, orderTime=${order.order_time}, bindingTime=${bindingEarly.created_at}`
+        )
+        return
+      }
+    }
+    if (!bindingEarly) {
+      this.logger.info(`[AutoShip] 未绑定商品，仅入台账: productId=${productId} order=${order.order_id}`)
       return
     }
 
@@ -450,20 +501,14 @@ export class AutoShipService {
       return false
     }
 
-    // ===== 绑定时间过滤：只处理「绑定商品之后」下单的订单（对标阿奇锁 FirstReply.CreateTime）=====
+    // ===== 绑定时间过滤：只处理「绑定商品之后」下单的订单 =====
     if (order.order_time && binding.created_at) {
-      const orderTs = this.parseTimeToTs(order.order_time)
-      const bindingTs = this.parseTimeToTs(binding.created_at)
+      const orderTs = this.parseTimeToTs(order.order_time, 'cn')
+      const bindingTs = this.parseTimeToTs(binding.created_at, 'utc')
       if (orderTs !== null && bindingTs !== null && orderTs < bindingTs) {
         this.logger.info(
           `[AutoShip] 订单早于绑定时间，跳过（只处理绑定后订单）: order=${order.order_id}, orderTime=${order.order_time}, bindingTime=${binding.created_at}`
         )
-        this.storage.addShipLog({
-          shopId,
-          orderId: order.order_id,
-          status: 'before_binding',
-          errorMsg: `订单下单时间(${order.order_time})早于绑定时间(${binding.created_at})`
-        })
         return false
       }
     }
@@ -585,10 +630,12 @@ export class AutoShipService {
         cardContent: cardForOrder ?? undefined
       })
 
-      // Mock 模式：直接成功
+      // Mock 模式：直接成功（记 mock_success，不算真实发码）
       let shipResult: { success: boolean; trackingNumber?: string; buyerId?: string; error?: string }
       if (this.mock.isEnabled()) {
-        this.logger.info(`[AutoShip][Mock] 模拟发货[${i + 1}/${msgTotal}]: ${finalContent.substring(0, 20)}...`)
+        this.logger.warn(
+          `[AutoShip][Mock] 模拟发货[${i + 1}/${msgTotal}]（未真实发 IM）: ${finalContent.substring(0, 20)}...`
+        )
         shipResult = { success: true, trackingNumber: finalContent.substring(0, 50) }
       } else {
         shipResult = await this.executeRealShip(shopId, order.order_id, finalContent, msg.type)
@@ -596,10 +643,9 @@ export class AutoShipService {
 
       if (shipResult.success) {
         if (cardLocked) this.storage.confirmCard(order.order_id)
-        // 回填真实买家 UID（对标阿奇锁 UpdateUidByTidAsync）：
-        // 优先用 IM 层 search_customer 找到的 buyerId，订单 buyer_info 兜底
         const realBuyerUid = shipResult.buyerId || buyerUid || ''
-        this.storage.updateDeliveryStatus(msgGuid, 'success', {
+        const sendStatus = this.mock.isEnabled() ? 'mock_success' : 'success'
+        this.storage.updateDeliveryStatus(msgGuid, sendStatus, {
           buyerUid: realBuyerUid || undefined,
           cardContent: cardForOrder ?? undefined
         })
@@ -607,9 +653,9 @@ export class AutoShipService {
           shopId,
           orderId: order.order_id,
           trackingNumber: shipResult.trackingNumber || finalContent.substring(0, 50),
-          status: 'success'
+          status: sendStatus
         })
-        this.logger.info(`[AutoShip] 消息发送成功 [${i + 1}/${msgTotal}]: ${order.order_id}`)
+        this.logger.info(`[AutoShip] 消息发送成功 [${i + 1}/${msgTotal}]: ${order.order_id} status=${sendStatus}`)
       } else {
         if (cardLocked) {
           this.storage.rollbackCard(order.order_id)
@@ -641,25 +687,45 @@ export class AutoShipService {
   }
 
   /**
-   * 解析时间字符串为毫秒时间戳（支持多种格式），解析失败返回 null
+   * 解析时间字符串为毫秒时间戳。
+   * - cn：千帆 paidAt「YYYY-MM-DD HH:mm:ss」按东八区
+   * - utc：SQLite datetime('now') 按 UTC
    */
-  private parseTimeToTs(timeStr: string): number | null {
+  private parseTimeToTs(timeStr: string, tz: 'cn' | 'utc' | 'auto' = 'auto'): number | null {
     if (!timeStr) return null
     const s = String(timeStr).trim()
     if (!s) return null
 
-    // 纯数字：可能是秒级或毫秒级时间戳
     if (/^\d+$/.test(s)) {
       const n = parseInt(s, 10)
-      // 毫秒级（13 位）或秒级（10 位）
       if (n > 1e12) return n
       if (n > 1e9) return n * 1000
       return null
     }
 
-    // 标准日期字符串（兼容 SQLite datetime('now') 的 "YYYY-MM-DD HH:MM:SS" 与 ISO）
-    const normalized = s.replace(' ', 'T')
-    const ts = Date.parse(normalized)
+    const m = s.match(
+      /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?(Z|[+-]\d{2}:?\d{2})?$/
+    )
+    if (m) {
+      const y = Number(m[1])
+      const mo = Number(m[2]) - 1
+      const d = Number(m[3])
+      const h = Number(m[4])
+      const mi = Number(m[5])
+      const se = Number(m[6] || 0)
+      const suffix = m[7] || ''
+      if (suffix === 'Z' || tz === 'utc') {
+        return Date.UTC(y, mo, d, h, mi, se)
+      }
+      if (suffix) {
+        const ts = Date.parse(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${String(se).padStart(2, '0')}${suffix}`)
+        return Number.isNaN(ts) ? null : ts
+      }
+      // 默认按东八区（订单时间 / 未标明时区）
+      return Date.UTC(y, mo, d, h, mi, se) - 8 * 60 * 60 * 1000
+    }
+
+    const ts = Date.parse(s.replace(' ', 'T'))
     return Number.isNaN(ts) ? null : ts
   }
 
@@ -680,37 +746,76 @@ export class AutoShipService {
       }
     }
 
-    const wc = await this.waitForImReady(shopId, 25000)
-    if (!wc) {
+    const wcReady = await this.waitForImReady(shopId, 25000)
+    if (!wcReady) {
       return { success: false, error: `店铺 ${shopId} 监测/IM WebContents 未绑定` }
     }
+    let wc: WebContents = wcReady
 
-    const url = wc.getURL()
-    if (!url.includes('walle.xiaohongshu.com')) {
+    const url0 = wc.getURL()
+    if (!url0.includes('walle.xiaohongshu.com')) {
       return { success: false, error: `店铺 ${shopId} 当前不在小红书客服工作台页面` }
     }
 
     try {
-      const bridgeOk = await wc.executeJavaScript(`
-        (function(){
-          if (!window.__xhsAssistant) window.__xhsAssistant = {};
-          return !!(window.__xhsAssistant.im && window.__xhsAssistant.im.deliverByOrderSn);
-        })()
+      // 发货前强制注入（隐藏窗/导航后脚本常丢失；清 ready 标志允许热更新）
+      if (this.injectService) {
+        await wc
+          .executeJavaScript(
+            `try{ window.__xhsImSendReady = null; }catch(e){} true`
+          )
+          .catch(() => false)
+        await this.injectService.injectScriptAsync(wc, 'im-send').catch(() => false)
+      }
+      await this.sleep(600)
+
+      let bridgeOk = await wc.executeJavaScript(`
+        !!(window.__xhsAssistant && window.__xhsAssistant.im && typeof window.__xhsAssistant.im.deliverByOrderSn === 'function')
       `)
       if (!bridgeOk) {
+        // 再试一次注入
+        await this.injectService?.injectScriptAsync(wc, 'im-send').catch(() => false)
+        await this.sleep(800)
+        bridgeOk = await wc.executeJavaScript(`
+          !!(window.__xhsAssistant && window.__xhsAssistant.im && typeof window.__xhsAssistant.im.deliverByOrderSn === 'function')
+        `)
+      }
+      if (!bridgeOk) {
+        const diag = await wc
+          .executeJavaScript(
+            `(function(){ try { return JSON.stringify({ ready: window.__xhsImSendReady, hasA: !!window.__xhsAssistant, keys: window.__xhsAssistant && window.__xhsAssistant.im ? Object.keys(window.__xhsAssistant.im) : [], rim: !!(window.XhsRim && window.XhsRim.sendTextMsg) }); } catch(e){ return String(e); } })()`
+          )
+          .catch((e) => String(e))
         return {
           success: false,
-          error: `店铺 ${shopId} IMSend 桥未注入：请等待客服聊天页加载完成`
+          error: `店铺 ${shopId} IMSend 桥未注入：请等待客服聊天页加载完成 url=${url0.slice(0, 80)} diag=${diag}`
         }
       }
 
-      const hasRim = await wc.executeJavaScript(
-        `window.__xhsAssistant.im.hasXhsRim && window.__xhsAssistant.im.hasXhsRim()`
-      )
+      let hasRim = false
+      const rimDeadline = Date.now() + 20000
+      while (Date.now() < rimDeadline) {
+        hasRim = !!(await wc
+          .executeJavaScript(
+            `!!(window.XhsRim && typeof window.XhsRim.sendTextMsg === 'function')`
+          )
+          .catch(() => false))
+        if (hasRim) break
+        // 尝试换到其它已登录客服页（同商家多 partition）
+        const alt = this.getShipWcWithRim(shopId, wc)
+        if (alt && alt !== wc) {
+          wc = alt
+          if (this.injectService) {
+            await alt.executeJavaScript(`try{window.__xhsImSendReady=null}catch(e){}`).catch(() => false)
+            await this.injectService.injectScriptAsync(alt, 'im-send').catch(() => false)
+          }
+        }
+        await this.sleep(500)
+      }
       if (!hasRim) {
         return {
           success: false,
-          error: `店铺 ${shopId} XhsRim 未就绪：请保持该店客服聊天页已登录`
+          error: `店铺 ${shopId} XhsRim 未就绪：请保持该店客服聊天页已登录（可手动打开一次客服页）`
         }
       }
 
@@ -738,6 +843,26 @@ export class AutoShipService {
     } catch (err: any) {
       return { success: false, error: err.message || String(err) }
     }
+  }
+
+  /** 找任意已登录客服页（可排除当前窗，便于 XhsRim 未就绪时切换） */
+  private getShipWcWithRim(preferredShopId?: string, exclude?: WebContents | null): WebContents | null {
+    const candidates: WebContents[] = []
+    const preferred = this.getShipWc(preferredShopId)
+    if (preferred) candidates.push(preferred)
+    for (const w of this.imByShop.values()) {
+      if (w && !w.isDestroyed() && !candidates.includes(w)) candidates.push(w)
+    }
+    if (this.imWebContents && !this.imWebContents.isDestroyed() && !candidates.includes(this.imWebContents)) {
+      candidates.push(this.imWebContents)
+    }
+    for (const cand of candidates) {
+      if (exclude && cand === exclude) continue
+      const url = cand.getURL() || ''
+      if (!url.includes('walle.xiaohongshu.com') || url.includes('/login')) continue
+      return cand
+    }
+    return null
   }
 
   private async waitForImReady(shopId: string, timeoutMs = 20000): Promise<WebContents | null> {
