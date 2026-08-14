@@ -16,12 +16,13 @@ import { AutoShipService } from './services/autoship.service'
 import { AutoReshipService } from './services/autoreship.service'
 import { ShopContextService } from './services/shop-context.service'
 import { PsyCloudService } from './services/psy-cloud.service'
-import { ensureSingleInstance } from './utils/singleton'
+import { acquireSingleInstanceLock, ensureSingleInstance, focusAssistantMainWindow } from './utils/singleton'
 import { currentShopId, DEFAULT_SHOP_ID, newShopId, partitionForShop } from './utils/shop-partition'
 import { CHROME_UA, applyElectronStealthFlags } from './constants/browser-env'
 import { bindEvaNedbIpc, invokeDb } from './eva-nedb'
 
 applyElectronStealthFlags(app)
+acquireSingleInstanceLock()
 
 // 无控制台启动时 stdout 断开会触发 EPIPE，必须在最早阶段吞掉
 process.on('uncaughtException', (err: NodeJS.ErrnoException) => {
@@ -563,6 +564,7 @@ function createMainWindow() {
   mainWindow.once('ready-to-show', async () => {
     mainWindow?.setTitle('小红书发货助手')
     mainWindow?.show()
+    focusAssistantMainWindow()
 
     // 保活：后台拉起客服页给自动发货用；界面默认进发货管理（不要一打开只剩客服页）
     const shopId = currentShopId()
@@ -625,7 +627,6 @@ function createMainWindow() {
     startCookieWatchdog()
   })
 
-  // 防止 BrowserView 把窗口标题改成「工作台」
   mainWindow.on('page-title-updated', (e) => {
     e.preventDefault()
     mainWindow?.setTitle('小红书发货助手')
@@ -889,6 +890,7 @@ async function ensureShopImWindow(
   const existing = shopImWindows.get(sid)
   if (existing && !existing.isDestroyed()) {
     if (opts?.show) {
+      ;(existing as any).__allowShow = true
       existing.setSkipTaskbar(false)
       existing.show()
       existing.focus()
@@ -900,6 +902,7 @@ async function ensureShopImWindow(
   if (pending) {
     const win = await pending
     if (opts?.show && win && !win.isDestroyed()) {
+      ;(win as any).__allowShow = true
       win.setSkipTaskbar(false)
       win.show()
       win.focus()
@@ -919,23 +922,37 @@ async function ensureShopImWindow(
 async function createShopImWindow(shopId: string, show: boolean): Promise<BrowserWindow | null> {
   prepareShopPartition(shopId)
   const win = new BrowserWindow({
-    show,
+    show: false,
     width: 1100,
     height: 760,
     title: '客服聊天',
-    skipTaskbar: !show,
+    skipTaskbar: true,
     webPreferences: {
       ...getXhsWebPreferences(shopId),
       backgroundThrottling: false
     }
   })
+  ;(win as any).__allowShow = !!show
   win.webContents.setUserAgent(CHROME_UA)
   shopImWindows.set(shopId, win)
   if (show) kefuWindow = win
 
+  win.on('show', () => {
+    // 禁止后台客服页意外露脸（第二次启动 / 导航会把隐藏窗顶出来）
+    if (!(win as any).__allowShow) {
+      try {
+        win.setSkipTaskbar(true)
+        win.hide()
+      } catch {
+        /* ignore */
+      }
+    }
+  })
+
   win.on('close', (e) => {
     if ((app as any).isQuitting || (win as any).__allowClose) return
     e.preventDefault()
+    ;(win as any).__allowShow = false
     win.setSkipTaskbar(true)
     win.hide()
   })
@@ -972,25 +989,14 @@ async function createShopImWindow(shopId: string, show: boolean): Promise<Browse
     logger.warn(`[KefuBrowser] 店铺 ${shopId} 加载聊天页失败: ${err}`)
   }
   autoShipService?.bindImWebContents(win.webContents, shopId)
-
-  // 登录态不过则弹出客服窗，让人补登（隐藏窗常没有 XhsRim）
-  try {
-    await new Promise((r) => setTimeout(r, 2000))
-    const logged = await autoLoginService.checkLoginStatus(win.webContents)
-    const url = win.webContents.getURL() || ''
-    const onLogin = /\/login/i.test(url)
-    if (!logged || onLogin) {
-      logger.warn(`[KefuBrowser] 店铺 ${shopId} 客服未就绪，弹出窗口补登 url=${url.slice(0, 90)}`)
-      win.setSkipTaskbar(false)
-      win.show()
-      win.focus()
-      kefuWindow = win
-    }
-  } catch (e) {
-    logger.warn(`[KefuBrowser] 店铺 ${shopId} 登录探测失败: ${e}`)
+  logger.info(`[KefuBrowser] 已就绪 shop=${shopId} show=${!!show} partition=${partitionForShop(shopId)}`)
+  if (show) {
+    ;(win as any).__allowShow = true
+    win.setSkipTaskbar(false)
+    win.show()
+    win.focus()
+    kefuWindow = win
   }
-
-  logger.info(`[KefuBrowser] 已就绪 shop=${shopId} show=${show || win.isVisible()} partition=${partitionForShop(shopId)}`)
   return win
 }
 

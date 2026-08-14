@@ -15,6 +15,7 @@ public class WinFocus {
   [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
   [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
   [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+  [DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
 }
 '@
   $found = $false
@@ -24,6 +25,7 @@ public class WinFocus {
     $sb = New-Object System.Text.StringBuilder 512
     [void][WinFocus]::GetWindowText($h, $sb, $sb.Capacity)
     $t = $sb.ToString()
+    # 绝不前置「客服聊天」——那是后台隐藏窗，点到它会以为客户端坏了
     if ($t -eq '小红书发货助手' -or $t -like '小红书发货助手*') {
       [WinFocus]::ShowWindow($h, 9) | Out-Null
       [WinFocus]::SetForegroundWindow($h) | Out-Null
@@ -35,8 +37,30 @@ public class WinFocus {
   return $found
 }
 
-# 已有主窗口：直接前置，不要再开一个裸 electron（否则会只看到客服页）
+function Get-AssistantElectron {
+  Get-CimInstance Win32_Process -Filter "name='electron.exe'" | Where-Object {
+    $_.CommandLine -and (
+      $_.CommandLine -match 'xhs-shipping-assistant' -or
+      $_.CommandLine -match 'dist-electron\\main'
+    ) -and $_.CommandLine -notmatch '--type='
+  }
+}
+
+# 已有主窗口：直接前置，禁止再开第二个客户端
 if (Focus-AssistantWindow) { exit 0 }
+
+$running = @(Get-AssistantElectron)
+if ($running.Count -gt 0) {
+  # 进程在但主窗口被客服页挡住：再戳一次单实例（第二实例会立刻退出并唤起主窗）
+  $env:VITE_DEV_SERVER_URL = 'http://localhost:5173/'
+  $ele = Join-Path $Root 'node_modules\electron\dist\electron.exe'
+  if (Test-Path $ele) {
+    Start-Process -FilePath $ele -ArgumentList '.' -WorkingDirectory $Root
+  }
+  Start-Sleep -Milliseconds 800
+  [void](Focus-AssistantWindow)
+  exit 0
+}
 
 $viteUp = $false
 try {
@@ -48,7 +72,6 @@ try {
 }
 
 if ($viteUp) {
-  # Vite 在但窗口没了：用开发环境变量唤起（与 npm run dev 一致）
   $env:VITE_DEV_SERVER_URL = 'http://localhost:5173/'
   Start-Process -FilePath (Join-Path $Root 'node_modules\electron\dist\electron.exe') -ArgumentList '.' -WorkingDirectory $Root
   Start-Sleep -Seconds 2

@@ -186,11 +186,20 @@ export class AutoShipService {
           height: 720,
           title: '订单轮询（后台）',
           autoHideMenuBar: true,
+          skipTaskbar: true,
           webPreferences: {
             partition: partitionForShop(sid),
             nodeIntegration: false,
             contextIsolation: true,
             webSecurity: false
+          }
+        })
+        win.on('show', () => {
+          try {
+            win!.setSkipTaskbar(true)
+            win!.hide()
+          } catch {
+            /* ignore */
           }
         })
         this.orderPollByShop.set(sid, win)
@@ -827,34 +836,12 @@ export class AutoShipService {
         await this.sleep(500)
       }
       if (!hasRim) {
-        // 弹出该店客服窗，等待人工/自动登录后 XhsRim 出现
-        try {
-          const { BrowserWindow: BW } = require('electron')
-          const owner = BW.fromWebContents(wc)
-          if (owner && !owner.isDestroyed()) {
-            owner.setSkipTaskbar(false)
-            owner.show()
-            owner.focus()
-            this.logger.warn(`[AutoShip] XhsRim 未就绪，已弹出客服窗 shop=${shopId}，等待登录…`)
-          }
-        } catch {
-          /* ignore */
-        }
-        const extraDeadline = Date.now() + 90000
-        while (Date.now() < extraDeadline) {
-          hasRim = !!(await wc
-            .executeJavaScript(
-              `!!(window.XhsRim && typeof window.XhsRim.sendTextMsg === 'function')`
-            )
-            .catch(() => false))
-          if (hasRim) break
-          await this.sleep(1000)
-        }
-      }
-      if (!hasRim) {
+        this.logger.warn(
+          `[AutoShip] XhsRim 未就绪 shop=${shopId}：不弹出客服窗（避免只剩客服页/互踢登录）。请在主窗口「小红书后台」用客服邮箱登录。`
+        )
         return {
           success: false,
-          error: `店铺 ${shopId} XhsRim 未就绪：请在弹出的客服页完成登录后重试`
+          error: `店铺 ${shopId} 客服会话未就绪：请在主窗口完成客服登录，不要另开客户端`
         }
       }
 

@@ -1,6 +1,7 @@
 import { Tray, Menu, nativeImage, app, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { LoggerService } from './services/logger.service'
+import { focusAssistantMainWindow } from './utils/singleton'
 
 let tray: Tray | null = null
 
@@ -19,8 +20,7 @@ export function createTray(mainWindow: BrowserWindow, logger: LoggerService, han
     {
       label: '显示主窗口',
       click: () => {
-        mainWindow.show()
-        mainWindow.focus()
+        focusAssistantMainWindow()
       }
     },
     {
@@ -62,8 +62,7 @@ export function createTray(mainWindow: BrowserWindow, logger: LoggerService, han
   tray.setContextMenu(contextMenu)
 
   tray.on('double-click', () => {
-    mainWindow.show()
-    mainWindow.focus()
+    focusAssistantMainWindow()
   })
 
   return tray

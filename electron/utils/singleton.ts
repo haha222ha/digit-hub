@@ -1,41 +1,81 @@
 import { app, BrowserWindow } from 'electron'
 
-/**
- * 单实例锁
- * - 对标原版防止重复启动
- * - 关键：必须同步阻止后续初始化，否则 app.quit() 异步性会导致端口冲突
- */
-export function preventMultipleInstance(): boolean {
-  const gotTheLock = app.requestSingleInstanceLock()
+const MAIN_TITLE = '小红书发货助手'
+const BACKGROUND_TITLE_RE = /客服聊天|订单轮询|千帆商家后台/
 
+let lockAcquired = false
+
+function isBackgroundWin(win: BrowserWindow): boolean {
+  const t = String(win.getTitle() || '')
+  if (BACKGROUND_TITLE_RE.test(t)) return true
+  try {
+    const url = win.webContents?.getURL?.() || ''
+    if (/\/cstools\/chat/i.test(url) && !t.startsWith(MAIN_TITLE)) return true
+  } catch {
+    /* ignore */
+  }
+  return false
+}
+
+/**
+ * 第二实例 / 托盘唤起：只亮主窗口，绝不把隐藏客服页顶到前台。
+ * 多开客服页会互踢 CSA 登录，导致 XhsRim 发消息失败。
+ */
+export function focusAssistantMainWindow(): void {
+  const all = BrowserWindow.getAllWindows().filter((w) => w && !w.isDestroyed())
+  const main =
+    all.find((w) => String(w.getTitle() || '').startsWith(MAIN_TITLE) && !isBackgroundWin(w)) ||
+    all.find((w) => !isBackgroundWin(w)) ||
+    null
+
+  for (const w of all) {
+    if (main && w === main) continue
+    if (!isBackgroundWin(w)) continue
+    try {
+      w.setSkipTaskbar(true)
+      if (w.isVisible()) w.hide()
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (!main) return
+  try {
+    if (main.isMinimized()) main.restore()
+    main.setSkipTaskbar(false)
+    main.show()
+    main.focus()
+    main.setTitle(MAIN_TITLE)
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * 必须在 app.whenReady 之前调用。晚了第二实例会把隐藏客服窗当成主界面。
+ */
+export function acquireSingleInstanceLock(): boolean {
+  if (lockAcquired) return true
+  const gotTheLock = app.requestSingleInstanceLock()
   if (!gotTheLock) {
     app.quit()
     app.exit(0)
     return false
   }
-
+  lockAcquired = true
   app.on('second-instance', () => {
-    // 有人试图运行第二个实例，我们应该聚焦到主窗口
-    const windows = BrowserWindow.getAllWindows()
-    if (windows.length > 0) {
-      const win = windows[0]
-      if (win.isMinimized()) win.restore()
-      win.show()
-      win.focus()
-    }
+    focusAssistantMainWindow()
   })
-
   return true
 }
 
-/**
- * 在 initialize() 中使用此函数确保单实例
- * 如果不是单实例，立即抛出错误中断后续初始化
- */
+/** @deprecated 用 acquireSingleInstanceLock（启动最早阶段） */
+export function preventMultipleInstance(): boolean {
+  return acquireSingleInstanceLock()
+}
+
 export function ensureSingleInstance(): void {
-  if (!preventMultipleInstance()) {
-    // 抛出错误以中断 initialize() 后续流程
-    // 防止 app.quit() 异步执行时端口被占用
+  if (!acquireSingleInstanceLock()) {
     throw new Error('SINGLE_INSTANCE_QUIT')
   }
 }
