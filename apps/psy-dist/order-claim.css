@@ -68,8 +68,12 @@ body {
   margin-bottom: 1.75rem;
 }
 
-.claim-brand img {
+.claim-brand img,
+.claim-brand .brand-mark {
   display: block;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
   border-radius: 10px;
 }
 

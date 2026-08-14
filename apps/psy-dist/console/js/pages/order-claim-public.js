@@ -20,7 +20,7 @@ export function renderPublicOrderClaim(root) {
   if (!document.querySelector('link[data-order-claim-css]')) {
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/order-claim.css?v=20260814oc2";
+    link.href = "/order-claim.css?v=20260814oc3";
     link.setAttribute("data-order-claim-css", "1");
     document.head.appendChild(link);
   }
@@ -120,7 +120,10 @@ export function renderPublicOrderClaim(root) {
     el("div", { className: "atmosphere", "aria-hidden": "true" }),
     el("main", { className: "claim-shell" }, [
       el("header", { className: "claim-brand" }, [
-        el("img", { src: "/images/logo-app.svg", alt: "", width: "40", height: "40" }),
+        el("span", {
+          className: "brand-mark-wrap",
+          html: '<svg class="brand-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="40" height="40" aria-hidden="true" focusable="false"><circle cx="73" cy="100" r="54" fill="#0F766E"/><circle cx="127" cy="100" r="54" fill="#0F766E"/><path fill="#FFFFFF" d="M100 46.14 A54 54 0 0 0 100 153.86 A54 54 0 0 0 100 46.14 Z"/><path fill="#B8952E" d="M100 90.5 C104.8 96.8 104.8 105.2 100 111.5 C95.2 105.2 95.2 96.8 100 90.5 Z"/></svg>',
+        }),
         el("div", {}, [
           el("p", { className: "brand-name", text: "心象测" }),
           el("p", { className: "brand-sub", text: "订单领取测评链接" }),
