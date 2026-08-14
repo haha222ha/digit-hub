@@ -1,7 +1,10 @@
-# 小红书发货助手启动器（心象测发货，不是阿奇锁 Pro）
+# xhs-shipping-assistant launcher (UTF-8)
 $ErrorActionPreference = 'SilentlyContinue'
+chcp 65001 | Out-Null
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $Root = 'D:\eva\xhs-shipping-assistant'
 Set-Location $Root
+$script:MainTitle = '小红书发货助手'
 
 function Focus-AssistantWindow {
   Add-Type -TypeDefinition @'
@@ -15,7 +18,6 @@ public class WinFocus {
   [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
   [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
   [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
-  [DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
 }
 '@
   $found = $false
@@ -25,8 +27,7 @@ public class WinFocus {
     $sb = New-Object System.Text.StringBuilder 512
     [void][WinFocus]::GetWindowText($h, $sb, $sb.Capacity)
     $t = $sb.ToString()
-    # 绝不前置「客服聊天」——那是后台隐藏窗，点到它会以为客户端坏了
-    if ($t -eq '小红书发货助手' -or $t -like '小红书发货助手*') {
+    if ($t -eq $script:MainTitle -or $t.StartsWith($script:MainTitle)) {
       [WinFocus]::ShowWindow($h, 9) | Out-Null
       [WinFocus]::SetForegroundWindow($h) | Out-Null
       $script:found = $true
@@ -46,12 +47,10 @@ function Get-AssistantElectron {
   }
 }
 
-# 已有主窗口：直接前置，禁止再开第二个客户端
 if (Focus-AssistantWindow) { exit 0 }
 
 $running = @(Get-AssistantElectron)
 if ($running.Count -gt 0) {
-  # 进程在但主窗口被客服页挡住：再戳一次单实例（第二实例会立刻退出并唤起主窗）
   $env:VITE_DEV_SERVER_URL = 'http://localhost:5173/'
   $ele = Join-Path $Root 'node_modules\electron\dist\electron.exe'
   if (Test-Path $ele) {
@@ -79,4 +78,6 @@ if ($viteUp) {
   exit 0
 }
 
-Start-Process -FilePath 'cmd.exe' -ArgumentList '/c npm run dev' -WorkingDirectory $Root -WindowStyle Minimized
+Start-Process -FilePath 'cmd.exe' -ArgumentList '/c npm run electron:dev' -WorkingDirectory $Root -WindowStyle Minimized
+Start-Sleep -Seconds 10
+[void](Focus-AssistantWindow)

@@ -33,6 +33,15 @@ export class WebSocketService {
 
   private status: 'Closed' | 'Connecting' | 'Open' = 'Closed'
   private kefuStatus: 'Closed' | 'Connecting' | 'Open' = 'Closed'
+  private kefuLastSeq = 0
+  private kefuPendingAcks = new Map<
+    string,
+    {
+      resolve: (body: unknown) => void
+      reject: (err: Error) => void
+      timer: ReturnType<typeof setTimeout>
+    }
+  >()
 
   constructor(logger: LoggerService, storage: StorageService) {
     this.logger = logger
@@ -255,8 +264,27 @@ export class WebSocketService {
 
   private onKefuMessage(data: WebSocket.RawData) {
     try {
-      const message = JSON.parse(data.toString())
-      this.handleKefuMessage(message)
+      const message = JSON.parse(data.toString()) as {
+        header?: { type?: number; action?: string; traceId?: string; seq?: number }
+        body?: { code?: number; msg?: string }
+        type?: string
+        action?: string
+      }
+      const hdr = message.header
+      if (hdr && typeof hdr.seq === 'number') {
+        this.kefuLastSeq = Math.max(this.kefuLastSeq, hdr.seq)
+      }
+      if (hdr?.type === 131 && hdr.action === '/message/send' && hdr.traceId) {
+        const pending = this.kefuPendingAcks.get(hdr.traceId)
+        if (pending) {
+          clearTimeout(pending.timer)
+          this.kefuPendingAcks.delete(hdr.traceId)
+          const body = message.body || {}
+          if (body.code === 0) pending.resolve(body)
+          else pending.reject(new Error(`${body.msg || 'send failed'} code=${body.code}`))
+        }
+      }
+      this.handleKefuMessage(message as Record<string, unknown>)
     } catch (error) {
       this.logger.error('[WebSocket][Kefu] 消息解析失败:', error)
     }
@@ -370,6 +398,107 @@ export class WebSocketService {
       return true
     }
     return false
+  }
+
+  private b64NoPad(str: string): string {
+    return Buffer.from(str, 'utf8').toString('base64').replace(/=+$/, '')
+  }
+
+  buildAppCid(buyerId: string, csProviderId: string): string {
+    const buyerUid = `1#2#2#${buyerId}`
+    const sellerUid = `1#3#6#${csProviderId}`
+    return `$3$${this.b64NoPad(buyerUid)}.${this.b64NoPad(sellerUid)}`
+  }
+
+  private randomHex32(): string {
+    let s = ''
+    for (let i = 0; i < 32; i++) s += Math.floor(Math.random() * 16).toString(16)
+    return s
+  }
+
+  private randomTraceId(): string {
+    return `cfffd${this.randomHex32().slice(5)}`
+  }
+
+  private randomSMid(): string {
+    return `${this.randomHex32().slice(0, 13)}-${Date.now().toString(16).slice(-10)}`
+  }
+
+  private randomTextUuid(): string {
+    return `text-${this.randomHex32().slice(0, 13)}-${Date.now().toString(16).slice(-10)}`
+  }
+
+  private randomUuid(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0
+      const v = c === 'x' ? r : (r & 0x3) | 0x8
+      return v.toString(16)
+    })
+  }
+
+  async ensureKefuOpen(timeoutMs = 15000): Promise<boolean> {
+    if (this.kefuWs?.readyState === WebSocket.OPEN) return true
+    this.reconnectKefu()
+    const deadline = Date.now() + timeoutMs
+    while (Date.now() < deadline) {
+      if (this.kefuWs?.readyState === WebSocket.OPEN) return true
+      await new Promise((r) => setTimeout(r, 250))
+    }
+    return this.kefuWs?.readyState === WebSocket.OPEN
+  }
+
+  private waitKefuAck(traceId: string, timeoutMs = 12000): Promise<unknown> {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        this.kefuPendingAcks.delete(traceId)
+        reject(new Error(`主进程 zelda WS /message/send 回执超时 traceId=${traceId}`))
+      }, timeoutMs)
+      this.kefuPendingAcks.set(traceId, { resolve, reject, timer })
+    })
+  }
+
+  async sendImpaasText(
+    content: string,
+    buyerId: string,
+    csProviderId: string
+  ): Promise<{ appCid: string }> {
+    const open = await this.ensureKefuOpen(18000)
+    if (!open) throw new Error('主进程 zelda WebSocket 未连接')
+    const appCid = this.buildAppCid(buyerId, csProviderId)
+    const traceId = this.randomTraceId()
+    const seq = this.kefuLastSeq + 1
+    const frame = {
+      header: {
+        sTime: Date.now(),
+        seq,
+        type: 3,
+        bizId: 10,
+        contentType: 'json',
+        traceId,
+        action: '/message/send',
+        serviceId: 'impaas.oi',
+        oneWay: false,
+        sMid: this.randomSMid()
+      },
+      body: {
+        appCid,
+        convType: 1,
+        uuid: this.randomTextUuid(),
+        receiverAppUids: [`1#2#2#${buyerId}`],
+        contentInfo: { contentType: 1, content: String(content) },
+        convCreateIsSelfVisible: true,
+        convRedPointIsNotSelfClear: true,
+        extension: {
+          additionInfo: JSON.stringify({ uuid: this.randomUuid(), sendMsgDoubleCheck: false })
+        },
+        callbackCtx: {}
+      }
+    }
+    const ackPromise = this.waitKefuAck(traceId, 12000)
+    if (!this.sendKefu(frame)) throw new Error('主进程 zelda WebSocket send 失败')
+    this.kefuLastSeq = seq
+    await ackPromise
+    return { appCid }
   }
 
   stop() {

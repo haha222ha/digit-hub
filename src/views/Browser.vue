@@ -199,15 +199,17 @@ onMounted(async () => {
   window.electronAPI.onBrowserLoading(onLoadingChanged)
   window.electronAPI.onLoginRequired?.(onLoginRequired)
 
+  await window.electronAPI.browserShow()
+  hasLoaded.value = true
+
   const current = await window.electronAPI.browserGetUrl()
   if (current && current.includes('xiaohongshu.com')) {
-    hasLoaded.value = true
     currentUrl.value = current
     needRelogin.value = isLoginUrl(current)
-    await window.electronAPI.browserShow()
-  } else {
-    await window.electronAPI.browserShow()
-    hasLoaded.value = true
+    // 从发货页离屏恢复后，chat 列表常需刷新一次
+    if (isChatUrl(current)) {
+      await window.electronAPI.browserReload()
+    }
   }
 })
 

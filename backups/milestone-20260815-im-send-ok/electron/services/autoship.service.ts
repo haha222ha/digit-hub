@@ -990,9 +990,6 @@ export class AutoShipService {
 
       if (shipResult.success) {
         if (cardLocked) this.storage.confirmCard(order.order_id)
-        if (isLinkCard && cloudAllocatedUrl) {
-          this.storage.markCardUrlUsed(binding.id, cloudAllocatedUrl, order.order_id)
-        }
         const realBuyerUid = shipResult.buyerId || buyerUid || ''
         const sendStatus = this.mock.isEnabled() ? 'mock_success' : 'success'
         this.storage.updateDeliveryStatus(msgGuid, sendStatus, {
@@ -1825,7 +1822,6 @@ export class AutoShipService {
 
       let sendContent = String(item.card_content || binding?.deliver_content || '')
       let cardConsumed = false
-      let linkUrl = ''
       if (isLinkCard) {
         let url = String(item.card_content || '').trim()
         if (!url && this.psyCloud?.getToken()) {
@@ -1842,7 +1838,6 @@ export class AutoShipService {
           this.storage.updateDeliveryStatus(item.msg_guid, 'fail', { errorMsg: '心象测未分配链接（重试）' })
           continue
         }
-        linkUrl = url
         sendContent = renderTemplate(binding?.deliver_content || '{卡密}', {
           orderId: item.order_id,
           card: url,
@@ -1861,9 +1856,6 @@ export class AutoShipService {
       const shipResult = await this.executeRealShip(item.shop_id || currentShopId(), item.order_id, sendContent, type)
       if (shipResult.success) {
         if (cardConsumed) this.storage.confirmCard(item.order_id)
-        if (isLinkCard && linkUrl && item.binding_id) {
-          this.storage.markCardUrlUsed(item.binding_id, linkUrl, item.order_id)
-        }
         this.storage.updateDeliveryStatus(item.msg_guid, 'success', {
           buyerUid: shipResult.buyerId || item.buyer_uid || undefined
         })

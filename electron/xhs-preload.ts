@@ -1,11 +1,13 @@
 /**
- * BrowserView 专用 preload — 在小红书页面脚本运行前伪装为 Chrome + 注入 csBridge
+ * v4（阿奇索历史 Electron）：nodeIntegration:true + @electron/remote + dashboard + Jl() rim bootstrap
  */
+import { ipcRenderer } from 'electron'
 import { CHROME_UA } from './constants/browser-env'
 import { installCsBridge } from './cs-bridge-shim'
+import { startRimBootstrap } from './rim-bootstrap'
 
-// 必须在 walle-eva 脚本执行前注入（对标官方千帆 / 阿奇锁 JsFilter）
 installCsBridge()
+startRimBootstrap()
 
 function spoofChromeEnv() {
   try {
@@ -46,13 +48,11 @@ function spoofChromeEnv() {
 
 spoofChromeEnv()
 
-// 401 / API 桥接（BrowserView 内 xiaohongshu 页面）
 window.addEventListener('message', (event) => {
   if (event.source !== window) return
   const data = event.data
   if (!data?.type) return
 
-  const { ipcRenderer } = require('electron')
   switch (data.type) {
     case 'xhs-401-redirect':
       ipcRenderer.send('xhs-401-redirect', data)

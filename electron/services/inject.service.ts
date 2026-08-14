@@ -31,7 +31,8 @@ export class InjectService {
       { name: 'api-interceptor', file: 'api-interceptor.js' },
       { name: 'login-helper', file: 'login-helper.js' },
       { name: 'im-send', file: 'im-send.js' },
-      { name: 'goods-sync', file: 'goods-sync.js' }
+      { name: 'goods-sync', file: 'goods-sync.js' },
+      { name: 'csbridge-diag', file: 'csbridge-diag.js' }
     ]
 
     for (const script of scripts) {
@@ -184,6 +185,7 @@ export class InjectService {
     if (url.includes('/cstools/chat') || url.includes('kefu')) {
       this.executeScript(webContents, 'kefu-monitor')
       this.executeScript(webContents, 'im-send')
+      this.executeScript(webContents, 'csbridge-diag')
     }
   }
 
@@ -198,7 +200,8 @@ export class InjectService {
       const fileMap: Record<string, string> = {
         'im-send': 'im-send.js',
         'goods-sync': 'goods-sync.js',
-        'api-interceptor': 'api-interceptor.js'
+        'api-interceptor': 'api-interceptor.js',
+        'csbridge-diag': 'csbridge-diag.js'
       }
       const file = fileMap[scriptName]
       if (file) {
@@ -210,14 +213,23 @@ export class InjectService {
     }
     const script = this.injectedScripts.get(scriptName)
     if (!script || webContents.isDestroyed()) return false
-    try {
-      await webContents.executeJavaScript(script)
-      this.logger.info(`[Inject] 脚本注入成功: ${scriptName}`)
-      return true
-    } catch (error) {
-      this.logger.error(`[Inject] 脚本注入失败: ${scriptName}`, error)
-      return false
+    let ok = false
+    const frames = webContents.mainFrame?.framesInSubtree || [webContents.mainFrame]
+    for (const frame of frames) {
+      if (!frame) continue
+      try {
+        await frame.executeJavaScript(script)
+        ok = true
+      } catch {
+        /* 跨域 iframe 忽略 */
+      }
     }
+    if (ok) {
+      this.logger.info(`[Inject] 脚本注入成功: ${scriptName} frames=${frames.length}`)
+    } else {
+      this.logger.error(`[Inject] 脚本注入失败: ${scriptName}`)
+    }
+    return ok
   }
 
   private executeScript(webContents: WebContents, scriptName: string) {

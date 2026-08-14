@@ -52,6 +52,62 @@
     return false;
   }
 
+  // ===== get_csa_info 成功 → 提取 csProviderId 写入 imStore（加速 XhsRim 就绪） =====
+  function extractCsProviderId(data) {
+    if (!data || typeof data !== 'object') return '';
+    function pick(v) {
+      var s = String(v == null ? '' : v).trim();
+      return s && s.length > 0 && s.length < 64 ? s : '';
+    }
+    var d = (data.data && typeof data.data === 'object') ? data.data : data;
+    var direct = [
+      d.csProviderId, d.cs_provider_id, d.providerId, d.provider_id,
+      d.user && d.user.csProviderId, d.user && d.user.cs_provider_id,
+      d.csaInfo && d.csaInfo.csProviderId, d.csa_info && d.csa_info.csProviderId,
+      d.seller && d.seller.csProviderId
+    ];
+    for (var i = 0; i < direct.length; i++) {
+      var s = pick(direct[i]);
+      if (s) return s;
+    }
+    // 兜底：浅扫一层对象，找 csProviderId / cs_provider_id
+    try {
+      var ks = Object.keys(d);
+      for (var j = 0; j < ks.length; j++) {
+        var val = d[ks[j]];
+        if (val && typeof val === 'object') {
+          var s2 = pick(val.csProviderId || val.cs_provider_id);
+          if (s2) return s2;
+        }
+      }
+    } catch (e) { }
+    return '';
+  }
+
+  function patchImStoreCsProviderId(csProviderId) {
+    if (!csProviderId) return false;
+    try {
+      var app = document.querySelector('#app');
+      var store = app && app.__vue_app__ && app.__vue_app__._context &&
+        app.__vue_app__._context.provides && app.__vue_app__._context.provides.store;
+      if (!store || !store.state || !store.state.imStore) return false;
+      var imStore = store.state.imStore;
+      var next = Object.assign({}, imStore.xUserInfo || {}, { csProviderId: String(csProviderId) });
+      // 优先 patch 已有 xUserInfo
+      if (imStore.xUserInfo && typeof imStore.xUserInfo === 'object') {
+        try { imStore.xUserInfo.csProviderId = String(csProviderId); return true; } catch (e) { }
+      }
+      // 尝试 commit（不同版本 action 名可能不同）
+      if (typeof store.commit === 'function') {
+        try { store.commit('setXUserInfo', next); return true; } catch (e) { }
+        try { store.commit('SET_X_USER_INFO', next); return true; } catch (e) { }
+      }
+      // 兜底：直接挂到 imStore.xUserInfo
+      try { imStore.xUserInfo = next; return true; } catch (e) { }
+    } catch (e) { }
+    return false;
+  }
+
   const LOGIN_API = /get_login_user|login_user|mcs\/user|switch_eva_login_user|ServiceTicket|service_ticket|password_login|email_login|sms_login|\/cas\/|eva\/login|account\/login|auth\/token|get_token/i;
 
   // ===== 拦截 fetch 请求 =====
@@ -80,12 +136,19 @@
         // ServiceTicket / get_csa_info（对标 HandleServiceTicketResponseAsync）
         if (url && String(url).includes('get_csa_info')) {
           const success = data && (data.success === true || (data.code === 0 && data.data));
+          const csProviderId = success ? extractCsProviderId(data) : '';
           window.postMessage({
             type: 'xhs-csa-info',
             url: url,
             success: !!success,
+            csProviderId: csProviderId,
             data: data
           }, '*');
+          // 登录成功后把 csProviderId 直接 patch 进 imStore，加速 XhsRim 就绪
+          if (success && csProviderId) {
+            patchImStoreCsProviderId(csProviderId);
+            window.ImLoginInfo = Object.assign({}, window.ImLoginInfo || {}, { csProviderId: csProviderId });
+          }
           // 登录过程中 get_csa 失败是常态，禁止当 Cookie 过期
         }
 
@@ -181,12 +244,18 @@
 
         if (reqUrl.includes('get_csa_info')) {
           const success = data && (data.success === true || (data.code === 0 && data.data));
+          const csProviderId = success ? extractCsProviderId(data) : '';
           window.postMessage({
             type: 'xhs-csa-info',
             url: reqUrl,
             success: !!success,
+            csProviderId: csProviderId,
             data: data
           }, '*');
+          if (success && csProviderId) {
+            patchImStoreCsProviderId(csProviderId);
+            window.ImLoginInfo = Object.assign({}, window.ImLoginInfo || {}, { csProviderId: csProviderId });
+          }
         }
 
         scrapeAuth(data);

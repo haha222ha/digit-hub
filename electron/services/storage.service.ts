@@ -1155,36 +1155,61 @@ export class StorageService {
   }
 
   /**
-   * 将本地卡密池中与云端 URL 相同的条目标为已用（避免双扣）。
-   * 若本地没有该 URL，返回 false（仍可仅靠 order_delivery 记履约）。
+   * 链接卡密发货成功后记账：把已发 URL 标为已用并关联订单号，刷新池库存。
+   * 本地池没有该 URL 时补插一条已用记录（云端直分配、未预先领取进池）。
    */
   markCardUrlUsed(bindingId: number, url: string, orderId: string): boolean {
     const content = String(url || '').trim()
     const oid = String(orderId || '').trim()
-    if (!content || !oid) return false
+    if (!content || !oid || !bindingId) return false
     const tx = this.db.transaction(() => {
-      const row = this.db.prepare(
-        `SELECT id, status FROM card_pool
-         WHERE binding_id = ? AND card_content = ?`
-      ).get(bindingId, content) as { id: number; status: string } | undefined
-      if (!row) return false
-      if (row.status === 'used') {
-        this.db.prepare(
-          `UPDATE card_pool SET order_id = COALESCE(order_id, ?), used_at = COALESCE(used_at, datetime('now'))
-           WHERE id = ?`
-        ).run(oid, row.id)
-        return true
+      const binding = this.db
+        .prepare('SELECT id, pool_key, deliver_type, psy_test_code FROM product_bindings WHERE id = ?')
+        .get(bindingId) as { id: number; pool_key: string; deliver_type: string; psy_test_code: string } | undefined
+      if (!binding) return false
+      const poolKey = this.computePoolKey(binding)
+
+      let row = this.db
+        .prepare(
+          `SELECT id, status FROM card_pool
+           WHERE card_content = ? AND (pool_key = ? OR binding_id = ?)
+           LIMIT 1`
+        )
+        .get(content, poolKey, bindingId) as { id: number; status: string } | undefined
+
+      if (!row) {
+        const ins = this.db
+          .prepare(
+            `INSERT INTO card_pool (binding_id, pool_key, card_content, status, order_id, used_at)
+             VALUES (?, ?, ?, 'used', ?, datetime('now'))`
+          )
+          .run(bindingId, poolKey, content, oid)
+        row = { id: Number(ins.lastInsertRowid), status: 'unused' }
+      } else if (row.status === 'used') {
+        this.db
+          .prepare(
+            `UPDATE card_pool SET order_id = COALESCE(NULLIF(order_id, ''), ?),
+               used_at = COALESCE(used_at, datetime('now'))
+             WHERE id = ?`
+          )
+          .run(oid, row.id)
+      } else {
+        this.db
+          .prepare(
+            `UPDATE card_pool SET status = 'used', order_id = ?, used_at = datetime('now'), locked_at = NULL, pool_key = ?
+             WHERE id = ?`
+          )
+          .run(oid, poolKey, row.id)
       }
-      this.db.prepare(
-        `UPDATE card_pool SET status = 'used', order_id = ?, used_at = datetime('now'), locked_at = NULL
-         WHERE id = ?`
-      ).run(oid, row.id)
+
       if (row.status === 'unused' || row.status === 'locked') {
-        this.db.prepare(
-          `UPDATE product_bindings SET stock = CASE WHEN stock > 0 THEN stock - 1 ELSE 0 END,
-             delivered_count = delivered_count + 1, updated_at = datetime('now') WHERE id = ?`
-        ).run(bindingId)
+        this.db
+          .prepare(
+            `UPDATE product_bindings SET delivered_count = delivered_count + 1, updated_at = datetime('now') WHERE id = ?`
+          )
+          .run(bindingId)
       }
+      this.refreshPoolStock(poolKey)
       return true
     })
     return !!tx()

@@ -54,6 +54,17 @@ export default defineConfig({
         }
       },
       {
+        entry: 'electron/xhs-im-preload.ts',
+        vite: {
+          build: {
+            outDir: 'dist-electron',
+            rollupOptions: {
+              external: ['electron', '@electron/remote']
+            }
+          }
+        }
+      },
+      {
         entry: 'electron/psy-login-preload.ts',
         vite: {
           build: {

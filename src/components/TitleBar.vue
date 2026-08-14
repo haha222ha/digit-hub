@@ -99,6 +99,8 @@ const handleClose = () => {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
+  -webkit-app-region: drag;
 }
 
 .logo {
@@ -116,13 +118,15 @@ const handleClose = () => {
   flex: 1;
   display: flex;
   justify-content: center;
-  -webkit-app-region: no-drag;
+  height: 100%;
+  -webkit-app-region: drag;
 }
 
 .shop-switch {
   display: flex;
   align-items: center;
   gap: 8px;
+  -webkit-app-region: no-drag;
 }
 
 .shop-select {

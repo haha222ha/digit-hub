@@ -136,6 +136,86 @@ export class ApiService {
       }
     })
 
+    this.app.post('/api/shipping/prepare-im', async (_req, res) => {
+      const fn = (global as any).prepareImVisible
+      if (!fn) return res.status(503).json({ error: 'prepareImVisible not ready' })
+      try {
+        const out = await fn()
+        res.json({ success: true, ...out })
+      } catch (e: any) {
+        res.status(500).json({ success: false, error: e?.message || String(e) })
+      }
+    })
+
+    this.app.get('/api/shipping/im-health', async (_req, res) => {
+      const autoShipService = (global as any).autoShipService
+      if (!autoShipService) return res.status(503).json({ error: 'AutoShipService not ready' })
+      const health = await autoShipService.refreshImHealth()
+      res.json({ success: true, health })
+    })
+
+    this.app.get('/api/shipping/csbridge-diag', async (_req, res) => {
+      const autoShipService = (global as any).autoShipService
+      if (!autoShipService) return res.status(503).json({ error: 'AutoShipService not ready' })
+      const report = await autoShipService.runCsBridgeDiag()
+      res.json({ success: !!report, report })
+    })
+
+    this.app.get('/api/debug/deep-probe-rim', async (_req, res) => {
+      const autoShipService = (global as any).autoShipService
+      if (!autoShipService) return res.status(503).json({ error: 'AutoShipService not ready' })
+      const report = await autoShipService.runDeepProbeRim()
+      res.json({ success: !!report, report })
+    })
+
+    this.app.post('/api/debug/test-deliver', async (req, res) => {
+      const autoShipService = (global as any).autoShipService
+      if (!autoShipService) return res.status(503).json({ error: 'AutoShipService not ready' })
+      const orderId = String(req.body?.orderId || '80223388178802120')
+      const content = String(req.body?.content || '【测试消息】自动发货链路验证')
+      try {
+        const out = await autoShipService.debugDeliver(orderId, content)
+        res.json({ success: true, ...out })
+      } catch (e: any) {
+        res.status(500).json({ success: false, error: e?.message || String(e) })
+      }
+    })
+
+    this.app.post('/api/debug/open-devtools', async (_req, res) => {
+      const fn = (global as any).openWorkbenchDevTools
+      if (!fn) return res.status(503).json({ error: 'openWorkbenchDevTools not ready' })
+      const out = await fn()
+      res.json({ success: !!out.ok, ...out })
+    })
+
+    this.app.post('/api/debug/capture-start', async (req, res) => {
+      const netCaptureService = (global as any).netCaptureService
+      const xhsBrowserView = (global as any).xhsBrowserViewRef
+      if (!netCaptureService) return res.status(503).json({ error: 'NetCaptureService not ready' })
+      const wc = xhsBrowserView?.webContents
+      if (!wc || wc.isDestroyed()) return res.status(503).json({ error: 'BrowserView not ready' })
+      const tag = String(req.body?.tag || 'manual-chat')
+      const out = await netCaptureService.start(wc, tag)
+      res.json({ success: out.ok, ...out })
+    })
+
+    this.app.post('/api/debug/capture-stop', async (_req, res) => {
+      const netCaptureService = (global as any).netCaptureService
+      if (!netCaptureService) return res.status(503).json({ error: 'NetCaptureService not ready' })
+      const out = await netCaptureService.stop()
+      res.json({ success: true, ...out })
+    })
+
+    this.app.get('/api/debug/capture-status', (_req, res) => {
+      const netCaptureService = (global as any).netCaptureService
+      if (!netCaptureService) return res.status(503).json({ error: 'NetCaptureService not ready' })
+      res.json({
+        active: netCaptureService.isActive(),
+        logFile: netCaptureService.getLogFile(),
+        count: netCaptureService.getEntryCount()
+      })
+    })
+
     // 自动回复匹配接口
     this.app.post('/api/reply/match', (req, res) => {
       const { content } = req.body
