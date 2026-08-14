@@ -138,6 +138,15 @@ export interface ElectronAPI {
   stopAutoShip(): Promise<boolean>
   manualTriggerShip(order: Record<string, unknown>): Promise<boolean>
   getShipLogs(shopId: string, limit?: number): Promise<ShipLog[]>
+  exportShipLogs(): Promise<{ success: boolean; filePath?: string; count?: number; canceled?: boolean; error?: string }>
+  getSystemStats(): Promise<{
+    totalmemMb: number
+    freememMb: number
+    rssMb: number
+    heapMb: number
+    uptimeSec: number
+    cpuCount: number
+  }>
 
   listReplyRules(shopId: string): Promise<ReplyRule[]>
   addReplyRule(rule: { shopId: string; keyword: string; replyText: string; replyType?: string }): Promise<boolean>

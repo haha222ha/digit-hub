@@ -1,6 +1,12 @@
 import express from 'express'
 import { LoggerService } from './logger.service'
 
+type StorageServiceLike = {
+  get?: (key: string) => unknown
+  getAllShopConfigs?: () => Array<{ shop_id?: string }>
+  getReplyRules: (shopId: string) => unknown[]
+}
+
 /**
  * 本地 API 服务
  * - 对标原版 ASP.NET Core + Swagger
@@ -216,12 +222,10 @@ export class ApiService {
       })
     })
 
-    // 自动回复匹配接口
+    // 自动回复匹配（注入脚本 kefu-monitor 调用）
     this.app.post('/api/reply/match', (req, res) => {
-      const { content } = req.body
-      this.logger.info(`[API] 回复匹配: content=${content}`)
-      // TODO: 查询 reply_rules 表匹配关键词
-      const reply = this.matchReplyRule(content)
+      const { content, shopId } = req.body || {}
+      const reply = this.matchReplyRule(String(content || ''), shopId ? String(shopId) : undefined)
       res.json({ reply })
     })
 
@@ -452,22 +456,42 @@ export class ApiService {
   }
 
   /**
-   * 匹配回复规则
+   * 匹配回复规则：需开启自动回复；按当前店（可传 shopId）；长关键词优先。
    */
-  private matchReplyRule(content: string): string | null {
-    const storageService = (global as any).storageService
+  private matchReplyRule(content: string, shopId?: string): string | null {
+    const text = String(content || '').trim()
+    if (!text) return null
+    const storageService = (global as { storageService?: StorageServiceLike }).storageService
     if (!storageService) return null
 
-    // 查询所有店铺的回复规则（简化版，实际应按当前店铺查询）
     try {
-      const shops = storageService.getAllShopConfigs()
-      for (const shop of shops) {
-        const rules = storageService.getReplyRules(shop.shop_id)
+      if (storageService.get?.('autoReplyEnabled') !== true) return null
+
+      const sid =
+        String(shopId || '').trim() ||
+        String(storageService.get?.('currentShopId') || '').trim()
+      const shopIds = sid
+        ? [sid]
+        : (storageService.getAllShopConfigs?.() || []).map((s) => String(s.shop_id || '')).filter(Boolean)
+
+      const hits: Array<{ keyword: string; reply: string }> = []
+      for (const id of shopIds) {
+        const rules = (storageService.getReplyRules(id) || []) as Array<{
+          keyword?: string
+          reply_text?: string
+          enabled?: number | boolean
+        }>
         for (const rule of rules) {
-          if (content.includes(rule.keyword)) {
-            return rule.reply_text
-          }
+          const kw = String(rule.keyword || '').trim()
+          if (!kw) continue
+          if (text.includes(kw)) hits.push({ keyword: kw, reply: String(rule.reply_text || '') })
         }
+      }
+      hits.sort((a, b) => b.keyword.length - a.keyword.length)
+      const best = hits.find((h) => h.reply)
+      if (best) {
+        this.logger.info(`[API] 自动回复命中 keyword=${best.keyword}`)
+        return best.reply
       }
     } catch (error) {
       this.logger.error('[API] 回复规则匹配失败:', error)

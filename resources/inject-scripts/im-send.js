@@ -23,6 +23,12 @@
   }
   window.__xhsImSendReady = SCRIPT_VER
 
+  function imWarn(e) {
+    try {
+      console.warn('[IMSend]', e && (e.message || e))
+    } catch (_ignore) {}
+  }
+
   /** impaas zelda WebSocket 直发（dashboard 通道，不依赖 XhsRim） */
   var _rootWin = window.top || window
   var _wsState = _rootWin.__xhsImWsState || {
@@ -160,13 +166,13 @@
       ;['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'].forEach(function (k) {
         try {
           HookedWebSocket[k] = OrigPS[k]
-        } catch (e) {}
+        } catch (e) { imWarn(e) }
       })
       hookTarget.WebSocket = HookedWebSocket
       if (hookTarget !== window) {
         try {
           window.WebSocket = HookedWebSocket
-        } catch (e) {}
+        } catch (e) { imWarn(e) }
       }
     }
 
@@ -450,7 +456,7 @@
             }
           }
         }
-      } catch (e) {}
+      } catch (e) { imWarn(e) }
     }
     return hits
   }
@@ -489,7 +495,7 @@
             }
           }
         }
-      } catch (e) {}
+      } catch (e) { imWarn(e) }
       el = el.parentElement
     }
     try {
@@ -621,7 +627,7 @@
         if (window.location.href !== XHS_IM_LOGIN_URL) {
           window.location.href = XHS_IM_LOGIN_URL
         }
-      } catch (e) {}
+      } catch (e) { imWarn(e) }
     }, 200)
   }
 
@@ -637,7 +643,7 @@
       var imToken = null
       try {
         imToken = JSON.parse(userInfoRaw).imToken
-      } catch (e) {}
+      } catch (e) { imWarn(e) }
       if (!imToken) {
         needToLogin = true
         return
@@ -699,7 +705,7 @@
       if (info && info.csProviderId) {
         return info
       }
-    } catch (e) {}
+    } catch (e) { imWarn(e) }
     return window.ImLoginInfo || null
   }
 
@@ -797,7 +803,7 @@
       if (isFullXhsRim(t.rim)) return { rim: t.rim, path: path + '.rim' }
       if (isFullXhsRim(t.xhsRim)) return { rim: t.xhsRim, path: path + '.xhsRim' }
       if (isFullXhsRim(t.jarvisRim)) return { rim: t.jarvisRim, path: path + '.jarvisRim' }
-    } catch (e) {}
+    } catch (e) { imWarn(e) }
     return null
   }
 
@@ -822,7 +828,7 @@
           if (hit) return hit.rim
         }
       }
-    } catch (e) {}
+    } catch (e) { imWarn(e) }
     var sub = vnode.component && vnode.component.subTree
     if (sub) {
       var h1 = walkVue3GetRim(sub, depth + 1, seen)
@@ -861,7 +867,7 @@
       if (hasSendRim(obj) && obj.rimSdk) {
         hits.push({ rim: obj, path: path + '(partial)' })
       }
-    } catch (e) {}
+    } catch (e) { imWarn(e) }
     var keys
     try {
       keys = Object.keys(obj)
@@ -893,7 +899,7 @@
       if (store && store._state && store._state.data) {
         deepScanObjectForRim(store._state.data, 'store._state.data', 0, new Set(), hits)
       }
-    } catch (e) {}
+    } catch (e) { imWarn(e) }
     return hits
   }
 
@@ -910,7 +916,7 @@
         else if (v && typeof v === 'object' && isFullXhsRim(v.rim)) {
           hits.push({ rim: v.rim, path: 'window.' + names[i] + '.rim' })
         }
-      } catch (e) {}
+      } catch (e) { imWarn(e) }
     }
     return hits
   }
@@ -928,7 +934,7 @@
             var r = fc.__vue__.getRim()
             if (r) hits.push({ rim: r, path: 'iframe[' + i + '].__vue__.getRim' })
           }
-        } catch (e) {}
+        } catch (e) { imWarn(e) }
       }
     } catch (e2) {}
     return hits
@@ -983,13 +989,13 @@
           if (typeof store.dispatch === 'function' && store._actions && store._actions[actions[i]]) {
             try {
               store.dispatch(actions[i])
-            } catch (e) {}
+            } catch (e) { imWarn(e) }
           }
         }
       }
       var tab = document.querySelector('[class*="chat"], [data-tab="chat"], .im-tab, .chat-tab')
       if (tab && typeof tab.click === 'function') tab.click()
-    } catch (e) {}
+    } catch (e) { imWarn(e) }
   }
 
   function rimFromFarmerChatApp() {
@@ -1009,7 +1015,7 @@
             if (r1) return r1
           }
         }
-      } catch (e) {}
+      } catch (e) { imWarn(e) }
       el = el.parentElement
     }
     try {
@@ -1067,7 +1073,7 @@
           if (hit) return hit
         }
       }
-    } catch (e) {}
+    } catch (e) { imWarn(e) }
     var names = ['XhsRim', 'xhsRim', '__XHS_RIM__', 'JarvisIM', 'jarvisIM', '__JARVIS_IM__', 'rimSdk']
     for (var n = 0; n < names.length; n++) {
       try {
@@ -1106,7 +1112,7 @@
   ;(function startDashboardReloadGuard() {
     if (window.__xhsDashboardReloadGuard) return
     window.__xhsDashboardReloadGuard = true
-    var reloadCount = 0
+    var reloadCount = parseInt(sessionStorage.getItem('__xhsDashReloadCount') || '0', 10) || 0
     var lastReloadAt = 0
     setInterval(function () {
       try {
@@ -1115,19 +1121,27 @@
         // ★ 仅 dashboard 页面启用 reload guard；chat 页会正常渲染 farmer-chat-app，
         // 无需 reload（之前 chat 也 reload → window 重建 → 计数重置 → 无限循环，IM SDK 永远无法初始化）
         if (!/\/cstools\/seller\/dashboard/.test(location.href)) return
-        if (document.querySelector('.farmer-chat-app')) return
+        if (document.querySelector('.farmer-chat-app')) {
+          try {
+            sessionStorage.removeItem('__xhsDashReloadCount')
+          } catch (_e) {}
+          return
+        }
         if (reloadCount >= 3) return
         var now = Date.now()
         if (now - lastReloadAt < 20000) return
         lastReloadAt = now
         reloadCount++
+        try {
+          sessionStorage.setItem('__xhsDashReloadCount', String(reloadCount))
+        } catch (_e) {}
         console.warn('[IMSend] farmer-chat-app 未出现，reload (' + reloadCount + '/3)')
         setTimeout(function () {
           try {
             location.reload()
-          } catch (e) {}
+          } catch (e) { imWarn(e) }
         }, 1500)
-      } catch (e) {}
+      } catch (e) { imWarn(e) }
     }, 5000)
   })()
 
@@ -1394,7 +1408,7 @@
           if (s2) return s2
         }
       }
-    } catch (e) {}
+    } catch (e) { imWarn(e) }
     return ''
   }
 
@@ -1409,15 +1423,15 @@
         var imStore = store.state.imStore
         var next = Object.assign({}, imStore.xUserInfo || {}, { csProviderId: String(csProviderId) })
         if (imStore.xUserInfo && typeof imStore.xUserInfo === 'object') {
-          try { imStore.xUserInfo.csProviderId = String(csProviderId); } catch (e) {}
+          try { imStore.xUserInfo.csProviderId = String(csProviderId); } catch (e) { imWarn(e) }
         } else if (typeof store.commit === 'function') {
-          try { store.commit('setXUserInfo', next) } catch (e) {}
-          try { store.commit('SET_X_USER_INFO', next) } catch (e) {}
+          try { store.commit('setXUserInfo', next) } catch (e) { imWarn(e) }
+          try { store.commit('SET_X_USER_INFO', next) } catch (e) { imWarn(e) }
         } else {
-          try { imStore.xUserInfo = next } catch (e) {}
+          try { imStore.xUserInfo = next } catch (e) { imWarn(e) }
         }
       }
-    } catch (e) {}
+    } catch (e) { imWarn(e) }
     window.ImLoginInfo = Object.assign({}, window.ImLoginInfo || {}, { csProviderId: String(csProviderId) })
     return true
   }
@@ -1587,7 +1601,7 @@
       const host = location.hostname || ''
       if (host.includes('ark.xiaohongshu.com')) hosts.push('https://ark.xiaohongshu.com')
       if (host.includes('walle.xiaohongshu.com')) hosts.push('https://walle.xiaohongshu.com')
-    } catch (e) {}
+    } catch (e) { imWarn(e) }
     hosts.push('https://ark.xiaohongshu.com', 'https://walle.xiaohongshu.com')
     const uniqHosts = hosts.filter(function (h, i) {
       return hosts.indexOf(h) === i

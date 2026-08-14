@@ -79,6 +79,14 @@
                 {{ autoReplyEnabled ? '已开启' : '未开启' }}
               </el-tag>
             </div>
+            <div class="status-row">
+              <span>内存</span>
+              <span class="hint-text">{{ sysStats.rssMb }} MB / 系统剩余 {{ sysStats.freememMb }} MB</span>
+            </div>
+            <div class="status-row">
+              <span>运行时长</span>
+              <span class="hint-text">{{ sysUptime }}</span>
+            </div>
           </div>
         </div>
       </el-col>
@@ -117,6 +125,13 @@ const wsStatus = ref('Closed')
 const autoShipEnabled = ref(false)
 const autoReplyEnabled = ref(false)
 const recentLogs = ref<string[]>([])
+const sysStats = ref({ rssMb: 0, freememMb: 0, totalmemMb: 0, uptimeSec: 0, cpuCount: 0, heapMb: 0 })
+const sysUptime = computed(() => {
+  const s = sysStats.value.uptimeSec || 0
+  const h = Math.floor(s / 3600)
+  const m = Math.floor((s % 3600) / 60)
+  return `${h}小时${m}分`
+})
 
 const wsStatusText = computed(() => {
   const map: Record<string, string> = { Closed: '已断开', Connecting: '连接中', Open: '已连接' }
@@ -165,6 +180,9 @@ onMounted(async () => {
     const config = await window.electronAPI.getAllConfig() as Record<string, unknown>
     autoShipEnabled.value = !!config.autoShipEnabled
     autoReplyEnabled.value = !!config.autoReplyEnabled
+    if (window.electronAPI.getSystemStats) {
+      sysStats.value = await window.electronAPI.getSystemStats()
+    }
   }
 })
 </script>

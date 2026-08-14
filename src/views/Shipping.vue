@@ -92,6 +92,9 @@
 
         <!-- ============ 发货记录 ============ -->
         <el-tab-pane label="发货记录" name="logs">
+          <div style="margin-bottom: 8px">
+            <el-button size="small" @click="exportShipLogs">导出 CSV</el-button>
+          </div>
           <el-table :data="shipLogs" border>
             <el-table-column prop="order_id" label="订单号" />
             <el-table-column prop="tracking_number" label="物流/内容" />
@@ -599,6 +602,13 @@ const loadCachedGoods = async () => {
   } catch {
     /* ignore */
   }
+}
+
+const exportShipLogs = async () => {
+  const res = await window.electronAPI?.exportShipLogs()
+  if (!res || res.canceled) return
+  if (res.success) ElMessage.success(`已导出 ${res.count || 0} 条到 ${res.filePath}`)
+  else ElMessage.warning(res.error || '导出失败')
 }
 
 const loadData = async () => {

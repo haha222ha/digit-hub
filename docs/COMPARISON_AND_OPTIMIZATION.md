@@ -232,6 +232,18 @@
 
 ## 七、优化建议汇总（按优先级排序）
 
+> **2026-08-15 实施确认**（git 标签 `milestone-20260815-im-send-ok` 为优化前快照）
+
+| 项 | 结论 | 处理 |
+|---|---|---|
+| 自动回复 TODO | **部分过时**：`matchReplyRule` 早已实现，但未校验开关、未按店 | ✅ 必须开启自动回复 + 当前店 + 长词优先 |
+| SQLCipher 全库加密 | Cookie/Token/密码已应用层 AES；全库迁移会打断现网 `data.db` | ⏸ 本轮不做 |
+| 拆分 main.ts | IM 刚稳定，大拆分回归风险高 | ⏸ 本轮不做 |
+| globalShortcut | Eva stub 会调此 IPC，原先只返回 true | ✅ `Ctrl+Shift+X` 唤起窗口 |
+| 空 catch / reload 计数 | 探测路径需吞异常；reload 计数会随页面重建归零 | ✅ `imWarn` + sessionStorage |
+| 桌面通知 / CSV / 内存 | 确认缺失 | ✅ 已补 |
+| `as any` 87 处 | 多为 sqlite 行类型 | ⏸ 不一次改完 |
+
 ### 🔴 高优先级（应尽快处理）
 
 1. **实现自动回复关键词匹配** — `api.service.ts:223` 的 TODO

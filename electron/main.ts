@@ -1,4 +1,6 @@
-import { app, BrowserWindow, BrowserView, ipcMain, session, shell, WebContents } from 'electron'
+import { app, BrowserWindow, BrowserView, ipcMain, session, shell, WebContents, globalShortcut, dialog } from 'electron'
+import * as os from 'os'
+import { notifyDesktop } from './notify'
 import { join } from 'path'
 import { createTray } from './tray'
 import { DeviceService } from './services/device.service'
@@ -45,6 +47,17 @@ process.stdout?.on?.('error', (err: NodeJS.ErrnoException) => {
 })
 process.stderr?.on?.('error', (err: NodeJS.ErrnoException) => {
   if (err?.code === 'EPIPE' || err?.code === 'ERR_STREAM_DESTROYED') return
+})
+process.on('unhandledRejection', (reason) => {
+  try {
+    const logDir = require('path').join(require('electron').app.getPath('userData'), 'Logs')
+    require('fs').appendFileSync(
+      require('path').join(logDir, 'uncaught.log'),
+      `[${new Date().toISOString()}] unhandledRejection ${reason}\n`
+    )
+  } catch {
+    /* ignore */
+  }
 })
 
 // ==================== 布局常量（与 Vue UI 对齐）====================
@@ -854,7 +867,16 @@ function setupEvaIpcStubs() {
   } catch {
     /* ignore */
   }
-  ipcMain.handle('globalShortcut', () => true)
+  ipcMain.handle('globalShortcut', (_event, accelerator?: string) => {
+    const accel = String(accelerator || '').trim()
+    if (!accel) return true
+    try {
+      return globalShortcut.register(accel, () => focusAssistantMainWindow())
+    } catch (e) {
+      logger?.warn(`[Shortcut] 注册失败 ${accel}: ${e}`)
+      return false
+    }
+  })
 
   setupAgisoImIpc()
 }
@@ -1614,6 +1636,36 @@ function setupIPC() {
 
   ipcMain.handle('shiplog:list', (_event, shopId: string, limit?: number) =>
     storageService.getShipLogs(shopId, limit || 100))
+  ipcMain.handle('shiplog:export', async () => {
+    if (!mainWindow) return { success: false, error: '主窗口未就绪' }
+    const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+      title: '导出发货记录',
+      defaultPath: `ship-log-${new Date().toISOString().slice(0, 10)}.csv`,
+      filters: [{ name: 'CSV', extensions: ['csv'] }]
+    })
+    if (canceled || !filePath) return { success: false, canceled: true }
+    const rows = storageService.getShipLogs('*', 5000) as Array<Record<string, unknown>>
+    const header = 'order_id,status,tracking_number,error_msg,created_at,shop_id'
+    const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const lines = [header].concat(
+      rows.map((r) =>
+        [r.order_id, r.status, r.tracking_number, r.error_msg, r.created_at, r.shop_id].map(esc).join(',')
+      )
+    )
+    require('fs').writeFileSync(filePath, '\uFEFF' + lines.join('\r\n'), 'utf8')
+    return { success: true, filePath, count: rows.length }
+  })
+  ipcMain.handle('system:stats', () => {
+    const mem = process.memoryUsage()
+    return {
+      totalmemMb: Math.round(os.totalmem() / 1024 / 1024),
+      freememMb: Math.round(os.freemem() / 1024 / 1024),
+      rssMb: Math.round(mem.rss / 1024 / 1024),
+      heapMb: Math.round(mem.heapUsed / 1024 / 1024),
+      uptimeSec: Math.round(process.uptime()),
+      cpuCount: os.cpus()?.length || 0
+    }
+  })
 
   // 401 / ServiceTicket / 订单 / 客服消息桥接
   ipcMain.on('xhs-401-redirect', (_event, data) => {
@@ -1701,6 +1753,144 @@ function setupIPC() {
     logger.info(`[Kefu] 新消息: ${data?.content}`)
     mainWindow?.webContents.send('kefu:new-message', data)
   })
+
+  // ==================== 阿奇索1:1复刻 IPC 通道 ====================
+
+  // --- 云端验证占位（原版 ALDS / killOnlineUser / syncDisableMsg 等，已移除云端依赖） ---
+  ipcMain.on('on:aldsLoginSuccess', () => { /* 占位：ALDS 登录成功（已移除云端验证） */ })
+  ipcMain.on('on:aldsSetToken', () => { /* 占位：ALDS 设置 Token（已移除云端验证） */ })
+  ipcMain.on('on:killOnlineUser', () => { /* 占位：踢出在线用户（已移除云端验证） */ })
+  ipcMain.on('on:reLoginAlds', () => { /* 占位：ALDS 重新登录（已移除云端验证） */ })
+  ipcMain.on('on:syncDisableMsg', () => { /* 占位：同步禁用消息（已移除云端验证） */ })
+  ipcMain.on('on:xhsAldsLoaded', () => { /* 占位：XHS ALDS 加载完成（已移除云端验证） */ })
+  ipcMain.handle('on:disableAldsMsg', async () => { return { success: false, msg: '已移除云端验证' } })
+  ipcMain.handle('on:getAldsLogList', async () => { return [] })
+  ipcMain.handle('on:getXhsAldsAuthCodeUrl', async () => { return { url: '', msg: '已移除云端验证' } })
+  ipcMain.handle('on:receivedAldsMsg', async () => { return null })
+  ipcMain.handle('on:resendAlds', async () => { return { success: false, msg: '已移除云端验证' } })
+
+  // --- 窗口管理 ---
+  ipcMain.on('on:hideWindows', () => {
+    mainWindow?.hide()
+    for (const w of shopImWindows.values()) { if (!w.isDestroyed()) w.hide() }
+  })
+  ipcMain.on('on:showMainWin', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.show()
+      mainWindow.focus()
+    }
+  })
+  ipcMain.on('on:logout', () => {
+    logoutCurrentShop().catch(() => false)
+  })
+  ipcMain.on('on:openCurrentWinDevTools', () => {
+    const wc = BrowserWindow.getFocusedWindow()?.webContents
+    if (wc) wc.toggleDevTools()
+  })
+  ipcMain.on('on:openExternalUrl', (_event, url: string) => {
+    if (url) shell.openExternal(url).catch(() => false)
+  })
+  ipcMain.on('on:loginTimeoutNotice', () => {
+    mainWindow?.webContents.send('on:loginTimeoutNotice')
+  })
+  ipcMain.on('on:loginViewLoaded', () => {
+    logger.info('[Login] 登录视图已加载')
+  })
+  ipcMain.on('on:tokenExpired', () => {
+    logger.warn('[Auth] Token 已过期')
+    mainWindow?.webContents.send('on:tokenExpired')
+  })
+  ipcMain.on('on:setLoginEmailAndPassword', (_event, email: string, password: string) => {
+    storageService.set('loginEmail', email)
+    storageService.set('loginPassword', password)
+  })
+  ipcMain.on('on:wsLog', (_event, msg: string) => {
+    logger.info(`[WS] ${msg}`)
+  })
+  ipcMain.on('showMsg', (_event, title: string, body: string) => {
+    new Notification({ title: title || '提示', body: body || '' }).show()
+  })
+  ipcMain.on('setSharedData', (_event, key: string, value: unknown) => {
+    (global as Record<string, unknown>).__sharedData = (global as Record<string, unknown>).__sharedData || {}
+    ;((global as Record<string, unknown>).__sharedData as Record<string, unknown>)[key] = value
+  })
+  ipcMain.on('store:updateEndpoint', (_event, endpoint: string) => {
+    storageService.set('apiEndpoint', endpoint)
+  })
+  ipcMain.on('getWinInfo', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    event.reply('getWinInfo', {
+      id: win?.id || 0,
+      title: win?.getTitle() || '',
+      isMaximized: win?.isMaximized() || false,
+      isMinimized: win?.isMinimized() || false,
+      bounds: win?.getBounds() || null
+    })
+  })
+  ipcMain.on('newAccount', () => {
+    addShopAccount().catch(() => false)
+  })
+  ipcMain.on('installNewVersion', () => {
+    updateService.installUpdate()
+  })
+
+  // --- ipcMain.handle 补齐 ---
+  ipcMain.handle('autoLogin:getAutoOpen', () => storageService.get<boolean>('autoOpen') ?? false)
+  ipcMain.handle('autoLogin:setAutoOpen', (_event, val: boolean) => {
+    storageService.set('autoOpen', val)
+    applyAutoStartSetting()
+    return true
+  })
+  ipcMain.handle('getAppVersionInfo', () => ({
+    version: app.getVersion(),
+    electron: process.versions.electron,
+    chrome: process.versions.chrome,
+    node: process.versions.node,
+    platform: process.platform,
+    arch: process.arch
+  }))
+  ipcMain.handle('getGlobalStore', () => ({
+    apiEndpoint: storageService.get('apiEndpoint') || '',
+    autoOpen: storageService.get('autoOpen') ?? false,
+    version: app.getVersion()
+  }))
+  ipcMain.handle('getSystemData', () => ({
+    platform: process.platform,
+    arch: process.arch,
+    cpuCount: os.cpus().length,
+    totalMem: Math.round(os.totalmem() / 1024 / 1024),
+    freeMem: Math.round(os.freemem() / 1024 / 1024),
+    uptime: Math.round(os.uptime())
+  }))
+  ipcMain.handle('on:createMainWindow', () => {
+    if (mainWindow) { mainWindow.show(); mainWindow.focus() }
+    return true
+  })
+  ipcMain.handle('on:deleteXhsUserLocal', (_event, shopId: string) => {
+    return storageService.deleteShopAccount(shopId)
+  })
+  ipcMain.handle('on:getXhsUserLocal', (_event, shopId: string) => {
+    return storageService.getShopAccount(shopId)
+  })
+  ipcMain.handle('on:getXhsUserLocalList', () => {
+    return storageService.getShopAccounts()
+  })
+  ipcMain.handle('on:memory', () => {
+    const mem = process.memoryUsage()
+    return {
+      rss: Math.round(mem.rss / 1024 / 1024),
+      heapUsed: Math.round(mem.heapUsed / 1024 / 1024),
+      heapTotal: Math.round(mem.heapTotal / 1024 / 1024),
+      external: Math.round(mem.external / 1024 / 1024)
+    }
+  })
+  ipcMain.handle('on:updateAppConfigJson', (_event, config: Record<string, unknown>) => {
+    for (const [k, v] of Object.entries(config)) {
+      storageService.set(k, v)
+    }
+    return true
+  })
 }
 
 // ==================== 应用生命周期 ====================
@@ -1723,12 +1913,24 @@ app.whenReady().then(async () => {
   setupIPC()
   createMainWindow()
   createTray(mainWindow!, logger, { openKefu: createKefuWindow })
+  try {
+    globalShortcut.unregisterAll()
+    const ok = globalShortcut.register('CommandOrControl+Shift+X', () => focusAssistantMainWindow())
+    logger.info(`[Shortcut] Ctrl+Shift+X 唤起窗口: ${ok ? 'ok' : 'fail'}`)
+  } catch (e) {
+    logger.warn(`[Shortcut] 注册失败: ${e}`)
+  }
 })
 
 app.on('window-all-closed', () => {})
 
 app.on('before-quit', () => {
   (app as any).isQuitting = true
+  try {
+    globalShortcut.unregisterAll()
+  } catch {
+    /* ignore */
+  }
   destroyAllShopImWindows()
   wsService?.stop()
   apiService?.stop()

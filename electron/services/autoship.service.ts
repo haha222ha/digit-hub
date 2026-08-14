@@ -21,6 +21,7 @@ import { encrypt } from '../utils/crypto'
 import type { PsyCloudService } from './psy-cloud.service'
 import type { AgisoImManager } from '../agiso-im-manager'
 import { ImWsCdpService } from './im-ws-cdp.service'
+import { notifyDesktop } from '../notify'
 
 /** 阿奇锁商品笔记列表页（有 accessToken + _webmsxyw） */
 const ARK_GOODS_NOTE_LIST_URL = 'https://ark.xiaohongshu.com/app-note/note-list'
@@ -1006,6 +1007,9 @@ export class AutoShipService {
           status: sendStatus
         })
         this.logger.info(`[AutoShip] 消息发送成功 [${i + 1}/${msgTotal}]: ${order.order_id} status=${sendStatus}`)
+        if (sendStatus === 'success' && i === msgTotal - 1) {
+          notifyDesktop('发货成功', `订单 ${order.order_id}`)
+        }
       } else {
         if (cardLocked) {
           this.storage.rollbackCard(order.order_id)
@@ -1020,6 +1024,7 @@ export class AutoShipService {
           errorMsg: shipResult.error
         })
         this.logger.error(`[AutoShip] 消息发送失败 [${i + 1}/${msgTotal}]: ${order.order_id}`, shipResult.error)
+        notifyDesktop('发货失败', `${order.order_id}：${String(shipResult.error || '').slice(0, 80)}`)
         return false
       }
 

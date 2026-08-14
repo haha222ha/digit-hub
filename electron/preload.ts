@@ -152,6 +152,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   stopAutoShip: () => ipcRenderer.invoke('autoship:stop'),
   manualTriggerShip: (order: Record<string, unknown>) => ipcRenderer.invoke('autoship:manual-trigger', order),
   getShipLogs: (shopId: string, limit?: number) => ipcRenderer.invoke('shiplog:list', shopId, limit),
+  exportShipLogs: () => ipcRenderer.invoke('shiplog:export'),
+  getSystemStats: () => ipcRenderer.invoke('system:stats'),
 
   listReplyRules: (shopId: string) => ipcRenderer.invoke('reply:list', shopId),
   addReplyRule: (rule: { shopId: string; keyword: string; replyText: string; replyType?: string }) =>
@@ -216,5 +218,60 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   onKefuMessage: (callback: (data: unknown) => void) => {
     ipcRenderer.on('kefu:new-message', (_event, data) => callback(data))
+  },
+
+  // ==================== 阿奇索1:1兼容通道 ====================
+  // 云端验证占位（已移除云端依赖）
+  onKillOnlineUser: (callback: () => void) => { ipcRenderer.on('on:killOnlineUser', () => callback()) },
+  onSyncDisableMsg: (callback: (data: unknown) => void) => { ipcRenderer.on('on:syncDisableMsg', (_e, data) => callback(data)) },
+  onAldsLoginSuccess: (callback: (data: unknown) => void) => { ipcRenderer.on('on:aldsLoginSuccess', (_e, data) => callback(data)) },
+  onAldsSetToken: (callback: (data: unknown) => void) => { ipcRenderer.on('on:aldsSetToken', (_e, data) => callback(data)) },
+  onReLoginAlds: () => ipcRenderer.send('on:reLoginAlds'),
+  onXhsAldsLoaded: () => ipcRenderer.send('on:xhsAldsLoaded'),
+  disableAldsMsg: () => ipcRenderer.invoke('on:disableAldsMsg'),
+  getAldsLogList: () => ipcRenderer.invoke('on:getAldsLogList'),
+  getXhsAldsAuthCodeUrl: () => ipcRenderer.invoke('on:getXhsAldsAuthCodeUrl'),
+  receivedAldsMsg: () => ipcRenderer.invoke('on:receivedAldsMsg'),
+  resendAlds: () => ipcRenderer.invoke('on:resendAlds'),
+
+  // 窗口管理
+  hideWindows: () => ipcRenderer.send('on:hideWindows'),
+  showMainWin: () => ipcRenderer.send('on:showMainWin'),
+  logout: () => ipcRenderer.send('on:logout'),
+  openCurrentWinDevTools: () => ipcRenderer.send('on:openCurrentWinDevTools'),
+  openExternalUrl: (url: string) => ipcRenderer.send('on:openExternalUrl', url),
+  onLoginTimeoutNotice: (callback: () => void) => { ipcRenderer.on('on:loginTimeoutNotice', () => callback()) },
+  onTokenExpired: (callback: () => void) => { ipcRenderer.on('on:tokenExpired', () => callback()) },
+  setLoginEmailAndPassword: (email: string, password: string) => ipcRenderer.send('on:setLoginEmailAndPassword', email, password),
+  wsLog: (msg: string) => ipcRenderer.send('on:wsLog', msg),
+  showMsg: (title: string, body: string) => ipcRenderer.send('showMsg', title, body),
+  setSharedData: (key: string, value: unknown) => ipcRenderer.send('setSharedData', key, value),
+  updateEndpoint: (endpoint: string) => ipcRenderer.send('store:updateEndpoint', endpoint),
+  newAccount: () => ipcRenderer.send('newAccount'),
+  installNewVersion: () => ipcRenderer.send('installNewVersion'),
+
+  // 系统/版本信息
+  getAutoOpen: () => ipcRenderer.invoke('autoLogin:getAutoOpen'),
+  setAutoOpen: (val: boolean) => ipcRenderer.invoke('autoLogin:setAutoOpen', val),
+  getAppVersionInfo: () => ipcRenderer.invoke('getAppVersionInfo'),
+  getGlobalStore: () => ipcRenderer.invoke('getGlobalStore'),
+  getSystemData: () => ipcRenderer.invoke('getSystemData'),
+  createMainWindow: () => ipcRenderer.invoke('on:createMainWindow'),
+  deleteXhsUserLocal: (shopId: string) => ipcRenderer.invoke('on:deleteXhsUserLocal', shopId),
+  getXhsUserLocal: (shopId: string) => ipcRenderer.invoke('on:getXhsUserLocal', shopId),
+  getXhsUserLocalList: () => ipcRenderer.invoke('on:getXhsUserLocalList'),
+  getMemory: () => ipcRenderer.invoke('on:memory'),
+  updateAppConfigJson: (config: Record<string, unknown>) => ipcRenderer.invoke('on:updateAppConfigJson', config),
+
+  // ipcRenderer 透传（原版 preload 直接暴露 ipcRenderer）
+  ipcRenderer: {
+    send: (channel: string, ...args: unknown[]) => ipcRenderer.send(channel, ...args),
+    invoke: (channel: string, ...args: unknown[]) => ipcRenderer.invoke(channel, ...args),
+    on: (channel: string, callback: (...args: unknown[]) => void) => {
+      const handler = (_event: unknown, ...args: unknown[]) => callback(...args)
+      ipcRenderer.on(channel, handler)
+      return () => ipcRenderer.removeListener(channel, handler)
+    },
+    removeAllListeners: (channel: string) => ipcRenderer.removeAllListeners(channel)
   }
 })

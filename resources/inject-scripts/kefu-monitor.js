@@ -71,6 +71,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           content: content,
+          shopId: (window.__xhsAssistant && window.__xhsAssistant.shopId) || '',
           timestamp: Date.now()
         })
       })
