@@ -178,6 +178,12 @@ def _dist_token(request: Request) -> dict:
     token = auth[7:].strip() if auth.lower().startswith("bearer ") else ""
     if not token:
         raise HTTPException(status_code=401, detail="需要登录")
+    # 长久对接 token（发货助手）：不以 JWT 设备会话校验
+    if token.startswith("xxpsy_"):
+        user = dist_db.user_from_api_token(token)
+        if not user:
+            raise HTTPException(status_code=401, detail="对接 token 无效或已作废")
+        return user
     return user_from_token(token)
 
 
@@ -287,7 +293,19 @@ def compat_auth_login(body: DistLoginBody, request: Request):
         return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
     user = svc.map_user_for_dist(uid)
     token = res["access_token"]
-    return _ok({"user": user, "token": token}, "登录成功")
+    try:
+        integ = dist_db.get_or_create_api_token(uid, rotate=False)
+    except Exception:
+        integ = {"token": "", "integration_token": ""}
+    return _ok(
+        {
+            "user": user,
+            "token": token,
+            "integration_token": integ.get("integration_token") or integ.get("token") or "",
+            "api_token": integ.get("token") or "",
+        },
+        "登录成功",
+    )
 
 
 @compat_router.post("/api/auth/register")
@@ -317,7 +335,19 @@ def compat_auth_register(body: DistRegisterBody, request: Request):
     except HTTPException as e:
         return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
     user = svc.map_user_for_dist(uid)
-    return _ok({"user": user, "token": res["access_token"]}, "注册成功")
+    try:
+        integ = dist_db.get_or_create_api_token(uid, rotate=False)
+    except Exception:
+        integ = {"token": ""}
+    return _ok(
+        {
+            "user": user,
+            "token": res["access_token"],
+            "integration_token": integ.get("token") or "",
+            "api_token": integ.get("token") or "",
+        },
+        "注册成功",
+    )
 
 
 @compat_router.post("/api/auth/login-code")
@@ -337,6 +367,10 @@ def compat_auth_login_code(body: LoginCodeBody, request: Request):
     except HTTPException as e:
         return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
     user = svc.map_user_for_dist(uid)
+    try:
+        integ = dist_db.get_or_create_api_token(uid, rotate=False)
+    except Exception:
+        integ = {"token": ""}
     return _ok(
         {
             "user": user,
@@ -344,6 +378,8 @@ def compat_auth_login_code(body: LoginCodeBody, request: Request):
             "login_method": res.get("login_method") or "auth_code",
             "login_hint": res.get("login_hint")
             or "授权码登录成功，建议立即修改密码",
+            "integration_token": integ.get("token") or "",
+            "api_token": integ.get("token") or "",
         },
         "授权码登录成功",
     )
@@ -357,10 +393,43 @@ def compat_auth_change_password(body: ChangePasswordBody, request: Request):
     if len(new_pw) < 6:
         return JSONResponse(_fail("新密码至少 6 位"), status_code=200)
     try:
+        from cloud_deploy.cloud_api.auth import change_member_password
+
         change_member_password(int(user["id"]), new_pw, current_password=cur_pw)
+        return _ok({"ok": True}, "密码已更新")
     except HTTPException as e:
         return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
-    return _ok({"ok": True}, "密码已更新")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+    except Exception as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@compat_router.get("/api/auth/integration-token")
+def compat_get_integration_token(request: Request):
+    """查看/自动生成长久对接 token（需已登录 JWT 或现有对接 token）。"""
+    user = _dist_token(request)
+    try:
+        out = dist_db.get_or_create_api_token(user["id"], rotate=False)
+        return _ok(out, "ok")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@compat_router.post("/api/auth/integration-token/regenerate")
+def compat_regen_integration_token(request: Request):
+    """重新生成对接 token；旧 token 立即失效。"""
+    user = _dist_token(request)
+    # 仅允许会话 JWT 轮换，避免泄露的 api_token 自我续命
+    auth = request.headers.get("authorization") or ""
+    raw = auth[7:].strip() if auth.lower().startswith("bearer ") else ""
+    if raw.startswith("xxpsy_"):
+        return JSONResponse(_fail("请使用账号密码登录后台后再重新生成对接 token"), status_code=200)
+    try:
+        out = dist_db.get_or_create_api_token(user["id"], rotate=True)
+        return _ok(out, "已重新生成对接 token，请更新发货助手配置")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
 
 
 @compat_router.post("/api/auth/recover-with-code")

@@ -220,6 +220,9 @@ def _migrate_dist_schema() -> None:
         "ALTER TABLE dist_links ADD COLUMN faka_claim_batch TEXT",
         "ALTER TABLE dist_links ADD COLUMN faka_claim_meta TEXT",
         "CREATE INDEX IF NOT EXISTS idx_dist_links_faka_claim ON dist_links(user_id, test_code, status, faka_claimed_at)",
+        "ALTER TABLE dist_distributors ADD COLUMN api_token TEXT",
+        "ALTER TABLE dist_distributors ADD COLUMN api_token_created_at TEXT",
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_dist_api_token ON dist_distributors(api_token)",
         "ALTER TABLE dist_unlimited_sessions ADD COLUMN expires_at TEXT",
         "ALTER TABLE dist_test_overrides ADD COLUMN show_on_homepage INTEGER NOT NULL DEFAULT 1",
     ]
@@ -231,6 +234,9 @@ def _migrate_dist_schema() -> None:
         "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS faka_claim_batch TEXT",
         "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS faka_claim_meta TEXT",
         "CREATE INDEX IF NOT EXISTS idx_dist_links_faka_claim ON dist_links(user_id, test_code, status, faka_claimed_at)",
+        "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS api_token TEXT",
+        "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS api_token_created_at TIMESTAMP",
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_dist_api_token ON dist_distributors(api_token)",
         "ALTER TABLE dist_unlimited_sessions ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP",
         "ALTER TABLE dist_test_overrides ADD COLUMN IF NOT EXISTS show_on_homepage BOOLEAN NOT NULL DEFAULT TRUE",
         """CREATE TABLE IF NOT EXISTS dist_announcements (
@@ -643,7 +649,129 @@ def _map_distributor(dist: dict | None, profile: dict) -> dict:
         "invite_code": dist.get("invite_code") or "",
         "inviter_user_id": dist.get("inviter_user_id"),
         "detailed_tutorial_access": bool(dist.get("detailed_tutorial_access")),
+        "has_api_token": bool((dist.get("api_token") or "").strip()),
+        "api_token_created_at": _fmt_ts(dist.get("api_token_created_at")) or "",
     }
+
+
+def _gen_api_token() -> str:
+    return "xxpsy_" + secrets.token_urlsafe(32)
+
+
+def get_or_create_api_token(user_id: int, *, rotate: bool = False) -> dict:
+    """返回长久对接 token（明文一次给客户端保存）。rotate=True 时强制换新。"""
+    init_dist_tables()
+    ensure_distributor(int(user_id))
+    uid = int(user_id)
+    now = _now()
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        try:
+            c.execute("SELECT api_token, api_token_created_at FROM dist_distributors WHERE user_id=%s", (uid,))
+            row = _row_dict(c.fetchone()) or {}
+            token = (row.get("api_token") or "").strip()
+            if rotate or not token:
+                for _ in range(5):
+                    token = _gen_api_token()
+                    try:
+                        c.execute(
+                            """UPDATE dist_distributors
+                               SET api_token=%s, api_token_created_at=NOW()
+                               WHERE user_id=%s""",
+                            (token, uid),
+                        )
+                        break
+                    except Exception:
+                        token = ""
+                        continue
+                if not token:
+                    raise ValueError("生成对接 token 失败，请重试")
+            conn.commit()
+            c.execute("SELECT api_token, api_token_created_at FROM dist_distributors WHERE user_id=%s", (uid,))
+            row = _row_dict(c.fetchone()) or {}
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute("SELECT api_token, api_token_created_at FROM dist_distributors WHERE user_id=?", (uid,))
+        row = _row_dict(c.fetchone()) or {}
+        token = (row.get("api_token") or "").strip()
+        if rotate or not token:
+            for _ in range(5):
+                token = _gen_api_token()
+                try:
+                    c.execute(
+                        """UPDATE dist_distributors
+                           SET api_token=?, api_token_created_at=?
+                           WHERE user_id=?""",
+                        (token, now, uid),
+                    )
+                    conn.commit()
+                    break
+                except Exception:
+                    token = ""
+                    continue
+            if not token:
+                conn.close()
+                raise ValueError("生成对接 token 失败，请重试")
+            c.execute("SELECT api_token, api_token_created_at FROM dist_distributors WHERE user_id=?", (uid,))
+            row = _row_dict(c.fetchone()) or {}
+        conn.close()
+    tok = (row.get("api_token") or "").strip()
+    return {
+        "token": tok,
+        "integration_token": tok,
+        "created_at": _fmt_ts(row.get("api_token_created_at")) or now,
+        "prefix": "xxpsy_",
+        "hint": "长久对接 token，请本地加密保存；泄露后请在账户设置中重新生成",
+    }
+
+
+def user_from_api_token(token: str) -> dict | None:
+    """用长久对接 token 解析商家（不走 JWT 设备会话）。"""
+    tok = (token or "").strip()
+    if not tok.startswith("xxpsy_"):
+        return None
+    init_dist_tables()
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute(
+            """SELECT d.user_id, d.status, u.username
+               FROM dist_distributors d
+               LEFT JOIN users u ON u.id = d.user_id
+               WHERE d.api_token=%s""",
+            (tok,),
+        )
+        row = _row_dict(c.fetchone())
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            """SELECT d.user_id, d.status, u.username
+               FROM dist_distributors d
+               LEFT JOIN users u ON u.id = d.user_id
+               WHERE d.api_token=?""",
+            (tok,),
+        )
+        row = _row_dict(c.fetchone())
+        conn.close()
+    if not row:
+        return None
+    st = str(row.get("status") or "active").strip().lower()
+    if st in ("deleted", "disabled", "banned"):
+        return None
+    uid = int(row.get("user_id") or 0)
+    if uid <= 0:
+        return None
+    username = (row.get("username") or "").strip() or f"user_{uid}"
+    return {"id": uid, "username": username, "auth_via": "api_token"}
 
 
 def find_distributor_by_invite_code(invite_code: str) -> dict | None:

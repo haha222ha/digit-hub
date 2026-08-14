@@ -602,14 +602,10 @@ function formatLinkCountdown(link) {
 export async function renderLinks(root) {
   const host = el("div", { className: "panel" });
   const filterBar = el("div", { className: "filter-bar" });
-  const statusSel = el("select");
-  statusSel.append(
-    el("option", { value: "", text: "全部状态" }),
-    el("option", { value: "unused", text: "未使用" }),
-    el("option", { value: "used", text: "已使用" }),
-    el("option", { value: "expired", text: "已过期" }),
-    el("option", { value: "revoked", text: "已撤销" })
-  );
+  const tabBar = el("div", { className: "link-tabs" });
+  /** @type {'all'|'unbound'|'inactive'|'active'} */
+  let tab = "all";
+
   const testSel = el("select");
   testSel.append(el("option", { value: "", text: "全部测题" }));
   try {
@@ -624,12 +620,6 @@ export async function renderLinks(root) {
   for (const n of [20, 50, 100]) {
     perPageSel.append(el("option", { value: String(n), text: `${n}/页` }));
   }
-  const fakaSel = el("select");
-  fakaSel.append(
-    el("option", { value: "", text: "发卡领取·全部" }),
-    el("option", { value: "0", text: "未进发卡池" }),
-    el("option", { value: "1", text: "已进发卡池" })
-  );
   const startDate = el("input", { type: "date" });
   const endDate = el("input", { type: "date" });
   const sortSel = el("select");
@@ -649,9 +639,7 @@ export async function renderLinks(root) {
     title: "含测题码、相对路径、状态（TSV），不对发卡网导入",
   });
   filterBar.append(
-    el("div", { className: "field", style: "margin:0;min-width:140px" }, [el("label", { text: "状态" }), statusSel]),
     el("div", { className: "field", style: "margin:0;min-width:180px" }, [el("label", { text: "测题" }), testSel]),
-    el("div", { className: "field", style: "margin:0;min-width:150px" }, [el("label", { text: "发卡领取" }), fakaSel]),
     el("div", { className: "field", style: "margin:0;min-width:130px" }, [el("label", { text: "开始日期" }), startDate]),
     el("div", { className: "field", style: "margin:0;min-width:130px" }, [el("label", { text: "结束日期" }), endDate]),
     el("div", { className: "field", style: "margin:0;min-width:140px" }, [el("label", { text: "排序" }), sortSel]),
@@ -659,28 +647,52 @@ export async function renderLinks(root) {
     el("div", { className: "row-actions", style: "align-items:flex-end" }, [applyBtn, exportAuditBtn])
   );
 
+  function paintTabs() {
+    const tabs = [
+      { id: "all", label: "全部" },
+      { id: "unbound", label: "未绑定" },
+      { id: "inactive", label: "未激活使用" },
+      { id: "active", label: "已激活使用" },
+    ];
+    tabBar.replaceChildren(
+      ...tabs.map((t) =>
+        el("button", {
+          type: "button",
+          className: `link-tab${tab === t.id ? " active" : ""}`,
+          text: t.label,
+          onClick: () => {
+            tab = t.id;
+            page = 1;
+            paintTabs();
+            reload();
+          },
+        })
+      )
+    );
+  }
+
   root.append(
     shell("/admin/link-management", [
       el("h1", { className: "page-title", text: "链接管理" }),
       el("p", {
         className: "page-lead",
-        text: "勾选后「复制所选 / 导出发卡 TXT」= 每行一条完整链接。云端「已进发卡」表示已被发货助手领取，不会重复导入。误领可「释放回池」。",
+        text: "未绑定=尚未进发卡池；未激活=买家未开测；已激活=买家已开测。发货助手领取后标记为已绑定。",
       }),
+      tabBar,
       filterBar,
       host,
     ])
   );
   attachBackToTop(root);
+  paintTabs();
 
   let page = 1;
   let selected = new Set();
 
   function filters() {
     const [sortBy, sortOrder] = (sortSel.value || "createdAt:DESC").split(":");
-    return {
-      status: statusSel.value || undefined,
+    const base = {
       testCode: testSel.value || undefined,
-      fakaClaimed: fakaSel.value || undefined,
       startDate: startDate.value || undefined,
       endDate: endDate.value || undefined,
       sortBy,
@@ -688,6 +700,10 @@ export async function renderLinks(root) {
       perPage: perPageSel.value || "20",
       page: String(page),
     };
+    if (tab === "unbound") return { ...base, status: "unused", fakaClaimed: "0" };
+    if (tab === "inactive") return { ...base, status: "unused" };
+    if (tab === "active") return { ...base, status: "used" };
+    return base;
   }
 
   async function doExport(payload) {
@@ -1560,10 +1576,52 @@ export async function renderAccount(root) {
 
   const user = getUser() || {};
   const quota = await loadQuota();
+  const tokenHost = el("div", { className: "panel" });
+  const tokenVal = el("code", { className: "integration-token", text: "加载中…" });
+  const tokenMeta = el("p", { className: "muted", text: "" });
+  const copyTok = el("button", { className: "btn btn-primary", type: "button", text: "复制对接 Token", style: "width:auto" });
+  const regenTok = el("button", { className: "btn btn-ghost", type: "button", text: "重新生成", style: "width:auto" });
+  async function loadToken() {
+    try {
+      const data = await api.getIntegrationToken();
+      const tok = (data && (data.integration_token || data.token)) || "";
+      tokenVal.textContent = tok || "（无）";
+      tokenMeta.textContent = data && data.created_at ? `生成时间：${data.created_at}` : "";
+      bindCopyButton(copyTok, () => tok, { okText: "已复制", onOk: () => showToast("对接 Token 已复制") });
+    } catch (e) {
+      tokenVal.textContent = "加载失败";
+      tokenMeta.textContent = e.message || "";
+    }
+  }
+  regenTok.addEventListener("click", async () => {
+    if (!confirm("重新生成后，旧 Token 立即失效，发货助手需重新配置。继续？")) return;
+    try {
+      const data = await api.regenIntegrationToken();
+      const tok = (data && (data.integration_token || data.token)) || "";
+      tokenVal.textContent = tok;
+      tokenMeta.textContent = data && data.created_at ? `生成时间：${data.created_at}` : "";
+      showToast("已重新生成对接 Token");
+      await loadToken();
+    } catch (e) {
+      alert(e.message || "重新生成失败");
+    }
+  });
+  tokenHost.append(
+    el("h3", { text: "发货助手对接 Token" }),
+    el("p", {
+      className: "muted",
+      text: "长久有效。可复制到发货助手，或在助手内用账号密码登录自动获取并本地保存。不要分享给他人。",
+    }),
+    el("div", { className: "token-box" }, [tokenVal]),
+    tokenMeta,
+    el("div", { className: "row-actions", style: "margin-top:8px" }, [copyTok, regenTok])
+  );
+  void loadToken();
+
   root.append(
     shell("/admin/account-settings", [
       el("h1", { className: "page-title", text: "账户设置" }),
-      el("p", { className: "page-lead", text: "管理登录密码。无需绑定邮箱。" }),
+      el("p", { className: "page-lead", text: "管理登录密码与发货助手对接 Token。无需绑定邮箱。" }),
       el("div", { className: "stat-row cols-3" }, [
         el("div", { className: "stat" }, [
           el("div", { className: "k", text: "用户名" }),
@@ -1578,6 +1636,7 @@ export async function renderAccount(root) {
           el("div", { className: "v", text: String(quota.remaining_quota ?? "—") }),
         ]),
       ]),
+      tokenHost,
       form,
     ])
   );

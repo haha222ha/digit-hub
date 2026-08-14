@@ -148,6 +148,9 @@ export const api = {
       auth: true,
       body: payload,
     }),
+  getIntegrationToken: () => request("/api/auth/integration-token", { auth: true }),
+  regenIntegrationToken: () =>
+    request("/api/auth/integration-token/regenerate", { method: "POST", auth: true }),
   revokeLink: (linkId) =>
     request("/api/links/revoke", {
       method: "POST",
