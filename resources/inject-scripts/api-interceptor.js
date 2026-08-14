@@ -100,23 +100,29 @@
           }, '*');
         }
 
-        // 订单列表（待发货）→ 推给自动发货
+        // 订单列表 → 推给自动发货（字段对齐千帆 packages：orderId / itemId / statusDesc / paidAt）
         if (url && /fulfillment\/order\/page|order\/page/i.test(String(url))) {
           try {
             const rows =
-              (data && data.data && (data.data.orders || data.data.package_list || data.data.list || data.data.packages)) ||
+              (data && data.data && (data.data.packages || data.data.orders || data.data.package_list || data.data.list)) ||
               [];
             if (Array.isArray(rows)) {
               rows.forEach(function (row) {
-                const orderSn = row.order_id || row.orderSn || row.order_sn || row.id || '';
+                const orderSn =
+                  row.orderId || row.order_id || row.orderSn || row.order_sn || row.packageId || row.id || '';
                 const pkgs = row.packages || [row];
                 const sku = (pkgs[0] && pkgs[0].skus && pkgs[0].skus[0]) || (row.skus && row.skus[0]) || null;
-                const productId = (sku && (sku.itemId || sku.item_id || sku.sku_id)) || row.item_id || '';
-                const statusText = row.status_desc || row.status_name || row.status || '待发货';
+                const productId =
+                  (sku && (sku.itemId || sku.item_id || sku.goodsId)) ||
+                  row.itemId ||
+                  row.item_id ||
+                  '';
+                const statusText = row.statusDesc || row.status_desc || row.status_name || row.status || '待发货';
                 const orderTime =
-                  row.created_at || row.create_time || row.createTime ||
-                  row.order_time || row.orderTime || row.paid_time || row.pay_time ||
-                  row.payTime || row.gmt_create || row.gmtCreate || '';
+                  row.paidAt || row.paid_at || row.orderedAt || row.ordered_at ||
+                  row.createdAt || row.created_at || row.create_time || row.createTime ||
+                  row.order_time || row.orderTime || row.pay_time || row.payTime ||
+                  row.gmt_create || row.gmtCreate || '';
                 if (orderSn) {
                   window.postMessage({
                     type: 'xhs-new-order',
@@ -185,13 +191,50 @@
 
         scrapeAuth(data);
 
-        // XHR 路径同样同步 login token（不少登录接口走 XHR）
+        // 登录用户信息 + 同步 token 到 localStorage（供主进程写 walle-eva-auth）
         if (LOGIN_API.test(reqUrl)) {
           window.postMessage({
             type: 'xhs-login-user',
             url: reqUrl,
             data: data
           }, '*');
+        }
+
+        // XHR 路径同样推送订单（部分页面走 XHR 而非 fetch）
+        if (/fulfillment\/order\/page|order\/page/i.test(reqUrl)) {
+          try {
+            const rows =
+              (data && data.data && (data.data.packages || data.data.orders || data.data.package_list || data.data.list)) ||
+              [];
+            if (Array.isArray(rows)) {
+              rows.forEach(function (row) {
+                const orderSn =
+                  row.orderId || row.order_id || row.orderSn || row.order_sn || row.packageId || row.id || '';
+                const sku = (row.skus && row.skus[0]) || null;
+                const productId =
+                  (sku && (sku.itemId || sku.item_id || sku.goodsId)) ||
+                  row.itemId ||
+                  row.item_id ||
+                  '';
+                const statusText = row.statusDesc || row.status_desc || row.status_name || row.status || '待发货';
+                const orderTime =
+                  row.paidAt || row.paid_at || row.orderedAt || row.ordered_at ||
+                  row.createdAt || row.created_at || row.create_time || row.createTime ||
+                  row.order_time || row.orderTime || row.pay_time || row.payTime ||
+                  row.gmt_create || row.gmtCreate || '';
+                if (orderSn) {
+                  window.postMessage({
+                    type: 'xhs-new-order',
+                    orderId: String(orderSn),
+                    productId: String(productId || ''),
+                    status: String(statusText),
+                    orderTime: String(orderTime || ''),
+                    source: 'api_intercept_xhr'
+                  }, '*');
+                }
+              });
+            }
+          } catch (e) { }
         }
 
         window.postMessage({

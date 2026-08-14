@@ -5,8 +5,10 @@
  * 暴露：window.__xhsAssistant.im
  */
 (function () {
-  if (window.__xhsImSendReady) return
-  window.__xhsImSendReady = true
+  // 版本号变更时允许热更新（否则旧 fetchPendingOrders 会一直空列表）
+  var SCRIPT_VER = 'order-poll-v2'
+  if (window.__xhsImSendReady === SCRIPT_VER) return
+  window.__xhsImSendReady = SCRIPT_VER
 
   function getAccessToken() {
     return (
@@ -32,12 +34,14 @@
     }
   }
 
-  function buildSignHeaders(apiPath) {
+  function buildSignHeaders(apiPath, opts) {
+    opts = opts || {}
     const headers = {
       Accept: 'application/json, text/plain, */*',
-      'Content-Type': 'application/json',
-      'x-subsystem': 'eva'
+      'Content-Type': 'application/json'
     }
+    // 客服域走 eva；千帆 ark 订单页 HAR 无 x-subsystem，勿硬塞
+    if (opts.subsystem) headers['x-subsystem'] = opts.subsystem
     const token = getAccessToken()
     if (token) headers.Authorization = token.startsWith('Bearer') ? token : `Bearer ${token}`
     try {
@@ -56,7 +60,7 @@
   }
 
   async function apiGet(path) {
-    const headers = buildSignHeaders(path)
+    const headers = buildSignHeaders(path, { subsystem: 'eva' })
     const res = await fetch('https://walle.xiaohongshu.com' + path, {
       method: 'GET',
       credentials: 'include',
@@ -66,7 +70,7 @@
   }
 
   async function apiPost(path, body) {
-    const headers = buildSignHeaders(path)
+    const headers = buildSignHeaders(path, { subsystem: 'eva' })
     const res = await fetch('https://walle.xiaohongshu.com' + path, {
       method: 'POST',
       credentials: 'include',
@@ -211,65 +215,173 @@
   }
 
   /**
-   * 拉取待发货订单（对标 fulfillment/order/page）
-   * 优先 ark，失败回退 walle
+   * 拉取待发货/待虚拟发卡订单
+   * 请求体对齐千帆后台 HAR：POST /api/edith/fulfillment/order/page
+   * 旧版 status:2（数字）会被接口当成非法筛选 → packages=[] → 本地零动作
+   * HAR 成功样例：status:[]（数组）+ time_range_list.time_type=3 + camelCase packages.orderId/skus[].itemId
    */
-  async function fetchPendingOrders() {
+  async function fetchPendingOrders(opts) {
+    opts = opts || {}
+    const now = Date.now()
+    const dayMs = 24 * 60 * 60 * 1000
+    // time_type:3 = 按下单/支付时间；正常近 3 天，补拉近 7 天
+    const lookbackDays = opts.recover ? 7 : 3
+    const start = Number(opts.startTime) || now - lookbackDays * dayMs
+    const end = Number(opts.endTime) || now + dayMs
+    // 待发货族：1/2/21/26（order_stats HAR）；补拉时 status:[] 不筛，再本地过滤虚拟已发货
+    const PENDING_STATUS = [1, 2, 21, 26]
+    const statusList = Array.isArray(opts.status)
+      ? opts.status
+      : opts.recover
+        ? []
+        : PENDING_STATUS
+
     const body = {
-      page_no: 1,
-      page_size: 20,
-      status: 2,
-      multi_search_field: ''
+      page_no: Number(opts.pageNo) || 1,
+      page_size: Number(opts.pageSize) || 50,
+      order_tag_list: [],
+      order_type_list: [],
+      status: statusList,
+      time_range_list: [{ time_type: 3, start_time: start, end_time: end }],
+      seller_mark_priority_list: [],
+      seller_mark_note_status_list: [],
+      overdue_status: -2,
+      sort_by: { sort_field: 'ordered_at', desc: true },
+      need_declare_info: true,
+      need_declare_times: true,
+      allow_es_fallback: true
     }
+
     const path = '/api/edith/fulfillment/order/page'
-    const headers = buildSignHeaders(path)
-    let data = null
+    const hosts = []
     try {
-      const res = await fetch('https://ark.xiaohongshu.com' + path, {
-        method: 'POST',
-        credentials: 'include',
-        headers,
-        body: JSON.stringify(body)
-      })
-      data = await res.json()
-    } catch (e) {
-      const res2 = await fetch('https://walle.xiaohongshu.com' + path, {
-        method: 'POST',
-        credentials: 'include',
-        headers,
-        body: JSON.stringify(body)
-      })
-      data = await res2.json()
+      const host = location.hostname || ''
+      // 当前页同域优先：ark 订单页有 _webmsxyw 签名（与 HAR 一致）
+      if (host.includes('ark.xiaohongshu.com')) hosts.push('https://ark.xiaohongshu.com')
+      if (host.includes('walle.xiaohongshu.com')) hosts.push('https://walle.xiaohongshu.com')
+    } catch (e) {}
+    hosts.push('https://ark.xiaohongshu.com', 'https://walle.xiaohongshu.com')
+    const uniqHosts = hosts.filter(function (h, i) {
+      return hosts.indexOf(h) === i
+    })
+
+    let data = null
+    let lastErr = ''
+    let usedHost = ''
+    for (let hi = 0; hi < uniqHosts.length; hi++) {
+      const base = uniqHosts[hi]
+      const isArk = /ark\.xiaohongshu\.com/i.test(base)
+      const headers = buildSignHeaders(path, { subsystem: isArk ? '' : 'eva' })
+      try {
+        const res = await fetch(base + path, {
+          method: 'POST',
+          credentials: 'include',
+          headers: headers,
+          body: JSON.stringify(body)
+        })
+        const json = await res.json()
+        data = json
+        usedHost = base
+        if (json && (json.success === true || json.code === 0 || (json.data && Array.isArray(json.data.packages)))) {
+          break
+        }
+        lastErr =
+          'host=' +
+          base +
+          ' http=' +
+          res.status +
+          ' code=' +
+          (json && json.code) +
+          ' msg=' +
+          (json && (json.msg || json.message))
+      } catch (e) {
+        lastErr = 'host=' + base + ' ' + String(e && e.message ? e.message : e)
+      }
+    }
+
+    if (!data) {
+      return { __error: lastErr || 'fulfillment/order/page 无响应', orders: [] }
+    }
+    if (data.success === false && data.code !== 0) {
+      return {
+        __error:
+          'fulfillment/order/page 失败: code=' +
+          data.code +
+          ' msg=' +
+          (data.msg || data.message || '') +
+          ' host=' +
+          usedHost,
+        orders: []
+      }
     }
 
     const packages =
-      data?.data?.orders ||
-      data?.data?.package_list ||
-      data?.data?.list ||
-      data?.data?.packages ||
+      (data.data && (data.data.packages || data.data.orders || data.data.package_list || data.data.list)) ||
       []
+
     const orders = []
     for (const row of Array.isArray(packages) ? packages : []) {
-      const orderSn = row.order_id || row.orderSn || row.order_sn || row.id || ''
-      const pkgs = row.packages || [row]
-      const sku =
-        (pkgs[0] && pkgs[0].skus && pkgs[0].skus[0]) ||
-        (row.skus && row.skus[0]) ||
-        null
-      const productId = sku?.itemId || sku?.item_id || sku?.sku_id || row.item_id || ''
-      const statusText = row.status_desc || row.status_name || row.status || '待发货'
-      // 下单/支付时间（用于「只处理绑定时间之后的订单」过滤）
+      const orderSn =
+        row.orderId ||
+        row.order_id ||
+        row.orderSn ||
+        row.order_sn ||
+        row.packageId ||
+        row.package_id ||
+        row.id ||
+        ''
+      // HAR：itemId 在 packages[].skus[0].itemId（商品级），skuId 是规格级勿当商品绑定键
+      const sku = (row.skus && row.skus[0]) || null
+      const productId =
+        (sku && (sku.itemId || sku.item_id || sku.goodsId || sku.goods_id)) ||
+        row.itemId ||
+        row.item_id ||
+        ''
+      const statusText =
+        row.statusDesc || row.status_desc || row.status_name || row.status || '待发货'
+      const statusCode = Number(row.status)
+      const tags = row.orderTagList || row.order_tag_list || []
+      const isVirtual =
+        (Array.isArray(tags) &&
+          tags.some(function (t) {
+            return /NO_LOGISTICS|AUTO_DELIVERY|ONLY_SUPPORT_NO_LOGISTICS/i.test(String(t))
+          })) ||
+        false
+
+      const isPending = PENDING_STATUS.indexOf(statusCode) >= 0
+      // 已发货未签收(6)/已完成类：仅 recover + 无物流/自动发货虚拟单才纳入（补发卡密）
+      if (!isPending) {
+        if (!(opts.recover && isVirtual && (statusCode === 6 || statusCode === 65 || statusCode === 7))) {
+          continue
+        }
+      }
+
       const orderTime =
-        row.created_at || row.create_time || row.createTime ||
-        row.order_time || row.orderTime || row.paid_time || row.pay_time ||
-        row.payTime || row.gmt_create || row.gmtCreate || ''
+        row.paidAt ||
+        row.paid_at ||
+        row.orderedAt ||
+        row.ordered_at ||
+        row.createdAt ||
+        row.created_at ||
+        row.create_time ||
+        row.createTime ||
+        row.order_time ||
+        row.orderTime ||
+        row.pay_time ||
+        row.payTime ||
+        row.gmt_create ||
+        row.gmtCreate ||
+        ''
       if (orderSn) {
         orders.push({
           order_id: String(orderSn),
           product_id: String(productId || ''),
           status: String(statusText),
+          status_code: Number.isFinite(statusCode) ? statusCode : null,
           order_time: String(orderTime || ''),
-          source: 'fulfillment_api'
+          is_virtual: isVirtual,
+          source: 'fulfillment_api',
+          host: usedHost
         })
       }
     }

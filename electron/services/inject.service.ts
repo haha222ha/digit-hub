@@ -172,8 +172,13 @@ export class InjectService {
     }
 
     // 千帆商家后台：商品同步（对标阿奇锁 getGoodsNoteList，必须在 ark 域）
+    // 订单查询页同时注入 im-send，供隐藏窗轮询 fulfillment/order/page
     if (url.includes('ark.xiaohongshu.com') && !isLogin) {
+      this.executeScript(webContents, 'api-interceptor')
       this.executeScript(webContents, 'goods-sync')
+      if (/\/app-order\//i.test(url)) {
+        this.executeScript(webContents, 'im-send')
+      }
     }
 
     if (url.includes('/cstools/chat') || url.includes('kefu')) {

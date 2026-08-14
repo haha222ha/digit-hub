@@ -64,7 +64,7 @@ export class ShopContextService {
     if (autoShipEnabled !== false) {
       // orderPollInterval 单位秒，默认 30 秒（内部接口，避免风控/限流）
       this.autoShip.startPolling(
-        (this.storage.get<number>('orderPollInterval') || 30) * 1000
+        (this.storage.get<number>('orderPollInterval') || 15) * 1000
       )
     }
 

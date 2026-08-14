@@ -22,6 +22,8 @@ import type { PsyCloudService } from './psy-cloud.service'
 
 /** 阿奇锁商品笔记列表页（有 accessToken + _webmsxyw） */
 const ARK_GOODS_NOTE_LIST_URL = 'https://ark.xiaohongshu.com/app-note/note-list'
+/** 千帆订单查询页（HAR 同源：有 _webmsxyw，适合拉 fulfillment/order/page） */
+const ARK_ORDER_QUERY_URL = 'https://ark.xiaohongshu.com/app-order/order/query'
 
 function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
   return new Promise((resolve) => {
@@ -86,11 +88,16 @@ export class AutoShipService {
   private ensureImSession: ((shopId: string) => Promise<boolean>) | null = null
   /** 轮询退避计数（失败时指数退避） */
   private pollBackoff = 0
-  /** 默认轮询间隔：30 秒（内部接口，避免风控/限流） */
-  private static readonly DEFAULT_POLL_INTERVAL = 30_000
+  /** 轮询序号：每隔几次做一次「虚拟已发货补拉」 */
+  private pollTick = 0
+  /** 默认轮询间隔：15 秒（虚拟单窗口短，官方可能几分钟内改成已发货） */
+  private static readonly DEFAULT_POLL_INTERVAL = 15_000
   /** 退避上限：60 秒 */
   private static readonly MAX_POLL_BACKOFF = 60_000
   private goodsSyncWindow: BrowserWindow | null = null
+  /** 按店隐藏的 ark 订单查询窗（轮询用，与客服 IM 窗分离） */
+  private orderPollByShop = new Map<string, BrowserWindow>()
+  private orderPollReadyAt = new Map<string, number>()
 
   constructor(storage: StorageService, logger: LoggerService, mock: MockService) {
     this.storage = storage
@@ -152,9 +159,72 @@ export class AutoShipService {
     return null
   }
 
+  /**
+   * 订单轮询优先用隐藏 ark 订单页（HAR 同源 + _webmsxyw），失败再回落客服 IM 页。
+   * 发货仍走 getShipWc / IM。
+   */
+  private async ensureOrderPollWc(shopId: string): Promise<WebContents | null> {
+    const sid = String(shopId || currentShopId()).trim() || currentShopId()
+    try {
+      let win = this.orderPollByShop.get(sid)
+      if (!win || win.isDestroyed()) {
+        win = new BrowserWindow({
+          show: false,
+          width: 1100,
+          height: 720,
+          title: '订单轮询（后台）',
+          autoHideMenuBar: true,
+          webPreferences: {
+            partition: partitionForShop(sid),
+            nodeIntegration: false,
+            contextIsolation: true,
+            webSecurity: false
+          }
+        })
+        this.orderPollByShop.set(sid, win)
+        win.on('closed', () => {
+          if (this.orderPollByShop.get(sid) === win) this.orderPollByShop.delete(sid)
+          this.orderPollReadyAt.delete(sid)
+        })
+        this.logger.info(`[AutoShip] 创建隐藏 ark 订单轮询窗 shop=${sid}`)
+      }
+
+      const wc = win.webContents
+      const url = wc.getURL() || ''
+      const needLoad =
+        !url ||
+        url === 'about:blank' ||
+        isArkLoginUrl(url) ||
+        !/ark\.xiaohongshu\.com\/app-order/i.test(url)
+      const lastReady = this.orderPollReadyAt.get(sid) || 0
+      if (needLoad || Date.now() - lastReady > 30 * 60 * 1000) {
+        await withTimeout(wc.loadURL(ARK_ORDER_QUERY_URL) as any, 25000, null)
+        await new Promise((r) => setTimeout(r, 1200))
+      }
+
+      const after = wc.getURL() || ''
+      if (isArkLoginUrl(after) || !isArkAuthedUrl(after)) {
+        this.logger.warn(
+          `[AutoShip] ark 订单页未登录，回落客服页轮询 shop=${sid} url=${after.slice(0, 90)}`
+        )
+        return this.getShipWc(sid)
+      }
+
+      await this.seedArkAccessToken(wc, sid)
+      if (this.injectService) {
+        await this.injectService.injectScriptAsync(wc, 'im-send').catch(() => false)
+      }
+      this.orderPollReadyAt.set(sid, Date.now())
+      return wc
+    } catch (e) {
+      this.logger.warn(`[AutoShip] ensureOrderPollWc 失败 shop=${sid}: ${e}`)
+      return this.getShipWc(sid)
+    }
+  }
+
   startPolling(intervalMs?: number) {
     this.stopPolling()
-    // 默认 30 秒；配置值若 <5 秒则强制下限保护（避免内部接口风控）
+    // 默认 15 秒；配置值若 <5 秒则强制下限保护（避免内部接口风控）
     const base = intervalMs && intervalMs > 0 ? intervalMs : AutoShipService.DEFAULT_POLL_INTERVAL
     const safeBase = Math.max(base, 5000)
 
@@ -202,36 +272,70 @@ export class AutoShipService {
   }
 
   private async pollOrdersForShop(shopId: string): Promise<void> {
-    const wc = this.getShipWc(shopId)
-    if (!wc) return
+    const wc = await this.ensureOrderPollWc(shopId)
+    if (!wc) {
+      this.logger.warn(`[AutoShip] 轮询跳过：无 WebContents shop=${shopId}`)
+      return
+    }
     const url = wc.getURL()
-    if (!url.includes('walle.xiaohongshu.com') && !url.includes('ark.xiaohongshu.com')) return
+    if (!url.includes('walle.xiaohongshu.com') && !url.includes('ark.xiaohongshu.com')) {
+      this.logger.warn(`[AutoShip] 轮询跳过：页面不在千帆域 shop=${shopId} url=${url.slice(0, 80)}`)
+      return
+    }
 
     try {
-      const ready = await wc.executeJavaScript(`
-        !!(window.__xhsAssistant && window.__xhsAssistant.im && window.__xhsAssistant.im.fetchPendingOrders)
-      `).catch(() => false)
-      if (!ready) return
+      // 页面可能被导航冲掉脚本，每次轮询确保注入
+      if (this.injectService) {
+        await this.injectService.injectScriptAsync(wc, 'im-send').catch(() => false)
+      }
 
-      const orders = await wc.executeJavaScript(`
-        window.__xhsAssistant.im.fetchPendingOrders().catch(function(e){ return { __error: String(e&&e.message||e) }; })
+      const ready = await wc
+        .executeJavaScript(
+          `!!(window.__xhsAssistant && window.__xhsAssistant.im && window.__xhsAssistant.im.fetchPendingOrders)`
+        )
+        .catch(() => false)
+      if (!ready) {
+        this.logger.warn(`[AutoShip] 轮询跳过：IMSend 未就绪 shop=${shopId}`)
+        return
+      }
+
+      this.pollTick += 1
+      // 每 4 次补拉一次：status:[] + 虚拟已发货（HAR 中订单约 4 分钟内已变 status=6）
+      const recover = this.pollTick % 4 === 0
+      const raw = await wc.executeJavaScript(`
+        window.__xhsAssistant.im.fetchPendingOrders({ recover: ${recover ? 'true' : 'false'} })
+          .catch(function(e){ return { __error: String(e&&e.message||e) }; })
       `)
 
-      if (orders && orders.__error) {
-        this.logger.warn(`[AutoShip] fetchPendingOrders shop=${shopId}: ${orders.__error}`)
+      if (raw && raw.__error) {
+        this.logger.warn(`[AutoShip] fetchPendingOrders shop=${shopId}: ${raw.__error}`)
         this.pollBackoff = Math.min((this.pollBackoff || 3000) * 2, AutoShipService.MAX_POLL_BACKOFF)
         return
       }
-      if (!Array.isArray(orders)) return
+
+      const orders = Array.isArray(raw) ? raw : Array.isArray(raw?.orders) ? raw.orders : null
+      if (!orders) {
+        this.logger.warn(`[AutoShip] fetchPendingOrders 返回异常 shop=${shopId} type=${typeof raw}`)
+        return
+      }
 
       this.pollBackoff = 0
+      if (orders.length === 0) {
+        if (this.pollTick % 4 === 1) {
+          this.logger.info(`[AutoShip] 轮询空列表 shop=${shopId} recover=${recover} url=${url.slice(0, 60)}`)
+        }
+        return
+      }
 
+      this.logger.info(
+        `[AutoShip] 轮询命中 ${orders.length} 单 shop=${shopId} recover=${recover} host=${orders[0]?.host || '-'}`
+      )
       for (const order of orders) {
         await this.handleNewOrder({ ...order, shop_id: shopId, source: order.source || 'poll' })
       }
       this.cleanupProcessed()
-    } catch {
-      // 静默：页面可能尚未注入
+    } catch (err) {
+      this.logger.warn(`[AutoShip] 轮询异常 shop=${shopId}: ${err}`)
     }
   }
 
@@ -905,9 +1009,9 @@ export class AutoShipService {
     return !!v
   }
 
-  private async seedArkAccessToken(wc: WebContents): Promise<void> {
+  private async seedArkAccessToken(wc: WebContents, shopId?: string): Promise<void> {
     try {
-      const ses = session.fromPartition(partitionForShop())
+      const ses = session.fromPartition(partitionForShop(shopId))
       const cookies = await ses.cookies.get({})
       let token = ''
       for (const c of cookies) {
@@ -1056,6 +1160,17 @@ export class AutoShipService {
     this.imWebContents = null
     this.monitorByShop.clear()
     this.imByShop.clear()
+    for (const win of this.orderPollByShop.values()) {
+      if (win && !win.isDestroyed()) {
+        try {
+          win.destroy()
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    this.orderPollByShop.clear()
+    this.orderPollReadyAt.clear()
     if (this.goodsSyncWindow && !this.goodsSyncWindow.isDestroyed()) {
       try {
         this.goodsSyncWindow.destroy()

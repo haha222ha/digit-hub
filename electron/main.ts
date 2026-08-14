@@ -317,7 +317,7 @@ let lastMerchantLoginGuardAt = 0
 
 /**
  * 主窗口只服务客服工作台：
- * - 订单探测走 API 注入，不需要打开 ark 商家后台页面
+ * - 订单轮询优先走隐藏 ark /app-order/order/query（与 HAR 同源）；客服页作回落
  * - 误跳到 customer/ark 登录时，有 SSO 则回工作台，否则回 cstools/login
  */
 async function guardAgainstMerchantLoginPage(url: string) {
