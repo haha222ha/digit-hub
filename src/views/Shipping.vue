@@ -207,19 +207,27 @@
             <div class="bind-claim-row">
               <span>
                 云端可领
-                <strong>{{ bindCloudInventory?.unclaimed_unused ?? '—' }}</strong>
-                条
-                <template v-if="bindCloudInventory">
+                <strong v-if="bindInvLoading">…</strong>
+                <strong v-else-if="!bindingForm.psyTestCode">请先选测题</strong>
+                <strong v-else>{{ bindCloudInventory?.unclaimed_unused ?? '获取失败' }}</strong>
+                <template v-if="bindingForm.psyTestCode && !bindInvLoading"> 条</template>
+                <template v-if="bindCloudInventory && !bindInvLoading">
                   （已领未开测 {{ bindCloudInventory.claimed_unused }}）
                 </template>
               </span>
               <el-input-number v-model="claimCount" :min="1" :max="200" size="small" style="width: 110px" />
-              <el-button size="small" :disabled="!bindingForm.psyTestCode" @click="refreshBindInventory">
+              <el-button size="small" :loading="bindInvLoading" @click="refreshBindInventory">
                 刷新
               </el-button>
             </div>
-            <p v-if="bindCloudInventory && bindCloudInventory.unclaimed_unused === 0" class="hint-text" style="margin-top: 6px; color: #b45309">
-              云端暂无可领链接：请先到心象测「生成链接」生成 7v7，再回来领取。
+            <p v-if="!bindingForm.psyTestCode" class="hint-text" style="margin-top: 6px; color: #b45309">
+              请先在上方选择心象测测题（如 7v7），才会显示可领条数。
+            </p>
+            <p v-else-if="bindInvError" class="hint-text" style="margin-top: 6px; color: #b45309">
+              {{ bindInvError }}
+            </p>
+            <p v-else-if="bindCloudInventory && bindCloudInventory.unclaimed_unused === 0" class="hint-text" style="margin-top: 6px; color: #b45309">
+              云端暂无可领链接：请先到心象测「生成链接」生成该测题，再回来领取。
             </p>
           </div>
         </el-form-item>
@@ -370,6 +378,8 @@ const claimCount = ref(20)
 const claiming = ref(false)
 const cloudInventory = ref<{ unclaimed_unused: number; claimed_unused: number; used: number } | null>(null)
 const bindCloudInventory = ref<{ unclaimed_unused: number; claimed_unused: number; used: number } | null>(null)
+const bindInvLoading = ref(false)
+const bindInvError = ref('')
 const cloudLowHint = ref<Record<number, boolean>>({})
 /** 保存后自动打开链接池并领取 */
 const pendingClaimAfterSave = ref(false)
@@ -717,21 +727,89 @@ const loadPsyTests = async () => {
   if (!window.electronAPI?.psyListTests) return
   psyTestsLoading.value = true
   try {
+    const st = await window.electronAPI.psyStatus?.()
+    if (st && !st.hasToken) {
+      ElMessage.warning('请先到「设置 → 心象测对接」登录')
+      psyTests.value = []
+      return
+    }
     const res = await window.electronAPI.psyListTests()
-    if (res.success) psyTests.value = res.tests || []
-    else if (res.message) ElMessage.warning(res.message)
+    if (res.success) {
+      psyTests.value = res.tests || []
+      // 未选手动测题时，按商品名自动匹配（如「七宗罪」→ 7v7）
+      if (!bindingForm.value.psyTestCode.trim()) {
+        const guessed = guessTestCode(bindingForm.value.productName, psyTests.value)
+        if (guessed) bindingForm.value.psyTestCode = guessed
+      }
+      if (bindingForm.value.psyTestCode.trim()) await refreshBindInventory()
+    } else if (res.message) {
+      ElMessage.warning(res.message)
+    }
   } finally {
     psyTestsLoading.value = false
   }
 }
 
+/** 根据商品名猜测测题 code */
+function guessTestCode(
+  productName: string,
+  tests: Array<{ test_code: string; test_name?: string; name?: string }>
+): string {
+  const name = String(productName || '')
+  if (!tests.length) return ''
+  if (/七宗罪|七美德|\b7v7\b/i.test(name)) {
+    const hit = tests.find((t) => t.test_code === '7v7')
+    if (hit) return '7v7'
+  }
+  for (const t of tests) {
+    const label = String(t.test_name || t.name || '').trim()
+    if (label.length >= 2 && name.includes(label)) return t.test_code
+  }
+  for (const t of tests) {
+    if (t.test_code && name.toLowerCase().includes(String(t.test_code).toLowerCase())) {
+      return t.test_code
+    }
+  }
+  return ''
+}
+
 const refreshBindInventory = async () => {
-  bindCloudInventory.value = null
   const code = (bindingForm.value.psyTestCode || '').trim()
-  if (!code || !window.electronAPI?.psyInventory) return
-  const res = await window.electronAPI.psyInventory(code)
-  if (res.success && res.inventory) bindCloudInventory.value = res.inventory
-  else if (res.message) ElMessage.warning(res.message)
+  bindInvError.value = ''
+  if (!code) {
+    bindCloudInventory.value = null
+    bindInvError.value = '请先选择心象测测题'
+    return
+  }
+  if (!window.electronAPI?.psyInventory) {
+    bindInvError.value = '桌面接口未就绪，请重启助手'
+    return
+  }
+  bindInvLoading.value = true
+  try {
+    const st = await window.electronAPI.psyStatus?.()
+    if (st && !st.hasToken) {
+      bindCloudInventory.value = null
+      bindInvError.value = '未登录心象测，请到设置里登录后再刷新'
+      return
+    }
+    const res = await window.electronAPI.psyInventory(code)
+    if (res.success && res.inventory) {
+      bindCloudInventory.value = res.inventory
+      const n = Number(res.inventory.unclaimed_unused || 0)
+      if (n > 0 && claimCount.value > n) claimCount.value = n
+    } else {
+      bindCloudInventory.value = null
+      bindInvError.value = res.message || '获取云端可领数量失败'
+      ElMessage.warning(bindInvError.value)
+    }
+  } catch (e: any) {
+    bindCloudInventory.value = null
+    bindInvError.value = e?.message || '获取云端可领数量失败'
+    ElMessage.warning(bindInvError.value)
+  } finally {
+    bindInvLoading.value = false
+  }
 }
 
 const onBindTestChange = () => {
