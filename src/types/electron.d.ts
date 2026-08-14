@@ -73,6 +73,36 @@ export interface ElectronAPI {
   getCardStats(bindingId: number): Promise<{ total: number; unused: number; used: number; locked: number }>
   getCardList(bindingId: number, status?: string, limit?: number, offset?: number): Promise<CardPoolItem[]>
 
+  psyStatus(): Promise<{ configured: boolean; baseUrl: string; username: string; hasToken: boolean }>
+  psySetConfig(opts: { baseUrl?: string; token?: string; username?: string }): Promise<boolean>
+  psyClearAuth(): Promise<boolean>
+  psyLogin(username: string, password: string): Promise<{ success: boolean; message?: string; username?: string }>
+  psyListTests(): Promise<{ success: boolean; tests: Array<{ test_code: string; test_name?: string; name?: string }>; message?: string }>
+  psyInventory(testCode: string): Promise<{
+    success: boolean
+    inventory?: {
+      test_code: string
+      unclaimed_unused: number
+      claimed_unused: number
+      used: number
+    }
+    message?: string
+  }>
+  psyClaimIntoPool(
+    bindingId: number,
+    testCode: string,
+    count: number,
+    productId?: string
+  ): Promise<{
+    success: boolean
+    message?: string
+    claimed?: number
+    added?: number
+    remaining_unclaimed?: number
+    batchId?: string
+  }>
+  psyReleaseBatch(batchId: string): Promise<{ success: boolean; released?: number; message?: string }>
+
   // 订单发卡管理
   getOrderDeliveries(filter: { shopId?: string; status?: string; limit?: number; offset?: number }): Promise<{ items: OrderDelivery[]; total: number }>
   getOrderDeliveryDetail(orderId: string): Promise<OrderDelivery[]>
@@ -81,7 +111,9 @@ export interface ElectronAPI {
   retryFailedDeliveries(): Promise<number>
 
   // 商品同步
-  syncGoodsList(): Promise<{ success: boolean; goods: Array<{ itemId: string; title: string; noteId?: string; price?: string; stock?: string; image?: string }>; error?: string }>
+  syncGoodsList(): Promise<{ success: boolean; goods: Array<{ itemId: string; title: string; noteId?: string; price?: string; stock?: string; image?: string; variant?: string }>; error?: string }>
+  openArkMerchant(): Promise<{ success: boolean; error?: string }>
+  onGoodsSyncResult(callback: (result: { success: boolean; goods: any[]; error?: string }) => void): () => void
 
   getAutoShipProcessedCount(): Promise<number>
   startAutoShip(intervalMs?: number): Promise<boolean>
@@ -109,6 +141,8 @@ export interface ElectronAPI {
   browserCanGoForward(): Promise<boolean>
   browserShow(): Promise<boolean>
   browserHide(): Promise<boolean>
+  browserOpenLoginAssist(): Promise<boolean>
+  browserFocus(): Promise<boolean>
   browserRoute(path: string): Promise<boolean>
   browserSetBounds(bounds: { x: number; y: number; width: number; height: number }): Promise<boolean>
   onBrowserUrlChange(callback: (url: string) => void): void
@@ -148,7 +182,7 @@ export interface ProductBindingInput {
   productId: string
   productName?: string
   productType?: 'virtual' | 'physical'
-  deliverType?: 'card' | 'text' | 'link' | 'note' | 'image' | 'video' | 'mixed' | 'manual'
+  deliverType?: 'card' | 'link_card' | 'text' | 'link' | 'note' | 'image' | 'video' | 'mixed' | 'manual'
   deliverContent: string
   stock?: number
   randomMode?: boolean
@@ -156,6 +190,7 @@ export interface ProductBindingInput {
   sendIntervalMs?: number
   uidLength?: number
   msgSeparator?: string
+  psyTestCode?: string
 }
 
 export interface ProductBinding {
@@ -174,6 +209,7 @@ export interface ProductBinding {
   send_interval_ms?: number
   uid_length?: number
   msg_separator?: string
+  psy_test_code?: string
 }
 
 export interface CardPoolItem {

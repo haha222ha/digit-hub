@@ -138,6 +138,7 @@ export class StorageService {
         send_interval_ms INTEGER DEFAULT 500,
         uid_length INTEGER DEFAULT 10,
         msg_separator TEXT DEFAULT '\n\n',
+        psy_test_code TEXT DEFAULT '',
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now'))
       );
@@ -183,6 +184,13 @@ export class StorageService {
       CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_order ON order_delivery(order_id);
       CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_guid ON order_delivery(msg_guid);
     `)
+
+    // 增量列（幂等）
+    try {
+      this.db.exec(`ALTER TABLE product_bindings ADD COLUMN psy_test_code TEXT DEFAULT ''`)
+    } catch {
+      /* already exists */
+    }
   }
 
   /**
@@ -498,7 +506,7 @@ export class StorageService {
     productId: string
     productName?: string
     productType?: 'virtual' | 'physical'
-    deliverType?: 'card' | 'text' | 'link' | 'note' | 'image' | 'video' | 'mixed' | 'manual'
+    deliverType?: 'card' | 'link_card' | 'text' | 'link' | 'note' | 'image' | 'video' | 'mixed' | 'manual'
     deliverContent: string
     stock?: number
     randomMode?: boolean
@@ -506,12 +514,13 @@ export class StorageService {
     sendIntervalMs?: number
     uidLength?: number
     msgSeparator?: string
+    psyTestCode?: string
   }): number {
     const result = this.db.prepare(
       `INSERT INTO product_bindings
         (shop_id, product_id, product_name, product_type, deliver_type, deliver_content, stock,
-         random_mode, low_stock_alert, send_interval_ms, uid_length, msg_separator)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+         random_mode, low_stock_alert, send_interval_ms, uid_length, msg_separator, psy_test_code)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       binding.shopId,
       binding.productId,
@@ -524,7 +533,8 @@ export class StorageService {
       binding.lowStockAlert ?? 10,
       binding.sendIntervalMs ?? 500,
       binding.uidLength ?? 10,
-      binding.msgSeparator ?? '\n\n'
+      binding.msgSeparator ?? '\n\n',
+      binding.psyTestCode || ''
     )
     this.logger.info(`[Storage] 新增商品绑定: productId=${binding.productId}, id=${result.lastInsertRowid}`)
     return Number(result.lastInsertRowid)
@@ -608,6 +618,7 @@ export class StorageService {
     sendIntervalMs?: number
     uidLength?: number
     msgSeparator?: string
+    psyTestCode?: string
   }): boolean {
     const fields: string[] = []
     const values: any[] = []
@@ -621,6 +632,7 @@ export class StorageService {
     if (updates.sendIntervalMs !== undefined) { fields.push('send_interval_ms = ?'); values.push(updates.sendIntervalMs) }
     if (updates.uidLength !== undefined) { fields.push('uid_length = ?'); values.push(updates.uidLength) }
     if (updates.msgSeparator !== undefined) { fields.push('msg_separator = ?'); values.push(updates.msgSeparator) }
+    if (updates.psyTestCode !== undefined) { fields.push('psy_test_code = ?'); values.push(updates.psyTestCode) }
     if (fields.length === 0) return false
     fields.push('updated_at = datetime(\'now\')')
     values.push(id)

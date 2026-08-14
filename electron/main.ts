@@ -15,6 +15,7 @@ import { MockService } from './services/mock.service'
 import { AutoShipService } from './services/autoship.service'
 import { AutoReshipService } from './services/autoreship.service'
 import { ShopContextService } from './services/shop-context.service'
+import { PsyCloudService } from './services/psy-cloud.service'
 import { ensureSingleInstance } from './utils/singleton'
 import { CHROME_UA, applyElectronStealthFlags } from './constants/browser-env'
 import { bindEvaNedbIpc, invokeDb } from './eva-nedb'
@@ -65,6 +66,7 @@ let autoLoginService: AutoLoginService
 let crashRecoveryService: CrashRecoveryService
 let mockService: MockService
 let autoShipService: AutoShipService
+let psyCloudService: PsyCloudService
 let autoReshipService: AutoReshipService
 let shopContextService: ShopContextService
 
@@ -90,6 +92,98 @@ function getBrowserViewBounds(): { x: number; y: number; width: number; height: 
 function updateBrowserViewBounds() {
   if (!mainWindow || !xhsBrowserView) return
   xhsBrowserView.setBounds(getBrowserViewBounds())
+  try {
+    mainWindow.setTopBrowserView(xhsBrowserView)
+  } catch {
+    // ignore
+  }
+}
+
+function focusXhsBrowserView() {
+  if (!mainWindow || !xhsBrowserView) return
+  try {
+    mainWindow.addBrowserView(xhsBrowserView)
+    updateBrowserViewBounds()
+    mainWindow.setTopBrowserView(xhsBrowserView)
+    xhsBrowserView.webContents.focus()
+  } catch (e) {
+    logger?.warn(`[XhsBrowser] focus 失败: ${e}`)
+  }
+}
+
+/** 独立登录窗：验证码在 BrowserView 内常点不到，弹窗可正常点选 */
+let loginAssistWindow: BrowserWindow | null = null
+
+async function openLoginAssistWindow(reason = 'manual') {
+  if (loginAssistWindow && !loginAssistWindow.isDestroyed()) {
+    loginAssistWindow.show()
+    loginAssistWindow.focus()
+    return loginAssistWindow
+  }
+
+  loginAssistWindow = new BrowserWindow({
+    width: 1080,
+    height: 720,
+    minWidth: 900,
+    minHeight: 600,
+    title: '客服登录 / 安全验证（请在此窗口完成验证）',
+    parent: mainWindow || undefined,
+    modal: false,
+    autoHideMenuBar: true,
+    webPreferences: getXhsWebPreferences()
+  })
+
+  loginAssistWindow.webContents.setUserAgent(CHROME_UA)
+  logger.info(`[LoginAssist] 打开独立登录窗 reason=${reason}`)
+
+  loginAssistWindow.webContents.on('dom-ready', () => {
+    injectService?.injectOnDomReady(loginAssistWindow!.webContents)
+    // 登录页强制注入 login-helper，方便验证码可点修补
+    void injectService?.injectLoginHelper(loginAssistWindow!.webContents)
+  })
+  loginAssistWindow.webContents.on('did-finish-load', () => {
+    injectService?.injectScripts(loginAssistWindow!.webContents)
+    void injectService?.injectLoginHelper(loginAssistWindow!.webContents)
+    loginAssistWindow?.webContents.focus()
+  })
+
+  loginAssistWindow.webContents.on('did-navigate', (_e, url) => {
+    void onLoginAssistNavigated(url)
+  })
+  loginAssistWindow.webContents.on('did-navigate-in-page', (_e, url) => {
+    void onLoginAssistNavigated(url)
+  })
+
+  loginAssistWindow.on('closed', () => {
+    loginAssistWindow = null
+  })
+
+  await loginAssistWindow.loadURL(XHS_LOGIN_URL)
+  loginAssistWindow.show()
+  loginAssistWindow.focus()
+  return loginAssistWindow
+}
+
+async function onLoginAssistNavigated(url: string) {
+  if (!url.includes('walle.xiaohongshu.com/cstools/')) return
+  if (url.includes('/login')) return
+  logger.info(`[LoginAssist] 登录成功，同步主视图: ${url}`)
+  const shopId = (global as any).currentShopId || 'default'
+  try {
+    if (xhsBrowserView && autoLoginService) {
+      await xhsBrowserView.webContents.loadURL(url.includes('/cstools/') ? url : XHS_DASHBOARD_URL)
+      focusXhsBrowserView()
+      await autoLoginService.saveCookies(shopId, xhsBrowserView.webContents)
+      await shopContextService?.initializePhase2(shopId)
+      wsService?.reconnectKefu()
+      mainWindow?.webContents.send('login-assist-done', { url })
+    }
+  } catch (e) {
+    logger.warn(`[LoginAssist] 同步失败: ${e}`)
+  }
+  if (loginAssistWindow && !loginAssistWindow.isDestroyed()) {
+    loginAssistWindow.close()
+  }
 }
 
 async function showAndLoadXhs(url?: string) {
@@ -118,13 +212,31 @@ async function handle401Redirect(sourceUrl?: string) {
   if (!xhsBrowserView || !autoLoginService) return
   const currentUrl = xhsBrowserView.webContents.getURL()
 
-  // 已在登录页：不再 reload / 自动登录，避免表单被刷没
+  // 工作台壳还在：对齐阿奇锁——401 不强制踢登录（很多次要接口会 401）
+  if (
+    currentUrl.includes('walle.xiaohongshu.com/cstools/') &&
+    !currentUrl.includes('/login')
+  ) {
+    const shellOk = await autoLoginService.isWorkbenchShellReady(xhsBrowserView.webContents)
+    if (shellOk || (await autoLoginService.hasSsoSessionCookies())) {
+      logger.info(`[401] 工作台仍有效，忽略: ${String(sourceUrl || '').slice(0, 100)}`)
+      return
+    }
+  }
+
+  // 已在客服登录页：不再 reload，避免表单被刷没
+  if (currentUrl.includes('/cstools/login') && !currentUrl.includes('customer.xiaohongshu.com')) {
+    logger.info('[401] 已在客服登录页，等待手动登录')
+    mainWindow?.webContents.send('login-required', { reason: 'cookie_expired' })
+    return
+  }
+  // 误落商家登录页：改回客服登录
   if (
     currentUrl.includes('customer.xiaohongshu.com') ||
-    currentUrl.includes('/cstools/login') ||
-    currentUrl.includes('/login')
+    currentUrl.includes('ark.xiaohongshu.com/ark/login')
   ) {
-    logger.info('[401] 已在登录页，等待手动登录')
+    logger.warn('[401] 当前在商家登录页，改回客服登录页')
+    await xhsBrowserView.webContents.loadURL(XHS_LOGIN_URL)
     mainWindow?.webContents.send('login-required', { reason: 'cookie_expired' })
     return
   }
@@ -194,6 +306,41 @@ function startCookieWatchdog() {
 
 /** 登录成功跳到工作台后补 Phase2 / 鉴权 Cookie（拦截器 postMessage 可能丢） */
 let lastWorkbenchPhase2At = 0
+/** 防止误进商家 ark/customer 登录页后死循环回跳 */
+let lastMerchantLoginGuardAt = 0
+
+/**
+ * 主窗口只服务客服工作台：
+ * - 订单探测走 API 注入，不需要打开 ark 商家后台页面
+ * - 误跳到 customer/ark 登录时，有 SSO 则回工作台，否则回 cstools/login
+ */
+async function guardAgainstMerchantLoginPage(url: string) {
+  if (!xhsBrowserView || !autoLoginService) return
+  const isMerchantLogin =
+    /customer\.xiaohongshu\.com/i.test(url) ||
+    /ark\.xiaohongshu\.com\/ark\/login/i.test(url) ||
+    (/ark\.xiaohongshu\.com/i.test(url) && /[?&]service=/i.test(url) && /login/i.test(url))
+  if (!isMerchantLogin) return
+
+  const now = Date.now()
+  if (now - lastMerchantLoginGuardAt < 2500) return
+  lastMerchantLoginGuardAt = now
+
+  const hasSso = await autoLoginService.hasSsoSessionCookies()
+  const target = hasSso ? XHS_DASHBOARD_URL : XHS_LOGIN_URL
+  logger.warn(
+    `[XhsBrowser] 拦截商家后台登录页，改回客服链路 hasSso=${hasSso} → ${target}`
+  )
+  try {
+    await xhsBrowserView.webContents.loadURL(target)
+  } catch (e) {
+    logger.warn(`[XhsBrowser] 回跳失败: ${e}`)
+  }
+  if (!hasSso) {
+    mainWindow?.webContents.send('login-required', { reason: 'need_kefu_login' })
+  }
+}
+
 async function onWorkbenchNavigated(url: string) {
   if (!autoLoginService || !shopContextService) return
   if (!url.includes('walle.xiaohongshu.com/cstools/')) return
@@ -221,10 +368,16 @@ function bindXhsBrowserViewEvents(view: BrowserView) {
   wc.on('dom-ready', () => injectService?.injectOnDomReady(wc))
   wc.on('did-finish-load', async () => {
     injectService?.injectScripts(wc)
+    try {
+      await autoLoginService?.applyPendingLocalStorage(wc)
+    } catch {
+      // ignore
+    }
   })
 
   wc.on('did-navigate', (_event, url) => {
     mainWindow?.webContents.send('browser:url-changed', url)
+    void guardAgainstMerchantLoginPage(url)
     void onWorkbenchNavigated(url)
   })
   wc.on('did-navigate-in-page', (_event, url) => {
@@ -235,7 +388,12 @@ function bindXhsBrowserViewEvents(view: BrowserView) {
   wc.on('did-stop-loading', () => mainWindow?.webContents.send('browser:loading', false))
 
   wc.on('did-redirect-navigation', (_event, url) => {
-    if (url.includes('/login') || url.includes('/cstools/login') || url.includes('customer.xiaohongshu.com/login')) {
+    void guardAgainstMerchantLoginPage(url)
+    if (
+      url.includes('/cstools/login') ||
+      url.includes('customer.xiaohongshu.com/login') ||
+      url.includes('ark.xiaohongshu.com/ark/login')
+    ) {
       logger.info(`[XhsBrowser] 跳转到登录页: ${url}`)
       mainWindow?.webContents.send('login-required', { reason: 'redirect_to_login' })
     }
@@ -310,6 +468,8 @@ async function initialize() {
   }
 
   autoShipService = new AutoShipService(storageService, logger, mockService)
+  autoShipService.setInjectService(injectService)
+  psyCloudService = new PsyCloudService(storageService, logger)
   autoReshipService = new AutoReshipService(storageService, logger, autoShipService)
   shopContextService = new ShopContextService(
     logger, storageService, wsService, autoShipService, autoReshipService, mockService
@@ -343,6 +503,7 @@ async function initialize() {
   ;(global as any).autoReshipService = autoReshipService
   ;(global as any).mockService = mockService
   ;(global as any).currentShopId = 'default'
+  ;(global as any).openLoginAssistWindow = openLoginAssistWindow
 
   wsService.start()
   logger.info('初始化完成')
@@ -386,35 +547,45 @@ function createMainWindow() {
 
   mainWindow.once('ready-to-show', async () => {
     mainWindow?.show()
-    // 对齐阿奇锁：先打开客服登录页 cstools/login
-    await showAndLoadXhs(XHS_START_URL)
     mainWindow?.webContents.send('navigate', '/browser')
 
+    // 保活：优先注入已存 Cookie → 直接进工作台；失效才打开客服登录页（永不默认打开 ark）
+    const shopId = (global as any).currentShopId || 'default'
+    await showAndLoadXhs('about:blank')
     autoShipService.bindWebContents(xhsBrowserView!.webContents)
     autoReshipService.bindWebContents(xhsBrowserView!.webContents)
 
-    const shopId = (global as any).currentShopId || 'default'
-    const isLoggedIn = await autoLoginService.checkLoginStatus(xhsBrowserView!.webContents)
-    if (isLoggedIn) {
-      await autoLoginService.saveCookies(shopId, xhsBrowserView!.webContents)
-      await xhsBrowserView!.webContents.loadURL(XHS_DASHBOARD_URL)
-      await shopContextService.initializePhase2(shopId)
-      logger.info('[Login] 登录成功，已完成 Phase 2')
-    } else {
-      logger.info('[KefuBrowser] Cookie 过期或未登录，尝试自动登录...')
-      const ok = await autoLoginService.tryAutoLoginIfNeeded(
-        shopId,
-        xhsBrowserView!.webContents,
-        XHS_LOGIN_URL
-      )
-      if (ok) {
+    let ok = false
+    try {
+      const injected = await autoLoginService.loadAndInjectCookies(shopId)
+      if (injected) {
         await xhsBrowserView!.webContents.loadURL(XHS_DASHBOARD_URL)
-        await shopContextService.initializePhase2(shopId)
-        logger.info('[KefuAutoLogin] ✅ 自动登录成功')
-      } else {
-        logger.info('[Login] 等待手动登录：请用客服邮箱登录 cstools/login（不是上架扫码）')
-        mainWindow?.webContents.send('login-required', { reason: 'need_manual_login' })
+        await new Promise((r) => setTimeout(r, 2500))
       }
+      ok = await autoLoginService.checkLoginStatus(xhsBrowserView!.webContents)
+      if (!ok) {
+        ok = await autoLoginService.tryAutoLoginIfNeeded(
+          shopId,
+          xhsBrowserView!.webContents,
+          XHS_DASHBOARD_URL
+        )
+      }
+    } catch (e) {
+      logger.warn(`[Login] 启动保活失败: ${e}`)
+    }
+
+    if (ok) {
+      await autoLoginService.saveCookies(shopId, xhsBrowserView!.webContents)
+      const cur = xhsBrowserView!.webContents.getURL()
+      if (!cur.includes('walle.xiaohongshu.com/cstools/') || cur.includes('/login')) {
+        await xhsBrowserView!.webContents.loadURL(XHS_DASHBOARD_URL)
+      }
+      await shopContextService.initializePhase2(shopId)
+      logger.info('[Login] 登录保活成功，已进入客服工作台')
+    } else {
+      await showAndLoadXhs(XHS_LOGIN_URL)
+      logger.info('[Login] 需手动登录：请用客服邮箱登录（不是商家扫码）')
+      mainWindow?.webContents.send('login-required', { reason: 'need_manual_login' })
     }
 
     startCookieWatchdog()
@@ -601,8 +772,7 @@ function setupIPC() {
   ipcMain.handle('browser:route', (_event, path: string) => {
     if (!mainWindow || !xhsBrowserView) return false
     if (path === '/browser') {
-      mainWindow.addBrowserView(xhsBrowserView)
-      updateBrowserViewBounds()
+      focusXhsBrowserView()
     } else {
       mainWindow.removeBrowserView(xhsBrowserView)
     }
@@ -611,9 +781,22 @@ function setupIPC() {
 
   ipcMain.handle('browser:show', () => {
     if (!mainWindow || !xhsBrowserView) return false
-    mainWindow.addBrowserView(xhsBrowserView)
-    updateBrowserViewBounds()
+    focusXhsBrowserView()
     return true
+  })
+
+  ipcMain.handle('browser:focus', () => {
+    focusXhsBrowserView()
+    return true
+  })
+
+  ipcMain.handle('browser:open-login-assist', async () => {
+    await openLoginAssistWindow('ui')
+    return true
+  })
+
+  ipcMain.on('captcha-required', () => {
+    void openLoginAssistWindow('captcha')
   })
 
   ipcMain.handle('browser:hide', () => {
@@ -742,6 +925,26 @@ function setupIPC() {
   ipcMain.handle('product:card-list', (_event, bindingId: number, status?: string, limit?: number, offset?: number) =>
     storageService.getCardPoolList(bindingId, status, limit, offset))
 
+  ipcMain.handle('psy:status', () => psyCloudService.getStatus())
+  ipcMain.handle('psy:set-config', (_event, opts: { baseUrl?: string; token?: string; username?: string }) => {
+    psyCloudService.setConfig(opts || {})
+    return true
+  })
+  ipcMain.handle('psy:clear-auth', () => {
+    psyCloudService.clearAuth()
+    return true
+  })
+  ipcMain.handle('psy:login', async (_event, username: string, password: string) =>
+    psyCloudService.login(username, password))
+  ipcMain.handle('psy:list-tests', async () => psyCloudService.listTests())
+  ipcMain.handle('psy:inventory', async (_event, testCode: string) => psyCloudService.inventory(testCode))
+  ipcMain.handle(
+    'psy:claim-into-pool',
+    async (_event, bindingId: number, testCode: string, count: number, productId?: string) =>
+      psyCloudService.claimIntoPool(bindingId, testCode, count, productId)
+  )
+  ipcMain.handle('psy:release-batch', async (_event, batchId: string) => psyCloudService.releaseBatch(batchId))
+
   // 订单发卡管理（对标阿奇锁 OrderImMsgController）
   ipcMain.handle('order:deliveries', (_event, filter) => storageService.getOrderDeliveriesList(filter || {}))
   ipcMain.handle('order:delivery-detail', (_event, orderId: string) => storageService.getOrderDeliveries(orderId))
@@ -760,6 +963,7 @@ function setupIPC() {
 
   // 同步千帆后台商品列表（对标阿奇锁 getGoodsNoteList）
   ipcMain.handle('goods:sync', async () => autoShipService.syncGoodsList())
+  ipcMain.handle('goods:open-ark', () => autoShipService.openArkMerchantWindow())
 
   ipcMain.handle('reply:list', (_event, shopId: string) => storageService.getReplyRules(shopId, true))
   ipcMain.handle('reply:add', (_event, rule) => {
@@ -818,10 +1022,10 @@ function setupIPC() {
     if (data?.success) {
       autoLoginService.markCsaSuccess()
     }
-    // 无论 success 与否都尝试抠 token（401 业务体里有时仍带 token）
+    // 先从 API 体抠 token；auth===access 时 apply 会拒绝，避免污染
     if (data?.data) {
       const tok = autoLoginService.extractAuthFromPayload(data.data)
-      if (tok.authToken || tok.accessToken) {
+      if (tok.authToken && tok.accessToken && tok.authToken !== tok.accessToken) {
         await autoLoginService.applyEvaAuthTokens(tok)
       }
     }

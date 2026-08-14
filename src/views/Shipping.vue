@@ -13,15 +13,41 @@
       <el-tabs v-model="activeTab">
         <!-- ============ 商品绑定 ============ -->
         <el-tab-pane label="商品绑定" name="bindings">
-          <el-button type="primary" @click="openBindingDialog()" style="margin-bottom: 16px">
-            添加商品绑定
-          </el-button>
-          <el-button style="margin-bottom: 16px; margin-left: 8px" :loading="syncingGoods" @click="syncGoods">
-            同步千帆商品
-          </el-button>
-          <span v-if="goodsList.length > 0" class="hint-text" style="margin-left: 8px">
-            已同步 {{ goodsList.length }} 个商品
-          </span>
+          <div style="margin-bottom: 16px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px">
+            <el-button type="primary" @click="openBindingDialog()">
+              添加商品绑定
+            </el-button>
+            <el-button type="success" :loading="syncingGoods" @click="syncGoods">
+              同步千帆商品
+            </el-button>
+            <el-button :disabled="syncingGoods" @click="openArkLogin">
+              打开商家登录
+            </el-button>
+            <span v-if="goodsList.length > 0" class="hint-text">
+              已同步 {{ goodsList.length }} 个商品，点下方「绑卡」导入激活码
+            </span>
+            <span v-else class="hint-text">
+              客服登录≠商家后台；先「打开商家登录」或点同步后在弹出窗登录
+            </span>
+          </div>
+
+          <!-- 已同步的店铺商品（绑卡入口） -->
+          <el-card v-if="goodsList.length > 0" shadow="never" style="margin-bottom: 16px">
+            <template #header>
+              <span>店铺商品（同步结果）</span>
+            </template>
+            <el-table :data="goodsList" border max-height="280" size="small">
+              <el-table-column prop="itemId" label="商品ID" width="180" />
+              <el-table-column prop="title" label="商品名称" min-width="200" show-overflow-tooltip />
+              <el-table-column prop="variant" label="规格" width="120" show-overflow-tooltip />
+              <el-table-column label="操作" width="160" fixed="right">
+                <template #default="{ row }">
+                  <el-button text type="primary" @click="bindGoodsForCard(row)">绑卡</el-button>
+                  <el-button text @click="quickBindGoods(row)">仅绑定</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
 
           <el-table :data="bindings" border>
             <el-table-column prop="product_id" label="商品ID" width="160" />
@@ -31,10 +57,16 @@
                 <el-tag size="small">{{ deliverTypeText(row.deliver_type) }}</el-tag>
               </template>
             </el-table-column>
+            <el-table-column prop="psy_test_code" label="测题" width="100" />
             <el-table-column prop="stock" label="库存" width="80" />
-            <el-table-column label="告警" width="90">
+            <el-table-column label="告警" width="110">
               <template #default="{ row }">
                 <el-tag v-if="row.stock <= (row.low_stock_alert ?? 10)" type="warning" size="small">低库存</el-tag>
+                <el-tag
+                  v-else-if="row.deliver_type === 'link_card' && cloudLowHint[row.id]"
+                  type="warning"
+                  size="small"
+                >云端可领少</el-tag>
                 <span v-else>-</span>
               </template>
             </el-table-column>
@@ -129,16 +161,40 @@
           <el-input v-model="bindingForm.productName" />
         </el-form-item>
         <el-form-item label="发货类型">
-          <el-select v-model="bindingForm.deliverType" style="width: 100%">
+          <el-select v-model="bindingForm.deliverType" style="width: 100%" @change="onDeliverTypeChange">
             <el-option label="激活码/卡密" value="card" />
+            <el-option label="链接卡密（一单一链）" value="link_card" />
             <el-option label="固定文本" value="text" />
-            <el-option label="网盘链接" value="link" />
+            <el-option label="固定网盘链接" value="link" />
             <el-option label="笔记/网址凭证" value="note" />
             <el-option label="图片" value="image" />
             <el-option label="视频" value="video" />
             <el-option label="多段组合(JSON)" value="mixed" />
             <el-option label="手动" value="manual" />
           </el-select>
+          <div v-if="bindingForm.deliverType === 'link_card'" class="hint-text" style="margin-top: 6px">
+            每条订单消耗卡密池里的一条专属链接（如 psy.xhs365.cn/…），已发送标记为已用，不会重复发
+          </div>
+        </el-form-item>
+        <el-form-item v-if="bindingForm.deliverType === 'link_card'" label="心象测测题" required>
+          <el-select
+            v-model="bindingForm.psyTestCode"
+            filterable
+            clearable
+            placeholder="选择对应测题（生成链接时的 test_code）"
+            style="width: 100%"
+            :loading="psyTestsLoading"
+          >
+            <el-option
+              v-for="t in psyTests"
+              :key="t.test_code"
+              :label="`${t.test_name || t.name || t.test_code} (${t.test_code})`"
+              :value="t.test_code"
+            />
+          </el-select>
+          <div class="hint-text" style="margin-top: 6px">
+            未看到测题？先到「设置 → 心象测对接」登录商家账号
+          </div>
         </el-form-item>
         <el-form-item label="发货内容">
           <el-input
@@ -177,9 +233,32 @@
     </el-dialog>
 
     <!-- ============ 卡密管理弹窗 ============ -->
-    <el-dialog v-model="showCards" title="卡密池管理" width="700px">
+    <el-dialog v-model="showCards" :title="cardBindingIsLink ? '专属链接池' : '卡密池管理'" width="720px">
+      <div v-if="cardBindingIsLink" class="cloud-claim-bar">
+        <span>
+          测题 <strong>{{ cardPsyTestCode || '未绑定' }}</strong>
+          · 云端可领 <strong>{{ cloudInventory?.unclaimed_unused ?? '—' }}</strong>
+          · 已领未开测 {{ cloudInventory?.claimed_unused ?? '—' }}
+        </span>
+        <el-input-number v-model="claimCount" :min="1" :max="200" size="small" style="width: 110px; margin-left: 12px" />
+        <el-button
+          type="success"
+          size="small"
+          style="margin-left: 8px"
+          :loading="claiming"
+          :disabled="!cardPsyTestCode"
+          @click="claimFromCloud"
+        >
+          从云端领取导入
+        </el-button>
+        <el-button size="small" style="margin-left: 4px" :disabled="!cardPsyTestCode" @click="refreshCloudInventory">
+          刷新库存
+        </el-button>
+      </div>
       <div class="card-toolbar">
-        <el-button type="primary" @click="showCardImport = true">批量导入</el-button>
+        <el-button type="primary" @click="showCardImport = true">
+          {{ cardBindingIsLink ? '批量粘贴导入' : '批量导入' }}
+        </el-button>
         <el-select v-model="cardFilter" placeholder="状态筛选" style="width: 140px; margin-left: 8px" @change="loadCards">
           <el-option label="全部" value="all" />
           <el-option label="未使用" value="unused" />
@@ -192,7 +271,7 @@
       </div>
 
       <el-table :data="cardList" border max-height="360" style="margin-top: 12px">
-        <el-table-column prop="card_content" label="卡密内容" />
+        <el-table-column :prop="'card_content'" :label="cardBindingIsLink ? '专属链接' : '卡密内容'" />
         <el-table-column prop="status" label="状态" width="90">
           <template #default="{ row }">
             <el-tag :type="row.status === 'used' ? 'success' : row.status === 'locked' ? 'warning' : 'info'" size="small">
@@ -206,9 +285,19 @@
     </el-dialog>
 
     <!-- ============ 卡密导入弹窗 ============ -->
-    <el-dialog v-model="showCardImport" title="批量导入卡密" width="500px" append-to-body>
-      <el-input v-model="cardText" type="textarea" :rows="10" placeholder="每行一条卡密" />
-      <el-checkbox v-model="skipDuplicate" style="margin-top: 8px">跳过重复卡密</el-checkbox>
+    <el-dialog v-model="showCardImport" :title="cardImportTitle" width="560px" append-to-body>
+      <el-input
+        v-model="cardText"
+        type="textarea"
+        :rows="10"
+        :placeholder="cardImportPlaceholder"
+      />
+      <el-checkbox v-model="skipDuplicate" style="margin-top: 8px">跳过重复{{ cardBindingIsLink ? '链接' : '卡密' }}</el-checkbox>
+      <div v-if="cardBindingIsLink" class="hint-text" style="margin-top: 8px">
+        示例：<br />
+        https://psy.xhs365.cn/test/7v7/1rKI1KSy9tpRfxj24hTM8w<br />
+        https://psy.xhs365.cn/test/7v7/FbM9K_egHN8sW5NTs1Ebdg
+      </div>
       <template #footer>
         <el-button @click="showCardImport = false">取消</el-button>
         <el-button type="primary" @click="saveCards">导入</el-button>
@@ -218,7 +307,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { ProductBinding, ShipLog, CardPoolItem, OrderDelivery } from '../types/electron'
 
@@ -239,18 +328,27 @@ const cardFilter = ref('all')
 const cardList = ref<CardPoolItem[]>([])
 const cardStats = ref({ total: 0, unused: 0, used: 0, locked: 0 })
 const deliveries = ref<OrderDelivery[]>([])
+const psyTests = ref<Array<{ test_code: string; test_name?: string; name?: string }>>([])
+const psyTestsLoading = ref(false)
+const claimCount = ref(20)
+const claiming = ref(false)
+const cloudInventory = ref<{ unclaimed_unused: number; claimed_unused: number; used: number } | null>(null)
+const cloudLowHint = ref<Record<number, boolean>>({})
 
 const orderQuery = ref({ orderId: '', status: '' })
 
 const syncingGoods = ref(false)
-const goodsList = ref<Array<{ itemId: string; title: string; noteId?: string; price?: string; stock?: string; image?: string }>>([])
+const goodsList = ref<Array<{ itemId: string; title: string; noteId?: string; price?: string; stock?: string; image?: string; variant?: string }>>([])
 const selectedGoods = ref('')
+/** 绑卡：保存绑定后自动打开卡密导入 */
+const pendingOpenCardsAfterSave = ref(false)
 
 const bindingForm = ref({
   productId: '',
   productName: '',
-  deliverType: 'card' as 'card' | 'text' | 'link' | 'note' | 'image' | 'video' | 'mixed' | 'manual',
+  deliverType: 'card' as 'card' | 'link_card' | 'text' | 'link' | 'note' | 'image' | 'video' | 'mixed' | 'manual',
   deliverContent: '',
+  psyTestCode: '',
   randomMode: false,
   uidLength: 10,
   sendIntervalMs: 500,
@@ -261,7 +359,7 @@ const templateVars = [
   { key: '{订单号}', desc: '订单号' },
   { key: '{买家昵称}', desc: '买家昵称' },
   { key: '{商品名}', desc: '商品名' },
-  { key: '{卡密}', desc: '卡密' },
+  { key: '{卡密}', desc: '卡密/专属链接' },
   { key: '{店铺名}', desc: '店铺名' },
   { key: '{uid}', desc: '随机码' },
   { key: '{ts}', desc: '时间戳' }
@@ -269,9 +367,10 @@ const templateVars = [
 
 const contentPlaceholder = computed(() => {
   const map: Record<string, string> = {
-    card: '如：https://xxx.com/redeem?code={卡密}（卡密从池中消耗）',
+    card: '如：您的激活码：{卡密}（从卡密池消耗）',
+    link_card: '默认发 {卡密}（即专属链接）。也可写成：您的测评链接：{卡密}',
     text: '如：您好，{买家昵称}，感谢购买【{商品名}】',
-    link: '如：https://pan.xxx.com/s/ABC123 提取码：{卡密}',
+    link: '如：https://pan.xxx.com/s/ABC123 提取码：xxxx（固定链接，不走卡密池）',
     note: '如：https://www.xiaohongshu.com/xxx（网址发货凭证，发给买家）',
     image: '图片 URL',
     video: '视频内容',
@@ -281,11 +380,49 @@ const contentPlaceholder = computed(() => {
   return map[bindingForm.value.deliverType] || ''
 })
 
+const cardBindingIsLink = computed(() => {
+  const row = bindings.value.find((b) => b.id === cardBindingId.value)
+  return row?.deliver_type === 'link_card'
+})
+
+const cardPsyTestCode = computed(() => {
+  const row = bindings.value.find((b) => b.id === cardBindingId.value)
+  return (row?.psy_test_code || '').trim()
+})
+
+const cardImportTitle = computed(() =>
+  cardBindingIsLink.value ? '批量导入专属链接' : '批量导入卡密'
+)
+
+const cardImportPlaceholder = computed(() =>
+  cardBindingIsLink.value
+    ? '每行一条专属链接，例如：\nhttps://psy.xhs365.cn/test/7v7/xxxx'
+    : '每行一条卡密'
+)
+
 const deliverTypeText = (t: string) => {
   const map: Record<string, string> = {
-    card: '卡密', text: '文本', link: '链接', note: '网址凭证', image: '图片', video: '视频', mixed: '多段', manual: '手动'
+    card: '卡密',
+    link_card: '链接卡密',
+    text: '文本',
+    link: '固定链接',
+    note: '网址凭证',
+    image: '图片',
+    video: '视频',
+    mixed: '多段',
+    manual: '手动'
   }
   return map[t] || t
+}
+
+const onDeliverTypeChange = (t: string) => {
+  if (t === 'link_card' && !bindingForm.value.deliverContent.trim()) {
+    bindingForm.value.deliverContent = '{卡密}'
+  }
+  if (t === 'card' && !bindingForm.value.deliverContent.trim()) {
+    bindingForm.value.deliverContent = '您的激活码：{卡密}'
+  }
+  if (t === 'link_card') void loadPsyTests()
 }
 
 const getStatusType = (status: string) => {
@@ -336,21 +473,64 @@ const loadData = async () => {
   shipLogs.value = await window.electronAPI.getShipLogs(SHOP_ID, 100)
   const reship = await window.electronAPI.getReshipConfig(SHOP_ID)
   reshipEnabled.value = !!reship?.enabled
+  await refreshCloudLowHints()
+}
+
+const refreshCloudLowHints = async () => {
+  const next: Record<number, boolean> = {}
+  if (!window.electronAPI?.psyInventory) {
+    cloudLowHint.value = next
+    return
+  }
+  const linkRows = bindings.value.filter((b) => b.deliver_type === 'link_card' && (b.psy_test_code || '').trim())
+  await Promise.all(
+    linkRows.map(async (b) => {
+      try {
+        const res = await window.electronAPI!.psyInventory(String(b.psy_test_code))
+        const n = Number(res.inventory?.unclaimed_unused ?? 0)
+        const alert = Number(b.low_stock_alert ?? 10)
+        if (res.success && n <= alert) next[b.id] = true
+      } catch {
+        /* ignore */
+      }
+    })
+  )
+  cloudLowHint.value = next
 }
 
 const syncGoods = async () => {
   if (!window.electronAPI) return
   syncingGoods.value = true
+  ElMessage.info({
+    message: '正在打开商家后台窗口，请登录后等待自动同步（最多约 5 分钟）',
+    duration: 5000
+  })
   try {
     const res = await window.electronAPI.syncGoodsList()
     if (res?.success) {
       goodsList.value = res.goods || []
       ElMessage.success(`同步成功，共 ${goodsList.value.length} 个商品`)
+      if (goodsList.value.length === 0) {
+        ElMessage.info('店铺暂无商品笔记，可手动添加商品 ID 后绑卡')
+      }
     } else {
-      ElMessage.warning(res?.error || '同步失败')
+      ElMessage.warning({ message: res?.error || '同步失败', duration: 8000 })
     }
   } finally {
     syncingGoods.value = false
+  }
+}
+
+const openArkLogin = async () => {
+  syncingGoods.value = true
+  ElMessage.info({
+    message: '已打开商家后台：请登录，成功后会自动保存会话、同步商品并关闭窗口',
+    duration: 6000
+  })
+  const res = await window.electronAPI?.openArkMerchant()
+  if (!res?.success) {
+    syncingGoods.value = false
+    ElMessage.warning(res?.error || '打开失败')
   }
 }
 
@@ -361,6 +541,40 @@ const onSelectGoods = (itemId: string) => {
     bindingForm.value.productId = g.itemId
     bindingForm.value.productName = g.title
   }
+}
+
+/** 仅创建/打开绑定（发货类型默认卡密） */
+const quickBindGoods = (g: { itemId: string; title: string }) => {
+  pendingOpenCardsAfterSave.value = false
+  editingBinding.value = null
+  selectedGoods.value = g.itemId
+  bindingForm.value = {
+    productId: g.itemId,
+    productName: g.title,
+    deliverType: 'link_card',
+    deliverContent: '{卡密}',
+    psyTestCode: '',
+    randomMode: false,
+    uidLength: 10,
+    sendIntervalMs: 500,
+    lowStockAlert: 10
+  }
+  showBinding.value = true
+  void loadPsyTests()
+}
+
+/** 绑定并导入卡密 */
+const bindGoodsForCard = async (g: { itemId: string; title: string }) => {
+  if (!window.electronAPI) return
+  // 已有绑定则直接开卡密池
+  const existing = bindings.value.find((b) => b.product_id === g.itemId)
+  if (existing) {
+    openCardDialog(existing)
+    showCardImport.value = true
+    return
+  }
+  pendingOpenCardsAfterSave.value = true
+  quickBindGoods(g)
 }
 
 const loadDeliveries = async () => {
@@ -402,15 +616,39 @@ const openBindingDialog = (row?: ProductBinding) => {
       productName: row.product_name,
       deliverType: row.deliver_type as any,
       deliverContent: row.deliver_content,
+      psyTestCode: row.psy_test_code || '',
       randomMode: !!row.random_mode,
       uidLength: row.uid_length ?? 10,
       sendIntervalMs: row.send_interval_ms ?? 500,
       lowStockAlert: row.low_stock_alert ?? 10
     }
   } else {
-    bindingForm.value = { productId: '', productName: '', deliverType: 'card', deliverContent: '', randomMode: false, uidLength: 10, sendIntervalMs: 500, lowStockAlert: 10 }
+    bindingForm.value = {
+      productId: '',
+      productName: '',
+      deliverType: 'card',
+      deliverContent: '您的激活码：{卡密}',
+      psyTestCode: '',
+      randomMode: false,
+      uidLength: 10,
+      sendIntervalMs: 500,
+      lowStockAlert: 10
+    }
   }
   showBinding.value = true
+  if (bindingForm.value.deliverType === 'link_card') void loadPsyTests()
+}
+
+const loadPsyTests = async () => {
+  if (!window.electronAPI?.psyListTests) return
+  psyTestsLoading.value = true
+  try {
+    const res = await window.electronAPI.psyListTests()
+    if (res.success) psyTests.value = res.tests || []
+    else if (res.message) ElMessage.warning(res.message)
+  } finally {
+    psyTestsLoading.value = false
+  }
 }
 
 const saveBinding = async () => {
@@ -418,19 +656,32 @@ const saveBinding = async () => {
     ElMessage.warning('请输入商品ID')
     return
   }
+  if (bindingForm.value.deliverType === 'link_card' && !bindingForm.value.psyTestCode.trim()) {
+    ElMessage.warning('链接卡密请选择心象测测题')
+    return
+  }
   if (!window.electronAPI) return
+
+  let deliverContent = bindingForm.value.deliverContent
+  if (bindingForm.value.deliverType === 'link_card' && !deliverContent.trim()) {
+    deliverContent = '{卡密}'
+  }
 
   const payload = {
     shopId: SHOP_ID,
     productId: bindingForm.value.productId,
     productName: bindingForm.value.productName,
     deliverType: bindingForm.value.deliverType,
-    deliverContent: bindingForm.value.deliverContent,
+    deliverContent,
+    psyTestCode: bindingForm.value.deliverType === 'link_card' ? bindingForm.value.psyTestCode.trim() : '',
     randomMode: bindingForm.value.randomMode,
     uidLength: bindingForm.value.uidLength,
     sendIntervalMs: bindingForm.value.sendIntervalMs,
     lowStockAlert: bindingForm.value.lowStockAlert
   }
+
+  const openCards = pendingOpenCardsAfterSave.value
+  pendingOpenCardsAfterSave.value = false
 
   if (editingBinding.value) {
     await window.electronAPI.updateProductBinding(editingBinding.value.id, payload)
@@ -440,6 +691,15 @@ const saveBinding = async () => {
   showBinding.value = false
   await loadData()
   ElMessage.success('保存成功')
+
+  if (openCards) {
+    const row = bindings.value.find((b) => b.product_id === payload.productId)
+    if (row) {
+      openCardDialog(row)
+      if (row.deliver_type === 'link_card') showCardImport.value = false
+      else showCardImport.value = true
+    }
+  }
 }
 
 const removeBinding = (row: ProductBinding) => {
@@ -458,6 +718,44 @@ const openCardDialog = (row: ProductBinding) => {
   cardFilter.value = 'all'
   showCards.value = true
   loadCards()
+  if (row.deliver_type === 'link_card') void refreshCloudInventory()
+}
+
+const refreshCloudInventory = async () => {
+  const code = cardPsyTestCode.value
+  cloudInventory.value = null
+  if (!code || !window.electronAPI?.psyInventory) return
+  const res = await window.electronAPI.psyInventory(code)
+  if (res.success && res.inventory) cloudInventory.value = res.inventory
+}
+
+const claimFromCloud = async () => {
+  const code = cardPsyTestCode.value
+  if (!code) {
+    ElMessage.warning('请先在绑定里选择测题')
+    return
+  }
+  if (!window.electronAPI?.psyClaimIntoPool) return
+  claiming.value = true
+  try {
+    const row = bindings.value.find((b) => b.id === cardBindingId.value)
+    const res = await window.electronAPI.psyClaimIntoPool(
+      cardBindingId.value,
+      code,
+      claimCount.value,
+      row?.product_id
+    )
+    if (!res.success) {
+      ElMessage.error(res.message || '领取失败')
+      return
+    }
+    ElMessage.success(res.message || `已导入 ${res.added || 0} 条`)
+    await loadCards()
+    await loadData()
+    await refreshCloudInventory()
+  } finally {
+    claiming.value = false
+  }
 }
 
 const loadCards = async () => {
@@ -496,12 +794,29 @@ const disableOrder = async (row: OrderDelivery) => {
     .catch(() => {})
 }
 
+let offGoodsSync: (() => void) | null = null
+
 onMounted(async () => {
   if (window.electronAPI) {
     const config = await window.electronAPI.getAllConfig() as Record<string, unknown>
     autoShipEnabled.value = !!config.autoShipEnabled
     await loadData()
+    offGoodsSync = window.electronAPI.onGoodsSyncResult((res) => {
+      if (res?.success) {
+        goodsList.value = res.goods || []
+        syncingGoods.value = false
+        ElMessage.success(`同步成功，共 ${goodsList.value.length} 个商品`)
+      } else if (res?.error) {
+        syncingGoods.value = false
+        ElMessage.warning({ message: res.error, duration: 8000 })
+      }
+    })
   }
+})
+
+onUnmounted(() => {
+  offGoodsSync?.()
+  offGoodsSync = null
 })
 </script>
 
@@ -532,6 +847,19 @@ onMounted(async () => {
 .card-toolbar {
   display: flex;
   align-items: center;
+}
+.cloud-claim-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #0f766e;
 }
 .card-stats {
   font-size: 13px;

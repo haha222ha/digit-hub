@@ -48,6 +48,34 @@
           style="margin-bottom: 16px"
         />
 
+        <el-divider content-position="left">心象测对接（激活链接）</el-divider>
+
+        <el-form-item label="云端地址">
+          <el-input v-model="psyForm.baseUrl" placeholder="https://psy.xhs365.cn" style="width: 320px" />
+        </el-form-item>
+        <el-form-item label="商家账号">
+          <el-input v-model="psyForm.username" placeholder="心象测用户名" style="width: 200px; margin-right: 8px" />
+          <el-input v-model="psyForm.password" type="password" show-password placeholder="密码" style="width: 160px" />
+        </el-form-item>
+        <el-form-item label="或粘贴 Token">
+          <el-input v-model="psyForm.token" type="password" show-password placeholder="可选：直接粘贴商家 JWT" style="width: 360px" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :loading="psyBusy" @click="savePsyLogin">登录并保存</el-button>
+          <el-button @click="savePsyTokenOnly">仅保存 Token/地址</el-button>
+          <el-button @click="clearPsyAuth">退出心象测</el-button>
+          <span class="form-tip" style="margin-left: 12px">
+            {{ psyStatus.hasToken ? `已登录：${psyStatus.username || 'token'}` : '未登录' }}
+          </span>
+        </el-form-item>
+        <el-alert
+          type="info"
+          :closable="false"
+          show-icon
+          title="发货页「链接卡密」可按测题从云端领取已生成链接；已领取标记在云端，避免重复导入。"
+          style="margin-bottom: 16px"
+        />
+
         <el-divider content-position="left">子账号管理</el-divider>
 
         <el-form-item label="添加子账号">
@@ -110,12 +138,59 @@ const mainLogin = ref({ email: '', password: '' })
 const subForm = ref({ username: '', password: '' })
 const subAccounts = ref<SubAccount[]>([])
 const logs = ref<string[]>([])
+const psyBusy = ref(false)
+const psyStatus = ref({ configured: false, baseUrl: 'https://psy.xhs365.cn', username: '', hasToken: false })
+const psyForm = ref({ baseUrl: 'https://psy.xhs365.cn', username: '', password: '', token: '' })
 
 const saveSetting = async (key: string, value: unknown) => {
   if (window.electronAPI) {
     await window.electronAPI.setConfig(key, value)
   }
   ElMessage.success('设置已保存')
+}
+
+const refreshPsyStatus = async () => {
+  if (!window.electronAPI?.psyStatus) return
+  const st = await window.electronAPI.psyStatus()
+  psyStatus.value = st
+  psyForm.value.baseUrl = st.baseUrl || 'https://psy.xhs365.cn'
+  if (st.username) psyForm.value.username = st.username
+}
+
+const savePsyLogin = async () => {
+  if (!window.electronAPI?.psyLogin) return
+  psyBusy.value = true
+  try {
+    await window.electronAPI.psySetConfig({ baseUrl: psyForm.value.baseUrl })
+    const res = await window.electronAPI.psyLogin(psyForm.value.username, psyForm.value.password)
+    if (res.success) {
+      ElMessage.success('心象测登录成功')
+      psyForm.value.password = ''
+      await refreshPsyStatus()
+    } else {
+      ElMessage.error(res.message || '登录失败')
+    }
+  } finally {
+    psyBusy.value = false
+  }
+}
+
+const savePsyTokenOnly = async () => {
+  if (!window.electronAPI?.psySetConfig) return
+  await window.electronAPI.psySetConfig({
+    baseUrl: psyForm.value.baseUrl,
+    token: psyForm.value.token,
+    username: psyForm.value.username
+  })
+  ElMessage.success('已保存心象测配置')
+  psyForm.value.token = ''
+  await refreshPsyStatus()
+}
+
+const clearPsyAuth = async () => {
+  await window.electronAPI?.psyClearAuth()
+  ElMessage.success('已退出心象测')
+  await refreshPsyStatus()
 }
 
 const saveMainLogin = async () => {
@@ -185,6 +260,7 @@ onMounted(async () => {
       mainLogin.value.email = saved.email
       if (saved.hasPassword) mainLogin.value.password = '********'
     }
+    await refreshPsyStatus()
   }
 })
 </script>

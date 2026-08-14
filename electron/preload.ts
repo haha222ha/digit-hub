@@ -104,6 +104,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getCardList: (bindingId: number, status?: string, limit?: number, offset?: number) =>
     ipcRenderer.invoke('product:card-list', bindingId, status, limit, offset),
 
+  psyStatus: () => ipcRenderer.invoke('psy:status'),
+  psySetConfig: (opts: { baseUrl?: string; token?: string; username?: string }) =>
+    ipcRenderer.invoke('psy:set-config', opts),
+  psyClearAuth: () => ipcRenderer.invoke('psy:clear-auth'),
+  psyLogin: (username: string, password: string) => ipcRenderer.invoke('psy:login', username, password),
+  psyListTests: () => ipcRenderer.invoke('psy:list-tests'),
+  psyInventory: (testCode: string) => ipcRenderer.invoke('psy:inventory', testCode),
+  psyClaimIntoPool: (bindingId: number, testCode: string, count: number, productId?: string) =>
+    ipcRenderer.invoke('psy:claim-into-pool', bindingId, testCode, count, productId),
+  psyReleaseBatch: (batchId: string) => ipcRenderer.invoke('psy:release-batch', batchId),
+
   // 订单发卡管理
   getOrderDeliveries: (filter: { shopId?: string; status?: string; limit?: number; offset?: number }) =>
     ipcRenderer.invoke('order:deliveries', filter),
@@ -114,6 +125,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // 商品同步
   syncGoodsList: () => ipcRenderer.invoke('goods:sync'),
+  openArkMerchant: () => ipcRenderer.invoke('goods:open-ark'),
+  onGoodsSyncResult: (callback: (result: { success: boolean; goods: any[]; error?: string }) => void) => {
+    const handler = (_event: any, result: any) => callback(result)
+    ipcRenderer.on('goods:sync-result', handler)
+    return () => ipcRenderer.removeListener('goods:sync-result', handler)
+  },
 
   getAutoShipProcessedCount: () => ipcRenderer.invoke('autoship:processed-count'),
   startAutoShip: (intervalMs?: number) => ipcRenderer.invoke('autoship:start', intervalMs),
@@ -143,6 +160,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   browserCanGoForward: () => ipcRenderer.invoke('browser:can-go-forward'),
   browserShow: () => ipcRenderer.invoke('browser:show'),
   browserHide: () => ipcRenderer.invoke('browser:hide'),
+  browserOpenLoginAssist: () => ipcRenderer.invoke('browser:open-login-assist'),
+  browserFocus: () => ipcRenderer.invoke('browser:focus'),
   browserRoute: (path: string) => ipcRenderer.invoke('browser:route', path),
   browserSetBounds: (bounds: { x: number; y: number; width: number; height: number }) =>
     ipcRenderer.invoke('browser:set-bounds', bounds),
