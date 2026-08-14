@@ -79,11 +79,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getCrashStatus: () => ipcRenderer.invoke('crash:status'),
 
   addProductBinding: (binding: {
-    shopId: string
+    shopId?: string
     productId: string
     productName?: string
     productType?: 'virtual' | 'physical'
-    deliverType?: 'card' | 'text' | 'link' | 'note' | 'image' | 'video' | 'mixed' | 'manual'
+    deliverType?: 'card' | 'link_card' | 'text' | 'link' | 'note' | 'image' | 'video' | 'mixed' | 'manual'
     deliverContent: string
     stock?: number
     randomMode?: boolean
@@ -91,13 +91,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
     sendIntervalMs?: number
     uidLength?: number
     msgSeparator?: string
+    psyTestCode?: string
+    poolKey?: string
   }) => ipcRenderer.invoke('product:add-binding', binding),
   getProductBinding: (shopId: string, productId: string) =>
     ipcRenderer.invoke('product:get-binding', shopId, productId),
-  listProductBindings: (shopId: string) => ipcRenderer.invoke('product:list-bindings', shopId),
+  listProductBindings: (shopId?: string) => ipcRenderer.invoke('product:list-bindings', shopId),
+  listSharedPools: () => ipcRenderer.invoke('product:list-shared-pools'),
   updateProductBinding: (id: number, updates: Record<string, unknown>) =>
     ipcRenderer.invoke('product:update-binding', id, updates),
   deleteProductBinding: (id: number) => ipcRenderer.invoke('product:delete-binding', id),
+  clearAllProductBindings: () => ipcRenderer.invoke('product:clear-all-bindings'),
   addCards: (bindingId: number, cards: string[], options?: { skipDuplicate?: boolean }) =>
     ipcRenderer.invoke('product:add-cards', bindingId, cards, options),
   getCardStats: (bindingId: number) => ipcRenderer.invoke('product:card-stats', bindingId),

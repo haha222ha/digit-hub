@@ -198,10 +198,12 @@ export class StorageService {
       `ALTER TABLE product_bindings ADD COLUMN uid_length INTEGER DEFAULT 10`,
       `ALTER TABLE product_bindings ADD COLUMN msg_separator TEXT DEFAULT '\n\n'`,
       `ALTER TABLE product_bindings ADD COLUMN psy_test_code TEXT DEFAULT ''`,
+      `ALTER TABLE product_bindings ADD COLUMN pool_key TEXT DEFAULT ''`,
       `ALTER TABLE product_bindings ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))`,
       `ALTER TABLE card_pool ADD COLUMN locked_at TEXT`,
       `ALTER TABLE card_pool ADD COLUMN order_id TEXT`,
       `ALTER TABLE card_pool ADD COLUMN used_at TEXT`,
+      `ALTER TABLE card_pool ADD COLUMN pool_key TEXT DEFAULT ''`,
     ]
     try {
       this.db.exec('DROP INDEX IF EXISTS idx_order_delivery_order')
@@ -214,13 +216,6 @@ export class StorageService {
       )
     } catch {
       /* ignore */
-    }
-    try {
-      this.db.exec(
-        'CREATE UNIQUE INDEX IF NOT EXISTS idx_product_bindings_shop_pid ON product_bindings(shop_id, product_id)'
-      )
-    } catch {
-      /* 若已有重复绑定则跳过，查询仍按 shop_id+product_id */
     }
     if (!this.getShopConfig('default')) {
       this.saveShopConfig('default', {
@@ -237,6 +232,193 @@ export class StorageService {
         /* column already exists */
       }
     }
+
+    this.migrateMerchantLevelBindings()
+  }
+
+  /**
+   * 商家级绑定：同一 product_id 只留一条；多商品可共享 pool_key；卡密按 pool_key 消耗一次。
+   */
+  private migrateMerchantLevelBindings(): void {
+    const flag = 'migrate_merchant_bindings_v2'
+    if (this.get<boolean>(flag)) return
+    try {
+      const tx = this.db.transaction(() => {
+        const rows = this.db
+          .prepare('SELECT id, shop_id, product_id, deliver_type, psy_test_code, pool_key, enabled, updated_at FROM product_bindings')
+          .all() as Array<{
+          id: number
+          shop_id: string
+          product_id: string
+          deliver_type: string
+          psy_test_code: string
+          pool_key: string
+          enabled: number
+          updated_at: string
+        }>
+
+        // 1) 为每行补全 pool_key
+        for (const r of rows) {
+          const key = this.computePoolKey(r)
+          if (String(r.pool_key || '').trim() !== key) {
+            this.db.prepare('UPDATE product_bindings SET pool_key = ? WHERE id = ?').run(key, r.id)
+            r.pool_key = key
+          }
+        }
+
+        // 2) 同一 product_id 多店重复：保留最新 enabled 优先
+        const byPid = new Map<string, typeof rows>()
+        for (const r of rows) {
+          const pid = String(r.product_id || '').trim()
+          if (!pid) continue
+          const list = byPid.get(pid) || []
+          list.push(r)
+          byPid.set(pid, list)
+        }
+        for (const [, list] of byPid) {
+          if (list.length <= 1) continue
+          list.sort((a, b) => {
+            if (!!b.enabled !== !!a.enabled) return (b.enabled ? 1 : 0) - (a.enabled ? 1 : 0)
+            return String(b.updated_at || '').localeCompare(String(a.updated_at || '')) || b.id - a.id
+          })
+          const keep = list[0]
+          for (const doomed of list.slice(1)) {
+            this.db
+              .prepare('UPDATE card_pool SET binding_id = ?, pool_key = ? WHERE binding_id = ?')
+              .run(keep.id, keep.pool_key || this.computePoolKey(keep), doomed.id)
+            this.db.prepare('DELETE FROM product_bindings WHERE id = ?').run(doomed.id)
+            this.logger.info(
+              `[Storage] 商家级去重: product_id=${keep.product_id} 保留#${keep.id} 删除#${doomed.id}(原shop=${doomed.shop_id})`
+            )
+          }
+        }
+
+        // 3) 回填 card_pool.pool_key
+        this.db.exec(`
+          UPDATE card_pool
+             SET pool_key = COALESCE(
+               (SELECT NULLIF(trim(pb.pool_key),'') FROM product_bindings pb WHERE pb.id = card_pool.binding_id),
+               'binding:' || card_pool.binding_id
+             )
+           WHERE pool_key IS NULL OR trim(pool_key) = ''
+        `)
+
+        // 4) 换唯一索引：product_id 商家唯一（不再按店）
+        try {
+          this.db.exec('DROP INDEX IF EXISTS idx_product_bindings_shop_pid')
+        } catch {
+          /* ignore */
+        }
+        try {
+          this.db.exec(
+            'CREATE UNIQUE INDEX IF NOT EXISTS idx_product_bindings_pid_unique ON product_bindings(product_id)'
+          )
+        } catch (e) {
+          this.logger.warn(`[Storage] 创建 product_id 唯一索引失败（可能仍有重复）: ${e}`)
+        }
+        try {
+          this.db.exec('CREATE INDEX IF NOT EXISTS idx_card_pool_pool_key ON card_pool(pool_key)')
+        } catch {
+          /* ignore */
+        }
+
+        // 5) 刷新各共享池库存
+        const keys = this.db
+          .prepare(`SELECT DISTINCT pool_key FROM product_bindings WHERE pool_key IS NOT NULL AND trim(pool_key) != ''`)
+          .all() as Array<{ pool_key: string }>
+        for (const k of keys) this.refreshPoolStock(k.pool_key)
+      })
+      tx()
+      this.set(flag, true)
+      this.logger.info('[Storage] 商家级绑定迁移完成')
+    } catch (e) {
+      this.logger.warn(`[Storage] 商家级绑定迁移失败: ${e}`)
+    }
+  }
+
+  /** 共享发卡池键：link_card 用测题；普通卡密用显式 pool_key 或 binding:id */
+  computePoolKey(binding: {
+    id?: number
+    deliver_type?: string
+    psy_test_code?: string
+    pool_key?: string
+  }): string {
+    const explicit = String(binding.pool_key || '').trim()
+    if (explicit) return explicit
+    const dtype = String(binding.deliver_type || '')
+    if (dtype === 'link_card') {
+      const code = String(binding.psy_test_code || '').trim()
+      if (code) return `psy:${code}`
+    }
+    if (binding.id) return `binding:${binding.id}`
+    return ''
+  }
+
+  refreshPoolStock(poolKey: string): void {
+    const key = String(poolKey || '').trim()
+    if (!key) return
+    const unused = (
+      this.db
+        .prepare(`SELECT COUNT(*) as c FROM card_pool WHERE pool_key = ? AND status = 'unused'`)
+        .get(key) as { c: number }
+    ).c
+    this.db
+      .prepare(
+        `UPDATE product_bindings SET stock = ?, updated_at = datetime('now') WHERE pool_key = ?`
+      )
+      .run(unused, key)
+  }
+
+  listSharedPools(): Array<{
+    pool_key: string
+    label: string
+    deliver_type: string
+    psy_test_code: string
+    unused: number
+    product_count: number
+  }> {
+    const rows = this.db
+      .prepare(
+        `SELECT pool_key,
+                MAX(deliver_type) as deliver_type,
+                MAX(psy_test_code) as psy_test_code,
+                COUNT(*) as product_count
+         FROM product_bindings
+         WHERE pool_key IS NOT NULL AND trim(pool_key) != ''
+         GROUP BY pool_key
+         ORDER BY product_count DESC, pool_key ASC`
+      )
+      .all() as Array<{
+      pool_key: string
+      deliver_type: string
+      psy_test_code: string
+      product_count: number
+    }>
+    return rows.map((r) => {
+      const unused = (
+        this.db
+          .prepare(`SELECT COUNT(*) as c FROM card_pool WHERE pool_key = ? AND status = 'unused'`)
+          .get(r.pool_key) as { c: number }
+      ).c
+      const sample = this.db
+        .prepare(
+          `SELECT product_name, product_id FROM product_bindings WHERE pool_key = ? ORDER BY id ASC LIMIT 1`
+        )
+        .get(r.pool_key) as { product_name?: string; product_id?: string } | undefined
+      const code = String(r.psy_test_code || '').trim()
+      const label =
+        r.deliver_type === 'link_card' && code
+          ? `心象测 ${code}`
+          : `卡池 ${r.pool_key.replace(/^binding:/, '#')}（${sample?.product_name || sample?.product_id || r.pool_key}）`
+      return {
+        pool_key: r.pool_key,
+        label,
+        deliver_type: r.deliver_type,
+        psy_test_code: code,
+        unused,
+        product_count: Number(r.product_count || 0)
+      }
+    })
   }
 
   /**
@@ -372,9 +554,15 @@ export class StorageService {
   }
 
   getShipLogs(shopId: string, limit: number = 100) {
-    return this.db.prepare(
-      'SELECT * FROM ship_log WHERE shop_id = ? ORDER BY created_at DESC LIMIT ?'
-    ).all(shopId, limit)
+    // 商家统一面板：传空/'*' 或具体店都返回全量，按时间倒序
+    if (!shopId || shopId === '*' || shopId === '__all__') {
+      return this.db
+        .prepare('SELECT * FROM ship_log ORDER BY created_at DESC LIMIT ?')
+        .all(limit)
+    }
+    return this.db
+      .prepare('SELECT * FROM ship_log ORDER BY created_at DESC LIMIT ?')
+      .all(limit)
   }
 
   addReplyRule(rule: { shopId: string; keyword: string; replyText: string; replyType?: string }) {
@@ -576,7 +764,7 @@ export class StorageService {
    * @param binding 商品绑定信息
    */
   addProductBinding(binding: {
-    shopId: string
+    shopId?: string
     productId: string
     productName?: string
     productType?: 'virtual' | 'physical'
@@ -589,18 +777,47 @@ export class StorageService {
     uidLength?: number
     msgSeparator?: string
     psyTestCode?: string
+    poolKey?: string
   }): number {
+    const deliverType = binding.deliverType || 'card'
+    const psyTestCode = binding.psyTestCode || ''
+    let poolKey = String(binding.poolKey || '').trim()
+    if (!poolKey) {
+      if (deliverType === 'link_card' && psyTestCode.trim()) poolKey = `psy:${psyTestCode.trim()}`
+    }
+
+    const existing = this.db
+      .prepare('SELECT id FROM product_bindings WHERE product_id = ?')
+      .get(String(binding.productId).trim()) as { id: number } | undefined
+    if (existing?.id) {
+      this.updateProductBinding(existing.id, {
+        productName: binding.productName,
+        productType: binding.productType,
+        deliverType,
+        deliverContent: binding.deliverContent,
+        randomMode: binding.randomMode,
+        lowStockAlert: binding.lowStockAlert,
+        sendIntervalMs: binding.sendIntervalMs,
+        uidLength: binding.uidLength,
+        msgSeparator: binding.msgSeparator,
+        psyTestCode,
+        poolKey: poolKey || undefined,
+        shopId: binding.shopId
+      })
+      return existing.id
+    }
+
     const result = this.db.prepare(
       `INSERT INTO product_bindings
         (shop_id, product_id, product_name, product_type, deliver_type, deliver_content, stock,
-         random_mode, low_stock_alert, send_interval_ms, uid_length, msg_separator, psy_test_code)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+         random_mode, low_stock_alert, send_interval_ms, uid_length, msg_separator, psy_test_code, pool_key)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
-      binding.shopId,
-      binding.productId,
+      binding.shopId || '',
+      String(binding.productId).trim(),
       binding.productName || '',
       binding.productType || 'virtual',
-      binding.deliverType || 'card',
+      deliverType,
       binding.deliverContent,
       binding.stock || 0,
       binding.randomMode ? 1 : 0,
@@ -608,24 +825,37 @@ export class StorageService {
       binding.sendIntervalMs ?? 500,
       binding.uidLength ?? 10,
       binding.msgSeparator ?? '\n\n',
-      binding.psyTestCode || ''
+      psyTestCode,
+      poolKey
     )
-    this.logger.info(`[Storage] 新增商品绑定: productId=${binding.productId}, id=${result.lastInsertRowid}`)
-    return Number(result.lastInsertRowid)
+    const id = Number(result.lastInsertRowid)
+    if (!poolKey) {
+      poolKey = `binding:${id}`
+      this.db.prepare('UPDATE product_bindings SET pool_key = ? WHERE id = ?').run(poolKey, id)
+    }
+    this.refreshPoolStock(poolKey)
+    this.logger.info(`[Storage] 新增商品绑定: productId=${binding.productId}, pool=${poolKey}, id=${id}`)
+    return id
   }
 
   /**
-   * 批量添加卡密到卡密池（自动去重，跳过已存在的卡密）
-   * @returns 实际新增数量
+   * 批量添加卡密到共享发卡池（按 binding → pool_key；多商品共用同一池）
    */
   addCardPool(bindingId: number, cards: string[], options?: { skipDuplicate?: boolean }): number {
     if (cards.length === 0) return 0
     const skipDuplicate = options?.skipDuplicate ?? true
+    const binding = this.db
+      .prepare('SELECT id, pool_key, deliver_type, psy_test_code FROM product_bindings WHERE id = ?')
+      .get(bindingId) as { id: number; pool_key: string; deliver_type: string; psy_test_code: string } | undefined
+    if (!binding) return 0
+    const poolKey = this.computePoolKey(binding)
+    if (String(binding.pool_key || '').trim() !== poolKey) {
+      this.db.prepare('UPDATE product_bindings SET pool_key = ? WHERE id = ?').run(poolKey, bindingId)
+    }
 
-    // 去重：仅保留「该绑定下不存在」的卡密内容
-    const existing = this.db.prepare(
-      'SELECT card_content FROM card_pool WHERE binding_id = ?'
-    ).all(bindingId) as { card_content: string }[]
+    const existing = this.db
+      .prepare('SELECT card_content FROM card_pool WHERE pool_key = ?')
+      .all(poolKey) as { card_content: string }[]
     const existingSet = new Set(existing.map((r) => r.card_content))
 
     const toInsert = skipDuplicate
@@ -633,49 +863,56 @@ export class StorageService {
       : cards.filter((c) => !!c)
 
     if (toInsert.length === 0) {
-      this.logger.info(`[Storage] 卡密全部重复，跳过: bindingId=${bindingId}`)
+      this.logger.info(`[Storage] 卡密全部重复，跳过: pool=${poolKey}`)
       return 0
     }
 
     const stmt = this.db.prepare(
-      'INSERT INTO card_pool (binding_id, card_content) VALUES (?, ?)'
+      'INSERT INTO card_pool (binding_id, pool_key, card_content) VALUES (?, ?, ?)'
     )
     const tx = this.db.transaction((items: string[]) => {
-      for (const c of items) stmt.run(bindingId, c)
+      for (const c of items) stmt.run(bindingId, poolKey, c)
     })
     tx(toInsert)
-    // 更新库存
-    this.db.prepare(
-      'UPDATE product_bindings SET stock = stock + ?, updated_at = datetime(\'now\') WHERE id = ?'
-    ).run(toInsert.length, bindingId)
-    this.logger.info(`[Storage] 批量添加卡密: bindingId=${bindingId}, count=${toInsert.length}, 去重跳过=${cards.length - toInsert.length}`)
+    this.refreshPoolStock(poolKey)
+    this.logger.info(
+      `[Storage] 批量添加卡密: pool=${poolKey}, count=${toInsert.length}, 去重跳过=${cards.length - toInsert.length}`
+    )
     return toInsert.length
   }
 
   /**
-   * 获取商品绑定（按商品ID）
+   * 商家级匹配：只认 product_id（shopId 兼容保留，不参与匹配）
    */
-  getProductBinding(shopId: string, productId: string): any | null {
-    const row = this.db.prepare(
-      'SELECT * FROM product_bindings WHERE shop_id = ? AND product_id = ? AND enabled = 1'
-    ).get(shopId, productId) as any
+  getProductBinding(shopIdOrProductId: string, productId?: string): any | null {
+    const id =
+      productId !== undefined && productId !== null
+        ? String(productId || '').trim()
+        : String(shopIdOrProductId || '').trim()
+    if (!id) return null
+    const row = this.db
+      .prepare('SELECT * FROM product_bindings WHERE product_id = ? AND enabled = 1 LIMIT 1')
+      .get(id) as any
     if (!row) return null
     return {
       ...row,
       enabled: !!row.enabled,
       product_type: row.product_type,
-      deliver_type: row.deliver_type
+      deliver_type: row.deliver_type,
+      pool_key: row.pool_key || this.computePoolKey(row)
     }
   }
 
   /**
-   * 获取所有商品绑定
+   * 全部商品绑定（商家统一面板，不随切换店铺清空）
    */
-  getAllProductBindings(shopId: string): any[] {
-    const rows = this.db.prepare(
-      'SELECT * FROM product_bindings WHERE shop_id = ? ORDER BY updated_at DESC'
-    ).all(shopId) as any[]
-    return rows.map((r) => ({ ...r, enabled: !!r.enabled }))
+  getAllProductBindings(_shopId?: string): any[] {
+    const rows = this.db.prepare('SELECT * FROM product_bindings ORDER BY updated_at DESC').all() as any[]
+    return rows.map((r) => ({
+      ...r,
+      enabled: !!r.enabled,
+      pool_key: r.pool_key || this.computePoolKey(r)
+    }))
   }
 
   /**
@@ -693,6 +930,8 @@ export class StorageService {
     uidLength?: number
     msgSeparator?: string
     psyTestCode?: string
+    poolKey?: string
+    shopId?: string
   }): boolean {
     const fields: string[] = []
     const values: any[] = []
@@ -707,59 +946,147 @@ export class StorageService {
     if (updates.uidLength !== undefined) { fields.push('uid_length = ?'); values.push(updates.uidLength) }
     if (updates.msgSeparator !== undefined) { fields.push('msg_separator = ?'); values.push(updates.msgSeparator) }
     if (updates.psyTestCode !== undefined) { fields.push('psy_test_code = ?'); values.push(updates.psyTestCode) }
+    if (updates.shopId !== undefined) { fields.push('shop_id = ?'); values.push(updates.shopId) }
+
+    const cur = this.db.prepare('SELECT * FROM product_bindings WHERE id = ?').get(id) as any
+    if (!cur) return false
+
+    let nextPool = updates.poolKey !== undefined ? String(updates.poolKey || '').trim() : String(cur.pool_key || '').trim()
+    const nextType = updates.deliverType !== undefined ? updates.deliverType : cur.deliver_type
+    const nextCode = updates.psyTestCode !== undefined ? updates.psyTestCode : cur.psy_test_code
+    if (!nextPool) {
+      nextPool = this.computePoolKey({
+        id,
+        deliver_type: nextType,
+        psy_test_code: nextCode,
+        pool_key: ''
+      })
+    }
+    if (nextType === 'link_card' && String(nextCode || '').trim()) {
+      nextPool = `psy:${String(nextCode).trim()}`
+    }
+    fields.push('pool_key = ?')
+    values.push(nextPool)
+
     if (fields.length === 0) return false
     fields.push('updated_at = datetime(\'now\')')
     values.push(id)
     const result = this.db.prepare(
       `UPDATE product_bindings SET ${fields.join(', ')} WHERE id = ?`
     ).run(...values)
+    this.db.prepare('UPDATE card_pool SET pool_key = ? WHERE binding_id = ?').run(nextPool, id)
+    this.refreshPoolStock(nextPool)
+    if (cur.pool_key && cur.pool_key !== nextPool) this.refreshPoolStock(cur.pool_key)
     return result.changes > 0
   }
 
   /**
-   * 删除商品绑定（同时删除卡密池）
+   * 删除商品绑定。共享卡池若仍有其他商品引用则保留卡密，仅删本商品行。
    */
   deleteProductBinding(id: number): boolean {
+    const row = this.db.prepare('SELECT pool_key FROM product_bindings WHERE id = ?').get(id) as
+      | { pool_key: string }
+      | undefined
+    if (!row) return false
+    const poolKey = String(row.pool_key || '').trim()
+    const others = poolKey
+      ? (
+          this.db
+            .prepare('SELECT COUNT(*) as c FROM product_bindings WHERE pool_key = ? AND id != ?')
+            .get(poolKey, id) as { c: number }
+        ).c
+      : 0
     const result = this.db.prepare('DELETE FROM product_bindings WHERE id = ?').run(id)
-    this.db.prepare('DELETE FROM card_pool WHERE binding_id = ?').run(id)
+    if (others === 0) {
+      this.db.prepare('DELETE FROM card_pool WHERE binding_id = ? OR pool_key = ?').run(id, poolKey || `binding:${id}`)
+    } else {
+      // 把孤儿卡密挂到同池另一绑定上
+      const other = this.db
+        .prepare('SELECT id FROM product_bindings WHERE pool_key = ? LIMIT 1')
+        .get(poolKey) as { id: number } | undefined
+      if (other?.id) {
+        this.db.prepare('UPDATE card_pool SET binding_id = ? WHERE binding_id = ?').run(other.id, id)
+      }
+      this.refreshPoolStock(poolKey)
+    }
     return result.changes > 0
   }
 
   /**
-   * 锁定一张卡密（两段式第一步：锁定，防并发重复取）
-   * 对标阿奇锁 locked 中间态
-   * @returns 卡密内容，无可用卡密返回 null
+   * 从共享池锁定一张卡密（按 pool_key；同池多商品共用，一码只用一次）
    */
   lockCard(bindingId: number, orderId: string, random: boolean = false): string | null {
     const lockTx = this.db.transaction(() => {
+      const binding = this.db
+        .prepare('SELECT id, pool_key, deliver_type, psy_test_code FROM product_bindings WHERE id = ?')
+        .get(bindingId) as any
+      if (!binding) return null
+      const poolKey = this.computePoolKey(binding)
+      // 同单已锁/已用则直接返回，防重复消耗
+      const existing = this.db
+        .prepare(
+          `SELECT card_content, status FROM card_pool
+           WHERE order_id = ? AND (pool_key = ? OR binding_id = ?)
+           LIMIT 1`
+        )
+        .get(orderId, poolKey, bindingId) as { card_content: string; status: string } | undefined
+      if (existing?.card_content) return existing.card_content
+
       const orderBy = random ? 'ORDER BY RANDOM()' : 'ORDER BY id ASC'
-      const card = this.db.prepare(
-        `SELECT id, card_content FROM card_pool WHERE binding_id = ? AND status = 'unused' ${orderBy} LIMIT 1`
-      ).get(bindingId) as any
+      let card = this.db
+        .prepare(
+          `SELECT id, card_content FROM card_pool WHERE pool_key = ? AND status = 'unused' ${orderBy} LIMIT 1`
+        )
+        .get(poolKey) as any
+      if (!card) {
+        card = this.db
+          .prepare(
+            `SELECT id, card_content FROM card_pool WHERE binding_id = ? AND status = 'unused' ${orderBy} LIMIT 1`
+          )
+          .get(bindingId) as any
+      }
       if (!card) return null
-      this.db.prepare(
-        'UPDATE card_pool SET status = \'locked\', order_id = ?, locked_at = datetime(\'now\') WHERE id = ?'
-      ).run(orderId, card.id)
+      this.db
+        .prepare(
+          `UPDATE card_pool SET status = 'locked', order_id = ?, locked_at = datetime('now'), pool_key = ?
+           WHERE id = ? AND status = 'unused'`
+        )
+        .run(orderId, poolKey, card.id)
+      const changed = (
+        this.db.prepare(`SELECT id FROM card_pool WHERE id = ? AND status = 'locked' AND order_id = ?`).get(
+          card.id,
+          orderId
+        ) as { id: number } | undefined
+      )
+      if (!changed) return null
       return card.card_content as string
     })
     return lockTx()
   }
 
   /**
-   * 确认卡密已使用（两段式第二步：发送成功后）
+   * 确认卡密已使用（发送成功后：标记 used，库存按共享池刷新）
    */
   confirmCard(orderId: string): void {
-    this.db.prepare(
-      'UPDATE card_pool SET status = \'used\', used_at = datetime(\'now\'), locked_at = NULL WHERE order_id = ? AND status = \'locked\''
-    ).run(orderId)
-    // 更新库存与发货计数
-    const row = this.db.prepare(
-      'SELECT binding_id FROM card_pool WHERE order_id = ?'
-    ).get(orderId) as any
+    const row = this.db
+      .prepare(`SELECT id, pool_key, binding_id FROM card_pool WHERE order_id = ? AND status = 'locked'`)
+      .get(orderId) as { id: number; pool_key: string; binding_id: number } | undefined
+    this.db
+      .prepare(
+        `UPDATE card_pool SET status = 'used', used_at = datetime('now'), locked_at = NULL
+         WHERE order_id = ? AND status = 'locked'`
+      )
+      .run(orderId)
+    const poolKey =
+      row?.pool_key ||
+      (row?.binding_id ? this.computePoolKey(this.db.prepare('SELECT * FROM product_bindings WHERE id = ?').get(row.binding_id) as any) : '')
+    if (poolKey) this.refreshPoolStock(poolKey)
     if (row?.binding_id) {
-      this.db.prepare(
-        'UPDATE product_bindings SET stock = stock - 1, delivered_count = delivered_count + 1, updated_at = datetime(\'now\') WHERE id = ?'
-      ).run(row.binding_id)
+      this.db
+        .prepare(
+          `UPDATE product_bindings SET delivered_count = delivered_count + 1, updated_at = datetime('now') WHERE id = ?`
+        )
+        .run(row.binding_id)
     }
   }
 
@@ -830,28 +1157,50 @@ export class StorageService {
   }
 
   /**
-   * 获取卡密池统计
+   * 获取卡密池统计（共享池维度）
    */
   getCardPoolStats(bindingId: number) {
-    const total = (this.db.prepare('SELECT COUNT(*) as c FROM card_pool WHERE binding_id = ?').get(bindingId) as any).c
-    const unused = (this.db.prepare('SELECT COUNT(*) as c FROM card_pool WHERE binding_id = ? AND status = \'unused\'').get(bindingId) as any).c
-    const used = (this.db.prepare('SELECT COUNT(*) as c FROM card_pool WHERE binding_id = ? AND status = \'used\'').get(bindingId) as any).c
-    const locked = (this.db.prepare('SELECT COUNT(*) as c FROM card_pool WHERE binding_id = ? AND status = \'locked\'').get(bindingId) as any).c
-    return { total, unused, used, locked }
+    const binding = this.db
+      .prepare('SELECT pool_key, deliver_type, psy_test_code FROM product_bindings WHERE id = ?')
+      .get(bindingId) as any
+    const poolKey = binding ? this.computePoolKey(binding) : `binding:${bindingId}`
+    const total = (this.db.prepare('SELECT COUNT(*) as c FROM card_pool WHERE pool_key = ?').get(poolKey) as any).c
+    const unused = (
+      this.db
+        .prepare(`SELECT COUNT(*) as c FROM card_pool WHERE pool_key = ? AND status = 'unused'`)
+        .get(poolKey) as any
+    ).c
+    const used = (
+      this.db
+        .prepare(`SELECT COUNT(*) as c FROM card_pool WHERE pool_key = ? AND status = 'used'`)
+        .get(poolKey) as any
+    ).c
+    const locked = (
+      this.db
+        .prepare(`SELECT COUNT(*) as c FROM card_pool WHERE pool_key = ? AND status = 'locked'`)
+        .get(poolKey) as any
+    ).c
+    return { total, unused, used, locked, pool_key: poolKey }
   }
 
   /**
-   * 获取卡密池列表（分页 + 状态筛选）
+   * 获取卡密池列表（共享池维度）
    */
   getCardPoolList(bindingId: number, status?: string, limit: number = 50, offset: number = 0) {
+    const binding = this.db
+      .prepare('SELECT pool_key, deliver_type, psy_test_code FROM product_bindings WHERE id = ?')
+      .get(bindingId) as any
+    const poolKey = binding ? this.computePoolKey(binding) : `binding:${bindingId}`
     if (status && status !== 'all') {
-      return this.db.prepare(
-        'SELECT * FROM card_pool WHERE binding_id = ? AND status = ? ORDER BY id ASC LIMIT ? OFFSET ?'
-      ).all(bindingId, status, limit, offset)
+      return this.db
+        .prepare(
+          'SELECT * FROM card_pool WHERE pool_key = ? AND status = ? ORDER BY id ASC LIMIT ? OFFSET ?'
+        )
+        .all(poolKey, status, limit, offset)
     }
-    return this.db.prepare(
-      'SELECT * FROM card_pool WHERE binding_id = ? ORDER BY id ASC LIMIT ? OFFSET ?'
-    ).all(bindingId, limit, offset)
+    return this.db
+      .prepare('SELECT * FROM card_pool WHERE pool_key = ? ORDER BY id ASC LIMIT ? OFFSET ?')
+      .all(poolKey, limit, offset)
   }
 
   /** 缓存千帆同步的商品列表（切页/重开不丢） */
@@ -901,18 +1250,10 @@ export class StorageService {
   }
 
   /**
-   * 订单是否已存在发货记录（处理前判重，对标 GetByTidAsync）
+   * 订单是否已存在发货记录（商家级：同订单号只发一次）
    */
-  existsOrderDelivery(orderId: string, shopId?: string): boolean {
-    if (shopId) {
-      const row = this.db.prepare(
-        'SELECT id FROM order_delivery WHERE order_id = ? AND shop_id = ? LIMIT 1'
-      ).get(orderId, shopId)
-      return !!row
-    }
-    const row = this.db.prepare(
-      'SELECT id FROM order_delivery WHERE order_id = ? LIMIT 1'
-    ).get(orderId)
+  existsOrderDelivery(orderId: string, _shopId?: string): boolean {
+    const row = this.db.prepare('SELECT id FROM order_delivery WHERE order_id = ? LIMIT 1').get(orderId)
     return !!row
   }
 
@@ -933,8 +1274,11 @@ export class StorageService {
     const offset = filter.offset ?? 0
     const conds: string[] = []
     const values: any[] = []
-    if (filter.shopId) { conds.push('shop_id = ?'); values.push(filter.shopId) }
-    if (filter.status && filter.status !== 'all') { conds.push('send_status = ?'); values.push(filter.status) }
+    // 商家统一：不再按店过滤订单查询
+    if (filter.status && filter.status !== 'all') {
+      conds.push('send_status = ?')
+      values.push(filter.status)
+    }
     const where = conds.length ? 'WHERE ' + conds.join(' AND ') : ''
     const rows = this.db.prepare(
       `SELECT * FROM order_delivery ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`

@@ -1140,14 +1140,28 @@ function setupIPC() {
   })
   ipcMain.handle('product:get-binding', (_event, shopId: string, productId: string) =>
     storageService.getProductBinding(shopId, productId))
-  ipcMain.handle('product:list-bindings', (_event, shopId: string) =>
-    storageService.getAllProductBindings(shopId))
+  ipcMain.handle('product:list-bindings', (_event, _shopId?: string) =>
+    storageService.getAllProductBindings())
+  ipcMain.handle('product:list-shared-pools', () => storageService.listSharedPools())
   ipcMain.handle('product:update-binding', (_event, id: number, updates) => {
     const ok = storageService.updateProductBinding(id, updates)
     void psyCloudService.syncBindingsFromLocal(currentShopId())
     return ok
   })
-  ipcMain.handle('product:delete-binding', (_event, id: number) => storageService.deleteProductBinding(id))
+  ipcMain.handle('product:delete-binding', (_event, id: number) => {
+    const ok = storageService.deleteProductBinding(id)
+    void psyCloudService.syncBindingsFromLocal(currentShopId())
+    return ok
+  })
+  ipcMain.handle('product:clear-all-bindings', () => {
+    const rows = storageService.getAllProductBindings() as Array<{ id: number }>
+    let n = 0
+    for (const r of rows) {
+      if (storageService.deleteProductBinding(r.id)) n++
+    }
+    void psyCloudService.syncBindingsFromLocal(currentShopId())
+    return { success: true, deleted: n }
+  })
   ipcMain.handle('product:add-cards', (_event, bindingId: number, cards: string[], options) =>
     storageService.addCardPool(bindingId, cards, options))
   ipcMain.handle('product:card-stats', (_event, bindingId: number) =>

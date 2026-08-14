@@ -9,6 +9,9 @@
           <el-button size="small" style="margin-left: 12px" @click="retryFailed">重试失败订单</el-button>
         </div>
       </div>
+      <p class="hint-text" style="margin: -4px 0 12px">
+        商家统一面板：绑定按商品 ID，切换店铺不会清空列表。多店可把不同商品 ID 绑到同一测题/卡池；同一订单号只发一次。
+      </p>
 
       <el-tabs v-model="activeTab">
         <!-- ============ 商品绑定 ============ -->
@@ -23,8 +26,9 @@
             <el-button :disabled="syncingGoods" @click="openArkLogin">
               打开商家登录
             </el-button>
+            <el-button type="danger" plain @click="clearAllBindings">清空全部绑定</el-button>
             <span v-if="goodsList.length > 0" class="hint-text">
-              已同步 {{ goodsList.length }} 个商品{{ goodsSyncedAt ? `（${goodsSyncedAt}）` : '' }}，点下方「绑卡」导入激活码；切换标签也会保留
+              已同步 {{ goodsList.length }} 个商品{{ goodsSyncedAt ? `（${goodsSyncedAt}）` : '' }}；绑定列表为商家全量
             </span>
             <span v-else class="hint-text">
               客服登录≠商家后台；先「打开商家登录」或点同步后在弹出窗登录
@@ -57,8 +61,14 @@
                 <el-tag size="small">{{ deliverTypeText(row.deliver_type) }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="psy_test_code" label="测题" width="100" />
-            <el-table-column prop="stock" label="库存" width="80" />
+            <el-table-column label="共享发卡" min-width="140">
+              <template #default="{ row }">
+                <span v-if="row.deliver_type === 'link_card'">测题 {{ row.psy_test_code || '-' }}</span>
+                <span v-else-if="row.pool_key">{{ formatPoolKey(row.pool_key) }}</span>
+                <span v-else>-</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="stock" label="池库存" width="80" />
             <el-table-column label="告警" width="110">
               <template #default="{ row }">
                 <el-tag v-if="row.stock <= (row.low_stock_alert ?? 10)" type="warning" size="small">低库存</el-tag>
@@ -173,7 +183,7 @@
             <el-option label="手动" value="manual" />
           </el-select>
           <div v-if="bindingForm.deliverType === 'link_card'" class="hint-text" style="margin-top: 6px">
-            心象测按订单号分配同一套链接（多店共用）。本店只负责对该单买家自动发起会话并发送话术。
+            多店不同商品 ID 可选同一测题，共用云端发卡池；同一订单号只分配一次。
           </div>
         </el-form-item>
         <el-form-item v-if="bindingForm.deliverType === 'link_card'" label="心象测测题" required>
@@ -181,7 +191,7 @@
             v-model="bindingForm.psyTestCode"
             filterable
             clearable
-            placeholder="选择对应测题（生成链接时的 test_code）"
+            placeholder="选择测题（多商品可绑同一测题）"
             style="width: 100%"
             :loading="psyTestsLoading"
             @change="onBindTestChange"
@@ -194,7 +204,27 @@
             />
           </el-select>
           <div class="hint-text" style="margin-top: 6px">
-            未看到测题？先到「设置 → 心象测对接」登录商家账号
+            已有绑定也可选同一测题以共享发卡码。未看到测题？先到「设置 → 心象测对接」登录
+          </div>
+        </el-form-item>
+        <el-form-item v-if="bindingForm.deliverType === 'card'" label="共享卡池">
+          <el-select
+            v-model="bindingForm.poolKey"
+            filterable
+            clearable
+            placeholder="新建独立卡池，或选中已有卡池共享"
+            style="width: 100%"
+          >
+            <el-option label="新建独立卡池" value="" />
+            <el-option
+              v-for="p in cardSharedPools"
+              :key="p.pool_key"
+              :label="`${p.label} · 剩余${p.unused} · ${p.product_count}个商品`"
+              :value="p.pool_key"
+            />
+          </el-select>
+          <div class="hint-text" style="margin-top: 6px">
+            多店售卖同类货时，选同一卡池；每条卡密发出后标记已用，不会再发。
           </div>
         </el-form-item>
         <el-form-item v-if="bindingForm.deliverType === 'link_card'" label="领取链接">
@@ -399,11 +429,34 @@ const bindingForm = ref({
   deliverType: 'card' as 'card' | 'link_card' | 'text' | 'link' | 'note' | 'image' | 'video' | 'mixed' | 'manual',
   deliverContent: '',
   psyTestCode: '',
+  poolKey: '',
   randomMode: false,
   uidLength: 10,
   sendIntervalMs: 500,
   lowStockAlert: 10
 })
+
+const sharedPools = ref<
+  Array<{
+    pool_key: string
+    label: string
+    deliver_type: string
+    psy_test_code: string
+    unused: number
+    product_count: number
+  }>
+>([])
+
+const cardSharedPools = computed(() =>
+  sharedPools.value.filter((p) => p.deliver_type === 'card' || !String(p.pool_key).startsWith('psy:'))
+)
+
+const formatPoolKey = (key: string) => {
+  const k = String(key || '')
+  if (k.startsWith('psy:')) return `测题 ${k.slice(4)}`
+  if (k.startsWith('binding:')) return `独立池 #${k.slice(8)}`
+  return k
+}
 
 const templateVars = [
   { key: '{订单号}', desc: '订单号' },
@@ -473,10 +526,12 @@ const onDeliverTypeChange = (t: string) => {
     bindingForm.value.deliverContent = '您的激活码：{卡密}'
   }
   if (t === 'link_card') {
+    bindingForm.value.poolKey = ''
     void loadPsyTests()
     void refreshBindInventory()
   } else {
     bindCloudInventory.value = null
+    void loadSharedPools()
   }
 }
 
@@ -548,7 +603,8 @@ const loadCachedGoods = async () => {
 
 const loadData = async () => {
   if (!window.electronAPI) return
-  bindings.value = await window.electronAPI.listProductBindings(SHOP_ID.value)
+  bindings.value = await window.electronAPI.listProductBindings()
+  sharedPools.value = (await window.electronAPI.listSharedPools?.()) || []
   shipLogs.value = await window.electronAPI.getShipLogs(SHOP_ID.value, 100)
   const reship = await window.electronAPI.getReshipConfig(SHOP_ID.value)
   reshipEnabled.value = !!reship?.enabled
@@ -633,6 +689,7 @@ const quickBindGoods = (g: { itemId: string; title: string }) => {
     deliverType: 'link_card',
     deliverContent: '{卡密}',
     psyTestCode: '',
+    poolKey: '',
     randomMode: false,
     uidLength: 10,
     sendIntervalMs: 500,
@@ -689,6 +746,7 @@ const retryFailed = async () => {
 const openBindingDialog = (row?: ProductBinding) => {
   editingBinding.value = row || null
   selectedGoods.value = ''
+  void loadSharedPools()
   if (row) {
     bindingForm.value = {
       productId: row.product_id,
@@ -696,6 +754,7 @@ const openBindingDialog = (row?: ProductBinding) => {
       deliverType: row.deliver_type as any,
       deliverContent: row.deliver_content,
       psyTestCode: row.psy_test_code || '',
+      poolKey: row.pool_key || '',
       randomMode: !!row.random_mode,
       uidLength: row.uid_length ?? 10,
       sendIntervalMs: row.send_interval_ms ?? 500,
@@ -708,6 +767,7 @@ const openBindingDialog = (row?: ProductBinding) => {
       deliverType: 'card',
       deliverContent: '您的激活码：{卡密}',
       psyTestCode: '',
+      poolKey: '',
       randomMode: false,
       uidLength: 10,
       sendIntervalMs: 500,
@@ -721,6 +781,32 @@ const openBindingDialog = (row?: ProductBinding) => {
   } else {
     bindCloudInventory.value = null
   }
+}
+
+const loadSharedPools = async () => {
+  if (!window.electronAPI?.listSharedPools) {
+    sharedPools.value = []
+    return
+  }
+  try {
+    sharedPools.value = (await window.electronAPI.listSharedPools()) || []
+  } catch {
+    sharedPools.value = []
+  }
+}
+
+const clearAllBindings = () => {
+  ElMessageBox.confirm(
+    '将删除全部商品绑定。共享卡池中未用完的卡密也会清除（若无其它引用）。用于纠正错绑。确定？',
+    '清空全部绑定',
+    { type: 'warning' }
+  )
+    .then(async () => {
+      const res = await window.electronAPI?.clearAllProductBindings?.()
+      await loadData()
+      ElMessage.success(`已清空 ${res?.deleted ?? 0} 条绑定`)
+    })
+    .catch(() => {})
 }
 
 const loadPsyTests = async () => {
@@ -842,6 +928,12 @@ const saveBinding = async (claimAfter = false) => {
     deliverType: bindingForm.value.deliverType,
     deliverContent,
     psyTestCode: bindingForm.value.deliverType === 'link_card' ? bindingForm.value.psyTestCode.trim() : '',
+    poolKey:
+      bindingForm.value.deliverType === 'link_card'
+        ? bindingForm.value.psyTestCode.trim()
+          ? `psy:${bindingForm.value.psyTestCode.trim()}`
+          : ''
+        : bindingForm.value.poolKey || '',
     randomMode: bindingForm.value.randomMode,
     uidLength: bindingForm.value.uidLength,
     sendIntervalMs: bindingForm.value.sendIntervalMs,

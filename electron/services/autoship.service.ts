@@ -267,8 +267,8 @@ export class AutoShipService {
       void this.psyCloud.syncOrders([{ order_id: order.order_id, product_id: productId }])
     }
 
-    if (this.storage.existsOrderDelivery(order.order_id, shopId)) {
-      this.logger.info(`[AutoShip] 订单已处理过，跳过（本店判重）: ${shopId} ${order.order_id}`)
+    if (this.storage.existsOrderDelivery(order.order_id)) {
+      this.logger.info(`[AutoShip] 订单已处理过，跳过（订单号判重）: ${order.order_id}`)
       return
     }
     if (this.processedOrders.has(`${shopId}:${order.order_id}`)) {
@@ -319,24 +319,15 @@ export class AutoShipService {
   }
 
   private async processShipment(shopId: string, order: any): Promise<boolean> {
-    const binding = this.storage.getProductBinding(shopId, order.product_id)
+    // 商家级匹配：只认 product_id；IM 仍用订单所属店
+    const binding = this.storage.getProductBinding(order.product_id)
     if (!binding) {
-      this.logger.warn(`[AutoShip] 未找到本店商品绑定: shop=${shopId} productId=${order.product_id}`)
+      this.logger.warn(`[AutoShip] 未找到商品绑定: productId=${order.product_id} (订单店=${shopId})`)
       this.storage.addShipLog({
         shopId,
         orderId: order.order_id,
         status: 'no_binding',
-        errorMsg: `本店未绑定该商品: ${order.product_id}（禁止跨店发卡）`
-      })
-      return false
-    }
-    if (String(binding.shop_id || shopId) !== String(shopId)) {
-      this.logger.error(`[AutoShip] 拒绝跨店发卡: orderShop=${shopId} bindingShop=${binding.shop_id}`)
-      this.storage.addShipLog({
-        shopId,
-        orderId: order.order_id,
-        status: 'cross_shop_blocked',
-        errorMsg: `绑定店铺 ${binding.shop_id} 与登录店铺 ${shopId} 不一致`
+        errorMsg: `未绑定该商品: ${order.product_id}`
       })
       return false
     }

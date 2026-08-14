@@ -66,9 +66,20 @@ export interface ElectronAPI {
 
   addProductBinding(binding: ProductBindingInput): Promise<number>
   getProductBinding(shopId: string, productId: string): Promise<ProductBinding | null>
-  listProductBindings(shopId: string): Promise<ProductBinding[]>
+  listProductBindings(shopId?: string): Promise<ProductBinding[]>
+  listSharedPools(): Promise<
+    Array<{
+      pool_key: string
+      label: string
+      deliver_type: string
+      psy_test_code: string
+      unused: number
+      product_count: number
+    }>
+  >
   updateProductBinding(id: number, updates: Record<string, unknown>): Promise<boolean>
   deleteProductBinding(id: number): Promise<boolean>
+  clearAllProductBindings(): Promise<{ success: boolean; deleted: number }>
   addCards(bindingId: number, cards: string[], options?: { skipDuplicate?: boolean }): Promise<number>
   getCardStats(bindingId: number): Promise<{ total: number; unused: number; used: number; locked: number }>
   getCardList(bindingId: number, status?: string, limit?: number, offset?: number): Promise<CardPoolItem[]>
@@ -190,7 +201,7 @@ export interface SubAccount {
 }
 
 export interface ProductBindingInput {
-  shopId: string
+  shopId?: string
   productId: string
   productName?: string
   productType?: 'virtual' | 'physical'
@@ -203,6 +214,7 @@ export interface ProductBindingInput {
   uidLength?: number
   msgSeparator?: string
   psyTestCode?: string
+  poolKey?: string
 }
 
 export interface ProductBinding {
@@ -222,6 +234,7 @@ export interface ProductBinding {
   uid_length?: number
   msg_separator?: string
   psy_test_code?: string
+  pool_key?: string
 }
 
 export interface CardPoolItem {
