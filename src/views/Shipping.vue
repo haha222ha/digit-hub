@@ -184,6 +184,7 @@
             placeholder="选择对应测题（生成链接时的 test_code）"
             style="width: 100%"
             :loading="psyTestsLoading"
+            @change="onBindTestChange"
           >
             <el-option
               v-for="t in psyTests"
@@ -196,11 +197,37 @@
             未看到测题？先到「设置 → 心象测对接」登录商家账号
           </div>
         </el-form-item>
+        <el-form-item v-if="bindingForm.deliverType === 'link_card'" label="领取链接">
+          <div class="bind-claim-box">
+            <p class="bind-claim-lead">
+              发货内容用 <code>{卡密}</code> 占位；真正的
+              <code>psy.xhs365.cn/test/…</code>
+              链接在「保存」后从云端领取进链接池，一单一条。
+            </p>
+            <div class="bind-claim-row">
+              <span>
+                云端可领
+                <strong>{{ bindCloudInventory?.unclaimed_unused ?? '—' }}</strong>
+                条
+                <template v-if="bindCloudInventory">
+                  （已领未开测 {{ bindCloudInventory.claimed_unused }}）
+                </template>
+              </span>
+              <el-input-number v-model="claimCount" :min="1" :max="200" size="small" style="width: 110px" />
+              <el-button size="small" :disabled="!bindingForm.psyTestCode" @click="refreshBindInventory">
+                刷新
+              </el-button>
+            </div>
+            <p v-if="bindCloudInventory && bindCloudInventory.unclaimed_unused === 0" class="hint-text" style="margin-top: 6px; color: #b45309">
+              云端暂无可领链接：请先到心象测「生成链接」生成 7v7，再回来领取。
+            </p>
+          </div>
+        </el-form-item>
         <el-form-item label="发货内容">
           <el-input
             v-model="bindingForm.deliverContent"
             type="textarea"
-            :rows="6"
+            :rows="bindingForm.deliverType === 'link_card' ? 2 : 6"
             :placeholder="contentPlaceholder"
           />
           <div class="template-hint">
@@ -228,7 +255,16 @@
       </el-form>
       <template #footer>
         <el-button @click="showBinding = false">取消</el-button>
-        <el-button type="primary" @click="saveBinding">保存</el-button>
+        <el-button @click="saveBinding(false)">仅保存</el-button>
+        <el-button
+          v-if="bindingForm.deliverType === 'link_card'"
+          type="success"
+          :loading="claiming"
+          @click="saveBinding(true)"
+        >
+          保存并领取链接
+        </el-button>
+        <el-button v-else type="primary" @click="saveBinding(false)">保存</el-button>
       </template>
     </el-dialog>
 
@@ -333,7 +369,10 @@ const psyTestsLoading = ref(false)
 const claimCount = ref(20)
 const claiming = ref(false)
 const cloudInventory = ref<{ unclaimed_unused: number; claimed_unused: number; used: number } | null>(null)
+const bindCloudInventory = ref<{ unclaimed_unused: number; claimed_unused: number; used: number } | null>(null)
 const cloudLowHint = ref<Record<number, boolean>>({})
+/** 保存后自动打开链接池并领取 */
+const pendingClaimAfterSave = ref(false)
 
 const orderQuery = ref({ orderId: '', status: '' })
 
@@ -423,7 +462,12 @@ const onDeliverTypeChange = (t: string) => {
   if (t === 'card' && !bindingForm.value.deliverContent.trim()) {
     bindingForm.value.deliverContent = '您的激活码：{卡密}'
   }
-  if (t === 'link_card') void loadPsyTests()
+  if (t === 'link_card') {
+    void loadPsyTests()
+    void refreshBindInventory()
+  } else {
+    bindCloudInventory.value = null
+  }
 }
 
 const getStatusType = (status: string) => {
@@ -591,14 +635,14 @@ const quickBindGoods = (g: { itemId: string; title: string }) => {
 /** 绑定并导入卡密 */
 const bindGoodsForCard = async (g: { itemId: string; title: string }) => {
   if (!window.electronAPI) return
-  // 已有绑定则直接开卡密池
+  // 已有绑定则直接开链接池（云端领取）
   const existing = bindings.value.find((b) => b.product_id === g.itemId)
   if (existing) {
     openCardDialog(existing)
-    showCardImport.value = true
     return
   }
   pendingOpenCardsAfterSave.value = true
+  pendingClaimAfterSave.value = true
   quickBindGoods(g)
 }
 
@@ -661,7 +705,12 @@ const openBindingDialog = (row?: ProductBinding) => {
     }
   }
   showBinding.value = true
-  if (bindingForm.value.deliverType === 'link_card') void loadPsyTests()
+  if (bindingForm.value.deliverType === 'link_card') {
+    void loadPsyTests()
+    void refreshBindInventory()
+  } else {
+    bindCloudInventory.value = null
+  }
 }
 
 const loadPsyTests = async () => {
@@ -676,7 +725,20 @@ const loadPsyTests = async () => {
   }
 }
 
-const saveBinding = async () => {
+const refreshBindInventory = async () => {
+  bindCloudInventory.value = null
+  const code = (bindingForm.value.psyTestCode || '').trim()
+  if (!code || !window.electronAPI?.psyInventory) return
+  const res = await window.electronAPI.psyInventory(code)
+  if (res.success && res.inventory) bindCloudInventory.value = res.inventory
+  else if (res.message) ElMessage.warning(res.message)
+}
+
+const onBindTestChange = () => {
+  void refreshBindInventory()
+}
+
+const saveBinding = async (claimAfter = false) => {
   if (!bindingForm.value.productId) {
     ElMessage.warning('请输入商品ID')
     return
@@ -705,8 +767,13 @@ const saveBinding = async () => {
     lowStockAlert: bindingForm.value.lowStockAlert
   }
 
-  const openCards = pendingOpenCardsAfterSave.value
+  const openCards =
+    pendingOpenCardsAfterSave.value ||
+    claimAfter ||
+    bindingForm.value.deliverType === 'link_card'
+  const doClaim = pendingClaimAfterSave.value || claimAfter
   pendingOpenCardsAfterSave.value = false
+  pendingClaimAfterSave.value = false
 
   if (editingBinding.value) {
     await window.electronAPI.updateProductBinding(editingBinding.value.id, payload)
@@ -717,12 +784,13 @@ const saveBinding = async () => {
   await loadData()
   ElMessage.success('保存成功')
 
-  if (openCards) {
+  if (openCards || doClaim) {
     const row = bindings.value.find((b) => b.product_id === payload.productId)
     if (row) {
       openCardDialog(row)
-      if (row.deliver_type === 'link_card') showCardImport.value = false
-      else showCardImport.value = true
+      if (doClaim && row.deliver_type === 'link_card') {
+        await claimFromCloud()
+      }
     }
   }
 }
@@ -892,6 +960,37 @@ onUnmounted(() => {
   border-radius: 6px;
   font-size: 13px;
   color: #0f766e;
+}
+
+.bind-claim-box {
+  width: 100%;
+  padding: 10px 12px;
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+  border-radius: 6px;
+}
+
+.bind-claim-lead {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #0f766e;
+}
+
+.bind-claim-lead code {
+  font-size: 11px;
+  background: rgba(15, 118, 110, 0.08);
+  padding: 0 4px;
+  border-radius: 3px;
+}
+
+.bind-claim-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 13px;
+  color: #134e4a;
 }
 .card-stats {
   font-size: 13px;
