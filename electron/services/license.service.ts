@@ -77,9 +77,9 @@ export const EDITION_FEATURES: Record<LicenseEdition, string[]> = {
  * 各版本店铺数量限制
  */
 export const EDITION_SHOP_LIMITS: Record<LicenseEdition, number> = {
-  trial: 1,
-  basic: 1,
-  pro: 5,
+  trial: 5,
+  basic: 5,
+  pro: 10,
   enterprise: 999
 }
 

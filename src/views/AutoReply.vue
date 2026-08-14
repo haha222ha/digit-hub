@@ -62,11 +62,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { ReplyRule } from '../types/electron'
+import { useShopStore } from '../stores/shop'
 
-const SHOP_ID = 'default'
+const shopStore = useShopStore()
+const SHOP_ID = () => shopStore.currentId
 const autoReplyEnabled = ref(false)
 const showAddRule = ref(false)
 const editingRule = ref<ReplyRule | null>(null)
@@ -81,7 +83,7 @@ const getTypeText = (type: string) => {
 
 const loadRules = async () => {
   if (!window.electronAPI) return
-  replyRules.value = await window.electronAPI.listReplyRules(SHOP_ID)
+  replyRules.value = await window.electronAPI.listReplyRules(SHOP_ID())
 }
 
 const toggleAutoReply = async (val: boolean) => {
@@ -122,7 +124,7 @@ const saveRule = async () => {
     editingRule.value = null
   } else {
     await window.electronAPI.addReplyRule({
-      shopId: SHOP_ID,
+      shopId: SHOP_ID(),
       keyword: ruleForm.value.keyword,
       replyText: ruleForm.value.reply_text,
       replyType: ruleForm.value.reply_type

@@ -43,8 +43,10 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { ArrowLeft, ArrowRight, Refresh } from '@element-plus/icons-vue'
 import { XHS_DASHBOARD_URL, XHS_LOGIN_URL, XHS_CHAT_URL } from '@/constants/xhs-urls'
+import { useShopStore } from '../stores/shop'
 
-const SHOP_ID = 'default'
+const shopStore = useShopStore()
+const SHOP_ID = () => shopStore.currentId
 
 const currentUrl = ref('')
 const canGoBack = ref(false)
@@ -109,7 +111,7 @@ const openLoginAssist = async () => {
 const triggerAutoLogin = async () => {
   loading.value = true
   try {
-    const ok = await window.electronAPI?.autoLogin(SHOP_ID)
+    const ok = await window.electronAPI?.autoLogin(SHOP_ID())
     if (ok) {
       ElMessage.success('已恢复登录态')
       needRelogin.value = false
@@ -143,9 +145,9 @@ const loadUrl = async (targetUrl: string) => {
 
 const saveLogin = async () => {
   if (!window.electronAPI) return
-  const ok = await window.electronAPI.saveCookies(SHOP_ID)
+  const ok = await window.electronAPI.saveCookies(SHOP_ID())
   if (ok) {
-    await window.electronAPI.initShopPhase2(SHOP_ID)
+    await window.electronAPI.initShopPhase2(SHOP_ID())
     needRelogin.value = false
     ElMessage.success('登录态已保存，下次启动将自动恢复')
   } else {

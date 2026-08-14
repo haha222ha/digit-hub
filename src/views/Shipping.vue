@@ -173,7 +173,7 @@
             <el-option label="手动" value="manual" />
           </el-select>
           <div v-if="bindingForm.deliverType === 'link_card'" class="hint-text" style="margin-top: 6px">
-            每条订单消耗卡密池里的一条专属链接（如 psy.xhs365.cn/…），已发送标记为已用，不会重复发
+            心象测按订单号分配同一套链接（多店共用）。本店只负责对该单买家自动发起会话并发送话术。
           </div>
         </el-form-item>
         <el-form-item v-if="bindingForm.deliverType === 'link_card'" label="心象测测题" required>
@@ -200,9 +200,7 @@
         <el-form-item v-if="bindingForm.deliverType === 'link_card'" label="领取链接">
           <div class="bind-claim-box">
             <p class="bind-claim-lead">
-              发货内容用 <code>{卡密}</code> 占位；真正的
-              <code>psy.xhs365.cn/test/…</code>
-              链接在「保存」后从云端领取进链接池，一单一条。
+              发货时按订单号向心象测领取专属链接（多店同一套码）。此处「领取进链接池」仅作库存预览，自动发货不再扣本地池。
             </p>
             <div class="bind-claim-row">
               <span>
@@ -351,11 +349,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { ProductBinding, ShipLog, CardPoolItem, OrderDelivery } from '../types/electron'
+import { useShopStore } from '../stores/shop'
 
-const SHOP_ID = 'default'
+const shopStore = useShopStore()
+const SHOP_ID = computed(() => shopStore.currentId)
 const activeTab = ref('bindings')
 const autoShipEnabled = ref(false)
 const reshipEnabled = ref(false)
@@ -539,7 +539,7 @@ const applyGoodsCache = (goods: typeof goodsList.value, syncedAt?: string) => {
 const loadCachedGoods = async () => {
   if (!window.electronAPI?.getCachedGoods) return
   try {
-    const cached = await window.electronAPI.getCachedGoods(SHOP_ID)
+    const cached = await window.electronAPI.getCachedGoods(SHOP_ID.value)
     if (cached?.goods?.length) applyGoodsCache(cached.goods, cached.syncedAt)
   } catch {
     /* ignore */
@@ -548,9 +548,9 @@ const loadCachedGoods = async () => {
 
 const loadData = async () => {
   if (!window.electronAPI) return
-  bindings.value = await window.electronAPI.listProductBindings(SHOP_ID)
-  shipLogs.value = await window.electronAPI.getShipLogs(SHOP_ID, 100)
-  const reship = await window.electronAPI.getReshipConfig(SHOP_ID)
+  bindings.value = await window.electronAPI.listProductBindings(SHOP_ID.value)
+  shipLogs.value = await window.electronAPI.getShipLogs(SHOP_ID.value, 100)
+  const reship = await window.electronAPI.getReshipConfig(SHOP_ID.value)
   reshipEnabled.value = !!reship?.enabled
   await refreshCloudLowHints()
 }
@@ -663,7 +663,7 @@ const loadDeliveries = async () => {
     deliveries.value = detail || []
     if (!detail || detail.length === 0) ElMessage.info('发货消息不存在')
   } else {
-    const res = await window.electronAPI.getOrderDeliveries({ shopId: SHOP_ID, status: orderQuery.value.status || 'all' })
+    const res = await window.electronAPI.getOrderDeliveries({ shopId: SHOP_ID.value, status: orderQuery.value.status || 'all' })
     deliveries.value = res?.items || []
   }
 }
@@ -676,7 +676,7 @@ const toggleAutoShip = async (val: boolean) => {
 }
 
 const toggleReship = async (val: boolean) => {
-  await window.electronAPI?.setReshipConfig(SHOP_ID, { enabled: val, retryIntervalMs: 10000 })
+  await window.electronAPI?.setReshipConfig(SHOP_ID.value, { enabled: val, retryIntervalMs: 10000 })
   ElMessage.success(`自动补发已${val ? '开启' : '关闭'}`)
 }
 
@@ -836,7 +836,7 @@ const saveBinding = async (claimAfter = false) => {
   }
 
   const payload = {
-    shopId: SHOP_ID,
+    shopId: SHOP_ID.value,
     productId: bindingForm.value.productId,
     productName: bindingForm.value.productName,
     deliverType: bindingForm.value.deliverType,
@@ -1012,6 +1012,14 @@ onMounted(async () => {
     })
   }
 })
+
+watch(
+  () => shopStore.currentId,
+  () => {
+    void loadCachedGoods()
+    void loadData()
+  }
+)
 
 onUnmounted(() => {
   offGoodsSync?.()

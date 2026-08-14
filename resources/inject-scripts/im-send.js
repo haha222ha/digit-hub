@@ -113,15 +113,23 @@
     )
   }
 
-  /** 买家 ID → chatId（对标 getUserByOrderSnChatId / XhsRim.getChatInfo） */
+  /**
+   * 买家 ID → chatId。getChatInfo 会打开/创建与该买家的会话（无需买家先开口）。
+   * 对标阿奇锁 getUserByOrderSnChatId / XhsRim.getChatInfo
+   */
   async function getChatId(buyerId, orderSn) {
     if (!window.XhsRim || !window.XhsRim.rimSdk) {
       throw new Error('XhsRim 未就绪：请打开客服聊天页 /cstools/chat')
     }
     const arg1 = buyerId
     const arg2 = orderSn || buyerId
-    const chatInfo = await window.XhsRim.rimSdk.getChatInfo(arg1, arg2)
-    return chatInfo?.data?.id || chatInfo?.id || null
+    let chatInfo = await window.XhsRim.rimSdk.getChatInfo(arg1, arg2)
+    let chatId = chatInfo?.data?.id || chatInfo?.id || null
+    if (!chatId) {
+      chatInfo = await window.XhsRim.rimSdk.getChatInfo(arg1)
+      chatId = chatInfo?.data?.id || chatInfo?.id || null
+    }
+    return chatId
   }
 
   async function sendTextMsg(content, chatId) {
@@ -170,10 +178,8 @@
   }
 
   /**
-   * 一站式：订单号 → 找买家 → 开聊 → 发消息（文本/图片/视频）
-   * @param {string} orderSn 订单号
-   * @param {string} content 内容（文本内容 / 图片 URL / 视频内容）
-   * @param {string} type 'text' | 'image' | 'video'
+   * 一站式：订单号 → 找买家 → 自动开会话 → 发消息（文本/图片/视频）
+   * 买家未先发消息也可以发起，对标阿奇锁主动虚拟发货。
    */
   async function deliverByOrderSn(orderSn, content, type) {
     type = type || 'text'

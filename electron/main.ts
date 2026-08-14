@@ -1,4 +1,4 @@
-import { app, BrowserWindow, BrowserView, ipcMain, session, shell } from 'electron'
+import { app, BrowserWindow, BrowserView, ipcMain, session, shell, WebContents } from 'electron'
 import { join } from 'path'
 import { createTray } from './tray'
 import { DeviceService } from './services/device.service'
@@ -9,7 +9,7 @@ import { WebSocketService } from './services/websocket.service'
 import { ApiService } from './services/api.service'
 import { InjectService } from './services/inject.service'
 import { UpdateService } from './services/update.service'
-import { AutoLoginService, XHS_DASHBOARD_URL, XHS_LOGIN_URL } from './services/auto-login.service'
+import { AutoLoginService, XHS_DASHBOARD_URL, XHS_LOGIN_URL, XHS_CHAT_URL } from './services/auto-login.service'
 import { CrashRecoveryService } from './services/crash-recovery.service'
 import { MockService } from './services/mock.service'
 import { AutoShipService } from './services/autoship.service'
@@ -57,6 +57,8 @@ let kefuWindow: BrowserWindow | null = null
 let psyLoginWindow: BrowserWindow | null = null
 let xhsBrowserView: BrowserView | null = null
 const shopViews = new Map<string, BrowserView>()
+const shopImWindows = new Map<string, BrowserWindow>()
+const shopImCreating = new Map<string, Promise<BrowserWindow | null>>()
 const preparedPartitions = new Set<string>()
 let deviceService: DeviceService
 let licenseService: LicenseService
@@ -467,10 +469,18 @@ async function initialize() {
   autoShipService.setInjectService(injectService)
   psyCloudService = new PsyCloudService(storageService, logger)
   autoShipService.setPsyCloud(psyCloudService)
+  autoShipService.setEnsureImSession(async (sid) => {
+    const win = await ensureShopImWindow(sid, { show: false })
+    return !!(win && !win.isDestroyed())
+  })
   autoReshipService = new AutoReshipService(storageService, logger, autoShipService)
   shopContextService = new ShopContextService(
     logger, storageService, wsService, autoShipService, autoReshipService, mockService
   )
+  shopContextService.setEnsureImSession(async (sid) => {
+    const win = await ensureShopImWindow(sid, { show: false })
+    return !!(win && !win.isDestroyed())
+  })
 
   // 启动时自动扫描失败订单重试（对标阿奇锁 MessageRetryTask 定时任务）
   const retryFailedOrders = async () => {
@@ -581,6 +591,11 @@ function createMainWindow() {
       }
       await shopContextService.initializePhase2(shopId)
       logger.info('[Login] 登录保活成功，已进入客服工作台')
+      for (const shop of storageService.listShops()) {
+        if (shop.id && shop.id !== shopId && storageService.getShopCookies(shop.id)) {
+          void ensureShopImWindow(shop.id, { show: false })
+        }
+      }
     } else {
       await showAndLoadXhs(XHS_LOGIN_URL)
       logger.info('[Login] 需手动登录：请用客服邮箱登录（不是商家扫码）')
@@ -698,6 +713,22 @@ function setupEvaIpcStubs() {
     return invokeDb(name, fn, rest)
   })
 
+  // 官方：ipcMain.handle("tab:getAllLogin", () => tabList.map(v => v.bUserId))
+  // 新店空分区必须返回 []，否则 Eva 当成已登录账号恢复失败 →「登录已过期」
+  try {
+    ipcMain.removeHandler('tab:getAllLogin')
+  } catch {
+    /* ignore */
+  }
+  ipcMain.handle('tab:getAllLogin', () => [])
+
+  try {
+    ipcMain.removeHandler('globalShortcut')
+  } catch {
+    /* ignore */
+  }
+  ipcMain.handle('globalShortcut', () => true)
+
   // 官方千帆内部 channel；缺注册会导致客服页 Uncaught promise
   const channels = ['handle-invoke-method', 'invoke-current-win-function']
   for (const ch of channels) {
@@ -789,6 +820,12 @@ async function addShopAccount(): Promise<{ success: boolean; shopId?: string; me
     autoReplyEnabled: false
   })
   autoLoginService.clearLogoutHold(id)
+  const part = partitionForShop(id)
+  try {
+    await session.fromPartition(part).clearStorageData()
+  } catch {
+    /* 新分区无数据 */
+  }
   await switchToShop(id)
   await showAndLoadXhs(XHS_LOGIN_URL)
   mainWindow?.webContents.send('navigate', '/browser')
@@ -798,6 +835,7 @@ async function addShopAccount(): Promise<{ success: boolean; shopId?: string; me
 
 async function logoutCurrentShop(): Promise<boolean> {
   const sid = currentShopId()
+  await destroyShopImWindow(sid)
   await autoLoginService.clearShopSession(sid)
   await showAndLoadXhs(XHS_LOGIN_URL)
   mainWindow?.webContents.send('navigate', '/browser')
@@ -806,41 +844,136 @@ async function logoutCurrentShop(): Promise<boolean> {
   return true
 }
 
-function createKefuWindow() {
-  if (kefuWindow && !kefuWindow.isDestroyed()) {
-    kefuWindow.show()
-    kefuWindow.focus()
-    return
+function shopIdFromWebContents(wc: WebContents | null | undefined): string | null {
+  if (!wc) return null
+  for (const [id, view] of shopViews) {
+    if (view.webContents.id === wc.id) return id
   }
+  for (const [id, win] of shopImWindows) {
+    if (!win.isDestroyed() && win.webContents.id === wc.id) return id
+  }
+  return null
+}
 
-  kefuWindow = new BrowserWindow({
+async function ensureShopImWindow(
+  shopId: string,
+  opts?: { show?: boolean }
+): Promise<BrowserWindow | null> {
+  const sid = String(shopId || currentShopId()).trim() || DEFAULT_SHOP_ID
+  const existing = shopImWindows.get(sid)
+  if (existing && !existing.isDestroyed()) {
+    if (opts?.show) {
+      existing.setSkipTaskbar(false)
+      existing.show()
+      existing.focus()
+      kefuWindow = existing
+    }
+    return existing
+  }
+  const pending = shopImCreating.get(sid)
+  if (pending) {
+    const win = await pending
+    if (opts?.show && win && !win.isDestroyed()) {
+      win.setSkipTaskbar(false)
+      win.show()
+      win.focus()
+      kefuWindow = win
+    }
+    return win
+  }
+  const created = createShopImWindow(sid, !!opts?.show)
+  shopImCreating.set(sid, created)
+  try {
+    return await created
+  } finally {
+    shopImCreating.delete(sid)
+  }
+}
+
+async function createShopImWindow(shopId: string, show: boolean): Promise<BrowserWindow | null> {
+  prepareShopPartition(shopId)
+  const win = new BrowserWindow({
+    show,
     width: 1100,
     height: 760,
     title: '客服聊天',
-    webPreferences: getXhsWebPreferences()
-  })
-
-  kefuWindow.webContents.setUserAgent(CHROME_UA)
-  kefuWindow.loadURL('https://walle.xiaohongshu.com/cstools/chat')
-
-  kefuWindow.webContents.on('dom-ready', () => injectService?.injectOnDomReady(kefuWindow!.webContents))
-  kefuWindow.webContents.on('did-finish-load', async () => {
-    injectService?.injectScripts(kefuWindow!.webContents)
-    autoShipService?.bindImWebContents(kefuWindow!.webContents, currentShopId())
-    const shopId = (global as any).currentShopId || 'default'
-    const isLoggedIn = await autoLoginService.checkLoginStatus(kefuWindow!.webContents)
-    if (!isLoggedIn) {
-      logger.warn('[KefuBrowser] Cookie 过期，队列已熔断')
-      await autoLoginService.autoLogin(shopId, kefuWindow!.webContents, 'https://walle.xiaohongshu.com/cstools/chat')
-    } else {
-      await autoLoginService.syncEvaAuthCookies(kefuWindow!.webContents)
+    skipTaskbar: !show,
+    webPreferences: {
+      ...getXhsWebPreferences(shopId),
+      backgroundThrottling: false
     }
   })
+  win.webContents.setUserAgent(CHROME_UA)
+  shopImWindows.set(shopId, win)
+  if (show) kefuWindow = win
 
-  kefuWindow.webContents.on('render-process-gone', async (_event, details) => {
-    logger.warn(`[客服窗口] 渲染进程崩溃: ${details.reason}`)
-    if (kefuWindow && !kefuWindow.isDestroyed()) kefuWindow.reload()
+  win.on('close', (e) => {
+    if ((app as any).isQuitting || (win as any).__allowClose) return
+    e.preventDefault()
+    win.setSkipTaskbar(true)
+    win.hide()
   })
+  win.on('closed', () => {
+    if (shopImWindows.get(shopId) === win) shopImWindows.delete(shopId)
+    if (kefuWindow === win) kefuWindow = null
+    autoShipService?.unbindImWebContents(shopId)
+  })
+
+  win.webContents.on('dom-ready', () => injectService?.injectOnDomReady(win.webContents))
+  win.webContents.on('did-finish-load', async () => {
+    injectService?.injectScripts(win.webContents)
+    autoShipService?.bindImWebContents(win.webContents, shopId)
+    try {
+      const isLoggedIn = await autoLoginService.checkLoginStatus(win.webContents)
+      if (!isLoggedIn) {
+        logger.warn(`[KefuBrowser] 店铺 ${shopId} Cookie 可能过期，尝试自动登录`)
+        await autoLoginService.autoLogin(shopId, win.webContents, XHS_CHAT_URL)
+      } else {
+        await autoLoginService.syncEvaAuthCookies(win.webContents)
+      }
+    } catch (err) {
+      logger.warn(`[KefuBrowser] 店铺 ${shopId} 会话检查失败: ${err}`)
+    }
+  })
+  win.webContents.on('render-process-gone', async (_event, details) => {
+    logger.warn(`[客服窗口] 店铺 ${shopId} 渲染进程崩溃: ${details.reason}`)
+    if (!win.isDestroyed()) win.reload()
+  })
+
+  try {
+    await win.loadURL(XHS_CHAT_URL)
+  } catch (err) {
+    logger.warn(`[KefuBrowser] 店铺 ${shopId} 加载聊天页失败: ${err}`)
+  }
+  autoShipService?.bindImWebContents(win.webContents, shopId)
+  logger.info(`[KefuBrowser] 已就绪 shop=${shopId} show=${show} partition=${partitionForShop(shopId)}`)
+  return win
+}
+
+async function destroyShopImWindow(shopId: string): Promise<void> {
+  const win = shopImWindows.get(shopId)
+  if (!win) return
+  shopImWindows.delete(shopId)
+  ;(win as any).__allowClose = true
+  if (kefuWindow === win) kefuWindow = null
+  autoShipService?.unbindImWebContents(shopId)
+  if (!win.isDestroyed()) {
+    try {
+      win.destroy()
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
+function destroyAllShopImWindows() {
+  for (const id of [...shopImWindows.keys()]) {
+    void destroyShopImWindow(id)
+  }
+}
+
+function createKefuWindow() {
+  void ensureShopImWindow(currentShopId(), { show: true })
 }
 
 // ==================== IPC 通信 ====================
@@ -1245,13 +1378,15 @@ function setupIPC() {
     }
   })
 
-  ipcMain.on('xhs-new-order', async (_event, data) => {
+  ipcMain.on('xhs-new-order', async (event, data) => {
     if (data?.orderId || data?.order_id) {
+      const shopId = shopIdFromWebContents(event.sender) || currentShopId()
       await autoShipService.handleNewOrder({
         order_id: data.orderId || data.order_id,
         product_id: data.productId || data.product_id || '',
         status: data.status || '待发货',
-        source: data.source || 'inject'
+        source: data.source || 'inject',
+        shop_id: shopId
       })
     }
   })
@@ -1288,6 +1423,7 @@ app.on('window-all-closed', () => {})
 
 app.on('before-quit', () => {
   (app as any).isQuitting = true
+  destroyAllShopImWindows()
   wsService?.stop()
   apiService?.stop()
   autoShipService?.dispose()

@@ -23,10 +23,12 @@ import TitleBar from './components/TitleBar.vue'
 import SideMenu from './components/SideMenu.vue'
 import StatusBar from './components/StatusBar.vue'
 import { useLicenseStore } from './stores/license'
+import { useShopStore } from './stores/shop'
 
 const router = useRouter()
 const route = useRoute()
 const licenseStore = useLicenseStore()
+const shopStore = useShopStore()
 
 function syncBrowserViewVisibility(path: string) {
   window.electronAPI?.browserRoute(path)
@@ -34,6 +36,7 @@ function syncBrowserViewVisibility(path: string) {
 
 onMounted(async () => {
   await licenseStore.checkStatus()
+  await shopStore.refresh()
 
   if (!licenseStore.isValid) {
     router.push('/license')
@@ -53,6 +56,10 @@ onMounted(async () => {
 
     window.electronAPI.onLoginRequired(() => {
       router.push('/browser')
+    })
+
+    window.electronAPI.onShopChanged?.((data) => {
+      shopStore.applyPayload(data)
     })
   }
 })

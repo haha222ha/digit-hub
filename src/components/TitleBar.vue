@@ -6,9 +6,13 @@
     </div>
 
     <div class="title-center">
-      <span class="shop-name" v-if="shopStore.currentShop">
-        {{ shopStore.currentShop.name }}
-      </span>
+      <div class="shop-switch" v-if="shopStore.shops.length">
+        <select class="shop-select" :value="shopStore.currentId" @change="onShopChange">
+          <option v-for="s in shopStore.shops" :key="s.id" :value="s.id">{{ s.name || s.id }}</option>
+        </select>
+        <button class="shop-btn" type="button" @click="onAddShop">添加店铺</button>
+        <button class="shop-btn" type="button" @click="onLogout">退出当前</button>
+      </div>
     </div>
 
     <div class="title-right">
@@ -32,9 +36,39 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useShopStore } from '../stores/shop'
 
 const shopStore = useShopStore()
+
+onMounted(() => {
+  void shopStore.refresh()
+})
+
+const onShopChange = async (e: Event) => {
+  const id = (e.target as HTMLSelectElement).value
+  if (id && id !== shopStore.currentId) await shopStore.switchShop(id)
+}
+
+const onAddShop = async () => {
+  const res = await shopStore.addShop()
+  if (!res.success) {
+    ElMessage.warning(res.message || '无法添加店铺')
+    return
+  }
+  ElMessage.success('已新建店铺，请用该店客服账号登录（Cookie 与发卡互不串店）')
+}
+
+const onLogout = async () => {
+  try {
+    await ElMessageBox.confirm('退出后需重新登录该店铺，卡密绑定仍留在本店。', '退出当前店铺', { type: 'warning' })
+  } catch {
+    return
+  }
+  await shopStore.logoutShop()
+  ElMessage.success('已退出当前店铺')
+}
 
 const handleMinimize = () => {
   window.electronAPI?.minimizeWindow()
@@ -80,12 +114,41 @@ const handleClose = () => {
 
 .title-center {
   flex: 1;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  -webkit-app-region: no-drag;
 }
 
-.shop-name {
+.shop-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shop-select {
+  max-width: 180px;
+  height: 24px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
   font-size: 12px;
-  color: #909399;
+  color: #303133;
+  padding: 0 6px;
+}
+
+.shop-btn {
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  color: #606266;
+}
+
+.shop-btn:hover {
+  color: #409eff;
+  border-color: #c6e2ff;
 }
 
 .title-right {

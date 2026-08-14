@@ -283,17 +283,28 @@ export class PsyCloudService {
     }
   }
 
-  /** 从本地库推送全部 link_card 绑定 */
-  async syncBindingsFromLocal(shopId = 'default'): Promise<{ success: boolean; upserted?: number; message?: string }> {
-    const list = this.storage.getAllProductBindings(shopId) || []
-    const rows = list
-      .filter((b: any) => String(b.deliver_type || '') === 'link_card' && String(b.psy_test_code || '').trim())
-      .map((b: any) => ({
-        product_id: String(b.product_id || ''),
-        test_code: String(b.psy_test_code || ''),
-        product_name: String(b.product_name || ''),
-        enabled: Number(b.enabled) !== 0
-      }))
+  /** 从本地所有店铺推送 link_card 绑定（云端按商家 product_id，不按店拆池） */
+  async syncBindingsFromLocal(_shopId = 'default'): Promise<{ success: boolean; upserted?: number; message?: string }> {
+    const shops = this.storage.listShops()
+    const ids = shops.length ? shops.map((s) => s.id) : [_shopId || 'default']
+    const seen = new Set<string>()
+    const rows: Array<{ product_id: string; test_code: string; product_name: string; enabled: boolean }> = []
+    for (const sid of ids) {
+      const list = this.storage.getAllProductBindings(sid) || []
+      for (const b of list) {
+        const productId = String(b.product_id || '').trim()
+        const testCode = String(b.psy_test_code || '').trim()
+        if (String(b.deliver_type || '') !== 'link_card' || !productId || !testCode) continue
+        if (seen.has(productId)) continue
+        seen.add(productId)
+        rows.push({
+          product_id: productId,
+          test_code: testCode,
+          product_name: String(b.product_name || ''),
+          enabled: Number(b.enabled) !== 0
+        })
+      }
+    }
     return this.syncBindings(rows)
   }
 

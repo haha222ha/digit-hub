@@ -2,6 +2,7 @@ import WebSocket from 'ws'
 import { BrowserWindow, session } from 'electron'
 import { LoggerService } from './logger.service'
 import { StorageService } from './storage.service'
+import { partitionForShop } from '../utils/shop-partition'
 
 /**
  * WebSocket 双通道
@@ -186,7 +187,7 @@ export class WebSocketService {
   /** 从 Electron session 拼 Cookie（优先于过期存档） */
   private async buildLiveCookieHeader(): Promise<string> {
     try {
-      const cookies = await session.fromPartition('persist:main').cookies.get({})
+      const cookies = await session.fromPartition(partitionForShop()).cookies.get({})
       const xhs = cookies.filter((c) => /xiaohongshu\.com/i.test(String(c.domain || '')))
       if (!xhs.length) return ''
       return xhs.map((c) => `${c.name}=${c.value}`).join('; ')

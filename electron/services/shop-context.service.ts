@@ -16,6 +16,7 @@ export class ShopContextService {
   private autoReship: AutoReshipService
   private mock: MockService
   private initializedShops: Set<string> = new Set()
+  private ensureImSession: ((shopId: string) => Promise<boolean>) | null = null
 
   constructor(
     logger: LoggerService,
@@ -33,11 +34,15 @@ export class ShopContextService {
     this.mock = mock
   }
 
+  setEnsureImSession(fn: (shopId: string) => Promise<boolean>) {
+    this.ensureImSession = fn
+  }
+
   async initializePhase2(shopId: string, shopName?: string): Promise<void> {
     if (this.initializedShops.has(shopId)) {
       this.logger.info(`[XhsShopContext] 店铺已初始化: ${shopId}，仍尝试重连 zelda`)
-      // 鉴权 Cookie 可能晚于首次 Phase2 才齐，必须再连一次
       this.ws.reconnectKefu()
+      void this.ensureImSession?.(shopId)
       return
     }
 
@@ -74,6 +79,7 @@ export class ShopContextService {
 
     this.ws.reconnectKefu()
     this.initializedShops.add(shopId)
+    void this.ensureImSession?.(shopId)
     this.logger.info(`[XhsShopContext] 初始化完成 ShopId=${shopId}`)
     this.logger.info('[Login] 登录成功')
   }

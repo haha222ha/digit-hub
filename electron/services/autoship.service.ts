@@ -80,6 +80,10 @@ export class AutoShipService {
   private imWebContents: WebContents | null = null
   private monitorByShop = new Map<string, WebContents>()
   private imByShop = new Map<string, WebContents>()
+  /** 发货串行，避免多店同时打 IM */
+  private shipChain: Promise<void> = Promise.resolve()
+  /** 登录成功后由主进程按店拉起隐藏客服窗 */
+  private ensureImSession: ((shopId: string) => Promise<boolean>) | null = null
   /** 轮询退避计数（失败时指数退避） */
   private pollBackoff = 0
   /** 默认轮询间隔：30 秒（内部接口，避免风控/限流） */
@@ -102,6 +106,10 @@ export class AutoShipService {
     this.psyCloud = svc
   }
 
+  setEnsureImSession(fn: (shopId: string) => Promise<boolean>) {
+    this.ensureImSession = fn
+  }
+
   bindWebContents(wc: WebContents, shopId?: string) {
     const sid = shopId || currentShopId()
     this.monitorWebContents = wc
@@ -116,6 +124,15 @@ export class AutoShipService {
     this.imWebContents = wc
     this.imByShop.set(sid, wc)
     this.logger.info(`[AutoShip] 已绑定 IM WebContents shop=${sid}`)
+  }
+
+  unbindImWebContents(shopId: string) {
+    const sid = String(shopId || '').trim()
+    if (!sid) return
+    const cur = this.imByShop.get(sid)
+    this.imByShop.delete(sid)
+    if (this.imWebContents === cur) this.imWebContents = null
+    this.logger.info(`[AutoShip] 已解绑 IM WebContents shop=${sid}`)
   }
 
   /** @deprecated 使用 bindWebContents */
@@ -172,13 +189,19 @@ export class AutoShipService {
    */
   private async pollOrders(): Promise<void> {
     const shopIds = new Set<string>([currentShopId(), ...this.monitorByShop.keys(), ...this.imByShop.keys()])
+    for (const s of this.storage.listShops()) {
+      if (s.id) shopIds.add(s.id)
+    }
     for (const shopId of shopIds) {
+      const hasSession = !!this.storage.getShopCookies(shopId) || this.imByShop.has(shopId)
+      if (hasSession && this.ensureImSession) {
+        await this.ensureImSession(shopId).catch(() => false)
+      }
       await this.pollOrdersForShop(shopId)
     }
   }
 
   private async pollOrdersForShop(shopId: string): Promise<void> {
-    if (this.isShipping) return
     const wc = this.getShipWc(shopId)
     if (!wc) return
     const url = wc.getURL()
@@ -253,17 +276,26 @@ export class AutoShipService {
       return
     }
 
+    const run = this.shipChain.then(() => this.shipOneOrder(shopId, order))
+    this.shipChain = run.then(
+      () => undefined,
+      () => undefined
+    )
+    await run
+  }
+
+  private async shipOneOrder(shopId: string, order: any): Promise<void> {
     this.isShipping = true
     try {
       const success = await this.processShipment(shopId, order)
       if (success) {
         this.processedOrders.add(`${shopId}:${order.order_id}`)
-        this.logger.info(`[AutoShip] 订单发货成功: ${order.order_id}`)
+        this.logger.info(`[AutoShip] 订单发货成功: shop=${shopId} ${order.order_id}`)
       } else {
-        this.logger.warn(`[AutoShip] 订单发货失败: ${order.order_id}`)
+        this.logger.warn(`[AutoShip] 订单发货失败: shop=${shopId} ${order.order_id}`)
       }
     } catch (err) {
-      this.logger.error(`[AutoShip] 订单发货异常: ${order.order_id}`, err)
+      this.logger.error(`[AutoShip] 订单发货异常: shop=${shopId} ${order.order_id}`, err)
     } finally {
       this.isShipping = false
     }
@@ -354,9 +386,19 @@ export class AutoShipService {
     let cardLocked = false
     let cloudAllocatedUrl: string | null = null
 
-    // 链接卡密：先问云端幂等分配，避免与自助领取双花
+    // 链接卡密：只问心象测（一户一池，按订单号幂等）。本地卡池不扣第二份。
     const isLinkCard = String(binding.deliver_type || '') === 'link_card'
-    if (isLinkCard && this.psyCloud?.getToken()) {
+    if (isLinkCard) {
+      if (!this.psyCloud?.getToken()) {
+        this.logger.error(`[AutoShip] 心象测未登录，无法分配链接: ${order.order_id}`)
+        this.storage.addShipLog({
+          shopId,
+          orderId: order.order_id,
+          status: 'cloud_allocate_fail',
+          errorMsg: '未配置心象测 Token，链接卡密必须走云端分配'
+        })
+        return false
+      }
       const alloc = await this.psyCloud.allocateForOrder(order.order_id, order.product_id)
       if (!alloc.success || !alloc.url) {
         this.logger.error(`[AutoShip] 云端分配失败: ${order.order_id} ${alloc.message || ''}`)
@@ -370,9 +412,8 @@ export class AutoShipService {
       }
       cloudAllocatedUrl = alloc.url
       cardForOrder = alloc.url
-      const marked = this.storage.markCardUrlUsed(binding.id, alloc.url, order.order_id)
       this.logger.info(
-        `[AutoShip] 云端分配 URL order=${order.order_id} already=${!!alloc.already} localMarked=${marked}`
+        `[AutoShip] 云端分配 URL shop=${shopId} order=${order.order_id} already=${!!alloc.already}`
       )
     }
 
@@ -392,9 +433,19 @@ export class AutoShipService {
         msgTotal
       })
 
-      // 若本条含 {card}，锁定卡密（三段式第一步）
+      // 普通卡密才锁本地池；link_card 已用云端 URL
       const needCard = needsCard(msg.rawContent)
       if (needCard && !cardForOrder) {
+        if (isLinkCard) {
+          this.storage.updateDeliveryStatus(msgGuid, 'fail', { errorMsg: '心象测未返回链接' })
+          this.storage.addShipLog({
+            shopId,
+            orderId: order.order_id,
+            status: 'cloud_allocate_fail',
+            errorMsg: '心象测未返回链接'
+          })
+          return false
+        }
         const card = this.storage.lockCard(binding.id, order.order_id, !!binding.random_mode)
         if (!card) {
           this.logger.error(`[AutoShip] 卡密池已空: bindingId=${binding.id}`)
@@ -408,13 +459,13 @@ export class AutoShipService {
         cardForOrder = cloudAllocatedUrl
       }
 
-      // 渲染模板（占位符替换 + {uid}/{ts} 动态参数）
+      const shopCfg = this.storage.getShopConfig(shopId)
       const ctx: TemplateContext = {
         orderId: order.order_id,
         buyerName,
         productName: binding.product_name || '',
         card: cardForOrder ?? undefined,
-        shopName: (global as any).currentShopName || '',
+        shopName: shopCfg?.shop_name || shopCfg?.config?.shopName || '',
         uidLength: binding.uid_length ?? 10
       }
       const finalContent = renderTemplate(msg.rawContent, ctx)
@@ -504,7 +555,8 @@ export class AutoShipService {
   }
 
   /**
-   * 真实虚拟发货：IM 发消息给买家（对标阿奇锁 JsIMSend）
+   * 真实虚拟发货：按店打开买家会话并发送（对标阿奇锁 JsIMSend）
+   * search_customer(订单号) → getChatInfo 开会话 → sendTextMsg
    */
   private async executeRealShip(
     shopId: string,
@@ -512,14 +564,21 @@ export class AutoShipService {
     content: string,
     type: 'text' | 'image' | 'video' | 'note' = 'text'
   ): Promise<{ success: boolean; trackingNumber?: string; buyerId?: string; error?: string }> {
-    const wc = this.getShipWc(shopId)
+    if (this.ensureImSession) {
+      const ok = await this.ensureImSession(shopId).catch(() => false)
+      if (!ok) {
+        return { success: false, error: `店铺 ${shopId} 客服会话页未能打开，请确认该店已登录` }
+      }
+    }
+
+    const wc = await this.waitForImReady(shopId, 25000)
     if (!wc) {
-      return { success: false, error: '监测/IM WebContents 未绑定' }
+      return { success: false, error: `店铺 ${shopId} 监测/IM WebContents 未绑定` }
     }
 
     const url = wc.getURL()
     if (!url.includes('walle.xiaohongshu.com')) {
-      return { success: false, error: '当前不在小红书客服工作台页面' }
+      return { success: false, error: `店铺 ${shopId} 当前不在小红书客服工作台页面` }
     }
 
     try {
@@ -532,7 +591,7 @@ export class AutoShipService {
       if (!bridgeOk) {
         return {
           success: false,
-          error: 'IMSend 桥未注入：请打开 /cstools/chat 并等待页面加载完成'
+          error: `店铺 ${shopId} IMSend 桥未注入：请等待客服聊天页加载完成`
         }
       }
 
@@ -542,7 +601,7 @@ export class AutoShipService {
       if (!hasRim) {
         return {
           success: false,
-          error: 'XhsRim 未就绪：请保持客服聊天页打开（/cstools/chat）'
+          error: `店铺 ${shopId} XhsRim 未就绪：请保持该店客服聊天页已登录`
         }
       }
 
@@ -558,7 +617,7 @@ export class AutoShipService {
 
       if (result?.success) {
         this.logger.info(
-          `[AutoShip] IM 发货成功: order=${orderId}, type=${type}, chatId=${result.chatId || '-'}, buyer=${result.buyerId || '-'}`
+          `[AutoShip] IM 发货成功: shop=${shopId} order=${orderId}, type=${type}, chatId=${result.chatId || '-'}, buyer=${result.buyerId || '-'}`
         )
         return {
           success: true,
@@ -570,6 +629,26 @@ export class AutoShipService {
     } catch (err: any) {
       return { success: false, error: err.message || String(err) }
     }
+  }
+
+  private async waitForImReady(shopId: string, timeoutMs = 20000): Promise<WebContents | null> {
+    const deadline = Date.now() + timeoutMs
+    while (Date.now() < deadline) {
+      const wc = this.getShipWc(shopId)
+      if (wc && !wc.isDestroyed()) {
+        const url = wc.getURL() || ''
+        if (url.includes('walle.xiaohongshu.com') && !url.includes('/login')) {
+          const ok = await wc
+            .executeJavaScript(
+              `!!(window.__xhsAssistant && window.__xhsAssistant.im && window.__xhsAssistant.im.deliverByOrderSn && window.__xhsAssistant.im.hasXhsRim && window.__xhsAssistant.im.hasXhsRim())`
+            )
+            .catch(() => false)
+          if (ok) return wc
+        }
+      }
+      await this.sleep(500)
+    }
+    return this.getShipWc(shopId)
   }
 
   private arkWatcherAttached = false
@@ -650,7 +729,7 @@ export class AutoShipService {
       title: '千帆商家后台（商品同步）',
       autoHideMenuBar: true,
       webPreferences: {
-        partition: SESSION_PARTITION,
+        partition: partitionForShop(),
         nodeIntegration: false,
         contextIsolation: true,
         webSecurity: false
@@ -837,7 +916,7 @@ export class AutoShipService {
 
   private async seedArkAccessToken(wc: WebContents): Promise<void> {
     try {
-      const ses = session.fromPartition(SESSION_PARTITION)
+      const ses = session.fromPartition(partitionForShop())
       const cookies = await ses.cookies.get({})
       let token = ''
       for (const c of cookies) {
@@ -865,7 +944,7 @@ export class AutoShipService {
 
   private async saveArkCookies(shopId: string, wc: WebContents): Promise<void> {
     try {
-      const ses = session.fromPartition(SESSION_PARTITION)
+      const ses = session.fromPartition(partitionForShop())
       const cookies = await ses.cookies.get({})
       const xhsCookies = cookies.filter(
         (c) => c.domain?.includes('xiaohongshu.com') || c.domain?.includes('xhscdn.com')
@@ -912,26 +991,46 @@ export class AutoShipService {
       retried++
       const shopId = item.shop_id
       const binding = item.binding_id ? this.storage.getAllProductBindings(shopId).find((b: any) => b.id === item.binding_id) : null
-
-      const cardForOrder = item.card_content || null
-      const content = item.card_content || (binding?.deliver_content ?? '')
+      const isLinkCard = String(binding?.deliver_type || '') === 'link_card'
       const type: 'text' | 'image' | 'video' | 'note' =
         binding?.deliver_type === 'image' ? 'image' :
         binding?.deliver_type === 'video' ? 'video' :
         binding?.deliver_type === 'note' ? 'note' : 'text'
 
-      // 若本条含卡密，重新锁定一张（旧卡密已回滚）
+      let sendContent = String(item.card_content || binding?.deliver_content || '')
       let cardConsumed = false
-      if (needsCard(content)) {
+      if (isLinkCard) {
+        let url = String(item.card_content || '').trim()
+        if (!url && this.psyCloud?.getToken()) {
+          const alloc = await this.psyCloud.allocateForOrder(item.order_id, item.product_id)
+          if (!alloc.success || !alloc.url) {
+            this.storage.updateDeliveryStatus(item.msg_guid, 'fail', {
+              errorMsg: alloc.message || '云端分配失败（重试）'
+            })
+            continue
+          }
+          url = alloc.url
+        }
+        if (!url) {
+          this.storage.updateDeliveryStatus(item.msg_guid, 'fail', { errorMsg: '心象测未分配链接（重试）' })
+          continue
+        }
+        sendContent = renderTemplate(binding?.deliver_content || '{卡密}', {
+          orderId: item.order_id,
+          card: url,
+          productName: binding?.product_name || ''
+        })
+      } else if (needsCard(sendContent) && !item.card_content) {
         const card = this.storage.lockCard(item.binding_id, item.order_id, !!binding?.random_mode)
         if (!card) {
           this.storage.updateDeliveryStatus(item.msg_guid, 'fail', { errorMsg: '卡密池已空（重试）' })
           continue
         }
         cardConsumed = true
+        sendContent = renderTemplate(sendContent, { orderId: item.order_id, card })
       }
 
-      const shipResult = await this.executeRealShip(item.shop_id || currentShopId(), item.order_id, content, type)
+      const shipResult = await this.executeRealShip(item.shop_id || currentShopId(), item.order_id, sendContent, type)
       if (shipResult.success) {
         if (cardConsumed) this.storage.confirmCard(item.order_id)
         this.storage.updateDeliveryStatus(item.msg_guid, 'success', {
@@ -964,6 +1063,8 @@ export class AutoShipService {
     this.processedOrders.clear()
     this.monitorWebContents = null
     this.imWebContents = null
+    this.monitorByShop.clear()
+    this.imByShop.clear()
     if (this.goodsSyncWindow && !this.goodsSyncWindow.isDestroyed()) {
       try {
         this.goodsSyncWindow.destroy()

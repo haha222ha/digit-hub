@@ -11,6 +11,7 @@ export class InjectService {
   private injectedScripts: Map<string, string> = new Map()
   private pendingJsInjectUrls: Set<string> = new Set()
   private onCsaHttpOk: ((url: string) => void) | null = null
+  private hookedPartitions = new Set<string>()
 
   constructor(logger: LoggerService) {
     this.logger = logger
@@ -48,8 +49,10 @@ export class InjectService {
   /**
    * 设置请求拦截 — 近似 XhsJsFilter（监听 walle-eva JS 加载）
    */
-  setupRequestInterception() {
-    const ses = session.fromPartition('persist:main')
+  setupRequestInterception(partition = 'persist:main') {
+    if (this.hookedPartitions.has(partition)) return
+    this.hookedPartitions.add(partition)
+    const ses = session.fromPartition(partition)
 
     // Electron 每个 session 只能挂一个 onBeforeRequest / onCompleted，必须合并监听
     ses.webRequest.onBeforeRequest(

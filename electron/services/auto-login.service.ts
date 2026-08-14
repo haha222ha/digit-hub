@@ -6,6 +6,7 @@ import { LoggerService } from './logger.service'
 import { StorageService } from './storage.service'
 import { InjectService } from './inject.service'
 import { encrypt, decrypt } from '../utils/crypto'
+import { partitionForShop } from '../utils/shop-partition'
 
 export const XHS_DASHBOARD_URL = 'https://walle.xiaohongshu.com/cstools/seller/dashboard'
 export const XHS_CHAT_URL = 'https://walle.xiaohongshu.com/cstools/chat'
@@ -19,7 +20,6 @@ const SSO_COOKIES = ['web_session', 'customer-shop-sid']
 /** 辅助字段，仅作补充，不能单独判定登录成功 */
 const AUX_COOKIES = ['a1', 'webId', 'xhsappid', 'xsecappid']
 const KEY_COOKIES = [...AUTH_COOKIES, ...AUX_COOKIES]
-const SESSION_PARTITION = 'persist:main'
 const EVA_COOKIE_URL = 'https://walle.xiaohongshu.com/'
 
 /** 拒绝 undefined/null/过短/哨兵值/设备串，防止写出 walle-eva-auth=not_found!!… */
@@ -55,6 +55,8 @@ export class AutoLoginService {
   private isLoginInProgress = false
   /** SPA 已成功打通 get_csa_info 的时间戳（裸 fetch 常因缺签名失败，不能单独否决） */
   private lastCsaOkAt = 0
+  /** 用户主动退出后，禁止自动用存档密码再登回去 */
+  private logoutHold = new Set<string>()
 
   constructor(logger: LoggerService, storage: StorageService, injectService?: InjectService) {
     this.logger = logger
@@ -80,10 +82,9 @@ export class AutoLoginService {
       url.includes('/login')
   }
 
-  private async navigateToLoginIfNeeded(webContents: WebContents, _targetUrl: string): Promise<void> {
+  private async navigateToLoginIfNeeded(webContents: WebContents, _targetUrl: string, force = false): Promise<void> {
     const currentUrl = webContents.getURL()
-    // 已在工作台：绝对禁止踢回登录（这是「好好的突然退出」主因）
-    if (this.isWorkbenchUrl(currentUrl) || (await this.isWorkbenchShellReady(webContents))) {
+    if (!force && (this.isWorkbenchUrl(currentUrl) || (await this.isWorkbenchShellReady(webContents)))) {
       this.logger.warn(`[KefuAutoLogin] 已在工作台，拒绝跳登录页: ${currentUrl}`)
       return
     }
@@ -131,8 +132,29 @@ export class AutoLoginService {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 
-  private getSession() {
-    return session.fromPartition(SESSION_PARTITION)
+  private getSession(shopId?: string) {
+    return session.fromPartition(partitionForShop(shopId))
+  }
+
+  holdLogout(shopId: string): void {
+    this.logoutHold.add(shopId)
+  }
+
+  clearLogoutHold(shopId: string): void {
+    this.logoutHold.delete(shopId)
+  }
+
+  isLogoutHeld(shopId: string): boolean {
+    return this.logoutHold.has(shopId)
+  }
+
+  async clearShopSession(shopId: string): Promise<void> {
+    const ses = this.getSession(shopId)
+    await ses.clearStorageData()
+    this.storage.deleteShopCookies(shopId)
+    this.holdLogout(shopId)
+    this.lastCsaOkAt = 0
+    this.logger.info(`[AutoLogin] 已退出店铺会话 shopId=${shopId}`)
   }
 
   private isWorkbenchUrl(url: string): boolean {
@@ -960,6 +982,13 @@ export class AutoLoginService {
     this.isLoginInProgress = true
     this.logger.info(`[KefuAutoLogin] 开始自动登录: shopId=${shopId}`)
 
+    if (this.isLogoutHeld(shopId)) {
+      this.logger.info(`[KefuAutoLogin] 用户已退出 ${shopId}，跳过自动登录，停留登录页`)
+      await this.navigateToLoginIfNeeded(webContents, targetUrl, true)
+      this.isLoginInProgress = false
+      return false
+    }
+
     try {
       if (await this.checkLoginStatus(webContents)) {
         this.logger.info('[KefuAutoLogin] ✅ 已处于登录状态')
@@ -1143,7 +1172,6 @@ export class AutoLoginService {
   }
 
   async clearCookies(): Promise<void> {
-    await this.getSession().clearStorageData({ storages: ['cookies'] })
-    this.logger.info('[AutoLogin] Cookie 已清除')
+    await this.clearShopSession(String((global as any).currentShopId || 'default'))
   }
 }

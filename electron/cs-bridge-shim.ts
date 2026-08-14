@@ -111,11 +111,11 @@ export function installCsBridge(): void {
         }
       },
       invoke: (channel: string, ...args: unknown[]) => {
-        try {
-          return ipcRenderer.invoke(channel, ...args)
-        } catch {
-          return noopPromise(null)
-        }
+        // invoke 失败是 Promise reject，try/catch 接不住；缺 handler 时必须 resolve 空值
+        return Promise.resolve(ipcRenderer.invoke(channel, ...args)).catch(() => {
+          if (channel === 'tab:getAllLogin') return []
+          return null
+        })
       },
       on: () => ipcRenderer,
       once: (_ch: string, fn: (...args: unknown[]) => void) => {
@@ -152,12 +152,16 @@ export function installCsBridge(): void {
       getDeviceId: () => noopPromise('xhs-shipping-assistant'),
     },
     supportNewUI: true,
+    // 多账号由本助手 partition 管，不走官方 Eva Tab IPC（否则会调 tab:getAllLogin 报登录过期）
     supportTab: false,
     supportFloatPlayVoice: false,
     supportFloatWin: false,
     supportArkLogin: true,
     supportBackgroundHigh: false,
-    handleClientLogout: () => null,
+    handleClientLogout: () => {
+      void ipcRenderer.invoke('shop:logout')
+      return true
+    },
     isMac: process.platform === 'darwin',
   }
 }
