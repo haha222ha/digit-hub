@@ -144,3 +144,28 @@ export function bindCopyButton(btn, getText, { okText = "已复制", failPrefix 
     }
   });
 }
+
+/** 列表页右下角「回到顶部」。挂到 host；路由切走时一并移除。 */
+export function attachBackToTop(host, { threshold = 360 } = {}) {
+  document.querySelectorAll(".back-top").forEach((n) => n.remove());
+  if (!host) return null;
+  const btn = el("button", {
+    className: "back-top",
+    type: "button",
+    text: "↑ 回顶",
+    "aria-label": "回到顶部",
+    hidden: "true",
+  });
+  const onScroll = () => {
+    const y = window.scrollY || document.documentElement.scrollTop || 0;
+    if (y >= threshold) btn.removeAttribute("hidden");
+    else btn.setAttribute("hidden", "");
+  };
+  btn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  window.addEventListener("scroll", onScroll, { passive: true });
+  host.append(btn);
+  onScroll();
+  return btn;
+}

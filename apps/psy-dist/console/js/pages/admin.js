@@ -1,5 +1,16 @@
 import { api, getUser, clearSession, getToken, setSession } from "../api.js";
-import { el, flash, clear, copyText, bindCopyButton, showToast, isWechatBrowser, openModal, openDrawer } from "../ui.js";
+import {
+  el,
+  flash,
+  clear,
+  copyText,
+  bindCopyButton,
+  showToast,
+  isWechatBrowser,
+  openModal,
+  openDrawer,
+  attachBackToTop,
+} from "../ui.js";
 import { navigate, linkClick } from "../router.js";
 
 const NAV = [
@@ -473,9 +484,7 @@ export async function renderGenerate(root) {
       const n = Math.min(50, Math.max(1, Number(count.value) || 1));
       const data = await api.generateLinks(select.value, n);
       const links = (data && data.links) || [];
-      const urls = links.map(
-        (link) => `${location.origin}/test/${link.test_code || select.value}/${link.token}`
-      );
+      const urls = links.map((link) => linkFullUrl(link, select.value));
       resultHost.append(flash("ok", `已生成 ${links.length} 条链接（可一键复制到自动发卡）`));
 
       const bulkBar = el("div", { className: "row-actions", style: "margin:12px 0;flex-wrap:wrap;gap:8px" });
@@ -487,34 +496,31 @@ export async function renderGenerate(root) {
       const exportBtn = el("button", {
         className: "btn btn-ghost",
         type: "button",
-        text: "导出 TXT",
+        text: "导出发卡 TXT",
+      });
+      const goManage = el("a", {
+        className: "btn btn-ghost",
+        href: "/admin/link-management",
+        text: "去链接管理",
+        onClick: (e) => linkClick(e, "/admin/link-management"),
       });
       const hint = el("span", {
         className: "muted",
-        text: "每行一条链接，适合粘贴到自动发卡 / Excel",
+        text: "每行一条完整链接，无表头，可直接粘贴到发卡网",
       });
       bindCopyButton(copyAllBtn, () => urls.join("\n"), {
         okText: `已复制 ${urls.length} 条`,
         onOk: () => showToast(`已复制 ${urls.length} 条链接`),
       });
       exportBtn.addEventListener("click", () => {
-        const blob = new Blob([urls.join("\n") + (urls.length ? "\n" : "")], {
-          type: "text/plain;charset=utf-8",
-        });
-        const a = document.createElement("a");
-        const stamp = new Date().toISOString().slice(0, 19).replace(/[-:T]/g, "");
-        a.href = URL.createObjectURL(blob);
-        a.download = `psy_links_${select.value || "batch"}_${stamp}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(a.href);
+        downloadPlainTxt(fakaTxtFromUrls(urls), `psy_links_${select.value || "batch"}_${Date.now()}.txt`);
         exportBtn.textContent = "已下载";
+        showToast(`已导出 ${urls.length} 条（发卡格式）`);
         setTimeout(() => {
-          exportBtn.textContent = "导出 TXT";
+          exportBtn.textContent = "导出发卡 TXT";
         }, 1500);
       });
-      bulkBar.append(copyAllBtn, exportBtn, hint);
+      bulkBar.append(copyAllBtn, exportBtn, goManage, hint);
       resultHost.append(bulkBar);
 
       const list = el("div", { className: "link-list" });
@@ -524,6 +530,7 @@ export async function renderGenerate(root) {
         list.append(el("div", { className: "link-item" }, [el("code", { text: url }), copyBtn]));
       }
       resultHost.append(list);
+      resultHost.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
       errHost.append(flash("error", err.message || "生成失败"));
     } finally {
@@ -552,6 +559,27 @@ export async function renderGenerate(root) {
       form,
     ])
   );
+}
+
+function linkFullUrl(link, fallbackCode = "") {
+  const token = link.token || "";
+  const code = link.test_code || link.testCode || fallbackCode || "";
+  return `${location.origin}/test/${code}/${token}`;
+}
+
+function downloadPlainTxt(text, filename) {
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(a.href);
+}
+
+function fakaTxtFromUrls(urls) {
+  return urls.filter(Boolean).join("\n") + (urls.length ? "\n" : "");
 }
 
 function formatLinkCountdown(link) {
@@ -607,7 +635,13 @@ export async function renderLinks(root) {
     el("option", { value: "usedCount:DESC", text: "使用次数 ↓" })
   );
   const applyBtn = el("button", { className: "btn btn-primary", type: "button", text: "筛选", style: "width:auto" });
-  const exportBtn = el("button", { className: "btn btn-ghost", type: "button", text: "导出筛选结果", style: "width:auto" });
+  const exportAuditBtn = el("button", {
+    className: "btn btn-ghost",
+    type: "button",
+    text: "导出对账表",
+    style: "width:auto",
+    title: "含测题码、相对路径、状态（TSV），不对发卡网导入",
+  });
   filterBar.append(
     el("div", { className: "field", style: "margin:0;min-width:140px" }, [el("label", { text: "状态" }), statusSel]),
     el("div", { className: "field", style: "margin:0;min-width:180px" }, [el("label", { text: "测题" }), testSel]),
@@ -615,7 +649,7 @@ export async function renderLinks(root) {
     el("div", { className: "field", style: "margin:0;min-width:130px" }, [el("label", { text: "结束日期" }), endDate]),
     el("div", { className: "field", style: "margin:0;min-width:140px" }, [el("label", { text: "排序" }), sortSel]),
     el("div", { className: "field", style: "margin:0;min-width:100px" }, [el("label", { text: "每页" }), perPageSel]),
-    el("div", { className: "row-actions", style: "align-items:flex-end" }, [applyBtn, exportBtn])
+    el("div", { className: "row-actions", style: "align-items:flex-end" }, [applyBtn, exportAuditBtn])
   );
 
   root.append(
@@ -623,12 +657,13 @@ export async function renderLinks(root) {
       el("h1", { className: "page-title", text: "链接管理" }),
       el("p", {
         className: "page-lead",
-        text: "真分页 + 筛选。未开测撤销会退还额度；已开测仅作废不退额。",
+        text: "勾选后「复制所选 / 导出发卡 TXT」= 每行一条完整链接，可直接导入发卡网。对账表另含状态，勿当发卡导入。",
       }),
       filterBar,
       host,
     ])
   );
+  attachBackToTop(root);
 
   let page = 1;
   let selected = new Set();
@@ -688,14 +723,23 @@ export async function renderLinks(root) {
         return;
       }
 
-      const pageUrls = links.map((link) => {
-        const token = link.token || "";
-        const code = link.test_code || "";
-        return `${location.origin}/test/${code}/${token}`;
-      });
+      const pageUrls = links.map((link) => linkFullUrl(link));
+      const selectedUrls = () =>
+        links.filter((l) => l.id && selected.has(l.id)).map((link) => linkFullUrl(link));
+
       const bulk = el("div", { className: "row-actions", style: "margin:0 0 12px;flex-wrap:wrap;gap:8px" });
-      const copyPageBtn = el("button", {
+      const copySelBtn = el("button", {
         className: "btn btn-primary",
+        type: "button",
+        text: "复制所选",
+      });
+      const exportFakaBtn = el("button", {
+        className: "btn btn-primary",
+        type: "button",
+        text: "导出发卡 TXT",
+      });
+      const copyPageBtn = el("button", {
+        className: "btn btn-ghost",
         type: "button",
         text: `复制本页（${pageUrls.length}）`,
       });
@@ -704,16 +748,45 @@ export async function renderLinks(root) {
         type: "button",
         text: "批量撤销所选",
       });
-      const exportSelBtn = el("button", {
-        className: "btn btn-ghost",
-        type: "button",
-        text: "导出所选",
+      const fakaHint = el("span", {
+        className: "muted",
+        text: "发卡格式：每行一条完整 URL，无表头",
       });
-      bindCopyButton(copyPageBtn, () => pageUrls.join("\n"), { okText: `已复制 ${pageUrls.length} 条` });
+
+      copySelBtn.addEventListener("click", async () => {
+        const urls = selectedUrls();
+        if (!urls.length) {
+          showToast("请先勾选要复制的链接", "error");
+          return;
+        }
+        try {
+          await copyText(urls.join("\n"));
+          showToast(`已复制 ${urls.length} 条（发卡格式）`);
+          copySelBtn.textContent = `已复制 ${urls.length}`;
+          setTimeout(() => {
+            copySelBtn.textContent = "复制所选";
+          }, 1500);
+        } catch (e) {
+          alert((e && e.message) || "复制失败，请改用导出发卡 TXT");
+        }
+      });
+      exportFakaBtn.addEventListener("click", () => {
+        const urls = selectedUrls();
+        if (!urls.length) {
+          showToast("请先勾选要导出的链接", "error");
+          return;
+        }
+        downloadPlainTxt(fakaTxtFromUrls(urls), `links_faka_${Date.now()}.txt`);
+        showToast(`已导出 ${urls.length} 条（发卡格式）`);
+      });
+      bindCopyButton(copyPageBtn, () => pageUrls.join("\n"), {
+        okText: `已复制 ${pageUrls.length} 条`,
+        onOk: () => showToast(`已复制本页 ${pageUrls.length} 条`),
+      });
       batchRevokeBtn.addEventListener("click", async () => {
         const ids = [...selected];
         if (!ids.length) {
-          alert("请先勾选要撤销的链接");
+          showToast("请先勾选要撤销的链接", "error");
           return;
         }
         const unusedN = links.filter((l) => ids.includes(l.id) && Number(l.used_count ?? l.usedCount ?? 0) === 0).length;
@@ -732,15 +805,7 @@ export async function renderLinks(root) {
           alert(e.message || "批量撤销失败");
         }
       });
-      exportSelBtn.addEventListener("click", () => {
-        const ids = [...selected];
-        if (!ids.length) {
-          alert("请先勾选");
-          return;
-        }
-        doExport({ linkIds: ids });
-      });
-      bulk.append(copyPageBtn, batchRevokeBtn, exportSelBtn);
+      bulk.append(copySelBtn, exportFakaBtn, copyPageBtn, batchRevokeBtn, fakaHint);
       host.append(bulk);
 
       const checkAll = el("input", { type: "checkbox" });
@@ -770,7 +835,7 @@ export async function renderLinks(root) {
       for (const link of links) {
         const token = link.token || "";
         const code = link.test_code || "";
-        const url = `${location.origin}/test/${code}/${token}`;
+        const url = linkFullUrl(link);
         const status = link.status || "unused";
         const used = Number(link.used_count ?? link.usedCount ?? 0);
         const maxUses = Number(link.max_uses ?? link.maxUses ?? 3);
@@ -905,16 +970,21 @@ export async function renderLinks(root) {
     page = 1;
     reload();
   });
-  exportBtn.addEventListener("click", () => {
+  exportAuditBtn.addEventListener("click", async () => {
     const f = filters();
-    doExport({
-      status: f.status,
-      testCode: f.testCode,
-      startDate: f.startDate,
-      endDate: f.endDate,
-      sortBy: f.sortBy,
-      sortOrder: f.sortOrder,
-    });
+    try {
+      await doExport({
+        status: f.status,
+        testCode: f.testCode,
+        startDate: f.startDate,
+        endDate: f.endDate,
+        sortBy: f.sortBy,
+        sortOrder: f.sortOrder,
+      });
+      showToast("已导出对账表（含状态，勿直接导入发卡）");
+    } catch {
+      /* doExport already alerts */
+    }
   });
   await reload();
 }
