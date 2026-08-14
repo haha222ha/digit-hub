@@ -5,8 +5,8 @@
  * 暴露：window.__xhsAssistant.im
  */
 (function () {
-  // 版本号变更时允许热更新（否则旧 fetchPendingOrders 会一直空列表）
-  var SCRIPT_VER = 'order-poll-v2'
+  // 版本号变更时允许热更新（全量台账模式）
+  var SCRIPT_VER = 'order-ledger-v1'
   if (window.__xhsImSendReady === SCRIPT_VER) return
   window.__xhsImSendReady = SCRIPT_VER
 
@@ -215,26 +215,18 @@
   }
 
   /**
-   * 拉取待发货/待虚拟发卡订单
-   * 请求体对齐千帆后台 HAR：POST /api/edith/fulfillment/order/page
-   * 旧版 status:2（数字）会被接口当成非法筛选 → packages=[] → 本地零动作
-   * HAR 成功样例：status:[]（数组）+ time_range_list.time_type=3 + camelCase packages.orderId/skus[].itemId
+   * 拉取全量订单（对齐千帆 HAR：status:[]）
+   * 不按平台状态过滤——本地台账 order_ledger / 是否已发码 才是是否发卡的依据
    */
   async function fetchPendingOrders(opts) {
     opts = opts || {}
     const now = Date.now()
     const dayMs = 24 * 60 * 60 * 1000
-    // time_type:3 = 按下单/支付时间；正常近 3 天，补拉近 7 天
-    const lookbackDays = opts.recover ? 7 : 3
+    const lookbackDays = Number(opts.lookbackDays) > 0 ? Number(opts.lookbackDays) : 7
     const start = Number(opts.startTime) || now - lookbackDays * dayMs
     const end = Number(opts.endTime) || now + dayMs
-    // 待发货族：1/2/21/26（order_stats HAR）；补拉时 status:[] 不筛，再本地过滤虚拟已发货
-    const PENDING_STATUS = [1, 2, 21, 26]
-    const statusList = Array.isArray(opts.status)
-      ? opts.status
-      : opts.recover
-        ? []
-        : PENDING_STATUS
+    // HAR：后台「全部订单」= status:[]；可选覆盖
+    const statusList = Array.isArray(opts.status) ? opts.status : []
 
     const body = {
       page_no: Number(opts.pageNo) || 1,
@@ -256,7 +248,6 @@
     const hosts = []
     try {
       const host = location.hostname || ''
-      // 当前页同域优先：ark 订单页有 _webmsxyw 签名（与 HAR 一致）
       if (host.includes('ark.xiaohongshu.com')) hosts.push('https://ark.xiaohongshu.com')
       if (host.includes('walle.xiaohongshu.com')) hosts.push('https://walle.xiaohongshu.com')
     } catch (e) {}
@@ -330,7 +321,6 @@
         row.package_id ||
         row.id ||
         ''
-      // HAR：itemId 在 packages[].skus[0].itemId（商品级），skuId 是规格级勿当商品绑定键
       const sku = (row.skus && row.skus[0]) || null
       const productId =
         (sku && (sku.itemId || sku.item_id || sku.goodsId || sku.goods_id)) ||
@@ -338,7 +328,7 @@
         row.item_id ||
         ''
       const statusText =
-        row.statusDesc || row.status_desc || row.status_name || row.status || '待发货'
+        row.statusDesc || row.status_desc || row.status_name || row.status || ''
       const statusCode = Number(row.status)
       const tags = row.orderTagList || row.order_tag_list || []
       const isVirtual =
@@ -347,14 +337,6 @@
             return /NO_LOGISTICS|AUTO_DELIVERY|ONLY_SUPPORT_NO_LOGISTICS/i.test(String(t))
           })) ||
         false
-
-      const isPending = PENDING_STATUS.indexOf(statusCode) >= 0
-      // 已发货未签收(6)/已完成类：仅 recover + 无物流/自动发货虚拟单才纳入（补发卡密）
-      if (!isPending) {
-        if (!(opts.recover && isVirtual && (statusCode === 6 || statusCode === 65 || statusCode === 7))) {
-          continue
-        }
-      }
 
       const orderTime =
         row.paidAt ||

@@ -300,10 +300,9 @@ export class AutoShipService {
       }
 
       this.pollTick += 1
-      // 每 4 次补拉一次：status:[] + 虚拟已发货（HAR 中订单约 4 分钟内已变 status=6）
-      const recover = this.pollTick % 4 === 0
+      // 全量订单：status:[]，不按千帆状态过滤；是否发卡只看本地台账
       const raw = await wc.executeJavaScript(`
-        window.__xhsAssistant.im.fetchPendingOrders({ recover: ${recover ? 'true' : 'false'} })
+        window.__xhsAssistant.im.fetchPendingOrders({ lookbackDays: 7 })
           .catch(function(e){ return { __error: String(e&&e.message||e) }; })
       `)
 
@@ -322,13 +321,13 @@ export class AutoShipService {
       this.pollBackoff = 0
       if (orders.length === 0) {
         if (this.pollTick % 4 === 1) {
-          this.logger.info(`[AutoShip] 轮询空列表 shop=${shopId} recover=${recover} url=${url.slice(0, 60)}`)
+          this.logger.info(`[AutoShip] 轮询空列表 shop=${shopId} url=${url.slice(0, 60)}`)
         }
         return
       }
 
       this.logger.info(
-        `[AutoShip] 轮询命中 ${orders.length} 单 shop=${shopId} recover=${recover} host=${orders[0]?.host || '-'}`
+        `[AutoShip] 轮询命中 ${orders.length} 单(全量) shop=${shopId} host=${orders[0]?.host || '-'}`
       )
       for (const order of orders) {
         await this.handleNewOrder({ ...order, shop_id: shopId, source: order.source || 'poll' })
@@ -344,7 +343,9 @@ export class AutoShipService {
     product_id?: string
     buyer_info?: unknown
     status?: string
+    status_code?: number | null
     order_time?: string
+    is_virtual?: boolean
     source?: string
     shop_id?: string
     shopId?: string
@@ -352,31 +353,47 @@ export class AutoShipService {
     if (!order || !order.order_id) return
 
     const shopId = String(order.shop_id || order.shopId || currentShopId())
-    this.logger.info(
-      `[AutoShip] 收到新订单: shop=${shopId} orderId=${order.order_id}, productId=${order.product_id || 'N/A'}, source=${order.source || '-'}`
-    )
-
     let productId = order.product_id || ''
     if (!productId) {
       productId = (await this.resolveProductId(order.order_id, shopId)) || ''
     }
-    if (!productId) {
-      this.logger.warn(`[AutoShip] 订单缺少 product_id，跳过: ${order.order_id}`)
-      return
-    }
     order.product_id = productId
     order.shop_id = shopId
+
+    // 1) 全量入台账（无视千帆状态）
+    this.storage.upsertOrderLedger({
+      orderId: order.order_id,
+      shopId,
+      productId,
+      platformStatus: order.status || '',
+      platformStatusCode: order.status_code ?? null,
+      orderTime: order.order_time || '',
+      isVirtual: !!order.is_virtual
+    })
+
+    this.logger.info(
+      `[AutoShip] 台账订单: shop=${shopId} orderId=${order.order_id}, productId=${productId || 'N/A'}, platform=${order.status || '-'}, source=${order.source || '-'}`
+    )
 
     if (this.psyCloud?.getToken()) {
       void this.psyCloud.syncOrders([{ order_id: order.order_id, product_id: productId }])
     }
 
+    // 2) 只跟本地「是否已发码」比对；失败单交给 retry 任务，不在此重复占位
+    if (this.storage.hasShippedCode(order.order_id)) {
+      this.logger.info(`[AutoShip] 台账已发码，跳过: ${order.order_id}`)
+      return
+    }
     if (this.storage.existsOrderDelivery(order.order_id)) {
-      this.logger.info(`[AutoShip] 订单已处理过，跳过（订单号判重）: ${order.order_id}`)
+      // 已有发货流水但未成功 → 留给 retryFailedDeliveries，避免重复 claim
       return
     }
     if (this.processedOrders.has(`${shopId}:${order.order_id}`)) {
-      this.logger.info(`[AutoShip] 订单已处理过，跳过（内存判重）: ${shopId} ${order.order_id}`)
+      return
+    }
+
+    if (!productId) {
+      this.logger.warn(`[AutoShip] 订单缺 product_id，仅入台账: ${order.order_id}`)
       return
     }
 
@@ -426,13 +443,10 @@ export class AutoShipService {
     // 商家级匹配：只认 product_id；IM 仍用订单所属店
     const binding = this.storage.getProductBinding(order.product_id)
     if (!binding) {
-      this.logger.warn(`[AutoShip] 未找到商品绑定: productId=${order.product_id} (订单店=${shopId})`)
-      this.storage.addShipLog({
-        shopId,
-        orderId: order.order_id,
-        status: 'no_binding',
-        errorMsg: `未绑定该商品: ${order.product_id}`
-      })
+      // 未绑定只入台账，不刷 ship_log（全量轮询会反复扫到）
+      this.logger.info(
+        `[AutoShip] 未绑定商品，仅入台账: productId=${order.product_id} order=${order.order_id}`
+      )
       return false
     }
 

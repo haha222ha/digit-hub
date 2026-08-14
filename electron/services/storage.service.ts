@@ -183,6 +183,21 @@ export class StorageService {
       CREATE INDEX IF NOT EXISTS idx_card_pool_status ON card_pool(status);
       CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_shop_order ON order_delivery(shop_id, order_id);
       CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_guid ON order_delivery(msg_guid);
+
+      -- 全量订单台账：轮询到的订单号一律入库；是否发码只看 order_delivery.success
+      CREATE TABLE IF NOT EXISTS order_ledger (
+        order_id TEXT PRIMARY KEY,
+        shop_id TEXT NOT NULL DEFAULT '',
+        product_id TEXT DEFAULT '',
+        platform_status TEXT DEFAULT '',
+        platform_status_code INTEGER,
+        order_time TEXT DEFAULT '',
+        is_virtual INTEGER DEFAULT 0,
+        first_seen_at TEXT DEFAULT (datetime('now')),
+        last_seen_at TEXT DEFAULT (datetime('now'))
+      );
+      CREATE INDEX IF NOT EXISTS idx_order_ledger_shop ON order_ledger(shop_id);
+      CREATE INDEX IF NOT EXISTS idx_order_ledger_product ON order_ledger(product_id);
     `)
 
     // 增量列（幂等）：旧库可能缺 random_mode 等，导致保存绑定静默失败
@@ -214,6 +229,25 @@ export class StorageService {
       this.db.exec(
         'CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_shop_order ON order_delivery(shop_id, order_id)'
       )
+    } catch {
+      /* ignore */
+    }
+    try {
+      this.db.exec(`
+        CREATE TABLE IF NOT EXISTS order_ledger (
+          order_id TEXT PRIMARY KEY,
+          shop_id TEXT NOT NULL DEFAULT '',
+          product_id TEXT DEFAULT '',
+          platform_status TEXT DEFAULT '',
+          platform_status_code INTEGER,
+          order_time TEXT DEFAULT '',
+          is_virtual INTEGER DEFAULT 0,
+          first_seen_at TEXT DEFAULT (datetime('now')),
+          last_seen_at TEXT DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_order_ledger_shop ON order_ledger(shop_id);
+        CREATE INDEX IF NOT EXISTS idx_order_ledger_product ON order_ledger(product_id);
+      `)
     } catch {
       /* ignore */
     }
@@ -1255,6 +1289,59 @@ export class StorageService {
   existsOrderDelivery(orderId: string, _shopId?: string): boolean {
     const row = this.db.prepare('SELECT id FROM order_delivery WHERE order_id = ? LIMIT 1').get(orderId)
     return !!row
+  }
+
+  /**
+   * 是否已发码成功（台账判重 SSOT：无视千帆订单状态）
+   */
+  hasShippedCode(orderId: string): boolean {
+    const row = this.db
+      .prepare(
+        `SELECT id FROM order_delivery
+         WHERE order_id = ? AND send_status = 'success'
+         LIMIT 1`
+      )
+      .get(orderId)
+    return !!row
+  }
+
+  /**
+   * 全量订单入台账（轮询到即写；已存在则刷新 last_seen）
+   */
+  upsertOrderLedger(row: {
+    orderId: string
+    shopId: string
+    productId?: string
+    platformStatus?: string
+    platformStatusCode?: number | null
+    orderTime?: string
+    isVirtual?: boolean
+  }): void {
+    const orderId = String(row.orderId || '').trim()
+    if (!orderId) return
+    this.db
+      .prepare(
+        `INSERT INTO order_ledger
+          (order_id, shop_id, product_id, platform_status, platform_status_code, order_time, is_virtual, first_seen_at, last_seen_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+         ON CONFLICT(order_id) DO UPDATE SET
+           shop_id = excluded.shop_id,
+           product_id = CASE WHEN excluded.product_id != '' THEN excluded.product_id ELSE order_ledger.product_id END,
+           platform_status = excluded.platform_status,
+           platform_status_code = excluded.platform_status_code,
+           order_time = CASE WHEN excluded.order_time != '' THEN excluded.order_time ELSE order_ledger.order_time END,
+           is_virtual = excluded.is_virtual,
+           last_seen_at = datetime('now')`
+      )
+      .run(
+        orderId,
+        String(row.shopId || ''),
+        String(row.productId || ''),
+        String(row.platformStatus || ''),
+        row.platformStatusCode ?? null,
+        String(row.orderTime || ''),
+        row.isVirtual ? 1 : 0
+      )
   }
 
   /**
