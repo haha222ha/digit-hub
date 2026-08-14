@@ -1,6 +1,6 @@
 {
   "source": "digit-hub/packages/psy-dist/tests-catalog.json",
-  "total": 36,
+  "total": 37,
   "url_pattern": {
     "static_test": "/tests/{test_code}/index.html",
     "distribution_link": "/test/{test_code}/{token}"
@@ -292,6 +292,14 @@
       "questions": 40,
       "duration_min": 8,
       "hot": false,
+      "dual_perspective": false
+    },
+    {
+      "code": "phd",
+      "name": "你适合读博吗",
+      "questions": 21,
+      "duration_min": 5,
+      "hot": true,
       "dual_perspective": false
     }
   ]
