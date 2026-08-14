@@ -115,6 +115,28 @@ class OrderClaimTest(unittest.TestCase):
             dist_db.order_claim_public("ORD-4004")
         self.assertIn("未绑定", str(cm.exception))
 
+    def test_xhs_package_id_self_serve(self):
+        """买家输入 packageId(P+orderId+序号) 应能领取。"""
+        profile = db.register_user_account("order_claim_pkg", "pass123456")
+        uid = int(profile["id"])
+        dist_db.ensure_distributor(uid, default_quota=10)
+        svc.generate_links(uid, "mbti", 2)
+        dist_db.sync_product_bindings(
+            uid,
+            [{"product_id": "sku-pkg", "test_code": "mbti", "product_name": "pkg"}],
+        )
+        # 发货助手同步的是卖家 orderId（无 P）
+        dist_db.sync_seen_orders(uid, [{"order_id": "80223388178802120", "product_id": "sku-pkg"}])
+        out = dist_db.order_claim_public("P802233881788021201")
+        self.assertTrue(out["url"])
+        self.assertFalse(out["already"])
+        self.assertEqual(out["order_id"], "80223388178802120")
+
+    def test_normalize_xhs_order_id(self):
+        self.assertEqual(dist_db.normalize_xhs_order_id("P802233881788021201"), "80223388178802120")
+        self.assertEqual(dist_db.normalize_xhs_order_id("P802087103969376951"), "80208710396937695")
+        self.assertEqual(dist_db.normalize_xhs_order_id("80223388178802120"), "80223388178802120")
+
 
 if __name__ == "__main__":
     unittest.main()

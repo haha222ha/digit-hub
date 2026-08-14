@@ -1512,6 +1512,43 @@ def sync_product_bindings(user_id: int, bindings: list[dict]) -> dict:
     return {"upserted": upserted}
 
 
+def normalize_xhs_order_id(raw: str) -> str:
+    """小红书订单号规范化：买家 packageId(P+orderId+包裹序号) → 卖家 orderId。"""
+    s = (raw or "").strip()
+    if not s:
+        return ""
+    if s[0] in "Pp" and len(s) > 1:
+        body = s[1:]
+        if body.isdigit() and len(body) >= 2:
+            # 例：P802233881788021201 → 80223388178802120
+            return body[:-1]
+        return body
+    return s
+
+
+def _xhs_order_lookup_keys(raw: str) -> list[str]:
+    """查询 dist_seen_orders / fulfill_order_id 时尝试的键（兼容 P 前缀包裹号）。"""
+    s = (raw or "").strip()
+    if not s:
+        return []
+    keys: list[str] = []
+
+    def add(k: str) -> None:
+        k = (k or "").strip()
+        if k and k not in keys:
+            keys.append(k)
+
+    add(s)
+    canon = normalize_xhs_order_id(s)
+    add(canon)
+    if canon and not s.upper().startswith("P"):
+        add(f"P{canon}1")
+    if s.upper().startswith("P"):
+        body = s[1:]
+        add(body)
+    return keys
+
+
 def sync_seen_orders(user_id: int, orders: list[dict]) -> dict:
     """探针同步订单。orders: [{order_id, product_id}]"""
     init_dist_tables()
@@ -1525,7 +1562,9 @@ def sync_seen_orders(user_id: int, orders: list[dict]) -> dict:
             for raw in orders or []:
                 if not isinstance(raw, dict):
                     continue
-                oid = str(raw.get("order_id") or raw.get("orderId") or "").strip()
+                oid = normalize_xhs_order_id(
+                    str(raw.get("order_id") or raw.get("orderId") or "")
+                )
                 pid = str(raw.get("product_id") or raw.get("productId") or "").strip()
                 if not oid:
                     continue
@@ -1552,7 +1591,9 @@ def sync_seen_orders(user_id: int, orders: list[dict]) -> dict:
             for raw in orders or []:
                 if not isinstance(raw, dict):
                     continue
-                oid = str(raw.get("order_id") or raw.get("orderId") or "").strip()
+                oid = normalize_xhs_order_id(
+                    str(raw.get("order_id") or raw.get("orderId") or "")
+                )
                 pid = str(raw.get("product_id") or raw.get("productId") or "").strip()
                 if not oid:
                     continue
@@ -1576,23 +1617,33 @@ def sync_seen_orders(user_id: int, orders: list[dict]) -> dict:
 
 
 def _get_seen_order(order_id: str) -> dict | None:
-    oid = (order_id or "").strip()
-    if not oid:
+    keys = _xhs_order_lookup_keys(order_id)
+    if not keys:
         return None
     init_dist_tables()
     if _USE_PG:
         conn = _pg_conn()
         c = _pg_cur(conn)
-        c.execute("SELECT * FROM dist_seen_orders WHERE order_id=%s", (oid,))
-        row = _row_dict(c.fetchone())
-        conn.close()
+        try:
+            for oid in keys:
+                c.execute("SELECT * FROM dist_seen_orders WHERE order_id=%s", (oid,))
+                row = _row_dict(c.fetchone())
+                if row:
+                    return row
+        finally:
+            conn.close()
     else:
         conn = _sqlite_conn()
         c = conn.cursor()
-        c.execute("SELECT * FROM dist_seen_orders WHERE order_id=?", (oid,))
-        row = _row_dict(c.fetchone())
-        conn.close()
-    return row
+        try:
+            for oid in keys:
+                c.execute("SELECT * FROM dist_seen_orders WHERE order_id=?", (oid,))
+                row = _row_dict(c.fetchone())
+                if row:
+                    return row
+        finally:
+            conn.close()
+    return None
 
 
 def _get_binding(user_id: int, product_id: str) -> dict | None:
@@ -1626,28 +1677,38 @@ def _get_binding(user_id: int, product_id: str) -> dict | None:
 
 def _find_fulfilled_link(user_id: int, order_id: str) -> dict | None:
     uid = int(user_id)
-    oid = (order_id or "").strip()
-    if not oid:
+    keys = _xhs_order_lookup_keys(order_id)
+    if not keys:
         return None
     if _USE_PG:
         conn = _pg_conn()
         c = _pg_cur(conn)
-        c.execute(
-            "SELECT * FROM dist_links WHERE user_id=%s AND fulfill_order_id=%s LIMIT 1",
-            (uid, oid),
-        )
-        row = _row_dict(c.fetchone())
-        conn.close()
+        try:
+            for oid in keys:
+                c.execute(
+                    "SELECT * FROM dist_links WHERE user_id=%s AND fulfill_order_id=%s LIMIT 1",
+                    (uid, oid),
+                )
+                row = _row_dict(c.fetchone())
+                if row:
+                    return _map_link(row)
+        finally:
+            conn.close()
     else:
         conn = _sqlite_conn()
         c = conn.cursor()
-        c.execute(
-            "SELECT * FROM dist_links WHERE user_id=? AND fulfill_order_id=? LIMIT 1",
-            (uid, oid),
-        )
-        row = _row_dict(c.fetchone())
-        conn.close()
-    return _map_link(row) if row else None
+        try:
+            for oid in keys:
+                c.execute(
+                    "SELECT * FROM dist_links WHERE user_id=? AND fulfill_order_id=? LIMIT 1",
+                    (uid, oid),
+                )
+                row = _row_dict(c.fetchone())
+                if row:
+                    return _map_link(row)
+        finally:
+            conn.close()
+    return None
 
 
 def allocate_link_for_order(
@@ -1665,7 +1726,7 @@ def allocate_link_for_order(
     """
     init_dist_tables()
     uid = int(user_id)
-    oid = (order_id or "").strip()
+    oid = normalize_xhs_order_id(order_id) or (order_id or "").strip()
     ch = (channel or "im").strip() or "im"
     if ch not in ("im", "self_serve"):
         ch = "im"
@@ -1865,7 +1926,7 @@ def allocate_link_for_order(
 
 def order_claim_public(order_id: str) -> dict:
     """公开自助领取：查 seen → 用订单归属商家分配。"""
-    oid = (order_id or "").strip()
+    oid = normalize_xhs_order_id(order_id) or (order_id or "").strip()
     if not oid:
         raise ValueError("请输入订单号")
     seen = _get_seen_order(oid)
