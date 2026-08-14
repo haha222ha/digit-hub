@@ -371,6 +371,11 @@ async function onWorkbenchNavigated(url: string) {
 function bindXhsBrowserViewEvents(view: BrowserView) {
   const wc = view.webContents
 
+  wc.on('page-title-updated', (e) => {
+    e.preventDefault()
+    mainWindow?.setTitle('小红书发货助手')
+  })
+
   wc.on('dom-ready', () => injectService?.injectOnDomReady(wc))
   wc.on('did-finish-load', async () => {
     injectService?.injectScripts(wc)
@@ -555,10 +560,10 @@ function createMainWindow() {
   }
 
   mainWindow.once('ready-to-show', async () => {
+    mainWindow?.setTitle('小红书发货助手')
     mainWindow?.show()
-    mainWindow?.webContents.send('navigate', '/browser')
 
-    // 保活：优先注入已存 Cookie → 直接进工作台；失效才打开客服登录页（永不默认打开 ark）
+    // 保活：后台拉起客服页给自动发货用；界面默认进发货管理（不要一打开只剩客服页）
     const shopId = currentShopId()
     await showAndLoadXhs('about:blank')
     autoShipService.bindWebContents(xhsBrowserView!.webContents, shopId)
@@ -596,13 +601,30 @@ function createMainWindow() {
           void ensureShopImWindow(shop.id, { show: false })
         }
       }
+      // 已登录：主界面进发货管理；客服 BrowserView 收到后台（仍可轮询）
+      if (mainWindow && xhsBrowserView) {
+        try {
+          mainWindow.removeBrowserView(xhsBrowserView)
+        } catch {
+          /* ignore */
+        }
+      }
+      mainWindow?.webContents.send('navigate', '/shipping')
+      mainWindow?.setTitle('小红书发货助手')
     } else {
       await showAndLoadXhs(XHS_LOGIN_URL)
       logger.info('[Login] 需手动登录：请用客服邮箱登录（不是商家扫码）')
+      mainWindow?.webContents.send('navigate', '/browser')
       mainWindow?.webContents.send('login-required', { reason: 'need_manual_login' })
     }
 
     startCookieWatchdog()
+  })
+
+  // 防止 BrowserView 把窗口标题改成「工作台」
+  mainWindow.on('page-title-updated', (e) => {
+    e.preventDefault()
+    mainWindow?.setTitle('小红书发货助手')
   })
 
   mainWindow.on('close', (event) => {
