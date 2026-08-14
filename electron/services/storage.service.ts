@@ -185,11 +185,30 @@ export class StorageService {
       CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_guid ON order_delivery(msg_guid);
     `)
 
-    // 增量列（幂等）
-    try {
-      this.db.exec(`ALTER TABLE product_bindings ADD COLUMN psy_test_code TEXT DEFAULT ''`)
-    } catch {
-      /* already exists */
+    // 增量列（幂等）：旧库可能缺 random_mode 等，导致保存绑定静默失败
+    const bindingAlters = [
+      `ALTER TABLE product_bindings ADD COLUMN product_type TEXT DEFAULT 'virtual'`,
+      `ALTER TABLE product_bindings ADD COLUMN deliver_type TEXT DEFAULT 'card'`,
+      `ALTER TABLE product_bindings ADD COLUMN stock INTEGER DEFAULT 0`,
+      `ALTER TABLE product_bindings ADD COLUMN delivered_count INTEGER DEFAULT 0`,
+      `ALTER TABLE product_bindings ADD COLUMN enabled INTEGER DEFAULT 1`,
+      `ALTER TABLE product_bindings ADD COLUMN random_mode INTEGER DEFAULT 0`,
+      `ALTER TABLE product_bindings ADD COLUMN low_stock_alert INTEGER DEFAULT 10`,
+      `ALTER TABLE product_bindings ADD COLUMN send_interval_ms INTEGER DEFAULT 500`,
+      `ALTER TABLE product_bindings ADD COLUMN uid_length INTEGER DEFAULT 10`,
+      `ALTER TABLE product_bindings ADD COLUMN msg_separator TEXT DEFAULT '\n\n'`,
+      `ALTER TABLE product_bindings ADD COLUMN psy_test_code TEXT DEFAULT ''`,
+      `ALTER TABLE product_bindings ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))`,
+      `ALTER TABLE card_pool ADD COLUMN locked_at TEXT`,
+      `ALTER TABLE card_pool ADD COLUMN order_id TEXT`,
+      `ALTER TABLE card_pool ADD COLUMN used_at TEXT`,
+    ]
+    for (const sql of bindingAlters) {
+      try {
+        this.db.exec(sql)
+      } catch {
+        /* column already exists */
+      }
     }
   }
 

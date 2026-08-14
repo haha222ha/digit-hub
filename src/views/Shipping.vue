@@ -255,16 +255,16 @@
       </el-form>
       <template #footer>
         <el-button @click="showBinding = false">取消</el-button>
-        <el-button @click="saveBinding(false)">仅保存</el-button>
+        <el-button :loading="claiming" @click="() => saveBinding(false)">仅保存</el-button>
         <el-button
           v-if="bindingForm.deliverType === 'link_card'"
           type="success"
           :loading="claiming"
-          @click="saveBinding(true)"
+          @click="() => saveBinding(true)"
         >
           保存并领取链接
         </el-button>
-        <el-button v-else type="primary" @click="saveBinding(false)">保存</el-button>
+        <el-button v-else type="primary" :loading="claiming" @click="() => saveBinding(false)">保存</el-button>
       </template>
     </el-dialog>
 
@@ -747,7 +747,10 @@ const saveBinding = async (claimAfter = false) => {
     ElMessage.warning('链接卡密请选择心象测测题')
     return
   }
-  if (!window.electronAPI) return
+  if (!window.electronAPI) {
+    ElMessage.error('桌面接口未就绪，请重启发货助手')
+    return
+  }
 
   let deliverContent = bindingForm.value.deliverContent
   if (bindingForm.value.deliverType === 'link_card' && !deliverContent.trim()) {
@@ -775,23 +778,41 @@ const saveBinding = async (claimAfter = false) => {
   pendingOpenCardsAfterSave.value = false
   pendingClaimAfterSave.value = false
 
-  if (editingBinding.value) {
-    await window.electronAPI.updateProductBinding(editingBinding.value.id, payload)
-  } else {
-    await window.electronAPI.addProductBinding(payload)
-  }
-  showBinding.value = false
-  await loadData()
-  ElMessage.success('保存成功')
+  claiming.value = true
+  try {
+    let bindingId = editingBinding.value?.id || 0
+    const existing = bindings.value.find((b) => b.product_id === payload.productId)
 
-  if (openCards || doClaim) {
-    const row = bindings.value.find((b) => b.product_id === payload.productId)
-    if (row) {
+    if (editingBinding.value) {
+      await window.electronAPI.updateProductBinding(editingBinding.value.id, payload)
+      bindingId = editingBinding.value.id
+    } else if (existing) {
+      await window.electronAPI.updateProductBinding(existing.id, payload)
+      bindingId = existing.id
+    } else {
+      bindingId = await window.electronAPI.addProductBinding(payload)
+    }
+
+    showBinding.value = false
+    await loadData()
+    ElMessage.success('保存成功')
+
+    const row =
+      bindings.value.find((b) => b.id === bindingId) ||
+      bindings.value.find((b) => b.product_id === payload.productId)
+
+    if ((openCards || doClaim) && row) {
       openCardDialog(row)
       if (doClaim && row.deliver_type === 'link_card') {
         await claimFromCloud()
       }
+    } else if (doClaim && !row) {
+      ElMessage.warning('绑定已保存，但未找到记录，请点「卡密」手动领取')
     }
+  } catch (e: any) {
+    ElMessage.error(e?.message || String(e) || '保存失败')
+  } finally {
+    claiming.value = false
   }
 }
 
