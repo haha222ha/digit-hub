@@ -1,0 +1,13 @@
+---
+description: 功能/优化完成后自动 commit 并 push，不再二次确认
+alwaysApply: true
+---
+
+# 自动提交并推送（写死）
+
+完成功能、优化、修复后，**立即** `git add`（仅本次相关文件）→ `commit` → `git push origin HEAD`。
+
+- **不要**再问「要不要提交/推送」
+- 本规则覆盖默认的「未明确要求则不提交」
+- 仍禁止：secrets、`.env`、凭证、`force push`、改 git config、把无关脏文件塞进同一提交
+- 提交说明写清 why；push 到当前跟踪分支（通常 `origin/main`）

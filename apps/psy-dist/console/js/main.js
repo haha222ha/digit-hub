@@ -18,6 +18,7 @@ import {
   renderTestResults,
   requireAuth,
 } from "./pages/admin.js";
+import { renderPublicOrderClaim } from "./pages/order-claim-public.js";
 import {
   renderSaDashboard,
   renderSaUsers,
@@ -80,8 +81,27 @@ const SUPER_PAGES = {
   "/super-admin/payment-notify-logs": renderSaPaymentNotifyLogs,
 };
 
+function isOrderClaimPath(path, search) {
+  if (path === "/order-claim" || path === "/order-claim/" || path === "/order-claim.html") return true;
+  const redir = new URLSearchParams(search || "").get("redirect") || "";
+  return redir === "/order-claim" || redir.startsWith("/order-claim");
+}
+
 async function render(fullPath) {
   const path = pathOnly(fullPath);
+  const search = (fullPath || "").includes("?") ? fullPath.slice(fullPath.indexOf("?")) : location.search;
+
+  // 买家领链接是公开履约页：绝不进商家登录 / 工作台
+  if (isOrderClaimPath(path, search)) {
+    if (path === "/order-claim.html" || path === "/order-claim" || path === "/order-claim/") {
+      clear(root);
+      renderPublicOrderClaim(root);
+      return;
+    }
+    location.replace("/order-claim.html");
+    return;
+  }
+
   clear(root);
   document.title = "心象测 · 工作台";
 
@@ -116,7 +136,7 @@ async function render(fullPath) {
   }
 
   if (isAuthed()) navigate("/admin/dashboard", { replace: true });
-  else navigate("/login", { replace: true });
+  else location.assign("/");
 }
 
 onRoute((p) => {

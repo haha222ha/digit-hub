@@ -220,6 +220,29 @@ def _migrate_dist_schema() -> None:
         "ALTER TABLE dist_links ADD COLUMN faka_claim_batch TEXT",
         "ALTER TABLE dist_links ADD COLUMN faka_claim_meta TEXT",
         "CREATE INDEX IF NOT EXISTS idx_dist_links_faka_claim ON dist_links(user_id, test_code, status, faka_claimed_at)",
+        "ALTER TABLE dist_links ADD COLUMN fulfill_order_id TEXT",
+        "ALTER TABLE dist_links ADD COLUMN fulfill_channel TEXT",
+        "ALTER TABLE dist_links ADD COLUMN fulfilled_at TEXT",
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_dist_links_fulfill_order ON dist_links(user_id, fulfill_order_id) WHERE fulfill_order_id IS NOT NULL AND fulfill_order_id != ''",
+        """CREATE TABLE IF NOT EXISTS dist_product_bindings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            product_id TEXT NOT NULL,
+            test_code TEXT NOT NULL DEFAULT '',
+            product_name TEXT NOT NULL DEFAULT '',
+            enabled INTEGER NOT NULL DEFAULT 1,
+            updated_at TEXT NOT NULL,
+            UNIQUE(user_id, product_id)
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_seen_orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            order_id TEXT NOT NULL,
+            product_id TEXT NOT NULL DEFAULT '',
+            seen_at TEXT NOT NULL,
+            UNIQUE(order_id)
+        )""",
+        "CREATE INDEX IF NOT EXISTS idx_dist_seen_orders_user ON dist_seen_orders(user_id)",
         "ALTER TABLE dist_distributors ADD COLUMN api_token TEXT",
         "ALTER TABLE dist_distributors ADD COLUMN api_token_created_at TEXT",
         "CREATE UNIQUE INDEX IF NOT EXISTS idx_dist_api_token ON dist_distributors(api_token)",
@@ -234,6 +257,28 @@ def _migrate_dist_schema() -> None:
         "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS faka_claim_batch TEXT",
         "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS faka_claim_meta TEXT",
         "CREATE INDEX IF NOT EXISTS idx_dist_links_faka_claim ON dist_links(user_id, test_code, status, faka_claimed_at)",
+        "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS fulfill_order_id TEXT",
+        "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS fulfill_channel TEXT",
+        "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS fulfilled_at TIMESTAMP",
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_dist_links_fulfill_order ON dist_links(user_id, fulfill_order_id) WHERE fulfill_order_id IS NOT NULL AND fulfill_order_id != ''",
+        """CREATE TABLE IF NOT EXISTS dist_product_bindings (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            product_id TEXT NOT NULL,
+            test_code TEXT NOT NULL DEFAULT '',
+            product_name TEXT NOT NULL DEFAULT '',
+            enabled BOOLEAN NOT NULL DEFAULT TRUE,
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            UNIQUE(user_id, product_id)
+        )""",
+        """CREATE TABLE IF NOT EXISTS dist_seen_orders (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            order_id TEXT NOT NULL UNIQUE,
+            product_id TEXT NOT NULL DEFAULT '',
+            seen_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )""",
+        "CREATE INDEX IF NOT EXISTS idx_dist_seen_orders_user ON dist_seen_orders(user_id)",
         "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS api_token TEXT",
         "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS api_token_created_at TIMESTAMP",
         "CREATE UNIQUE INDEX IF NOT EXISTS idx_dist_api_token ON dist_distributors(api_token)",
@@ -1113,6 +1158,9 @@ def _map_link(row: dict | None) -> dict:
         "faka_claim_batch": row.get("faka_claim_batch") or "",
         "faka_claim_meta": row.get("faka_claim_meta") or "",
         "faka_claimed": faka_claimed,
+        "fulfill_order_id": (row.get("fulfill_order_id") or "") or "",
+        "fulfill_channel": (row.get("fulfill_channel") or "") or "",
+        "fulfilled_at": _fmt_ts(row.get("fulfilled_at")),
         # SDK / 源站兼容字段
         "usedCount": used_count,
         "maxUses": max_uses,
@@ -1121,6 +1169,8 @@ def _map_link(row: dict | None) -> dict:
         "fakaClaimed": faka_claimed,
         "fakaClaimedAt": faka_claimed_at,
         "fakaClaimBatch": row.get("faka_claim_batch") or "",
+        "fulfillOrderId": (row.get("fulfill_order_id") or "") or "",
+        "fulfillChannel": (row.get("fulfill_channel") or "") or "",
     }
     return out
 
@@ -1387,6 +1437,450 @@ def release_links_for_faka(
         finally:
             conn.close()
     return {"released": released, "batchId": batch, "batch_id": batch}
+
+
+def sync_product_bindings(user_id: int, bindings: list[dict]) -> dict:
+    """发货助手同步商品→测题绑定。bindings: [{product_id, test_code, product_name, enabled?}]"""
+    init_dist_tables()
+    uid = int(user_id)
+    now = _now()
+    upserted = 0
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        try:
+            for raw in bindings or []:
+                if not isinstance(raw, dict):
+                    continue
+                pid = str(raw.get("product_id") or raw.get("productId") or "").strip()
+                tc = str(raw.get("test_code") or raw.get("testCode") or "").strip()
+                if not pid or not tc:
+                    continue
+                name = str(raw.get("product_name") or raw.get("productName") or "").strip()
+                en_raw = raw.get("enabled")
+                enabled = True if en_raw is None else bool(en_raw)
+                c.execute(
+                    """INSERT INTO dist_product_bindings
+                       (user_id, product_id, test_code, product_name, enabled, updated_at)
+                       VALUES (%s,%s,%s,%s,%s,NOW())
+                       ON CONFLICT (user_id, product_id) DO UPDATE SET
+                         test_code=EXCLUDED.test_code,
+                         product_name=EXCLUDED.product_name,
+                         enabled=EXCLUDED.enabled,
+                         updated_at=NOW()""",
+                    (uid, pid, tc, name, enabled),
+                )
+                upserted += 1
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        try:
+            for raw in bindings or []:
+                if not isinstance(raw, dict):
+                    continue
+                pid = str(raw.get("product_id") or raw.get("productId") or "").strip()
+                tc = str(raw.get("test_code") or raw.get("testCode") or "").strip()
+                if not pid or not tc:
+                    continue
+                name = str(raw.get("product_name") or raw.get("productName") or "").strip()
+                en_raw = raw.get("enabled")
+                enabled = 1 if en_raw is None or bool(en_raw) else 0
+                c.execute(
+                    """INSERT INTO dist_product_bindings
+                       (user_id, product_id, test_code, product_name, enabled, updated_at)
+                       VALUES (?,?,?,?,?,?)
+                       ON CONFLICT(user_id, product_id) DO UPDATE SET
+                         test_code=excluded.test_code,
+                         product_name=excluded.product_name,
+                         enabled=excluded.enabled,
+                         updated_at=excluded.updated_at""",
+                    (uid, pid, tc, name, enabled, now),
+                )
+                upserted += 1
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    return {"upserted": upserted}
+
+
+def sync_seen_orders(user_id: int, orders: list[dict]) -> dict:
+    """探针同步订单。orders: [{order_id, product_id}]"""
+    init_dist_tables()
+    uid = int(user_id)
+    now = _now()
+    upserted = 0
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        try:
+            for raw in orders or []:
+                if not isinstance(raw, dict):
+                    continue
+                oid = str(raw.get("order_id") or raw.get("orderId") or "").strip()
+                pid = str(raw.get("product_id") or raw.get("productId") or "").strip()
+                if not oid:
+                    continue
+                c.execute(
+                    """INSERT INTO dist_seen_orders (user_id, order_id, product_id, seen_at)
+                       VALUES (%s,%s,%s,NOW())
+                       ON CONFLICT (order_id) DO UPDATE SET
+                         product_id=CASE WHEN EXCLUDED.product_id!='' THEN EXCLUDED.product_id ELSE dist_seen_orders.product_id END,
+                         user_id=EXCLUDED.user_id,
+                         seen_at=NOW()""",
+                    (uid, oid, pid),
+                )
+                upserted += 1
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        try:
+            for raw in orders or []:
+                if not isinstance(raw, dict):
+                    continue
+                oid = str(raw.get("order_id") or raw.get("orderId") or "").strip()
+                pid = str(raw.get("product_id") or raw.get("productId") or "").strip()
+                if not oid:
+                    continue
+                c.execute(
+                    """INSERT INTO dist_seen_orders (user_id, order_id, product_id, seen_at)
+                       VALUES (?,?,?,?)
+                       ON CONFLICT(order_id) DO UPDATE SET
+                         product_id=CASE WHEN excluded.product_id!='' THEN excluded.product_id ELSE product_id END,
+                         user_id=excluded.user_id,
+                         seen_at=excluded.seen_at""",
+                    (uid, oid, pid, now),
+                )
+                upserted += 1
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    return {"upserted": upserted}
+
+
+def _get_seen_order(order_id: str) -> dict | None:
+    oid = (order_id or "").strip()
+    if not oid:
+        return None
+    init_dist_tables()
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute("SELECT * FROM dist_seen_orders WHERE order_id=%s", (oid,))
+        row = _row_dict(c.fetchone())
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute("SELECT * FROM dist_seen_orders WHERE order_id=?", (oid,))
+        row = _row_dict(c.fetchone())
+        conn.close()
+    return row
+
+
+def _get_binding(user_id: int, product_id: str) -> dict | None:
+    uid = int(user_id)
+    pid = (product_id or "").strip()
+    if not pid:
+        return None
+    init_dist_tables()
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute(
+            """SELECT * FROM dist_product_bindings
+               WHERE user_id=%s AND product_id=%s AND enabled IS TRUE""",
+            (uid, pid),
+        )
+        row = _row_dict(c.fetchone())
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            """SELECT * FROM dist_product_bindings
+               WHERE user_id=? AND product_id=? AND COALESCE(enabled,1)=1""",
+            (uid, pid),
+        )
+        row = _row_dict(c.fetchone())
+        conn.close()
+    return row
+
+
+def _find_fulfilled_link(user_id: int, order_id: str) -> dict | None:
+    uid = int(user_id)
+    oid = (order_id or "").strip()
+    if not oid:
+        return None
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute(
+            "SELECT * FROM dist_links WHERE user_id=%s AND fulfill_order_id=%s LIMIT 1",
+            (uid, oid),
+        )
+        row = _row_dict(c.fetchone())
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            "SELECT * FROM dist_links WHERE user_id=? AND fulfill_order_id=? LIMIT 1",
+            (uid, oid),
+        )
+        row = _row_dict(c.fetchone())
+        conn.close()
+    return _map_link(row) if row else None
+
+
+def allocate_link_for_order(
+    user_id: int,
+    order_id: str,
+    *,
+    channel: str = "im",
+    require_seen: bool = False,
+    product_id: str = "",
+) -> dict:
+    """幂等：同一订单永远同一条链接。channel: im | self_serve。
+
+    require_seen=True 时（自助领取）必须先有 dist_seen_orders 记录。
+    IM 可传 product_id：未见订单时自动登记 seen。
+    """
+    init_dist_tables()
+    uid = int(user_id)
+    oid = (order_id or "").strip()
+    ch = (channel or "im").strip() or "im"
+    if ch not in ("im", "self_serve"):
+        ch = "im"
+    if not oid:
+        raise ValueError("请提供订单号")
+
+    pid_in = (product_id or "").strip()
+    if pid_in and not require_seen:
+        sync_seen_orders(uid, [{"order_id": oid, "product_id": pid_in}])
+
+    seen = _get_seen_order(oid)
+    if require_seen and not seen:
+        raise ValueError("订单未同步，请稍后再试或联系客服")
+
+    # 已分配：直接返回（跨 channel 幂等）
+    # 先按本商家查；自助场景若商家不一致，用 seen.user_id
+    lookup_uid = uid
+    if seen and require_seen:
+        lookup_uid = int(seen.get("user_id") or uid)
+
+    existing = _find_fulfilled_link(lookup_uid, oid)
+    if not existing and lookup_uid != uid:
+        existing = _find_fulfilled_link(uid, oid)
+    if existing:
+        tc = existing.get("test_code") or ""
+        tok = existing.get("token") or ""
+        return {
+            "url": link_public_url(tc, tok),
+            "test_code": tc,
+            "testCode": tc,
+            "token": tok,
+            "channel": existing.get("fulfill_channel") or ch,
+            "order_id": oid,
+            "orderId": oid,
+            "link_id": existing.get("id"),
+            "already": True,
+        }
+
+    # 自助：强制使用 seen 归属商家
+    if require_seen and seen:
+        uid = int(seen.get("user_id") or 0)
+        if uid <= 0:
+            raise ValueError("订单未同步，请稍后再试或联系客服")
+
+    # 解析 product_id / test_code
+    pid = pid_in
+    if not pid and seen:
+        pid = str(seen.get("product_id") or "").strip()
+    if not pid:
+        raise ValueError("订单缺少商品信息，无法分配链接")
+
+    binding = _get_binding(uid, pid)
+    if not binding:
+        raise ValueError("该商品未绑定测题，请先在发货助手完成绑定")
+    tc = str(binding.get("test_code") or "").strip()
+    if not tc:
+        raise ValueError("该商品未绑定测题，请先在发货助手完成绑定")
+
+    if seen and int(seen.get("user_id") or 0) not in (0, uid):
+        raise ValueError("订单归属不匹配")
+
+    now = _now()
+    claimed_row = None
+    newly = False
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        try:
+            c.execute(
+                "SELECT * FROM dist_links WHERE user_id=%s AND fulfill_order_id=%s LIMIT 1 FOR UPDATE",
+                (uid, oid),
+            )
+            row = _row_dict(c.fetchone())
+            if row:
+                claimed_row = _map_link(row)
+            else:
+                c.execute(
+                    """SELECT id FROM dist_links
+                       WHERE user_id=%s AND test_code=%s AND status='unused'
+                         AND (fulfill_order_id IS NULL OR fulfill_order_id='')
+                         AND first_used_at IS NULL AND COALESCE(used_count,0)=0
+                         AND faka_claimed_at IS NOT NULL
+                       ORDER BY id ASC LIMIT 1 FOR UPDATE SKIP LOCKED""",
+                    (uid, tc),
+                )
+                pick = _row_dict(c.fetchone())
+                if not pick:
+                    c.execute(
+                        """SELECT id FROM dist_links
+                           WHERE user_id=%s AND test_code=%s AND status='unused'
+                             AND (fulfill_order_id IS NULL OR fulfill_order_id='')
+                             AND first_used_at IS NULL AND COALESCE(used_count,0)=0
+                           ORDER BY id ASC LIMIT 1 FOR UPDATE SKIP LOCKED""",
+                        (uid, tc),
+                    )
+                    pick = _row_dict(c.fetchone())
+                if not pick:
+                    raise ValueError("测评链接库存不足，请先在心象测生成或领取")
+                lid = int(pick.get("id"))
+                c.execute(
+                    """UPDATE dist_links
+                       SET fulfill_order_id=%s, fulfill_channel=%s, fulfilled_at=NOW()
+                       WHERE id=%s AND user_id=%s
+                         AND (fulfill_order_id IS NULL OR fulfill_order_id='')
+                       RETURNING *""",
+                    (oid, ch, lid, uid),
+                )
+                out = _row_dict(c.fetchone())
+                if not out:
+                    c.execute(
+                        "SELECT * FROM dist_links WHERE user_id=%s AND fulfill_order_id=%s LIMIT 1",
+                        (uid, oid),
+                    )
+                    out = _row_dict(c.fetchone())
+                if not out:
+                    raise ValueError("分配失败，请重试")
+                claimed_row = _map_link(out)
+                newly = True
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        try:
+            c.execute("BEGIN IMMEDIATE")
+            c.execute(
+                "SELECT * FROM dist_links WHERE user_id=? AND fulfill_order_id=? LIMIT 1",
+                (uid, oid),
+            )
+            row = _row_dict(c.fetchone())
+            if row:
+                claimed_row = _map_link(row)
+            else:
+                c.execute(
+                    """SELECT id FROM dist_links
+                       WHERE user_id=? AND test_code=? AND status='unused'
+                         AND (fulfill_order_id IS NULL OR fulfill_order_id='')
+                         AND (first_used_at IS NULL OR first_used_at='')
+                         AND COALESCE(used_count,0)=0
+                         AND faka_claimed_at IS NOT NULL AND faka_claimed_at!=''
+                       ORDER BY id ASC LIMIT 1""",
+                    (uid, tc),
+                )
+                pick = _row_dict(c.fetchone())
+                if not pick:
+                    c.execute(
+                        """SELECT id FROM dist_links
+                           WHERE user_id=? AND test_code=? AND status='unused'
+                             AND (fulfill_order_id IS NULL OR fulfill_order_id='')
+                             AND (first_used_at IS NULL OR first_used_at='')
+                             AND COALESCE(used_count,0)=0
+                           ORDER BY id ASC LIMIT 1""",
+                        (uid, tc),
+                    )
+                    pick = _row_dict(c.fetchone())
+                if not pick:
+                    raise ValueError("测评链接库存不足，请先在心象测生成或领取")
+                lid = int(pick.get("id"))
+                c.execute(
+                    """UPDATE dist_links
+                       SET fulfill_order_id=?, fulfill_channel=?, fulfilled_at=?
+                       WHERE id=? AND user_id=?
+                         AND (fulfill_order_id IS NULL OR fulfill_order_id='')""",
+                    (oid, ch, now, lid, uid),
+                )
+                if not c.rowcount:
+                    raise ValueError("分配失败，请重试")
+                c.execute("SELECT * FROM dist_links WHERE id=?", (lid,))
+                claimed_row = _map_link(_row_dict(c.fetchone()))
+                newly = True
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+
+    assert claimed_row is not None
+    code = claimed_row.get("test_code") or tc
+    tok = claimed_row.get("token") or ""
+    return {
+        "url": link_public_url(code, tok),
+        "test_code": code,
+        "testCode": code,
+        "token": tok,
+        "channel": claimed_row.get("fulfill_channel") or ch,
+        "order_id": oid,
+        "orderId": oid,
+        "link_id": claimed_row.get("id"),
+        "already": not newly,
+    }
+
+
+def order_claim_public(order_id: str) -> dict:
+    """公开自助领取：查 seen → 用订单归属商家分配。"""
+    oid = (order_id or "").strip()
+    if not oid:
+        raise ValueError("请输入订单号")
+    seen = _get_seen_order(oid)
+    if not seen:
+        raise ValueError("订单未同步，请稍后再试或联系客服")
+    uid = int(seen.get("user_id") or 0)
+    if uid <= 0:
+        raise ValueError("订单未同步，请稍后再试或联系客服")
+    return allocate_link_for_order(
+        uid,
+        oid,
+        channel="self_serve",
+        require_seen=True,
+        product_id=str(seen.get("product_id") or ""),
+    )
 
 
 def _set_link_status(token: str, status: str) -> None:

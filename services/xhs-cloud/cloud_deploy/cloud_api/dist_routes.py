@@ -140,6 +140,26 @@ class FakaReleaseBody(BaseModel):
     link_ids: list[int] | None = None
 
 
+class ShipBindingsSyncBody(BaseModel):
+    bindings: list[dict] | None = None
+
+
+class ShipOrdersSyncBody(BaseModel):
+    orders: list[dict] | None = None
+
+
+class ShipAllocateBody(BaseModel):
+    orderId: str = ""
+    order_id: str = ""
+    productId: str = ""
+    product_id: str = ""
+
+
+class OrderClaimBody(BaseModel):
+    orderId: str = ""
+    order_id: str = ""
+
+
 class UnlimitedStartBody(BaseModel):
     testCode: str
 
@@ -688,6 +708,57 @@ def compat_faka_release_links(body: FakaReleaseBody, request: Request):
     try:
         out = dist_db.release_links_for_faka(user["id"], batch_id=batch, link_ids=ids)
         return _ok(out, f"已释放 {out.get('released') or 0} 条")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@compat_router.post("/api/ship/bindings/sync")
+def compat_ship_bindings_sync(body: ShipBindingsSyncBody, request: Request):
+    user = _dist_token(request)
+    try:
+        out = dist_db.sync_product_bindings(user["id"], list(body.bindings or []))
+        return _ok(out, f"已同步 {out.get('upserted') or 0} 条绑定")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@compat_router.post("/api/ship/orders/sync")
+def compat_ship_orders_sync(body: ShipOrdersSyncBody, request: Request):
+    user = _dist_token(request)
+    try:
+        out = dist_db.sync_seen_orders(user["id"], list(body.orders or []))
+        return _ok(out, f"已同步 {out.get('upserted') or 0} 条订单")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@compat_router.post("/api/ship/allocate")
+def compat_ship_allocate(body: ShipAllocateBody, request: Request):
+    user = _dist_token(request)
+    oid = _pick_code(body.orderId, body.order_id)
+    pid = _pick_code(body.productId, body.product_id)
+    try:
+        out = dist_db.allocate_link_for_order(
+            user["id"],
+            oid,
+            channel="im",
+            require_seen=False,
+            product_id=pid,
+        )
+        msg = "已分配测评链接" if not out.get("already") else "订单已有测评链接"
+        return _ok(out, msg)
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@compat_router.post("/api/order-claim")
+def compat_order_claim(body: OrderClaimBody):
+    """公开：买家凭订单号领取测评链接（无需登录）。"""
+    oid = _pick_code(body.orderId, body.order_id)
+    try:
+        out = dist_db.order_claim_public(oid)
+        msg = "领取成功" if not out.get("already") else "该订单已领取过，以下为原链接"
+        return _ok(out, msg)
     except ValueError as e:
         return JSONResponse(_fail(str(e)), status_code=200)
 

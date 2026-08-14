@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="robots" content="noindex,nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=7" />
+    <title>订单领取测评链接 · 心象测</title>
+    <meta name="description" content="输入订单号领取测评链接" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/order-claim.css?v=20260814oc1" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true"></div>
+    <main class="claim-shell">
+      <header class="claim-brand">
+        <img src="/images/logo-app.svg" alt="" width="40" height="40" />
+        <div>
+          <p class="brand-name">心象测</p>
+          <p class="brand-sub">订单领取测评链接</p>
+        </div>
+      </header>
+
+      <section class="claim-panel" aria-labelledby="claim-title">
+        <h1 id="claim-title">输入订单号领取</h1>
+        <p class="hint">请填写购买时的订单号。同一订单始终对应同一条测评链接。</p>
+
+        <label class="field-label" for="orderId">订单号</label>
+        <div class="field-row">
+          <input
+            id="orderId"
+            name="orderId"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="粘贴或输入订单号"
+            maxlength="64"
+          />
+          <button type="button" id="claimBtn" class="btn-primary">领取链接</button>
+        </div>
+
+        <p id="statusMsg" class="status" role="status" hidden></p>
+
+        <div id="resultBox" class="result" hidden>
+          <label class="field-label" for="resultUrl">测评链接</label>
+          <div class="field-row">
+            <input id="resultUrl" type="text" readonly />
+            <button type="button" id="copyBtn" class="btn-secondary">复制</button>
+          </div>
+          <a id="openLink" class="open-link" href="#" target="_blank" rel="noopener noreferrer">打开测评</a>
+        </div>
+      </section>
+
+      <p class="foot-note">如提示订单未同步，请稍候再试，或联系商家客服。</p>
+    </main>
+    <script src="/order-claim.js?v=20260814oc1" defer></script>
+  </body>
+</html>

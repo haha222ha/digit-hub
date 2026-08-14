@@ -186,6 +186,28 @@ ${GZIP_DIRECTIVES}
     location = /home.js {
         add_header Cache-Control "no-store, no-cache, must-revalidate";
     }
+    # 买家公开领链接：禁止回落到 /console（否则会弹出商家登录）
+    location = /order-claim {
+        try_files /order-claim.html /order-claim/index.html =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header X-Robots-Tag "noindex, nofollow";
+    }
+    location = /order-claim/ {
+        return 301 /order-claim;
+    }
+    location = /order-claim.html {
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header X-Robots-Tag "noindex, nofollow";
+    }
+    location = /order-claim.css {
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+    location = /order-claim.js {
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+    location = /app.html {
+        return 302 /;
+    }
 
     # 心象测自有工作台（原生 SPA，替代仿站 Vue app.html）
     location ^~ /console/ {
