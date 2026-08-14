@@ -739,6 +739,42 @@ export class StorageService {
   }
 
   /**
+   * 将本地卡密池中与云端 URL 相同的条目标为已用（避免双扣）。
+   * 若本地没有该 URL，返回 false（仍可仅靠 order_delivery 记履约）。
+   */
+  markCardUrlUsed(bindingId: number, url: string, orderId: string): boolean {
+    const content = String(url || '').trim()
+    const oid = String(orderId || '').trim()
+    if (!content || !oid) return false
+    const tx = this.db.transaction(() => {
+      const row = this.db.prepare(
+        `SELECT id, status FROM card_pool
+         WHERE binding_id = ? AND card_content = ?`
+      ).get(bindingId, content) as { id: number; status: string } | undefined
+      if (!row) return false
+      if (row.status === 'used') {
+        this.db.prepare(
+          `UPDATE card_pool SET order_id = COALESCE(order_id, ?), used_at = COALESCE(used_at, datetime('now'))
+           WHERE id = ?`
+        ).run(oid, row.id)
+        return true
+      }
+      this.db.prepare(
+        `UPDATE card_pool SET status = 'used', order_id = ?, used_at = datetime('now'), locked_at = NULL
+         WHERE id = ?`
+      ).run(oid, row.id)
+      if (row.status === 'unused' || row.status === 'locked') {
+        this.db.prepare(
+          `UPDATE product_bindings SET stock = CASE WHEN stock > 0 THEN stock - 1 ELSE 0 END,
+             delivered_count = delivered_count + 1, updated_at = datetime('now') WHERE id = ?`
+        ).run(bindingId)
+      }
+      return true
+    })
+    return !!tx()
+  }
+
+  /**
    * 获取卡密池统计
    */
   getCardPoolStats(bindingId: number) {

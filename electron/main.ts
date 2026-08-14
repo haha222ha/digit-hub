@@ -471,6 +471,7 @@ async function initialize() {
   autoShipService = new AutoShipService(storageService, logger, mockService)
   autoShipService.setInjectService(injectService)
   psyCloudService = new PsyCloudService(storageService, logger)
+  autoShipService.setPsyCloud(psyCloudService)
   autoReshipService = new AutoReshipService(storageService, logger, autoShipService)
   shopContextService = new ShopContextService(
     logger, storageService, wsService, autoShipService, autoReshipService, mockService
@@ -911,13 +912,20 @@ function setupIPC() {
   ipcMain.handle('mock:status', () => mockService.isEnabled())
   ipcMain.handle('crash:status', () => crashRecoveryService.getStatus())
 
-  ipcMain.handle('product:add-binding', (_event, binding) => storageService.addProductBinding(binding))
+  ipcMain.handle('product:add-binding', (_event, binding) => {
+    const id = storageService.addProductBinding(binding)
+    void psyCloudService.syncBindingsFromLocal('default')
+    return id
+  })
   ipcMain.handle('product:get-binding', (_event, shopId: string, productId: string) =>
     storageService.getProductBinding(shopId, productId))
   ipcMain.handle('product:list-bindings', (_event, shopId: string) =>
     storageService.getAllProductBindings(shopId))
-  ipcMain.handle('product:update-binding', (_event, id: number, updates) =>
-    storageService.updateProductBinding(id, updates))
+  ipcMain.handle('product:update-binding', (_event, id: number, updates) => {
+    const ok = storageService.updateProductBinding(id, updates)
+    void psyCloudService.syncBindingsFromLocal('default')
+    return ok
+  })
   ipcMain.handle('product:delete-binding', (_event, id: number) => storageService.deleteProductBinding(id))
   ipcMain.handle('product:add-cards', (_event, bindingId: number, cards: string[], options) =>
     storageService.addCardPool(bindingId, cards, options))
@@ -979,6 +987,7 @@ function setupIPC() {
     }
     if (res.success) {
       mainWindow?.webContents.send('psy-auth-updated', psyCloudService.getStatus())
+      void psyCloudService.syncBindingsFromLocal('default')
     }
     return res
   })
@@ -994,6 +1003,8 @@ function setupIPC() {
       psyCloudService.claimIntoPool(bindingId, testCode, count, productId)
   )
   ipcMain.handle('psy:release-batch', async (_event, batchId: string) => psyCloudService.releaseBatch(batchId))
+  ipcMain.handle('psy:sync-bindings', async () => psyCloudService.syncBindingsFromLocal('default'))
+  ipcMain.handle('psy:order-claim-url', () => psyCloudService.getOrderClaimUrl())
 
   // 订单发卡管理（对标阿奇锁 OrderImMsgController）
   ipcMain.handle('order:deliveries', (_event, filter) => storageService.getOrderDeliveriesList(filter || {}))

@@ -168,9 +168,32 @@ export class InjectService {
       this.executeScript(webContents, 'goods-sync')
     }
 
+    // 千帆商家后台：商品同步（对标阿奇锁 getGoodsNoteList，必须在 ark 域）
+    if (url.includes('ark.xiaohongshu.com') && !isLogin) {
+      this.executeScript(webContents, 'goods-sync')
+    }
+
     if (url.includes('/cstools/chat') || url.includes('kefu')) {
       this.executeScript(webContents, 'kefu-monitor')
       this.executeScript(webContents, 'im-send')
+    }
+  }
+
+  getScript(scriptName: string): string | undefined {
+    return this.injectedScripts.get(scriptName)
+  }
+
+  /** 同步注入并等待完成（商品同步隐藏窗用） */
+  async injectScriptAsync(webContents: WebContents, scriptName: string): Promise<boolean> {
+    const script = this.injectedScripts.get(scriptName)
+    if (!script || webContents.isDestroyed()) return false
+    try {
+      await webContents.executeJavaScript(script)
+      this.logger.info(`[Inject] 脚本注入成功: ${scriptName}`)
+      return true
+    } catch (error) {
+      this.logger.error(`[Inject] 脚本注入失败: ${scriptName}`, error)
+      return false
     }
   }
 

@@ -116,6 +116,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   psyClaimIntoPool: (bindingId: number, testCode: string, count: number, productId?: string) =>
     ipcRenderer.invoke('psy:claim-into-pool', bindingId, testCode, count, productId),
   psyReleaseBatch: (batchId: string) => ipcRenderer.invoke('psy:release-batch', batchId),
+  psySyncBindings: () => ipcRenderer.invoke('psy:sync-bindings'),
+  psyOrderClaimUrl: () => ipcRenderer.invoke('psy:order-claim-url'),
   onPsyAuthUpdated: (callback: (status: any) => void) => {
     const handler = (_event: any, data: any) => callback(data)
     ipcRenderer.on('psy-auth-updated', handler)

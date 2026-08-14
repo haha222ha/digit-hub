@@ -71,10 +71,17 @@ export function buildMessages(
   splitMulti: boolean = true
 ): { type: MessageType; rawContent: string }[] | null {
   const type = binding.deliver_type
-  const raw = binding.deliver_content || ''
+  let raw = binding.deliver_content || ''
+
+  // 链接卡密：池里每条是完整 URL；未写模板时默认整条发链接
+  if (type === 'link_card') {
+    if (!raw.trim()) raw = '{卡密}'
+    else if (!needsCard(raw)) raw = raw.trim() + '\n{卡密}'
+  }
 
   switch (type) {
     case 'card':
+    case 'link_card':
     case 'text':
     case 'link': {
       // 纯文本类型：支持多轮拆分（若内容含分隔符则拆多条）

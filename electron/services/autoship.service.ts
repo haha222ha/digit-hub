@@ -17,6 +17,7 @@ import {
 } from './template.service'
 import { randomUUID } from 'crypto'
 import { encrypt } from '../utils/crypto'
+import type { PsyCloudService } from './psy-cloud.service'
 
 /** 阿奇锁商品笔记列表页（有 accessToken + _webmsxyw） */
 const ARK_GOODS_NOTE_LIST_URL = 'https://ark.xiaohongshu.com/app-note/note-list'
@@ -70,6 +71,7 @@ export class AutoShipService {
   private logger: LoggerService
   private mock: MockService
   private injectService: InjectService | null = null
+  private psyCloud: PsyCloudService | null = null
   private monitorInterval: NodeJS.Timeout | null = null
   private processedOrders: Set<string> = new Set()
   private isShipping = false
@@ -92,6 +94,10 @@ export class AutoShipService {
 
   setInjectService(inject: InjectService) {
     this.injectService = inject
+  }
+
+  setPsyCloud(svc: PsyCloudService) {
+    this.psyCloud = svc
   }
 
   bindWebContents(wc: WebContents) {
@@ -221,6 +227,11 @@ export class AutoShipService {
     }
     order.product_id = productId
 
+    // 探针订单同步到云端（自助领链接依赖）
+    if (this.psyCloud?.getToken()) {
+      void this.psyCloud.syncOrders([{ order_id: order.order_id, product_id: productId }])
+    }
+
     const shopId = (global as any).currentShopId || 'default'
 
     // 幂等拦截：数据库唯一索引兜底（对标阿奇锁 GetByTidAsync + IdNo 唯一索引）
@@ -323,6 +334,31 @@ export class AutoShipService {
     // 预检查：若任一消息需要卡密但卡密池为空，提前失败（避免半途才发现）
     let cardForOrder: string | null = null
     let cardConsumed = false
+    let cloudAllocatedUrl: string | null = null
+
+    // 链接卡密：先问云端幂等分配，避免与自助领取双花
+    const isLinkCard = String(binding.deliver_type || '') === 'link_card'
+    if (isLinkCard && this.psyCloud?.getToken()) {
+      const alloc = await this.psyCloud.allocateForOrder(order.order_id, order.product_id)
+      if (!alloc.success || !alloc.url) {
+        this.logger.error(`[AutoShip] 云端分配失败: ${order.order_id} ${alloc.message || ''}`)
+        this.storage.addShipLog({
+          shopId,
+          orderId: order.order_id,
+          status: 'cloud_allocate_fail',
+          errorMsg: alloc.message || '云端分配失败'
+        })
+        return false
+      }
+      cloudAllocatedUrl = alloc.url
+      cardForOrder = alloc.url
+      // 本地同 URL 标 used（没有则只走 order_delivery，不双扣）
+      const marked = this.storage.markCardUrlUsed(binding.id, alloc.url, order.order_id)
+      cardConsumed = marked
+      this.logger.info(
+        `[AutoShip] 云端分配 URL order=${order.order_id} already=${!!alloc.already} localMarked=${marked}`
+      )
+    }
 
     // 逐条发送（状态机 + 消息级追踪，对标阿奇锁 SetReplySending/Success/Fail）
     for (let i = 0; i < messages.length; i++) {
@@ -342,7 +378,7 @@ export class AutoShipService {
 
       // 若本条含 {card}，锁定卡密（三段式第一步）
       const needCard = needsCard(msg.rawContent)
-      if (needCard && !cardConsumed) {
+      if (needCard && !cardForOrder) {
         const card = this.storage.lockCard(binding.id, order.order_id, !!binding.random_mode)
         if (!card) {
           this.logger.error(`[AutoShip] 卡密池已空: bindingId=${binding.id}`)
@@ -352,6 +388,9 @@ export class AutoShipService {
         }
         cardForOrder = card
         cardConsumed = true
+      } else if (needCard && cloudAllocatedUrl && !cardConsumed) {
+        // 云端已分配但本地无同 URL：仍用云端 URL 发货，不 lock 本地另一张
+        cardForOrder = cloudAllocatedUrl
       }
 
       // 渲染模板（占位符替换 + {uid}/{ts} 动态参数）

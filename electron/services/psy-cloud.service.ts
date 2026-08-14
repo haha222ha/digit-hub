@@ -110,6 +110,9 @@ export class PsyCloudService {
     if (body && typeof body === 'object' && body.success === false) {
       throw new Error(String(body.message || '请求失败'))
     }
+    if (body && typeof body === 'object' && body.code != null && Number(body.code) !== 200) {
+      throw new Error(String(body.message || '请求失败'))
+    }
     return body
   }
 
@@ -245,5 +248,116 @@ export class PsyCloudService {
       added,
       message: `云端领取 ${urls.length} 条，本地新增 ${added} 条（去重跳过 ${urls.length - added}）`
     }
+  }
+
+  /** 同步商品→测题绑定到云端（自助领链接 / IM allocate 共用） */
+  async syncBindings(bindings: Array<{
+    product_id: string
+    test_code: string
+    product_name?: string
+    enabled?: boolean
+  }>): Promise<{ success: boolean; upserted?: number; message?: string }> {
+    if (!this.getToken()) return { success: false, message: '未配置心象测 Token' }
+    const rows = (bindings || [])
+      .map((b) => ({
+        product_id: String(b.product_id || '').trim(),
+        test_code: String(b.test_code || '').trim(),
+        product_name: String(b.product_name || '').trim(),
+        enabled: b.enabled !== false
+      }))
+      .filter((b) => b.product_id && b.test_code)
+    if (!rows.length) return { success: true, upserted: 0, message: '无绑定可同步' }
+    try {
+      const body = await this.request('/api/ship/bindings/sync', {
+        method: 'POST',
+        body: JSON.stringify({ bindings: rows })
+      })
+      const data = unwrapData(body)
+      return {
+        success: true,
+        upserted: Number(data?.upserted || 0),
+        message: body?.message
+      }
+    } catch (e: any) {
+      return { success: false, message: e?.message || '同步绑定失败' }
+    }
+  }
+
+  /** 从本地库推送全部 link_card 绑定 */
+  async syncBindingsFromLocal(shopId = 'default'): Promise<{ success: boolean; upserted?: number; message?: string }> {
+    const list = this.storage.getAllProductBindings(shopId) || []
+    const rows = list
+      .filter((b: any) => String(b.deliver_type || '') === 'link_card' && String(b.psy_test_code || '').trim())
+      .map((b: any) => ({
+        product_id: String(b.product_id || ''),
+        test_code: String(b.psy_test_code || ''),
+        product_name: String(b.product_name || ''),
+        enabled: Number(b.enabled) !== 0
+      }))
+    return this.syncBindings(rows)
+  }
+
+  async syncOrders(orders: Array<{ order_id: string; product_id?: string }>): Promise<{
+    success: boolean
+    upserted?: number
+    message?: string
+  }> {
+    if (!this.getToken()) return { success: false, message: '未配置心象测 Token' }
+    const rows = (orders || [])
+      .map((o) => ({
+        order_id: String(o.order_id || '').trim(),
+        product_id: String(o.product_id || '').trim()
+      }))
+      .filter((o) => o.order_id)
+    if (!rows.length) return { success: true, upserted: 0 }
+    try {
+      const body = await this.request('/api/ship/orders/sync', {
+        method: 'POST',
+        body: JSON.stringify({ orders: rows })
+      })
+      const data = unwrapData(body)
+      return { success: true, upserted: Number(data?.upserted || 0), message: body?.message }
+    } catch (e: any) {
+      this.logger.warn(`[PsyCloud] syncOrders 失败: ${e?.message || e}`)
+      return { success: false, message: e?.message || '同步订单失败' }
+    }
+  }
+
+  /** IM 发货：云端幂等分配测评 URL */
+  async allocateForOrder(orderId: string, productId?: string): Promise<{
+    success: boolean
+    url?: string
+    testCode?: string
+    already?: boolean
+    message?: string
+  }> {
+    const oid = String(orderId || '').trim()
+    if (!oid) return { success: false, message: '缺少订单号' }
+    if (!this.getToken()) return { success: false, message: '未配置心象测 Token' }
+    try {
+      const body = await this.request('/api/ship/allocate', {
+        method: 'POST',
+        body: JSON.stringify({
+          orderId: oid,
+          productId: String(productId || '').trim()
+        })
+      })
+      const data = unwrapData(body)
+      const url = String(data?.url || '').trim()
+      if (!url) return { success: false, message: body?.message || '未返回链接' }
+      return {
+        success: true,
+        url,
+        testCode: String(data?.test_code || data?.testCode || ''),
+        already: !!data?.already,
+        message: body?.message
+      }
+    } catch (e: any) {
+      return { success: false, message: e?.message || '云端分配失败' }
+    }
+  }
+
+  getOrderClaimUrl(): string {
+    return `${this.getBaseUrl()}/order-claim`
   }
 }

@@ -59,7 +59,33 @@
     })
   }
 
+  function isCaptchaVisible() {
+    const text = (document.body && document.body.innerText) || ''
+    if (/安全验证|请选择最符合描述|换一换/.test(text)) return true
+    if (document.querySelector('[class*="captcha"], [class*=" Captcha"], [id*="captcha"]')) return true
+    if (document.querySelector('iframe[src*="captcha"], iframe[src*="verify"], iframe[src*="geetest"], iframe[src*="punish"]')) {
+      return true
+    }
+    return false
+  }
+
+  function ensureCaptchaClickable() {
+    document.querySelectorAll('iframe').forEach((f) => {
+      const el = f
+      el.style.setProperty('pointer-events', 'auto', 'important')
+      el.style.setProperty('z-index', '2147483646', 'important')
+    })
+    document.querySelectorAll('[class*="captcha"], [class*="mask"], [class*="modal"], [class*="dialog"]').forEach((n) => {
+      if (!(n instanceof HTMLElement)) return
+      n.style.setProperty('pointer-events', 'auto', 'important')
+    })
+  }
+
   function hideSubLoginElements() {
+    if (isCaptchaVisible()) {
+      ensureCaptchaClickable()
+      return { ok: false, hasEmail: false, captcha: true }
+    }
     clickAccountTab()
     const emailInput = findEmailInput()
     if (emailInput) {
@@ -79,6 +105,10 @@
   }
 
   function enterLoginInfo(email, password) {
+    if (isCaptchaVisible()) {
+      ensureCaptchaClickable()
+      return { ok: false, reason: 'captcha', captcha: true }
+    }
     if (!email) return { ok: false, reason: 'no_email' }
     hideSubLoginElements()
 
@@ -98,6 +128,10 @@
   }
 
   function clickLoginButton() {
+    if (isCaptchaVisible()) {
+      ensureCaptchaClickable()
+      return { ok: false, reason: 'captcha', captcha: true }
+    }
     const btn =
       document.querySelector('.login-box button[type="submit"]') ||
       document.querySelector('.login-box .login-btn') ||
@@ -130,4 +164,11 @@
   window.__xhsLoginHelper.enterLoginInfo = enterLoginInfo
   window.__xhsLoginHelper.clickLoginButton = clickLoginButton
   window.__xhsLoginHelper.isDashboardRendered = isDashboardRendered
+  window.__xhsLoginHelper.isCaptchaVisible = isCaptchaVisible
+  window.__xhsLoginHelper.ensureCaptchaClickable = ensureCaptchaClickable
+
+  // 验证码出现时持续抬高层级，避免点不到
+  setInterval(function () {
+    if (isCaptchaVisible()) ensureCaptchaClickable()
+  }, 800)
 })()

@@ -104,6 +104,8 @@ export interface ElectronAPI {
     batchId?: string
   }>
   psyReleaseBatch(batchId: string): Promise<{ success: boolean; released?: number; message?: string }>
+  psySyncBindings(): Promise<{ success: boolean; upserted?: number; message?: string }>
+  psyOrderClaimUrl(): Promise<string>
   onPsyAuthUpdated(callback: (status: { configured: boolean; baseUrl: string; username: string; hasToken: boolean }) => void): () => void
 
   // 订单发卡管理

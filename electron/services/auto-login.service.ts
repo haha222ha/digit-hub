@@ -22,12 +22,14 @@ const KEY_COOKIES = [...AUTH_COOKIES, ...AUX_COOKIES]
 const SESSION_PARTITION = 'persist:main'
 const EVA_COOKIE_URL = 'https://walle.xiaohongshu.com/'
 
-/** 拒绝 undefined/null/过短/设备串，防止写出 walle-eva-auth=undefined!!… */
+/** 拒绝 undefined/null/过短/哨兵值/设备串，防止写出 walle-eva-auth=not_found!!… */
 export function isUsableAuthToken(v: unknown): boolean {
   const s = String(v ?? '').trim()
   if (!s || s.length < 16) return false
   if (/^(undefined|null|nan)$/i.test(s)) return false
+  if (/not[_-]?found/i.test(s)) return false
   if (/^a1:/i.test(s)) return false
+  if (/^(true|false|ok|error|fail)$/i.test(s)) return false
   return true
 }
 
@@ -78,22 +80,20 @@ export class AutoLoginService {
       url.includes('/login')
   }
 
-  private async navigateToLoginIfNeeded(webContents: WebContents, targetUrl: string): Promise<void> {
+  private async navigateToLoginIfNeeded(webContents: WebContents, _targetUrl: string): Promise<void> {
     const currentUrl = webContents.getURL()
-    if (
-      currentUrl.includes('/cstools/login') ||
-      currentUrl.includes('customer.xiaohongshu.com')
-    ) {
+    // 已在工作台：绝对禁止踢回登录（这是「好好的突然退出」主因）
+    if (this.isWorkbenchUrl(currentUrl) || (await this.isWorkbenchShellReady(webContents))) {
+      this.logger.warn(`[KefuAutoLogin] 已在工作台，拒绝跳登录页: ${currentUrl}`)
+      return
+    }
+    if (currentUrl.includes('/cstools/login') && !currentUrl.includes('customer.xiaohongshu.com')) {
       this.logger.info(`[KefuAutoLogin] 已在客服登录页: ${currentUrl}`)
       await this.waitForLoginForm(webContents, 12000)
       return
     }
-    const loginUrl =
-      targetUrl.includes('/cstools/login') || !targetUrl
-        ? XHS_LOGIN_URL
-        : buildSsoLoginUrl(targetUrl.includes('/login') ? XHS_DASHBOARD_URL : targetUrl)
-    this.logger.info(`[KefuAutoLogin] 跳转客服登录页: ${loginUrl}`)
-    await webContents.loadURL(loginUrl.includes('/cstools/login') ? XHS_LOGIN_URL : loginUrl)
+    this.logger.info(`[KefuAutoLogin] 跳转客服登录页: ${XHS_LOGIN_URL}`)
+    await webContents.loadURL(XHS_LOGIN_URL)
     await this.waitForLoginForm(webContents, 15000)
   }
 
@@ -224,7 +224,9 @@ export class AutoLoginService {
   }
 
   /**
-   * 严格登录检测 — P0：仅认 get_csa_info 成功，禁止 a1/webId + DOM 假成功
+   * 登录检测（对齐阿奇锁 / 千帆）：
+   * - SPA 近期 get_csa 业务成功 / 工作台壳已渲染 → 已登录
+   * - 裸 fetch get_csa 常因缺 x-s 签名 401，不能单独用来踢登录
    */
   async checkLoginStatus(webContents: WebContents): Promise<boolean> {
     try {
@@ -232,19 +234,38 @@ export class AutoLoginService {
       if (
         !url ||
         url === 'about:blank' ||
-        url.includes('/login') ||
+        url.includes('/cstools/login') ||
         url.includes('customer.xiaohongshu.com/login')
       ) {
         return false
       }
 
+      // 1) SPA 拦截器刚报过 get_csa success
+      if (this.lastCsaOkAt > 0 && Date.now() - this.lastCsaOkAt < 15 * 60 * 1000) {
+        if (this.isWorkbenchUrl(url) || (await this.isWorkbenchShellReady(webContents))) {
+          return true
+        }
+      }
+
+      // 2) 工作台壳已出（店名/会话区）—— 与「自动退出」对抗的核心
+      if (await this.isWorkbenchShellReady(webContents)) {
+        this.logger.info('[AutoLogin] 工作台壳已就绪，保持登录（不因裸 fetch 401 踢出）')
+        return true
+      }
+
+      // 3) 裸 API / soft SSO
       const apiCheck = await this.verifySessionViaApi(webContents)
       if (apiCheck.ok) {
-        // 登录成功后尽量把官方鉴权 Cookie 补齐
         await this.syncEvaAuthCookies(webContents)
         return true
       }
-      this.logger.warn('[AutoLogin] get_csa_info 未通过，判定未登录（禁止 DOM/a1 假成功）')
+
+      if (await this.hasSsoSessionCookies() || (await this.hasValidWalleEvaAuthCookie())) {
+        this.logger.info('[AutoLogin] 有 SSO/合法 eva-auth，保持登录')
+        return true
+      }
+
+      this.logger.warn('[AutoLogin] 无工作台壳且无鉴权 Cookie，判定未登录')
       return false
     } catch (error) {
       this.logger.error('[AutoLogin] 检测登录状态失败:', error)
@@ -315,7 +336,7 @@ export class AutoLoginService {
     }
   }
 
-  async clickLoginButton(webContents: WebContents): Promise<boolean> {
+  async clickLoginButton(webContents: WebContents): Promise<{ ok: boolean; captcha?: boolean; reason?: string }> {
     try {
       const result = await webContents.executeJavaScript(`
         (function() {
@@ -327,26 +348,83 @@ export class AutoLoginService {
           return { ok: false };
         })()
       `)
-      return !!result?.ok
+      return result || { ok: false }
+    } catch {
+      return { ok: false }
+    }
+  }
+
+  async isCaptchaVisible(webContents: WebContents): Promise<boolean> {
+    try {
+      return !!(await webContents.executeJavaScript(`
+        (function() {
+          if (window.__xhsLoginHelper && window.__xhsLoginHelper.isCaptchaVisible) {
+            return window.__xhsLoginHelper.isCaptchaVisible();
+          }
+          const t = (document.body && document.body.innerText) || '';
+          return /安全验证|请选择最符合描述/.test(t);
+        })()
+      `))
     } catch {
       return false
     }
   }
 
+  async ensureCaptchaClickable(webContents: WebContents): Promise<void> {
+    try {
+      await webContents.executeJavaScript(`
+        (function() {
+          if (window.__xhsLoginHelper && window.__xhsLoginHelper.ensureCaptchaClickable) {
+            window.__xhsLoginHelper.ensureCaptchaClickable();
+          }
+          document.querySelectorAll('iframe').forEach(function(f) {
+            f.style.setProperty('pointer-events', 'auto', 'important');
+            f.style.setProperty('z-index', '2147483646', 'important');
+          });
+          return true;
+        })()
+      `)
+      webContents.focus()
+    } catch {
+      // ignore
+    }
+  }
+
   /**
    * 对标官方千帆 setAutoLoginCookies：
-   * 从页面 localStorage / sessionStorage / cookie / window 取出 token，写入 walle-eva-auth
+   * 从页面 localStorage / sessionStorage / cookie / session 取出 token，写入 walle-eva-auth
    */
   async syncEvaAuthCookies(webContents: WebContents): Promise<boolean> {
     try {
       if (webContents.isDestroyed()) return false
+      // 先清页面里的 not_found 哨兵，避免再次写脏 Cookie
+      await webContents.executeJavaScript(`
+        (function() {
+          try {
+            ['auth-token','authToken','accessToken','access_token'].forEach(function(k) {
+              var v = localStorage.getItem(k);
+              if (v && /not[_-]?found|undefined|null/i.test(String(v))) localStorage.removeItem(k);
+            });
+          } catch (e) {}
+          return true;
+        })()
+      `).catch(() => null)
+
       const tokens = await webContents.executeJavaScript(`
         (function() {
+          function usable(v) {
+            var s = String(v == null ? '' : v).trim();
+            if (!s || s.length < 16) return false;
+            if (/^(undefined|null|nan)$/i.test(s)) return false;
+            if (/not[_-]?found/i.test(s)) return false;
+            if (/^a1:/i.test(s)) return false;
+            return true;
+          }
           function dig(obj, keys, depth) {
             if (!obj || depth > 4) return '';
             if (typeof obj === 'string') return '';
             for (const k of keys) {
-              if (obj[k] != null && String(obj[k]).length > 4) return String(obj[k]);
+              if (usable(obj[k])) return String(obj[k]);
             }
             for (const v of Object.values(obj)) {
               if (v && typeof v === 'object') {
@@ -370,16 +448,23 @@ export class AutoLoginService {
               if (k) ss[k] = sessionStorage.getItem(k) || '';
             }
           } catch (e) {}
-          const authKeys = ['auth-token','authToken','auth_token','token','Authorization'];
+          const authKeys = ['auth-token','authToken','auth_token'];
           const accessKeys = ['accessToken','access_token','access-token'];
           const userKeys = ['bUserId','b_user_id','userId','user_id','sellerId'];
-          let authToken = ls['auth-token'] || ls['authToken'] || ss['auth-token'] || ss['authToken'] || '';
-          let accessToken = ls['accessToken'] || ls['access_token'] || ss['accessToken'] || '';
-          let bUserId = ls['bUserId'] || ls['walle-eva-bUserId'] || ss['bUserId'] || '';
-          // 深挖 JSON 缓存
+          let authToken = '';
+          let accessToken = '';
+          let bUserId = '';
+          for (const bag of [ls, ss]) {
+            if (!authToken && usable(bag['auth-token'])) authToken = bag['auth-token'];
+            if (!authToken && usable(bag['authToken'])) authToken = bag['authToken'];
+            if (!accessToken && usable(bag['accessToken'])) accessToken = bag['accessToken'];
+            if (!accessToken && usable(bag['access_token'])) accessToken = bag['access_token'];
+            if (!bUserId && bag['bUserId']) bUserId = bag['bUserId'];
+            if (!bUserId && bag['walle-eva-bUserId']) bUserId = bag['walle-eva-bUserId'];
+          }
           for (const bag of [ls, ss]) {
             for (const [k, raw] of Object.entries(bag)) {
-              if (!raw || raw.length < 8 || raw[0] !== '{' && raw[0] !== '[') continue;
+              if (!raw || raw.length < 8 || (raw[0] !== '{' && raw[0] !== '[')) continue;
               try {
                 const j = JSON.parse(raw);
                 if (!authToken) authToken = dig(j, authKeys, 0);
@@ -392,9 +477,13 @@ export class AutoLoginService {
           const cookieAuth = m ? decodeURIComponent(m[1]) : '';
           const mb = document.cookie.match(/(?:^|;\\s*)walle-eva-bUserId=([^;]+)/);
           if (!bUserId && mb) bUserId = decodeURIComponent(mb[1]);
+          // 工作台是否已渲染（有店名/会话壳，不是登录表单）
+          const onWorkbench = /walle\\.xiaohongshu\\.com\\/cstools\\//.test(location.href)
+            && !/\\/login/.test(location.href)
+            && !document.querySelector('input[type="password"]');
           return {
-            authToken, accessToken, bUserId, cookieAuth,
-            lsKeys: Object.keys(ls).slice(0, 40)
+            authToken, accessToken, bUserId, cookieAuth, onWorkbench,
+            lsKeys: Object.keys(ls).slice(0, 50)
           };
         })()
       `)
@@ -411,28 +500,48 @@ export class AutoLoginService {
         }
       }
 
-      // 补充：从 Electron session 里的 SSO Cookie 抠（登录后常有 access-token-walle…）
-      if (!isUsableAuthToken(authToken) || !isUsableAuthToken(accessToken)) {
-        const sesCookies = await this.getSession().cookies.get({})
-        for (const c of sesCookies) {
-          const n = c.name || ''
-          const v = String(c.value || '')
-          if (!isUsableAuthToken(v)) continue
-          if (!isUsableAuthToken(accessToken) && /access-token/i.test(n)) accessToken = v
-          if (!isUsableAuthToken(authToken) && (/^auth-token/i.test(n) || n === 'auth-token')) authToken = v
-          if (!bUserId && /bUserId|user-id-walle/i.test(n)) bUserId = v
-          if (n === 'walle-eva-auth' && v.includes('!!')) {
-            const parts = v.split('!!')
-            if (!isUsableAuthToken(authToken) && isUsableAuthToken(parts[0])) authToken = parts[0]
-            if (!isUsableAuthToken(accessToken) && isUsableAuthToken(parts[1])) accessToken = parts[1]
-          }
+      // 补充：从 Electron session 里的 SSO / access-token-* Cookie 抠
+      const sesCookies = await this.getSession().cookies.get({})
+      for (const c of sesCookies) {
+        const n = c.name || ''
+        const v = String(c.value || '')
+        if (!isUsableAuthToken(v)) continue
+        if (!isUsableAuthToken(accessToken) && /access-token/i.test(n)) accessToken = v
+        if (!isUsableAuthToken(authToken) && (/^auth-token/i.test(n) || n === 'auth-token')) authToken = v
+        if (!bUserId && /bUserId|user-id-walle/i.test(n)) bUserId = v
+        if (n === 'walle-eva-auth' && v.includes('!!')) {
+          const parts = v.split('!!')
+          if (!isUsableAuthToken(authToken) && isUsableAuthToken(parts[0])) authToken = parts[0]
+          if (!isUsableAuthToken(accessToken) && isUsableAuthToken(parts[1])) accessToken = parts[1]
         }
+      }
+
+      // 若只有 access、没有独立 auth：禁止写成 AT!!AT（千帆要求两段真实 token，双写会污染会话导致自动退出）
+      if (!isUsableAuthToken(authToken) && isUsableAuthToken(accessToken)) {
+        const existing = await this.hasValidWalleEvaAuthCookie()
+        if (existing) {
+          this.logger.info('[AutoLogin] 缺独立 auth-token，保留已有合法 walle-eva-auth')
+          return true
+        }
+        this.logger.warn('[AutoLogin] 缺独立 auth-token，跳过写 Cookie（避免 AT!!AT 污染）')
+        return false
       }
 
       if (!isUsableAuthToken(authToken) || !isUsableAuthToken(accessToken)) {
         this.logger.warn(
           `[AutoLogin] 无可用 auth/access token，跳过写 walle-eva-auth；lsKeys=${(tokens?.lsKeys || []).join(',')}`
         )
+        return false
+      }
+
+      // 两段相同也视为不完整（常见于只抠到 access）
+      if (authToken === accessToken) {
+        const existing = await this.hasValidWalleEvaAuthCookie()
+        if (existing) {
+          this.logger.info('[AutoLogin] auth===access，保留已有合法 Cookie，不覆盖')
+          return true
+        }
+        this.logger.warn('[AutoLogin] auth===access 且无旧 Cookie，暂不写入')
         return false
       }
 
@@ -534,6 +643,26 @@ export class AutoLoginService {
     return true
   }
 
+  /** 仅删除脏 walle-eva-auth（含 not_found/undefined），不动其它 Cookie */
+  async purgePollutedEvaAuthCookies(): Promise<void> {
+    const ses = this.getSession()
+    const cookies = await ses.cookies.get({ name: 'walle-eva-auth' })
+    for (const c of cookies) {
+      const parts = String(c.value || '').split('!!')
+      const bad =
+        parts.length < 2 || !isUsableAuthToken(parts[0]) || !isUsableAuthToken(parts[1])
+      if (!bad) continue
+      try {
+        const url = `https://${String(c.domain || 'xiaohongshu.com').replace(/^\./, '')}${c.path || '/'}`
+        await ses.cookies.remove(url, c.name)
+        await ses.cookies.remove(EVA_COOKIE_URL, 'walle-eva-auth')
+        this.logger.warn(`[AutoLogin] 已删除脏 walle-eva-auth: ${String(c.value).slice(0, 40)}`)
+      } catch {
+        // ignore
+      }
+    }
+  }
+
   /** 启动时：清脏 walle-eva-auth；无 SSO 时清弱 Cookie */
   async clearWeakSessionCookies(): Promise<void> {
     const ses = this.getSession()
@@ -581,19 +710,23 @@ export class AutoLoginService {
     )
   }
 
-  /** 清除假成功落库的 Cookie 文件（无 SSO / 合法 eva-auth） */
+  /** 清除假成功落库的 Cookie 文件（无 SSO / 合法 eva-auth / access-token） */
   purgeInvalidStoredCookies(shopId: string): void {
     try {
       const encrypted = this.storage.getShopCookies(shopId)
       if (!encrypted) return
-      const cookies: Cookie[] = JSON.parse(decrypt(encrypted))
+      const parsed = JSON.parse(decrypt(encrypted))
+      const cookies: Cookie[] = Array.isArray(parsed) ? parsed : parsed?.cookies || []
       const names = new Set(cookies.map((c) => c.name))
       const hasSso = SSO_COOKIES.some((n) => names.has(n))
       const eva = cookies.find((c) => c.name === 'walle-eva-auth')
       const parts = String(eva?.value || '').split('!!')
       const hasGoodAuth =
         parts.length >= 2 && isUsableAuthToken(parts[0]) && isUsableAuthToken(parts[1])
-      if (!hasSso && !hasGoodAuth) {
+      const hasAccess = cookies.some(
+        (c) => /access-token/i.test(c.name || '') && isUsableAuthToken(c.value)
+      )
+      if (!hasSso && !hasGoodAuth && !hasAccess) {
         this.storage.saveShopCookies(shopId, '')
         this.logger.warn(`[AutoLogin] 已清除假成功 Cookie 存档 shopId=${shopId}`)
       }
@@ -602,21 +735,58 @@ export class AutoLoginService {
     }
   }
 
+  /** 页面已在客服工作台壳子（有店名/会话区），即使 get_csa 裸请求 401 也应允许保存保活 */
+  async isWorkbenchShellReady(webContents: WebContents): Promise<boolean> {
+    try {
+      if (webContents.isDestroyed()) return false
+      const url = webContents.getURL()
+      if (!this.isWorkbenchUrl(url)) return false
+      return !!(await webContents.executeJavaScript(`
+        (function() {
+          if (/\\/login/.test(location.href)) return false;
+          if (document.querySelector('input[type="password"]')) return false;
+          const text = (document.body && document.body.innerText) || '';
+          // 工作台特征：当前会话 / 店 / 离线|在线
+          return /当前会话|客服|工作台/.test(text) || text.length > 80;
+        })()
+      `))
+    } catch {
+      return false
+    }
+  }
+
+  async hasAccessTokenCookie(): Promise<boolean> {
+    const cookies = await this.getSession().cookies.get({})
+    return cookies.some(
+      (c) => /access-token/i.test(c.name || '') && isUsableAuthToken(c.value)
+    )
+  }
+
   async saveCookies(shopId: string, webContents?: WebContents): Promise<boolean> {
     try {
       if (!webContents) {
-        this.logger.warn('[AutoLogin] 保存 Cookie 必须带 webContents，且需 get_csa_info 成功')
+        this.logger.warn('[AutoLogin] 保存 Cookie 必须带 webContents')
         return false
       }
+
+      // 只删脏 walle-eva-auth，禁止在保存时清空整站 Cookie
+      await this.purgePollutedEvaAuthCookies()
       await this.syncEvaAuthCookies(webContents)
+
+      const shellOk = await this.isWorkbenchShellReady(webContents)
       const valid = await this.verifySessionViaApi(webContents)
-      if (!valid.ok) {
-        const hasSso = await this.hasSsoSessionCookies()
-        if (!hasSso) {
-          this.logger.warn('[AutoLogin] get_csa_info 失败且无 SSO Cookie，拒绝保存')
-          return false
-        }
-        this.logger.warn('[AutoLogin] get_csa_info 裸请求未通过，但已有 SSO Cookie，继续保存')
+      const hasSso = await this.hasSsoSessionCookies()
+      const hasGoodAuth = await this.hasValidWalleEvaAuthCookie()
+      const hasAccess = await this.hasAccessTokenCookie()
+
+      if (!valid.ok && !hasSso && !shellOk) {
+        this.logger.warn('[AutoLogin] get_csa 失败且不在工作台壳，拒绝保存')
+        return false
+      }
+      if (!valid.ok && shellOk) {
+        this.logger.warn(
+          '[AutoLogin] get_csa 裸请求未通过，但工作台壳已就绪，仍保存 Cookie 用于保活'
+        )
       } else if (valid.soft) {
         this.logger.info('[AutoLogin] soft-ok，继续保存 Cookie')
       }
@@ -627,18 +797,44 @@ export class AutoLoginService {
       )
 
       const names = new Set(xhsCookies.map((c) => c.name))
-      const hasSso = SSO_COOKIES.some((n) => names.has(n))
-      const hasGoodAuth = await this.hasValidWalleEvaAuthCookie()
-      if (!hasSso && !hasGoodAuth) {
+      if (!hasSso && !hasGoodAuth && !hasAccess && !shellOk) {
         this.logger.warn(
-          `[AutoLogin] Cookie 无 SSO/合法 walle-eva-auth，拒绝保存；现有=${[...names].join(',')}`
+          `[AutoLogin] 无可保活证据，拒绝保存；现有=${[...names].join(',')}`
         )
         return false
       }
 
-      const encrypted = encrypt(JSON.stringify(xhsCookies))
+      // 附带保存页面 localStorage 关键项，供下次注入
+      let lsSnapshot: Record<string, string> = {}
+      try {
+        lsSnapshot = (await webContents.executeJavaScript(`
+          (function() {
+            var out = {};
+            try {
+              ['auth-token','authToken','accessToken','access_token','bUserId','walle-eva-bUserId'].forEach(function(k) {
+                var v = localStorage.getItem(k);
+                if (v && !/not[_-]?found|undefined|null/i.test(v) && v.length >= 8) out[k] = v;
+              });
+            } catch (e) {}
+            return out;
+          })()
+        `)) as Record<string, string>
+      } catch {
+        lsSnapshot = {}
+      }
+
+      const encrypted = encrypt(
+        JSON.stringify({
+          cookies: xhsCookies,
+          localStorage: lsSnapshot,
+          savedAt: Date.now(),
+          pageUrl: webContents.getURL()
+        })
+      )
       this.storage.saveShopCookies(shopId, encrypted)
-      this.logger.info(`[AutoLogin] Cookie 已保存: shopId=${shopId}, count=${xhsCookies.length}`)
+      this.logger.info(
+        `[AutoLogin] Cookie 已保存: shopId=${shopId}, count=${xhsCookies.length}, ls=${Object.keys(lsSnapshot).join(',') || '-'}, shell=${shellOk}, sso=${hasSso}, auth=${hasGoodAuth}`
+      )
       return true
     } catch (error) {
       this.logger.error('[AutoLogin] 保存 Cookie 失败:', error)
@@ -654,15 +850,21 @@ export class AutoLoginService {
         return false
       }
 
-      const cookies: Cookie[] = JSON.parse(decrypt(encrypted))
+      const parsed = JSON.parse(decrypt(encrypted))
+      const cookies: Cookie[] = Array.isArray(parsed) ? parsed : parsed?.cookies || []
+      const lsSnapshot: Record<string, string> =
+        !Array.isArray(parsed) && parsed?.localStorage ? parsed.localStorage : {}
       const names = new Set(cookies.map((c) => c.name))
       const hasSso = SSO_COOKIES.some((n) => names.has(n))
       const eva = cookies.find((c) => c.name === 'walle-eva-auth')
       const parts = String(eva?.value || '').split('!!')
       const hasGoodAuth =
         parts.length >= 2 && isUsableAuthToken(parts[0]) && isUsableAuthToken(parts[1])
-      if (!hasSso && !hasGoodAuth) {
-        this.logger.warn('[AutoLogin] 存档 Cookie 无 SSO/合法 walle-eva-auth，丢弃并要求重新登录')
+      const hasAccess = cookies.some(
+        (c) => /access-token/i.test(c.name || '') && isUsableAuthToken(c.value)
+      )
+      if (!hasSso && !hasGoodAuth && !hasAccess && Object.keys(lsSnapshot).length === 0) {
+        this.logger.warn('[AutoLogin] 存档无可保活字段，丢弃并要求重新登录')
         this.storage.saveShopCookies(shopId, '')
         return false
       }
@@ -671,6 +873,11 @@ export class AutoLoginService {
 
       for (const cookie of cookies) {
         try {
+          // 跳过脏 walle-eva-auth
+          if (cookie.name === 'walle-eva-auth') {
+            const p = String(cookie.value || '').split('!!')
+            if (p.length < 2 || !isUsableAuthToken(p[0]) || !isUsableAuthToken(p[1])) continue
+          }
           const domain = (cookie.domain || '.xiaohongshu.com').replace(/^\./, '')
           const secure = cookie.secure !== false
           await ses.cookies.set({
@@ -691,11 +898,39 @@ export class AutoLoginService {
         }
       }
 
-      this.logger.info(`[AutoLogin] Cookie 已注入: shopId=${shopId}, count=${cookies.length}`)
+      // localStorage 在页面加载后由 inject 写入；先挂到 global 供 did-finish-load 使用
+      ;(global as any).__xhsPendingLsSnapshot = lsSnapshot
+
+      this.logger.info(
+        `[AutoLogin] Cookie 已注入: shopId=${shopId}, count=${cookies.length}, ls=${Object.keys(lsSnapshot).length}`
+      )
       return true
     } catch (error) {
       this.logger.error('[AutoLogin] 加载 Cookie 失败:', error)
       return false
+    }
+  }
+
+  /** 页面加载后把存档的 localStorage 写回（配合 loadAndInjectCookies） */
+  async applyPendingLocalStorage(webContents: WebContents): Promise<void> {
+    const snap = (global as any).__xhsPendingLsSnapshot as Record<string, string> | undefined
+    if (!snap || !Object.keys(snap).length || webContents.isDestroyed()) return
+    try {
+      await webContents.executeJavaScript(`
+        (function(data) {
+          try {
+            Object.keys(data || {}).forEach(function(k) {
+              if (data[k] && !/not[_-]?found|undefined|null/i.test(data[k])) {
+                localStorage.setItem(k, data[k]);
+              }
+            });
+          } catch (e) {}
+          return true;
+        })(${JSON.stringify(snap)})
+      `)
+      this.logger.info(`[AutoLogin] 已写回 localStorage: ${Object.keys(snap).join(',')}`)
+    } catch (e) {
+      this.logger.warn(`[AutoLogin] 写回 localStorage 失败: ${e}`)
     }
   }
 
@@ -748,6 +983,16 @@ export class AutoLoginService {
 
       const creds = this.getCredentials(shopId)
       if (!creds) {
+        // 对齐阿奇锁：已在工作台则保活，绝不因「没存邮箱密码」踢回登录
+        if (
+          this.isWorkbenchUrl(webContents.getURL()) ||
+          (await this.isWorkbenchShellReady(webContents)) ||
+          (this.lastCsaOkAt > 0 && Date.now() - this.lastCsaOkAt < 15 * 60 * 1000)
+        ) {
+          this.logger.warn('[SubLogin] 账号密码为空，但会话仍有效，保持工作台不跳登录')
+          await this.saveCookies(shopId, webContents)
+          return true
+        }
         this.logger.warn('[SubLogin] 账号密码为空，回退为子账号手动登录')
         await this.navigateToLoginIfNeeded(webContents, targetUrl)
         return false
@@ -778,13 +1023,27 @@ export class AutoLoginService {
       await this.delay(500)
       await this.clickLoginButton(webContents)
 
-      // 3) 等待跳转出 login + ServiceTicket 生效
+      let captchaNotified = false
+      // 3) 等待跳转出 login；若出验证码则拉长等待并禁止再点登录
       const afterLoginTarget =
         targetUrl.includes('/cstools/login') ? XHS_DASHBOARD_URL : (targetUrl || XHS_DASHBOARD_URL)
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 90; i++) {
         await this.delay(1000)
         const currentUrl = webContents.getURL()
-        this.logger.info(`[KefuAutoLogin] 等待登录跳转 ${i + 1}/30: ${currentUrl}`)
+        const captcha = await this.isCaptchaVisible(webContents)
+        if (captcha) {
+          if (!captchaNotified) {
+            captchaNotified = true
+            this.logger.warn('[KefuAutoLogin] 检测到安全验证，请在弹出窗口中手动点选')
+            const openAssist = (global as any).openLoginAssistWindow as
+              | ((reason?: string) => Promise<unknown>)
+              | undefined
+            if (openAssist) await openAssist('captcha')
+          }
+          if (i % 5 === 0) await this.ensureCaptchaClickable(webContents)
+          continue
+        }
+        this.logger.info(`[KefuAutoLogin] 等待登录跳转 ${i + 1}/90: ${currentUrl}`)
 
         if (currentUrl.includes('walle.xiaohongshu.com') && !currentUrl.includes('/login')) {
           if (await this.checkLoginStatus(webContents)) {
@@ -844,15 +1103,20 @@ export class AutoLoginService {
       if (this.isOnLoginPage(url)) {
         return
       }
-      // get_csa_info 裸请求常 401（缺签名），禁止因此踢回登录——会冲掉已渲染的会话列表
-      if (this.isWorkbenchUrl(url) || (await this.hasSsoSessionCookies())) {
+      // 对齐阿奇锁 HandleServiceTicket：失败时若仍在工作台则保活，禁止踢登录
+      if (
+        this.isWorkbenchUrl(url) ||
+        (await this.isWorkbenchShellReady(webContents)) ||
+        (await this.hasSsoSessionCookies()) ||
+        (await this.hasValidWalleEvaAuthCookie()) ||
+        (this.lastCsaOkAt > 0 && Date.now() - this.lastCsaOkAt < 15 * 60 * 1000)
+      ) {
         this.logger.warn(
-          '[KefuAutoLogin] ServiceTicket/get_csa 业务未成功，但已在工作台或有 SSO Cookie，不重登录'
+          '[KefuAutoLogin] ServiceTicket/get_csa 业务未成功，但会话仍有效，不重登录'
         )
         return
       }
-      this.logger.warn('[KefuAutoLogin] ServiceTicket 响应失败且无会话，触发重登录')
-      await this.tryAutoLoginIfNeeded(shopId, webContents, XHS_DASHBOARD_URL)
+      this.logger.warn('[KefuAutoLogin] ServiceTicket 响应失败且无会话，仅提示需登录（不强制刷页）')
       return
     }
     this.logger.info('[KefuAutoLogin] HandleServiceTicketResponseAsync 成功')
@@ -860,9 +1124,14 @@ export class AutoLoginService {
   }
 
   async checkAndRefreshCookie(shopId: string, webContents: WebContents, dashboardUrl: string): Promise<void> {
+    // 工作台壳在就续期/保存，绝不因裸 fetch 401 跳登录
+    if (await this.isWorkbenchShellReady(webContents)) {
+      await this.saveCookies(shopId, webContents)
+      return
+    }
     const valid = await this.checkLoginStatus(webContents)
     if (!valid) {
-      this.logger.warn('[KefuBrowser] Cookie 过期，队列已熔断，尝试自动登录')
+      this.logger.warn('[KefuBrowser] 会话失效，尝试自动恢复（有凭证才填表；无凭证不踢页）')
       await this.tryAutoLoginIfNeeded(shopId, webContents, dashboardUrl)
       return
     }

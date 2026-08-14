@@ -78,6 +78,19 @@
           style="margin-bottom: 16px"
         />
 
+        <el-form-item label="买家领链接">
+          <el-input v-model="orderClaimUrl" readonly style="width: 360px; margin-right: 8px" />
+          <el-button @click="copyOrderClaimUrl">复制到千帆发货栏</el-button>
+          <el-button @click="syncPsyBindings">同步商品绑定到云端</el-button>
+        </el-form-item>
+        <el-alert
+          type="success"
+          :closable="false"
+          show-icon
+          title="千帆发货/官网填写上方固定地址；买家输入订单号即可领取测评链接（与 IM 自动发卡同一条，不双花）。"
+          style="margin-bottom: 16px"
+        />
+
         <el-divider content-position="left">子账号管理</el-divider>
 
         <el-form-item label="添加子账号">
@@ -143,6 +156,7 @@ const logs = ref<string[]>([])
 const psyBusy = ref(false)
 const psyStatus = ref({ configured: false, baseUrl: 'https://psy.xhs365.cn', username: '', hasToken: false })
 const psyForm = ref({ baseUrl: 'https://psy.xhs365.cn', username: '', password: '', token: '' })
+const orderClaimUrl = ref('https://psy.xhs365.cn/order-claim')
 
 const saveSetting = async (key: string, value: unknown) => {
   if (window.electronAPI) {
@@ -157,6 +171,34 @@ const refreshPsyStatus = async () => {
   psyStatus.value = st
   psyForm.value.baseUrl = st.baseUrl || 'https://psy.xhs365.cn'
   if (st.username) psyForm.value.username = st.username
+  if (window.electronAPI.psyOrderClaimUrl) {
+    orderClaimUrl.value = (await window.electronAPI.psyOrderClaimUrl()) || orderClaimUrl.value
+  } else {
+    orderClaimUrl.value = `${(st.baseUrl || 'https://psy.xhs365.cn').replace(/\/+$/, '')}/order-claim`
+  }
+}
+
+const copyOrderClaimUrl = async () => {
+  const url = orderClaimUrl.value
+  try {
+    await navigator.clipboard.writeText(url)
+    ElMessage.success('已复制固定领链接地址')
+  } catch {
+    ElMessage.info(url)
+  }
+}
+
+const syncPsyBindings = async () => {
+  if (!window.electronAPI?.psySyncBindings) {
+    ElMessage.warning('当前版本不支持同步绑定')
+    return
+  }
+  const res = await window.electronAPI.psySyncBindings()
+  if (res.success) {
+    ElMessage.success(res.message || `已同步 ${res.upserted || 0} 条绑定`)
+  } else {
+    ElMessage.error(res.message || '同步失败')
+  }
 }
 
 const savePsyLogin = async () => {
@@ -197,6 +239,7 @@ const savePsyTokenOnly = async () => {
   ElMessage.success('已保存心象测对接配置')
   psyForm.value.token = ''
   await refreshPsyStatus()
+  void syncPsyBindings()
 }
 
 const clearPsyAuth = async () => {

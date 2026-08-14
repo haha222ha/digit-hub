@@ -40,8 +40,9 @@
       const authToken = payload.authToken || payload.auth_token || payload['auth-token'] || '';
       const accessToken = payload.accessToken || payload.access_token || payload['access-token'] || '';
       const bUserId = payload.bUserId || payload.b_user_id || payload.userId || payload.sellerId || '';
-      // 禁止写 undefined!!… —— Eva 读到后全站 API 401 并弹「登录认证已过期」且清 Cookie
       if (!ok(authToken) || !ok(accessToken)) return false;
+      // 禁止写 not_found 哨兵
+      if (/not[_-]?found/i.test(String(authToken)) || /not[_-]?found/i.test(String(accessToken))) return false;
       localStorage.setItem('auth-token', String(authToken));
       localStorage.setItem('accessToken', String(accessToken));
       if (bUserId) localStorage.setItem('bUserId', String(bUserId));

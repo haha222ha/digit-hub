@@ -30,7 +30,7 @@ const menuItems = [
   { path: '/dashboard', title: '仪表盘', icon: HomeFilled },
   { path: '/shipping', title: '发货管理', icon: Goods },
   { path: '/auto-reply', title: '自动回复', icon: ChatDotRound },
-  { path: '/browser', title: '小红书后台', icon: Monitor },
+  { path: '/browser', title: '客服工作台', icon: Monitor },
   { path: '/license', title: '授权管理', icon: Key },
   { path: '/settings', title: '系统设置', icon: Setting }
 ]
