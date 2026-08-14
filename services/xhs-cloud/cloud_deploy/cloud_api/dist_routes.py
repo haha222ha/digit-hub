@@ -121,6 +121,25 @@ class LinksExportBody(BaseModel):
     sort_order: str | None = None
 
 
+class FakaClaimBody(BaseModel):
+    testCode: str = ""
+    test_code: str = ""
+    count: int = Field(default=1, ge=1, le=200)
+    clientId: str = ""
+    client_id: str = ""
+    productId: str = ""
+    product_id: str = ""
+    shopId: str = ""
+    shop_id: str = ""
+
+
+class FakaReleaseBody(BaseModel):
+    batchId: str = ""
+    batch_id: str = ""
+    linkIds: list[int] | None = None
+    link_ids: list[int] | None = None
+
+
 class UnlimitedStartBody(BaseModel):
     testCode: str
 
@@ -529,11 +548,14 @@ def compat_links_list(
     sort_by: str = "",
     sortOrder: str = "",
     sort_order: str = "",
+    fakaClaimed: str = "",
+    faka_claimed: str = "",
 ):
     user = _dist_token(request)
     pp = int(perPage or per_page or 20)
     pg = int(page or 1)
     tc = (testCode or test_code or "").strip() or None
+    fc = (fakaClaimed or faka_claimed or "").strip() or None
     data = dist_db.list_links_page(
         user["id"],
         status=(status or "").strip() or None,
@@ -542,6 +564,7 @@ def compat_links_list(
         end_date=(endDate or end_date or "").strip() or None,
         sort_by=(sortBy or sort_by or "").strip() or None,
         sort_order=(sortOrder or sort_order or "").strip() or None,
+        faka_claimed=fc,
         page=pg,
         per_page=pp,
     )
@@ -558,6 +581,46 @@ def compat_links_list(
         },
         "获取链接列表成功",
     )
+
+
+@compat_router.get("/api/faka/inventory")
+def compat_faka_inventory(request: Request, testCode: str = "", test_code: str = ""):
+    user = _dist_token(request)
+    tc = (testCode or test_code or "").strip() or None
+    data = dist_db.faka_inventory(user["id"], test_code=tc)
+    return _ok(data, "ok")
+
+
+@compat_router.post("/api/faka/claim-links")
+def compat_faka_claim_links(body: FakaClaimBody, request: Request):
+    user = _dist_token(request)
+    tc = _pick_code(body.testCode, body.test_code)
+    try:
+        out = dist_db.claim_links_for_faka(
+            user["id"],
+            test_code=tc,
+            count=int(body.count or 1),
+            client_id=_pick_code(body.clientId, body.client_id),
+            product_id=_pick_code(body.productId, body.product_id),
+            shop_id=_pick_code(body.shopId, body.shop_id),
+        )
+        claimed = int(out.get("claimed") or 0)
+        msg = f"已领取 {claimed} 条链接" if claimed else "无可领取链接（请先在心象测生成，或已全部进发卡池）"
+        return _ok(out, msg)
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@compat_router.post("/api/faka/release-links")
+def compat_faka_release_links(body: FakaReleaseBody, request: Request):
+    user = _dist_token(request)
+    batch = _pick_code(body.batchId, body.batch_id)
+    ids = list(body.linkIds or body.link_ids or [])
+    try:
+        out = dist_db.release_links_for_faka(user["id"], batch_id=batch, link_ids=ids)
+        return _ok(out, f"已释放 {out.get('released') or 0} 条")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
 
 
 @compat_router.post("/api/links/export")

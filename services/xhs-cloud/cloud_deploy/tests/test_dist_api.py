@@ -195,6 +195,32 @@ class DistApiTest(unittest.TestCase):
         self.assertIn("tests_catalog", stats)
         self.assertIn("links_total", stats)
 
+    def test_faka_claim_no_reuse(self):
+        profile = db.register_user_account("fakauser1", "pass123456")
+        uid = int(profile["id"])
+        dist_db.ensure_distributor(uid, default_quota=20)
+        svc.generate_links(uid, "7v7", 5)
+        inv0 = dist_db.faka_inventory(uid, test_code="7v7")
+        self.assertEqual(inv0["unclaimed_unused"], 5)
+        first = dist_db.claim_links_for_faka(uid, test_code="7v7", count=3, client_id="pc-1")
+        self.assertEqual(first["claimed"], 3)
+        self.assertEqual(len(first["links"]), 3)
+        self.assertTrue(all(x.get("url", "").startswith("https://") for x in first["links"]))
+        self.assertEqual(first["remaining_unclaimed"], 2)
+        tokens = {x["token"] for x in first["links"]}
+        second = dist_db.claim_links_for_faka(uid, test_code="7v7", count=10, client_id="pc-2")
+        self.assertEqual(second["claimed"], 2)
+        self.assertTrue(tokens.isdisjoint({x["token"] for x in second["links"]}))
+        third = dist_db.claim_links_for_faka(uid, test_code="7v7", count=1)
+        self.assertEqual(third["claimed"], 0)
+        listed = dist_db.list_links_page(uid, test_code="7v7", faka_claimed="1", page=1, per_page=50)
+        self.assertEqual(listed["total"], 5)
+        # release batch then reclaim
+        rel = dist_db.release_links_for_faka(uid, batch_id=first["batchId"])
+        self.assertEqual(rel["released"], 3)
+        again = dist_db.claim_links_for_faka(uid, test_code="7v7", count=2)
+        self.assertEqual(again["claimed"], 2)
+
 
 if __name__ == "__main__":
     unittest.main()

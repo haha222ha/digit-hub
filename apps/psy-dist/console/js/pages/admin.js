@@ -624,6 +624,12 @@ export async function renderLinks(root) {
   for (const n of [20, 50, 100]) {
     perPageSel.append(el("option", { value: String(n), text: `${n}/页` }));
   }
+  const fakaSel = el("select");
+  fakaSel.append(
+    el("option", { value: "", text: "发卡领取·全部" }),
+    el("option", { value: "0", text: "未进发卡池" }),
+    el("option", { value: "1", text: "已进发卡池" })
+  );
   const startDate = el("input", { type: "date" });
   const endDate = el("input", { type: "date" });
   const sortSel = el("select");
@@ -645,6 +651,7 @@ export async function renderLinks(root) {
   filterBar.append(
     el("div", { className: "field", style: "margin:0;min-width:140px" }, [el("label", { text: "状态" }), statusSel]),
     el("div", { className: "field", style: "margin:0;min-width:180px" }, [el("label", { text: "测题" }), testSel]),
+    el("div", { className: "field", style: "margin:0;min-width:150px" }, [el("label", { text: "发卡领取" }), fakaSel]),
     el("div", { className: "field", style: "margin:0;min-width:130px" }, [el("label", { text: "开始日期" }), startDate]),
     el("div", { className: "field", style: "margin:0;min-width:130px" }, [el("label", { text: "结束日期" }), endDate]),
     el("div", { className: "field", style: "margin:0;min-width:140px" }, [el("label", { text: "排序" }), sortSel]),
@@ -657,7 +664,7 @@ export async function renderLinks(root) {
       el("h1", { className: "page-title", text: "链接管理" }),
       el("p", {
         className: "page-lead",
-        text: "勾选后「复制所选 / 导出发卡 TXT」= 每行一条完整链接，可直接导入发卡网。对账表另含状态，勿当发卡导入。",
+        text: "勾选后「复制所选 / 导出发卡 TXT」= 每行一条完整链接。云端「已进发卡」表示已被发货助手领取，不会重复导入。误领可「释放回池」。",
       }),
       filterBar,
       host,
@@ -673,6 +680,7 @@ export async function renderLinks(root) {
     return {
       status: statusSel.value || undefined,
       testCode: testSel.value || undefined,
+      fakaClaimed: fakaSel.value || undefined,
       startDate: startDate.value || undefined,
       endDate: endDate.value || undefined,
       sortBy,
@@ -805,7 +813,28 @@ export async function renderLinks(root) {
           alert(e.message || "批量撤销失败");
         }
       });
-      bulk.append(copySelBtn, exportFakaBtn, copyPageBtn, batchRevokeBtn, fakaHint);
+      const releaseSelBtn = el("button", {
+        className: "btn btn-ghost",
+        type: "button",
+        text: "释放回池（误领）",
+        title: "仅释放已进发卡且未开测的链接，可再次被发货助手领取",
+      });
+      releaseSelBtn.addEventListener("click", async () => {
+        const ids = [...selected];
+        if (!ids.length) {
+          showToast("请先勾选要释放的链接", "error");
+          return;
+        }
+        if (!confirm(`确定将选中的 ${ids.length} 条从发卡池释放？仅未开测的会生效。`)) return;
+        try {
+          const out = await api.fakaReleaseLinks({ linkIds: ids });
+          showToast(`已释放 ${out.released || 0} 条`);
+          await reload();
+        } catch (e) {
+          alert(e.message || "释放失败");
+        }
+      });
+      bulk.append(copySelBtn, exportFakaBtn, copyPageBtn, batchRevokeBtn, releaseSelBtn, fakaHint);
       host.append(bulk);
 
       const checkAll = el("input", { type: "checkbox" });
@@ -827,6 +856,7 @@ export async function renderLinks(root) {
             el("th", { text: "已用 / 剩余" }),
             el("th", { text: "有效期" }),
             el("th", { text: "状态" }),
+            el("th", { text: "发卡" }),
             el("th", { text: "操作" }),
           ]),
         ])
@@ -847,6 +877,10 @@ export async function renderLinks(root) {
         const usesClass = remain <= 0 ? "tag tag-warn" : remain === 1 ? "tag tag-warn" : "tag tag-ok";
         const cd = formatLinkCountdown(link);
         const cdClass = cd.tone === "warn" ? "tag tag-warn" : cd.tone === "ok" ? "tag tag-ok" : "tag";
+        const fakaClaimed = !!(link.faka_claimed || link.fakaClaimed || link.faka_claimed_at || link.fakaClaimedAt);
+        const fakaTag = fakaClaimed
+          ? el("span", { className: "tag tag-warn", text: "已进发卡" })
+          : el("span", { className: "tag tag-ok", text: "未进发卡" });
         const cb = el("input", { type: "checkbox" });
         if (link.id) cb.setAttribute("data-link-id", String(link.id));
         if (status === "revoked") cb.disabled = true;
@@ -870,6 +904,12 @@ export async function renderLinks(root) {
                 el("dd", { text: url }),
                 el("dt", { text: "状态" }),
                 el("dd", { text: statusLabel }),
+                el("dt", { text: "发卡领取" }),
+                el("dd", {
+                  text: fakaClaimed
+                    ? `已进发卡 · ${link.faka_claimed_at || link.fakaClaimedAt || ""} · batch ${link.faka_claim_batch || link.fakaClaimBatch || "—"}`
+                    : "未进发卡池",
+                }),
                 el("dt", { text: "已用 / 剩余" }),
                 el("dd", { text: `${used} / 剩 ${remain}（上限 ${maxUses}）` }),
                 el("dt", { text: "有效期" }),
@@ -926,6 +966,7 @@ export async function renderLinks(root) {
               ]),
             ]),
             el("td", {}, [el("span", { className: `tag ${tagClass}`, text: statusLabel })]),
+            el("td", {}, [fakaTag]),
             el("td", {}, [actions]),
           ])
         );

@@ -131,11 +131,23 @@ export const api = {
     if (params.endDate || params.end_date) q.set("endDate", params.endDate || params.end_date);
     if (params.sortBy || params.sort_by) q.set("sortBy", params.sortBy || params.sort_by);
     if (params.sortOrder || params.sort_order) q.set("sortOrder", params.sortOrder || params.sort_order);
+    if (params.fakaClaimed != null && params.fakaClaimed !== "")
+      q.set("fakaClaimed", String(params.fakaClaimed));
     if (params.page) q.set("page", String(params.page));
     if (params.perPage || params.per_page) q.set("perPage", String(params.perPage || params.per_page));
     const s = q.toString();
     return request(`/api/links/list${s ? `?${s}` : ""}`, { auth: true });
   },
+  fakaInventory: (testCode) => {
+    const q = testCode ? `?testCode=${encodeURIComponent(testCode)}` : "";
+    return request(`/api/faka/inventory${q}`, { auth: true });
+  },
+  fakaReleaseLinks: (payload = {}) =>
+    request("/api/faka/release-links", {
+      method: "POST",
+      auth: true,
+      body: payload,
+    }),
   revokeLink: (linkId) =>
     request("/api/links/revoke", {
       method: "POST",

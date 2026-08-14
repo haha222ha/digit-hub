@@ -6,6 +6,7 @@ import json
 import os
 import secrets
 import sqlite3
+import uuid
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -215,6 +216,10 @@ def _migrate_dist_schema() -> None:
             created_at TEXT NOT NULL
         )""",
         "ALTER TABLE dist_links ADD COLUMN first_used_at TEXT",
+        "ALTER TABLE dist_links ADD COLUMN faka_claimed_at TEXT",
+        "ALTER TABLE dist_links ADD COLUMN faka_claim_batch TEXT",
+        "ALTER TABLE dist_links ADD COLUMN faka_claim_meta TEXT",
+        "CREATE INDEX IF NOT EXISTS idx_dist_links_faka_claim ON dist_links(user_id, test_code, status, faka_claimed_at)",
         "ALTER TABLE dist_unlimited_sessions ADD COLUMN expires_at TEXT",
         "ALTER TABLE dist_test_overrides ADD COLUMN show_on_homepage INTEGER NOT NULL DEFAULT 1",
     ]
@@ -222,6 +227,10 @@ def _migrate_dist_schema() -> None:
         "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS inviter_user_id INTEGER",
         "ALTER TABLE dist_distributors ADD COLUMN IF NOT EXISTS detailed_tutorial_access BOOLEAN NOT NULL DEFAULT FALSE",
         "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS first_used_at TIMESTAMP",
+        "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS faka_claimed_at TIMESTAMP",
+        "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS faka_claim_batch TEXT",
+        "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS faka_claim_meta TEXT",
+        "CREATE INDEX IF NOT EXISTS idx_dist_links_faka_claim ON dist_links(user_id, test_code, status, faka_claimed_at)",
         "ALTER TABLE dist_unlimited_sessions ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP",
         "ALTER TABLE dist_test_overrides ADD COLUMN IF NOT EXISTS show_on_homepage BOOLEAN NOT NULL DEFAULT TRUE",
         """CREATE TABLE IF NOT EXISTS dist_announcements (
@@ -957,8 +966,10 @@ def _map_link(row: dict | None) -> dict:
     expires_at = _fmt_ts(row.get("expires_at"))
     first_used_at = _fmt_ts(row.get("first_used_at"))
     created_at = _fmt_ts(row.get("created_at")) or row.get("created_at")
+    faka_claimed_at = _fmt_ts(row.get("faka_claimed_at"))
     used_count = int(row.get("used_count") or 0)
     max_uses = int(row.get("max_uses") or 3)
+    faka_claimed = bool(faka_claimed_at)
     out = {
         "id": row.get("id"),
         "token": row.get("token"),
@@ -970,13 +981,284 @@ def _map_link(row: dict | None) -> dict:
         "expires_at": expires_at,
         "first_used_at": first_used_at,
         "created_at": created_at,
+        "faka_claimed_at": faka_claimed_at,
+        "faka_claim_batch": row.get("faka_claim_batch") or "",
+        "faka_claim_meta": row.get("faka_claim_meta") or "",
+        "faka_claimed": faka_claimed,
         # SDK / 源站兼容字段
         "usedCount": used_count,
         "maxUses": max_uses,
         "expiresAt": expires_at,
         "firstUsedAt": first_used_at,
+        "fakaClaimed": faka_claimed,
+        "fakaClaimedAt": faka_claimed_at,
+        "fakaClaimBatch": row.get("faka_claim_batch") or "",
     }
     return out
+
+
+def public_link_origin() -> str:
+    origin = (os.environ.get("PSY_PUBLIC_ORIGIN") or os.environ.get("XHS_PSY_PUBLIC_ORIGIN") or "").strip()
+    if origin:
+        return origin.rstrip("/")
+    return "https://psy.xhs365.cn"
+
+
+def link_public_url(test_code: str, token: str, *, origin: str | None = None) -> str:
+    base = (origin or public_link_origin()).rstrip("/")
+    code = (test_code or "").strip()
+    tok = (token or "").strip()
+    return f"{base}/test/{code}/{tok}"
+
+
+def faka_inventory(user_id: int, *, test_code: str | None = None) -> dict:
+    """发卡库存计数：未领取未开测 / 已领取未开测 / 已开测。"""
+    init_dist_tables()
+    uid = int(user_id)
+    tc = (test_code or "").strip() or None
+    where = ["user_id=%s" if _USE_PG else "user_id=?"]
+    params: list[Any] = [uid]
+    if tc:
+        where.append("test_code=%s" if _USE_PG else "test_code=?")
+        params.append(tc)
+    wh = " AND ".join(where)
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute(
+            f"""SELECT
+                  COUNT(*) FILTER (WHERE status='unused' AND faka_claimed_at IS NULL AND first_used_at IS NULL AND COALESCE(used_count,0)=0) AS unclaimed_unused,
+                  COUNT(*) FILTER (WHERE status='unused' AND faka_claimed_at IS NOT NULL AND first_used_at IS NULL AND COALESCE(used_count,0)=0) AS claimed_unused,
+                  COUNT(*) FILTER (WHERE status='used' OR first_used_at IS NOT NULL OR COALESCE(used_count,0)>0) AS used_count,
+                  COUNT(*) FILTER (WHERE status='revoked') AS revoked_count,
+                  COUNT(*) FILTER (WHERE status='expired') AS expired_count,
+                  COUNT(*) AS total
+                FROM dist_links WHERE {wh}""",
+            tuple(params),
+        )
+        row = _row_dict(c.fetchone()) or {}
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            f"""SELECT
+                  SUM(CASE WHEN status='unused' AND (faka_claimed_at IS NULL OR faka_claimed_at='') AND (first_used_at IS NULL OR first_used_at='') AND COALESCE(used_count,0)=0 THEN 1 ELSE 0 END) AS unclaimed_unused,
+                  SUM(CASE WHEN status='unused' AND faka_claimed_at IS NOT NULL AND faka_claimed_at!='' AND (first_used_at IS NULL OR first_used_at='') AND COALESCE(used_count,0)=0 THEN 1 ELSE 0 END) AS claimed_unused,
+                  SUM(CASE WHEN status='used' OR (first_used_at IS NOT NULL AND first_used_at!='') OR COALESCE(used_count,0)>0 THEN 1 ELSE 0 END) AS used_count,
+                  SUM(CASE WHEN status='revoked' THEN 1 ELSE 0 END) AS revoked_count,
+                  SUM(CASE WHEN status='expired' THEN 1 ELSE 0 END) AS expired_count,
+                  COUNT(*) AS total
+                FROM dist_links WHERE {wh}""",
+            tuple(params),
+        )
+        row = _row_dict(c.fetchone()) or {}
+        conn.close()
+    return {
+        "test_code": tc or "",
+        "unclaimed_unused": int(row.get("unclaimed_unused") or 0),
+        "claimed_unused": int(row.get("claimed_unused") or 0),
+        "used": int(row.get("used_count") or 0),
+        "revoked": int(row.get("revoked_count") or 0),
+        "expired": int(row.get("expired_count") or 0),
+        "total": int(row.get("total") or 0),
+    }
+
+
+def claim_links_for_faka(
+    user_id: int,
+    *,
+    test_code: str,
+    count: int = 1,
+    client_id: str = "",
+    product_id: str = "",
+    shop_id: str = "",
+) -> dict:
+    """原子领取未开测且未发卡领取的链接，写入 faka_claimed_*。不改 status。"""
+    init_dist_tables()
+    uid = int(user_id)
+    tc = (test_code or "").strip()
+    if not tc:
+        raise ValueError("请选择测题")
+    count = max(1, min(int(count or 1), 200))
+    batch_id = str(uuid.uuid4())
+    meta = json.dumps(
+        {
+            "client_id": (client_id or "").strip(),
+            "product_id": (product_id or "").strip(),
+            "shop_id": (shop_id or "").strip(),
+        },
+        ensure_ascii=False,
+    )
+    origin = public_link_origin()
+    claimed_rows: list[dict] = []
+    now = _now()
+
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        try:
+            c.execute(
+                """SELECT id FROM dist_links
+                   WHERE user_id=%s AND test_code=%s AND status='unused'
+                     AND faka_claimed_at IS NULL
+                     AND first_used_at IS NULL AND COALESCE(used_count,0)=0
+                   ORDER BY id ASC
+                   LIMIT %s
+                   FOR UPDATE SKIP LOCKED""",
+                (uid, tc, count),
+            )
+            ids = [int((_row_dict(r) or {}).get("id")) for r in c.fetchall() if r]
+            ids = [i for i in ids if i]
+            if ids:
+                c.execute(
+                    f"""UPDATE dist_links
+                       SET faka_claimed_at=NOW(), faka_claim_batch=%s, faka_claim_meta=%s
+                       WHERE id = ANY(%s) AND user_id=%s AND faka_claimed_at IS NULL
+                       RETURNING *""",
+                    (batch_id, meta, ids, uid),
+                )
+                claimed_rows = [_map_link(_row_dict(r)) for r in c.fetchall()]
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        try:
+            c.execute("BEGIN IMMEDIATE")
+            c.execute(
+                """SELECT id FROM dist_links
+                   WHERE user_id=? AND test_code=? AND status='unused'
+                     AND (faka_claimed_at IS NULL OR faka_claimed_at='')
+                     AND (first_used_at IS NULL OR first_used_at='')
+                     AND COALESCE(used_count,0)=0
+                   ORDER BY id ASC
+                   LIMIT ?""",
+                (uid, tc, count),
+            )
+            ids = [int((_row_dict(r) or {}).get("id")) for r in c.fetchall() if r]
+            ids = [i for i in ids if i]
+            for lid in ids:
+                c.execute(
+                    """UPDATE dist_links
+                       SET faka_claimed_at=?, faka_claim_batch=?, faka_claim_meta=?
+                       WHERE id=? AND user_id=? AND (faka_claimed_at IS NULL OR faka_claimed_at='')""",
+                    (now, batch_id, meta, lid, uid),
+                )
+                if c.rowcount:
+                    c.execute("SELECT * FROM dist_links WHERE id=?", (lid,))
+                    claimed_rows.append(_map_link(_row_dict(c.fetchone())))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+
+    inv = faka_inventory(uid, test_code=tc)
+    links_out = []
+    for link in claimed_rows:
+        token = link.get("token") or ""
+        code = link.get("test_code") or tc
+        links_out.append(
+            {
+                **link,
+                "url": link_public_url(code, token, origin=origin),
+            }
+        )
+    return {
+        "claimed": len(links_out),
+        "batchId": batch_id if links_out else "",
+        "batch_id": batch_id if links_out else "",
+        "links": links_out,
+        "remaining_unclaimed": int(inv.get("unclaimed_unused") or 0),
+        "inventory": inv,
+        "test_code": tc,
+    }
+
+
+def release_links_for_faka(
+    user_id: int,
+    *,
+    batch_id: str = "",
+    link_ids: list[int] | None = None,
+) -> dict:
+    """释放误领：仅 status=unused 且已 claim 的链接可回池。"""
+    init_dist_tables()
+    uid = int(user_id)
+    batch = (batch_id or "").strip()
+    ids = [int(x) for x in (link_ids or []) if x is not None]
+    if not batch and not ids:
+        raise ValueError("请提供 batchId 或 linkIds")
+    released = 0
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        try:
+            if batch:
+                c.execute(
+                    """UPDATE dist_links
+                       SET faka_claimed_at=NULL, faka_claim_batch=NULL, faka_claim_meta=NULL
+                       WHERE user_id=%s AND status='unused' AND faka_claim_batch=%s
+                         AND faka_claimed_at IS NOT NULL
+                         AND first_used_at IS NULL AND COALESCE(used_count,0)=0""",
+                    (uid, batch),
+                )
+                released = int(c.rowcount or 0)
+            else:
+                c.execute(
+                    """UPDATE dist_links
+                       SET faka_claimed_at=NULL, faka_claim_batch=NULL, faka_claim_meta=NULL
+                       WHERE user_id=%s AND status='unused' AND id = ANY(%s)
+                         AND faka_claimed_at IS NOT NULL
+                         AND first_used_at IS NULL AND COALESCE(used_count,0)=0""",
+                    (uid, ids),
+                )
+                released = int(c.rowcount or 0)
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        try:
+            if batch:
+                c.execute(
+                    """UPDATE dist_links
+                       SET faka_claimed_at=NULL, faka_claim_batch=NULL, faka_claim_meta=NULL
+                       WHERE user_id=? AND status='unused' AND faka_claim_batch=?
+                         AND faka_claimed_at IS NOT NULL AND faka_claimed_at!=''
+                         AND (first_used_at IS NULL OR first_used_at='')
+                         AND COALESCE(used_count,0)=0""",
+                    (uid, batch),
+                )
+                released = int(c.rowcount or 0)
+            else:
+                placeholders = ",".join("?" for _ in ids)
+                c.execute(
+                    f"""UPDATE dist_links
+                       SET faka_claimed_at=NULL, faka_claim_batch=NULL, faka_claim_meta=NULL
+                       WHERE user_id=? AND status='unused' AND id IN ({placeholders})
+                         AND faka_claimed_at IS NOT NULL AND faka_claimed_at!=''
+                         AND (first_used_at IS NULL OR first_used_at='')
+                         AND COALESCE(used_count,0)=0""",
+                    tuple([uid] + ids),
+                )
+                released = int(c.rowcount or 0)
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    return {"released": released, "batchId": batch, "batch_id": batch}
 
 
 def _set_link_status(token: str, status: str) -> None:
@@ -1351,6 +1633,7 @@ def list_links_page(
     end_date: str | None = None,
     sort_by: str | None = None,
     sort_order: str | None = None,
+    faka_claimed: str | bool | int | None = None,
     page: int = 1,
     per_page: int = 20,
 ) -> dict:
@@ -1383,6 +1666,21 @@ def list_links_page(
         else:
             where.append("date(created_at) <= date(?)")
         params.append(ed)
+    fc_raw = faka_claimed
+    if fc_raw is not None and str(fc_raw).strip() != "":
+        fc_s = str(fc_raw).strip().lower()
+        want_claimed = fc_s in ("1", "true", "yes", "claimed")
+        want_unclaimed = fc_s in ("0", "false", "no", "unclaimed")
+        if want_claimed:
+            if _USE_PG:
+                where.append("faka_claimed_at IS NOT NULL")
+            else:
+                where.append("faka_claimed_at IS NOT NULL AND faka_claimed_at!=''")
+        elif want_unclaimed:
+            if _USE_PG:
+                where.append("faka_claimed_at IS NULL")
+            else:
+                where.append("(faka_claimed_at IS NULL OR faka_claimed_at='')")
     wh = " AND ".join(where)
     order_sql = _link_sort_clause(sort_by, sort_order)
     if _USE_PG:
