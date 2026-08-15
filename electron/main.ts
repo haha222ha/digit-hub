@@ -22,6 +22,7 @@ import { PsyCloudService } from './services/psy-cloud.service'
 import { AutoReplenishService } from './services/auto-replenish.service'
 import { acquireSingleInstanceLock, ensureSingleInstance, focusAssistantMainWindow } from './utils/singleton'
 import { currentShopId, DEFAULT_SHOP_ID, newShopId, partitionForShop } from './utils/shop-partition'
+import { safeLoadURL } from './utils/safe-load-url'
 import { CHROME_UA, applyElectronStealthFlags } from './constants/browser-env'
 import { bindEvaNedbIpc, invokeDb } from './eva-nedb'
 import { enableElectronRemote, setupElectronRemote } from './remote-main'
@@ -160,7 +161,10 @@ function focusXhsBrowserView() {
     const cur = xhsBrowserView.webContents.getURL() || ''
     if (cur.includes('/cstools/chat')) {
       logger.info('[XhsBrowser] 主窗误驻 chat，恢复 dashboard')
-      void xhsBrowserView.webContents.loadURL(XHS_DASHBOARD_URL).catch(() => false)
+      void safeLoadURL(xhsBrowserView.webContents, XHS_DASHBOARD_URL, {
+        label: 'focus-restore-dashboard',
+        logger
+      })
     }
   } catch (e) {
     logger?.warn(`[XhsBrowser] focus 失败: ${e}`)
@@ -251,7 +255,11 @@ async function onLoginAssistNavigated(url: string) {
   const shopId = (global as any).currentShopId || 'default'
   try {
     if (xhsBrowserView && autoLoginService) {
-      await xhsBrowserView.webContents.loadURL(url.includes('/cstools/') ? url : XHS_DASHBOARD_URL)
+      await safeLoadURL(
+        xhsBrowserView.webContents,
+        url.includes('/cstools/') ? url : XHS_DASHBOARD_URL,
+        { label: 'login-assist-sync', logger }
+      )
       focusXhsBrowserView()
       await autoLoginService.saveCookies(shopId, xhsBrowserView.webContents)
       await shopContextService?.initializePhase2(shopId)
@@ -278,7 +286,7 @@ async function showAndLoadXhs(url?: string) {
   updateBrowserViewBounds()
 
   try {
-    await view.webContents.loadURL(targetUrl)
+    await safeLoadURL(view.webContents, targetUrl, { label: 'showAndLoadXhs', logger, timeoutMs: 30000 })
     mainWindow.webContents.send('browser:url-changed', targetUrl)
     return true
   } catch (err) {
@@ -318,7 +326,7 @@ async function handle401Redirect(sourceUrl?: string) {
     currentUrl.includes('ark.xiaohongshu.com/ark/login')
   ) {
     logger.warn('[401] 当前在商家登录页，改回客服登录页')
-    await xhsBrowserView.webContents.loadURL(XHS_LOGIN_URL)
+    await safeLoadURL(xhsBrowserView.webContents, XHS_LOGIN_URL, { label: '401-to-login', logger })
     mainWindow?.webContents.send('login-required', { reason: 'cookie_expired' })
     return
   }
@@ -414,7 +422,7 @@ async function guardAgainstMerchantLoginPage(url: string) {
     `[XhsBrowser] 拦截商家后台登录页，改回客服链路 hasSso=${hasSso} → ${target}`
   )
   try {
-    await xhsBrowserView.webContents.loadURL(target)
+    await safeLoadURL(xhsBrowserView.webContents, target, { label: 'merchant-login-guard', logger })
   } catch (e) {
     logger.warn(`[XhsBrowser] 回跳失败: ${e}`)
   }
@@ -684,7 +692,11 @@ function createMainWindow() {
     try {
       const injected = await autoLoginService.loadAndInjectCookies(shopId)
       if (injected) {
-        await xhsBrowserView!.webContents.loadURL(XHS_DASHBOARD_URL)
+        await safeLoadURL(xhsBrowserView!.webContents, XHS_DASHBOARD_URL, {
+          label: 'startup-keepalive',
+          logger,
+          timeoutMs: 25000
+        })
         await new Promise((r) => setTimeout(r, 2500))
       }
       ok = await autoLoginService.checkLoginStatus(xhsBrowserView!.webContents)
@@ -703,7 +715,10 @@ function createMainWindow() {
       await autoLoginService.saveCookies(shopId, xhsBrowserView!.webContents)
       const cur = xhsBrowserView!.webContents.getURL()
       if (!cur.includes('walle.xiaohongshu.com/cstools/') || cur.includes('/login')) {
-        await xhsBrowserView!.webContents.loadURL(XHS_DASHBOARD_URL)
+        await safeLoadURL(xhsBrowserView!.webContents, XHS_DASHBOARD_URL, {
+          label: 'startup-dashboard',
+          logger
+        })
       }
       await shopContextService.initializePhase2(shopId)
       logger.info('[Login] 登录保活成功，dashboard 已加载（IM 发码走工作台 JarvisIM）')
@@ -1082,30 +1097,54 @@ function shopIdFromWebContents(wc: WebContents | null | undefined): string | nul
   return null
 }
 
+const bindShopImInFlight = new Map<string, Promise<boolean>>()
+
 async function bindShopImForShip(sid: string): Promise<boolean> {
   const shopId = String(sid || currentShopId()).trim() || currentShopId()
+  const existing = bindShopImInFlight.get(shopId)
+  if (existing) {
+    logger.info(`[IM] bindShopImForShip 复用进行中任务 shop=${shopId}`)
+    return existing
+  }
+  const run = bindShopImForShipInner(shopId).finally(() => {
+    if (bindShopImInFlight.get(shopId) === run) bindShopImInFlight.delete(shopId)
+  })
+  bindShopImInFlight.set(shopId, run)
+  return run
+}
 
+async function bindShopImForShipInner(shopId: string): Promise<boolean> {
   const view =
     shopViews.get(shopId) || (shopId === currentShopId() ? xhsBrowserView : null)
   if (view && !view.webContents.isDestroyed()) {
     const url = view.webContents.getURL() || ''
-    // 加载中 / 登录页：不要二次 loadURL（会 ERR_ABORTED，极端时原生崩溃）
+    // 加载中：等完再绑，禁止二次 loadURL（会 ERR_ABORTED，极端时原生崩溃）
     if (view.webContents.isLoading()) {
-      logger.warn(`[IM] bindShopImForShip 跳过：BrowserView 仍在加载 url=${url.slice(0, 80)}`)
+      logger.warn(`[IM] bindShopImForShip 等待 BrowserView 加载完成 url=${url.slice(0, 80)}`)
+      const deadline = Date.now() + 8000
+      while (view.webContents.isLoading() && Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 150))
+      }
+    }
+    const url2 = view.webContents.getURL() || ''
+    if (url2.includes('/login') || url2 === 'about:blank' || !url2) {
+      logger.warn(`[IM] bindShopImForShip 跳过：未进工作台 url=${url2.slice(0, 80)}`)
       return false
     }
-    if (url.includes('/login') || url === 'about:blank' || !url) {
-      logger.warn(`[IM] bindShopImForShip 跳过：未进工作台 url=${url.slice(0, 80)}`)
-      return false
-    }
-    if (!url.includes('walle.xiaohongshu.com')) {
-      await view.webContents.loadURL(XHS_DASHBOARD_URL).catch(() => false)
-      await new Promise((r) => setTimeout(r, 2000))
-    } else if (url.includes('/cstools/chat')) {
-      await view.webContents.loadURL(XHS_DASHBOARD_URL).catch(() => false)
+    if (!url2.includes('walle.xiaohongshu.com')) {
+      await safeLoadURL(view.webContents, XHS_DASHBOARD_URL, {
+        label: 'bind-view-dashboard',
+        logger
+      })
       await new Promise((r) => setTimeout(r, 1500))
+    } else if (url2.includes('/cstools/chat')) {
+      await safeLoadURL(view.webContents, XHS_DASHBOARD_URL, {
+        label: 'bind-view-from-chat',
+        logger
+      })
+      await new Promise((r) => setTimeout(r, 1000))
     }
-    autoShipService?.bindWebContents(view.webContents, shopId)
+    autoShipService?.bindWebContents(view.webContents, shopId, { startPolling: false })
   }
 
   const imWin = await ensureShopImWindow(shopId, { show: false })
@@ -1113,16 +1152,21 @@ async function bindShopImForShip(sid: string): Promise<boolean> {
     autoShipService?.bindImWebContents(imWin.webContents, shopId)
     const wc = imWin.webContents
     const cur = wc.getURL() || ''
-    // ★ IM 窗须驻留 /cstools/chat（才有 XhsRim）；dashboard 无 IM 组件
+    // IM 窗驻留 dashboard（farmer-chat-app）；已在目标页则不再 loadURL
     if (!cur.includes('/cstools/seller/dashboard') || cur.includes('/login')) {
-      await wc.loadURL(XHS_DASHBOARD_URL).catch(() => false)
-      await new Promise((r) => setTimeout(r, 2500))
+      await safeLoadURL(wc, XHS_DASHBOARD_URL, {
+        label: 'bind-im-dashboard',
+        logger,
+        timeoutMs: 25000
+      })
+      await new Promise((r) => setTimeout(r, 1500))
     }
-    const deadline = Date.now() + 30000
+    const deadline = Date.now() + 20000
     while (Date.now() < deadline) {
       const url = wc.getURL() || ''
       if (url.includes('/cstools/seller/dashboard') && !url.includes('/login')) break
-      if (url.includes('walle.xiaohongshu.com') && !url.includes('/login') && !url.includes('about:blank')) break
+      if (url.includes('walle.xiaohongshu.com') && !url.includes('/login') && !url.includes('about:blank'))
+        break
       await new Promise((r) => setTimeout(r, 400))
     }
   }
@@ -1287,14 +1331,20 @@ async function createShopImWindow(shopId: string, show: boolean): Promise<Browse
     if (!win.isDestroyed()) win.reload()
   })
 
-  // ★ IM 窗加载 /cstools/seller/dashboard — dashboard 页面才渲染 .farmer-chat-app（含聊天组件）
-  // chat 页面不渲染 .farmer-chat-app（CDP 探测确认：dashboard farmerChatApp=true, chat farmerChatApp=false）
+  // ★ IM 窗加载 /cstools/seller/dashboard — dashboard 页面才渲染 .farmer-chat-app
   try {
-    await win.loadURL(XHS_DASHBOARD_URL)
+    await safeLoadURL(win.webContents, XHS_DASHBOARD_URL, {
+      label: 'create-im-dashboard',
+      logger,
+      timeoutMs: 30000
+    })
   } catch (err) {
     logger.warn(`[KefuBrowser] 店铺 ${shopId} 加载 dashboard 失败: ${err}`)
     try {
-      await win.loadURL(XHS_CHAT_URL)
+      await safeLoadURL(win.webContents, XHS_CHAT_URL, {
+        label: 'create-im-chat-fallback',
+        logger
+      })
     } catch (err2) {
       logger.warn(`[KefuBrowser] 店铺 ${shopId} 加载页失败: ${err2}`)
     }
@@ -1464,7 +1514,10 @@ function setupIPC() {
     if (!xhsBrowserView) return false
     const ok = await autoLoginService.tryAutoLoginIfNeeded(shopId, xhsBrowserView.webContents, XHS_LOGIN_URL)
     if (ok) {
-      await xhsBrowserView.webContents.loadURL(XHS_DASHBOARD_URL)
+      await safeLoadURL(xhsBrowserView.webContents, XHS_DASHBOARD_URL, {
+        label: 'autologin-login-ok',
+        logger
+      })
       await shopContextService.initializePhase2(shopId)
     }
     return ok
@@ -1491,7 +1544,12 @@ function setupIPC() {
   ipcMain.handle('subaccount:login', async (_event, id: number) => {
     if (!xhsBrowserView) return false
     const ok = await autoLoginService.loginWithSubAccount(id, xhsBrowserView.webContents, XHS_LOGIN_URL)
-    if (ok) await xhsBrowserView.webContents.loadURL(XHS_DASHBOARD_URL)
+    if (ok) {
+      await safeLoadURL(xhsBrowserView.webContents, XHS_DASHBOARD_URL, {
+        label: 'subaccount-login-ok',
+        logger
+      })
+    }
     return ok
   })
 
@@ -1683,7 +1741,10 @@ function setupIPC() {
       const url = view.webContents.getURL()
       if (!url || url === 'about:blank') {
         const injected = await autoLoginService.loadAndInjectCookies(currentShopId())
-        await view.webContents.loadURL(injected ? XHS_DASHBOARD_URL : XHS_LOGIN_URL)
+        await safeLoadURL(view.webContents, injected ? XHS_DASHBOARD_URL : XHS_LOGIN_URL, {
+          label: 'shop-switch',
+          logger
+        })
       }
     }
     mainWindow?.webContents.send('navigate', '/browser')

@@ -22,6 +22,7 @@ import type { PsyCloudService } from './psy-cloud.service'
 import type { AgisoImManager } from '../agiso-im-manager'
 import { ImWsCdpService } from './im-ws-cdp.service'
 import { notifyDesktop } from '../notify'
+import { safeLoadURL } from '../utils/safe-load-url'
 
 /** 阿奇锁商品笔记列表页（有 accessToken + _webmsxyw） */
 const ARK_GOODS_NOTE_LIST_URL = 'https://ark.xiaohongshu.com/app-note/note-list'
@@ -65,22 +66,14 @@ function withTimeout<T>(p: Promise<T>, ms: number, fallback: T, onTimeout?: () =
   })
 }
 
-/** 带超时的 loadURL：超时则 stop()，避免孤儿导航拖死后续轮询 */
+/** 带超时的安全 loadURL：串行 + 同页跳过；超时不 stop()（stop 易与并发导航一起原生闪退） */
 async function loadUrlCapped(wc: WebContents, url: string, ms: number): Promise<boolean> {
   if (!wc || wc.isDestroyed()) return false
-  const ok = await withTimeout(
-    wc.loadURL(url).then(() => true) as Promise<boolean>,
-    ms,
-    false,
-    () => {
-      try {
-        if (!wc.isDestroyed() && wc.isLoading()) wc.stop()
-      } catch {
-        /* ignore */
-      }
-    }
-  )
-  return !!ok
+  return safeLoadURL(wc, url, {
+    timeoutMs: ms,
+    waitIdleMs: Math.min(ms, 8000),
+    label: 'ark-poll'
+  })
 }
 
 function isArkLoginUrl(url: string): boolean {
@@ -547,15 +540,8 @@ export class AutoShipService {
    */
   private async ensureOrderPollWc(shopId: string): Promise<WebContents | null> {
     const sid = String(shopId || currentShopId()).trim() || currentShopId()
-    const wc = await withTimeout(this.ensureOrderPollWcInner(sid), 12000, null, () => {
-      const win = this.orderPollByShop.get(sid)
-      try {
-        const c = win && !win.isDestroyed() ? win.webContents : null
-        if (c && !c.isDestroyed() && c.isLoading()) c.stop()
-      } catch {
-        /* ignore */
-      }
-    })
+    // 超时不再 wc.stop()：与并发 loadURL 叠在一起会触发 Electron 原生闪退
+    const wc = await withTimeout(this.ensureOrderPollWcInner(sid), 12000, null)
     if (wc && !wc.isDestroyed()) {
       if (this.injectService) {
         await this.injectService.injectScriptAsync(wc, 'im-send').catch(() => false)
@@ -1790,8 +1776,12 @@ export class AutoShipService {
     try {
       const win = this.ensureArkGoodsWindow(true)
       this.attachArkAutoSyncWatcher(win)
-      win.loadURL(ARK_GOODS_SHELF_URL).catch((e) => {
-        this.logger.warn('[AutoShip] 打开商家页失败: ' + e)
+      void safeLoadURL(win.webContents, ARK_GOODS_SHELF_URL, {
+        label: 'ark-goods',
+        timeoutMs: 25000,
+        logger: this.logger
+      }).then((ok) => {
+        if (!ok) this.logger.warn('[AutoShip] 打开商家页失败')
       })
       return { success: true }
     } catch (err: any) {
@@ -1894,7 +1884,11 @@ export class AutoShipService {
         if (win.isDestroyed()) return
 
         if (!/app-item\/list\/(shelf|all)|app-note/i.test(wc.getURL())) {
-          await withTimeout(wc.loadURL(ARK_GOODS_SHELF_URL) as any, 25000, null)
+          await safeLoadURL(wc, ARK_GOODS_SHELF_URL, {
+            timeoutMs: 25000,
+            label: 'ark-sync',
+            logger: this.logger
+          })
           await new Promise((r) => setTimeout(r, 2000))
         }
 
@@ -2002,7 +1996,11 @@ export class AutoShipService {
 
     this.logger.info('[AutoShip] 打开千帆已上架商品页: ' + ARK_GOODS_SHELF_URL)
     win.setTitle('千帆商家后台 — 登录后将同步已上架商品')
-    await withTimeout(wc.loadURL(ARK_GOODS_SHELF_URL) as any, 30000, null)
+    await safeLoadURL(wc, ARK_GOODS_SHELF_URL, {
+      timeoutMs: 30000,
+      label: 'ark-sync-wait',
+      logger: this.logger
+    })
     await new Promise((r) => setTimeout(r, 800))
 
     const result = await this.waitForArkSyncResult(win, 300000)

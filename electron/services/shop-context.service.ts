@@ -84,7 +84,7 @@ export class ShopContextService {
 
     this.ws.reconnectKefu()
     this.initializedShops.add(shopId)
-    void this.ensureImSession?.(shopId)
+    // 首次初始化不抢跑 ensureImSession：与 ready-to-show 的 await bindShopImForShip 并发 loadURL 会闪退
     this.logger.info(`[XhsShopContext] 初始化完成 ShopId=${shopId}`)
     this.logger.info('[Login] 登录成功')
   }

@@ -7,6 +7,7 @@ import { StorageService } from './storage.service'
 import { InjectService } from './inject.service'
 import { encrypt, decrypt } from '../utils/crypto'
 import { partitionForShop } from '../utils/shop-partition'
+import { safeLoadURL } from '../utils/safe-load-url'
 
 export const XHS_DASHBOARD_URL = 'https://walle.xiaohongshu.com/cstools/seller/dashboard'
 export const XHS_CHAT_URL = 'https://walle.xiaohongshu.com/cstools/chat'
@@ -94,7 +95,11 @@ export class AutoLoginService {
       return
     }
     this.logger.info(`[KefuAutoLogin] 跳转客服登录页: ${XHS_LOGIN_URL}`)
-    await webContents.loadURL(XHS_LOGIN_URL)
+    await safeLoadURL(webContents, XHS_LOGIN_URL, {
+      label: 'navigate-login',
+      logger: this.logger,
+      timeoutMs: 20000
+    })
     await this.waitForLoginForm(webContents, 15000)
   }
 
@@ -1000,7 +1005,11 @@ export class AutoLoginService {
       // 1) 尝试 Cookie 注入
       const injected = await this.loadAndInjectCookies(shopId)
       if (injected) {
-        await webContents.loadURL(targetUrl)
+        await safeLoadURL(webContents, targetUrl, {
+          label: 'cookie-inject-nav',
+          logger: this.logger,
+          timeoutMs: 25000
+        })
         await this.delay(3500)
         if (await this.checkLoginStatus(webContents)) {
           this.logger.info('[KefuAutoLogin] ✅ Cookie 注入登录成功')
@@ -1044,7 +1053,10 @@ export class AutoLoginService {
         this.logger.warn('[KefuAutoLogin] 未找到客服登录表单。请确认打开的是 walle/cstools/login，且使用客服邮箱（非上架扫码号）')
         // 强制再打开一次阿奇锁同款登录页，便于手动登录
         if (!webContents.getURL().includes('/cstools/login')) {
-          await webContents.loadURL(XHS_LOGIN_URL)
+          await safeLoadURL(webContents, XHS_LOGIN_URL, {
+            label: 'form-missing-relogin',
+            logger: this.logger
+          })
         }
         return false
       }
@@ -1078,7 +1090,10 @@ export class AutoLoginService {
           if (await this.checkLoginStatus(webContents)) {
             this.logger.info('[KefuAutoLogin] ✅ 自动登录成功，进入客服工作台')
             if (!currentUrl.startsWith(afterLoginTarget.split('?')[0])) {
-              await webContents.loadURL(afterLoginTarget)
+              await safeLoadURL(webContents, afterLoginTarget, {
+                label: 'after-login-target',
+                logger: this.logger
+              })
               await this.delay(2000)
             }
             await this.saveCookies(shopId, webContents)
