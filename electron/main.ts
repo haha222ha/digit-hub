@@ -19,6 +19,7 @@ import { AutoShipService } from './services/autoship.service'
 import { AutoReshipService } from './services/autoreship.service'
 import { ShopContextService } from './services/shop-context.service'
 import { PsyCloudService } from './services/psy-cloud.service'
+import { AutoReplenishService } from './services/auto-replenish.service'
 import { acquireSingleInstanceLock, ensureSingleInstance, focusAssistantMainWindow } from './utils/singleton'
 import { currentShopId, DEFAULT_SHOP_ID, newShopId, partitionForShop } from './utils/shop-partition'
 import { CHROME_UA, applyElectronStealthFlags } from './constants/browser-env'
@@ -90,6 +91,7 @@ let crashRecoveryService: CrashRecoveryService
 let mockService: MockService
 let autoShipService: AutoShipService
 let psyCloudService: PsyCloudService
+let autoReplenishService: AutoReplenishService
 let autoReshipService: AutoReshipService
 let netCaptureService: NetCaptureService
 let shopContextService: ShopContextService
@@ -560,6 +562,7 @@ async function initialize() {
     return true
   })
   autoReshipService = new AutoReshipService(storageService, logger, autoShipService)
+  autoReplenishService = new AutoReplenishService(storageService, psyCloudService, logger)
   shopContextService = new ShopContextService(
     logger, storageService, wsService, autoShipService, autoReshipService, mockService
   )
@@ -578,6 +581,8 @@ async function initialize() {
   // 启动后延迟 45 秒首次扫描（避开登录保活窗口），之后每 5 分钟一次
   setTimeout(retryFailedOrders, 45 * 1000)
   setInterval(retryFailedOrders, 5 * 60 * 1000)
+  // 链接卡自动补货巡检（生成→领取入池）
+  setTimeout(() => autoReplenishService?.start(60_000), 20_000)
 
   updateService = new UpdateService(logger)
   updateService.checkForUpdates()
@@ -653,6 +658,7 @@ function createMainWindow() {
   })
 
   wsService.setMainWindow(mainWindow)
+  autoReplenishService?.setMainWindow(mainWindow)
 
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
@@ -1161,20 +1167,40 @@ async function ensureShopImWindow(
   }
 }
 
+function parkImWindowOffscreen(win: BrowserWindow) {
+  try {
+    win.setSkipTaskbar(true)
+    win.setOpacity(0)
+    win.setFocusable(false)
+    win.setIgnoreMouseEvents(true)
+    // 用超远坐标，避免多屏/系统把 -2000 裁回可见区变成「小白框」
+    win.setBounds({ x: -32000, y: -32000, width: 1100, height: 760 })
+  } catch {
+    /* ignore */
+  }
+}
+
 async function createShopImWindow(shopId: string, show: boolean): Promise<BrowserWindow | null> {
   prepareShopPartition(shopId)
   // IM_WINDOW_VISIBLE=1 时客服窗可见（便于 DevTools 调试），否则透明+屏幕外但持续渲染
   const debugVisible = process.env.IM_WINDOW_VISIBLE === '1'
   const win = new BrowserWindow({
-    show: true, // 关键：show:true 保证 Chromium 不判 hidden；用 opacity+屏幕外隐藏，避免 lazy-load 不触发
+    show: false,
     width: 1100,
     height: 760,
     title: '客服聊天',
     skipTaskbar: true,
+    frame: debugVisible,
+    transparent: !debugVisible,
+    backgroundColor: debugVisible ? '#ffffff' : '#00000000',
+    hasShadow: false,
     opacity: debugVisible ? 1 : 0,
+    focusable: debugVisible || !!show,
+    paintWhenInitiallyHidden: true,
     webPreferences: {
       ...getImWebPreferences(shopId),
-      backgroundThrottling: false
+      backgroundThrottling: false,
+      offscreen: false
     }
   })
   enableElectronRemote(win.webContents)
@@ -1183,30 +1209,40 @@ async function createShopImWindow(shopId: string, show: boolean): Promise<Browse
   win.webContents.setUserAgent(CHROME_UA)
   shopImWindows.set(shopId, win)
   if (show || debugVisible) kefuWindow = win
-  if (!debugVisible) {
+
+  // 先挪出屏幕再 showInactive：保证 Chromium 持续渲染，又不会冒出白框抢焦点
+  if (!debugVisible && !show) {
+    parkImWindowOffscreen(win)
     try {
-      win.setPosition(-2000, -2000)
-      // ★ 后台客服窗不可聚焦：show:true 会抢占焦点，导致主窗口无法选中/拖动
-      win.setFocusable(false)
+      win.showInactive()
     } catch {
-      /* ignore */
+      try {
+        win.show()
+      } catch {
+        /* ignore */
+      }
     }
+  } else {
+    win.show()
+    win.focus()
   }
 
   win.on('show', () => {
     // 禁止后台客服页意外露脸（第二次启动 / 导航会把隐藏窗顶出来）
     // 改为「屏幕外 + 透明」而非 hide()：hide 会让 Chromium 暂停渲染，IM 组件不挂载
     if (!(win as any).__allowShow) {
-      try {
-        win.setSkipTaskbar(true)
-        win.setPosition(-2000, -2000)
-        win.setOpacity(0)
-        win.setFocusable(false)
-        // 把焦点还给主窗口，避免透明客服窗抢焦点
-        if (mainWindow && !mainWindow.isDestroyed()) mainWindow.focus()
-      } catch {
-        /* ignore */
-      }
+      parkImWindowOffscreen(win)
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.focus()
+    }
+  })
+
+  win.on('move', () => {
+    if ((win as any).__allowShow) return
+    try {
+      const [x, y] = win.getPosition()
+      if (x > -10000 || y > -10000) parkImWindowOffscreen(win)
+    } catch {
+      /* ignore */
     }
   })
 
@@ -1214,14 +1250,7 @@ async function createShopImWindow(shopId: string, show: boolean): Promise<Browse
     if ((app as any).isQuitting || (win as any).__allowClose) return
     e.preventDefault()
     ;(win as any).__allowShow = false
-    win.setSkipTaskbar(true)
-    // 屏幕外+透明，避免 hide() 暂停渲染导致 IM 组件卸载
-    try {
-      win.setPosition(-2000, -2000)
-      win.setOpacity(0)
-    } catch {
-      win.hide()
-    }
+    parkImWindowOffscreen(win)
   })
   win.on('closed', () => {
     if (shopImWindows.get(shopId) === win) shopImWindows.delete(shopId)
@@ -1274,7 +1303,15 @@ async function createShopImWindow(shopId: string, show: boolean): Promise<Browse
   logger.info(`[KefuBrowser] 已就绪 shop=${shopId} show=${!!show} partition=${partitionForShop(shopId)}`)
   if (show) {
     ;(win as any).__allowShow = true
-    win.setSkipTaskbar(false)
+    try {
+      win.setSkipTaskbar(false)
+      win.setOpacity(1)
+      win.setFocusable(true)
+      win.setIgnoreMouseEvents(false)
+      win.setBounds({ x: 120, y: 80, width: 1100, height: 760 })
+    } catch {
+      /* ignore */
+    }
     win.show()
     win.focus()
     kefuWindow = win
@@ -1569,6 +1606,10 @@ function setupIPC() {
     async (_event, bindingId: number, testCode: string, count: number, productId?: string) =>
       psyCloudService.claimIntoPool(bindingId, testCode, count, productId)
   )
+  ipcMain.handle('psy:generate-links', async (_event, testCode: string, count: number) =>
+    psyCloudService.generateLinks(testCode, count))
+  ipcMain.handle('psy:auto-replenish-now', async (_event, bindingId: number) =>
+    autoReplenishService.replenishBinding(Number(bindingId)))
   ipcMain.handle('psy:release-batch', async (_event, batchId: string) => psyCloudService.releaseBatch(batchId))
   ipcMain.handle('psy:sync-bindings', async () => psyCloudService.syncBindingsFromLocal(currentShopId()))
   ipcMain.handle('psy:order-claim-url', () => psyCloudService.getOrderClaimUrl())

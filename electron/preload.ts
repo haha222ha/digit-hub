@@ -119,6 +119,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   psyInventory: (testCode: string) => ipcRenderer.invoke('psy:inventory', testCode),
   psyClaimIntoPool: (bindingId: number, testCode: string, count: number, productId?: string) =>
     ipcRenderer.invoke('psy:claim-into-pool', bindingId, testCode, count, productId),
+  psyGenerateLinks: (testCode: string, count: number) =>
+    ipcRenderer.invoke('psy:generate-links', testCode, count),
+  psyAutoReplenishNow: (bindingId: number) => ipcRenderer.invoke('psy:auto-replenish-now', bindingId),
+  onPsyAutoReplenish: (callback: (evt: any) => void) => {
+    const handler = (_event: any, data: any) => callback(data)
+    ipcRenderer.on('psy:auto-replenish', handler)
+    return () => ipcRenderer.removeListener('psy:auto-replenish', handler)
+  },
   psyReleaseBatch: (batchId: string) => ipcRenderer.invoke('psy:release-batch', batchId),
   psySyncBindings: () => ipcRenderer.invoke('psy:sync-bindings'),
   psyOrderClaimUrl: () => ipcRenderer.invoke('psy:order-claim-url'),

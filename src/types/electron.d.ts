@@ -114,6 +114,27 @@ export interface ElectronAPI {
     remaining_unclaimed?: number
     batchId?: string
   }>
+  psyGenerateLinks(testCode: string, count: number): Promise<{ success: boolean; generated?: number; message?: string }>
+  psyAutoReplenishNow(bindingId: number): Promise<{
+    bindingId: number
+    productId: string
+    testCode: string
+    generated: number
+    claimed: number
+    added: number
+    stock: number
+    message: string
+  }>
+  onPsyAutoReplenish(callback: (evt: {
+    bindingId: number
+    productId: string
+    testCode: string
+    generated: number
+    claimed: number
+    added: number
+    stock: number
+    message: string
+  }) => void): () => void
   psyReleaseBatch(batchId: string): Promise<{ success: boolean; released?: number; message?: string }>
   psySyncBindings(): Promise<{ success: boolean; upserted?: number; message?: string }>
   psyOrderClaimUrl(): Promise<string>
@@ -224,6 +245,10 @@ export interface ProductBindingInput {
   msgSeparator?: string
   psyTestCode?: string
   poolKey?: string
+  autoReplenishEnabled?: boolean
+  autoReplenishThreshold?: number
+  autoReplenishCount?: number
+  autoReplenishIntervalSec?: number
 }
 
 export interface ProductBinding {
@@ -244,6 +269,10 @@ export interface ProductBinding {
   msg_separator?: string
   psy_test_code?: string
   pool_key?: string
+  auto_replenish_enabled?: number
+  auto_replenish_threshold?: number
+  auto_replenish_count?: number
+  auto_replenish_interval_sec?: number
 }
 
 export interface CardPoolItem {

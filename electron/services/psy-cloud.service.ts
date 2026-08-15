@@ -231,6 +231,31 @@ export class PsyCloudService {
     }
   }
 
+  /** 云端生成测评链接（扣分销额度）→ 增加 unclaimed 库存 */
+  async generateLinks(
+    testCode: string,
+    count: number
+  ): Promise<{ success: boolean; generated?: number; message?: string }> {
+    const tc = (testCode || '').trim()
+    const n = Math.max(1, Math.min(50, Number(count) || 1))
+    if (!tc) return { success: false, message: '缺少测题代码' }
+    if (!this.getToken()) return { success: false, message: '请先在设置中登录心象测' }
+    try {
+      const body = await this.request('/api/links/generate', {
+        method: 'POST',
+        body: JSON.stringify({ testCode: tc, count: n })
+      })
+      if (body?.success === false) {
+        return { success: false, message: body?.message || '生成失败' }
+      }
+      const data = unwrapData(body)
+      const generated = Number(data?.generatedCount ?? data?.links?.length ?? n)
+      return { success: true, generated, message: body?.message || `已生成 ${generated} 条` }
+    } catch (e: any) {
+      return { success: false, message: e?.message || '生成链接失败' }
+    }
+  }
+
   /**
    * 领取并写入本地卡密池
    */

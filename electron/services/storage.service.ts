@@ -215,6 +215,10 @@ export class StorageService {
       `ALTER TABLE product_bindings ADD COLUMN psy_test_code TEXT DEFAULT ''`,
       `ALTER TABLE product_bindings ADD COLUMN pool_key TEXT DEFAULT ''`,
       `ALTER TABLE product_bindings ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))`,
+      `ALTER TABLE product_bindings ADD COLUMN auto_replenish_enabled INTEGER DEFAULT 0`,
+      `ALTER TABLE product_bindings ADD COLUMN auto_replenish_threshold INTEGER DEFAULT 10`,
+      `ALTER TABLE product_bindings ADD COLUMN auto_replenish_count INTEGER DEFAULT 20`,
+      `ALTER TABLE product_bindings ADD COLUMN auto_replenish_interval_sec INTEGER DEFAULT 300`,
       `ALTER TABLE card_pool ADD COLUMN locked_at TEXT`,
       `ALTER TABLE card_pool ADD COLUMN order_id TEXT`,
       `ALTER TABLE card_pool ADD COLUMN used_at TEXT`,
@@ -812,6 +816,10 @@ export class StorageService {
     msgSeparator?: string
     psyTestCode?: string
     poolKey?: string
+    autoReplenishEnabled?: boolean
+    autoReplenishThreshold?: number
+    autoReplenishCount?: number
+    autoReplenishIntervalSec?: number
   }): number {
     const deliverType = binding.deliverType || 'card'
     const psyTestCode = binding.psyTestCode || ''
@@ -836,7 +844,11 @@ export class StorageService {
         msgSeparator: binding.msgSeparator,
         psyTestCode,
         poolKey: poolKey || undefined,
-        shopId: binding.shopId
+        shopId: binding.shopId,
+        autoReplenishEnabled: binding.autoReplenishEnabled,
+        autoReplenishThreshold: binding.autoReplenishThreshold,
+        autoReplenishCount: binding.autoReplenishCount,
+        autoReplenishIntervalSec: binding.autoReplenishIntervalSec
       })
       return existing.id
     }
@@ -844,8 +856,9 @@ export class StorageService {
     const result = this.db.prepare(
       `INSERT INTO product_bindings
         (shop_id, product_id, product_name, product_type, deliver_type, deliver_content, stock,
-         random_mode, low_stock_alert, send_interval_ms, uid_length, msg_separator, psy_test_code, pool_key)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+         random_mode, low_stock_alert, send_interval_ms, uid_length, msg_separator, psy_test_code, pool_key,
+         auto_replenish_enabled, auto_replenish_threshold, auto_replenish_count, auto_replenish_interval_sec)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       binding.shopId || '',
       String(binding.productId).trim(),
@@ -860,7 +873,11 @@ export class StorageService {
       binding.uidLength ?? 10,
       binding.msgSeparator ?? '\n\n',
       psyTestCode,
-      poolKey
+      poolKey,
+      binding.autoReplenishEnabled ? 1 : 0,
+      binding.autoReplenishThreshold ?? binding.lowStockAlert ?? 10,
+      binding.autoReplenishCount ?? 20,
+      binding.autoReplenishIntervalSec ?? 300
     )
     const id = Number(result.lastInsertRowid)
     if (!poolKey) {
@@ -966,6 +983,10 @@ export class StorageService {
     psyTestCode?: string
     poolKey?: string
     shopId?: string
+    autoReplenishEnabled?: boolean
+    autoReplenishThreshold?: number
+    autoReplenishCount?: number
+    autoReplenishIntervalSec?: number
   }): boolean {
     const fields: string[] = []
     const values: any[] = []
@@ -981,6 +1002,22 @@ export class StorageService {
     if (updates.msgSeparator !== undefined) { fields.push('msg_separator = ?'); values.push(updates.msgSeparator) }
     if (updates.psyTestCode !== undefined) { fields.push('psy_test_code = ?'); values.push(updates.psyTestCode) }
     if (updates.shopId !== undefined) { fields.push('shop_id = ?'); values.push(updates.shopId) }
+    if (updates.autoReplenishEnabled !== undefined) {
+      fields.push('auto_replenish_enabled = ?')
+      values.push(updates.autoReplenishEnabled ? 1 : 0)
+    }
+    if (updates.autoReplenishThreshold !== undefined) {
+      fields.push('auto_replenish_threshold = ?')
+      values.push(updates.autoReplenishThreshold)
+    }
+    if (updates.autoReplenishCount !== undefined) {
+      fields.push('auto_replenish_count = ?')
+      values.push(updates.autoReplenishCount)
+    }
+    if (updates.autoReplenishIntervalSec !== undefined) {
+      fields.push('auto_replenish_interval_sec = ?')
+      values.push(updates.autoReplenishIntervalSec)
+    }
 
     const cur = this.db.prepare('SELECT * FROM product_bindings WHERE id = ?').get(id) as any
     if (!cur) return false

@@ -69,6 +69,15 @@
               </template>
             </el-table-column>
             <el-table-column prop="stock" label="池库存" width="80" />
+            <el-table-column label="自动补货" width="100">
+              <template #default="{ row }">
+                <el-tag v-if="row.deliver_type === 'link_card' && row.auto_replenish_enabled" type="success" size="small">
+                  开 · {{ row.auto_replenish_count || 20 }}
+                </el-tag>
+                <span v-else-if="row.deliver_type === 'link_card'">关</span>
+                <span v-else>-</span>
+              </template>
+            </el-table-column>
             <el-table-column label="告警" width="110">
               <template #default="{ row }">
                 <el-tag v-if="row.stock <= (row.low_stock_alert ?? 10)" type="warning" size="small">低库存</el-tag>
@@ -80,10 +89,17 @@
                 <span v-else>-</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="200">
+            <el-table-column label="操作" width="260">
               <template #default="{ row }">
                 <el-button text @click="openBindingDialog(row)">编辑</el-button>
                 <el-button text @click="openCardDialog(row)">卡密</el-button>
+                <el-button
+                  v-if="row.deliver_type === 'link_card'"
+                  text
+                  type="success"
+                  :loading="replenishingId === row.id"
+                  @click="manualReplenish(row)"
+                >立即补货</el-button>
                 <el-button text type="danger" @click="removeBinding(row)">删除</el-button>
               </template>
             </el-table-column>
@@ -291,6 +307,26 @@
         <el-form-item label="库存告警阈值">
           <el-input-number v-model="bindingForm.lowStockAlert" :min="0" :max="10000" />
         </el-form-item>
+        <template v-if="bindingForm.deliverType === 'link_card'">
+          <el-form-item label="自动补货">
+            <el-switch v-model="bindingForm.autoReplenishEnabled" active-text="开启" inactive-text="关闭" />
+            <div class="hint-text" style="margin-top: 6px; width: 100%">
+              池库存或云端可领 ≤ 阈值时：先调用心象测「生成链接」，再领取导入本地池并刷新展示。自动发货仍走云端按单分配。
+            </div>
+          </el-form-item>
+          <el-form-item v-if="bindingForm.autoReplenishEnabled" label="触发阈值">
+            <el-input-number v-model="bindingForm.autoReplenishThreshold" :min="0" :max="10000" />
+            <span class="hint-text" style="margin-left: 8px">池库存/云端可领低于此值触发</span>
+          </el-form-item>
+          <el-form-item v-if="bindingForm.autoReplenishEnabled" label="每次补充">
+            <el-input-number v-model="bindingForm.autoReplenishCount" :min="1" :max="50" />
+            <span class="hint-text" style="margin-left: 8px">条（≤50，受云端额度限制）</span>
+          </el-form-item>
+          <el-form-item v-if="bindingForm.autoReplenishEnabled" label="巡检间隔">
+            <el-input-number v-model="bindingForm.autoReplenishIntervalSec" :min="60" :max="86400" :step="60" />
+            <span class="hint-text" style="margin-left: 8px">秒（同测题最短间隔）</span>
+          </el-form-item>
+        </template>
       </el-form>
       <template #footer>
         <el-button @click="showBinding = false">取消</el-button>
@@ -409,6 +445,7 @@ const psyTests = ref<Array<{ test_code: string; test_name?: string; name?: strin
 const psyTestsLoading = ref(false)
 const claimCount = ref(20)
 const claiming = ref(false)
+const replenishingId = ref<number | null>(null)
 const cloudInventory = ref<{ unclaimed_unused: number; claimed_unused: number; used: number } | null>(null)
 const bindCloudInventory = ref<{ unclaimed_unused: number; claimed_unused: number; used: number } | null>(null)
 const bindInvLoading = ref(false)
@@ -436,7 +473,11 @@ const bindingForm = ref({
   randomMode: false,
   uidLength: 10,
   sendIntervalMs: 500,
-  lowStockAlert: 10
+  lowStockAlert: 10,
+  autoReplenishEnabled: false,
+  autoReplenishThreshold: 10,
+  autoReplenishCount: 20,
+  autoReplenishIntervalSec: 300
 })
 
 const sharedPools = ref<
@@ -703,7 +744,11 @@ const quickBindGoods = (g: { itemId: string; title: string }) => {
     randomMode: false,
     uidLength: 10,
     sendIntervalMs: 500,
-    lowStockAlert: 10
+    lowStockAlert: 10,
+    autoReplenishEnabled: false,
+    autoReplenishThreshold: 10,
+    autoReplenishCount: 20,
+    autoReplenishIntervalSec: 300
   }
   showBinding.value = true
   void loadPsyTests()
@@ -768,7 +813,11 @@ const openBindingDialog = (row?: ProductBinding) => {
       randomMode: !!row.random_mode,
       uidLength: row.uid_length ?? 10,
       sendIntervalMs: row.send_interval_ms ?? 500,
-      lowStockAlert: row.low_stock_alert ?? 10
+      lowStockAlert: row.low_stock_alert ?? 10,
+      autoReplenishEnabled: !!row.auto_replenish_enabled,
+      autoReplenishThreshold: row.auto_replenish_threshold ?? row.low_stock_alert ?? 10,
+      autoReplenishCount: row.auto_replenish_count ?? 20,
+      autoReplenishIntervalSec: row.auto_replenish_interval_sec ?? 300
     }
   } else {
     bindingForm.value = {
@@ -781,7 +830,11 @@ const openBindingDialog = (row?: ProductBinding) => {
       randomMode: false,
       uidLength: 10,
       sendIntervalMs: 500,
-      lowStockAlert: 10
+      lowStockAlert: 10,
+      autoReplenishEnabled: false,
+      autoReplenishThreshold: 10,
+      autoReplenishCount: 20,
+      autoReplenishIntervalSec: 300
     }
   }
   showBinding.value = true
@@ -947,7 +1000,12 @@ const saveBinding = async (claimAfter = false) => {
     randomMode: bindingForm.value.randomMode,
     uidLength: bindingForm.value.uidLength,
     sendIntervalMs: bindingForm.value.sendIntervalMs,
-    lowStockAlert: bindingForm.value.lowStockAlert
+    lowStockAlert: bindingForm.value.lowStockAlert,
+    autoReplenishEnabled:
+      bindingForm.value.deliverType === 'link_card' ? bindingForm.value.autoReplenishEnabled : false,
+    autoReplenishThreshold: bindingForm.value.autoReplenishThreshold,
+    autoReplenishCount: bindingForm.value.autoReplenishCount,
+    autoReplenishIntervalSec: bindingForm.value.autoReplenishIntervalSec
   }
 
   const openCards =
@@ -1058,6 +1116,32 @@ const claimFromCloud = async () => {
   }
 }
 
+const manualReplenish = async (row: ProductBinding) => {
+  if (!window.electronAPI?.psyAutoReplenishNow) return
+  const st = await window.electronAPI.psyStatus?.()
+  if (!st?.hasToken) {
+    ElMessage.info('请先登录心象测获取对接 Token')
+    await window.electronAPI.psyOpenLoginWindow?.()
+    return
+  }
+  replenishingId.value = row.id
+  try {
+    const res = await window.electronAPI.psyAutoReplenishNow(row.id)
+    if (res.added > 0 || res.generated > 0) {
+      ElMessage.success(res.message || '补货完成')
+    } else {
+      ElMessage.warning(res.message || '未补入新链接')
+    }
+    await loadData()
+    if (showCards.value && cardBindingId.value === row.id) {
+      await loadCards()
+      await refreshCloudInventory()
+    }
+  } finally {
+    replenishingId.value = null
+  }
+}
+
 const loadCards = async () => {
   if (!window.electronAPI) return
   cardStats.value = await window.electronAPI.getCardStats(cardBindingId.value)
@@ -1095,6 +1179,7 @@ const disableOrder = async (row: OrderDelivery) => {
 }
 
 let offGoodsSync: (() => void) | null = null
+let offAutoReplenish: (() => void) | null = null
 
 onMounted(async () => {
   if (window.electronAPI) {
@@ -1112,6 +1197,17 @@ onMounted(async () => {
         ElMessage.warning({ message: res.error, duration: 8000 })
       }
     })
+    offAutoReplenish = window.electronAPI.onPsyAutoReplenish?.((evt) => {
+      if (!evt) return
+      if (evt.added > 0 || evt.generated > 0) {
+        ElMessage.success(evt.message || '自动补货完成')
+        void loadData()
+        if (showCards.value && cardBindingId.value === evt.bindingId) {
+          void loadCards()
+          void refreshCloudInventory()
+        }
+      }
+    }) || null
   }
 })
 
@@ -1126,6 +1222,8 @@ watch(
 onUnmounted(() => {
   offGoodsSync?.()
   offGoodsSync = null
+  offAutoReplenish?.()
+  offAutoReplenish = null
 })
 </script>
 

@@ -33,6 +33,15 @@ export function focusAssistantMainWindow(): void {
     if (!isBackgroundWin(w)) continue
     try {
       w.setSkipTaskbar(true)
+      // IM 客服窗禁止 hide()：会暂停渲染导致发码失败；用透明+屏幕外压住「小白框」
+      if ((w as any).__isAgisoImWindow) {
+        ;(w as any).__allowShow = false
+        w.setOpacity(0)
+        w.setFocusable(false)
+        w.setIgnoreMouseEvents(true)
+        w.setBounds({ x: -32000, y: -32000, width: 1100, height: 760 })
+        continue
+      }
       if (w.isVisible()) w.hide()
     } catch {
       /* ignore */
