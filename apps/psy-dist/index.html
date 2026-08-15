@@ -32,14 +32,21 @@
       href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/home.css?v=20260813h3" />
+    <link rel="stylesheet" href="/home.css?v=20260815a" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "心象测",
         "url": "https://psy.xhs365.cn/",
-        "description": "心理测试链接分销平台"
+        "description": "心理测试链接分销平台",
+        "email": "support@xhs365.cn",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "support@xhs365.cn",
+          "contactType": "customer support",
+          "availableLanguage": ["zh-CN"]
+        }
       }
     </script>
   </head>
@@ -54,6 +61,7 @@
       <nav class="topnav">
         <a href="#flow">怎么用</a>
         <a href="#tests">测题</a>
+        <a href="#pricing">定价</a>
         <a class="ghost" href="/login">登录</a>
         <a class="solid" href="/register">免费注册</a>
       </nav>
@@ -106,6 +114,43 @@
         </div>
       </section>
 
+      <section class="section pricing" id="pricing">
+        <h2 class="section-title reveal">公开定价</h2>
+        <p class="section-lead reveal">
+          按测评次数计费，注册可见完整收银台。以下价格无需登录即可查看；规则详见
+          <a href="/terms/">服务条款</a>。
+        </p>
+        <div class="price-grid">
+          <article class="price-card reveal">
+            <h3>分销额度 · 100 次</h3>
+            <p class="price-amount"><span class="currency">¥</span>59</p>
+            <p class="price-desc">约 ¥0.59 / 次 · 有效期 365 天</p>
+            <ul>
+              <li>100 次测评链接生成额度</li>
+              <li>测完即看完整报告</li>
+              <li>后台管理链接与额度</li>
+            </ul>
+            <a class="btn secondary" href="/register">注册后购买</a>
+          </article>
+          <article class="price-card featured reveal delay-1">
+            <p class="price-badge">推荐</p>
+            <h3>分销额度 · 500 次</h3>
+            <p class="price-amount"><span class="currency">¥</span>199</p>
+            <p class="price-desc">约 ¥0.40 / 次 · 有效期 365 天</p>
+            <ul>
+              <li>500 次测评链接生成额度</li>
+              <li>测完即看完整报告</li>
+              <li>适合持续分销投放</li>
+            </ul>
+            <a class="btn primary" href="/register">注册后购买</a>
+          </article>
+        </div>
+        <p class="price-note reveal">
+          新用户注册即送少量试用额度。支付由 Waffo Pancake 处理，我们不存储完整银行卡号。更多说明见
+          <a href="/pricing/">定价页</a>。
+        </p>
+      </section>
+
       <section class="section close">
         <h2 class="section-title reveal">从一条链接开始</h2>
         <p class="section-lead reveal">注册即送少量试用额度，进入后台即可生成第一支测试链接。</p>
@@ -121,13 +166,21 @@
         <strong>心象测</strong>
       </div>
       <p class="footer-note">测评结果仅供参考，不能替代专业医疗诊断。</p>
+      <p class="footer-contact">
+        客服邮箱：
+        <a href="mailto:support@xhs365.cn">support@xhs365.cn</a>
+        · 隐私：
+        <a href="mailto:privacy@xhs365.cn">privacy@xhs365.cn</a>
+        · 服务时间：周一至周五 09:00–18:00（UTC+8）
+      </p>
       <p class="footer-links">
+        <a href="/pricing/">定价</a>
         <a href="/terms/">服务条款</a>
         <a href="/privacy/">隐私政策</a>
       </p>
       <p class="footer-copy">© <span id="y"></span> 心象测</p>
     </footer>
 
-    <script src="/home.js?v=20260813h3" defer></script>
+    <script src="/home.js?v=20260815a" defer></script>
   </body>
 </html>
