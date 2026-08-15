@@ -413,6 +413,19 @@ a {
   opacity: 0.8;
 }
 
+.footer-links {
+  margin: 0.55rem 0 0.25rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: var(--teal);
+  font-size: 0.92rem;
+  opacity: 1;
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(18px);
