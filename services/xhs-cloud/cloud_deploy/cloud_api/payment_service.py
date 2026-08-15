@@ -117,8 +117,8 @@ def list_public_plans() -> dict:
 
 
 def list_payment_channels() -> list[dict]:
-    """返回已配置凭证的支付方式（微信/支付宝 PID 独立）。"""
-    labels = {"wxpay": "微信支付", "alipay": "支付宝"}
+    """返回已配置凭证的支付方式（微信/支付宝/Waffo）。"""
+    labels = {"wxpay": "微信支付", "alipay": "支付宝", "waffo": "Card / International"}
     out: list[dict] = []
     for ch in ("wxpay", "alipay"):
         try:
@@ -126,7 +126,18 @@ def list_payment_channels() -> list[dict]:
             out.append({"channel": ch, "label": labels[ch]})
         except RuntimeError:
             continue
+    from cloud_deploy.cloud_api import waffo_pay
+
+    if waffo_pay.waffo_configured():
+        out.append({"channel": "waffo", "label": labels["waffo"], "psp": "waffo"})
     return out
+
+
+def _waffo_notify_url() -> str:
+    base = (get_settings().xhs_pay_notify_base or "").strip().rstrip("/")
+    if not base:
+        raise RuntimeError("未配置 XHS_PAY_NOTIFY_BASE")
+    return f"{base}/api/v1/payment/notify/waffo"
 
 
 def create_order(
@@ -136,8 +147,17 @@ def create_order(
     client_ip: str,
     channel: str = "wxpay",
     device: str = "pc",
+    currency: str | None = None,
+    country: str | None = None,
 ) -> dict:
-    from cloud_deploy.cloud_api.payment_plans import is_addon_plan, is_assess_plan, is_psy_dist_plan
+    from cloud_deploy.cloud_api.payment_plans import (
+        is_addon_plan,
+        is_assess_plan,
+        is_psy_dist_plan,
+        normalize_currency,
+        resolve_plan_amount,
+        resolve_psp_for_pay,
+    )
 
     plan = get_plan(plan_code)
     if not plan:
@@ -148,14 +168,29 @@ def create_order(
         profile = db.get_member_profile(int(user_id)) or {}
         if not profile.get("is_active"):
             raise ValueError("当前账号非有效会员，请购买非会员价或先开通会员")
+
     pay_channel = (channel or "wxpay").strip().lower()
-    if pay_channel not in ("wxpay", "alipay"):
-        raise ValueError("支付方式仅支持 wxpay 或 alipay")
+    if pay_channel in ("card", "international", "intl"):
+        pay_channel = "waffo"
+    country_code = (country or "").strip().upper()[:8]
+    cur = normalize_currency(currency, country=country_code)
+    amount_str, cur = resolve_plan_amount(plan, cur)
+    psp = resolve_psp_for_pay(currency=cur, channel=pay_channel)
+
+    if psp == "hwxun" and pay_channel not in ("wxpay", "alipay"):
+        pay_channel = "wxpay"
+    if psp == "waffo":
+        pay_channel = "waffo"
+        from cloud_deploy.cloud_api import waffo_pay
+
+        if not waffo_pay.waffo_configured():
+            raise RuntimeError("国际支付通道未配置（Waffo）")
+    elif pay_channel not in ("wxpay", "alipay"):
+        raise ValueError("支付方式仅支持 wxpay、alipay 或 waffo")
+
     pay_device = (device or "pc").strip().lower()
     if pay_device not in ("pc", "mobile", "wechat", "alipay", "jump"):
         pay_device = "pc"
-
-    # submit 跳转单不复用旧 mapi 扫码单（避免只有二维码没有收银台 URL）
 
     recent = db.count_recent_payment_orders(
         client_ip=client_ip or "",
@@ -183,53 +218,80 @@ def create_order(
         user_id=user_id,
         plan_code=plan["plan_code"],
         duration_days=int(plan["duration_days"]),
-        amount=plan["amount"],
+        amount=amount_str,
         channel=pay_channel,
         client_ip=client_ip,
         expires_at=expires_at,
+        currency=cur,
+        psp=psp,
+        country=country_code,
+        meta={"currency": cur, "psp": psp, "country": country_code},
     )
     if is_assess_plan(plan["plan_code"]):
         goods_name = f"心象测-{plan['label']}"
     elif is_addon_plan(plan["plan_code"]):
         goods_name = f"定制分析-{plan['label']}"
     elif is_psy_dist_plan(plan["plan_code"]):
-        goods_name = f"心理分销-{plan['label']}"
+        goods_name = plan.get("label_en") if cur != "CNY" else f"心理分销-{plan['label']}"
+        goods_name = goods_name or f"XinXiangCe-{plan['label']}"
     else:
         goods_name = f"AI选品会员-{plan['label']}"
 
-    # 微信/支付宝一律页面跳转 submit.php（对齐发卡网）
     qrcode = ""
     gateway_trade_no = ""
     pay_mode = "jump"
-    try:
-        payurl = build_epay_submit_url(
-            channel=pay_channel,
-            out_trade_no=order_no,
-            amount=plan["amount"],
-            name=goods_name,
-            notify_url=_notify_url(),
-            return_url=_return_url(order_no),
-            sitename="心象测",
+    payurl = ""
+
+    if psp == "waffo":
+        from cloud_deploy.cloud_api import waffo_pay
+
+        return_base = (get_settings().xhs_pay_notify_base or "").strip().rstrip("/")
+        success_url = f"{return_base}/admin/purchase-quota?paid_order={order_no}"
+        gw = waffo_pay.create_order(
+            merchant_order_id=order_no,
+            amount=amount_str,
+            currency=cur,
+            description=str(goods_name),
+            notify_url=_waffo_notify_url(),
+            success_redirect_url=success_url,
+            failed_redirect_url=success_url,
+            cancel_redirect_url=success_url,
+            user_id=str(user_id or "guest"),
+            goods_name=str(goods_name),
+            goods_url="https://psy.xhs365.cn/pricing/",
         )
-    except Exception:
-        # 降级 mapi（少见）
-        gw = create_epay_order(
-            channel=pay_channel,
-            out_trade_no=order_no,
-            amount=plan["amount"],
-            name=goods_name,
-            notify_url=_notify_url(),
-            clientip=client_ip,
-            device=pay_device if pay_device != "pc" else "mobile",
-        )
-        qrcode = str(gw.get("qrcode") or gw.get("code_url") or "").strip()
-        payurl = str(
-            gw.get("payurl") or gw.get("urlscheme") or gw.get("url") or ""
-        ).strip()
-        gateway_trade_no = str(gw.get("trade_no") or "").strip()
-        if not qrcode and not payurl:
-            raise RuntimeError("支付网关未返回支付链接")
-        pay_mode = "qrcode" if qrcode and not payurl else "jump"
+        payurl = gw["payurl"]
+        gateway_trade_no = gw.get("gateway_trade_no") or ""
+        pay_mode = "jump"
+    else:
+        try:
+            payurl = build_epay_submit_url(
+                channel=pay_channel,
+                out_trade_no=order_no,
+                amount=amount_str,
+                name=goods_name,
+                notify_url=_notify_url(),
+                return_url=_return_url(order_no),
+                sitename="心象测",
+            )
+        except Exception:
+            gw = create_epay_order(
+                channel=pay_channel,
+                out_trade_no=order_no,
+                amount=amount_str,
+                name=goods_name,
+                notify_url=_notify_url(),
+                clientip=client_ip,
+                device=pay_device if pay_device != "pc" else "mobile",
+            )
+            qrcode = str(gw.get("qrcode") or gw.get("code_url") or "").strip()
+            payurl = str(
+                gw.get("payurl") or gw.get("urlscheme") or gw.get("url") or ""
+            ).strip()
+            gateway_trade_no = str(gw.get("trade_no") or "").strip()
+            if not qrcode and not payurl:
+                raise RuntimeError("支付网关未返回支付链接")
+            pay_mode = "qrcode" if qrcode and not payurl else "jump"
 
     db.update_payment_order_gateway(
         order_no,
@@ -241,7 +303,10 @@ def create_order(
         "order_no": order_no,
         "plan_code": plan["plan_code"],
         "plan_label": plan["label"],
-        "amount": plan["amount"],
+        "amount": amount_str,
+        "currency": cur,
+        "psp": psp,
+        "country": country_code,
         "duration_days": plan["duration_days"],
         "qrcode": qrcode,
         "payurl": payurl,
@@ -275,6 +340,9 @@ def get_order_public(order_no: str) -> dict | None:
         "payurl": row.get("payurl") or "",
         "fulfilled": fulfilled,
         "channel": row.get("channel") or "wxpay",
+        "currency": row.get("currency") or "CNY",
+        "psp": row.get("psp") or "hwxun",
+        "country": row.get("country") or "",
     }
     if row["status"] == "paid":
         if fulfilled:
@@ -627,3 +695,171 @@ def handle_hwxun_notify(params: dict) -> str:
                     )
                 return "fail"
     return "success"
+
+
+def _fulfill_psy_dist_paid(row: dict, *, order_no: str, gateway_trade_no: str, paid_at: str) -> str:
+    """标记已付并履约额度；成功返回 success，否则 fail。"""
+    from cloud_deploy.cloud_api.payment_plans import is_psy_dist_plan
+
+    if not is_psy_dist_plan(row["plan_code"]):
+        return "fail"
+    ok = db.mark_payment_order_paid(
+        order_no,
+        gateway_trade_no=gateway_trade_no,
+        auth_code="",
+        paid_at=paid_at,
+    )
+    if not ok:
+        ok = db.mark_payment_order_paid_force(
+            order_no,
+            gateway_trade_no=gateway_trade_no,
+            auth_code="",
+            paid_at=paid_at,
+        )
+    if not ok:
+        return "fail"
+    user_id = row.get("user_id")
+    if not user_id:
+        return "fail"
+    try:
+        from cloud_deploy.cloud_api import dist_service
+
+        dist_service.fulfill_quota_from_payment(int(user_id), row["plan_code"], order_no)
+        if not db.mark_payment_order_fulfilled(order_no, int(user_id)):
+            refreshed = db.get_payment_order(order_no) or {}
+            if refreshed.get("fulfilled_user_id"):
+                return "success"
+            return "fail"
+        return "success"
+    except Exception as e:
+        logger.exception(
+            "psy_dist quota fulfill failed order_no=%s user_id=%s",
+            order_no,
+            user_id,
+        )
+        try:
+            db.mark_payment_order_fulfill_error(
+                order_no,
+                error=f"psy_dist_failed: {type(e).__name__}: {e}",
+            )
+        except Exception:
+            pass
+        return "fail"
+
+
+def handle_waffo_notify(raw_body: str, signature: str) -> tuple[str, str]:
+    """处理 Waffo Webhook。返回 (response_json, response_signature)。"""
+    from cloud_deploy.cloud_api import waffo_pay
+    from cloud_deploy.cloud_api.payment_plans import is_psy_dist_plan
+
+    def _resp(msg: str) -> tuple[str, str]:
+        return waffo_pay.webhook_response(msg)
+
+    if not waffo_pay.verify_waffo_signature(raw_body, signature or ""):
+        return _resp("failed")
+    try:
+        body = json.loads(raw_body) if raw_body else {}
+    except json.JSONDecodeError:
+        return _resp("failed")
+    if not isinstance(body, dict):
+        return _resp("failed")
+
+    parsed = waffo_pay.parse_payment_notification(body)
+    order_no = parsed["merchant_order_id"]
+    status = parsed["order_status"]
+    if not order_no:
+        return _resp("failed")
+
+    # 非终态成功：确认收到即可，避免无谓重试
+    if status and status not in ("PAY_SUCCESS", "SUCCESS", "PAID"):
+        if status in ("PAY_IN_PROGRESS", "AUTHORIZATION_REQUIRED", "AUTHED_WAITING_CAPTURE"):
+            return _resp("success")
+        # ORDER_CLOSE 等：标记成功接收，不履约
+        return _resp("success")
+
+    row = db.get_payment_order(order_no)
+    if not row:
+        return _resp("failed")
+
+    money = parsed["order_amount"] or row.get("amount") or ""
+    currency = (parsed["order_currency"] or row.get("currency") or "USD").upper()
+    row_cur = (row.get("currency") or "CNY").upper()
+    if currency and row_cur and currency != row_cur:
+        logger.warning(
+            "waffo currency mismatch order=%s notify=%s row=%s",
+            order_no,
+            currency,
+            row_cur,
+        )
+        return _resp("failed")
+    try:
+        if money and f"{float(row['amount']):.2f}" != f"{float(money):.2f}":
+            # IDR/VND 可能无小数
+            if abs(float(row["amount"]) - float(money)) > 0.011:
+                return _resp("failed")
+    except (TypeError, ValueError):
+        return _resp("failed")
+
+    gateway_trade_no = parsed["acquiring_order_id"] or (row.get("gateway_trade_no") or "")
+    paid_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    if row["status"] == "paid":
+        if row.get("fulfilled_user_id"):
+            return _resp("success")
+        if is_psy_dist_plan(row["plan_code"]) and row.get("user_id"):
+            try:
+                from cloud_deploy.cloud_api import dist_service
+
+                dist_service.fulfill_quota_from_payment(
+                    int(row["user_id"]), row["plan_code"], order_no
+                )
+                db.mark_payment_order_fulfilled(order_no, int(row["user_id"]))
+            except Exception:
+                logger.exception("waffo psy_dist retry fulfill failed order_no=%s", order_no)
+                return _resp("failed")
+        return _resp("success")
+
+    if is_psy_dist_plan(row["plan_code"]):
+        result = _fulfill_psy_dist_paid(
+            row, order_no=order_no, gateway_trade_no=gateway_trade_no, paid_at=paid_at
+        )
+        return _resp("success" if result == "success" else "failed")
+
+    # 非分销套餐：走授权码路径（与 hwxun 一致）
+    note = _payment_fulfillment_note(order_no, "waffo", row["plan_code"])
+    codes = db.generate_auth_codes(
+        count=1,
+        plan_code=row["plan_code"],
+        duration_days=int(row["duration_days"]),
+        max_activations=1,
+        note=note,
+    )
+    auth_code = codes[0] if codes else ""
+    ok = db.mark_payment_order_paid(
+        order_no,
+        gateway_trade_no=gateway_trade_no,
+        auth_code=auth_code,
+        paid_at=paid_at,
+    )
+    if not ok:
+        ok = db.mark_payment_order_paid_force(
+            order_no,
+            gateway_trade_no=gateway_trade_no,
+            auth_code=auth_code,
+            paid_at=paid_at,
+        )
+    if not ok:
+        return _resp("failed")
+    user_id = row.get("user_id")
+    if user_id and auth_code:
+        from cloud_deploy.cloud_api.payment_plans import is_addon_plan
+
+        if not is_addon_plan(row["plan_code"]):
+            try:
+                db.renew_with_auth_code(int(user_id), auth_code)
+                db.mark_payment_order_fulfilled(order_no, int(user_id))
+            except Exception:
+                logger.exception("waffo renew fulfill failed order_no=%s", order_no)
+                return _resp("failed")
+    return _resp("success")
+

@@ -213,28 +213,86 @@ def list_active_plans(*, include_addons: bool = False) -> list[dict]:
     return plans
 
 
+# 多币种价目（ISO 4217）。CNY 与 amount/price_yuan 保持一致；国际价可按市场调。
 PSY_DIST_PAYMENT_PLANS: tuple[dict, ...] = (
     {
         "plan_code": "psy_quota_100",
         "label": "分销额度·100次",
+        "label_en": "Quota · 100 credits",
         "duration_days": 365,
         "amount": "59.00",
         "price_yuan": 59,
+        "prices": {
+            "CNY": "59.00",
+            "USD": "8.99",
+            "GBP": "6.99",
+            "AUD": "13.90",
+            "CAD": "12.90",
+            "SGD": "11.90",
+            "MYR": "39.90",
+            "IDR": "145000",
+            "THB": "299.00",
+            "VND": "229000",
+            "PHP": "499.00",
+        },
         "quota_amount": 100,
         "summary": "100 次测评链接生成额度",
+        "summary_en": "100 assessment-link generation credits",
         "product": "psy_dist",
     },
     {
         "plan_code": "psy_quota_500",
         "label": "分销额度·500次",
+        "label_en": "Quota · 500 credits",
         "duration_days": 365,
         "amount": "199.00",
         "price_yuan": 199,
+        "prices": {
+            "CNY": "199.00",
+            "USD": "28.90",
+            "GBP": "22.90",
+            "AUD": "44.90",
+            "CAD": "39.90",
+            "SGD": "38.90",
+            "MYR": "129.00",
+            "IDR": "475000",
+            "THB": "990.00",
+            "VND": "749000",
+            "PHP": "1690.00",
+        },
         "quota_amount": 500,
         "summary": "500 次测评链接生成额度",
+        "summary_en": "500 assessment-link generation credits",
         "product": "psy_dist",
         "recommended": True,
     },
+)
+
+# 国家/地区 → 默认币种（ISO 3166-1 alpha-2）
+COUNTRY_CURRENCY: dict[str, str] = {
+    "CN": "CNY",
+    "US": "USD",
+    "GB": "GBP",
+    "AU": "AUD",
+    "NZ": "NZD",
+    "CA": "CAD",
+    "SG": "SGD",
+    "MY": "MYR",
+    "ID": "IDR",
+    "TH": "THB",
+    "VN": "VND",
+    "PH": "PHP",
+    "HK": "HKD",
+}
+
+# NZD / HKD 回退到邻近价目（一期未单独定价时用 USD/SGD）
+_CURRENCY_FALLBACK: dict[str, str] = {
+    "NZD": "AUD",
+    "HKD": "SGD",
+}
+
+INTL_CURRENCIES = frozenset(
+    {"USD", "GBP", "AUD", "CAD", "SGD", "MYR", "IDR", "THB", "VND", "PHP", "NZD", "HKD"}
 )
 
 
@@ -277,6 +335,65 @@ def is_psy_dist_plan(plan_code: str) -> bool:
 
 def list_psy_dist_plans() -> list[dict]:
     return list(PSY_DIST_PAYMENT_PLANS)
+
+
+def normalize_currency(currency: str | None, *, country: str | None = None) -> str:
+    cur = (currency or "").strip().upper()
+    if cur:
+        return cur
+    cc = (country or "").strip().upper()
+    if cc in COUNTRY_CURRENCY:
+        return COUNTRY_CURRENCY[cc]
+    return "CNY"
+
+
+def resolve_plan_amount(plan: dict, currency: str | None = None) -> tuple[str, str]:
+    """返回 (amount_str, currency)。无该币种价则回退 CNY。"""
+    cur = normalize_currency(currency)
+    cur = _CURRENCY_FALLBACK.get(cur, cur)
+    prices = plan.get("prices") if isinstance(plan.get("prices"), dict) else {}
+    if cur in prices and prices[cur] is not None:
+        raw = prices[cur]
+        if cur in ("IDR", "VND"):
+            # 零小数币种仍用整数字符串
+            return str(int(float(raw))), cur
+        return f"{float(raw):.2f}", cur
+    return str(plan.get("amount") or "0.00"), "CNY"
+
+
+def resolve_psp_for_pay(*, currency: str, channel: str = "") -> str:
+    """CNY + 微信/支付宝 → hwxun；其它国际币种或 waffo 渠道 → waffo。"""
+    ch = (channel or "").strip().lower()
+    cur = (currency or "CNY").strip().upper()
+    if ch in ("waffo", "card", "international"):
+        return "waffo"
+    if ch in ("wxpay", "alipay") and cur == "CNY":
+        return "hwxun"
+    if cur == "CNY" and ch in ("", "wxpay", "alipay"):
+        return "hwxun"
+    if cur in INTL_CURRENCIES or cur != "CNY":
+        return "waffo"
+    return "hwxun"
+
+
+def public_plan_row(plan: dict, *, currency: str | None = None, locale: str = "zh-CN") -> dict:
+    amount, cur = resolve_plan_amount(plan, currency)
+    use_en = (locale or "").lower().startswith("en")
+    row = {
+        "plan_code": plan["plan_code"],
+        "label": (plan.get("label_en") if use_en and plan.get("label_en") else plan.get("label")),
+        "duration_days": plan.get("duration_days"),
+        "amount": amount,
+        "currency": cur,
+        "price_yuan": plan.get("price_yuan"),
+        "summary": (plan.get("summary_en") if use_en and plan.get("summary_en") else plan.get("summary")),
+        "quota_amount": plan.get("quota_amount"),
+        "product": plan.get("product"),
+        "prices": dict(plan.get("prices") or {}),
+    }
+    if plan.get("recommended"):
+        row["recommended"] = True
+    return row
 
 
 def resolve_custom_analysis_plan(*, is_active_member: bool) -> str:

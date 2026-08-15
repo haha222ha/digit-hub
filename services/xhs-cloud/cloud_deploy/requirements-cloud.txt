@@ -8,3 +8,4 @@ segno>=1.6.0
 curl_cffi>=0.6.0
 DrissionPage>=4.0.0
 PyYAML>=6.0
+cryptography>=42.0.0

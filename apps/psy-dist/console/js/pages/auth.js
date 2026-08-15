@@ -7,25 +7,88 @@ function goMarketingHome(e) {
   location.assign("/");
 }
 
+function homeLink(label = "查看营销首页") {
+  return el("a", {
+    href: "/",
+    text: label,
+    onClick: goMarketingHome,
+  });
+}
+
+function loadAuthMarketingPreview(host) {
+  if (!host) return;
+  fetch("/api/stats/homepage", { headers: { Accept: "application/json" } })
+    .then((res) => (res.ok ? res.json() : null))
+    .then((body) => {
+      const data = (body && body.data) || body || {};
+      const stats = data.stats || {};
+      const tests = Number(stats.tests_catalog || stats.tests_homepage || 0);
+      const links = Number(stats.links_total || 0);
+      const done = Number(stats.completions_total || 0);
+      host.replaceChildren(
+        el("div", { className: "auth-marketing" }, [
+          el("h2", { className: "auth-marketing-title", text: "把心理测试，做成可分发的链接" }),
+          el("p", {
+            className: "auth-marketing-lead",
+            text: "生成专属测试链接发给用户。测完即出完整报告，后台管额度、管链接。",
+          }),
+          el("div", { className: "auth-marketing-stats" }, [
+            tests > 0 ? el("span", { className: "auth-marketing-stat", text: `${tests} 测评项目` }) : null,
+            links > 0 ? el("span", { className: "auth-marketing-stat", text: `${links} 链接已生成` }) : null,
+            done > 0 ? el("span", { className: "auth-marketing-stat", text: `${done} 次测评完成` }) : null,
+          ]),
+          el("button", {
+            className: "btn btn-ghost auth-marketing-btn",
+            type: "button",
+            text: "打开完整营销首页 →",
+            onClick: goMarketingHome,
+          }),
+        ])
+      );
+    })
+    .catch(() => {
+      host.replaceChildren(
+        el("button", {
+          className: "btn btn-ghost auth-marketing-btn",
+          type: "button",
+          text: "查看心象测介绍页 →",
+          onClick: goMarketingHome,
+        })
+      );
+    });
+}
+
 function authShell(title, sub, formNode, footerLinks) {
+  const marketingHost = el("div", { className: "auth-marketing-host" });
+  loadAuthMarketingPreview(marketingHost);
   return el("div", { className: "auth-screen" }, [
     el("aside", { className: "auth-brand" }, [
       el("a", { className: "auth-brand-link", href: "/", onClick: goMarketingHome }, [
         el("img", { className: "mark", src: "/images/logo.svg?v=5", alt: "心象测" }),
         el("h1", { text: "心象测" }),
       ]),
+      marketingHost,
       el("p", {
+        className: "auth-brand-note",
         text: "商家工作台：生成测试链接、管理额度。额度兑换码仅用于充值，不能当登录码。",
       }),
       el("a", {
         className: "auth-home-link",
         href: "/",
-        text: "← 返回营销首页",
+        text: "← 返回营销首页（psy.xhs365.cn/）",
         onClick: goMarketingHome,
       }),
     ]),
     el("section", { className: "auth-panel" }, [
       el("div", { className: "auth-card" }, [
+        el("p", { className: "auth-visitor-banner" }, [
+          el("span", { text: "这是商家后台登录页。" }),
+          el("a", {
+            href: "/",
+            text: "访客请访问营销首页 →",
+            onClick: goMarketingHome,
+          }),
+        ]),
         el("h2", { text: title }),
         el("p", { className: "sub", text: sub }),
         formNode,
@@ -132,7 +195,7 @@ export function renderLogin(root) {
         text: "忘记密码",
         onClick: (e) => linkClick(e, "/reset-password"),
       }),
-      el("a", { href: "/", text: "首页" }),
+      homeLink("营销首页"),
     ])
   );
 }
@@ -188,7 +251,7 @@ export function renderRegister(root) {
   root.append(
     authShell("注册商家账号", "注册即送少量试用额度；邀请奖励在好友首次购额后按比例返还。", box, [
       el("a", { href: "/login", text: "已有账号？登录", onClick: (e) => linkClick(e, "/login") }),
-      el("a", { href: "/", text: "返回首页" }),
+      homeLink("营销首页"),
     ])
   );
 }
@@ -236,7 +299,7 @@ export function renderReset(root) {
   root.append(
     authShell("授权码找回密码", "仅会员授权码可用；额度兑换码请登录后兑换。", box, [
       el("a", { href: "/login", text: "返回登录", onClick: (e) => linkClick(e, "/login") }),
-      el("a", { href: "/", text: "首页" }),
+      homeLink("营销首页"),
     ])
   );
 }

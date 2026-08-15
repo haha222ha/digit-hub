@@ -89,5 +89,15 @@
     }
   }
 
+  function showWorkbenchBar() {
+    if (!localStorage.getItem("xx_psy_token")) return;
+    const bar = document.createElement("div");
+    bar.className = "home-session-bar";
+    bar.innerHTML =
+      '<span>已登录商家账号</span><a href="/admin/dashboard">进入工作台 →</a>';
+    document.body.appendChild(bar);
+  }
+
   loadHomepage();
+  showWorkbenchBar();
 })();

@@ -1,0 +1,21 @@
+{
+  "purchase.title": "购买额度",
+  "purchase.lead": "在线支付后额度自动到账。若你是被邀请注册，首购将给邀请人返利（默认购额 20%）。",
+  "purchase.wechat": "微信支付",
+  "purchase.alipay": "支付宝",
+  "purchase.waffo": "国际卡支付",
+  "purchase.pay_now": "立即支付",
+  "purchase.success": "支付成功，额度已到账",
+  "purchase.rebate": "邀请返利比例：{pct}%（仅被邀请用户的首次购额）。",
+  "auth.login": "登录",
+  "auth.register": "注册",
+  "auth.reset": "重置密码",
+  "nav.dashboard": "工作台",
+  "nav.generate": "生成链接",
+  "nav.links": "链接管理",
+  "nav.purchase": "购买额度",
+  "common.loading": "加载中…",
+  "common.error": "出错了",
+  "lang.zh": "中文",
+  "lang.en": "English"
+}

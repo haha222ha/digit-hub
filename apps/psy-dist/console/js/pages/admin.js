@@ -12,6 +12,7 @@ import {
   attachBackToTop,
 } from "../ui.js";
 import { navigate, linkClick } from "../router.js";
+import { t, locale as uiLocale } from "../i18n.js";
 
 const NAV = [
   { path: "/admin/dashboard", label: "工作台" },
@@ -1173,32 +1174,71 @@ function renderPackageDocList(docs, packages) {
 export async function renderPurchase(root) {
   const host = el("div", { className: "purchase-page" });
   let selectedMethod = "wxpay";
-  const payWx = el("button", { className: "pay-method-btn active", type: "button", text: "微信支付" });
-  const payAli = el("button", { className: "pay-method-btn", type: "button", text: "支付宝" });
+  let currency = uiLocale() === "en" ? "USD" : "CNY";
+  let country = "";
+  try {
+    const meta = document.querySelector('meta[name="cf-ipcountry"]');
+    if (meta && meta.content) country = String(meta.content).toUpperCase();
+    if (!country && sessionStorage.getItem("psy_cf_cc")) country = sessionStorage.getItem("psy_cf_cc");
+  } catch (e) {}
+  try {
+    if (!country && window.PsyLocale && typeof window.PsyLocale.fetchGeo === "function") {
+      await window.PsyLocale.fetchGeo();
+      country = (window.__PSY_CF_COUNTRY || sessionStorage.getItem("psy_cf_cc") || "").toUpperCase();
+    } else if (!country) {
+      const geo = await fetch("/api/v1/geo", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null));
+      if (geo && geo.country) {
+        country = String(geo.country).toUpperCase();
+        try {
+          sessionStorage.setItem("psy_cf_cc", country);
+        } catch (e) {}
+      }
+      if (geo && geo.currency && uiLocale() === "en") currency = geo.currency;
+    }
+  } catch (e) {}
+  const payWx = el("button", { className: "pay-method-btn active", type: "button", text: t("purchase.wechat") });
+  const payAli = el("button", { className: "pay-method-btn", type: "button", text: t("purchase.alipay") });
+  const payWaffo = el("button", {
+    className: "pay-method-btn",
+    type: "button",
+    text: t("purchase.waffo"),
+    style: "display:none",
+  });
   payWx.addEventListener("click", () => {
     selectedMethod = "wxpay";
     payWx.classList.add("active");
     payAli.classList.remove("active");
+    payWaffo.classList.remove("active");
   });
   payAli.addEventListener("click", () => {
     selectedMethod = "alipay";
     payAli.classList.add("active");
     payWx.classList.remove("active");
+    payWaffo.classList.remove("active");
   });
-  const payMethods = el("div", { className: "pay-methods" }, [payWx, payAli]);
+  payWaffo.addEventListener("click", () => {
+    selectedMethod = "waffo";
+    payWaffo.classList.add("active");
+    payWx.classList.remove("active");
+    payAli.classList.remove("active");
+  });
+  const payMethods = el("div", { className: "pay-methods" }, [payWx, payAli, payWaffo]);
   const wechatTip = isWechatBrowser()
     ? el("p", {
         className: "wechat-tip",
-        text: "当前在微信内打开，将跳转易支付收银台完成支付（与发卡网相同）。",
+        text:
+          uiLocale() === "en"
+            ? "Opened in WeChat — you will be redirected to the payment cashier."
+            : "当前在微信内打开，将跳转易支付收银台完成支付（与发卡网相同）。",
       })
     : null;
 
   root.append(
     shell("/admin/purchase-quota", [
-      el("h1", { className: "page-title", text: "购买额度" }),
+      el("h1", { className: "page-title", text: t("purchase.title") }),
       el("p", {
         className: "page-lead",
-        text: "在线支付后额度自动到账。若你是被邀请注册，首购将给邀请人返利（默认购额 20%）。",
+        text: t("purchase.lead"),
       }),
       payMethods,
       wechatTip,
@@ -1222,7 +1262,7 @@ export async function renderPurchase(root) {
   }
 
   async function afterPaySuccess() {
-    showToast("支付成功，额度已到账");
+    showToast(t("purchase.success"));
     await refreshSessionQuota();
     navigate("/admin/dashboard");
   }
@@ -1319,19 +1359,48 @@ export async function renderPurchase(root) {
   try {
     const [pkgData, methods, cfg, docData] = await Promise.all([
       api.packagesList().catch(() => ({ packages: [] })),
-      api.purchaseMethods().catch(() => ({})),
+      api.purchaseMethods({ country, currency }).catch(() => ({})),
       api.customerService().catch(() => ({})),
       api.packageDocuments().catch(() => ({ documents: [] })),
     ]);
-    if (!methods.wechat && !methods.alipay) payMethods.style.display = "none";
-    if (methods.wechat === false) payWx.disabled = true;
-    if (methods.alipay === false) payAli.disabled = true;
-    if (methods.alipay && !methods.wechat) {
+    if (methods.currency) currency = methods.currency;
+    const showWx = !!methods.wechat;
+    const showAli = !!methods.alipay;
+    const showWaffo = !!methods.waffo;
+    if (!showWx) payWx.style.display = "none";
+    if (!showAli) payAli.style.display = "none";
+    if (showWaffo) {
+      payWaffo.style.display = "";
+      if (!showWx && !showAli) {
+        selectedMethod = "waffo";
+        payWaffo.classList.add("active");
+        payWx.classList.remove("active");
+      }
+    }
+    if (!showWx && !showAli && !showWaffo) payMethods.style.display = "none";
+    if (showAli && !showWx && !showWaffo) {
       selectedMethod = "alipay";
       payAli.classList.add("active");
       payWx.classList.remove("active");
     }
-    const packages = (pkgData && pkgData.packages) || [];
+    let packages = (pkgData && pkgData.packages) || [];
+    if (methods.plans && methods.plans.length) {
+      const byCode = Object.fromEntries(methods.plans.map((p) => [p.plan_code, p]));
+      packages = packages.map((p) => {
+        const code = p.plan_code || p.planCode;
+        const hit = code && byCode[code];
+        if (!hit) return p;
+        return {
+          ...p,
+          name: hit.label || p.name,
+          price_yuan: hit.amount,
+          amount: hit.amount,
+          currency: hit.currency || currency,
+          quota_amount: hit.quota_amount || p.quota_amount,
+          recommended: hit.recommended || p.recommended,
+        };
+      });
+    }
     const allDocs = (docData && (docData.documents || docData.list)) || [];
     const globalDocs = allDocs.filter((d) => Number(d.package_id ?? d.packageId ?? 0) === 0);
     if (!packages.length) {
@@ -1354,10 +1423,12 @@ export async function renderPurchase(root) {
     host.append(
       el("p", {
         className: "muted",
-        text: `邀请返利比例：${rebate}%（仅被邀请用户的首次购额）。`,
+        text: t("purchase.rebate", { pct: rebate }),
       })
     );
     const grid = el("div", { className: "plans-grid" });
+    const symMap = { CNY: "¥", USD: "$", GBP: "£", AUD: "A$", CAD: "C$", SGD: "S$" };
+    const sym = symMap[currency] || (currency === "CNY" ? "¥" : `${currency} `);
     packages.forEach((p, idx) => {
       const id = p.id || p.package_id || p.list_id;
       const pkgIds = packageDocIds(p);
@@ -1374,17 +1445,25 @@ export async function renderPurchase(root) {
       const btn = el("button", {
         className: `plan-buy-btn theme-${theme}`,
         type: "button",
-        text: "立即支付",
+        text: t("purchase.pay_now"),
       });
       btn.addEventListener("click", async () => {
         btn.disabled = true;
-        const method = selectedMethod || "wxpay";
+        const method = selectedMethod || (showWaffo ? "waffo" : "wxpay");
         try {
-          const created = await api.createOrder(id, method);
+          const created = await api.createOrder(id, method, { currency, country });
           const order = (created && created.order) || created || {};
           const orderNo = order.order_no || order.orderNo;
           if (!orderNo) throw new Error("未返回订单号");
-          await runPay(orderNo, method);
+          if (order.payurl && method === "waffo") {
+            window.open(order.payurl, "_blank");
+            host.prepend(flash("ok", `订单 ${orderNo} 已打开支付页，正在检测支付结果…`));
+            const ok = await pollPaid(orderNo);
+            if (ok) await afterPaySuccess();
+            else showToast("尚未检测到支付完成。若已付款，请稍后刷新工作台", "error");
+          } else {
+            await runPay(orderNo, method);
+          }
         } catch (e) {
           showToast(e.message || "下单失败，请改用兑换码", "error");
         } finally {
@@ -1399,19 +1478,19 @@ export async function renderPurchase(root) {
         ]),
         el("div", { className: "plan-price-desktop" }, [
           el("div", { className: "plan-price-row" }, [
-            el("span", { className: "plan-price", text: `¥${priceNum}` }),
+            el("span", { className: "plan-price", text: `${sym}${priceNum}` }),
             el("span", { className: `plan-quota theme-${theme}`, text: `${quota} 额度` }),
           ]),
-          unitPrice ? el("p", { className: `plan-unit theme-${theme}`, text: `约 ¥${unitPrice}/额度` }) : null,
+          unitPrice ? el("p", { className: `plan-unit theme-${theme}`, text: `约 ${sym}${unitPrice}/额度` }) : null,
         ]),
         el("div", { className: "plan-price-mobile" }, [
           el("div", { className: "plan-mobile-row" }, [
             el("div", { className: "plan-mobile-col" }, [
               el("p", { className: "plan-mobile-label", text: "套餐价格" }),
-              el("p", { className: "plan-price", text: `¥${priceNum}` }),
+              el("p", { className: "plan-price", text: `${sym}${priceNum}` }),
             ]),
             unitPrice
-              ? el("span", { className: "plan-discount-pill", text: `¥${unitPrice}/额度` })
+              ? el("span", { className: "plan-discount-pill", text: `${sym}${unitPrice}/额度` })
               : el("span", { className: "plan-arrow", text: "→" }),
             el("div", { className: "plan-mobile-col plan-mobile-col--right" }, [
               el("p", { className: "plan-mobile-label", text: "获得额度" }),

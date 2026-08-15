@@ -19,6 +19,7 @@ import {
   requireAuth,
 } from "./pages/admin.js";
 import { renderPublicOrderClaim } from "./pages/order-claim-public.js";
+import { loadConsoleI18n, t, locale as currentLocale } from "./i18n.js";
 import {
   renderSaDashboard,
   renderSaUsers,
@@ -91,6 +92,8 @@ async function render(fullPath) {
   const path = pathOnly(fullPath);
   const search = (fullPath || "").includes("?") ? fullPath.slice(fullPath.indexOf("?")) : location.search;
 
+  await loadConsoleI18n();
+
   // 买家领链接是公开履约页：绝不进商家登录 / 工作台
   if (isOrderClaimPath(path, search)) {
     if (path === "/order-claim.html" || path === "/order-claim" || path === "/order-claim/") {
@@ -103,7 +106,7 @@ async function render(fullPath) {
   }
 
   clear(root);
-  document.title = "心象测 · 工作台";
+  document.title = currentLocale() === "en" ? "XinXiangCe · Console" : "心象测 · 工作台";
 
   if (path === "/login") return renderLogin(root);
   if (path === "/register") return renderRegister(root);

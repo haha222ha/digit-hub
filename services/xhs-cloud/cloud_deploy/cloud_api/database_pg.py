@@ -481,6 +481,9 @@ def _migrate_legacy_columns(c) -> None:
     c.execute(
         "CREATE INDEX IF NOT EXISTS idx_member_broadcast_acks_bid ON member_broadcast_acks (broadcast_id, acknowledged_at DESC)"
     )
+    c.execute("ALTER TABLE payment_orders ADD COLUMN IF NOT EXISTS currency VARCHAR(8) DEFAULT 'CNY'")
+    c.execute("ALTER TABLE payment_orders ADD COLUMN IF NOT EXISTS psp VARCHAR(16) DEFAULT 'hwxun'")
+    c.execute("ALTER TABLE payment_orders ADD COLUMN IF NOT EXISTS country VARCHAR(8) DEFAULT ''")
     _migrate_legacy_single_session(c)
 
 
@@ -1794,6 +1797,7 @@ def _fmt_ts(value) -> str | None:
 def _payment_order_row(row) -> dict | None:
     if not row:
         return None
+    get = row.get if isinstance(row, dict) else (lambda k, d=None: row[k] if k in row.keys() else d)
     return {
         "id": row["id"],
         "order_no": row["order_no"],
@@ -1813,6 +1817,9 @@ def _payment_order_row(row) -> dict | None:
         "created_at": _fmt_ts(row["created_at"]),
         "expires_at": _fmt_ts(row["expires_at"]),
         "paid_at": _fmt_ts(row["paid_at"]),
+        "currency": get("currency") or "CNY",
+        "psp": get("psp") or "hwxun",
+        "country": get("country") or "",
     }
 
 
@@ -1826,7 +1833,14 @@ def insert_payment_order(
     channel: str,
     client_ip: str,
     expires_at: str,
+    currency: str = "CNY",
+    psp: str = "hwxun",
+    country: str = "",
+    meta: dict | None = None,
 ) -> None:
+    import json as _json
+
+    meta_json = _json.dumps(meta or {}, ensure_ascii=False) if meta else None
     conn = _conn()
     try:
         with conn.cursor() as c:
@@ -1834,9 +1848,22 @@ def insert_payment_order(
             c.execute(
                 """INSERT INTO payment_orders
                    (order_no, user_id, plan_code, duration_days, amount, channel, status,
-                    client_ip, expires_at)
-                   VALUES (%s,%s,%s,%s,%s,%s,'pending',%s,%s::timestamp)""",
-                (order_no, user_id, plan_code, duration_days, amount, channel, client_ip, expires_at),
+                    client_ip, expires_at, currency, psp, country, meta_json)
+                   VALUES (%s,%s,%s,%s,%s,%s,'pending',%s,%s::timestamp,%s,%s,%s,%s::jsonb)""",
+                (
+                    order_no,
+                    user_id,
+                    plan_code,
+                    duration_days,
+                    amount,
+                    channel,
+                    client_ip,
+                    expires_at,
+                    (currency or "CNY").upper(),
+                    (psp or "hwxun").lower(),
+                    (country or "").upper(),
+                    meta_json,
+                ),
             )
         conn.commit()
     finally:

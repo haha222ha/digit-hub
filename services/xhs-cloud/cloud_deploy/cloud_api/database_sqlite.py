@@ -212,6 +212,14 @@ def _migrate_legacy_columns(c) -> None:
         "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email) WHERE email IS NOT NULL AND email != ''"
     )
     c.execute("CREATE INDEX IF NOT EXISTS idx_prt_hash ON password_reset_tokens(token_hash)")
+    c.execute("PRAGMA table_info(payment_orders)")
+    pay_cols = {row[1] for row in c.fetchall()}
+    if "currency" not in pay_cols:
+        c.execute("ALTER TABLE payment_orders ADD COLUMN currency TEXT DEFAULT 'CNY'")
+    if "psp" not in pay_cols:
+        c.execute("ALTER TABLE payment_orders ADD COLUMN psp TEXT DEFAULT 'hwxun'")
+    if "country" not in pay_cols:
+        c.execute("ALTER TABLE payment_orders ADD COLUMN country TEXT DEFAULT ''")
     _migrate_legacy_single_session(c)
 
 
@@ -1291,6 +1299,7 @@ def delete_member_watchlist(user_id: int, goods_ids: list) -> int:
 def _payment_order_row(row) -> dict | None:
     if not row:
         return None
+    keys = set(row.keys()) if hasattr(row, "keys") else set()
     return {
         "id": row["id"],
         "order_no": row["order_no"],
@@ -1310,6 +1319,9 @@ def _payment_order_row(row) -> dict | None:
         "created_at": row["created_at"],
         "expires_at": row["expires_at"],
         "paid_at": row["paid_at"],
+        "currency": row["currency"] if "currency" in keys else "CNY",
+        "psp": row["psp"] if "psp" in keys else "hwxun",
+        "country": row["country"] if "country" in keys else "",
     }
 
 
@@ -1323,15 +1335,35 @@ def insert_payment_order(
     channel: str,
     client_ip: str,
     expires_at: str,
+    currency: str = "CNY",
+    psp: str = "hwxun",
+    country: str = "",
+    meta: dict | None = None,
 ) -> None:
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    meta_json = json.dumps(meta or {}, ensure_ascii=False) if meta else None
     conn = _conn()
     conn.execute(
         """INSERT INTO payment_orders
            (order_no, user_id, plan_code, duration_days, amount, channel, status,
-            client_ip, created_at, expires_at)
-           VALUES (?,?,?,?,?,?,?,?,?,?)""",
-        (order_no, user_id, plan_code, duration_days, amount, channel, "pending", client_ip, now, expires_at),
+            client_ip, created_at, expires_at, currency, psp, country, meta_json)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (
+            order_no,
+            user_id,
+            plan_code,
+            duration_days,
+            amount,
+            channel,
+            "pending",
+            client_ip,
+            now,
+            expires_at,
+            (currency or "CNY").upper(),
+            (psp or "hwxun").lower(),
+            (country or "").upper(),
+            meta_json,
+        ),
     )
     conn.commit()
     conn.close()

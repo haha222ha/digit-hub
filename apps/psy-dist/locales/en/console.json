@@ -1,0 +1,21 @@
+{
+  "purchase.title": "Buy credits",
+  "purchase.lead": "Credits are added automatically after payment. Invitees get a rebate for the inviter on the first purchase (default 20%).",
+  "purchase.wechat": "WeChat Pay",
+  "purchase.alipay": "Alipay",
+  "purchase.waffo": "Card / International",
+  "purchase.pay_now": "Pay now",
+  "purchase.success": "Payment successful — credits added",
+  "purchase.rebate": "Invite rebate: {pct}% (first purchase by invited users only).",
+  "auth.login": "Log in",
+  "auth.register": "Sign up",
+  "auth.reset": "Reset password",
+  "nav.dashboard": "Dashboard",
+  "nav.generate": "Generate link",
+  "nav.links": "Links",
+  "nav.purchase": "Buy credits",
+  "common.loading": "Loading…",
+  "common.error": "Something went wrong",
+  "lang.zh": "中文",
+  "lang.en": "English"
+}

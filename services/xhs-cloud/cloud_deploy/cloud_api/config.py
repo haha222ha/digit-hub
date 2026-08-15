@@ -30,6 +30,11 @@ class Settings:
     xhs_pay_alipay_pid: str = ""
     xhs_pay_alipay_key: str = ""
     xhs_pay_notify_base: str = ""
+    waffo_api_key: str = ""
+    waffo_merchant_id: str = ""
+    waffo_private_key: str = ""
+    waffo_public_key: str = ""
+    waffo_api_base: str = ""
 
 
 def get_settings() -> Settings:
@@ -63,4 +68,9 @@ def get_settings() -> Settings:
         xhs_pay_alipay_pid=os.environ.get("XHS_PAY_ALIPAY_PID", ""),
         xhs_pay_alipay_key=os.environ.get("XHS_PAY_ALIPAY_KEY", ""),
         xhs_pay_notify_base=os.environ.get("XHS_PAY_NOTIFY_BASE", ""),
+        waffo_api_key=os.environ.get("WAFFO_API_KEY", ""),
+        waffo_merchant_id=os.environ.get("WAFFO_MERCHANT_ID", ""),
+        waffo_private_key=os.environ.get("WAFFO_PRIVATE_KEY", ""),
+        waffo_public_key=os.environ.get("WAFFO_PUBLIC_KEY", ""),
+        waffo_api_base=os.environ.get("WAFFO_API_BASE", ""),
     )

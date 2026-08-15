@@ -218,12 +218,23 @@ export const api = {
   },
   packagesList: () => request("/api/admin/packages/list"),
   packageDocuments: () => request("/api/admin/package-documents/list", { auth: true }),
-  purchaseMethods: () => request("/api/admin/payment/purchase-methods"),
-  createOrder: (packageId, paymentMethod = "wxpay") =>
+  purchaseMethods: (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.country) q.set("country", params.country);
+    if (params.currency) q.set("currency", params.currency);
+    const qs = q.toString();
+    return request(`/api/admin/payment/purchase-methods${qs ? `?${qs}` : ""}`);
+  },
+  createOrder: (packageId, paymentMethod = "wxpay", opts = {}) =>
     request("/api/orders/create", {
       method: "POST",
       auth: true,
-      body: { packageId, payment_method: paymentMethod },
+      body: {
+        packageId,
+        payment_method: paymentMethod,
+        currency: opts.currency || undefined,
+        country: opts.country || undefined,
+      },
     }),
   orderDetail: (orderNo) => request(`/api/orders/${encodeURIComponent(orderNo)}`, { auth: true }),
   startPay: (orderNo, paymentMethod = "wxpay", deviceType = "mobile") =>

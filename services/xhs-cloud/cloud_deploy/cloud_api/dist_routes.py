@@ -92,6 +92,8 @@ class OrderCreateBody(BaseModel):
     packageId: int | None = None
     payment_method: str = "wxpay"
     paymentMethod: str | None = None
+    currency: str | None = None
+    country: str | None = None
 
 
 class OrderPayBody(BaseModel):
@@ -99,6 +101,8 @@ class OrderPayBody(BaseModel):
     paymentMethod: str | None = None
     device_type: str = "mobile"
     deviceType: str | None = None
+    currency: str | None = None
+    country: str | None = None
 
 
 class RevokeLinkBody(BaseModel):
@@ -524,8 +528,13 @@ def compat_packages():
 
 
 @compat_router.get("/api/admin/payment/purchase-methods")
-def compat_purchase_methods():
-    return _ok(dist_ord.purchase_methods())
+def compat_purchase_methods(
+    request: Request,
+    country: str | None = None,
+    currency: str | None = None,
+):
+    cc = (country or request.headers.get("CF-IPCountry") or "").strip().upper()
+    return _ok(dist_ord.purchase_methods(country=cc or None, currency=currency))
 
 
 @compat_router.post("/api/orders/create")
@@ -537,11 +546,14 @@ def compat_orders_create(body: OrderCreateBody, request: Request):
         from cloud_deploy.cloud_api.request_ip import resolve_client_ip
 
         ip = resolve_client_ip(request) or "127.0.0.1"
+        cc = (body.country or request.headers.get("CF-IPCountry") or "").strip().upper()
         order = dist_ord.create_order(
             user["id"],
             package_id=pkg_id,
             payment_method=pm,
             client_ip=ip,
+            currency=body.currency,
+            country=cc or None,
         )
         return _ok({"order": order}, "订单创建成功")
     except ValueError as e:

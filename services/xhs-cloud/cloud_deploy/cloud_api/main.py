@@ -129,9 +129,11 @@ class RenewWithCodeBody(DeviceAuthBody):
 
 class PaymentCreateBody(BaseModel):
     plan_code: str = Field(..., min_length=3, max_length=32)
-    channel: str = Field(default="wxpay", pattern="^(wxpay|alipay)$")
+    channel: str = Field(default="wxpay", pattern="^(wxpay|alipay|waffo|card|international|intl)$")
     # 易支付 device：pc=扫码；mobile/alipay/wechat/jump=优先返回可跳转 payurl
     device: str = Field(default="pc", pattern="^(pc|mobile|wechat|alipay|jump)$")
+    currency: str | None = Field(default=None, max_length=8)
+    country: str | None = Field(default=None, max_length=8)
 
 
 class PaymentCompleteBody(DeviceAuthBody):
@@ -494,6 +496,18 @@ def refresh_token(
     return member_auth_response(refresh_member_token(token))
 
 
+@app.get("/api/v1/geo")
+def client_geo(request: Request):
+    """轻量地理提示（CF-IPCountry），供前端软默认语言/币种；不硬锁。"""
+    cc = (request.headers.get("CF-IPCountry") or request.headers.get("cf-ipcountry") or "").strip().upper()
+    if len(cc) != 2 or not cc.isalpha():
+        cc = ""
+    from cloud_deploy.cloud_api.payment_plans import COUNTRY_CURRENCY, normalize_currency
+
+    currency = normalize_currency(None, country=cc) if cc else "CNY"
+    return {"country": cc, "currency": currency, "default_currency_by_country": dict(COUNTRY_CURRENCY)}
+
+
 @app.get("/api/v1/payment/channels")
 def payment_channels():
     return {"channels": pay.list_payment_channels()}
@@ -518,6 +532,8 @@ def payment_create_order(
             client_ip=public_ipv4_for_pay(request),
             channel=body.channel,
             device=body.device,
+            currency=body.currency,
+            country=body.country or (request.headers.get("CF-IPCountry") or ""),
         )
     except pay.PayRateLimitError as e:
         raise HTTPException(status_code=429, detail=str(e)) from e
@@ -625,6 +641,37 @@ async def payment_notify_hwxun(request: Request):
     except Exception:
         pass
     return PlainTextResponse(result)
+
+
+@app.api_route("/api/v1/payment/notify/waffo", methods=["GET", "POST"])
+async def payment_notify_waffo(request: Request):
+    """Waffo Raw Webhook：验签 → 履约 → 返回带 X-SIGNATURE 的 JSON。"""
+    raw = (await request.body()).decode("utf-8", errors="replace")
+    signature = (
+        request.headers.get("X-SIGNATURE")
+        or request.headers.get("x-signature")
+        or ""
+    ).strip()
+    from cloud_deploy.cloud_api import dist_db
+    from cloud_deploy.cloud_api.request_ip import resolve_client_ip
+
+    client_ip = resolve_client_ip(request)
+    body_out, sig_out = pay.handle_waffo_notify(raw, signature)
+    try:
+        import json as _json
+
+        log_payload = {"raw": raw[:2000], "psp": "waffo"}
+        try:
+            log_payload.update(_json.loads(raw) if raw else {})
+        except Exception:
+            pass
+        dist_db.log_payment_notify(log_payload, body_out, client_ip=client_ip)
+    except Exception:
+        pass
+    headers = {"Content-Type": "application/json"}
+    if sig_out:
+        headers["X-SIGNATURE"] = sig_out
+    return Response(content=body_out, media_type="application/json", headers=headers)
 
 
 @app.get("/api/v1/member/profile")

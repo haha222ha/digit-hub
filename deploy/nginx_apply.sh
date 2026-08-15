@@ -186,6 +186,45 @@ ${GZIP_DIRECTIVES}
     location = /home.js {
         add_header Cache-Control "no-store, no-cache, must-revalidate";
     }
+    # 多语言静态壳 + 文案包（必须先于 console SPA 回落）
+    location = /en {
+        return 302 /en/;
+    }
+    location = /en/ {
+        try_files /en/index.html =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+    location = /en/terms {
+        return 302 /en/terms/;
+    }
+    location = /en/terms/ {
+        try_files /en/terms/index.html =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+    location = /en/privacy {
+        return 302 /en/privacy/;
+    }
+    location = /en/privacy/ {
+        try_files /en/privacy/index.html =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+    location = /en/pricing {
+        return 302 /en/pricing/;
+    }
+    location = /en/pricing/ {
+        try_files /en/pricing/index.html =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+    location ^~ /locales/ {
+        try_files \$uri =404;
+        add_header Cache-Control "public, max-age=3600";
+        add_header CDN-Cache-Control "public, max-age=3600";
+    }
+    location = /js/locale.js {
+        try_files /js/locale.js =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+
     # Waffo / 合规披露页（必须先于 console SPA 回落）
     location = /terms {
         return 302 /terms/;
