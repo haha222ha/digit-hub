@@ -753,12 +753,57 @@ export class StorageService {
       raw.aftersaleEnabled !== undefined ? !!raw.aftersaleEnabled : !!raw.enabled
     const ledger =
       raw.ledgerReconcileEnabled !== undefined ? !!raw.ledgerReconcileEnabled : true
+    const retryIntervalMs = Number(raw.retryIntervalMs) || 10000
+    // 旧 shape 缺字段时写回，避免 UI/售后语义长期靠内存默认
+    if (raw.aftersaleEnabled === undefined || raw.ledgerReconcileEnabled === undefined) {
+      this.set(`reship_config_${shopId}`, {
+        enabled: aftersale,
+        aftersaleEnabled: aftersale,
+        ledgerReconcileEnabled: ledger,
+        retryIntervalMs
+      })
+    }
     return {
       enabled: aftersale,
       aftersaleEnabled: aftersale,
       ledgerReconcileEnabled: ledger,
-      retryIntervalMs: Number(raw.retryIntervalMs) || 10000
+      retryIntervalMs
     }
+  }
+
+  /**
+   * 订单号变体（与 im-send.js orderLookupKeys 对齐）：
+   * packageId = P + orderId + 包裹序号（末位常为 1）
+   */
+  orderIdVariants(orderId: string): string[] {
+    const s = String(orderId || '').trim()
+    const keys: string[] = []
+    const add = (k: string) => {
+      const t = String(k || '').trim()
+      if (t && !keys.includes(t)) keys.push(t)
+    }
+    add(s)
+    if (/^P/i.test(s)) {
+      const bare = s.replace(/^P/i, '')
+      add(bare)
+      if (/^\d+$/.test(bare) && bare.length > 1) add(bare.slice(0, -1))
+    } else if (/^\d+$/.test(s)) {
+      add('P' + s + '1')
+      add('P' + s + '01')
+    }
+    return keys.length ? keys : [s]
+  }
+
+  /** 台账/并发键：优先最短纯数字单号 */
+  canonicalOrderId(orderId: string): string {
+    const keys = this.orderIdVariants(orderId)
+    const digits = keys.filter((k) => /^\d+$/.test(k)).sort((a, b) => a.length - b.length)
+    return digits[0] || keys[0] || String(orderId || '').trim()
+  }
+
+  private orderIdInClause(orderId: string): { sql: string; params: string[] } {
+    const keys = this.orderIdVariants(orderId)
+    return { sql: keys.map(() => '?').join(','), params: keys }
   }
 
   /**
@@ -1445,6 +1490,30 @@ export class StorageService {
   }): { isNew: boolean; msgGuid: string; sendStatus: string; msgIndex: number; msgTotal: number } {
     const msgIndex = delivery.msgIndex ?? 1
     const msgTotal = delivery.msgTotal ?? 1
+    const { sql, params } = this.orderIdInClause(delivery.orderId)
+    // 先按变体复用已有行，避免 P/裸单号各占一条
+    const existing = this.db
+      .prepare(
+        `SELECT msg_guid, send_status, msg_index, msg_total FROM order_delivery
+         WHERE order_id IN (${sql}) AND msg_index = ?
+         ORDER BY CASE send_status
+           WHEN 'success' THEN 0 WHEN 'rate_limited' THEN 1 WHEN 'disabled' THEN 2
+           WHEN 'sending' THEN 3 WHEN 'pending' THEN 4 ELSE 5 END,
+           id DESC
+         LIMIT 1`
+      )
+      .get(...params, msgIndex) as
+      | { msg_guid: string; send_status: string; msg_index: number; msg_total: number }
+      | undefined
+    if (existing) {
+      return {
+        isNew: false,
+        msgGuid: String(existing.msg_guid),
+        sendStatus: String(existing.send_status || 'pending'),
+        msgIndex: Number(existing.msg_index) || msgIndex,
+        msgTotal: Number(existing.msg_total) || msgTotal
+      }
+    }
     const result = this.db
       .prepare(
         `INSERT OR IGNORE INTO order_delivery
@@ -1466,14 +1535,13 @@ export class StorageService {
     const row = this.db
       .prepare(
         `SELECT msg_guid, send_status, msg_index, msg_total FROM order_delivery
-         WHERE order_id = ? AND msg_index = ?
+         WHERE order_id IN (${sql}) AND msg_index = ?
          ORDER BY id DESC LIMIT 1`
       )
-      .get(delivery.orderId, msgIndex) as
+      .get(...params, msgIndex) as
       | { msg_guid: string; send_status: string; msg_index: number; msg_total: number }
       | undefined
     if (!row) {
-      // 极端：唯一冲突在 shop 维度不同；再插一次用新 guid 可能仍失败，返回入参兜底
       return { isNew: false, msgGuid: delivery.msgGuid, sendStatus: 'pending', msgIndex, msgTotal }
     }
     return {
@@ -1507,35 +1575,39 @@ export class StorageService {
   existsOrderDelivery(orderId: string, shopId?: string): boolean {
     const oid = String(orderId || '').trim()
     if (!oid) return false
+    const { sql, params } = this.orderIdInClause(oid)
     const sid = String(shopId || '').trim()
     if (sid) {
       const row = this.db
-        .prepare('SELECT id FROM order_delivery WHERE order_id = ? AND shop_id = ? LIMIT 1')
-        .get(oid, sid)
+        .prepare(`SELECT id FROM order_delivery WHERE order_id IN (${sql}) AND shop_id = ? LIMIT 1`)
+        .get(...params, sid)
       return !!row
     }
-    const row = this.db.prepare('SELECT id FROM order_delivery WHERE order_id = ? LIMIT 1').get(oid)
+    const row = this.db
+      .prepare(`SELECT id FROM order_delivery WHERE order_id IN (${sql}) LIMIT 1`)
+      .get(...params)
     return !!row
   }
 
   isOrderFullyShipped(orderId: string, shopId?: string): boolean {
     const oid = String(orderId || '').trim()
     if (!oid) return false
+    const { sql, params } = this.orderIdInClause(oid)
     const sid = String(shopId || '').trim()
     const rows = (
       sid
         ? this.db
             .prepare(
               `SELECT msg_index, msg_total, send_status FROM order_delivery
-               WHERE order_id = ? AND shop_id = ? ORDER BY msg_index ASC`
+               WHERE order_id IN (${sql}) AND shop_id = ? ORDER BY msg_index ASC`
             )
-            .all(oid, sid)
+            .all(...params, sid)
         : this.db
             .prepare(
               `SELECT msg_index, msg_total, send_status FROM order_delivery
-               WHERE order_id = ? ORDER BY msg_index ASC`
+               WHERE order_id IN (${sql}) ORDER BY msg_index ASC`
             )
-            .all(oid)
+            .all(...params)
     ) as Array<{ msg_index: number; msg_total: number; send_status: string }>
     if (!rows.length) return false
     const total = Math.max(
@@ -1543,8 +1615,16 @@ export class StorageService {
       ...rows.map((r) => Number(r.msg_total) || 1),
       ...rows.map((r) => Number(r.msg_index) || 1)
     )
+    // 同 index 多变体：success > rate_limited/disabled > 其它
+    const rank = (st: string) =>
+      st === 'success' ? 3 : st === 'rate_limited' || st === 'disabled' ? 2 : 1
     const byIndex = new Map<number, string>()
-    for (const r of rows) byIndex.set(Number(r.msg_index) || 1, String(r.send_status || ''))
+    for (const r of rows) {
+      const idx = Number(r.msg_index) || 1
+      const st = String(r.send_status || '')
+      const prev = byIndex.get(idx)
+      if (!prev || rank(st) > rank(prev)) byIndex.set(idx, st)
+    }
     let hasSuccess = false
     for (let i = 1; i <= total; i++) {
       const st = byIndex.get(i)
@@ -1565,12 +1645,13 @@ export class StorageService {
 
   /** 指定 msg_index 之前（不含）有多少条 success */
   countPriorSuccess(orderId: string, msgIndex: number): number {
+    const { sql, params } = this.orderIdInClause(orderId)
     const row = this.db
       .prepare(
-        `SELECT COUNT(*) as c FROM order_delivery
-         WHERE order_id = ? AND msg_index < ? AND send_status = 'success'`
+        `SELECT COUNT(DISTINCT msg_index) as c FROM order_delivery
+         WHERE order_id IN (${sql}) AND msg_index < ? AND send_status = 'success'`
       )
-      .get(orderId, msgIndex) as { c: number }
+      .get(...params, msgIndex) as { c: number }
     return Number(row?.c || 0)
   }
 
@@ -1579,21 +1660,23 @@ export class StorageService {
    * 不含 success——否则「第1条已成功」会挡住补发第2/3条。
    */
   hasRecentShippingActivity(orderId: string, withinSec = 600): boolean {
+    const { sql, params } = this.orderIdInClause(orderId)
     const row = this.db
       .prepare(
         `SELECT id FROM order_delivery
-         WHERE order_id = ?
+         WHERE order_id IN (${sql})
            AND send_status IN ('sending', 'pending')
            AND datetime(updated_at) >= datetime('now', ?)
          LIMIT 1`
       )
-      .get(orderId, `-${Math.max(30, withinSec)} seconds`)
+      .get(...params, `-${Math.max(30, withinSec)} seconds`)
     return !!row
   }
 
-  /** 清除某订单发货占位（用于 Mock 假成功后重跑真发） */
+  /** 清除某订单发货占位（含 P/裸号变体） */
   clearOrderDelivery(orderId: string): number {
-    const r = this.db.prepare('DELETE FROM order_delivery WHERE order_id = ?').run(orderId)
+    const { sql, params } = this.orderIdInClause(orderId)
+    const r = this.db.prepare(`DELETE FROM order_delivery WHERE order_id IN (${sql})`).run(...params)
     return r.changes
   }
 
@@ -1601,27 +1684,41 @@ export class StorageService {
   clearOrderDeliveryByStatuses(orderId: string, statuses: string[]): number {
     const list = (statuses || []).map((s) => String(s || '').trim()).filter(Boolean)
     if (!list.length) return 0
+    const { sql, params } = this.orderIdInClause(orderId)
     const ph = list.map(() => '?').join(',')
     const r = this.db
-      .prepare(`DELETE FROM order_delivery WHERE order_id = ? AND send_status IN (${ph})`)
-      .run(orderId, ...list)
+      .prepare(`DELETE FROM order_delivery WHERE order_id IN (${sql}) AND send_status IN (${ph})`)
+      .run(...params, ...list)
     return r.changes
   }
 
   /** 将超时的 pending/sending 标为 fail，允许后续 reclaim */
   reclaimStaleDeliveries(orderId: string, olderThanSec = 900): number {
+    const { sql, params } = this.orderIdInClause(orderId)
     const r = this.db
       .prepare(
         `UPDATE order_delivery
          SET send_status = 'fail',
              error_msg = COALESCE(error_msg, '') || ' [stale_reclaim]',
              updated_at = datetime('now')
-         WHERE order_id = ?
+         WHERE order_id IN (${sql})
            AND send_status IN ('pending', 'sending')
            AND datetime(updated_at) < datetime('now', ?)`
       )
-      .run(orderId, `-${Math.max(60, olderThanSec)} seconds`)
+      .run(...params, `-${Math.max(60, olderThanSec)} seconds`)
     return r.changes
+  }
+
+  /** 硬业务失败（冷却期内勿清库重试） */
+  isHardBusinessFailMsg(errorMsg: string): boolean {
+    return /根据订单号获取不到买家|search_customer 未找到|获取不到对话Id|创建会话失败|ImLoginInfo\.csProviderId 未就绪|卡密池已空|心象测未/.test(
+      String(errorMsg || '')
+    )
+  }
+
+  /** 非会话内：可走 WS 回退，不算永久硬失败 */
+  isSessionRequiredFailMsg(errorMsg: string): boolean {
+    return /不支持非会话内发送|非会话内/.test(String(errorMsg || ''))
   }
 
   /**
@@ -1711,9 +1808,10 @@ export class StorageService {
    * 按订单号查询发货记录（对标 GetByTidAsync）
    */
   getOrderDeliveries(orderId: string) {
-    return this.db.prepare(
-      'SELECT * FROM order_delivery WHERE order_id = ? ORDER BY msg_index ASC'
-    ).all(orderId)
+    const { sql, params } = this.orderIdInClause(orderId)
+    return this.db
+      .prepare(`SELECT * FROM order_delivery WHERE order_id IN (${sql}) ORDER BY msg_index ASC, id ASC`)
+      .all(...params)
   }
 
   /**
@@ -1758,16 +1856,17 @@ export class StorageService {
   getFailedRetryableDeliveries(limit: number = 10, maxRetry: number = 3, orderId?: string) {
     const oid = String(orderId || '').trim()
     if (oid) {
+      const { sql, params } = this.orderIdInClause(oid)
       return this.db
         .prepare(
           `SELECT * FROM order_delivery
-           WHERE order_id = ? AND send_status = 'fail' AND retry_count < ?
+           WHERE order_id IN (${sql}) AND send_status = 'fail' AND retry_count < ?
              AND IFNULL(error_msg, '') NOT LIKE '%连续发送%'
              AND IFNULL(error_msg, '') NOT LIKE '%不可超过%10%'
              AND IFNULL(error_msg, '') NOT LIKE '%超过10条%'
            ORDER BY msg_index ASC, updated_at ASC LIMIT ?`
         )
-        .all(oid, maxRetry, limit)
+        .all(...params, maxRetry, limit)
     }
     return this.db
       .prepare(

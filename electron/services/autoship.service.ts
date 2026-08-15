@@ -110,7 +110,11 @@ export class AutoShipService {
   private shippingInFlight: Set<string> = new Set()
   private lastLedgerReconcileAt = 0
   private static readonly LEDGER_RECONCILE_MIN_INTERVAL_MS = 5 * 60 * 1000
+  /** 硬业务失败冷却（秒）：不清库、不重试 */
+  private static readonly HARD_FAIL_COOLDOWN_SEC = 30 * 60
   private isShipping = false
+  /** 当前轮询基础间隔；用于幂等跳过重复 startPolling */
+  private pollingBaseMs: number | null = null
   private monitorWebContents: WebContents | null = null
   /** 阶段 A：与 monitor 同页（dashboard 单页 XhsRim）；显式客服窗为备选 */
   private imWebContents: WebContents | null = null
@@ -660,7 +664,7 @@ export class AutoShipService {
     for (const row of rows) {
       if (!row?.order_id) continue
       if (this.storage.hasShippedCode(row.order_id, row.shop_id || shopId)) continue
-      if (this.shippingInFlight.has(row.order_id)) continue
+      if (this.shippingInFlight.has(this.flightKey(row.shop_id || shopId, row.order_id))) continue
       if (this.storage.hasRecentShippingActivity(row.order_id, 10 * 60)) continue
       n += 1
       await this.handleNewOrder({
@@ -684,10 +688,15 @@ export class AutoShipService {
       this.logger.info('[AutoShip] 轮询已挂起（启动保活/未登录），跳过 startPolling')
       return
     }
-    this.stopPolling()
     // 默认 15 秒；配置值若 <5 秒则强制下限保护（避免内部接口风控）
     const base = intervalMs && intervalMs > 0 ? intervalMs : AutoShipService.DEFAULT_POLL_INTERVAL
     const safeBase = Math.max(base, 5000)
+    if (this.monitorInterval && this.pollingBaseMs === safeBase) {
+      this.logger.info('[AutoShip] 轮询已在运行，跳过重复 startPolling')
+      return
+    }
+    this.stopPolling()
+    this.pollingBaseMs = safeBase
 
     const schedule = () => {
       if (!this.pollingEnabled) return
@@ -715,11 +724,16 @@ export class AutoShipService {
   }
 
   stopPolling() {
+    this.pollingBaseMs = null
     if (this.monitorInterval) {
       clearTimeout(this.monitorInterval)
       this.monitorInterval = null
       this.logger.info('[AutoShip] 停止轮询监测')
     }
+  }
+
+  private flightKey(shopId: string, orderId: string): string {
+    return `${shopId}:${this.storage.canonicalOrderId(orderId)}`
   }
 
   /**
@@ -815,8 +829,9 @@ export class AutoShipService {
       for (const order of orders) {
         const oid = String(order.order_id || '')
         if (oid && seenOrderIds) {
-          if (seenOrderIds.has(oid)) continue
-          seenOrderIds.add(oid)
+          const canon = this.storage.canonicalOrderId(oid)
+          if (seenOrderIds.has(canon)) continue
+          seenOrderIds.add(canon)
         }
         await this.handleNewOrder({ ...order, shop_id: shopId, source: order.source || 'poll' })
       }
@@ -876,18 +891,19 @@ export class AutoShipService {
     }
 
     const forceReship = !!order.forceReship || order.source === 'reship'
+    const flight = this.flightKey(shopId, order.order_id)
     if (forceReship) {
       this.storage.clearOrderDelivery(order.order_id)
-      this.processedOrders.delete(`${shopId}:${order.order_id}`)
+      this.processedOrders.delete(flight)
       this.logger.warn(`[AutoShip] 强制补发：已清除旧发码记录 order=${order.order_id}`)
     }
 
-    // 2) 只跟本地「是否已整单发完」比对
-    if (!forceReship && this.storage.hasShippedCode(order.order_id)) {
+    // 2) 只跟本地「是否已整单发完」比对（含 P/裸号变体）
+    if (!forceReship && this.storage.hasShippedCode(order.order_id, shopId)) {
       this.logger.info(`[AutoShip] 台账已发码，跳过: ${order.order_id}`)
       return
     }
-    if (this.shippingInFlight.has(order.order_id)) {
+    if (this.shippingInFlight.has(flight)) {
       this.logger.info(`[AutoShip] 订单发送中，跳过并发: ${order.order_id}`)
       return
     }
@@ -900,24 +916,42 @@ export class AutoShipService {
       this.logger.info(`[AutoShip] 近期已有发码活动，跳过防重: ${order.order_id}`)
       return
     }
-    if (!forceReship && this.storage.existsOrderDelivery(order.order_id)) {
+    if (!forceReship && this.storage.existsOrderDelivery(order.order_id, shopId)) {
       const rows = this.storage.getOrderDeliveries(order.order_id) as Array<{
         send_status?: string
+        error_msg?: string
+        updated_at?: string
       }>
       const onlyMock =
         rows.length > 0 && rows.every((r) => String(r.send_status || '') === 'mock_success')
       const onlyFail =
         rows.length > 0 && rows.every((r) => String(r.send_status || '') === 'fail')
-      if (onlyMock || onlyFail) {
-        this.storage.clearOrderDeliveryByStatuses(order.order_id, ['fail', 'mock_success'])
-        this.logger.warn(
-          `[AutoShip] 清除未成功发码占位，准备重试: ${order.order_id} mock=${onlyMock} fail=${onlyFail}`
-        )
-      } else if (this.storage.hasShippedCode(order.order_id)) {
+      if (onlyMock) {
+        this.storage.clearOrderDeliveryByStatuses(order.order_id, ['mock_success'])
+        this.logger.warn(`[AutoShip] 清除 Mock 假成功占位，准备重试: ${order.order_id}`)
+      } else if (onlyFail) {
+        const hardRecent = rows.some((r) => {
+          if (!this.storage.isHardBusinessFailMsg(String(r.error_msg || ''))) return false
+          // SQLite updated_at 多为 UTC；用简单字符串/时间差兜底
+          const u = String(r.updated_at || '')
+          if (!u) return true
+          const ts = Date.parse(u.includes('T') || u.includes('Z') ? u : u.replace(' ', 'T') + 'Z')
+          if (!Number.isFinite(ts)) return true
+          return Date.now() - ts < AutoShipService.HARD_FAIL_COOLDOWN_SEC * 1000
+        })
+        if (hardRecent) {
+          this.logger.info(
+            `[AutoShip] 硬业务失败冷却中，跳过清库重试: ${order.order_id} err=${String(rows[0]?.error_msg || '').slice(0, 80)}`
+          )
+          return
+        }
+        // fail 行可直接重发（processShipment 不跳过 fail）；仅 mock 需清库
+        this.logger.info(`[AutoShip] 存在 fail 占位，直接重试不发清库: ${order.order_id}`)
+      } else if (this.storage.hasShippedCode(order.order_id, shopId)) {
         return
       }
     }
-    if (!forceReship && this.processedOrders.has(`${shopId}:${order.order_id}`)) {
+    if (!forceReship && this.processedOrders.has(flight)) {
       return
     }
 
@@ -953,23 +987,24 @@ export class AutoShipService {
   private async shipOneOrder(shopId: string, order: any): Promise<void> {
     const oid = String(order.order_id || '')
     if (!oid) return
+    const flight = this.flightKey(shopId, oid)
     // 入队后再次校验，防止并发双发
-    if (this.storage.hasShippedCode(oid)) {
+    if (this.storage.hasShippedCode(oid, shopId)) {
       this.logger.info(`[AutoShip] shipOneOrder 跳过（已整单发完）: ${oid}`)
-      this.processedOrders.add(`${shopId}:${oid}`)
+      this.processedOrders.add(flight)
       return
     }
-    if (this.shippingInFlight.has(oid)) {
+    if (this.shippingInFlight.has(flight)) {
       this.logger.info(`[AutoShip] shipOneOrder 跳过（已在发送）: ${oid}`)
       return
     }
-    this.shippingInFlight.add(oid)
+    this.shippingInFlight.add(flight)
     this.isShipping = true
     try {
-      if (this.storage.hasShippedCode(oid)) return
+      if (this.storage.hasShippedCode(oid, shopId)) return
       const success = await this.processShipment(shopId, order)
       if (success) {
-        this.processedOrders.add(`${shopId}:${oid}`)
+        this.processedOrders.add(flight)
         this.logger.info(`[AutoShip] 订单发货成功: shop=${shopId} ${oid}`)
       } else {
         this.logger.warn(`[AutoShip] 订单发货失败: shop=${shopId} ${oid}`)
@@ -977,7 +1012,7 @@ export class AutoShipService {
     } catch (err) {
       this.logger.error(`[AutoShip] 订单发货异常: shop=${shopId} ${oid}`, err)
     } finally {
-      this.shippingInFlight.delete(oid)
+      this.shippingInFlight.delete(flight)
       this.isShipping = false
     }
   }
@@ -1251,7 +1286,7 @@ export class AutoShipService {
       }
     }
 
-    return this.storage.hasShippedCode(order.order_id)
+    return this.storage.hasShippedCode(order.order_id, shopId)
   }
 
   private sleep(ms: number): Promise<void> {
@@ -1565,10 +1600,12 @@ export class AutoShipService {
     }
 
     const isRateLimitErr = (err: string) => /连续发送|不可超过\s*10|超过10条/.test(err)
+    const isSessionRequiredErr = (err: string) => this.storage.isSessionRequiredFailMsg(err)
 
     const maxAttempts = 4
     let lastError = ''
     let lastForceReQueue = false
+    let allowWsFallback = false
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       const probe = await this.agisoIm.probe(shopId).catch(() => ({} as Record<string, unknown>))
       this.logger.info(
@@ -1591,6 +1628,14 @@ export class AutoShipService {
         // 限流：禁止再走 deliverByOrderSn，否则同一内容双通道撞限
         return { success: false, error: lastError, rateLimited: true }
       }
+      if (isSessionRequiredErr(lastError)) {
+        // dashboard 有 XhsRim 但不能会话内发：允许一次 WS/deliverByOrderSn 回退
+        allowWsFallback = true
+        this.logger.warn(
+          `[AutoShip] 非会话内发送，改走 deliverByOrderSn/WS shop=${shopId} order=${orderId}`
+        )
+        break
+      }
       if (!result.forceReQueue || attempt >= maxAttempts) {
         break
       }
@@ -1604,8 +1649,8 @@ export class AutoShipService {
       }
     }
 
-    // 仅「页面/函数未就绪」才回退；业务失败（含限流）不再二次发送
-    if (!lastForceReQueue) {
+    // 仅「页面/函数未就绪」或「非会话内」才回退；限流/其它业务失败不再二次发送
+    if (!lastForceReQueue && !allowWsFallback) {
       return { success: false, error: lastError }
     }
 
@@ -2061,15 +2106,22 @@ export class AutoShipService {
     for (const item of failed as any[]) {
       const oid = String(item.order_id || '')
       if (!oid) continue
-      if (this.shippingInFlight.has(oid) || this.storage.hasShippedCode(oid)) continue
+      if (this.storage.isHardBusinessFailMsg(String(item.error_msg || ''))) {
+        this.logger.info(
+          `[AutoShip] 跳过硬业务失败重试: ${oid} ${String(item.error_msg || '').slice(0, 60)}`
+        )
+        continue
+      }
+      const shopId = String(item.shop_id || currentShopId())
+      const flight = this.flightKey(shopId, oid)
+      if (this.shippingInFlight.has(flight) || this.storage.hasShippedCode(oid, shopId)) continue
 
       const run = this.shipChain.then(async () => {
-        if (this.shippingInFlight.has(oid) || this.storage.hasShippedCode(oid)) return
+        if (this.shippingInFlight.has(flight) || this.storage.hasShippedCode(oid, shopId)) return
         if (!this.storage.tryClaimRetry(item.msg_guid)) return
-        this.shippingInFlight.add(oid)
+        this.shippingInFlight.add(flight)
         retried++
         try {
-          const shopId = item.shop_id
           const binding = item.binding_id
             ? this.storage.getAllProductBindings(shopId).find((b: any) => b.id === item.binding_id)
             : null
@@ -2156,7 +2208,7 @@ export class AutoShipService {
             this.logger.warn(`[AutoShip] 重试失败: ${item.order_id}`, shipResult.error)
           }
         } finally {
-          this.shippingInFlight.delete(oid)
+          this.shippingInFlight.delete(flight)
         }
       })
       this.shipChain = run.then(
