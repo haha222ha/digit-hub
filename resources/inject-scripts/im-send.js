@@ -1539,9 +1539,12 @@
         }
       } catch (wsErr) {
         var wsMsg = wsErr && wsErr.message ? wsErr.message : String(wsErr)
-        console.warn('[XHS Assistant] WS 发码失败，回退 XhsRim:', wsMsg)
-        if (!getActiveRim() || typeof getActiveRim().sendTextMsg !== 'function') {
-          return { success: false, error: 'impaas-ws 发码失败: ' + wsMsg, buyerId: buyerId }
+        console.warn('[XHS Assistant] WS 发码失败:', wsMsg)
+        // 已尝试 rim + ws，禁止再第三次 sendTextMsg（易触发连续发送限流）
+        return {
+          success: false,
+          error: 'impaas-ws 发码失败: ' + wsMsg,
+          buyerId: buyerId
         }
       }
     }

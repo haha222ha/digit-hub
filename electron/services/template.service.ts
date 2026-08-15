@@ -50,13 +50,14 @@ export function genUid(len: number = 10): string {
 
 /** 渲染单条内容，替换所有占位符 */
 export function renderTemplate(content: string, ctx: TemplateContext): string {
-  const uid = ctx.card ?? genUid(ctx.uidLength ?? 10)
+  const card = String(ctx.card || '').trim()
+  const uid = card || genUid(ctx.uidLength ?? 10)
   const ts = Date.now().toString()
   return String(content)
     .replace(/\{(订单号|order_id)\}/g, ctx.orderId)
     .replace(/\{(买家昵称|buyer_name)\}/g, ctx.buyerName || '')
     .replace(/\{(商品名|product_name)\}/g, ctx.productName || '')
-    .replace(/\{(卡密|card)\}/g, ctx.card || '')
+    .replace(/\{(卡密|card)\}/g, card)
     .replace(/\{(店铺名|shop_name)\}/g, ctx.shopName || '')
     .replace(/\{uid\}/g, uid)
     .replace(/\{ts\}/g, ts)

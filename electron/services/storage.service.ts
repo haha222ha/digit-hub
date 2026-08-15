@@ -1501,27 +1501,42 @@ export class StorageService {
   }
 
   /**
-   * 订单是否已存在发货记录（商家级：同订单号只发一次）
+   * 订单是否已存在发货记录。
+   * 传入 shopId 时按店隔离；不传则按 order_id（兼容旧调用）。
    */
-  existsOrderDelivery(orderId: string, _shopId?: string): boolean {
-    const row = this.db.prepare('SELECT id FROM order_delivery WHERE order_id = ? LIMIT 1').get(orderId)
+  existsOrderDelivery(orderId: string, shopId?: string): boolean {
+    const oid = String(orderId || '').trim()
+    if (!oid) return false
+    const sid = String(shopId || '').trim()
+    if (sid) {
+      const row = this.db
+        .prepare('SELECT id FROM order_delivery WHERE order_id = ? AND shop_id = ? LIMIT 1')
+        .get(oid, sid)
+      return !!row
+    }
+    const row = this.db.prepare('SELECT id FROM order_delivery WHERE order_id = ? LIMIT 1').get(oid)
     return !!row
   }
 
-  /**
-   * 整单是否已发完：1..msg_total 每条均为 success / rate_limited / disabled，且至少一条 success。
-   * （替代「任意一条 success 就算发过」——避免缺轮话术却永久跳过）
-   */
-  hasShippedCode(orderId: string): boolean {
-    return this.isOrderFullyShipped(orderId)
-  }
-
-  isOrderFullyShipped(orderId: string): boolean {
-    const rows = this.db
-      .prepare(
-        `SELECT msg_index, msg_total, send_status FROM order_delivery WHERE order_id = ? ORDER BY msg_index ASC`
-      )
-      .all(orderId) as Array<{ msg_index: number; msg_total: number; send_status: string }>
+  isOrderFullyShipped(orderId: string, shopId?: string): boolean {
+    const oid = String(orderId || '').trim()
+    if (!oid) return false
+    const sid = String(shopId || '').trim()
+    const rows = (
+      sid
+        ? this.db
+            .prepare(
+              `SELECT msg_index, msg_total, send_status FROM order_delivery
+               WHERE order_id = ? AND shop_id = ? ORDER BY msg_index ASC`
+            )
+            .all(oid, sid)
+        : this.db
+            .prepare(
+              `SELECT msg_index, msg_total, send_status FROM order_delivery
+               WHERE order_id = ? ORDER BY msg_index ASC`
+            )
+            .all(oid)
+    ) as Array<{ msg_index: number; msg_total: number; send_status: string }>
     if (!rows.length) return false
     const total = Math.max(
       1,
@@ -1536,12 +1551,16 @@ export class StorageService {
       if (!st) return false
       if (st === 'success') hasSuccess = true
       else if (st === 'rate_limited' || st === 'disabled') {
-        /* terminal skip for this index */
+        /* terminal */
       } else {
         return false
       }
     }
     return hasSuccess
+  }
+
+  hasShippedCode(orderId: string, shopId?: string): boolean {
+    return this.isOrderFullyShipped(orderId, shopId)
   }
 
   /** 指定 msg_index 之前（不含）有多少条 success */
@@ -1608,7 +1627,10 @@ export class StorageService {
   /**
    * 台账中尚未整单发完的订单（供补单对账）
    */
-  listLedgerNeedingShip(limit = 50): Array<{
+  listLedgerNeedingShip(
+    limit = 50,
+    shopId?: string
+  ): Array<{
     order_id: string
     shop_id: string
     product_id: string
@@ -1616,17 +1638,30 @@ export class StorageService {
     order_time: string
     is_virtual: number
   }> {
-    const rows = this.db
-      .prepare(
-        `SELECT l.order_id, l.shop_id, l.product_id, l.platform_status, l.order_time, l.is_virtual
-         FROM order_ledger l
-         ORDER BY l.last_seen_at DESC
-         LIMIT ?`
-      )
-      .all(Math.max(1, Math.min(500, limit * 4))) as any[]
+    const sid = String(shopId || '').trim()
+    const rows = (
+      sid
+        ? this.db
+            .prepare(
+              `SELECT l.order_id, l.shop_id, l.product_id, l.platform_status, l.order_time, l.is_virtual
+               FROM order_ledger l
+               WHERE l.shop_id = ? OR l.shop_id = '' OR l.shop_id = 'default'
+               ORDER BY l.last_seen_at DESC
+               LIMIT ?`
+            )
+            .all(sid, Math.max(1, Math.min(500, limit * 4)))
+        : this.db
+            .prepare(
+              `SELECT l.order_id, l.shop_id, l.product_id, l.platform_status, l.order_time, l.is_virtual
+               FROM order_ledger l
+               ORDER BY l.last_seen_at DESC
+               LIMIT ?`
+            )
+            .all(Math.max(1, Math.min(500, limit * 4)))
+    ) as any[]
     const out: any[] = []
     for (const row of rows) {
-      if (this.isOrderFullyShipped(row.order_id)) continue
+      if (this.isOrderFullyShipped(row.order_id, row.shop_id || sid || undefined)) continue
       out.push(row)
       if (out.length >= limit) break
     }

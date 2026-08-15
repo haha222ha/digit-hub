@@ -32,12 +32,17 @@ const ARK_ORDER_QUERY_URL = 'https://ark.xiaohongshu.com/app-order/order/query'
 /** dashboard 无 XhsRim 时，同 WebContents 后台切 chat（不新开窗，避免 CSA 互踢） */
 const XHS_CHAT_URL = 'https://walle.xiaohongshu.com/cstools/chat'
 
-function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
+function withTimeout<T>(p: Promise<T>, ms: number, fallback: T, onTimeout?: () => void): Promise<T> {
   return new Promise((resolve) => {
     let done = false
     const t = setTimeout(() => {
       if (!done) {
         done = true
+        try {
+          onTimeout?.()
+        } catch {
+          /* ignore */
+        }
         resolve(fallback)
       }
     }, ms)
@@ -58,6 +63,24 @@ function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
       }
     )
   })
+}
+
+/** 带超时的 loadURL：超时则 stop()，避免孤儿导航拖死后续轮询 */
+async function loadUrlCapped(wc: WebContents, url: string, ms: number): Promise<boolean> {
+  if (!wc || wc.isDestroyed()) return false
+  const ok = await withTimeout(
+    wc.loadURL(url).then(() => true) as Promise<boolean>,
+    ms,
+    false,
+    () => {
+      try {
+        if (!wc.isDestroyed() && wc.isLoading()) wc.stop()
+      } catch {
+        /* ignore */
+      }
+    }
+  )
+  return !!ok
 }
 
 function isArkLoginUrl(url: string): boolean {
@@ -520,8 +543,26 @@ export class AutoShipService {
    */
   private async ensureOrderPollWc(shopId: string): Promise<WebContents | null> {
     const sid = String(shopId || currentShopId()).trim() || currentShopId()
-    // 整段限时：ark 未登录/卡住时绝不能拖死整轮拉单与补单
-    return withTimeout(this.ensureOrderPollWcInner(sid), 12000, this.getShipWc(sid))
+    const wc = await withTimeout(this.ensureOrderPollWcInner(sid), 12000, null, () => {
+      const win = this.orderPollByShop.get(sid)
+      try {
+        const c = win && !win.isDestroyed() ? win.webContents : null
+        if (c && !c.isDestroyed() && c.isLoading()) c.stop()
+      } catch {
+        /* ignore */
+      }
+    })
+    if (wc && !wc.isDestroyed()) {
+      if (this.injectService) {
+        await this.injectService.injectScriptAsync(wc, 'im-send').catch(() => false)
+      }
+      return wc
+    }
+    const ship = this.getShipWc(sid)
+    if (ship && !ship.isDestroyed() && this.injectService) {
+      await this.injectService.injectScriptAsync(ship, 'im-send').catch(() => false)
+    }
+    return ship
   }
 
   private async ensureOrderPollWcInner(sid: string): Promise<WebContents | null> {
@@ -567,8 +608,13 @@ export class AutoShipService {
         !/ark\.xiaohongshu\.com\/app-order/i.test(url)
       const lastReady = this.orderPollReadyAt.get(sid) || 0
       if (needLoad || Date.now() - lastReady > 30 * 60 * 1000) {
-        await withTimeout(wc.loadURL(ARK_ORDER_QUERY_URL) as any, 8000, null)
-        await new Promise((r) => setTimeout(r, 800))
+        const loaded = await loadUrlCapped(wc, ARK_ORDER_QUERY_URL, 8000)
+        if (!loaded) {
+          this.logger.warn(`[AutoShip] ark 订单页加载超时，回落客服页 shop=${sid}`)
+          this.orderPollReadyAt.delete(sid)
+          return null
+        }
+        await new Promise((r) => setTimeout(r, 600))
       }
 
       const after = wc.getURL() || ''
@@ -576,7 +622,8 @@ export class AutoShipService {
         this.logger.warn(
           `[AutoShip] ark 订单页未登录，回落客服页轮询 shop=${sid} url=${after.slice(0, 90)}`
         )
-        return this.getShipWc(sid)
+        this.orderPollReadyAt.delete(sid)
+        return null
       }
 
       await this.seedArkAccessToken(wc, sid)
@@ -587,7 +634,8 @@ export class AutoShipService {
       return wc
     } catch (e) {
       this.logger.warn(`[AutoShip] ensureOrderPollWc 失败 shop=${sid}: ${e}`)
-      return this.getShipWc(sid)
+      this.orderPollReadyAt.delete(sid)
+      return null
     }
   }
 
@@ -607,11 +655,11 @@ export class AutoShipService {
       return 0
     }
     this.lastLedgerReconcileAt = now
-    const rows = this.storage.listLedgerNeedingShip(limit)
+    const rows = this.storage.listLedgerNeedingShip(limit, shopId)
     let n = 0
     for (const row of rows) {
       if (!row?.order_id) continue
-      if (this.storage.hasShippedCode(row.order_id)) continue
+      if (this.storage.hasShippedCode(row.order_id, row.shop_id || shopId)) continue
       if (this.shippingInFlight.has(row.order_id)) continue
       if (this.storage.hasRecentShippingActivity(row.order_id, 10 * 60)) continue
       n += 1
