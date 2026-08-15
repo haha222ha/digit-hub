@@ -143,7 +143,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getOrderDeliveryDetail: (orderId: string) => ipcRenderer.invoke('order:delivery-detail', orderId),
   resendOrderDelivery: (orderId: string) => ipcRenderer.invoke('order:delivery-resend', orderId),
   disableOrderDelivery: (orderId: string) => ipcRenderer.invoke('order:delivery-disable', orderId),
-  retryFailedDeliveries: () => ipcRenderer.invoke('order:retry-failed'),
+  retryFailedDeliveries: (orderId?: string) => ipcRenderer.invoke('order:retry-failed', orderId),
 
   // 商品同步
   syncGoodsList: () => ipcRenderer.invoke('goods:sync'),

@@ -592,11 +592,16 @@ export class AutoShipService {
   }
 
   /**
-   * 台账补单：对照 order_ledger vs 是否已 send_status=success，未成功则重走发码。
-   * （与「自动补货=补卡密池」「自动补发=扫售后 DOM」不同）
+   * 台账补单：对照 order_ledger vs 是否已整单发完。
+   * 受 reship_config.ledgerReconcileEnabled 控制（与售后补发分离）。
    */
   async reconcileUnshippedFromLedger(limit = 30): Promise<number> {
     if (!this.pollingEnabled) return 0
+    const shopId = currentShopId()
+    const cfg = this.storage.getReshipConfig(shopId)
+    if (cfg && cfg.ledgerReconcileEnabled === false) {
+      return 0
+    }
     const now = Date.now()
     if (now - this.lastLedgerReconcileAt < AutoShipService.LEDGER_RECONCILE_MIN_INTERVAL_MS) {
       return 0
@@ -784,6 +789,8 @@ export class AutoShipService {
     source?: string
     shop_id?: string
     shopId?: string
+    /** 售后补发：允许在已 success 后强制再发一轮 */
+    forceReship?: boolean
   }): Promise<void> {
     if (!order || !order.order_id) return
 
@@ -820,8 +827,15 @@ export class AutoShipService {
       void this.psyCloud.syncOrders([{ order_id: order.order_id, product_id: productId }])
     }
 
+    const forceReship = !!order.forceReship || order.source === 'reship'
+    if (forceReship) {
+      this.storage.clearOrderDelivery(order.order_id)
+      this.processedOrders.delete(`${shopId}:${order.order_id}`)
+      this.logger.warn(`[AutoShip] 强制补发：已清除旧发码记录 order=${order.order_id}`)
+    }
+
     // 2) 只跟本地「是否已整单发完」比对
-    if (this.storage.hasShippedCode(order.order_id)) {
+    if (!forceReship && this.storage.hasShippedCode(order.order_id)) {
       this.logger.info(`[AutoShip] 台账已发码，跳过: ${order.order_id}`)
       return
     }
@@ -834,11 +848,11 @@ export class AutoShipService {
     if (reclaimed > 0) {
       this.logger.warn(`[AutoShip] 回收超时发码占位 ${reclaimed} 条: ${order.order_id}`)
     }
-    if (this.storage.hasRecentShippingActivity(order.order_id, 10 * 60)) {
+    if (!forceReship && this.storage.hasRecentShippingActivity(order.order_id, 10 * 60)) {
       this.logger.info(`[AutoShip] 近期已有发码活动，跳过防重: ${order.order_id}`)
       return
     }
-    if (this.storage.existsOrderDelivery(order.order_id)) {
+    if (!forceReship && this.storage.existsOrderDelivery(order.order_id)) {
       const rows = this.storage.getOrderDeliveries(order.order_id) as Array<{
         send_status?: string
       }>
@@ -847,7 +861,6 @@ export class AutoShipService {
       const onlyFail =
         rows.length > 0 && rows.every((r) => String(r.send_status || '') === 'fail')
       if (onlyMock || onlyFail) {
-        // 仅删 fail/mock，禁止误删 sending/success
         this.storage.clearOrderDeliveryByStatuses(order.order_id, ['fail', 'mock_success'])
         this.logger.warn(
           `[AutoShip] 清除未成功发码占位，准备重试: ${order.order_id} mock=${onlyMock} fail=${onlyFail}`
@@ -855,9 +868,8 @@ export class AutoShipService {
       } else if (this.storage.hasShippedCode(order.order_id)) {
         return
       }
-      // 有 success 但未整单完成：进入补齐剩余 msg_index（不断库）
     }
-    if (this.processedOrders.has(`${shopId}:${order.order_id}`)) {
+    if (!forceReship && this.processedOrders.has(`${shopId}:${order.order_id}`)) {
       return
     }
 
@@ -867,7 +879,7 @@ export class AutoShipService {
     }
 
     // 3) 绑定时间门禁：绑定之前的订单只入台账，不补发（防历史单重复发码）
-    if (bindingEarly?.created_at && order.order_time) {
+    if (!forceReship && bindingEarly?.created_at && order.order_time) {
       const orderTs = this.parseTimeToTs(order.order_time, 'cn')
       const bindingTs = this.parseTimeToTs(bindingEarly.created_at, 'utc')
       if (orderTs !== null && bindingTs !== null && orderTs < bindingTs) {
@@ -1995,8 +2007,8 @@ export class AutoShipService {
    * - 乐观锁抢占：仅一个执行体能抢到同一条失败记录
    * - 断点续发：只补发未成功的消息条
    */
-  async retryFailedDeliveries(maxRetry: number = 3): Promise<number> {
-    const failed = this.storage.getFailedRetryableDeliveries(10, maxRetry)
+  async retryFailedDeliveries(maxRetry: number = 3, orderId?: string): Promise<number> {
+    const failed = this.storage.getFailedRetryableDeliveries(10, maxRetry, orderId)
     let retried = 0
     for (const item of failed as any[]) {
       const oid = String(item.order_id || '')

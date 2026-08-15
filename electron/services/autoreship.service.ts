@@ -2,10 +2,10 @@ import { WebContents } from 'electron'
 import { StorageService } from './storage.service'
 import { LoggerService } from './logger.service'
 import { AutoShipService } from './autoship.service'
+import { currentShopId } from '../utils/shop-partition'
 
 /**
- * 自动补发服务（对标原版 AutoShipReshipConfig）
- * 监控补发/售后单并触发重新发货
+ * 售后补发监测（DOM）——与「台账补单」「自动补货」分离
  */
 export class AutoReshipService {
   private storage: StorageService
@@ -26,11 +26,11 @@ export class AutoReshipService {
     this.logger.info('[AutoReship] 已绑定监测 WebContents')
   }
 
-  /** 根据配置启动补发监测 */
+  /** 根据配置启动售后补发监测（不含台账补单） */
   startMonitoring() {
-    const shopId = (global as any).currentShopId || 'default'
+    const shopId = currentShopId() || (global as any).currentShopId || 'default'
     const config = this.storage.getReshipConfig(shopId)
-    if (config?.enabled) {
+    if (config?.aftersaleEnabled || config?.enabled) {
       this.startPolling(config.retryIntervalMs || 10000)
     } else {
       this.stopPolling()
@@ -39,14 +39,12 @@ export class AutoReshipService {
 
   startPolling(intervalMs = 10000) {
     this.stopPolling()
-    // DOM 售后扫描可较勤；台账补单在 AutoShip 内已有 5 分钟节流，这里只偶发触发
     this.pollInterval = setInterval(() => {
       this.pollReshipOrders().catch((err) => {
         this.logger.error('[AutoReship] 轮询失败:', err)
       })
     }, intervalMs)
-    this.logger.info(`[AutoReship] 启动补发监测，间隔: ${intervalMs}ms`)
-    void this.autoShip.reconcileUnshippedFromLedger(30).catch(() => undefined)
+    this.logger.info(`[AutoReship] 启动售后补发监测，间隔: ${intervalMs}ms`)
   }
 
   stopPolling() {
@@ -58,15 +56,17 @@ export class AutoReshipService {
 
   private async pollReshipOrders(): Promise<void> {
     if (!this.monitorWebContents) return
-    const shopId = (global as any).currentShopId || 'default'
+    const shopId = currentShopId() || (global as any).currentShopId || 'default'
     const config = this.storage.getReshipConfig(shopId)
-    if (!config?.enabled) return
+    if (!(config?.aftersaleEnabled || config?.enabled)) return
 
     const url = this.monitorWebContents.getURL()
     if (!url.includes('walle.xiaohongshu.com') && !url.includes('ark.xiaohongshu.com')) return
 
     try {
-      const orders = await this.monitorWebContents.executeJavaScript(`
+      const orders = await this.monitorWebContents
+        .executeJavaScript(
+          `
         (function() {
           const items = [];
           document.querySelectorAll('[class*="reship"], [class*="aftersale"], [class*="补发"]').forEach(function(el) {
@@ -84,7 +84,9 @@ export class AutoReshipService {
           });
           return items;
         })();
-      `).catch(() => [])
+      `
+        )
+        .catch(() => [])
 
       if (Array.isArray(orders)) {
         for (const order of orders) {
@@ -96,19 +98,24 @@ export class AutoReshipService {
     }
   }
 
-  async handleReshipOrder(order: { order_id: string; product_id?: string; status?: string }): Promise<void> {
+  async handleReshipOrder(order: {
+    order_id: string
+    product_id?: string
+    status?: string
+  }): Promise<void> {
     if (!order?.order_id) return
     const key = `reship_${order.order_id}`
     if (this.processedReships.has(key)) return
 
-    this.logger.info(`[AutoReship] 检测到补发单: ${order.order_id}`)
+    this.logger.info(`[AutoReship] 检测到售后补发单: ${order.order_id}`)
     this.processedReships.add(key)
 
     await this.autoShip.handleNewOrder({
       order_id: order.order_id,
       product_id: order.product_id,
       status: '待发货',
-      source: 'reship'
+      source: 'reship',
+      forceReship: true
     })
   }
 

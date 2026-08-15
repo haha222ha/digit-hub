@@ -708,12 +708,57 @@ export class StorageService {
     return result.changes > 0
   }
 
-  saveReshipConfig(shopId: string, config: { enabled: boolean; retryIntervalMs?: number }) {
-    this.set(`reship_config_${shopId}`, config)
+  saveReshipConfig(
+    shopId: string,
+    config: {
+      enabled?: boolean
+      aftersaleEnabled?: boolean
+      ledgerReconcileEnabled?: boolean
+      retryIntervalMs?: number
+    }
+  ) {
+    const prev = this.getReshipConfig(shopId) || {
+      enabled: false,
+      aftersaleEnabled: false,
+      ledgerReconcileEnabled: true,
+      retryIntervalMs: 10000
+    }
+    const aftersale =
+      config.aftersaleEnabled !== undefined
+        ? !!config.aftersaleEnabled
+        : config.enabled !== undefined
+          ? !!config.enabled
+          : !!prev.aftersaleEnabled
+    const ledger =
+      config.ledgerReconcileEnabled !== undefined
+        ? !!config.ledgerReconcileEnabled
+        : prev.ledgerReconcileEnabled !== false
+    this.set(`reship_config_${shopId}`, {
+      enabled: aftersale, // 兼容旧字段：enabled = 售后补发
+      aftersaleEnabled: aftersale,
+      ledgerReconcileEnabled: ledger,
+      retryIntervalMs: config.retryIntervalMs ?? prev.retryIntervalMs ?? 10000
+    })
   }
 
-  getReshipConfig(shopId: string): { enabled: boolean; retryIntervalMs: number } | null {
-    return this.get(`reship_config_${shopId}`)
+  getReshipConfig(shopId: string): {
+    enabled: boolean
+    aftersaleEnabled: boolean
+    ledgerReconcileEnabled: boolean
+    retryIntervalMs: number
+  } | null {
+    const raw = this.get<any>(`reship_config_${shopId}`)
+    if (!raw) return null
+    const aftersale =
+      raw.aftersaleEnabled !== undefined ? !!raw.aftersaleEnabled : !!raw.enabled
+    const ledger =
+      raw.ledgerReconcileEnabled !== undefined ? !!raw.ledgerReconcileEnabled : true
+    return {
+      enabled: aftersale,
+      aftersaleEnabled: aftersale,
+      ledgerReconcileEnabled: ledger,
+      retryIntervalMs: Number(raw.retryIntervalMs) || 10000
+    }
   }
 
   /**
@@ -1675,15 +1720,30 @@ export class StorageService {
   /**
    * 查询失败且可重试的订单（对标 GetFailedRetryableLogsAsync）
    */
-  getFailedRetryableDeliveries(limit: number = 10, maxRetry: number = 3) {
-    return this.db.prepare(
-      `SELECT * FROM order_delivery
-       WHERE send_status = 'fail' AND retry_count < ?
-         AND IFNULL(error_msg, '') NOT LIKE '%连续发送%'
-         AND IFNULL(error_msg, '') NOT LIKE '%不可超过%10%'
-         AND IFNULL(error_msg, '') NOT LIKE '%超过10条%'
-       ORDER BY updated_at ASC LIMIT ?`
-    ).all(maxRetry, limit)
+  getFailedRetryableDeliveries(limit: number = 10, maxRetry: number = 3, orderId?: string) {
+    const oid = String(orderId || '').trim()
+    if (oid) {
+      return this.db
+        .prepare(
+          `SELECT * FROM order_delivery
+           WHERE order_id = ? AND send_status = 'fail' AND retry_count < ?
+             AND IFNULL(error_msg, '') NOT LIKE '%连续发送%'
+             AND IFNULL(error_msg, '') NOT LIKE '%不可超过%10%'
+             AND IFNULL(error_msg, '') NOT LIKE '%超过10条%'
+           ORDER BY msg_index ASC, updated_at ASC LIMIT ?`
+        )
+        .all(oid, maxRetry, limit)
+    }
+    return this.db
+      .prepare(
+        `SELECT * FROM order_delivery
+         WHERE send_status = 'fail' AND retry_count < ?
+           AND IFNULL(error_msg, '') NOT LIKE '%连续发送%'
+           AND IFNULL(error_msg, '') NOT LIKE '%不可超过%10%'
+           AND IFNULL(error_msg, '') NOT LIKE '%超过10条%'
+         ORDER BY updated_at ASC LIMIT ?`
+      )
+      .all(maxRetry, limit)
   }
 
   /**

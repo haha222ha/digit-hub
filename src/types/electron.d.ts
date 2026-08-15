@@ -150,7 +150,7 @@ export interface ElectronAPI {
   getOrderDeliveryDetail(orderId: string): Promise<OrderDelivery[]>
   resendOrderDelivery(orderId: string): Promise<{ success: boolean; retried?: number; message?: string }>
   disableOrderDelivery(orderId: string): Promise<{ success: boolean; message?: string }>
-  retryFailedDeliveries(): Promise<number>
+  retryFailedDeliveries(orderId?: string): Promise<number>
 
   // 商品同步
   syncGoodsList(): Promise<{ success: boolean; goods: Array<{ itemId: string; title: string; noteId?: string; price?: string; stock?: string; image?: string; variant?: string }>; error?: string }>
@@ -179,8 +179,21 @@ export interface ElectronAPI {
   updateReplyRule(id: number, updates: Record<string, unknown>): Promise<boolean>
   deleteReplyRule(id: number): Promise<boolean>
 
-  getReshipConfig(shopId: string): Promise<{ enabled: boolean; retryIntervalMs: number } | null>
-  setReshipConfig(shopId: string, config: { enabled: boolean; retryIntervalMs?: number }): Promise<boolean>
+  getReshipConfig(shopId: string): Promise<{
+    enabled: boolean
+    aftersaleEnabled: boolean
+    ledgerReconcileEnabled: boolean
+    retryIntervalMs: number
+  } | null>
+  setReshipConfig(
+    shopId: string,
+    config: {
+      enabled?: boolean
+      aftersaleEnabled?: boolean
+      ledgerReconcileEnabled?: boolean
+      retryIntervalMs?: number
+    }
+  ): Promise<boolean>
 
   initShopPhase2(shopId: string, shopName?: string): Promise<boolean>
   listShops(): Promise<{ currentId: string; shops: Array<{ id: string; name: string }>; limit: number }>

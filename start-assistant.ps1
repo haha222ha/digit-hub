@@ -50,7 +50,46 @@ function Get-AssistantElectron {
   }
 }
 
-# 已在运行时：先彻底退出再启动，否则会一直复用旧进程，vite build 后的修复不生效
+function Get-LatestSourceWriteTime {
+  $paths = @(
+    (Join-Path $Root "electron"),
+    (Join-Path $Root "src"),
+    (Join-Path $Root "resources\inject-scripts")
+  )
+  $latest = Get-Date 0
+  foreach ($p in $paths) {
+    if (-not (Test-Path $p)) { continue }
+    Get-ChildItem $p -Recurse -File -Include *.ts,*.js,*.vue,*.css -ErrorAction SilentlyContinue |
+      ForEach-Object {
+        if ($_.LastWriteTime -gt $latest) { $latest = $_.LastWriteTime }
+      }
+  }
+  return $latest
+}
+
+function Ensure-FreshBuild {
+  $mainJs = Join-Path $Root "dist-electron\main.js"
+  $needBuild = $false
+  if (-not (Test-Path $mainJs)) {
+    $needBuild = $true
+  } else {
+    $distTime = (Get-Item $mainJs).LastWriteTime
+    $srcTime = Get-LatestSourceWriteTime
+    if ($srcTime -gt $distTime.AddSeconds(2)) {
+      $needBuild = $true
+      Write-Host "[launcher] source newer than dist ($srcTime > $distTime), rebuilding..."
+    }
+  }
+  if ($needBuild) {
+    & npx vite build
+    if ($LASTEXITCODE -ne 0) {
+      Write-Host "[launcher] vite build failed, exit=$LASTEXITCODE"
+      exit 1
+    }
+  }
+}
+
+# 已在运行时：先彻底退出再启动，否则会一直复用旧进程
 $running = @(Get-AssistantElectron)
 if ($running.Count -gt 0) {
   foreach ($proc in $running) {
@@ -65,9 +104,7 @@ if ($running.Count -gt 0) {
 }
 
 Remove-Item Env:\VITE_DEV_SERVER_URL -ErrorAction SilentlyContinue
-if (-not (Test-Path (Join-Path $Root "dist-electron\main.js"))) {
-  & npx vite build --mode development | Out-Null
-}
+Ensure-FreshBuild
 
 if (Test-Path $Ele) {
   Start-Process -FilePath $Ele -ArgumentList "." -WorkingDirectory $Root

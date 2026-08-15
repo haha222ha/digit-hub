@@ -1619,17 +1619,31 @@ function setupIPC() {
   ipcMain.handle('order:deliveries', (_event, filter) => storageService.getOrderDeliveriesList(filter || {}))
   ipcMain.handle('order:delivery-detail', (_event, orderId: string) => storageService.getOrderDeliveries(orderId))
   ipcMain.handle('order:delivery-resend', async (_event, orderId: string) => {
-    const items = storageService.getOrderDeliveries(orderId)
+    const oid = String(orderId || '').trim()
+    if (!oid) return { success: false, message: '订单号为空' }
+    const items = storageService.getOrderDeliveries(oid)
     if (!items || items.length === 0) return { success: false, message: '发货消息不存在' }
-    if (items.some((it: any) => it.send_status === 'disabled')) return { success: false, message: '消息已作废，无法重发' }
-    const retried = await autoShipService.retryFailedDeliveries()
+    if (items.some((it: any) => it.send_status === 'disabled')) {
+      return { success: false, message: '消息已作废，无法重发' }
+    }
+    // 强制补发：清旧记录后整单再发
+    await autoShipService.handleNewOrder({
+      order_id: oid,
+      product_id: String((items[0] as any)?.product_id || ''),
+      shop_id: String((items[0] as any)?.shop_id || currentShopId()),
+      source: 'manual_resend',
+      forceReship: true
+    })
+    const retried = await autoShipService.retryFailedDeliveries(3, oid)
     return { success: true, retried }
   })
   ipcMain.handle('order:delivery-disable', (_event, orderId: string) => {
     const changed = storageService.disableOrderDelivery(orderId)
     return { success: changed, message: changed ? '作废成功' : '发货消息不存在' }
   })
-  ipcMain.handle('order:retry-failed', async () => autoShipService.retryFailedDeliveries())
+  ipcMain.handle('order:retry-failed', async (_event, orderId?: string) =>
+    autoShipService.retryFailedDeliveries(3, orderId ? String(orderId) : undefined)
+  )
 
   // 同步千帆后台商品列表（对标阿奇锁 getGoodsNoteList）
   ipcMain.handle('goods:sync', async () => autoShipService.syncGoodsList())

@@ -68,8 +68,13 @@ export class ShopContextService {
       )
     }
 
-    const reshipConfig = this.storage.getReshipConfig(shopId) || { enabled: false, retryIntervalMs: 10000 }
-    if (reshipConfig.enabled) {
+    const reshipConfig = this.storage.getReshipConfig(shopId) || {
+      enabled: false,
+      aftersaleEnabled: false,
+      ledgerReconcileEnabled: true,
+      retryIntervalMs: 10000
+    }
+    if (reshipConfig.aftersaleEnabled || reshipConfig.enabled) {
       this.autoReship.startPolling(reshipConfig.retryIntervalMs || 10000)
     }
 

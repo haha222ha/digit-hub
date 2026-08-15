@@ -5,9 +5,23 @@
         <h2 class="page-title">发货管理</h2>
         <div class="header-actions">
           <el-switch v-model="autoShipEnabled" active-text="自动发货" @change="toggleAutoShip" />
-          <el-switch v-model="reshipEnabled" active-text="自动补发/补单" @change="toggleReship" style="margin-left: 12px" />
-          <el-tooltip content="自动补货=卡密池库存不足时生成链接；与补单无关。补单=对照台账是否已发码成功。" placement="bottom">
-            <span style="margin-left: 10px; color: #909399; font-size: 12px; cursor: help">补货≠补单</span>
+          <el-switch
+            v-model="ledgerReconcileEnabled"
+            active-text="台账补单"
+            @change="toggleLedgerReconcile"
+            style="margin-left: 12px"
+          />
+          <el-switch
+            v-model="aftersaleReshipEnabled"
+            active-text="售后补发"
+            @change="toggleAftersaleReship"
+            style="margin-left: 12px"
+          />
+          <el-tooltip
+            content="自动发货=拉新单发 IM；台账补单=对照本地是否发完；售后补发=扫售后 DOM 强制再发；自动补货=卡密池库存（绑定里设置）。"
+            placement="bottom"
+          >
+            <span style="margin-left: 10px; color: #909399; font-size: 12px; cursor: help">说明</span>
           </el-tooltip>
           <el-button size="small" style="margin-left: 12px" @click="retryFailed">重试失败订单</el-button>
         </div>
@@ -455,7 +469,8 @@ const shopStore = useShopStore()
 const SHOP_ID = computed(() => shopStore.currentId)
 const activeTab = ref('bindings')
 const autoShipEnabled = ref(false)
-const reshipEnabled = ref(false)
+const ledgerReconcileEnabled = ref(true)
+const aftersaleReshipEnabled = ref(false)
 const bindings = ref<ProductBinding[]>([])
 const shipLogs = ref<ShipLog[]>([])
 const showBinding = ref(false)
@@ -735,7 +750,8 @@ const loadData = async () => {
   sharedPools.value = (await window.electronAPI.listSharedPools?.()) || []
   shipLogs.value = await window.electronAPI.getShipLogs(SHOP_ID.value, 100)
   const reship = await window.electronAPI.getReshipConfig(SHOP_ID.value)
-  reshipEnabled.value = !!reship?.enabled
+  ledgerReconcileEnabled.value = reship ? reship.ledgerReconcileEnabled !== false : true
+  aftersaleReshipEnabled.value = !!(reship?.aftersaleEnabled ?? reship?.enabled)
   await refreshCloudLowHints()
   await refreshPsyQuota()
 }
@@ -878,9 +894,22 @@ const toggleAutoShip = async (val: boolean) => {
   ElMessage.success(`自动发货已${val ? '开启' : '关闭'}`)
 }
 
-const toggleReship = async (val: boolean) => {
-  await window.electronAPI?.setReshipConfig(SHOP_ID.value, { enabled: val, retryIntervalMs: 10000 })
-  ElMessage.success(`自动补发已${val ? '开启' : '关闭'}`)
+const toggleLedgerReconcile = async (val: boolean) => {
+  await window.electronAPI?.setReshipConfig(SHOP_ID.value, {
+    ledgerReconcileEnabled: val,
+    aftersaleEnabled: aftersaleReshipEnabled.value,
+    retryIntervalMs: 10000
+  })
+  ElMessage.success(`台账补单已${val ? '开启' : '关闭'}`)
+}
+
+const toggleAftersaleReship = async (val: boolean) => {
+  await window.electronAPI?.setReshipConfig(SHOP_ID.value, {
+    aftersaleEnabled: val,
+    ledgerReconcileEnabled: ledgerReconcileEnabled.value,
+    retryIntervalMs: 10000
+  })
+  ElMessage.success(`售后补发已${val ? '开启' : '关闭'}`)
 }
 
 const retryFailed = async () => {
