@@ -1,12 +1,13 @@
 /**
- * 商品同步脚本 — 对标阿奇锁 getGoodsNoteList
- * 接口：GET https://ark.xiaohongshu.com/api/edith/goods-note/list
- * 必须在 ark 域（含 accessToken + _webmsxyw）执行
+ * 商品同步 — 对标 ProductAnalyzer 本店商品库「已上架」
+ * 主路径：POST /api/edith/product/search_item_v2（card_type=2）
+ * 回落：GET /api/edith/goods-note/list（旧笔记商品）
+ * 必须在 ark 域（含 accessToken + cookie）执行
  */
 (function () {
   if (window.__xhsAssistantGoodsSync) return
   window.__xhsAssistantGoodsSync = true
-  console.log('[XHS Assistant] 商品同步脚本已注入')
+  console.log('[XHS Assistant] 商品同步脚本已注入（search_item_v2）')
 
   function getAccessToken() {
     try {
@@ -34,16 +35,157 @@
     return {}
   }
 
+  function authHeaders(apiPath) {
+    const token = getAccessToken()
+    const sign = buildSign(apiPath)
+    const h = {
+      accept: 'application/json, text/plain, */*',
+      'content-type': 'application/json;charset=UTF-8',
+      'x-subsystem': 'ark'
+    }
+    if (token) h.authorization = token
+    return Object.assign(h, sign)
+  }
+
+  function priceToYuan(n) {
+    const v = Number(n)
+    if (!Number.isFinite(v) || v <= 0) return ''
+    if (!Number.isInteger(v)) return String(v)
+    if (v >= 50) return String(Math.round(v) / 100)
+    return String(v)
+  }
+
+  function pickImage(raw) {
+    if (!raw || typeof raw !== 'object') return ''
+    const direct = [
+      raw.image_url,
+      raw.imageUrl,
+      raw.cover,
+      raw.coverUrl,
+      raw.image,
+      raw.item_image,
+      raw.itemImage
+    ]
+    for (const v of direct) {
+      if (typeof v === 'string' && /^https?:\/\//i.test(v)) return v.trim()
+    }
+    const imgs = raw.images || raw.image_list || raw.imageList
+    if (Array.isArray(imgs) && imgs[0]) {
+      const first = imgs[0]
+      if (typeof first === 'string') return first
+      if (first && first.url) return String(first.url)
+    }
+    return ''
+  }
+
+  function mapShelfItem(raw) {
+    const itemId = String(raw.item_id || raw.itemId || raw.id || '').trim()
+    if (!itemId || itemId.length < 8) return null
+    if (raw.buyable === false || raw.buyable === 0) return null
+    const ss = raw.shelf_status != null ? raw.shelf_status : raw.shelfStatus
+    if (ss != null && ss !== '' && Number(ss) !== 1) return null
+    const title = String(
+      raw.item_name ||
+        raw.itemName ||
+        raw.item_name_with_brand_name ||
+        raw.title ||
+        raw.name ||
+        itemId
+    ).trim()
+    const price = priceToYuan(raw.min_price != null ? raw.min_price : raw.minPrice || raw.price)
+    const sku =
+      raw.first_buyable_sku_id ||
+      raw.firstBuyableSkuId ||
+      raw.sku_id ||
+      raw.skuId ||
+      ''
+    return {
+      itemId,
+      title: title || itemId,
+      noteId: '',
+      price: price || '',
+      stock: String(raw.stock != null ? raw.stock : raw.inventory || ''),
+      image: pickImage(raw),
+      variant: sku ? String(sku) : '',
+      buyable: raw.buyable,
+      source: 'search_item_v2'
+    }
+  }
+
+  /**
+   * 已上架商品（对标 PA 本店商品库 /list/shelf，card_type=2）
+   */
+  async function fetchShelfGoodsList() {
+    const pageSize = 100
+    let page = 1
+    const all = []
+    const seen = new Set()
+    let total = 0
+    const apiPath = '/api/edith/product/search_item_v2'
+
+    while (page <= 50) {
+      const body = {
+        page_no: page,
+        pageNo: page,
+        page_size: pageSize,
+        pageSize: pageSize,
+        buyable: true,
+        shelf_status: 1,
+        shelfStatus: 1,
+        search_filter: {
+          card_type: 2,
+          is_channel: false
+        },
+        search_order: { sort_field: 'create_time', order: 'desc' },
+        search_item_detail_option: {
+          with_product_quality_score: false,
+          with_hot_item_award_text_info: false,
+          with_ai_publish_note_permission: false,
+          with_inventory_risk_info: true,
+          with_item_lock_info: true
+        }
+      }
+
+      const response = await fetch('https://ark.xiaohongshu.com' + apiPath, {
+        method: 'POST',
+        credentials: 'include',
+        headers: authHeaders(apiPath),
+        body: JSON.stringify(body)
+      })
+      const result = await response.json().catch(() => null)
+      if (!result || result.success !== true) {
+        const msg =
+          (result && (result.msg || result.message)) ||
+          'search_item_v2 返回异常: ' + JSON.stringify(result || {}).slice(0, 200)
+        throw new Error(msg)
+      }
+
+      const data = result.data || {}
+      const items = Array.isArray(data.items) ? data.items : []
+      const t = Number(data.total)
+      if (Number.isFinite(t) && t > 0) total = t
+
+      for (const raw of items) {
+        const mapped = mapShelfItem(raw)
+        if (!mapped || seen.has(mapped.itemId)) continue
+        seen.add(mapped.itemId)
+        all.push(mapped)
+      }
+
+      if (items.length === 0) break
+      if (total > 0 && all.length >= total) break
+      if (items.length < pageSize) break
+      page++
+      await new Promise((r) => setTimeout(r, 280))
+    }
+
+    return all
+  }
+
   function pickItemId(note, goods) {
     const g = goods || {}
     return String(
-      g.item_id ||
-        g.itemId ||
-        g.goods_id ||
-        note.item_id ||
-        note.itemId ||
-        note.goods_id ||
-        ''
+      g.item_id || g.itemId || g.goods_id || note.item_id || note.itemId || note.goods_id || ''
     )
   }
 
@@ -61,11 +203,8 @@
     )
   }
 
-  /**
-   * 分页拉全量商品（按 itemId 去重）
-   * @returns {Promise<Array<{itemId, title, noteId, price, stock, image, variant}>>}
-   */
-  async function fetchGoodsList() {
+  /** 旧接口回落：笔记关联商品 */
+  async function fetchGoodsNoteList() {
     const token = getAccessToken()
     if (!token) {
       throw new Error('千帆商家后台未登录：缺少 accessToken，请先登录 ark 后台后再同步')
@@ -79,18 +218,10 @@
     while (true) {
       const apiUrl = `/api/edith/goods-note/list?page_num=${pageNo}&page_size=${pageSize}`
       const url = 'https://ark.xiaohongshu.com' + apiUrl
-      const sign = buildSign(apiUrl)
-
       const response = await fetch(url, {
         method: 'GET',
         credentials: 'include',
-        headers: {
-          accept: 'application/json, text/plain, */*',
-          'content-type': 'application/json;charset=UTF-8',
-          'x-subsystem': 'eva',
-          authorization: token,
-          ...sign
-        }
+        headers: authHeaders(apiUrl)
       })
       const result = await response.json()
       if (!result || result.success !== true) {
@@ -115,7 +246,8 @@
               price: g.price || note.price || '',
               stock: g.stock || note.stock || '',
               image: g.item_image || g.itemImage || g.image || note.image || '',
-              variant: g.variant_desc || g.variantDesc || ''
+              variant: g.variant_desc || g.variantDesc || '',
+              source: 'goods_note'
             })
           }
         } else {
@@ -130,7 +262,8 @@
             price: note.price || (firstSku && firstSku.price) || '',
             stock: note.stock || (firstSku && firstSku.stock) || '',
             image: note.image || note.cover || '',
-            variant: ''
+            variant: '',
+            source: 'goods_note'
           })
         }
       }
@@ -143,15 +276,33 @@
     return allGoods
   }
 
-  /** 页面是否具备同步条件（供主进程轮询） */
+  /**
+   * 优先已上架 search_item_v2；失败再回落笔记商品
+   */
+  async function fetchGoodsList() {
+    const token = getAccessToken()
+    if (!token) {
+      throw new Error('千帆商家后台未登录：缺少 accessToken，请先登录 ark 后台后再同步')
+    }
+    try {
+      const shelf = await fetchShelfGoodsList()
+      if (shelf.length > 0) return shelf
+      console.warn('[GoodsSync] search_item_v2 返回空，尝试 goods-note 回落')
+    } catch (e) {
+      console.warn('[GoodsSync] search_item_v2 失败，回落 goods-note:', e && e.message)
+    }
+    return fetchGoodsNoteList()
+  }
+
   function isReady() {
-    // 有 token 即可先尝试；签名脚本可能稍晚加载
     return !!getAccessToken()
   }
 
   if (!window.__xhsAssistant) window.__xhsAssistant = {}
   window.__xhsAssistant.goods = {
     fetchGoodsList,
+    fetchShelfGoodsList,
+    fetchGoodsNoteList,
     isReady,
     getAccessToken: () => !!getAccessToken()
   }

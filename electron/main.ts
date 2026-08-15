@@ -1601,6 +1601,7 @@ function setupIPC() {
   })
   ipcMain.handle('psy:list-tests', async () => psyCloudService.listTests())
   ipcMain.handle('psy:inventory', async (_event, testCode: string) => psyCloudService.inventory(testCode))
+  ipcMain.handle('psy:quota-info', async () => psyCloudService.quotaInfo())
   ipcMain.handle(
     'psy:claim-into-pool',
     async (_event, bindingId: number, testCode: string, count: number, productId?: string) =>

@@ -101,6 +101,11 @@ export interface ElectronAPI {
     }
     message?: string
   }>
+  psyQuotaInfo(): Promise<{
+    success: boolean
+    quota?: { quota: number; used_quota: number; remaining_quota: number }
+    message?: string
+  }>
   psyClaimIntoPool(
     bindingId: number,
     testCode: string,

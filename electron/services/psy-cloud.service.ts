@@ -27,6 +27,12 @@ export type PsyInventory = {
   total?: number
 }
 
+export type PsyQuotaInfo = {
+  quota: number
+  used_quota: number
+  remaining_quota: number
+}
+
 export type PsyClaimResult = {
   success: boolean
   message?: string
@@ -173,6 +179,26 @@ export class PsyCloudService {
       return { success: true, inventory: data }
     } catch (e: any) {
       return { success: false, message: e?.message || '获取库存失败' }
+    }
+  }
+
+  /** 分销账户额度（生成链接会扣 remaining_quota） */
+  async quotaInfo(): Promise<{ success: boolean; quota?: PsyQuotaInfo; message?: string }> {
+    if (!this.getToken()) return { success: false, message: '请先登录心象测' }
+    try {
+      const body = await this.request('/api/quota/info')
+      if (body?.success === false) {
+        return { success: false, message: body?.message || '查询额度失败' }
+      }
+      const data = unwrapData(body) || {}
+      const quota: PsyQuotaInfo = {
+        quota: Number(data.quota ?? 0),
+        used_quota: Number(data.used_quota ?? data.usedQuota ?? 0),
+        remaining_quota: Number(data.remaining_quota ?? data.remainingQuota ?? 0)
+      }
+      return { success: true, quota }
+    } catch (e: any) {
+      return { success: false, message: e?.message || '查询额度失败' }
     }
   }
 

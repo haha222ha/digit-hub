@@ -21,19 +21,28 @@
               添加商品绑定
             </el-button>
             <el-button type="success" :loading="syncingGoods" @click="syncGoods">
-              同步千帆商品
+              同步已上架商品
             </el-button>
             <el-button :disabled="syncingGoods" @click="openArkLogin">
               打开商家登录
             </el-button>
             <el-button type="danger" plain @click="clearAllBindings">清空全部绑定</el-button>
             <span v-if="goodsList.length > 0" class="hint-text">
-              已同步 {{ goodsList.length }} 个商品{{ goodsSyncedAt ? `（${goodsSyncedAt}）` : '' }}；绑定列表为商家全量
+              已同步 {{ goodsList.length }} 个已上架商品{{ goodsSyncedAt ? `（${goodsSyncedAt}）` : '' }}；对齐千帆「本店商品库 → 已上架」
             </span>
             <span v-else class="hint-text">
-              客服登录≠商家后台；先「打开商家登录」或点同步后在弹出窗登录
+              客服登录≠商家后台；先「打开商家登录」或点同步后在弹出窗登录，拉取已上架商品
             </span>
           </div>
+
+          <el-alert
+            v-if="quotaBanner.show"
+            :type="quotaBanner.type"
+            :closable="false"
+            show-icon
+            style="margin-bottom: 12px"
+            :title="quotaBanner.title"
+          />
 
           <!-- 已同步的店铺商品（绑卡入口） -->
           <el-card v-if="goodsList.length > 0" shadow="never" style="margin-bottom: 16px">
@@ -451,6 +460,35 @@ const bindCloudInventory = ref<{ unclaimed_unused: number; claimed_unused: numbe
 const bindInvLoading = ref(false)
 const bindInvError = ref('')
 const cloudLowHint = ref<Record<number, boolean>>({})
+const psyQuota = ref<{ quota: number; used_quota: number; remaining_quota: number } | null>(null)
+const QUOTA_WARN = 10
+const QUOTA_CRITICAL = 3
+
+const quotaBanner = computed(() => {
+  if (!psyQuota.value) return { show: false, type: 'info' as const, title: '' }
+  const rem = Number(psyQuota.value.remaining_quota || 0)
+  const used = Number(psyQuota.value.used_quota || 0)
+  const total = Number(psyQuota.value.quota || 0)
+  if (rem <= QUOTA_CRITICAL) {
+    return {
+      show: true,
+      type: 'error' as const,
+      title: `心象测额度不足：剩余 ${rem}（总额 ${total}，已用 ${used}）。生成链接会扣额度，请尽快兑换/充值。`
+    }
+  }
+  if (rem <= QUOTA_WARN) {
+    return {
+      show: true,
+      type: 'warning' as const,
+      title: `心象测额度偏低：剩余 ${rem}（总额 ${total}，已用 ${used}）。自动补货生成链接前请关注额度。`
+    }
+  }
+  return {
+    show: true,
+    type: 'success' as const,
+    title: `心象测账户额度：剩余 ${rem} / 总额 ${total}（已用 ${used}）`
+  }
+})
 /** 保存后自动打开链接池并领取 */
 const pendingClaimAfterSave = ref(false)
 
@@ -660,6 +698,20 @@ const loadData = async () => {
   const reship = await window.electronAPI.getReshipConfig(SHOP_ID.value)
   reshipEnabled.value = !!reship?.enabled
   await refreshCloudLowHints()
+  await refreshPsyQuota()
+}
+
+const refreshPsyQuota = async () => {
+  if (!window.electronAPI?.psyQuotaInfo) {
+    psyQuota.value = null
+    return
+  }
+  try {
+    const res = await window.electronAPI.psyQuotaInfo()
+    psyQuota.value = res.success && res.quota ? res.quota : null
+  } catch {
+    psyQuota.value = null
+  }
 }
 
 const refreshCloudLowHints = async () => {
@@ -688,16 +740,16 @@ const syncGoods = async () => {
   if (!window.electronAPI) return
   syncingGoods.value = true
   ElMessage.info({
-    message: '正在打开商家后台窗口，请登录后等待自动同步（最多约 5 分钟）',
+    message: '正在打开千帆「已上架」页，请登录后等待自动同步（最多约 5 分钟）',
     duration: 5000
   })
   try {
     const res = await window.electronAPI.syncGoodsList()
     if (res?.success) {
       applyGoodsCache(res.goods || [], new Date().toISOString())
-      ElMessage.success(`同步成功，共 ${goodsList.value.length} 个商品（已保存）`)
+      ElMessage.success(`已同步 ${goodsList.value.length} 个已上架商品（已保存）`)
       if (goodsList.value.length === 0) {
-        ElMessage.info('店铺暂无商品笔记，可手动添加商品 ID 后绑卡')
+        ElMessage.info('店铺暂无已上架商品，可手动添加商品 ID 后绑卡')
       }
     } else {
       ElMessage.warning({ message: res?.error || '同步失败', duration: 8000 })

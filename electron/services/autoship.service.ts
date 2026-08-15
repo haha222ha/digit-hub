@@ -25,6 +25,8 @@ import { notifyDesktop } from '../notify'
 
 /** 阿奇锁商品笔记列表页（有 accessToken + _webmsxyw） */
 const ARK_GOODS_NOTE_LIST_URL = 'https://ark.xiaohongshu.com/app-note/note-list'
+/** 对标 ProductAnalyzer 本店商品库「已上架」 */
+const ARK_GOODS_SHELF_URL = 'https://ark.xiaohongshu.com/app-item/list/shelf'
 /** 千帆订单查询页（HAR 同源：有 _webmsxyw，适合拉 fulfillment/order/page） */
 const ARK_ORDER_QUERY_URL = 'https://ark.xiaohongshu.com/app-order/order/query'
 /** dashboard 无 XhsRim 时，同 WebContents 后台切 chat（不新开窗，避免 CSA 互踢） */
@@ -1534,7 +1536,7 @@ export class AutoShipService {
     try {
       const win = this.ensureArkGoodsWindow(true)
       this.attachArkAutoSyncWatcher(win)
-      win.loadURL(ARK_GOODS_NOTE_LIST_URL).catch((e) => {
+      win.loadURL(ARK_GOODS_SHELF_URL).catch((e) => {
         this.logger.warn('[AutoShip] 打开商家页失败: ' + e)
       })
       return { success: true }
@@ -1637,8 +1639,8 @@ export class AutoShipService {
         await new Promise((r) => setTimeout(r, 1200))
         if (win.isDestroyed()) return
 
-        if (!wc.getURL().includes('app-note')) {
-          await withTimeout(wc.loadURL(ARK_GOODS_NOTE_LIST_URL) as any, 25000, null)
+        if (!/app-item\/list\/(shelf|all)|app-note/i.test(wc.getURL())) {
+          await withTimeout(wc.loadURL(ARK_GOODS_SHELF_URL) as any, 25000, null)
           await new Promise((r) => setTimeout(r, 2000))
         }
 
@@ -1744,9 +1746,9 @@ export class AutoShipService {
     this.attachArkAutoSyncWatcher(win)
     const wc = win.webContents
 
-    this.logger.info('[AutoShip] 打开千帆商品页: ' + ARK_GOODS_NOTE_LIST_URL)
-    win.setTitle('千帆商家后台 — 登录后将自动同步')
-    await withTimeout(wc.loadURL(ARK_GOODS_NOTE_LIST_URL) as any, 30000, null)
+    this.logger.info('[AutoShip] 打开千帆已上架商品页: ' + ARK_GOODS_SHELF_URL)
+    win.setTitle('千帆商家后台 — 登录后将同步已上架商品')
+    await withTimeout(wc.loadURL(ARK_GOODS_SHELF_URL) as any, 30000, null)
     await new Promise((r) => setTimeout(r, 800))
 
     const result = await this.waitForArkSyncResult(win, 300000)

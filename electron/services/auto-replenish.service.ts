@@ -151,6 +151,19 @@ export class AutoReplenishService {
     this.lastRunByPool.set(poolKey, now)
     let generated = 0
 
+    // 生成前检查账户额度
+    const qi = await this.psy.quotaInfo()
+    const rem = Number(qi.quota?.remaining_quota ?? -1)
+    if (qi.success && rem >= 0 && rem < count) {
+      base.message = `账户额度不足：剩余 ${rem}，本次需生成约 ${count} 条，请先兑换额度`
+      this.logger.warn(`[AutoReplenish] ${base.message}`)
+      this.emit({ ...base, message: base.message })
+      return base
+    }
+    if (qi.success && rem >= 0 && rem <= 10) {
+      this.logger.warn(`[AutoReplenish] 额度偏低 remaining=${rem}`)
+    }
+
     // 云端无可领或不够本轮数量时先生成（扣额度）
     if (!inv.success || cloudUnclaimed < count) {
       const deficit = Math.max(1, count - Math.max(0, cloudUnclaimed))

@@ -66,10 +66,35 @@
           <el-button type="primary" @click="openPsyLoginWindow">打开登录窗口获取 Token</el-button>
           <el-button @click="savePsyTokenOnly">保存 Token/地址</el-button>
           <el-button @click="clearPsyAuth">清除本地 Token</el-button>
+          <el-button :loading="quotaLoading" @click="refreshPsyQuota">刷新额度</el-button>
           <span class="form-tip" style="margin-left: 12px">
             {{ psyStatus.hasToken ? `已保存：${psyStatus.username || '对接 Token'}` : '未配置' }}
           </span>
         </el-form-item>
+        <el-form-item label="账户额度">
+          <template v-if="psyQuota">
+            <el-tag :type="quotaTagType" size="large" style="margin-right: 8px">
+              剩余 {{ psyQuota.remaining_quota }}
+            </el-tag>
+            <span class="form-tip">
+              总额 {{ psyQuota.quota }} · 已用 {{ psyQuota.used_quota }}
+              （生成测评链接会扣额度；≤10 预警，≤3 严重）
+            </span>
+          </template>
+          <span v-else class="form-tip">登录并配置 Token 后可查询</span>
+        </el-form-item>
+        <el-alert
+          v-if="psyQuota && psyQuota.remaining_quota <= 10"
+          :type="psyQuota.remaining_quota <= 3 ? 'error' : 'warning'"
+          :closable="false"
+          show-icon
+          style="margin-bottom: 12px"
+          :title="
+            psyQuota.remaining_quota <= 3
+              ? `额度严重不足（剩余 ${psyQuota.remaining_quota}），自动补货/生成链接可能失败，请尽快兑换额度`
+              : `额度偏低（剩余 ${psyQuota.remaining_quota}），建议提前兑换以免补货中断`
+          "
+        />
         <el-alert
           type="info"
           :closable="false"
@@ -133,7 +158,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { SubAccount } from '../types/electron'
 import { useShopStore } from '../stores/shop'
@@ -156,9 +181,38 @@ const subForm = ref({ username: '', password: '' })
 const subAccounts = ref<SubAccount[]>([])
 const logs = ref<string[]>([])
 const psyBusy = ref(false)
+const quotaLoading = ref(false)
 const psyStatus = ref({ configured: false, baseUrl: 'https://psy.xhs365.cn', username: '', hasToken: false })
 const psyForm = ref({ baseUrl: 'https://psy.xhs365.cn', username: '', password: '', token: '' })
 const orderClaimUrl = ref('https://psy.xhs365.cn/order-claim')
+const psyQuota = ref<{ quota: number; used_quota: number; remaining_quota: number } | null>(null)
+
+const quotaTagType = computed(() => {
+  const rem = Number(psyQuota.value?.remaining_quota ?? -1)
+  if (rem < 0) return 'info'
+  if (rem <= 3) return 'danger'
+  if (rem <= 10) return 'warning'
+  return 'success'
+})
+
+const refreshPsyQuota = async () => {
+  if (!window.electronAPI?.psyQuotaInfo) {
+    psyQuota.value = null
+    return
+  }
+  quotaLoading.value = true
+  try {
+    const res = await window.electronAPI.psyQuotaInfo()
+    psyQuota.value = res.success && res.quota ? res.quota : null
+    if (!res.success && psyStatus.value.hasToken) {
+      ElMessage.warning(res.message || '额度查询失败')
+    }
+  } catch {
+    psyQuota.value = null
+  } finally {
+    quotaLoading.value = false
+  }
+}
 
 const saveSetting = async (key: string, value: unknown) => {
   if (window.electronAPI) {
@@ -178,6 +232,7 @@ const refreshPsyStatus = async () => {
   } else {
     orderClaimUrl.value = `${(st.baseUrl || 'https://psy.xhs365.cn').replace(/\/+$/, '')}/order-claim`
   }
+  await refreshPsyQuota()
 }
 
 const copyOrderClaimUrl = async () => {

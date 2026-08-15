@@ -117,6 +117,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   psyEnsureIntegrationToken: () => ipcRenderer.invoke('psy:ensure-integration-token'),
   psyListTests: () => ipcRenderer.invoke('psy:list-tests'),
   psyInventory: (testCode: string) => ipcRenderer.invoke('psy:inventory', testCode),
+  psyQuotaInfo: () => ipcRenderer.invoke('psy:quota-info'),
   psyClaimIntoPool: (bindingId: number, testCode: string, count: number, productId?: string) =>
     ipcRenderer.invoke('psy:claim-into-pool', bindingId, testCode, count, productId),
   psyGenerateLinks: (testCode: string, count: number) =>
