@@ -181,7 +181,7 @@ export class StorageService {
       CREATE INDEX IF NOT EXISTS idx_product_bindings_pid ON product_bindings(product_id);
       CREATE INDEX IF NOT EXISTS idx_card_pool_binding ON card_pool(binding_id);
       CREATE INDEX IF NOT EXISTS idx_card_pool_status ON card_pool(status);
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_shop_order ON order_delivery(shop_id, order_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_shop_order_msg ON order_delivery(shop_id, order_id, msg_index);
       CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_guid ON order_delivery(msg_guid);
 
       -- 全量订单台账：轮询到的订单号一律入库；是否发码只看 order_delivery.success
@@ -236,6 +236,8 @@ export class StorageService {
     } catch {
       /* ignore */
     }
+    // Phase1：多轮消息按 msg_index 落库（替换「一单一行」唯一约束）
+    this.migrateOrderDeliveryMsgIndexUnique()
     try {
       this.db.exec(`
         CREATE TABLE IF NOT EXISTS order_ledger (
@@ -272,6 +274,73 @@ export class StorageService {
     }
 
     this.migrateMerchantLevelBindings()
+  }
+
+  /**
+   * 将 order_delivery 唯一约束从 (shop_id, order_id) 升级为 (shop_id, order_id, msg_index)，
+   * 并为历史「msg_total>1 但只有 1 行 success」回填占位，避免误重发后几轮。
+   */
+  private migrateOrderDeliveryMsgIndexUnique(): void {
+    const flag = 'migrate_order_delivery_msg_index_v1'
+    if (this.get<boolean>(flag)) return
+    try {
+      const tx = this.db.transaction(() => {
+        this.db.exec('DROP INDEX IF EXISTS idx_order_delivery_shop_order')
+        this.db.exec(
+          `CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_shop_order_msg
+           ON order_delivery(shop_id, order_id, msg_index)`
+        )
+        const legacy = this.db
+          .prepare(
+            `SELECT shop_id, order_id, product_id, binding_id, buyer_uid, card_content, msg_total, send_status
+             FROM order_delivery
+             WHERE send_status = 'success' AND IFNULL(msg_total, 1) > 1`
+          )
+          .all() as Array<{
+          shop_id: string
+          order_id: string
+          product_id: string
+          binding_id: number | null
+          buyer_uid: string
+          card_content: string
+          msg_total: number
+          send_status: string
+        }>
+        const ins = this.db.prepare(
+          `INSERT OR IGNORE INTO order_delivery
+            (shop_id, order_id, product_id, binding_id, buyer_uid, msg_guid, msg_index, msg_total, send_status, card_content, error_msg)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'success', ?, 'legacy_backfill')`
+        )
+        for (const row of legacy) {
+          const total = Math.max(1, Number(row.msg_total) || 1)
+          for (let i = 2; i <= total; i++) {
+            ins.run(
+              row.shop_id,
+              row.order_id,
+              row.product_id || '',
+              row.binding_id,
+              row.buyer_uid || '',
+              `legacy-${row.order_id}-${i}`,
+              i,
+              total,
+              row.card_content || ''
+            )
+          }
+        }
+      })
+      tx()
+      this.set(flag, true)
+    } catch (e) {
+      try {
+        this.db.exec(
+          `CREATE UNIQUE INDEX IF NOT EXISTS idx_order_delivery_shop_order_msg
+           ON order_delivery(shop_id, order_id, msg_index)`
+        )
+      } catch {
+        /* ignore */
+      }
+      console.warn('[Storage] migrateOrderDeliveryMsgIndexUnique:', e)
+    }
   }
 
   /**
@@ -1317,8 +1386,62 @@ export class StorageService {
   // ==================== 订单发货记录（对标阿奇锁 OrderImMsg，防重核心）====================
 
   /**
-   * 幂等占位：订单发货记录落库
-   * @returns true=首次处理该订单；false=该订单已存在（已发过/处理中），应跳过
+   * 幂等占位：按 (shop_id, order_id, msg_index) 落库。
+   * @returns { isNew, msgGuid, sendStatus } — isNew=false 时复用已有 guid，禁止再用随机 guid 更新
+   */
+  claimOrGetDelivery(delivery: {
+    shopId: string
+    orderId: string
+    productId?: string
+    bindingId?: number
+    msgGuid: string
+    msgIndex?: number
+    msgTotal?: number
+  }): { isNew: boolean; msgGuid: string; sendStatus: string; msgIndex: number; msgTotal: number } {
+    const msgIndex = delivery.msgIndex ?? 1
+    const msgTotal = delivery.msgTotal ?? 1
+    const result = this.db
+      .prepare(
+        `INSERT OR IGNORE INTO order_delivery
+          (shop_id, order_id, product_id, binding_id, msg_guid, msg_index, msg_total, send_status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`
+      )
+      .run(
+        delivery.shopId,
+        delivery.orderId,
+        delivery.productId || '',
+        delivery.bindingId ?? null,
+        delivery.msgGuid,
+        msgIndex,
+        msgTotal
+      )
+    if (result.changes === 1) {
+      return { isNew: true, msgGuid: delivery.msgGuid, sendStatus: 'pending', msgIndex, msgTotal }
+    }
+    const row = this.db
+      .prepare(
+        `SELECT msg_guid, send_status, msg_index, msg_total FROM order_delivery
+         WHERE order_id = ? AND msg_index = ?
+         ORDER BY id DESC LIMIT 1`
+      )
+      .get(delivery.orderId, msgIndex) as
+      | { msg_guid: string; send_status: string; msg_index: number; msg_total: number }
+      | undefined
+    if (!row) {
+      // 极端：唯一冲突在 shop 维度不同；再插一次用新 guid 可能仍失败，返回入参兜底
+      return { isNew: false, msgGuid: delivery.msgGuid, sendStatus: 'pending', msgIndex, msgTotal }
+    }
+    return {
+      isNew: false,
+      msgGuid: String(row.msg_guid),
+      sendStatus: String(row.send_status || 'pending'),
+      msgIndex: Number(row.msg_index) || msgIndex,
+      msgTotal: Number(row.msg_total) || msgTotal
+    }
+  }
+
+  /**
+   * @deprecated 请用 claimOrGetDelivery；保留给旧调用
    */
   claimOrderDelivery(delivery: {
     shopId: string
@@ -1329,20 +1452,7 @@ export class StorageService {
     msgIndex?: number
     msgTotal?: number
   }): boolean {
-    const result = this.db.prepare(
-      `INSERT OR IGNORE INTO order_delivery
-        (shop_id, order_id, product_id, binding_id, msg_guid, msg_index, msg_total, send_status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`
-    ).run(
-      delivery.shopId,
-      delivery.orderId,
-      delivery.productId || '',
-      delivery.bindingId ?? null,
-      delivery.msgGuid,
-      delivery.msgIndex ?? 1,
-      delivery.msgTotal ?? 1
-    )
-    return result.changes === 1
+    return this.claimOrGetDelivery(delivery).isNew
   }
 
   /**
@@ -1354,29 +1464,62 @@ export class StorageService {
   }
 
   /**
-   * 是否已真实发码成功（mock_success 不算，需真发 IM）
+   * 整单是否已发完：1..msg_total 每条均为 success / rate_limited / disabled，且至少一条 success。
+   * （替代「任意一条 success 就算发过」——避免缺轮话术却永久跳过）
    */
   hasShippedCode(orderId: string): boolean {
+    return this.isOrderFullyShipped(orderId)
+  }
+
+  isOrderFullyShipped(orderId: string): boolean {
+    const rows = this.db
+      .prepare(
+        `SELECT msg_index, msg_total, send_status FROM order_delivery WHERE order_id = ? ORDER BY msg_index ASC`
+      )
+      .all(orderId) as Array<{ msg_index: number; msg_total: number; send_status: string }>
+    if (!rows.length) return false
+    const total = Math.max(
+      1,
+      ...rows.map((r) => Number(r.msg_total) || 1),
+      ...rows.map((r) => Number(r.msg_index) || 1)
+    )
+    const byIndex = new Map<number, string>()
+    for (const r of rows) byIndex.set(Number(r.msg_index) || 1, String(r.send_status || ''))
+    let hasSuccess = false
+    for (let i = 1; i <= total; i++) {
+      const st = byIndex.get(i)
+      if (!st) return false
+      if (st === 'success') hasSuccess = true
+      else if (st === 'rate_limited' || st === 'disabled') {
+        /* terminal skip for this index */
+      } else {
+        return false
+      }
+    }
+    return hasSuccess
+  }
+
+  /** 指定 msg_index 之前（不含）有多少条 success */
+  countPriorSuccess(orderId: string, msgIndex: number): number {
     const row = this.db
       .prepare(
-        `SELECT id FROM order_delivery
-         WHERE order_id = ? AND send_status = 'success'
-         LIMIT 1`
+        `SELECT COUNT(*) as c FROM order_delivery
+         WHERE order_id = ? AND msg_index < ? AND send_status = 'success'`
       )
-      .get(orderId)
-    return !!row
+      .get(orderId, msgIndex) as { c: number }
+    return Number(row?.c || 0)
   }
 
   /**
-   * 近期是否有发码活动（sending/pending/success），用于防并发清库重发
-   * @param withinSec 秒
+   * 近期是否有进行中的发码（sending/pending），用于防并发。
+   * 不含 success——否则「第1条已成功」会挡住补发第2/3条。
    */
   hasRecentShippingActivity(orderId: string, withinSec = 600): boolean {
     const row = this.db
       .prepare(
         `SELECT id FROM order_delivery
          WHERE order_id = ?
-           AND send_status IN ('success', 'sending', 'pending')
+           AND send_status IN ('sending', 'pending')
            AND datetime(updated_at) >= datetime('now', ?)
          LIMIT 1`
       )
@@ -1390,8 +1533,35 @@ export class StorageService {
     return r.changes
   }
 
+  /** 仅清除指定状态（禁止误删 sending/success） */
+  clearOrderDeliveryByStatuses(orderId: string, statuses: string[]): number {
+    const list = (statuses || []).map((s) => String(s || '').trim()).filter(Boolean)
+    if (!list.length) return 0
+    const ph = list.map(() => '?').join(',')
+    const r = this.db
+      .prepare(`DELETE FROM order_delivery WHERE order_id = ? AND send_status IN (${ph})`)
+      .run(orderId, ...list)
+    return r.changes
+  }
+
+  /** 将超时的 pending/sending 标为 fail，允许后续 reclaim */
+  reclaimStaleDeliveries(orderId: string, olderThanSec = 900): number {
+    const r = this.db
+      .prepare(
+        `UPDATE order_delivery
+         SET send_status = 'fail',
+             error_msg = COALESCE(error_msg, '') || ' [stale_reclaim]',
+             updated_at = datetime('now')
+         WHERE order_id = ?
+           AND send_status IN ('pending', 'sending')
+           AND datetime(updated_at) < datetime('now', ?)`
+      )
+      .run(orderId, `-${Math.max(60, olderThanSec)} seconds`)
+    return r.changes
+  }
+
   /**
-   * 台账中尚未真实发码成功的订单（供补单对账）
+   * 台账中尚未整单发完的订单（供补单对账）
    */
   listLedgerNeedingShip(limit = 50): Array<{
     order_id: string
@@ -1401,18 +1571,21 @@ export class StorageService {
     order_time: string
     is_virtual: number
   }> {
-    return this.db
+    const rows = this.db
       .prepare(
         `SELECT l.order_id, l.shop_id, l.product_id, l.platform_status, l.order_time, l.is_virtual
          FROM order_ledger l
-         WHERE NOT EXISTS (
-           SELECT 1 FROM order_delivery d
-           WHERE d.order_id = l.order_id AND d.send_status = 'success'
-         )
          ORDER BY l.last_seen_at DESC
          LIMIT ?`
       )
-      .all(Math.max(1, Math.min(200, limit))) as any[]
+      .all(Math.max(1, Math.min(500, limit * 4))) as any[]
+    const out: any[] = []
+    for (const row of rows) {
+      if (this.isOrderFullyShipped(row.order_id)) continue
+      out.push(row)
+      if (out.length >= limit) break
+    }
+    return out
   }
 
   /**

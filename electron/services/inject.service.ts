@@ -213,11 +213,11 @@ export class InjectService {
     }
     const script = this.injectedScripts.get(scriptName)
     if (!script || webContents.isDestroyed()) return false
-    let ok = false
+    let mainOk = false
     // 主帧优先：轮询/发货都读 top window.__xhsAssistant；只注入 iframe 会导致「IMSend 未就绪」
     try {
       await webContents.executeJavaScript(script)
-      ok = true
+      mainOk = true
     } catch {
       /* 主帧可能短暂不可执行，再试 subtree */
     }
@@ -226,15 +226,16 @@ export class InjectService {
       if (!frame || frame === webContents.mainFrame) continue
       try {
         await frame.executeJavaScript(script)
-        ok = true
       } catch {
         /* 跨域 iframe 忽略 */
       }
     }
+    // im-send 必须以主帧成功为准（就绪检查只读 main window）
+    const ok = scriptName === 'im-send' ? mainOk : mainOk || frames.length > 0
     if (ok) {
-      this.logger.info(`[Inject] 脚本注入成功: ${scriptName} frames=${1 + frames.length}`)
+      this.logger.info(`[Inject] 脚本注入成功: ${scriptName} main=${mainOk} frames=${1 + frames.length}`)
     } else {
-      this.logger.error(`[Inject] 脚本注入失败: ${scriptName}`)
+      this.logger.error(`[Inject] 脚本注入失败: ${scriptName} main=${mainOk}`)
     }
     return ok
   }

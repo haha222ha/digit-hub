@@ -820,7 +820,7 @@ export class AutoShipService {
       void this.psyCloud.syncOrders([{ order_id: order.order_id, product_id: productId }])
     }
 
-    // 2) 只跟本地「是否已真实发码」比对
+    // 2) 只跟本地「是否已整单发完」比对
     if (this.storage.hasShippedCode(order.order_id)) {
       this.logger.info(`[AutoShip] 台账已发码，跳过: ${order.order_id}`)
       return
@@ -829,28 +829,33 @@ export class AutoShipService {
       this.logger.info(`[AutoShip] 订单发送中，跳过并发: ${order.order_id}`)
       return
     }
+    // 陈旧 pending/sending → fail，允许后续补发
+    const reclaimed = this.storage.reclaimStaleDeliveries(order.order_id, 15 * 60)
+    if (reclaimed > 0) {
+      this.logger.warn(`[AutoShip] 回收超时发码占位 ${reclaimed} 条: ${order.order_id}`)
+    }
     if (this.storage.hasRecentShippingActivity(order.order_id, 10 * 60)) {
       this.logger.info(`[AutoShip] 近期已有发码活动，跳过防重: ${order.order_id}`)
       return
     }
     if (this.storage.existsOrderDelivery(order.order_id)) {
-      // 仅清 Mock / 明确失败且非近期；禁止清 sending（否则会循环重发）
       const rows = this.storage.getOrderDeliveries(order.order_id) as Array<{
         send_status?: string
-        updated_at?: string
       }>
       const onlyMock =
         rows.length > 0 && rows.every((r) => String(r.send_status || '') === 'mock_success')
       const onlyFail =
         rows.length > 0 && rows.every((r) => String(r.send_status || '') === 'fail')
       if (onlyMock || onlyFail) {
-        this.storage.clearOrderDelivery(order.order_id)
+        // 仅删 fail/mock，禁止误删 sending/success
+        this.storage.clearOrderDeliveryByStatuses(order.order_id, ['fail', 'mock_success'])
         this.logger.warn(
           `[AutoShip] 清除未成功发码占位，准备重试: ${order.order_id} mock=${onlyMock} fail=${onlyFail}`
         )
-      } else {
+      } else if (this.storage.hasShippedCode(order.order_id)) {
         return
       }
+      // 有 success 但未整单完成：进入补齐剩余 msg_index（不断库）
     }
     if (this.processedOrders.has(`${shopId}:${order.order_id}`)) {
       return
@@ -888,6 +893,12 @@ export class AutoShipService {
   private async shipOneOrder(shopId: string, order: any): Promise<void> {
     const oid = String(order.order_id || '')
     if (!oid) return
+    // 入队后再次校验，防止并发双发
+    if (this.storage.hasShippedCode(oid)) {
+      this.logger.info(`[AutoShip] shipOneOrder 跳过（已整单发完）: ${oid}`)
+      this.processedOrders.add(`${shopId}:${oid}`)
+      return
+    }
     if (this.shippingInFlight.has(oid)) {
       this.logger.info(`[AutoShip] shipOneOrder 跳过（已在发送）: ${oid}`)
       return
@@ -895,6 +906,7 @@ export class AutoShipService {
     this.shippingInFlight.add(oid)
     this.isShipping = true
     try {
+      if (this.storage.hasShippedCode(oid)) return
       const success = await this.processShipment(shopId, order)
       if (success) {
         this.processedOrders.add(`${shopId}:${oid}`)
@@ -1008,21 +1020,27 @@ export class AutoShipService {
       )
     }
 
-    // 逐条发送（状态机 + 消息级追踪，对标阿奇锁 SetReplySending/Success/Fail）
+    // 逐条发送（按 msg_index 落库；已 success/rate_limited 跳过）
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i]
-      const msgGuid = randomUUID()
-
-      // 落库占位（幂等）：订单首次处理时插入；已有记录则说明是断点续发
-      this.storage.claimOrderDelivery({
+      const newGuid = randomUUID()
+      const claimed = this.storage.claimOrGetDelivery({
         shopId,
         orderId: order.order_id,
         productId: order.product_id,
         bindingId: binding.id,
-        msgGuid,
+        msgGuid: newGuid,
         msgIndex: i + 1,
         msgTotal
       })
+      const msgGuid = claimed.msgGuid
+      const st = String(claimed.sendStatus || '')
+      if (st === 'success' || st === 'rate_limited' || st === 'disabled') {
+        this.logger.info(
+          `[AutoShip] 跳过已终态消息 [${i + 1}/${msgTotal}] order=${order.order_id} status=${st}`
+        )
+        continue
+      }
 
       // 普通卡密才锁本地池；link_card 已用云端 URL
       const needCard = needsCard(msg.rawContent)
@@ -1068,7 +1086,13 @@ export class AutoShipService {
       })
 
       // Mock 模式：直接成功（记 mock_success，不算真实发码）
-      let shipResult: { success: boolean; trackingNumber?: string; buyerId?: string; error?: string }
+      let shipResult: {
+        success: boolean
+        trackingNumber?: string
+        buyerId?: string
+        error?: string
+        rateLimited?: boolean
+      }
       if (this.mock.isEnabled()) {
         this.logger.warn(
           `[AutoShip][Mock] 模拟发货[${i + 1}/${msgTotal}]（未真实发 IM）: ${finalContent.substring(0, 20)}...`
@@ -1101,30 +1125,48 @@ export class AutoShipService {
         }
       } else {
         const errText = String(shipResult.error || '')
-        const rateLimited = /连续发送|不可超过\s*10|超过10条/.test(errText)
-        // 平台限流：前面几条往往已成功送达；再重试只会刷失败弹窗
+        const rateLimited =
+          !!shipResult.rateLimited || /连续发送|不可超过\s*10|超过10条/.test(errText)
         if (rateLimited) {
-          const alreadyOk = this.storage.hasShippedCode(order.order_id) || i > 0
-          this.storage.updateDeliveryStatus(msgGuid, alreadyOk ? 'success' : 'fail', {
-            errorMsg: alreadyOk
-              ? `平台限流(已视为送达): ${errText.slice(0, 120)}`
-              : errText.slice(0, 200),
+          const priorOk = this.storage.countPriorSuccess(order.order_id, i + 1) > 0
+          this.storage.updateDeliveryStatus(msgGuid, 'rate_limited', {
+            errorMsg: errText.slice(0, 200),
             cardContent: cardForOrder ?? undefined
           })
+          // 后续未发送的 index 一并标 rate_limited，避免反复撞限
+          for (let j = i + 1; j < messages.length; j++) {
+            const restGuid = randomUUID()
+            const rest = this.storage.claimOrGetDelivery({
+              shopId,
+              orderId: order.order_id,
+              productId: order.product_id,
+              bindingId: binding.id,
+              msgGuid: restGuid,
+              msgIndex: j + 1,
+              msgTotal
+            })
+            if (!['success', 'rate_limited', 'disabled'].includes(String(rest.sendStatus))) {
+              this.storage.updateDeliveryStatus(rest.msgGuid, 'rate_limited', {
+                errorMsg: 'skipped_after_rate_limit'
+              })
+            }
+          }
           this.storage.addShipLog({
             shopId,
             orderId: order.order_id,
             trackingNumber: finalContent.substring(0, 50),
-            status: alreadyOk ? 'rate_limit_ok' : 'rate_limit',
+            status: priorOk ? 'rate_limit_ok' : 'rate_limit',
             errorMsg: errText.slice(0, 160)
           })
           this.logger.warn(
-            `[AutoShip] 平台连续发送限流 [${i + 1}/${msgTotal}] order=${order.order_id} treat=${alreadyOk ? 'success' : 'fail'}`
+            `[AutoShip] 平台连续发送限流 [${i + 1}/${msgTotal}] order=${order.order_id} priorOk=${priorOk}`
           )
-          if (!alreadyOk) {
+          if (!priorOk) {
             notifyDesktop('发货限流', `${order.order_id}：买家回复前最多连续10条，请稍后再补`)
+          } else {
+            notifyDesktop('发货完成(限流)', `订单 ${order.order_id} 链接已送达，后续话术遇平台限流已停止`)
           }
-          return alreadyOk
+          return priorOk
         }
         if (cardLocked) {
           this.storage.rollbackCard(order.order_id)
@@ -1149,7 +1191,7 @@ export class AutoShipService {
       }
     }
 
-    return true
+    return this.storage.hasShippedCode(order.order_id)
   }
 
   private sleep(ms: number): Promise<void> {
@@ -1441,7 +1483,13 @@ export class AutoShipService {
     orderId: string,
     content: string,
     type: 'text' | 'image' | 'video' | 'note' = 'text'
-  ): Promise<{ success: boolean; trackingNumber?: string; buyerId?: string; error?: string }> {
+  ): Promise<{
+    success: boolean
+    trackingNumber?: string
+    buyerId?: string
+    error?: string
+    rateLimited?: boolean
+  }> {
     if (type !== 'text') {
       return { success: false, error: `1:1 Agiso 路径仅支持 text，当前 type=${type}` }
     }
@@ -1456,8 +1504,11 @@ export class AutoShipService {
       }
     }
 
+    const isRateLimitErr = (err: string) => /连续发送|不可超过\s*10|超过10条/.test(err)
+
     const maxAttempts = 4
     let lastError = ''
+    let lastForceReQueue = false
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       const probe = await this.agisoIm.probe(shopId).catch(() => ({} as Record<string, unknown>))
       this.logger.info(
@@ -1475,6 +1526,11 @@ export class AutoShipService {
       }
 
       lastError = result.error || 'IM 发货失败'
+      lastForceReQueue = !!result.forceReQueue
+      if (isRateLimitErr(lastError)) {
+        // 限流：禁止再走 deliverByOrderSn，否则同一内容双通道撞限
+        return { success: false, error: lastError, rateLimited: true }
+      }
       if (!result.forceReQueue || attempt >= maxAttempts) {
         break
       }
@@ -1488,11 +1544,22 @@ export class AutoShipService {
       }
     }
 
-    // ★ 回退：XhsRim 不可用时（rim=fail），用 deliverByOrderSn（带 impaas-ws 直发回退）
+    // 仅「页面/函数未就绪」才回退；业务失败（含限流）不再二次发送
+    if (!lastForceReQueue) {
+      return { success: false, error: lastError }
+    }
+
     const fallback = await this.sendViaDeliverByOrderSn(shopId, orderId, content)
     if (fallback.success) return fallback
-
-    return { success: false, error: lastError + (fallback.error ? ' | ' + fallback.error : '') }
+    const fbErr = String(fallback.error || '')
+    if (isRateLimitErr(fbErr) || isRateLimitErr(lastError)) {
+      return {
+        success: false,
+        error: lastError + (fbErr ? ' | ' + fbErr : ''),
+        rateLimited: true
+      }
+    }
+    return { success: false, error: lastError + (fbErr ? ' | ' + fbErr : '') }
   }
 
   /**
@@ -1932,77 +1999,111 @@ export class AutoShipService {
     const failed = this.storage.getFailedRetryableDeliveries(10, maxRetry)
     let retried = 0
     for (const item of failed as any[]) {
-      // 乐观锁抢占（对标 WHERE SendStatus=?）
-      if (!this.storage.tryClaimRetry(item.msg_guid)) continue
-      retried++
-      const shopId = item.shop_id
-      const binding = item.binding_id ? this.storage.getAllProductBindings(shopId).find((b: any) => b.id === item.binding_id) : null
-      const isLinkCard = String(binding?.deliver_type || '') === 'link_card'
-      const type: 'text' | 'image' | 'video' | 'note' =
-        binding?.deliver_type === 'image' ? 'image' :
-        binding?.deliver_type === 'video' ? 'video' :
-        binding?.deliver_type === 'note' ? 'note' : 'text'
+      const oid = String(item.order_id || '')
+      if (!oid) continue
+      if (this.shippingInFlight.has(oid) || this.storage.hasShippedCode(oid)) continue
 
-      let sendContent = String(item.card_content || binding?.deliver_content || '')
-      let cardConsumed = false
-      let linkUrl = ''
-      if (isLinkCard) {
-        let url = String(item.card_content || '').trim()
-        if (!url && this.psyCloud?.getToken()) {
-          const alloc = await this.psyCloud.allocateForOrder(item.order_id, item.product_id)
-          if (!alloc.success || !alloc.url) {
-            this.storage.updateDeliveryStatus(item.msg_guid, 'fail', {
-              errorMsg: alloc.message || '云端分配失败（重试）'
+      const run = this.shipChain.then(async () => {
+        if (this.shippingInFlight.has(oid) || this.storage.hasShippedCode(oid)) return
+        if (!this.storage.tryClaimRetry(item.msg_guid)) return
+        this.shippingInFlight.add(oid)
+        retried++
+        try {
+          const shopId = item.shop_id
+          const binding = item.binding_id
+            ? this.storage.getAllProductBindings(shopId).find((b: any) => b.id === item.binding_id)
+            : null
+          const isLinkCard = String(binding?.deliver_type || '') === 'link_card'
+          const type: 'text' | 'image' | 'video' | 'note' =
+            binding?.deliver_type === 'image'
+              ? 'image'
+              : binding?.deliver_type === 'video'
+                ? 'video'
+                : binding?.deliver_type === 'note'
+                  ? 'note'
+                  : 'text'
+
+          let sendContent = String(item.card_content || binding?.deliver_content || '')
+          let cardConsumed = false
+          let linkUrl = ''
+          if (isLinkCard) {
+            let url = String(item.card_content || '').trim()
+            if (!url && this.psyCloud?.getToken()) {
+              const alloc = await this.psyCloud.allocateForOrder(item.order_id, item.product_id)
+              if (!alloc.success || !alloc.url) {
+                this.storage.updateDeliveryStatus(item.msg_guid, 'fail', {
+                  errorMsg: alloc.message || '云端分配失败（重试）'
+                })
+                return
+              }
+              url = alloc.url
+            }
+            if (!url) {
+              this.storage.updateDeliveryStatus(item.msg_guid, 'fail', {
+                errorMsg: '心象测未分配链接（重试）'
+              })
+              return
+            }
+            linkUrl = url
+            const msgs = buildMessages(
+              {
+                deliver_type: 'link_card',
+                deliver_content: String(binding?.deliver_content || ''),
+                msg_separator: binding?.msg_separator
+              },
+              true
+            )
+            const rawPart =
+              (msgs && msgs[Math.max(0, Number(item.msg_index || 1) - 1)]?.rawContent) || '{卡密}'
+            sendContent = renderTemplate(rawPart, {
+              orderId: item.order_id,
+              card: url,
+              productName: binding?.product_name || ''
             })
-            continue
+          } else if (needsCard(sendContent) && !item.card_content) {
+            const card = this.storage.lockCard(item.binding_id, item.order_id, !!binding?.random_mode)
+            if (!card) {
+              this.storage.updateDeliveryStatus(item.msg_guid, 'fail', { errorMsg: '卡密池已空（重试）' })
+              return
+            }
+            cardConsumed = true
+            sendContent = renderTemplate(sendContent, { orderId: item.order_id, card })
           }
-          url = alloc.url
-        }
-        if (!url) {
-          this.storage.updateDeliveryStatus(item.msg_guid, 'fail', { errorMsg: '心象测未分配链接（重试）' })
-          continue
-        }
-        linkUrl = url
-        const msgs = buildMessages(
-          {
-            deliver_type: 'link_card',
-            deliver_content: String(binding?.deliver_content || ''),
-            msg_separator: binding?.msg_separator
-          },
-          true
-        )
-        const rawPart =
-          (msgs && msgs[Math.max(0, Number(item.msg_index || 1) - 1)]?.rawContent) || '{卡密}'
-        sendContent = renderTemplate(rawPart, {
-          orderId: item.order_id,
-          card: url,
-          productName: binding?.product_name || ''
-        })
-      } else if (needsCard(sendContent) && !item.card_content) {
-        const card = this.storage.lockCard(item.binding_id, item.order_id, !!binding?.random_mode)
-        if (!card) {
-          this.storage.updateDeliveryStatus(item.msg_guid, 'fail', { errorMsg: '卡密池已空（重试）' })
-          continue
-        }
-        cardConsumed = true
-        sendContent = renderTemplate(sendContent, { orderId: item.order_id, card })
-      }
 
-      const shipResult = await this.executeRealShip(item.shop_id || currentShopId(), item.order_id, sendContent, type)
-      if (shipResult.success) {
-        if (cardConsumed) this.storage.confirmCard(item.order_id)
-        if (isLinkCard && linkUrl && item.binding_id) {
-          this.storage.markCardUrlUsed(item.binding_id, linkUrl, item.order_id)
+          const shipResult = await this.executeRealShip(
+            item.shop_id || currentShopId(),
+            item.order_id,
+            sendContent,
+            type
+          )
+          if (shipResult.success) {
+            if (cardConsumed) this.storage.confirmCard(item.order_id)
+            if (isLinkCard && linkUrl && item.binding_id) {
+              this.storage.markCardUrlUsed(item.binding_id, linkUrl, item.order_id)
+            }
+            this.storage.updateDeliveryStatus(item.msg_guid, 'success', {
+              buyerUid: shipResult.buyerId || item.buyer_uid || undefined
+            })
+            this.logger.info(`[AutoShip] 重试成功: ${item.order_id} [${item.msg_index}/${item.msg_total}]`)
+          } else if (shipResult.rateLimited || /连续发送|不可超过\s*10|超过10条/.test(String(shipResult.error || ''))) {
+            this.storage.updateDeliveryStatus(item.msg_guid, 'rate_limited', {
+              errorMsg: String(shipResult.error || '').slice(0, 200)
+            })
+            this.logger.warn(`[AutoShip] 重试遇限流已终态: ${item.order_id}`)
+          } else {
+            if (cardConsumed) this.storage.rollbackCard(item.order_id)
+            this.storage.updateDeliveryStatus(item.msg_guid, 'fail', { errorMsg: shipResult.error })
+            this.logger.warn(`[AutoShip] 重试失败: ${item.order_id}`, shipResult.error)
+          }
+        } finally {
+          this.shippingInFlight.delete(oid)
         }
-        this.storage.updateDeliveryStatus(item.msg_guid, 'success', {
-          buyerUid: shipResult.buyerId || item.buyer_uid || undefined
-        })
-        this.logger.info(`[AutoShip] 重试成功: ${item.order_id} [${item.msg_index}/${item.msg_total}]`)
-      } else {
-        if (cardConsumed) this.storage.rollbackCard(item.order_id)
-        this.storage.updateDeliveryStatus(item.msg_guid, 'fail', { errorMsg: shipResult.error })
-        this.logger.warn(`[AutoShip] 重试失败: ${item.order_id}`, shipResult.error)
-      }
+      })
+      this.shipChain = run.then(
+        () => undefined,
+        () => undefined
+      )
+      await run
     }
     return retried
   }
