@@ -186,6 +186,24 @@ ${GZIP_DIRECTIVES}
     location = /home.js {
         add_header Cache-Control "no-store, no-cache, must-revalidate";
     }
+    # Waffo / 合规披露页（必须先于 console SPA 回落）
+    location = /terms {
+        return 302 /terms/;
+    }
+    location = /terms/ {
+        try_files /terms/index.html =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+    location = /privacy {
+        return 302 /privacy/;
+    }
+    location = /privacy/ {
+        try_files /privacy/index.html =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+    location = /legal.css {
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
     # 买家公开领链接：禁止回落到 /console（否则会弹出商家登录）
     location = /order-claim {
         try_files /order-claim.html /order-claim/index.html =404;

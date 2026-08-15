@@ -1,0 +1,140 @@
+/* 心象测 · 服务条款 / 隐私政策 */
+
+:root {
+  --ink: #0b1c18;
+  --ink-soft: #243a34;
+  --teal: #0f766e;
+  --mist: #e7efec;
+  --paper: #f3f7f5;
+  --line: rgba(15, 118, 110, 0.18);
+  --font-display: "Noto Serif SC", "Songti SC", serif;
+  --font-body: "IBM Plex Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  background: var(--paper);
+}
+
+a {
+  color: var(--teal);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.1rem 1.25rem;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: inherit;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.topnav a {
+  margin-left: 0.85rem;
+  text-decoration: none;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.legal {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0.5rem 1.25rem 3.5rem;
+}
+
+.legal h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2rem);
+  margin: 0.4rem 0 0.35rem;
+  letter-spacing: 0.02em;
+}
+
+.meta {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  margin: 0 0 1.6rem;
+}
+
+.legal h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin: 1.75rem 0 0.55rem;
+}
+
+.legal h3 {
+  font-size: 1rem;
+  margin: 1.1rem 0 0.4rem;
+  color: var(--ink-soft);
+}
+
+.legal p,
+.legal li {
+  color: var(--ink);
+}
+
+.legal ul,
+.legal ol {
+  padding-left: 1.25rem;
+}
+
+.legal table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1rem;
+  font-size: 0.94rem;
+}
+
+.legal th,
+.legal td {
+  border: 1px solid var(--line);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.legal th {
+  background: var(--mist);
+}
+
+.note {
+  margin: 1rem 0;
+  padding: 0.85rem 1rem;
+  border-left: 3px solid var(--teal);
+  background: rgba(15, 118, 110, 0.08);
+  font-size: 0.94rem;
+}
+
+.site-footer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  border-top: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+
+.site-footer a {
+  margin-right: 0.85rem;
+}

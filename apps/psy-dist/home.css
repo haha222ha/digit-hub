@@ -459,3 +459,30 @@ a {
     opacity: 0.14;
   }
 }
+
+.home-session-bar {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  font-size: 0.88rem;
+  color: #334155;
+}
+
+.home-session-bar a {
+  color: #0f766e;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.home-session-bar a:hover {
+  text-decoration: underline;
+}
