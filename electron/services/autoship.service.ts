@@ -516,6 +516,11 @@ export class AutoShipService {
    */
   private async ensureOrderPollWc(shopId: string): Promise<WebContents | null> {
     const sid = String(shopId || currentShopId()).trim() || currentShopId()
+    // 整段限时：ark 未登录/卡住时绝不能拖死整轮拉单与补单
+    return withTimeout(this.ensureOrderPollWcInner(sid), 12000, this.getShipWc(sid))
+  }
+
+  private async ensureOrderPollWcInner(sid: string): Promise<WebContents | null> {
     try {
       let win = this.orderPollByShop.get(sid)
       if (!win || win.isDestroyed()) {
@@ -558,8 +563,8 @@ export class AutoShipService {
         !/ark\.xiaohongshu\.com\/app-order/i.test(url)
       const lastReady = this.orderPollReadyAt.get(sid) || 0
       if (needLoad || Date.now() - lastReady > 30 * 60 * 1000) {
-        await withTimeout(wc.loadURL(ARK_ORDER_QUERY_URL) as any, 25000, null)
-        await new Promise((r) => setTimeout(r, 1200))
+        await withTimeout(wc.loadURL(ARK_ORDER_QUERY_URL) as any, 8000, null)
+        await new Promise((r) => setTimeout(r, 800))
       }
 
       const after = wc.getURL() || ''
@@ -580,6 +585,34 @@ export class AutoShipService {
       this.logger.warn(`[AutoShip] ensureOrderPollWc 失败 shop=${sid}: ${e}`)
       return this.getShipWc(sid)
     }
+  }
+
+  /**
+   * 台账补单：对照 order_ledger vs 是否已 send_status=success，未成功则重走发码。
+   * （与「自动补货=补卡密池」「自动补发=扫售后 DOM」不同）
+   */
+  async reconcileUnshippedFromLedger(limit = 30): Promise<number> {
+    if (!this.pollingEnabled) return 0
+    const rows = this.storage.listLedgerNeedingShip(limit)
+    let n = 0
+    for (const row of rows) {
+      if (!row?.order_id) continue
+      if (this.storage.hasShippedCode(row.order_id)) continue
+      n += 1
+      await this.handleNewOrder({
+        order_id: row.order_id,
+        product_id: row.product_id || '',
+        shop_id: row.shop_id || currentShopId(),
+        status: row.platform_status || '',
+        order_time: row.order_time || '',
+        is_virtual: !!row.is_virtual,
+        source: 'ledger_reconcile'
+      })
+    }
+    if (n > 0) {
+      this.logger.info(`[AutoShip] 台账补单对账：待处理 ${n} 单`)
+    }
+    return n
   }
 
   startPolling(intervalMs?: number) {
@@ -609,6 +642,12 @@ export class AutoShipService {
     }
     schedule()
     this.logger.info(`[AutoShip] 启动轮询监测，基础间隔: ${safeBase}ms（含抖动与退避）`)
+    // 启动后先对台账未发码单做一轮补单（不依赖本轮拉单是否成功）
+    setTimeout(() => {
+      this.reconcileUnshippedFromLedger(30).catch((e) =>
+        this.logger.warn(`[AutoShip] 台账补单对账失败: ${e}`)
+      )
+    }, 8_000)
   }
 
   stopPolling() {

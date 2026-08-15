@@ -5,7 +5,10 @@
         <h2 class="page-title">发货管理</h2>
         <div class="header-actions">
           <el-switch v-model="autoShipEnabled" active-text="自动发货" @change="toggleAutoShip" />
-          <el-switch v-model="reshipEnabled" active-text="自动补发" @change="toggleReship" style="margin-left: 12px" />
+          <el-switch v-model="reshipEnabled" active-text="自动补发/补单" @change="toggleReship" style="margin-left: 12px" />
+          <el-tooltip content="自动补货=卡密池库存不足时生成链接；与补单无关。补单=对照台账是否已发码成功。" placement="bottom">
+            <span style="margin-left: 10px; color: #909399; font-size: 12px; cursor: help">补货≠补单</span>
+          </el-tooltip>
           <el-button size="small" style="margin-left: 12px" @click="retryFailed">重试失败订单</el-button>
         </div>
       </div>

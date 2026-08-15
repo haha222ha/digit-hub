@@ -1374,6 +1374,31 @@ export class StorageService {
   }
 
   /**
+   * 台账中尚未真实发码成功的订单（供补单对账）
+   */
+  listLedgerNeedingShip(limit = 50): Array<{
+    order_id: string
+    shop_id: string
+    product_id: string
+    platform_status: string
+    order_time: string
+    is_virtual: number
+  }> {
+    return this.db
+      .prepare(
+        `SELECT l.order_id, l.shop_id, l.product_id, l.platform_status, l.order_time, l.is_virtual
+         FROM order_ledger l
+         WHERE NOT EXISTS (
+           SELECT 1 FROM order_delivery d
+           WHERE d.order_id = l.order_id AND d.send_status = 'success'
+         )
+         ORDER BY l.last_seen_at DESC
+         LIMIT ?`
+      )
+      .all(Math.max(1, Math.min(200, limit))) as any[]
+  }
+
+  /**
    * 全量订单入台账（轮询到即写；已存在则刷新 last_seen）
    */
   upsertOrderLedger(row: {

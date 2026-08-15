@@ -1,4 +1,4 @@
-﻿# xhs-shipping-assistant launcher (ASCII-safe)
+# xhs-shipping-assistant launcher (ASCII-safe)
 $ErrorActionPreference = "SilentlyContinue"
 chcp 65001 | Out-Null
 $Root = "D:\eva\xhs-shipping-assistant"
@@ -50,15 +50,18 @@ function Get-AssistantElectron {
   }
 }
 
+# 已在运行时：先彻底退出再启动，否则会一直复用旧进程，vite build 后的修复不生效
 $running = @(Get-AssistantElectron)
 if ($running.Count -gt 0) {
-  if (Focus-AssistantWindow $MainTitle) { exit 0 }
-  if (Test-Path $Ele) {
-    Start-Process -FilePath $Ele -ArgumentList "." -WorkingDirectory $Root -WindowStyle Hidden
+  foreach ($proc in $running) {
+    try { Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue } catch {}
   }
-  Start-Sleep -Milliseconds 800
-  [void](Focus-AssistantWindow $MainTitle)
-  exit 0
+  Get-CimInstance Win32_Process -Filter "name='electron.exe'" | Where-Object {
+    $_.CommandLine -and ($_.CommandLine -like "*xhs-shipping-assistant*")
+  } | ForEach-Object {
+    try { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue } catch {}
+  }
+  Start-Sleep -Seconds 2
 }
 
 Remove-Item Env:\VITE_DEV_SERVER_URL -ErrorAction SilentlyContinue
