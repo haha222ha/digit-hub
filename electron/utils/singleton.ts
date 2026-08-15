@@ -42,9 +42,12 @@ export function focusAssistantMainWindow(): void {
   if (!main) return
   try {
     if (main.isMinimized()) main.restore()
+    // 关闭按钮只是 hide：再次启动必须强制 show，否则像「闪退」
+    main.setOpacity(1)
     main.setSkipTaskbar(false)
     main.show()
     main.focus()
+    main.moveTop()
     main.setTitle(MAIN_TITLE)
   } catch {
     /* ignore */

@@ -1,83 +1,78 @@
-# xhs-shipping-assistant launcher (UTF-8)
-$ErrorActionPreference = 'SilentlyContinue'
+﻿# xhs-shipping-assistant launcher (ASCII-safe)
+$ErrorActionPreference = "SilentlyContinue"
 chcp 65001 | Out-Null
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$Root = 'D:\eva\xhs-shipping-assistant'
+$Root = "D:\eva\xhs-shipping-assistant"
 Set-Location $Root
-$script:MainTitle = '小红书发货助手'
+$MainTitle = [System.Text.Encoding]::UTF8.GetString([byte[]](0xE5,0xB0,0x8F,0xE7,0xBA,0xA2,0xE4,0xB9,0xA6,0xE5,0x8F,0x91,0xE8,0xB4,0xA7,0xE5,0x8A,0xA9,0xE6,0x89,0x8B))
+$Ele = Join-Path $Root "node_modules\electron\dist\electron.exe"
 
-function Focus-AssistantWindow {
-  Add-Type -TypeDefinition @'
+$code = @"
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-public class WinFocus {
+public class WinFocus2 {
   public delegate bool EnumProc(IntPtr hWnd, IntPtr lParam);
   [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc lpEnumFunc, IntPtr lParam);
   [DllImport("user32.dll")] public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
-  [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
   [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
   [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+  [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr hWnd);
 }
-'@
-  $found = $false
-  [WinFocus]::EnumWindows({
+"@
+Add-Type -TypeDefinition $code -ErrorAction SilentlyContinue
+
+function Focus-AssistantWindow([string]$title) {
+  $script:found = $false
+  $script:want = $title
+  [WinFocus2]::EnumWindows({
     param($h, $l)
-    if (-not [WinFocus]::IsWindowVisible($h)) { return $true }
     $sb = New-Object System.Text.StringBuilder 512
-    [void][WinFocus]::GetWindowText($h, $sb, $sb.Capacity)
+    [void][WinFocus2]::GetWindowText($h, $sb, $sb.Capacity)
     $t = $sb.ToString()
-    if ($t -eq $script:MainTitle -or $t.StartsWith($script:MainTitle)) {
-      [WinFocus]::ShowWindow($h, 9) | Out-Null
-      [WinFocus]::SetForegroundWindow($h) | Out-Null
+    if ($t -and ($t -eq $script:want -or $t.StartsWith($script:want))) {
+      if ([WinFocus2]::IsIconic($h)) { [void][WinFocus2]::ShowWindow($h, 9) }
+      else { [void][WinFocus2]::ShowWindow($h, 5) }
+      [void][WinFocus2]::SetForegroundWindow($h)
       $script:found = $true
       return $false
     }
     return $true
   }, [IntPtr]::Zero)
-  return $found
+  return $script:found
 }
 
 function Get-AssistantElectron {
   Get-CimInstance Win32_Process -Filter "name='electron.exe'" | Where-Object {
     $_.CommandLine -and (
-      $_.CommandLine -match 'xhs-shipping-assistant' -or
-      $_.CommandLine -match 'dist-electron\\main'
-    ) -and $_.CommandLine -notmatch '--type='
+      $_.CommandLine -like "*xhs-shipping-assistant*" -or
+      $_.CommandLine -like "*dist-electron\main*"
+    ) -and ($_.CommandLine -notlike "*--type=*")
   }
 }
-
-if (Focus-AssistantWindow) { exit 0 }
 
 $running = @(Get-AssistantElectron)
 if ($running.Count -gt 0) {
-  $env:VITE_DEV_SERVER_URL = 'http://localhost:5173/'
-  $ele = Join-Path $Root 'node_modules\electron\dist\electron.exe'
-  if (Test-Path $ele) {
-    Start-Process -FilePath $ele -ArgumentList '.' -WorkingDirectory $Root
+  if (Focus-AssistantWindow $MainTitle) { exit 0 }
+  if (Test-Path $Ele) {
+    Start-Process -FilePath $Ele -ArgumentList "." -WorkingDirectory $Root -WindowStyle Hidden
   }
   Start-Sleep -Milliseconds 800
-  [void](Focus-AssistantWindow)
+  [void](Focus-AssistantWindow $MainTitle)
   exit 0
 }
 
-$viteUp = $false
-try {
-  $c = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
-  if ($c) { $viteUp = $true }
-} catch {
-  $r = netstat -ano | Select-String ':5173' | Select-String 'LISTENING'
-  if ($r) { $viteUp = $true }
+Remove-Item Env:\VITE_DEV_SERVER_URL -ErrorAction SilentlyContinue
+if (-not (Test-Path (Join-Path $Root "dist-electron\main.js"))) {
+  & npx vite build --mode development | Out-Null
 }
 
-if ($viteUp) {
-  $env:VITE_DEV_SERVER_URL = 'http://localhost:5173/'
-  Start-Process -FilePath (Join-Path $Root 'node_modules\electron\dist\electron.exe') -ArgumentList '.' -WorkingDirectory $Root
+if (Test-Path $Ele) {
+  Start-Process -FilePath $Ele -ArgumentList "." -WorkingDirectory $Root
   Start-Sleep -Seconds 2
-  [void](Focus-AssistantWindow)
+  [void](Focus-AssistantWindow $MainTitle)
   exit 0
 }
 
-Start-Process -FilePath 'cmd.exe' -ArgumentList '/c npm run electron:dev' -WorkingDirectory $Root -WindowStyle Minimized
+Start-Process -FilePath "cmd.exe" -ArgumentList "/c npm run electron:dev" -WorkingDirectory $Root -WindowStyle Minimized
 Start-Sleep -Seconds 10
-[void](Focus-AssistantWindow)
+[void](Focus-AssistantWindow $MainTitle)
