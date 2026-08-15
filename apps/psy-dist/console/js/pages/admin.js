@@ -12,7 +12,6 @@ import {
   attachBackToTop,
 } from "../ui.js";
 import { navigate, linkClick } from "../router.js";
-import { t, locale as uiLocale } from "../i18n.js";
 
 const NAV = [
   { path: "/admin/dashboard", label: "工作台" },
@@ -1174,7 +1173,7 @@ function renderPackageDocList(docs, packages) {
 export async function renderPurchase(root) {
   const host = el("div", { className: "purchase-page" });
   let selectedMethod = "wxpay";
-  let currency = uiLocale() === "en" ? "USD" : "CNY";
+  let currency = "CNY";
   let country = "";
   try {
     const meta = document.querySelector('meta[name="cf-ipcountry"]');
@@ -1182,10 +1181,7 @@ export async function renderPurchase(root) {
     if (!country && sessionStorage.getItem("psy_cf_cc")) country = sessionStorage.getItem("psy_cf_cc");
   } catch (e) {}
   try {
-    if (!country && window.PsyLocale && typeof window.PsyLocale.fetchGeo === "function") {
-      await window.PsyLocale.fetchGeo();
-      country = (window.__PSY_CF_COUNTRY || sessionStorage.getItem("psy_cf_cc") || "").toUpperCase();
-    } else if (!country) {
+    if (!country) {
       const geo = await fetch("/api/v1/geo", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null));
       if (geo && geo.country) {
         country = String(geo.country).toUpperCase();
@@ -1193,15 +1189,14 @@ export async function renderPurchase(root) {
           sessionStorage.setItem("psy_cf_cc", country);
         } catch (e) {}
       }
-      if (geo && geo.currency && uiLocale() === "en") currency = geo.currency;
     }
   } catch (e) {}
-  const payWx = el("button", { className: "pay-method-btn active", type: "button", text: t("purchase.wechat") });
-  const payAli = el("button", { className: "pay-method-btn", type: "button", text: t("purchase.alipay") });
+  const payWx = el("button", { className: "pay-method-btn active", type: "button", text: "微信支付" });
+  const payAli = el("button", { className: "pay-method-btn", type: "button", text: "支付宝" });
   const payWaffo = el("button", {
     className: "pay-method-btn",
     type: "button",
-    text: t("purchase.waffo"),
+    text: "国际卡支付",
     style: "display:none",
   });
   payWx.addEventListener("click", () => {
@@ -1226,19 +1221,16 @@ export async function renderPurchase(root) {
   const wechatTip = isWechatBrowser()
     ? el("p", {
         className: "wechat-tip",
-        text:
-          uiLocale() === "en"
-            ? "Opened in WeChat — you will be redirected to the payment cashier."
-            : "当前在微信内打开，将跳转易支付收银台完成支付（与发卡网相同）。",
+        text: "当前在微信内打开，将跳转易支付收银台完成支付（与发卡网相同）。",
       })
     : null;
 
   root.append(
     shell("/admin/purchase-quota", [
-      el("h1", { className: "page-title", text: t("purchase.title") }),
+      el("h1", { className: "page-title", text: "购买额度" }),
       el("p", {
         className: "page-lead",
-        text: t("purchase.lead"),
+        text: "在线支付后额度自动到账。若你是被邀请注册，首购将给邀请人返利（默认购额 20%）。",
       }),
       payMethods,
       wechatTip,
@@ -1262,7 +1254,7 @@ export async function renderPurchase(root) {
   }
 
   async function afterPaySuccess() {
-    showToast(t("purchase.success"));
+    showToast("支付成功，额度已到账");
     await refreshSessionQuota();
     navigate("/admin/dashboard");
   }
@@ -1423,7 +1415,7 @@ export async function renderPurchase(root) {
     host.append(
       el("p", {
         className: "muted",
-        text: t("purchase.rebate", { pct: rebate }),
+        text: `邀请返利比例：${rebate}%（仅被邀请用户的首次购额）。`,
       })
     );
     const grid = el("div", { className: "plans-grid" });
@@ -1445,7 +1437,7 @@ export async function renderPurchase(root) {
       const btn = el("button", {
         className: `plan-buy-btn theme-${theme}`,
         type: "button",
-        text: t("purchase.pay_now"),
+        text: "立即支付",
       });
       btn.addEventListener("click", async () => {
         btn.disabled = true;
