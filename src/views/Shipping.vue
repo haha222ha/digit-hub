@@ -290,16 +290,21 @@
             </p>
           </div>
         </el-form-item>
-        <el-form-item v-if="bindingForm.deliverType === 'link_card'" label="发货内容（写死）">
+        <el-form-item v-if="bindingForm.deliverType === 'link_card'" label="发货内容">
           <el-input
-            :model-value="linkCardFixedContent"
+            v-model="bindingForm.deliverContent"
             type="textarea"
-            :rows="8"
-            readonly
+            :rows="10"
+            :placeholder="contentPlaceholder"
           />
-          <div class="hint-text" style="margin-top: 6px">
-            测评类 IM 写死三轮：①专属测试链接 ②https://psy.xhs365.cn/order-claim ③客服引导说明。保存与发货均强制此模板。
+          <div class="template-hint">
+            <span>模板变量：</span>
+            <el-tag v-for="v in templateVars" :key="v.key" size="small" style="margin-right: 4px; cursor: pointer" @click="insertVar(v.key)">
+              {{ v.key }}
+            </el-tag>
+            <span class="hint-text">空一行拆成下一条消息；默认三轮：测试链接 / 使用方法 / 上滑提示</span>
           </div>
+          <el-button text type="primary" style="margin-top: 4px" @click="resetLinkCardTemplate">恢复默认话术</el-button>
         </el-form-item>
         <el-form-item v-else label="发货内容">
           <el-input
@@ -554,14 +559,18 @@ const formatPoolKey = (key: string) => {
   return k
 }
 
-const PSY_ORDER_CLAIM_URL = 'https://psy.xhs365.cn/order-claim'
-const LINK_CARD_FIXED_DELIVER_CONTENT = [
+const LINK_CARD_DEFAULT_DELIVER_CONTENT = [
   '{卡密}',
-  PSY_ORDER_CLAIM_URL,
-  '该链接需要输入您的订单号，上方链接提取繁琐，请直接进入店铺客服聊天窗口，客服已经把测试链接发给您了，方便您直接测试，聊天窗口位于商品页面左下角客服按钮，或订单详情下方的联系卖家 ，如果您已经在客服聊天窗口，可以直接往下查看测试链接'
+  [
+    '使用方法一：直接在红薯上点击打开并测试',
+    '使用方法二：',
+    '1.复制您的专属链接到手机浏览器',
+    '2.长按浏览器地址栏（长条输入框，苹果Safari是在最底部）',
+    '3.点击粘贴打开前进，不要使用搜索方式，会进入错误网站~',
+    '该链接可在三天内重复测三次，开始测试后72小时之后将失效，请及时测试并截图保存结果~有问题滴滴客服哈~'
+  ].join('\n'),
+  '宝，链接在上面哈，具体往上滑动屏幕可以看到~'
 ].join('\n\n')
-
-const linkCardFixedContent = LINK_CARD_FIXED_DELIVER_CONTENT
 
 const templateVars = [
   { key: '{订单号}', desc: '订单号' },
@@ -576,7 +585,7 @@ const templateVars = [
 const contentPlaceholder = computed(() => {
   const map: Record<string, string> = {
     card: '如：您的激活码：{卡密}（从卡密池消耗）',
-    link_card: '测评类内容已写死三轮 IM，不可改',
+    link_card: '默认三轮：{卡密} + 使用方法 + 上滑提示（可改，空一行拆条）',
     text: '如：您好，{买家昵称}，感谢购买【{商品名}】',
     link: '如：https://pan.xxx.com/s/ABC123 提取码：xxxx（固定链接，不走卡密池）',
     note: '如：https://www.xiaohongshu.com/xxx（网址发货凭证，发给买家）',
@@ -625,7 +634,12 @@ const deliverTypeText = (t: string) => {
 
 const onDeliverTypeChange = (t: string) => {
   if (t === 'link_card') {
-    bindingForm.value.deliverContent = LINK_CARD_FIXED_DELIVER_CONTENT
+    if (
+      !bindingForm.value.deliverContent.trim() ||
+      /order-claim|提取繁琐/.test(bindingForm.value.deliverContent)
+    ) {
+      bindingForm.value.deliverContent = LINK_CARD_DEFAULT_DELIVER_CONTENT
+    }
     bindingForm.value.poolKey = ''
     void loadPsyTests()
     void refreshBindInventory()
@@ -636,6 +650,10 @@ const onDeliverTypeChange = (t: string) => {
     bindCloudInventory.value = null
     void loadSharedPools()
   }
+}
+
+const resetLinkCardTemplate = () => {
+  bindingForm.value.deliverContent = LINK_CARD_DEFAULT_DELIVER_CONTENT
 }
 
 const getStatusType = (status: string) => {
@@ -811,7 +829,7 @@ const quickBindGoods = (g: { itemId: string; title: string }) => {
     productId: g.itemId,
     productName: g.title,
     deliverType: 'link_card',
-    deliverContent: LINK_CARD_FIXED_DELIVER_CONTENT,
+    deliverContent: LINK_CARD_DEFAULT_DELIVER_CONTENT,
     psyTestCode: '',
     poolKey: '',
     randomMode: false,
@@ -881,7 +899,10 @@ const openBindingDialog = (row?: ProductBinding) => {
       productName: row.product_name,
       deliverType: row.deliver_type as any,
       deliverContent:
-        row.deliver_type === 'link_card' ? LINK_CARD_FIXED_DELIVER_CONTENT : row.deliver_content,
+        row.deliver_type === 'link_card' &&
+        (!row.deliver_content || /order-claim|提取繁琐/.test(String(row.deliver_content)))
+          ? LINK_CARD_DEFAULT_DELIVER_CONTENT
+          : row.deliver_content,
       psyTestCode: row.psy_test_code || '',
       poolKey: row.pool_key || '',
       randomMode: !!row.random_mode,
@@ -1055,7 +1076,10 @@ const saveBinding = async (claimAfter = false) => {
 
   let deliverContent = bindingForm.value.deliverContent
   if (bindingForm.value.deliverType === 'link_card') {
-    deliverContent = LINK_CARD_FIXED_DELIVER_CONTENT
+    deliverContent = bindingForm.value.deliverContent.trim() || LINK_CARD_DEFAULT_DELIVER_CONTENT
+    if (!/\{(卡密|card)\}/.test(deliverContent)) {
+      deliverContent = '{卡密}\n\n' + deliverContent
+    }
   }
 
   const payload = {

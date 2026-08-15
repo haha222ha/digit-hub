@@ -39,14 +39,13 @@ export class AutoReshipService {
 
   startPolling(intervalMs = 10000) {
     this.stopPolling()
+    // DOM 售后扫描可较勤；台账补单在 AutoShip 内已有 5 分钟节流，这里只偶发触发
     this.pollInterval = setInterval(() => {
       this.pollReshipOrders().catch((err) => {
         this.logger.error('[AutoReship] 轮询失败:', err)
       })
-      // 与「自动补发」开关联动：同步跑台账未发码对账（用户预期的补单）
-      this.autoShip.reconcileUnshippedFromLedger(20).catch(() => undefined)
     }, intervalMs)
-    this.logger.info(`[AutoReship] 启动补发/台账补单监测，间隔: ${intervalMs}ms`)
+    this.logger.info(`[AutoReship] 启动补发监测，间隔: ${intervalMs}ms`)
     void this.autoShip.reconcileUnshippedFromLedger(30).catch(() => undefined)
   }
 

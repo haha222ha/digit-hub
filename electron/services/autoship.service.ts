@@ -83,6 +83,10 @@ export class AutoShipService {
   private psyCloud: PsyCloudService | null = null
   private monitorInterval: NodeJS.Timeout | null = null
   private processedOrders: Set<string> = new Set()
+  /** 发送中订单锁，防止轮询/补单并发导致循环重发 */
+  private shippingInFlight: Set<string> = new Set()
+  private lastLedgerReconcileAt = 0
+  private static readonly LEDGER_RECONCILE_MIN_INTERVAL_MS = 5 * 60 * 1000
   private isShipping = false
   private monitorWebContents: WebContents | null = null
   /** 阶段 A：与 monitor 同页（dashboard 单页 XhsRim）；显式客服窗为备选 */
@@ -593,11 +597,18 @@ export class AutoShipService {
    */
   async reconcileUnshippedFromLedger(limit = 30): Promise<number> {
     if (!this.pollingEnabled) return 0
+    const now = Date.now()
+    if (now - this.lastLedgerReconcileAt < AutoShipService.LEDGER_RECONCILE_MIN_INTERVAL_MS) {
+      return 0
+    }
+    this.lastLedgerReconcileAt = now
     const rows = this.storage.listLedgerNeedingShip(limit)
     let n = 0
     for (const row of rows) {
       if (!row?.order_id) continue
       if (this.storage.hasShippedCode(row.order_id)) continue
+      if (this.shippingInFlight.has(row.order_id)) continue
+      if (this.storage.hasRecentShippingActivity(row.order_id, 10 * 60)) continue
       n += 1
       await this.handleNewOrder({
         order_id: row.order_id,
@@ -814,24 +825,28 @@ export class AutoShipService {
       this.logger.info(`[AutoShip] 台账已发码，跳过: ${order.order_id}`)
       return
     }
+    if (this.shippingInFlight.has(order.order_id)) {
+      this.logger.info(`[AutoShip] 订单发送中，跳过并发: ${order.order_id}`)
+      return
+    }
+    if (this.storage.hasRecentShippingActivity(order.order_id, 10 * 60)) {
+      this.logger.info(`[AutoShip] 近期已有发码活动，跳过防重: ${order.order_id}`)
+      return
+    }
     if (this.storage.existsOrderDelivery(order.order_id)) {
-      // Mock 假成功 / 卡住的 sending·fail：清占位后允许重试；成功则上面已 return
+      // 仅清 Mock / 明确失败且非近期；禁止清 sending（否则会循环重发）
       const rows = this.storage.getOrderDeliveries(order.order_id) as Array<{
         send_status?: string
         updated_at?: string
       }>
       const onlyMock =
         rows.length > 0 && rows.every((r) => String(r.send_status || '') === 'mock_success')
-      const stuck =
-        rows.length > 0 &&
-        rows.every((r) => {
-          const st = String(r.send_status || '')
-          return st === 'fail' || st === 'pending' || st === 'sending'
-        })
-      if (onlyMock || stuck) {
+      const onlyFail =
+        rows.length > 0 && rows.every((r) => String(r.send_status || '') === 'fail')
+      if (onlyMock || onlyFail) {
         this.storage.clearOrderDelivery(order.order_id)
         this.logger.warn(
-          `[AutoShip] 清除未成功发码占位，准备重试: ${order.order_id} mock=${onlyMock} stuck=${stuck}`
+          `[AutoShip] 清除未成功发码占位，准备重试: ${order.order_id} mock=${onlyMock} fail=${onlyFail}`
         )
       } else {
         return
@@ -871,18 +886,26 @@ export class AutoShipService {
   }
 
   private async shipOneOrder(shopId: string, order: any): Promise<void> {
+    const oid = String(order.order_id || '')
+    if (!oid) return
+    if (this.shippingInFlight.has(oid)) {
+      this.logger.info(`[AutoShip] shipOneOrder 跳过（已在发送）: ${oid}`)
+      return
+    }
+    this.shippingInFlight.add(oid)
     this.isShipping = true
     try {
       const success = await this.processShipment(shopId, order)
       if (success) {
-        this.processedOrders.add(`${shopId}:${order.order_id}`)
-        this.logger.info(`[AutoShip] 订单发货成功: shop=${shopId} ${order.order_id}`)
+        this.processedOrders.add(`${shopId}:${oid}`)
+        this.logger.info(`[AutoShip] 订单发货成功: shop=${shopId} ${oid}`)
       } else {
-        this.logger.warn(`[AutoShip] 订单发货失败: shop=${shopId} ${order.order_id}`)
+        this.logger.warn(`[AutoShip] 订单发货失败: shop=${shopId} ${oid}`)
       }
     } catch (err) {
-      this.logger.error(`[AutoShip] 订单发货异常: shop=${shopId} ${order.order_id}`, err)
+      this.logger.error(`[AutoShip] 订单发货异常: shop=${shopId} ${oid}`, err)
     } finally {
+      this.shippingInFlight.delete(oid)
       this.isShipping = false
     }
   }
@@ -1915,7 +1938,11 @@ export class AutoShipService {
         }
         linkUrl = url
         const msgs = buildMessages(
-          { deliver_type: 'link_card', deliver_content: '', msg_separator: binding?.msg_separator },
+          {
+            deliver_type: 'link_card',
+            deliver_content: String(binding?.deliver_content || ''),
+            msg_separator: binding?.msg_separator
+          },
           true
         )
         const rawPart =

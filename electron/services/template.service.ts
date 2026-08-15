@@ -15,20 +15,30 @@ export interface TemplateContext {
   uidLength?: number
 }
 
-/** 测评类商品写死的自助领链接（千帆发货栏 / IM 第二轮） */
+/** 自助领链接（仅作参考；IM 话术默认不再带此项，可在发货内容里自行编辑） */
 export const PSY_ORDER_CLAIM_URL = 'https://psy.xhs365.cn/order-claim'
 
 /**
- * 测评链接卡（link_card）IM 自动发货 — 写死三轮：
- * 1) 专属测试链接 {卡密}
- * 2) 自助领链接 order-claim
- * 3) 客服引导说明
+ * 测评链接卡默认三轮话术（可编辑，非写死发货）
+ * 1) 测试链接 {卡密}
+ * 2) 使用方法
+ * 3) 引导上滑
  */
-export const LINK_CARD_FIXED_DELIVER_CONTENT = [
+export const LINK_CARD_DEFAULT_DELIVER_CONTENT = [
   '{卡密}',
-  PSY_ORDER_CLAIM_URL,
-  '该链接需要输入您的订单号，上方链接提取繁琐，请直接进入店铺客服聊天窗口，客服已经把测试链接发给您了，方便您直接测试，聊天窗口位于商品页面左下角客服按钮，或订单详情下方的联系卖家 ，如果您已经在客服聊天窗口，可以直接往下查看测试链接'
+  [
+    '使用方法一：直接在红薯上点击打开并测试',
+    '使用方法二：',
+    '1.复制您的专属链接到手机浏览器',
+    '2.长按浏览器地址栏（长条输入框，苹果Safari是在最底部）',
+    '3.点击粘贴打开前进，不要使用搜索方式，会进入错误网站~',
+    '该链接可在三天内重复测三次，开始测试后72小时之后将失效，请及时测试并截图保存结果~有问题滴滴客服哈~'
+  ].join('\n'),
+  '宝，链接在上面哈，具体往上滑动屏幕可以看到~'
 ].join('\n\n')
+
+/** @deprecated 兼容旧引用名 */
+export const LINK_CARD_FIXED_DELIVER_CONTENT = LINK_CARD_DEFAULT_DELIVER_CONTENT
 
 /** 随机短码（剔除易混淆字符 I/O/0/1） */
 export function genUid(len: number = 10): string {
@@ -86,13 +96,15 @@ export function buildMessages(
   splitMulti: boolean = true
 ): { type: MessageType; rawContent: string }[] | null {
   const type = binding.deliver_type
-  // 测评类链接卡：发货内容写死（专属链接 + order-claim + 客服引导）
+  // 链接卡：用绑定表可编辑话术；空则回落默认三轮
   let raw =
-    type === 'link_card' ? LINK_CARD_FIXED_DELIVER_CONTENT : binding.deliver_content || ''
+    type === 'link_card'
+      ? String(binding.deliver_content || '').trim() || LINK_CARD_DEFAULT_DELIVER_CONTENT
+      : binding.deliver_content || ''
 
   // 链接卡密兜底：确保含 {卡密}
   if (type === 'link_card') {
-    if (!needsCard(raw)) raw = raw.trim() + '\n\n{卡密}'
+    if (!needsCard(raw)) raw = '{卡密}\n\n' + raw.trim()
   }
 
   switch (type) {
@@ -100,35 +112,35 @@ export function buildMessages(
     case 'link_card':
     case 'text':
     case 'link': {
-      // 纯文本类型：支持多轮拆分（若内容含分隔符则拆多条）
       if (!splitMulti) return [{ type: 'text', rawContent: raw }]
       const parts = splitMultiRound(raw, binding.msg_separator)
-      return parts.length > 0 ? parts.map((p) => ({ type: 'text' as const, rawContent: p })) : [{ type: 'text', rawContent: raw }]
+      return parts.length > 0
+        ? parts.map((p) => ({ type: 'text' as const, rawContent: p }))
+        : [{ type: 'text', rawContent: raw }]
     }
     case 'image':
       return [{ type: 'image', rawContent: raw }]
     case 'video':
       return [{ type: 'video', rawContent: raw }]
     case 'note':
-      // 网址发货凭证（对标阿奇锁 sendCustomNotesMsg content_type:92）
       return [{ type: 'note', rawContent: raw }]
     case 'mixed': {
-      // JSON 数组多段（图文混排），每段 { type, content }
       try {
         const arr = JSON.parse(raw)
         if (!Array.isArray(arr)) throw new Error('mixed 内容非数组')
         return arr
-          .filter((seg: any) => seg && seg.content)
-          .map((seg: any) => ({ type: (seg.type === 'image' ? 'image' : seg.type === 'video' ? 'video' : seg.type === 'note' ? 'note' : 'text') as MessageType, rawContent: String(seg.content) }))
+          .map((item: any) => ({
+            type: (item.type || 'text') as MessageType,
+            rawContent: String(item.content ?? item.rawContent ?? '')
+          }))
+          .filter((m: { rawContent: string }) => m.rawContent.length > 0)
       } catch {
-        // 解析失败优雅降级为单段文本
         return [{ type: 'text', rawContent: raw }]
       }
     }
     case 'manual':
       return null
     default:
-      // 未知类型降级为文本
       return [{ type: 'text', rawContent: raw }]
   }
 }

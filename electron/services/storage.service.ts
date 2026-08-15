@@ -1367,6 +1367,23 @@ export class StorageService {
     return !!row
   }
 
+  /**
+   * 近期是否有发码活动（sending/pending/success），用于防并发清库重发
+   * @param withinSec 秒
+   */
+  hasRecentShippingActivity(orderId: string, withinSec = 600): boolean {
+    const row = this.db
+      .prepare(
+        `SELECT id FROM order_delivery
+         WHERE order_id = ?
+           AND send_status IN ('success', 'sending', 'pending')
+           AND datetime(updated_at) >= datetime('now', ?)
+         LIMIT 1`
+      )
+      .get(orderId, `-${Math.max(30, withinSec)} seconds`)
+    return !!row
+  }
+
   /** 清除某订单发货占位（用于 Mock 假成功后重跑真发） */
   clearOrderDelivery(orderId: string): number {
     const r = this.db.prepare('DELETE FROM order_delivery WHERE order_id = ?').run(orderId)
