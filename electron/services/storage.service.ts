@@ -1506,6 +1506,9 @@ export class StorageService {
     return this.db.prepare(
       `SELECT * FROM order_delivery
        WHERE send_status = 'fail' AND retry_count < ?
+         AND IFNULL(error_msg, '') NOT LIKE '%连续发送%'
+         AND IFNULL(error_msg, '') NOT LIKE '%不可超过%10%'
+         AND IFNULL(error_msg, '') NOT LIKE '%超过10条%'
        ORDER BY updated_at ASC LIMIT ?`
     ).all(maxRetry, limit)
   }

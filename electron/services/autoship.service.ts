@@ -1100,6 +1100,32 @@ export class AutoShipService {
           notifyDesktop('发货成功', `订单 ${order.order_id}`)
         }
       } else {
+        const errText = String(shipResult.error || '')
+        const rateLimited = /连续发送|不可超过\s*10|超过10条/.test(errText)
+        // 平台限流：前面几条往往已成功送达；再重试只会刷失败弹窗
+        if (rateLimited) {
+          const alreadyOk = this.storage.hasShippedCode(order.order_id) || i > 0
+          this.storage.updateDeliveryStatus(msgGuid, alreadyOk ? 'success' : 'fail', {
+            errorMsg: alreadyOk
+              ? `平台限流(已视为送达): ${errText.slice(0, 120)}`
+              : errText.slice(0, 200),
+            cardContent: cardForOrder ?? undefined
+          })
+          this.storage.addShipLog({
+            shopId,
+            orderId: order.order_id,
+            trackingNumber: finalContent.substring(0, 50),
+            status: alreadyOk ? 'rate_limit_ok' : 'rate_limit',
+            errorMsg: errText.slice(0, 160)
+          })
+          this.logger.warn(
+            `[AutoShip] 平台连续发送限流 [${i + 1}/${msgTotal}] order=${order.order_id} treat=${alreadyOk ? 'success' : 'fail'}`
+          )
+          if (!alreadyOk) {
+            notifyDesktop('发货限流', `${order.order_id}：买家回复前最多连续10条，请稍后再补`)
+          }
+          return alreadyOk
+        }
         if (cardLocked) {
           this.storage.rollbackCard(order.order_id)
           cardLocked = false
