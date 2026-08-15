@@ -287,15 +287,15 @@
             </p>
           </div>
         </el-form-item>
-        <el-form-item v-if="bindingForm.deliverType === 'link_card'" label="发货内容">
+        <el-form-item v-if="bindingForm.deliverType === 'link_card'" label="发货内容（写死）">
           <el-input
-            v-model="bindingForm.deliverContent"
+            :model-value="linkCardFixedContent"
             type="textarea"
-            :rows="3"
-            placeholder="默认 {卡密} = 专属测试链接（IM 发出）"
+            :rows="8"
+            readonly
           />
           <div class="hint-text" style="margin-top: 6px">
-            IM 发专属链接。千帆上架栏的发货链接/说明由选品工具写死为 order-claim，不必在此填百度网盘。
+            测评类 IM 写死三轮：①专属测试链接 ②https://psy.xhs365.cn/order-claim ③客服引导说明。保存与发货均强制此模板。
           </div>
         </el-form-item>
         <el-form-item v-else label="发货内容">
@@ -551,8 +551,14 @@ const formatPoolKey = (key: string) => {
   return k
 }
 
-/** IM 默认只发专属链接；千帆上架栏 order-claim 在选品工具写死 */
-const LINK_CARD_FIXED_DELIVER_CONTENT = '{卡密}'
+const PSY_ORDER_CLAIM_URL = 'https://psy.xhs365.cn/order-claim'
+const LINK_CARD_FIXED_DELIVER_CONTENT = [
+  '{卡密}',
+  PSY_ORDER_CLAIM_URL,
+  '该链接需要输入您的订单号，上方链接提取繁琐，请直接进入店铺客服聊天窗口，客服已经把测试链接发给您了，方便您直接测试，聊天窗口位于商品页面左下角客服按钮，或订单详情下方的联系卖家 ，如果您已经在客服聊天窗口，可以直接往下查看测试链接'
+].join('\n\n')
+
+const linkCardFixedContent = LINK_CARD_FIXED_DELIVER_CONTENT
 
 const templateVars = [
   { key: '{订单号}', desc: '订单号' },
@@ -567,7 +573,7 @@ const templateVars = [
 const contentPlaceholder = computed(() => {
   const map: Record<string, string> = {
     card: '如：您的激活码：{卡密}（从卡密池消耗）',
-    link_card: '默认 {卡密}（专属测评链接，IM 发出）',
+    link_card: '测评类内容已写死三轮 IM，不可改',
     text: '如：您好，{买家昵称}，感谢购买【{商品名}】',
     link: '如：https://pan.xxx.com/s/ABC123 提取码：xxxx（固定链接，不走卡密池）',
     note: '如：https://www.xiaohongshu.com/xxx（网址发货凭证，发给买家）',
