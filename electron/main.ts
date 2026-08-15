@@ -254,6 +254,8 @@ async function onLoginAssistNavigated(url: string) {
       await autoLoginService.saveCookies(shopId, xhsBrowserView.webContents)
       await shopContextService?.initializePhase2(shopId)
       wsService?.reconnectKefu()
+      autoShipService?.setPollingEnabled(true)
+      autoShipService?.startPolling()
       mainWindow?.webContents.send('login-assist-done', { url })
     }
   } catch (e) {
@@ -435,6 +437,8 @@ async function onWorkbenchNavigated(url: string) {
     await autoLoginService.saveCookies(shopId, xhsBrowserView.webContents)
     await shopContextService.initializePhase2(shopId)
     wsService?.reconnectKefu()
+    autoShipService?.setPollingEnabled(true)
+    autoShipService?.startPolling()
   } catch (e) {
     logger.warn(`[Login] 工作台导航后处理失败: ${e}`)
   }
@@ -564,14 +568,15 @@ async function initialize() {
   // 启动时自动扫描失败订单重试（对标阿奇锁 MessageRetryTask 定时任务）
   const retryFailedOrders = async () => {
     try {
+      if (!autoShipService?.isPollingEnabled()) return
       const count = await autoShipService.retryFailedDeliveries(3)
       if (count > 0) logger.info(`[RetryTask] 本轮重试失败订单 ${count} 条`)
     } catch (err) {
       logger.error('[RetryTask] 重试失败订单异常:', err)
     }
   }
-  // 启动后延迟 10 秒首次扫描，之后每 5 分钟一次
-  setTimeout(retryFailedOrders, 10 * 1000)
+  // 启动后延迟 45 秒首次扫描（避开登录保活窗口），之后每 5 分钟一次
+  setTimeout(retryFailedOrders, 45 * 1000)
   setInterval(retryFailedOrders, 5 * 60 * 1000)
 
   updateService = new UpdateService(logger)
@@ -660,10 +665,13 @@ function createMainWindow() {
     mainWindow?.show()
     focusAssistantMainWindow()
 
+    // 保活期间挂起轮询：避免首轮 poll→ensureImSession 与 dashboard loadURL 并发导致原生闪退
+    autoShipService.setPollingEnabled(false)
+
     // 保活：后台拉起客服页给自动发货用；界面默认进发货管理（不要一打开只剩客服页）
     const shopId = currentShopId()
     await showAndLoadXhs('about:blank')
-    autoShipService.bindWebContents(xhsBrowserView!.webContents, shopId)
+    autoShipService.bindWebContents(xhsBrowserView!.webContents, shopId, { startPolling: false })
     autoReshipService.bindWebContents(xhsBrowserView!.webContents)
 
     let ok = false
@@ -704,11 +712,14 @@ function createMainWindow() {
       }
       mainWindow?.webContents.send('navigate', '/shipping')
       mainWindow?.setTitle('小红书发货助手')
+      autoShipService.setPollingEnabled(true)
+      autoShipService.startPolling()
     } else {
       await showAndLoadXhs(XHS_LOGIN_URL)
       logger.info('[Login] 需手动登录：请用客服邮箱登录（不是商家扫码）')
       mainWindow?.webContents.send('navigate', '/browser')
       mainWindow?.webContents.send('login-required', { reason: 'need_manual_login' })
+      // 未登录保持挂起，登录成功后再由别处 resume
     }
 
     startCookieWatchdog()
@@ -1072,7 +1083,16 @@ async function bindShopImForShip(sid: string): Promise<boolean> {
     shopViews.get(shopId) || (shopId === currentShopId() ? xhsBrowserView : null)
   if (view && !view.webContents.isDestroyed()) {
     const url = view.webContents.getURL() || ''
-    if (!url.includes('walle.xiaohongshu.com') || url.includes('/login')) {
+    // 加载中 / 登录页：不要二次 loadURL（会 ERR_ABORTED，极端时原生崩溃）
+    if (view.webContents.isLoading()) {
+      logger.warn(`[IM] bindShopImForShip 跳过：BrowserView 仍在加载 url=${url.slice(0, 80)}`)
+      return false
+    }
+    if (url.includes('/login') || url === 'about:blank' || !url) {
+      logger.warn(`[IM] bindShopImForShip 跳过：未进工作台 url=${url.slice(0, 80)}`)
+      return false
+    }
+    if (!url.includes('walle.xiaohongshu.com')) {
       await view.webContents.loadURL(XHS_DASHBOARD_URL).catch(() => false)
       await new Promise((r) => setTimeout(r, 2000))
     } else if (url.includes('/cstools/chat')) {

@@ -138,11 +138,28 @@ export class AutoShipService {
     this.ensureBrowserViewActive = fn
   }
 
-  bindWebContents(wc: WebContents, shopId?: string) {
+  /**
+   * 启动保活未完成前禁止轮询：首轮 poll 会 ensureImSession→二次 loadURL，
+   * 与 ready-to-show 的 dashboard 导航撞车，曾导致 Electron ACCESS_VIOLATION 闪退。
+   */
+  private pollingEnabled = true
+
+  setPollingEnabled(enabled: boolean) {
+    this.pollingEnabled = !!enabled
+    if (!this.pollingEnabled) this.stopPolling()
+  }
+
+  isPollingEnabled(): boolean {
+    return this.pollingEnabled
+  }
+
+  bindWebContents(wc: WebContents, shopId?: string, opts?: { startPolling?: boolean }) {
     const sid = shopId || currentShopId()
     this.monitorWebContents = wc
     this.monitorByShop.set(sid, wc)
     this.logger.info(`[AutoShip] 已绑定监测 WebContents（dashboard）shop=${sid}`)
+    if (opts?.startPolling === false) return
+    if (!this.pollingEnabled) return
     this.startPolling()
   }
 
@@ -564,12 +581,17 @@ export class AutoShipService {
   }
 
   startPolling(intervalMs?: number) {
+    if (!this.pollingEnabled) {
+      this.logger.info('[AutoShip] 轮询已挂起（启动保活/未登录），跳过 startPolling')
+      return
+    }
     this.stopPolling()
     // 默认 15 秒；配置值若 <5 秒则强制下限保护（避免内部接口风控）
     const base = intervalMs && intervalMs > 0 ? intervalMs : AutoShipService.DEFAULT_POLL_INTERVAL
     const safeBase = Math.max(base, 5000)
 
     const schedule = () => {
+      if (!this.pollingEnabled) return
       if (this.monitorInterval) clearInterval(this.monitorInterval)
       // 抖动 ±0~5 秒，避免多实例同时请求
       const jitter = Math.floor(Math.random() * 5000)
@@ -599,6 +621,7 @@ export class AutoShipService {
    * 主动轮询待发货订单（fulfillment API，对标阿奇锁 getOrderDetailGoodsId）
    */
   private async pollOrders(): Promise<void> {
+    if (!this.pollingEnabled) return
     const shopIds = new Set<string>([currentShopId(), ...this.monitorByShop.keys(), ...this.imByShop.keys()])
     for (const s of this.storage.listShops()) {
       if (s.id) shopIds.add(s.id)
@@ -608,11 +631,19 @@ export class AutoShipService {
     const pollList = real.length > 0 ? real : [...shopIds]
     const seenOrderIds = new Set<string>()
     for (const shopId of pollList) {
+      const mon = this.monitorByShop.get(shopId) || (shopId === currentShopId() ? this.monitorWebContents : null)
+      const monUrl = mon && !mon.isDestroyed() ? mon.getURL() || '' : ''
+      // 登录页 / 加载中勿 ensureImSession，避免二次 loadURL 打断保活导航
+      const pageBusy =
+        !monUrl ||
+        monUrl === 'about:blank' ||
+        monUrl.includes('/login') ||
+        (!!mon && !mon.isDestroyed() && mon.isLoading())
       const hasSession =
         !!this.storage.getShopCookies(shopId) ||
         this.imByShop.has(shopId) ||
         this.monitorByShop.has(shopId)
-      if (hasSession && this.ensureImSession) {
+      if (hasSession && this.ensureImSession && !pageBusy) {
         await this.ensureImSession(shopId).catch(() => false)
       }
       await this.pollOrdersForShop(shopId, seenOrderIds)
