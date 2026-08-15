@@ -228,9 +228,9 @@ const refreshPsyStatus = async () => {
   psyForm.value.baseUrl = st.baseUrl || 'https://psy.xhs365.cn'
   if (st.username) psyForm.value.username = st.username
   if (window.electronAPI.psyOrderClaimUrl) {
-    orderClaimUrl.value = (await window.electronAPI.psyOrderClaimUrl()) || orderClaimUrl.value
+    orderClaimUrl.value = (await window.electronAPI.psyOrderClaimUrl()) || 'https://psy.xhs365.cn/order-claim'
   } else {
-    orderClaimUrl.value = `${(st.baseUrl || 'https://psy.xhs365.cn').replace(/\/+$/, '')}/order-claim`
+    orderClaimUrl.value = 'https://psy.xhs365.cn/order-claim'
   }
   await refreshPsyQuota()
 }

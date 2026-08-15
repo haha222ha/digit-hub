@@ -3,6 +3,7 @@
  */
 import { LoggerService } from './logger.service'
 import { StorageService } from './storage.service'
+import { PSY_ORDER_CLAIM_URL } from './template.service'
 import { randomUUID } from 'crypto'
 
 const CFG_BASE = 'psyCloudBaseUrl'
@@ -420,6 +421,6 @@ export class PsyCloudService {
   }
 
   getOrderClaimUrl(): string {
-    return `${this.getBaseUrl()}/order-claim`
+    return PSY_ORDER_CLAIM_URL
   }
 }

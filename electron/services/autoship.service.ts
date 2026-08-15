@@ -1881,7 +1881,13 @@ export class AutoShipService {
           continue
         }
         linkUrl = url
-        sendContent = renderTemplate(binding?.deliver_content || '{卡密}', {
+        const msgs = buildMessages(
+          { deliver_type: 'link_card', deliver_content: '', msg_separator: binding?.msg_separator },
+          true
+        )
+        const rawPart =
+          (msgs && msgs[Math.max(0, Number(item.msg_index || 1) - 1)]?.rawContent) || '{卡密}'
+        sendContent = renderTemplate(rawPart, {
           orderId: item.order_id,
           card: url,
           productName: binding?.product_name || ''

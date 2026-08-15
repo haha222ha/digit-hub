@@ -15,6 +15,21 @@ export interface TemplateContext {
   uidLength?: number
 }
 
+/** 测评类商品写死的自助领链接（千帆发货栏 / IM 备用入口） */
+export const PSY_ORDER_CLAIM_URL = 'https://psy.xhs365.cn/order-claim'
+
+/**
+ * 测评链接卡（link_card）自动发货内容 — 写死三轮：
+ * 1) 专属测试链接 {卡密}
+ * 2) 自助领链接 order-claim
+ * 3) 引导去客服窗查看已发链接的说明
+ */
+export const LINK_CARD_FIXED_DELIVER_CONTENT = [
+  '{卡密}',
+  PSY_ORDER_CLAIM_URL,
+  '该链接需要输入您的订单号，上方链接提取繁琐，请直接进入店铺客服聊天窗口，客服已经把测试链接发给您了，方便您直接测试，聊天窗口位于商品页面左下角客服按钮，或订单详情下方的联系卖家 ，如果您已经在客服聊天窗口，可以直接往下查看测试链接'
+].join('\n\n')
+
 /** 随机短码（剔除易混淆字符 I/O/0/1） */
 export function genUid(len: number = 10): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -71,12 +86,13 @@ export function buildMessages(
   splitMulti: boolean = true
 ): { type: MessageType; rawContent: string }[] | null {
   const type = binding.deliver_type
-  let raw = binding.deliver_content || ''
+  // 测评类链接卡：发货内容写死（专属链接 + order-claim + 客服引导）
+  let raw =
+    type === 'link_card' ? LINK_CARD_FIXED_DELIVER_CONTENT : binding.deliver_content || ''
 
-  // 链接卡密：池里每条是完整 URL；未写模板时默认整条发链接
+  // 链接卡密兜底：确保含 {卡密}
   if (type === 'link_card') {
-    if (!raw.trim()) raw = '{卡密}'
-    else if (!needsCard(raw)) raw = raw.trim() + '\n{卡密}'
+    if (!needsCard(raw)) raw = raw.trim() + '\n\n{卡密}'
   }
 
   switch (type) {
