@@ -15,20 +15,14 @@ export interface TemplateContext {
   uidLength?: number
 }
 
-/** 测评类商品写死的自助领链接（千帆发货栏 / IM 备用入口） */
+/** 测评类商品写死的自助领链接（千帆发货栏用；IM 发码仍发专属 {卡密}） */
 export const PSY_ORDER_CLAIM_URL = 'https://psy.xhs365.cn/order-claim'
 
 /**
- * 测评链接卡（link_card）自动发货内容 — 写死三轮：
- * 1) 专属测试链接 {卡密}
- * 2) 自助领链接 order-claim
- * 3) 引导去客服窗查看已发链接的说明
+ * IM 自动发货默认内容：只发专属测试链接。
+ * 千帆上架栏的 order-claim + 说明在 ProductAnalyzer store_transfer 写死，勿与此处混淆。
  */
-export const LINK_CARD_FIXED_DELIVER_CONTENT = [
-  '{卡密}',
-  PSY_ORDER_CLAIM_URL,
-  '该链接需要输入您的订单号，上方链接提取繁琐，请直接进入店铺客服聊天窗口，客服已经把测试链接发给您了，方便您直接测试，聊天窗口位于商品页面左下角客服按钮，或订单详情下方的联系卖家 ，如果您已经在客服聊天窗口，可以直接往下查看测试链接'
-].join('\n\n')
+export const LINK_CARD_FIXED_DELIVER_CONTENT = '{卡密}'
 
 /** 随机短码（剔除易混淆字符 I/O/0/1） */
 export function genUid(len: number = 10): string {
