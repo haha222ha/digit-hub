@@ -214,9 +214,16 @@ export class InjectService {
     const script = this.injectedScripts.get(scriptName)
     if (!script || webContents.isDestroyed()) return false
     let ok = false
-    const frames = webContents.mainFrame?.framesInSubtree || [webContents.mainFrame]
+    // 主帧优先：轮询/发货都读 top window.__xhsAssistant；只注入 iframe 会导致「IMSend 未就绪」
+    try {
+      await webContents.executeJavaScript(script)
+      ok = true
+    } catch {
+      /* 主帧可能短暂不可执行，再试 subtree */
+    }
+    const frames = webContents.mainFrame?.framesInSubtree || []
     for (const frame of frames) {
-      if (!frame) continue
+      if (!frame || frame === webContents.mainFrame) continue
       try {
         await frame.executeJavaScript(script)
         ok = true
@@ -225,7 +232,7 @@ export class InjectService {
       }
     }
     if (ok) {
-      this.logger.info(`[Inject] 脚本注入成功: ${scriptName} frames=${frames.length}`)
+      this.logger.info(`[Inject] 脚本注入成功: ${scriptName} frames=${1 + frames.length}`)
     } else {
       this.logger.error(`[Inject] 脚本注入失败: ${scriptName}`)
     }

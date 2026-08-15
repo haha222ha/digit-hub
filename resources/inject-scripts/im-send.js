@@ -5,7 +5,8 @@
  * 暴露：window.__xhsAssistant.im
  */
 (function () {
-  var SCRIPT_VER = 'agiso-v4-deepRim'
+  // 版本变更强制重注；早退必须含 fetchPendingOrders，否则拉单永远「未就绪」
+  var SCRIPT_VER = 'order-poll-decouple-v1'
   var ZELDA_WS_URL = 'wss://zelda.xiaohongshu.com/websocketV2'
   var CHAT_SDK_VERSION = 'v0.0.5'
   var CANCEL_TOKEN = encodeURIComponent('{"promise":{}}')
@@ -17,7 +18,8 @@
     window.__xhsAssistant.im &&
     typeof window.__xhsAssistant.im.deliverByOrderSn === 'function' &&
     typeof window.__xhsAssistant.im.checkImHealth === 'function' &&
-    typeof window.__xhsAssistant.im.sendTextViaImpaasWs === 'function'
+    typeof window.__xhsAssistant.im.sendTextViaImpaasWs === 'function' &&
+    typeof window.__xhsAssistant.im.fetchPendingOrders === 'function'
   ) {
     return
   }

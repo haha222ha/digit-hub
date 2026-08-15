@@ -633,21 +633,7 @@ export class AutoShipService {
     const pollList = real.length > 0 ? real : [...shopIds]
     const seenOrderIds = new Set<string>()
     for (const shopId of pollList) {
-      const mon = this.monitorByShop.get(shopId) || (shopId === currentShopId() ? this.monitorWebContents : null)
-      const monUrl = mon && !mon.isDestroyed() ? mon.getURL() || '' : ''
-      // 登录页 / 加载中勿 ensureImSession，避免二次 loadURL 打断保活导航
-      const pageBusy =
-        !monUrl ||
-        monUrl === 'about:blank' ||
-        monUrl.includes('/login') ||
-        (!!mon && !mon.isDestroyed() && mon.isLoading())
-      const hasSession =
-        !!this.storage.getShopCookies(shopId) ||
-        this.imByShop.has(shopId) ||
-        this.monitorByShop.has(shopId)
-      if (hasSession && this.ensureImSession && !pageBusy) {
-        await this.ensureImSession(shopId).catch(() => false)
-      }
+      // 拉单与发 IM 解耦：轮询阶段不要 ensureImSession（会卡 XhsRim 数十秒导致整轮跳过）
       await this.pollOrdersForShop(shopId, seenOrderIds)
     }
   }
@@ -665,23 +651,31 @@ export class AutoShipService {
     }
 
     try {
-      // 页面可能被导航冲掉脚本，每次轮询确保注入
+      // 页面可能被导航冲掉脚本，每次轮询确保注入（拉单只需 fetchPendingOrders，不依赖 XhsRim）
       if (this.injectService) {
         await this.injectService.injectScriptAsync(wc, 'im-send').catch(() => false)
       }
 
-      const shipWc = this.getShipWc(shopId)
-      if (shipWc && !shipWc.isDestroyed()) {
-        await this.runImHealthCheck(shopId, shipWc)
-      }
+      const readyCheck = async () =>
+        !!(await wc
+          .executeJavaScript(
+            `!!(window.__xhsAssistant && window.__xhsAssistant.im && window.__xhsAssistant.im.fetchPendingOrders)`
+          )
+          .catch(() => false))
 
-      const ready = await wc
-        .executeJavaScript(
-          `!!(window.__xhsAssistant && window.__xhsAssistant.im && window.__xhsAssistant.im.fetchPendingOrders)`
-        )
-        .catch(() => false)
+      let ready = await readyCheck()
       if (!ready) {
-        this.logger.warn(`[AutoShip] 轮询跳过：IMSend 未就绪 shop=${shopId}`)
+        // 再注一次并短等，避免偶发时序导致整轮跳过、新订单永远进不了台账
+        if (this.injectService) {
+          await this.injectService.injectScriptAsync(wc, 'im-send').catch(() => false)
+        }
+        await new Promise((r) => setTimeout(r, 400))
+        ready = await readyCheck()
+      }
+      if (!ready) {
+        this.logger.warn(
+          `[AutoShip] 轮询跳过：拉单脚本未就绪 shop=${shopId} url=${url.slice(0, 90)}（不影响下次；发码另走 IM 窗）`
+        )
         return
       }
 
