@@ -159,6 +159,12 @@ class ShipOrdersSyncBody(BaseModel):
     orders: list[dict] | None = None
 
 
+class ShipSnapshotBody(BaseModel):
+    snapshot: dict | None = None
+    device_label: str | None = None
+    deviceLabel: str | None = None
+
+
 class ShipAllocateBody(BaseModel):
     orderId: str = ""
     order_id: str = ""
@@ -786,20 +792,50 @@ def compat_ship_orders_sync(body: ShipOrdersSyncBody, request: Request):
         return JSONResponse(_fail(str(e)), status_code=200)
 
 
+@compat_router.post("/api/ship/snapshot/push")
+def compat_ship_snapshot_push(body: ShipSnapshotBody, request: Request):
+    """发货助手整机快照上传（换机用；不含 cookie）"""
+    user = _dist_token(request)
+    label = _pick_code(body.device_label, body.deviceLabel) or "default"
+    try:
+        out = dist_db.save_ship_snapshot(user["id"], label, body.snapshot or {})
+        return _ok(out, "快照已上传")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@compat_router.get("/api/ship/snapshot/pull")
+def compat_ship_snapshot_pull(request: Request, device_label: str = "default"):
+    """发货助手整机快照下载"""
+    user = _dist_token(request)
+    try:
+        out = dist_db.load_ship_snapshot(user["id"], device_label or "default")
+        if not out:
+            return JSONResponse(_fail("云端暂无快照"), status_code=200)
+        return _ok(out, "ok")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
 @compat_router.post("/api/ship/allocate")
 def compat_ship_allocate(body: ShipAllocateBody, request: Request):
     user = _dist_token(request)
     oid = _pick_code(body.orderId, body.order_id)
     pid = _pick_code(body.productId, body.product_id)
     try:
-        out = dist_db.allocate_link_for_order(
+        out = svc.allocate_for_order_with_autotopup(
             user["id"],
             oid,
             channel="im",
             require_seen=False,
             product_id=pid,
         )
-        msg = "已分配测评链接" if not out.get("already") else "订单已有测评链接"
+        if out.get("auto_generated"):
+            msg = f"已自动补货 {out.get('auto_generated_count') or 0} 条并分配测评链接"
+        elif out.get("already"):
+            msg = "订单已有测评链接"
+        else:
+            msg = "已分配测评链接"
         return _ok(out, msg)
     except ValueError as e:
         return JSONResponse(_fail(str(e)), status_code=200)
@@ -807,11 +843,28 @@ def compat_ship_allocate(body: ShipAllocateBody, request: Request):
 
 @compat_router.post("/api/order-claim")
 def compat_order_claim(body: OrderClaimBody):
-    """公开：买家凭订单号领取测评链接（无需登录）。"""
+    """公开：买家凭订单号领取测评链接（无需登录）。库存不足时同样自动补货。"""
     oid = _pick_code(body.orderId, body.order_id)
     try:
-        out = dist_db.order_claim_public(oid)
-        msg = "领取成功" if not out.get("already") else "该订单已领取过，以下为原链接"
+        seen = dist_db._get_seen_order(oid)  # noqa: SLF001
+        if not seen:
+            raise ValueError("订单未同步，请稍后再试或联系客服")
+        uid = int(seen.get("user_id") or 0)
+        if uid <= 0:
+            raise ValueError("订单未同步，请稍后再试或联系客服")
+        out = svc.allocate_for_order_with_autotopup(
+            uid,
+            oid,
+            channel="self_serve",
+            require_seen=True,
+            product_id=str(seen.get("product_id") or ""),
+        )
+        if out.get("already"):
+            msg = "该订单已领取过，以下为原链接"
+        elif out.get("auto_generated"):
+            msg = "领取成功（已自动补货）"
+        else:
+            msg = "领取成功"
         return _ok(out, msg)
     except ValueError as e:
         return JSONResponse(_fail(str(e)), status_code=200)

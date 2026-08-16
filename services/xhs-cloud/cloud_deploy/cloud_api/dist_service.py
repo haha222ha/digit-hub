@@ -12,6 +12,10 @@ from cloud_deploy.cloud_api import dist_db
 
 _DEFAULT_QUOTA = int(os.environ.get("XHS_DIST_DEFAULT_QUOTA", "5"))
 _LINK_MAX_USES = int(os.environ.get("XHS_DIST_LINK_MAX_USES", "3"))
+# allocate 库存不足时自动生成条数（与发货助手默认补货一致，单次上限 50）
+_ALLOCATE_AUTOTOPUP_COUNT = max(
+    1, min(int(os.environ.get("XHS_DIST_ALLOCATE_AUTOTOPUP", "50")), 50)
+)
 
 
 def _resolve_catalog_path() -> Path:
@@ -175,6 +179,67 @@ def generate_links(user_id: int, test_code: str, count: int) -> dict:
         raise ValueError("测试项目不存在")
     links = dist_db.generate_links(user_id, test_code, count, max_uses=_LINK_MAX_USES)
     return {"links": links, "generatedCount": len(links)}
+
+
+def _resolve_test_code_for_allocate(user_id: int, order_id: str, product_id: str = "") -> str:
+    """从绑定/已见订单解析测题代码，供 allocate 自愈补货使用。"""
+    pid = (product_id or "").strip()
+    if not pid:
+        seen = dist_db._get_seen_order(order_id)  # noqa: SLF001 — 同包内部
+        if seen:
+            pid = str(seen.get("product_id") or "").strip()
+    if not pid:
+        return ""
+    binding = dist_db._get_binding(int(user_id), pid)  # noqa: SLF001
+    if not binding:
+        return ""
+    return str(binding.get("test_code") or "").strip()
+
+
+def allocate_for_order_with_autotopup(
+    user_id: int,
+    order_id: str,
+    *,
+    channel: str = "im",
+    require_seen: bool = False,
+    product_id: str = "",
+) -> dict:
+    """IM/发货助手 allocate：库存不足时自动 generate（扣额度）再分配一次。
+
+    环境变量 XHS_DIST_ALLOCATE_AUTOTOPUP 控制补货条数（默认 50，上限 50）。
+    额度不足时仍抛出原错误语义（带额度提示）。
+    """
+    try:
+        return dist_db.allocate_link_for_order(
+            user_id,
+            order_id,
+            channel=channel,
+            require_seen=require_seen,
+            product_id=product_id,
+        )
+    except ValueError as e:
+        msg = str(e or "")
+        if "库存不足" not in msg:
+            raise
+        tc = _resolve_test_code_for_allocate(user_id, order_id, product_id)
+        if not tc:
+            raise
+        dist = dist_db.ensure_distributor(int(user_id))
+        rem = int(dist.get("remaining_quota") or 0)
+        if rem <= 0:
+            raise ValueError(f"测评链接库存不足，且账户额度不足（剩余 0），请先兑换额度") from e
+        n = min(_ALLOCATE_AUTOTOPUP_COUNT, rem)
+        gen = generate_links(int(user_id), tc, n)
+        out = dist_db.allocate_link_for_order(
+            user_id,
+            order_id,
+            channel=channel,
+            require_seen=require_seen,
+            product_id=product_id,
+        )
+        out["auto_generated"] = True
+        out["auto_generated_count"] = int(gen.get("generatedCount") or n)
+        return out
 
 
 def plan_fill_missing_links(
