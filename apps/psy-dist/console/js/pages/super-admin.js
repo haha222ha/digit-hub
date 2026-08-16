@@ -604,9 +604,9 @@ export async function renderSaRedeem(root) {
   const count = el("input", { type: "number", value: "5", min: "1", max: "200" });
   const sku = el("select");
   sku.append(
-    el("option", { value: "quota_100", text: "100 额度" }),
+    el("option", { value: "quota_100000", text: "10万额度（100000）", selected: "true" }),
     el("option", { value: "quota_500", text: "500 额度" }),
-    el("option", { value: "quota_100000", text: "100000 额度" })
+    el("option", { value: "quota_100", text: "100 额度" })
   );
   const note = el("input", { placeholder: "备注（可选）" });
   const genOut = el("div");
