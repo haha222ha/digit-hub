@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """从热库全量增量生成心象测超管「测评选品报告」精简快照。
 
-默认扫热库内所有带 advice_data.js 的日期，聚合成跨日联动观测报告。
-也可单日：python tools/build_psy_selection_intel.py --day 0816
+默认扫热库内所有 全量MMDD：优先 advice_data.js，否则从 data.js（columns+行）提取。
+覆盖 6/7 月仅有 data.js 的日期，与 8 月 advice 日一并做跨日联动观测。
 
 用法:
   python tools/build_psy_selection_intel.py              # 全库多日（默认）
   python tools/build_psy_selection_intel.py --scope all
-  python tools/build_psy_selection_intel.py --day 0816   # 仅单日
+  python tools/build_psy_selection_intel.py --day 0616   # 仅单日（data.js 也可）
 """
 from __future__ import annotations
 
@@ -122,15 +122,22 @@ def _report_date_from_dir(day_dir: Path) -> str:
     return f"{year}-{mmdd[:2]}-{mmdd[2:]}"
 
 
-def _list_advice_days() -> list[Path]:
+def _list_report_days() -> list[Path]:
+    """所有可分析日：有 advice_data.js 或 data.js。"""
     if not HOTLIB_ROOT.is_dir():
         raise SystemExit(f"找不到热库目录: {HOTLIB_ROOT}")
-    days = [
-        p
-        for p in HOTLIB_ROOT.iterdir()
-        if p.is_dir() and p.name.startswith("全量") and (p / "advice_data.js").is_file()
-    ]
+    days = []
+    for p in HOTLIB_ROOT.iterdir():
+        if not (p.is_dir() and p.name.startswith("全量")):
+            continue
+        if (p / "advice_data.js").is_file() or (p / "data.js").is_file():
+            days.append(p)
     return sorted(days, key=lambda p: p.name)
+
+
+def _list_advice_days() -> list[Path]:
+    """兼容旧名：等同全库可分析日。"""
+    return _list_report_days()
 
 
 def _find_day_dir(day: str | None) -> Path:
@@ -139,22 +146,137 @@ def _find_day_dir(day: str | None) -> Path:
         cand = HOTLIB_ROOT / f"全量{day}"
         if not cand.is_dir():
             raise SystemExit(f"找不到日目录: {cand}")
-        if not (cand / "advice_data.js").is_file():
-            raise SystemExit(f"该日缺少 advice_data.js: {cand}")
+        if not ((cand / "advice_data.js").is_file() or (cand / "data.js").is_file()):
+            raise SystemExit(f"该日缺少 advice_data.js / data.js: {cand}")
         return cand
-    days = _list_advice_days()
+    days = _list_report_days()
     if not days:
-        raise SystemExit("热库下没有带 advice_data.js 的 全量MMDD 目录")
+        raise SystemExit("热库下没有带 advice_data.js / data.js 的 全量MMDD 目录")
     return days[-1]
 
 
-def _load_advice(day_dir: Path) -> dict:
-    path = day_dir / "advice_data.js"
+def _parse_js_object(path: Path) -> dict:
     text = path.read_text(encoding="utf-8", errors="replace")
     i = text.find("{")
     if i < 0:
-        raise SystemExit(f"advice_data.js 无法解析: {path}")
+        raise SystemExit(f"无法解析 JS 对象: {path}")
     return json.loads(text[i:].rstrip().rstrip(";"))
+
+
+def _load_advice(day_dir: Path) -> dict:
+    return _parse_js_object(day_dir / "advice_data.js")
+
+
+def _normalize_data_row(cols: list[str], row: list) -> dict:
+    """把 data.js 的 columns+数组行，收成与 advice items 相近的 dict。"""
+    raw: dict = {}
+    for i, col in enumerate(cols):
+        if i < len(row):
+            raw[str(col)] = row[i]
+    title = str(raw.get("title") or "")
+    gid = str(raw.get("goods_id") or "")
+    # 增量：新版有 delta；6月部分只有 actual_v1d / v1d
+    delta = raw.get("delta")
+    if delta is None:
+        delta = raw.get("delta_24h")
+    if delta is None:
+        delta = raw.get("actual_v1d")
+    if delta is None:
+        delta = raw.get("v1d")
+    try:
+        delta_f = float(delta or 0)
+    except (TypeError, ValueError):
+        delta_f = 0.0
+    price = raw.get("price")
+    try:
+        price_f = float(price) if price is not None and price != "" else None
+    except (TypeError, ValueError):
+        price_f = None
+    pool = str(raw.get("pool") or "").strip()
+    return {
+        "goods_id": gid,
+        "title": title,
+        "price": price_f,
+        "sold": raw.get("sold"),
+        "delta": delta_f,
+        "sold_delta": delta_f,
+        "actual_gr": raw.get("actual_gr") or raw.get("gr") or 0,
+        "gr": raw.get("actual_gr") or raw.get("gr") or 0,
+        "pool": pool,
+        "keyword": raw.get("keyword"),
+        "advice_score": None,
+        "is_virtual": raw.get("is_virtual"),
+        "_source": "data.js",
+    }
+
+
+def _load_data_as_advice_shape(day_dir: Path) -> dict:
+    obj = _parse_js_object(day_dir / "data.js")
+    cols = obj.get("columns") or []
+    raw_items = obj.get("items") or []
+    if not isinstance(cols, list) or not cols:
+        raise SystemExit(f"data.js 缺少 columns: {day_dir}")
+    items: list[dict] = []
+    for row in raw_items:
+        if isinstance(row, dict):
+            # 少数可能已是 dict
+            title = str(row.get("title") or "")
+            if not title:
+                continue
+            delta = row.get("delta")
+            if delta is None:
+                delta = row.get("actual_v1d") or row.get("v1d") or 0
+            try:
+                delta_f = float(delta or 0)
+            except (TypeError, ValueError):
+                delta_f = 0.0
+            items.append(
+                {
+                    "goods_id": str(row.get("goods_id") or ""),
+                    "title": title,
+                    "price": row.get("price"),
+                    "sold": row.get("sold"),
+                    "delta": delta_f,
+                    "sold_delta": delta_f,
+                    "actual_gr": row.get("actual_gr") or 0,
+                    "gr": row.get("actual_gr") or 0,
+                    "pool": str(row.get("pool") or ""),
+                    "keyword": row.get("keyword"),
+                    "advice_score": None,
+                    "_source": "data.js",
+                }
+            )
+            continue
+        if not isinstance(row, (list, tuple)):
+            continue
+        it = _normalize_data_row([str(c) for c in cols], list(row))
+        if it.get("title"):
+            items.append(it)
+    meta = obj.get("meta") or {}
+    return {
+        "meta": {
+            **meta,
+            "total": int(meta.get("count") or meta.get("total_goods") or len(items)),
+            "source_kind": "data.js",
+        },
+        "items": items,
+        "buckets": {},  # data.js 无 advice 桶；紧急度用 pool 字段兜底
+    }
+
+
+def _load_day_payload(day_dir: Path) -> dict:
+    """优先 advice_data.js；否则整理 data.js 全量提取。"""
+    adv_path = day_dir / "advice_data.js"
+    data_path = day_dir / "data.js"
+    if adv_path.is_file():
+        adv = _load_advice(day_dir)
+        meta = dict(adv.get("meta") or {})
+        meta["source_kind"] = "advice_data.js"
+        adv["meta"] = meta
+        return adv
+    if data_path.is_file():
+        return _load_data_as_advice_shape(day_dir)
+    raise SystemExit(f"缺少 advice_data.js / data.js: {day_dir}")
 
 
 def _psy_codes() -> set[str]:
@@ -353,9 +475,10 @@ def _discover_themes(
 def _analyze_day(day_dir: Path, psy: set[str], catalog: dict[str, str]) -> dict:
     """单日分析，返回日摘要 + 主题列表 + top 明细。"""
     day = _day_key(day_dir)
-    adv = _load_advice(day_dir)
+    adv = _load_day_payload(day_dir)
     items = adv.get("items") or []
     buckets = adv.get("buckets") or {}
+    source_kind = str((adv.get("meta") or {}).get("source_kind") or "unknown")
     gid_buckets: dict[str, set[str]] = defaultdict(set)
     for bname, ids in buckets.items():
         for gid in ids or []:
@@ -447,6 +570,7 @@ def _analyze_day(day_dir: Path, psy: set[str], catalog: dict[str, str]) -> dict:
         "report_date": _report_date_from_dir(day_dir),
         "source_name": day_dir.name,
         "source_dir": str(day_dir),
+        "source_kind": source_kind,
         "advice_total": int((adv.get("meta") or {}).get("total") or len(items)),
         "assess_gate_count": len(assess_pool) + noise_count,
         "noise_filtered": noise_count,
@@ -729,16 +853,21 @@ def _short_card(t: dict) -> dict:
 
 
 def build_all() -> dict:
-    days = _list_advice_days()
+    days = _list_report_days()
     if not days:
-        raise SystemExit("没有可分析的 advice 日目录")
+        raise SystemExit("没有可分析的 全量MMDD（advice_data.js / data.js）")
     psy = _psy_codes()
     catalog = _catalog_name_map()
 
     day_results: list[dict] = []
     for day_dir in days:
-        print(f"... analyzing {day_dir.name}")
-        day_results.append(_analyze_day(day_dir, psy, catalog))
+        one = _analyze_day(day_dir, psy, catalog)
+        print(
+            f"... {day_dir.name} kind={one.get('source_kind')} "
+            f"assess={one['assess_hit_count']} active={one['active_theme_count']}",
+            flush=True,
+        )
+        day_results.append(one)
 
     themes, discovered = _aggregate_themes(day_results, psy)
     latest = day_results[-1]
@@ -770,6 +899,7 @@ def build_all() -> dict:
                 "day": d["day"],
                 "report_date": d["report_date"],
                 "source_name": d["source_name"],
+                "source_kind": d.get("source_kind") or "",
                 "advice_total": d["advice_total"],
                 "assess_hit_count": d["assess_hit_count"],
                 "noise_filtered": d["noise_filtered"],
@@ -835,7 +965,9 @@ def build_all() -> dict:
             "theme_count": len(themes),
             "active_theme_count": len(active),
             "schema_version": 3,
-            "note": "仅含带 advice_data.js 的日期；更早仅有 data.js 的日报未纳入紧急度桶",
+            "advice_day_count": sum(1 for d in day_results if d.get("source_kind") == "advice_data.js"),
+            "datajs_day_count": sum(1 for d in day_results if d.get("source_kind") == "data.js"),
+            "note": "全库：有 advice 用紧急度桶；6/7月等仅 data.js 的日期按 columns 提取，pool 字段兜底分桶",
         },
         "daily_digest": daily_digest,
         "action_tiers": {

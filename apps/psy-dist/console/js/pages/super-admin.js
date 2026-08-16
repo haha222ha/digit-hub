@@ -717,9 +717,9 @@ export async function renderSaSelectionReports(root) {
                 el("button", {
                   className: "btn" + (pickDay === d.day ? " btn-primary" : ""),
                   type: "button",
-                  text: `${d.day}·${d.assess_hit_count ?? 0}`,
+                  text: `${d.day}·${d.assess_hit_count ?? 0}${String(d.source_kind||'').includes('data') ? '·D' : ''}`,
                   style: "width:auto",
-                  title: `${d.report_date || ""} 活跃主题 ${d.active_theme_count ?? 0}`,
+                  title: `${d.report_date || ""} 活跃主题 ${d.active_theme_count ?? 0} · 源 ${d.source_kind || ""}`,
                   onClick: () => setDay(d.day),
                 })
               ),
@@ -947,7 +947,7 @@ export async function renderSaSelectionReports(root) {
       el("h1", { className: "page-title", text: "测评选品报告" }),
       el("p", {
         className: "page-lead",
-        text: "热库全量多日联动观测 · 日期轴 × 主题趋势 × 明细钻取 · 仅超管",
+        text: "热库全量多日联动（含6/7月 data.js）· 日期轴 × 主题趋势 · 仅超管",
       }),
       errHost,
       el("div", { className: "filter-bar" }, [
