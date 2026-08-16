@@ -3,10 +3,355 @@
     "report_date": "2026-08-16",
     "source_dir": "D:\\选品报告\\热库全量增量\\全量0816",
     "source_name": "全量0816",
-    "generated_at": "2026-08-16T15:23:13.019238+00:00",
+    "generated_at": "2026-08-16T15:38:57.770439+00:00",
     "advice_total": 27432,
-    "assess_hit_count": 227,
-    "theme_count": 24
+    "assess_gate_count": 1133,
+    "noise_filtered": 393,
+    "assess_hit_count": 740,
+    "curated_assigned": 329,
+    "discovered_theme_count": 8,
+    "uncategorized_count": 60,
+    "theme_count": 39,
+    "active_theme_count": 30,
+    "schema_version": 2
+  },
+  "action_tiers": {
+    "high": [
+      {
+        "name": "原生家庭",
+        "psy_code": "ysjt",
+        "urgency_score": 316.3,
+        "hit_count": 8,
+        "sum_delta": 121.0,
+        "avg_price": 13.05,
+        "max_delta": 73.0,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥39–99",
+        "premium_fit": "high"
+      },
+      {
+        "name": "该不该复合",
+        "psy_code": "gbfh",
+        "urgency_score": 145.3,
+        "hit_count": 11,
+        "sum_delta": 31.0,
+        "avg_price": 4.45,
+        "max_delta": 8.0,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥39–79",
+        "premium_fit": "high"
+      },
+      {
+        "name": "恋爱人格/恋爱脑/心软",
+        "psy_code": "lxrx",
+        "urgency_score": 116.9,
+        "hit_count": 6,
+        "sum_delta": 22.0,
+        "avg_price": 50.14,
+        "max_delta": 10.0,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥39–99",
+        "premium_fit": "high"
+      },
+      {
+        "name": "精神内耗/职场内耗",
+        "psy_code": "ydnh",
+        "urgency_score": 102.3,
+        "hit_count": 6,
+        "sum_delta": 102.0,
+        "avg_price": 29.12,
+        "max_delta": 61.0,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥39–79",
+        "premium_fit": "high"
+      },
+      {
+        "name": "依恋类型",
+        "psy_code": "yllx",
+        "urgency_score": 92.3,
+        "hit_count": 8,
+        "sum_delta": 27.0,
+        "avg_price": 1.55,
+        "max_delta": 10.0,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥49–99",
+        "premium_fit": "high"
+      },
+      {
+        "name": "暗恋指数",
+        "psy_code": "taxh",
+        "urgency_score": 82.4,
+        "hit_count": 4,
+        "sum_delta": 68.0,
+        "avg_price": 1.74,
+        "max_delta": 51.0,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥39–79",
+        "premium_fit": "high"
+      },
+      {
+        "name": "暧昧段位/暧昧拉扯",
+        "psy_code": "amdw",
+        "urgency_score": 67.2,
+        "hit_count": 2,
+        "sum_delta": 52.0,
+        "avg_price": 12.69,
+        "max_delta": 51.0,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥39–99",
+        "premium_fit": "high"
+      }
+    ],
+    "mid": [
+      {
+        "name": "MBTI十六型人格",
+        "psy_code": "mbti",
+        "urgency_score": 555.9,
+        "hit_count": 71,
+        "sum_delta": 793.0,
+        "avg_price": 13.48,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥29–59",
+        "premium_fit": "mid"
+      },
+      {
+        "name": "七宗罪/危险人格",
+        "psy_code": "7v7",
+        "urgency_score": 419.4,
+        "hit_count": 34,
+        "sum_delta": 1622.0,
+        "avg_price": 13.53,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥29–59",
+        "premium_fit": "mid"
+      },
+      {
+        "name": "性格城市匹配",
+        "psy_code": "cmt",
+        "urgency_score": 395.2,
+        "hit_count": 18,
+        "sum_delta": 790.0,
+        "avg_price": 1.95,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥19–49",
+        "premium_fit": "mid"
+      },
+      {
+        "name": "人格阴影/腹黑",
+        "psy_code": "amt",
+        "urgency_score": 351.2,
+        "hit_count": 9,
+        "sum_delta": 428.0,
+        "avg_price": 1.91,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥29–59",
+        "premium_fit": "mid"
+      },
+      {
+        "name": "天赋/职业测评",
+        "psy_code": "apt",
+        "urgency_score": 349.0,
+        "hit_count": 15,
+        "sum_delta": 1080.0,
+        "avg_price": 8.76,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥29–59",
+        "premium_fit": "mid"
+      },
+      {
+        "name": "心理年龄",
+        "psy_code": "xlnl2",
+        "urgency_score": 273.2,
+        "hit_count": 17,
+        "sum_delta": 181.0,
+        "avg_price": 1.73,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥29–59",
+        "premium_fit": "mid"
+      },
+      {
+        "name": "高敏感",
+        "psy_code": "gmgt",
+        "urgency_score": 149.4,
+        "hit_count": 14,
+        "sum_delta": 20.0,
+        "avg_price": 316.83,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥29–59",
+        "premium_fit": "mid"
+      },
+      {
+        "name": "黑暗三角人格",
+        "psy_code": "dt",
+        "urgency_score": 106.3,
+        "hit_count": 6,
+        "sum_delta": 58.0,
+        "avg_price": 1.47,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥29–59",
+        "premium_fit": "mid"
+      },
+      {
+        "name": "新16人格/心智阶位",
+        "psy_code": "16rg2",
+        "urgency_score": 77.4,
+        "hit_count": 4,
+        "sum_delta": 23.0,
+        "avg_price": 2.93,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥29–59",
+        "premium_fit": "mid"
+      },
+      {
+        "name": "松弛感",
+        "psy_code": "scgz",
+        "urgency_score": 76.2,
+        "hit_count": 5,
+        "sum_delta": 64.0,
+        "avg_price": 93.5,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥29–59",
+        "premium_fit": "mid"
+      },
+      {
+        "name": "工作性价比/这b班",
+        "psy_code": "wjt",
+        "urgency_score": 62.5,
+        "hit_count": 1,
+        "sum_delta": 27.0,
+        "avg_price": 2.0,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥19–49",
+        "premium_fit": "mid"
+      },
+      {
+        "name": "考研/读博适配",
+        "psy_code": "phd",
+        "urgency_score": 60.6,
+        "hit_count": 2,
+        "sum_delta": 116.0,
+        "avg_price": 3.5,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥29–59",
+        "premium_fit": "mid"
+      }
+    ],
+    "avoid": [
+      {
+        "name": "SCL-90完整90题",
+        "hit_count": 41,
+        "sum_delta": 714.0,
+        "urgency_score": 268.1,
+        "suggest_price_band": "仅文字·合规包装",
+        "premium_fit": "avoid"
+      },
+      {
+        "name": "抑郁焦虑筛查包装",
+        "hit_count": 27,
+        "sum_delta": 373.0,
+        "urgency_score": 181.0,
+        "suggest_price_band": "不做视频旗舰",
+        "premium_fit": "avoid"
+      },
+      {
+        "name": "童年创伤",
+        "hit_count": 1,
+        "sum_delta": 5.0,
+        "urgency_score": 15.6,
+        "suggest_price_band": "合规包装·慎做旗舰",
+        "premium_fit": "avoid"
+      }
+    ],
+    "discover": [
+      {
+        "name": "发现·趣味测试",
+        "urgency_score": 206.0,
+        "hit_count": 9,
+        "sum_delta": 443.0,
+        "avg_price": 2.65,
+        "has_psy_pack": false,
+        "psy_code": "",
+        "suggest_price_band": "¥1.99–9.9 趣味",
+        "premium_fit": "low"
+      },
+      {
+        "name": "发现·社会化程度匹配趣味测试",
+        "urgency_score": 73.1,
+        "hit_count": 2,
+        "sum_delta": 159.0,
+        "avg_price": 2.99,
+        "has_psy_pack": false,
+        "psy_code": "",
+        "suggest_price_band": "¥1.99–9.9 趣味",
+        "premium_fit": "low"
+      },
+      {
+        "name": "发现·自测人格",
+        "urgency_score": 51.4,
+        "hit_count": 3,
+        "sum_delta": 16.0,
+        "avg_price": 2.93,
+        "has_psy_pack": false,
+        "psy_code": "",
+        "suggest_price_band": "¥1.99–9.9 趣味",
+        "premium_fit": "low"
+      },
+      {
+        "name": "发现·你的水果塑人格",
+        "urgency_score": 29.2,
+        "hit_count": 2,
+        "sum_delta": 2.0,
+        "avg_price": 3.99,
+        "has_psy_pack": false,
+        "psy_code": "",
+        "suggest_price_band": "¥1.99–9.9 趣味",
+        "premium_fit": "low"
+      },
+      {
+        "name": "发现·人格优缺点测评",
+        "urgency_score": 20.5,
+        "hit_count": 2,
+        "sum_delta": 36.0,
+        "avg_price": 0.99,
+        "has_psy_pack": false,
+        "psy_code": "",
+        "suggest_price_band": "¥1.99–9.9 趣味",
+        "premium_fit": "low"
+      },
+      {
+        "name": "发现·十六人格",
+        "urgency_score": 16.1,
+        "hit_count": 3,
+        "sum_delta": 4.0,
+        "avg_price": 14.66,
+        "has_psy_pack": false,
+        "psy_code": "",
+        "suggest_price_band": "待评估·先观察",
+        "premium_fit": "mid"
+      },
+      {
+        "name": "发现·丨趣味性格测试",
+        "urgency_score": 13.5,
+        "hit_count": 2,
+        "sum_delta": 6.0,
+        "avg_price": 0.9,
+        "has_psy_pack": false,
+        "psy_code": "",
+        "suggest_price_band": "¥1.99–9.9 趣味",
+        "premium_fit": "low"
+      },
+      {
+        "name": "发现·职业能力倾向测验",
+        "urgency_score": 12.3,
+        "hit_count": 2,
+        "sum_delta": 2.0,
+        "avg_price": 6.55,
+        "has_psy_pack": false,
+        "psy_code": "",
+        "suggest_price_band": "待评估·先观察",
+        "premium_fit": "mid"
+      }
+    ]
   },
   "themes": [
     {
@@ -16,86 +361,64 @@
         "16人格",
         "16型人格",
         "十六型",
-        "mbti"
+        "mbti",
+        "MBT测试"
       ],
       "psy_code": "mbti",
       "hit_count": 71,
-      "sum_delta": 751.0,
-      "avg_price": 13.4,
+      "sum_delta": 793.0,
+      "avg_price": 13.48,
       "max_delta": 159.0,
       "buckets": {
+        "climb": 1,
         "streak5": 7,
-        "watch": 64
+        "watch": 63
       },
-      "urgency_score": 433.1,
+      "urgency_score": 555.9,
       "has_psy_pack": true,
       "premium_fit": "mid",
       "suggest_price_band": "¥29–59",
+      "source": "curated",
       "top": [
+        {
+          "goods_id": "6a5977a21a0aff0001bbf351",
+          "title": "全新独特版MBT测试|60道题目|32种独特结果|趣味自测人格网页模板",
+          "price": 6.99,
+          "delta": 56.0,
+          "pool": "WATCH",
+          "bucket": "climb"
+        },
         {
           "goods_id": "6a6ad70089d8ff0001b3a931",
           "title": "MBTI理想型测试丨可重",
           "price": 1.99,
-          "sold": 1932,
           "delta": 159.0,
-          "gr": 8.97,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 69.3,
-          "theme": "MBTI十六型人格"
+          "bucket": "streak5"
         },
         {
           "goods_id": "6a55bed05705e10001a9d059",
           "title": "MBTI16人格测试最新版",
           "price": 1.98,
-          "sold": 960,
           "delta": 77.0,
-          "gr": 8.72,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 64.1,
-          "theme": "MBTI十六型人格"
+          "bucket": "streak5"
         },
         {
           "goods_id": "6a4255e7654b390001f6ae4d",
           "title": "MBTI 16人格/正版电子资料｜模板/自动发货",
           "price": 0.99,
-          "sold": 2015,
           "delta": 76.0,
-          "gr": 3.92,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 64.5,
-          "theme": "MBTI十六型人格"
+          "bucket": "streak5"
         },
         {
           "goods_id": "6a4bcb36a9e8d300012d1ea3",
           "title": "【原创】MBTI人格 欺诈测试 | MBTI趣味测试网页模板",
           "price": 1.98,
-          "sold": 1041,
           "delta": 49.0,
-          "gr": 4.94,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 67.6,
-          "theme": "MBTI十六型人格"
-        },
-        {
-          "goods_id": "6a55abb2884646000187ecc0",
-          "title": "MBTI 16人格测试 · 拍下即测 · 可重复测试 · 可分享给朋友",
-          "price": 1.99,
-          "sold": 984,
-          "delta": 41.0,
-          "gr": 4.35,
-          "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 50.3,
-          "theme": "MBTI十六型人格"
+          "bucket": "streak5"
         }
       ]
     },
@@ -104,86 +427,261 @@
       "keywords": [
         "七宗罪",
         "危险人格",
-        "七美德"
+        "七美德",
+        "暗面人格"
       ],
-      "psy_code": "",
-      "hit_count": 35,
-      "sum_delta": 1627.0,
-      "avg_price": 13.17,
+      "psy_code": "7v7",
+      "hit_count": 34,
+      "sum_delta": 1622.0,
+      "avg_price": 13.53,
       "max_delta": 799.0,
       "buckets": {
         "streak7": 1,
-        "watch": 34
+        "watch": 33
       },
-      "urgency_score": 394.7,
-      "has_psy_pack": false,
+      "urgency_score": 419.4,
+      "has_psy_pack": true,
       "premium_fit": "mid",
       "suggest_price_band": "¥29–59",
+      "source": "curated",
       "top": [
         {
           "goods_id": "6a4cbee841bd0a000166922e",
           "title": "【原创】测测你的危险人格类型丨趣味性格测试网页模板",
           "price": 0.9,
-          "sold": 6893,
           "delta": 175.0,
-          "gr": 2.6,
           "pool": "WATCH",
-          "bucket": "streak7",
-          "bw": 42,
-          "advice_score": 62.2,
-          "theme": "七宗罪/危险人格"
+          "bucket": "streak7"
         },
         {
           "goods_id": "6a6ae1616cbefa0001251a4f",
           "title": "七宗罪分布测试(全新) +七美德测试（全新）",
           "price": 0.99,
-          "sold": 9524,
           "delta": 799.0,
-          "gr": 9.16,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 46.5,
-          "theme": "七宗罪/危险人格"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a6eb4e42bf2dc0001137d39",
           "title": "七宗罪分布测试(全新)",
           "price": 0.9,
-          "sold": 872,
           "delta": 383.0,
-          "gr": 78.32,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 60.6,
-          "theme": "七宗罪/危险人格"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a7858b42f88c60001cbeae8",
           "title": "七宗罪七美德测试（全新）",
           "price": 1.68,
-          "sold": 776,
           "delta": 63.0,
-          "gr": 8.84,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 44.8,
-          "theme": "七宗罪/危险人格"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a73542abfe8a50001b33d0a",
           "title": "七宗罪七美德性格测试 | 含多维解析报告",
           "price": 0.99,
-          "sold": 889,
           "delta": 49.0,
-          "gr": 5.83,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 42.0,
-          "theme": "七宗罪/危险人格"
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "性格城市匹配",
+      "keywords": [
+        "性格城市",
+        "城市匹配",
+        "天选之城",
+        "五行城市"
+      ],
+      "psy_code": "cmt",
+      "hit_count": 18,
+      "sum_delta": 790.0,
+      "avg_price": 1.95,
+      "max_delta": 583.0,
+      "buckets": {
+        "streak7": 2,
+        "streak5": 1,
+        "stable": 1,
+        "watch": 14
+      },
+      "urgency_score": 395.2,
+      "has_psy_pack": true,
+      "premium_fit": "mid",
+      "suggest_price_band": "¥19–49",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a1d8854b6178b00010bcb64",
+          "title": "性格城市 cp匹配趣味测验｜自动发货",
+          "price": 0.99,
+          "delta": 113.0,
+          "pool": "WATCH",
+          "bucket": "streak7"
+        },
+        {
+          "goods_id": "69e87d4af9b6f100013aaa59",
+          "title": "秒发货.2026性格城市cp匹配趣味测试｜下单后找客服聊天窗口自测",
+          "price": 0.99,
+          "delta": 6.0,
+          "pool": "WATCH",
+          "bucket": "streak7"
+        },
+        {
+          "goods_id": "6a5b31568c0a3e000120247d",
+          "title": "【进阶版】五行城市匹配测试  找到最旺你的城市",
+          "price": 0.87,
+          "delta": 23.0,
+          "pool": "WATCH",
+          "bucket": "streak5"
+        },
+        {
+          "goods_id": "6a60a1bdf8b2fa0001a0ac6e",
+          "title": "性格测试生活偏好城市匹配度评估 75种国内外城市结果",
+          "price": 2.15,
+          "delta": 18.0,
+          "pool": "WATCH",
+          "bucket": "stable"
+        },
+        {
+          "goods_id": "6a545e9e8c0a3e00018649e9",
+          "title": "笔记同款｜性格城市匹配测试课件资料包 40种城市结果",
+          "price": 0.99,
+          "delta": 583.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "人格阴影/腹黑",
+      "keywords": [
+        "人格阴影",
+        "腹黑人格",
+        "深层恐惧"
+      ],
+      "psy_code": "amt",
+      "hit_count": 9,
+      "sum_delta": 428.0,
+      "avg_price": 1.91,
+      "max_delta": 266.0,
+      "buckets": {
+        "burst": 1,
+        "streak5": 2,
+        "watch": 6
+      },
+      "urgency_score": 351.2,
+      "has_psy_pack": true,
+      "premium_fit": "mid",
+      "suggest_price_band": "¥29–59",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a1be09442db800001ec76b8",
+          "title": "【深层恐惧探测】在线测试·秒发人格认知探测内心深处可重复测",
+          "price": 0.99,
+          "delta": 266.0,
+          "pool": "WATCH",
+          "bucket": "burst"
+        },
+        {
+          "goods_id": "6a603926aa62b50001653c80",
+          "title": "人格阴影鉴定人格含解读报告",
+          "price": 1.88,
+          "delta": 86.0,
+          "pool": "WATCH",
+          "bucket": "streak5"
+        },
+        {
+          "goods_id": "6a3d6e3d362a910001589a8a",
+          "title": "【原创升级版】测测你的腹黑人格鉴定解读 趣味可重复测试",
+          "price": 1.99,
+          "delta": 67.0,
+          "pool": "WATCH",
+          "bucket": "streak5"
+        },
+        {
+          "goods_id": "6a3b9cc046109700014fcb63",
+          "title": "【原创】测测你的心理人格阴影|心理趣味测试模板",
+          "price": 1.98,
+          "delta": 4.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a6622a565f3a80001554bee",
+          "title": "【原创】人格阴影测试+深度解析人格阴影型人格阴影测试雷达图",
+          "price": 0.99,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "天赋/职业测评",
+      "keywords": [
+        "天赋测评",
+        "职业测评",
+        "天赋测试",
+        "天赋潜能",
+        "十大天赋"
+      ],
+      "psy_code": "apt",
+      "hit_count": 15,
+      "sum_delta": 1080.0,
+      "avg_price": 8.76,
+      "max_delta": 1000.0,
+      "buckets": {
+        "streak15": 1,
+        "watch": 14
+      },
+      "urgency_score": 349.0,
+      "has_psy_pack": true,
+      "premium_fit": "mid",
+      "suggest_price_band": "¥29–59",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a3910446f59ca000112d27a",
+          "title": "【自动发货】人类十大天赋测试|趣味自测人格网页模板",
+          "price": 1.99,
+          "delta": 10.0,
+          "pool": "WATCH",
+          "bucket": "streak15"
+        },
+        {
+          "goods_id": "6a13b92748fd3d0001342623",
+          "title": "升级版天赋测评+职业测评 测测你有什么天赋 职场人专用测评！",
+          "price": 5.99,
+          "delta": 1000.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a63324f6cbefa00014fea9a",
+          "title": "天赋自测-挖掘人类十大天赋领域-附详细解析 仅资料费用",
+          "price": 0.99,
+          "delta": 19.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a264fc23af1890001e1db3f",
+          "title": "人类十大天赋测试|趣味自测人格网页模板",
+          "price": 1.99,
+          "delta": 14.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a3f810724d4bb0001829afb",
+          "title": "天赋测试在线测评: 找到自己的优势领域 /职业/潜能挖掘/自动发货",
+          "price": 1.99,
+          "delta": 10.0,
+          "pool": "WATCH",
+          "bucket": "watch"
         }
       ]
     },
@@ -206,71 +704,179 @@
       "has_psy_pack": true,
       "premium_fit": "high",
       "suggest_price_band": "¥39–99",
+      "source": "curated",
       "top": [
         {
           "goods_id": "69feaf7a8c2c23000187bf06",
           "title": "武志红3天原生家庭重塑训练营【报名后看短信未找到找客服】",
           "price": 29.9,
-          "sold": 227,
           "delta": 73.0,
-          "gr": 47.4,
           "pool": "WATCH",
-          "bucket": "priority",
-          "bw": 120,
-          "advice_score": 80.0,
-          "theme": "原生家庭"
+          "bucket": "priority"
         },
         {
           "goods_id": "686cefc980b7300001bcb55f",
           "title": "武志红3天原生家庭自我突破训练营【报名后看短信未找到找客服】",
           "price": 29.9,
-          "sold": 3438,
           "delta": 35.0,
-          "gr": 1.03,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 49.6,
-          "theme": "原生家庭"
+          "bucket": "streak5"
         },
         {
           "goods_id": "6a577663fb672a00158c8ba1",
           "title": "武志红全套课程30天原生家庭破局成长营心理学",
           "price": 29.88,
-          "sold": 9,
           "delta": 5.0,
-          "gr": 125.0,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 39.1,
-          "theme": "原生家庭"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a2134ddb8334e0001c46c16",
           "title": "原生家庭健康度测试•测测你的原生家庭对你的伤害",
           "price": 0.99,
-          "sold": 259,
           "delta": 3.0,
-          "gr": 1.17,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 30.5,
-          "theme": "原生家庭"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a4f86968cb63f0001110d4d",
           "title": "原声家庭印记测试/成长模式/内在力量/测出你的原生家庭印记",
           "price": 0.87,
-          "sold": 114,
           "delta": 2.0,
-          "gr": 1.79,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 29.2,
-          "theme": "原生家庭"
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "山海经/历史人物趣味",
+      "keywords": [
+        "山海经",
+        "历史人物",
+        "文学人物",
+        "大明王朝"
+      ],
+      "psy_code": "shjss",
+      "hit_count": 26,
+      "sum_delta": 286.0,
+      "avg_price": 8.37,
+      "max_delta": 77.0,
+      "buckets": {
+        "streak5": 3,
+        "streak3": 2,
+        "watch": 21
+      },
+      "urgency_score": 301.2,
+      "has_psy_pack": true,
+      "premium_fit": "low",
+      "suggest_price_band": "¥9.9–29 趣味",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a22f9ebe42cc40001a563d2",
+          "title": "你最像哪个文学人物测评链接｜可永久重复测试",
+          "price": 9.99,
+          "delta": 77.0,
+          "pool": "WATCH",
+          "bucket": "streak5"
+        },
+        {
+          "goods_id": "6a33c30839d60d0001a091fd",
+          "title": "大明王朝主题人格测试解读",
+          "price": 0.99,
+          "delta": 36.0,
+          "pool": "WATCH",
+          "bucket": "streak5"
+        },
+        {
+          "goods_id": "6a55c4a38c0a3e0001a9a726",
+          "title": "【自动发货】测测你最像哪位历史人物/人格测试/趣味测试",
+          "price": 2.88,
+          "delta": 34.0,
+          "pool": "WATCH",
+          "bucket": "streak5"
+        },
+        {
+          "goods_id": "6a67194dd8558500016fcb70",
+          "title": "山海经108异兽•人格原型报告",
+          "price": 4.99,
+          "delta": 40.0,
+          "pool": "WATCH",
+          "bucket": "streak3"
+        },
+        {
+          "goods_id": "6a1ec5ff44bec000010dde10",
+          "title": "你最像哪个历史人物原型测评结果报告模板",
+          "price": 4.99,
+          "delta": 32.0,
+          "pool": "WATCH",
+          "bucket": "streak3"
+        }
+      ]
+    },
+    {
+      "name": "动物塑/动物人格",
+      "keywords": [
+        "动物塑",
+        "动物系人格",
+        "动物性格",
+        "灵魂动物"
+      ],
+      "psy_code": "ast",
+      "hit_count": 10,
+      "sum_delta": 328.0,
+      "avg_price": 1.54,
+      "max_delta": 153.0,
+      "buckets": {
+        "streak7": 3,
+        "streak5": 2,
+        "watch": 5
+      },
+      "urgency_score": 284.4,
+      "has_psy_pack": true,
+      "premium_fit": "low",
+      "suggest_price_band": "¥9.9–29 趣味",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a4e116a40226b00015ca528",
+          "title": "测测你是哪种动物系人格/动物塑测试/趣味小测试",
+          "price": 0.9,
+          "delta": 49.0,
+          "pool": "WATCH",
+          "bucket": "streak7"
+        },
+        {
+          "goods_id": "6a65d44288464600011e0be9",
+          "title": "动物塑测试｜网页模板",
+          "price": 0.99,
+          "delta": 18.0,
+          "pool": "WATCH",
+          "bucket": "streak7"
+        },
+        {
+          "goods_id": "69b78f0be95b340001abcfc9",
+          "title": "动物性格测试问卷趣味性格分析",
+          "price": 0.99,
+          "delta": 8.0,
+          "pool": "WATCH",
+          "bucket": "streak7"
+        },
+        {
+          "goods_id": "6a4ba802a9e8d300012a3bd2",
+          "title": "动物性格人格分析",
+          "price": 1.88,
+          "delta": 153.0,
+          "pool": "WATCH",
+          "bucket": "streak5"
+        },
+        {
+          "goods_id": "6a40d70724d4bb0001a08a80",
+          "title": "动物塑性格|在线测试模板",
+          "price": 1.99,
+          "delta": 62.0,
+          "pool": "WATCH",
+          "bucket": "streak5"
         }
       ]
     },
@@ -293,71 +899,47 @@
       "has_psy_pack": true,
       "premium_fit": "mid",
       "suggest_price_band": "¥29–59",
+      "source": "curated",
       "top": [
         {
           "goods_id": "6a32c9c73222c60001615a84",
           "title": "【新版原创】你的心理年龄是几岁/心理年龄测试",
           "price": 1.99,
-          "sold": 4944,
           "delta": 60.0,
-          "gr": 1.23,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 60.7,
-          "theme": "心理年龄"
+          "bucket": "streak5"
         },
         {
           "goods_id": "6a657816f1ffda0001764903",
           "title": "【原创】你的心理年龄多少岁？(专业版报告）",
           "price": 0.98,
-          "sold": 3135,
           "delta": 52.0,
-          "gr": 1.69,
           "pool": "WATCH",
-          "bucket": "streak3",
-          "bw": 22,
-          "advice_score": 49.4,
-          "theme": "心理年龄"
+          "bucket": "streak3"
         },
         {
           "goods_id": "6a435d7588d1c10001154f1f",
           "title": "性格城市匹配测试 五行版（赠送心理年龄测试）",
           "price": 1.98,
-          "sold": 665,
           "delta": 17.0,
-          "gr": 2.62,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 51.6,
-          "theme": "心理年龄"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a55ff387308b5000188f772",
           "title": "【原创】你的心理年龄多少岁？",
           "price": 1.99,
-          "sold": 100,
           "delta": 10.0,
-          "gr": 11.11,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 48.4,
-          "theme": "心理年龄"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a4b31bd9f30700001ec8024",
           "title": "心理年龄测评趣味测试50题秒懂内心成长阶段",
           "price": 0.99,
-          "sold": 214,
           "delta": 10.0,
-          "gr": 4.9,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 41.7,
-          "theme": "心理年龄"
+          "bucket": "watch"
         }
       ]
     },
@@ -371,84 +953,101 @@
         "scl90"
       ],
       "psy_code": "scl90",
-      "hit_count": 46,
-      "sum_delta": 725.0,
-      "avg_price": 2.48,
+      "hit_count": 41,
+      "sum_delta": 714.0,
+      "avg_price": 1.76,
       "max_delta": 96.0,
       "buckets": {
         "streak7": 1,
         "streak5": 8,
-        "watch": 37
+        "watch": 32
       },
       "urgency_score": 268.1,
       "has_psy_pack": true,
       "premium_fit": "avoid",
       "suggest_price_band": "仅文字·合规包装",
+      "source": "curated",
       "top": [
         {
           "goods_id": "6a5e2b218cb63f0001a46c63",
           "title": "SCL-90心理健康自测量表/抑郁焦虑筛查/自动发电子版+解读",
           "price": 0.99,
-          "sold": 73,
           "delta": 6.0,
-          "gr": 8.96,
           "pool": "WATCH",
-          "bucket": "streak7",
-          "bw": 42,
-          "advice_score": 46.7,
-          "theme": "SCL-90完整90题"
+          "bucket": "streak7"
         },
         {
           "goods_id": "6a3b330ce2951e0001dc08f5",
           "title": "抑郁焦虑躯体化SCL90线上专业心理测评|下单自动发货",
           "price": 0.99,
-          "sold": 1871,
           "delta": 96.0,
-          "gr": 5.41,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 48.2,
-          "theme": "SCL-90完整90题"
+          "bucket": "streak5"
         },
         {
           "goods_id": "6a311129963cbb0001d86392",
           "title": "抑郁焦虑躯体化在线测试slc90线上专业心理测评|scl90测试自动发",
           "price": 0.99,
-          "sold": 8220,
           "delta": 93.0,
-          "gr": 1.14,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 55.3,
-          "theme": "SCL-90完整90题"
+          "bucket": "streak5"
         },
         {
           "goods_id": "6a3d1b0cdb862b000101e3d9",
           "title": "SCL90心理健康测评",
           "price": 0.97,
-          "sold": 3028,
           "delta": 90.0,
-          "gr": 3.06,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 62.3,
-          "theme": "SCL-90完整90题"
+          "bucket": "streak5"
         },
         {
           "goods_id": "6a6321efd8558500011acfef",
           "title": "【自动发货】SCL-90 抑郁/焦虑/躯体化/九大维度全面心理健康测评",
           "price": 1.98,
-          "sold": 782,
           "delta": 69.0,
-          "gr": 9.68,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 54.7,
-          "theme": "SCL-90完整90题"
+          "bucket": "streak5"
+        }
+      ]
+    },
+    {
+      "name": "颜值/骨相皮相",
+      "keywords": [
+        "颜值测试",
+        "面部分析",
+        "骨相",
+        "皮相美"
+      ],
+      "psy_code": "yzt",
+      "hit_count": 2,
+      "sum_delta": 456.0,
+      "avg_price": 995.0,
+      "max_delta": 455.0,
+      "buckets": {
+        "burst": 1,
+        "watch": 1
+      },
+      "urgency_score": 192.1,
+      "has_psy_pack": true,
+      "premium_fit": "low",
+      "suggest_price_band": "¥9.9–29",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a3a9b08cde0db0001927695",
+          "title": "面部分析颜值测试",
+          "price": 2.0,
+          "delta": 455.0,
+          "pool": "WATCH",
+          "bucket": "burst"
+        },
+        {
+          "goods_id": "66b18bc3274e5300013bd0a4",
+          "title": "SHISPACE舍作高阶色彩测试风格测试+骨相精致妆发套餐",
+          "price": 1988.0,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
         }
       ]
     },
@@ -457,87 +1056,64 @@
       "keywords": [
         "抑郁测试",
         "焦虑测试",
-        "抑郁焦虑"
+        "抑郁焦虑",
+        "双相情感"
       ],
       "psy_code": "",
-      "hit_count": 29,
-      "sum_delta": 395.0,
-      "avg_price": 50.13,
+      "hit_count": 27,
+      "sum_delta": 373.0,
+      "avg_price": 2.7,
       "max_delta": 96.0,
       "buckets": {
         "streak7": 1,
         "streak5": 4,
-        "watch": 24
+        "watch": 22
       },
-      "urgency_score": 172.7,
+      "urgency_score": 181.0,
       "has_psy_pack": false,
       "premium_fit": "avoid",
       "suggest_price_band": "不做视频旗舰",
+      "source": "curated",
       "top": [
         {
           "goods_id": "6a5e2b218cb63f0001a46c63",
           "title": "SCL-90心理健康自测量表/抑郁焦虑筛查/自动发电子版+解读",
           "price": 0.99,
-          "sold": 73,
           "delta": 6.0,
-          "gr": 8.96,
           "pool": "WATCH",
-          "bucket": "streak7",
-          "bw": 42,
-          "advice_score": 46.7,
-          "theme": "抑郁焦虑筛查包装"
+          "bucket": "streak7"
         },
         {
           "goods_id": "6a3b330ce2951e0001dc08f5",
           "title": "抑郁焦虑躯体化SCL90线上专业心理测评|下单自动发货",
           "price": 0.99,
-          "sold": 1871,
           "delta": 96.0,
-          "gr": 5.41,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 48.2,
-          "theme": "抑郁焦虑筛查包装"
+          "bucket": "streak5"
         },
         {
           "goods_id": "6a311129963cbb0001d86392",
           "title": "抑郁焦虑躯体化在线测试slc90线上专业心理测评|scl90测试自动发",
           "price": 0.99,
-          "sold": 8220,
           "delta": 93.0,
-          "gr": 1.14,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 55.3,
-          "theme": "抑郁焦虑筛查包装"
+          "bucket": "streak5"
         },
         {
           "goods_id": "6a47317a9f30700001998f3b",
           "title": "【自动发货】SCL-90抑郁焦虑专业线上心理测评/在线测试",
           "price": 1.99,
-          "sold": 940,
           "delta": 32.0,
-          "gr": 3.52,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 40.8,
-          "theme": "抑郁焦虑筛查包装"
+          "bucket": "streak5"
         },
         {
           "goods_id": "6a37ecb45200e70001a2b26a",
           "title": "【自动发货】SCL-90抑郁焦虑躯体化在线测评专业线上心理测评",
           "price": 1.99,
-          "sold": 1059,
           "delta": 23.0,
-          "gr": 2.22,
           "pool": "WATCH",
-          "bucket": "streak5",
-          "bw": 32,
-          "advice_score": 37.6,
-          "theme": "抑郁焦虑筛查包装"
+          "bucket": "streak5"
         }
       ]
     },
@@ -558,71 +1134,111 @@
       "has_psy_pack": true,
       "premium_fit": "mid",
       "suggest_price_band": "¥29–59",
+      "source": "curated",
       "top": [
         {
           "goods_id": "6a0beda7e80a7b0001ded6b5",
           "title": "逃离精神吸血鬼丨高敏感内耗人群重获新生的实战心理指南",
           "price": 29.9,
-          "sold": 57,
           "delta": 3.0,
-          "gr": 5.56,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 37.2,
-          "theme": "高敏感"
+          "bucket": "watch"
         },
         {
           "goods_id": "697c3bcf265eb90001ad033c",
           "title": "高敏感育儿指南：从崩溃到天赋激活",
           "price": 199.0,
-          "sold": 1654,
           "delta": 3.0,
-          "gr": 0.18,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 33.1,
-          "theme": "高敏感"
+          "bucket": "watch"
         },
         {
           "goods_id": "69d87e67a57e4e00012fbcad",
           "title": "高敏感+内驱力科学育儿体系3-15岁养出情绪稳定的自主娃",
           "price": 349.0,
-          "sold": 336,
           "delta": 2.0,
-          "gr": 0.6,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 19.4,
-          "theme": "高敏感"
+          "bucket": "watch"
         },
         {
           "goods_id": "6920888af2c0f5000185d45b",
           "title": "开启高敏感孩子的天赋  高敏感是种与生俱来的气质  教养实战书",
           "price": 25.0,
-          "sold": 493,
           "delta": 2.0,
-          "gr": 0.41,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 32.3,
-          "theme": "高敏感"
+          "bucket": "watch"
         },
         {
           "goods_id": "69b7a500180bf40001a8a044",
           "title": "分裂的自我2026 回避型人格、高敏感、存在性焦虑人群必读。",
           "price": 27.5,
-          "sold": 4,
           "delta": 1.0,
-          "gr": 33.33,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 49.8,
-          "theme": "高敏感"
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "该不该复合",
+      "keywords": [
+        "该不该复合",
+        "复合测试",
+        "分手复合"
+      ],
+      "psy_code": "gbfh",
+      "hit_count": 11,
+      "sum_delta": 31.0,
+      "avg_price": 4.45,
+      "max_delta": 8.0,
+      "buckets": {
+        "streak7": 1,
+        "watch": 10
+      },
+      "urgency_score": 145.3,
+      "has_psy_pack": true,
+      "premium_fit": "high",
+      "suggest_price_band": "¥39–79",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "698dc1dc64479e000184a3b1",
+          "title": "1V1情感分析在线分析情感问题分手复合挽回指导",
+          "price": 5.98,
+          "delta": 8.0,
+          "pool": "WATCH",
+          "bucket": "streak7"
+        },
+        {
+          "goods_id": "69a907430635fd000178f746",
+          "title": "个人分析恋爱挽回指导分手复合",
+          "price": 3.28,
+          "delta": 7.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a0ee40200127100018e088c",
+          "title": "分手复合概率测试/在线测/秒出答案",
+          "price": 0.99,
+          "delta": 4.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "694b68bfb1e6660001876aab",
+          "title": "情感军师分析感情问题分手复合挽回指导",
+          "price": 1.9,
+          "delta": 3.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a1f8ccab9717f00015349b0",
+          "title": "分手复合几率自评｜多维度35道自查题｜电子版报告",
+          "price": 3.39,
+          "delta": 3.0,
+          "pool": "WATCH",
+          "bucket": "watch"
         }
       ]
     },
@@ -647,71 +1263,110 @@
       "has_psy_pack": true,
       "premium_fit": "high",
       "suggest_price_band": "¥39–99",
+      "source": "curated",
       "top": [
         {
           "goods_id": "6a44729b3e43a00001b93a6d",
           "title": "【原创】恋爱人格测试分析数据解读专属报告ppt",
           "price": 1.99,
-          "sold": 711,
           "delta": 10.0,
-          "gr": 1.43,
           "pool": "WATCH",
-          "bucket": "streak15",
-          "bw": 50,
-          "advice_score": 31.9,
-          "theme": "恋爱人格/恋爱脑/心软"
+          "bucket": "streak15"
         },
         {
           "goods_id": "69ff40b4377d170001059687",
           "title": "恋爱脑测试 | 情侣必做 | 恋爱脑指数评估系统",
           "price": 0.99,
-          "sold": 3014,
           "delta": 7.0,
-          "gr": 0.23,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 43.5,
-          "theme": "恋爱人格/恋爱脑/心软"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a210261c354cc0001413b8f",
           "title": "恋爱脑指 数 趣味分析资料鉴定ppt",
           "price": 1.99,
-          "sold": 71,
           "delta": 2.0,
-          "gr": 2.9,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 28.8,
-          "theme": "恋爱人格/恋爱脑/心软"
+          "bucket": "watch"
         },
         {
           "goods_id": "68882a6b02d7b00001d0d72d",
           "title": "婚恋情人主题布置恋爱脑VS清醒脑宫团建游戏道具氛围装饰背景墙kt",
           "price": 293.0,
-          "sold": 18,
           "delta": 1.0,
-          "gr": 5.88,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 27.3,
-          "theme": "恋爱人格/恋爱脑/心软"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a4e263ea9e8d300011cd135",
           "title": "恋爱依恋类型人格/恋爱类型/测出你的恋爱人格",
           "price": 0.87,
-          "sold": 41,
           "delta": 1.0,
-          "gr": 2.5,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 28.0,
-          "theme": "恋爱人格/恋爱脑/心软"
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "黑暗三角人格",
+      "keywords": [
+        "黑暗三角",
+        "马基雅维利"
+      ],
+      "psy_code": "dt",
+      "hit_count": 6,
+      "sum_delta": 58.0,
+      "avg_price": 1.47,
+      "max_delta": 42.0,
+      "buckets": {
+        "streak5": 1,
+        "watch": 5
+      },
+      "urgency_score": 106.3,
+      "has_psy_pack": true,
+      "premium_fit": "mid",
+      "suggest_price_band": "¥29–59",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a4dafbc44362a000173557c",
+          "title": "【自动发货】DT-70黑暗三角人格测试",
+          "price": 0.99,
+          "delta": 42.0,
+          "pool": "WATCH",
+          "bucket": "streak5"
+        },
+        {
+          "goods_id": "69a53f8696d31a0001a11f74",
+          "title": "黑暗三角人格测试报告  在线测试 售后不退 秒出结果 黑暗人格测",
+          "price": 0.99,
+          "delta": 6.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a37fa1b65e82f0001f4e2d0",
+          "title": "新版·黑暗三角人格·趣味自测人格网页模板",
+          "price": 1.99,
+          "delta": 6.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a2ace9e65e82f0001591b37",
+          "title": "黑暗三角人格 马基雅维利测试| 在线完成 | 秒出报告 |不退不换",
+          "price": 0.99,
+          "delta": 2.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a46a1ae654b390001527224",
+          "title": "【2.0新版】黑暗三角人格检测",
+          "price": 1.88,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
         }
       ]
     },
@@ -736,71 +1391,47 @@
       "has_psy_pack": true,
       "premium_fit": "high",
       "suggest_price_band": "¥39–79",
+      "source": "curated",
       "top": [
         {
           "goods_id": "69a1309b4d1dca0001b3baf0",
           "title": "此生何为：克里希那穆提哲学智慧 终结精神内耗 反焦虑自我成长",
           "price": 29.8,
-          "sold": 5055,
           "delta": 61.0,
-          "gr": 1.22,
           "pool": "WATCH",
-          "bucket": "streak3",
-          "bw": 22,
-          "advice_score": 60.3,
-          "theme": "精神内耗/职场内耗"
+          "bucket": "streak3"
         },
         {
           "goods_id": "6a4db54ad09fb600010d6c73",
           "title": "写下来痛苦就会过去手账本 新版 缓解精神内耗",
           "price": 19.9,
-          "sold": 722,
           "delta": 37.0,
-          "gr": 5.4,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 58.4,
-          "theme": "精神内耗/职场内耗"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a462a6746a14a0015215648",
           "title": "别费那个劲 没那么多事值得你在乎 反鸡汤清醒指南 摆脱精神内耗",
           "price": 29.9,
-          "sold": 15,
           "delta": 1.0,
-          "gr": 7.14,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 32.6,
-          "theme": "精神内耗/职场内耗"
+          "bucket": "watch"
         },
         {
           "goods_id": "68babd4d581ea200151c730b",
           "title": "与自己和解 做情绪稳定的成年人 停止精神内耗 告别内耗",
           "price": 29.8,
-          "sold": 117,
           "delta": 1.0,
-          "gr": 0.86,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 26.4,
-          "theme": "精神内耗/职场内耗"
+          "bucket": "watch"
         },
         {
           "goods_id": "67b71f83e4ed1f0015813a7d",
           "title": "【正版现货】 放自己一马 心理学家丛非从教你摆脱精神内耗",
           "price": 29.5,
-          "sold": 372,
           "delta": 1.0,
-          "gr": 0.27,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 25.8,
-          "theme": "精神内耗/职场内耗"
+          "bucket": "watch"
         }
       ]
     },
@@ -822,71 +1453,158 @@
       "has_psy_pack": true,
       "premium_fit": "high",
       "suggest_price_band": "¥49–99",
+      "source": "curated",
       "top": [
         {
           "goods_id": "6a1fa8f9421f8e000169ff67",
           "title": "恋爱依恋类型人格测试",
           "price": 1.99,
-          "sold": 621,
           "delta": 10.0,
-          "gr": 1.64,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 44.6,
-          "theme": "依恋类型"
+          "bucket": "watch"
         },
         {
           "goods_id": "69d61df86f218100013b544c",
           "title": "依恋类型测试·科学分析·成长建议·自动发货·可重复测试",
           "price": 0.97,
-          "sold": 731,
           "delta": 7.0,
-          "gr": 0.97,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 31.0,
-          "theme": "依恋类型"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a166dce5566b0000173ad65",
           "title": "恋爱依恋类型人格自测",
           "price": 1.99,
-          "sold": 280,
           "delta": 4.0,
-          "gr": 1.45,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 37.1,
-          "theme": "依恋类型"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a07e9ee67d5950001ad53c8",
           "title": "依恋类型测试|自动发货",
           "price": 1.88,
-          "sold": 36,
           "delta": 2.0,
-          "gr": 5.88,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 33.5,
-          "theme": "依恋类型"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a60390caa62b50001653a89",
           "title": "测一测：你是哪种依恋类型？自动发货+分析报告",
           "price": 2.49,
-          "sold": 14,
           "delta": 1.0,
-          "gr": 7.69,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 31.0,
-          "theme": "依恋类型"
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "暗恋指数",
+      "keywords": [
+        "暗恋测试",
+        "暗恋·",
+        "暗恋指数",
+        "他有多喜欢你"
+      ],
+      "psy_code": "taxh",
+      "hit_count": 4,
+      "sum_delta": 68.0,
+      "avg_price": 1.74,
+      "max_delta": 51.0,
+      "buckets": {
+        "watch": 4
+      },
+      "urgency_score": 82.4,
+      "has_psy_pack": true,
+      "premium_fit": "high",
+      "suggest_price_band": "¥39–79",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a16ceb07125f70001a60dbe",
+          "title": "【原创正版】他有多喜欢你丨暗恋·暧昧期指数评估",
+          "price": 3.98,
+          "delta": 51.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a1418a64245e30001e3da33",
+          "title": "暗恋测试TA是否也在偷偷喜欢你",
+          "price": 0.99,
+          "delta": 9.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a76b3472f88c60001a55cad",
+          "title": "暗恋测试/TA是否也在偷偷地喜欢你",
+          "price": 0.99,
+          "delta": 7.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a034c0e377d17000164e252",
+          "title": "测测他有多喜欢你呢？/情感测试/可重复使用/快速出答案",
+          "price": 0.99,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "新16人格/心智阶位",
+      "keywords": [
+        "心智阶位",
+        "新16人格",
+        "16rg"
+      ],
+      "psy_code": "16rg2",
+      "hit_count": 4,
+      "sum_delta": 23.0,
+      "avg_price": 2.93,
+      "max_delta": 11.0,
+      "buckets": {
+        "watch": 4
+      },
+      "urgency_score": 77.4,
+      "has_psy_pack": true,
+      "premium_fit": "mid",
+      "suggest_price_band": "¥29–59",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a38d6a446109700010ece25",
+          "title": "16型人格心智阶位测试测试",
+          "price": 2.99,
+          "delta": 11.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a2ea5b4461097000125599d",
+          "title": "16型人格 ·心智阶位 32题附带雷达图等详细解析 自动发货",
+          "price": 1.99,
+          "delta": 9.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a64b1fd84b8ee000170869d",
+          "title": "【自动发货】16人格心智阶位|未觉醒初中高阶|附赠标准MBTI93题",
+          "price": 4.99,
+          "delta": 2.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a54abe6e371ff0001425a71",
+          "title": "MBTI × 16人格心智阶位测评 人格潜力发展分析",
+          "price": 1.75,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
         }
       ]
     },
@@ -907,71 +1625,47 @@
       "has_psy_pack": true,
       "premium_fit": "mid",
       "suggest_price_band": "¥29–59",
+      "source": "curated",
       "top": [
         {
           "goods_id": "69295349b8c50800019bb44c",
           "title": "【8月-12月】咔咔雅思口语真题松弛感抖机灵Part123语料素材回答",
           "price": 358.0,
-          "sold": 4450,
           "delta": 44.0,
-          "gr": 1.0,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 44.8,
-          "theme": "松弛感"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a7c41cdfa5d5c0001e4bd02",
           "title": "【72.8%莱赛尔  超薄松弛感 】26夏 透气圆领宽松 加长袖T恤",
           "price": 86.0,
-          "sold": 212,
           "delta": 16.0,
-          "gr": 8.16,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 46.4,
-          "theme": "松弛感"
+          "bucket": "watch"
         },
         {
           "goods_id": "69faaca0a5715f0001e35559",
           "title": "13款免费可商用手写字体合集松弛感字体 设计素材 PPT素材",
           "price": 4.8,
-          "sold": 34,
           "delta": 2.0,
-          "gr": 6.25,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 32.4,
-          "theme": "松弛感"
+          "bucket": "watch"
         },
         {
           "goods_id": "68c054b9e7229000014cbe9c",
           "title": "10款松弛感手写风中文字体｜免·费商用",
           "price": 12.9,
-          "sold": 102,
           "delta": 1.0,
-          "gr": 0.99,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 27.1,
-          "theme": "松弛感"
+          "bucket": "watch"
         },
         {
           "goods_id": "69fb581430d0860001a13c79",
           "title": "12款小红书风格松弛感字体丨会呼吸的字体 设计素材 PPT素材",
           "price": 5.8,
-          "sold": 412,
           "delta": 1.0,
-          "gr": 0.24,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 19.0,
-          "theme": "松弛感"
+          "bucket": "watch"
         }
       ]
     },
@@ -980,33 +1674,203 @@
       "keywords": [
         "暧昧段位",
         "暧昧拉扯",
-        "暧昧测试"
+        "暧昧测试",
+        "暧昧期"
       ],
       "psy_code": "amdw",
-      "hit_count": 1,
-      "sum_delta": 1.0,
-      "avg_price": 21.4,
-      "max_delta": 1.0,
+      "hit_count": 2,
+      "sum_delta": 52.0,
+      "avg_price": 12.69,
+      "max_delta": 51.0,
       "buckets": {
-        "watch": 1
+        "watch": 2
       },
-      "urgency_score": 50.1,
+      "urgency_score": 67.2,
       "has_psy_pack": true,
       "premium_fit": "high",
       "suggest_price_band": "¥39–99",
+      "source": "curated",
       "top": [
+        {
+          "goods_id": "6a16ceb07125f70001a60dbe",
+          "title": "【原创正版】他有多喜欢你丨暗恋·暧昧期指数评估",
+          "price": 3.98,
+          "delta": 51.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
         {
           "goods_id": "6a5f0b7c11bb870001d887f9",
           "title": "《玫瑰窃贼》扯梨子 步步为营 暗恋成真 暧昧拉扯 撬墙角 修罗场",
           "price": 21.4,
-          "sold": 5,
           "delta": 1.0,
-          "gr": 25.0,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 46.9,
-          "theme": "暧昧段位/暧昧拉扯"
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "工作性价比/这b班",
+      "keywords": [
+        "工作性价比",
+        "这b班",
+        "这B班",
+        "班值不值"
+      ],
+      "psy_code": "wjt",
+      "hit_count": 1,
+      "sum_delta": 27.0,
+      "avg_price": 2.0,
+      "max_delta": 27.0,
+      "buckets": {
+        "streak5": 1
+      },
+      "urgency_score": 62.5,
+      "has_psy_pack": true,
+      "premium_fit": "mid",
+      "suggest_price_band": "¥19–49",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a3bf2f524d4bb0001012c43",
+          "title": "八大维度全面评测工作性价比测试速递报告",
+          "price": 2.0,
+          "delta": 27.0,
+          "pool": "WATCH",
+          "bucket": "streak5"
+        }
+      ]
+    },
+    {
+      "name": "考研/读博适配",
+      "keywords": [
+        "适合考研",
+        "适合读博",
+        "考研适配",
+        "读博吗"
+      ],
+      "psy_code": "phd",
+      "hit_count": 2,
+      "sum_delta": 116.0,
+      "avg_price": 3.5,
+      "max_delta": 105.0,
+      "buckets": {
+        "watch": 2
+      },
+      "urgency_score": 60.6,
+      "has_psy_pack": true,
+      "premium_fit": "mid",
+      "suggest_price_band": "¥29–59",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a4fb9f231d9b80001da5077",
+          "title": "你适合考研/读博吗？专业升学适配性测评 6维评估升学潜力与方向",
+          "price": 3.99,
+          "delta": 105.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a127e2b017ffc0001e7a23e",
+          "title": "【米大师授权】你适合读博吗-学术测试网页模板",
+          "price": 3.0,
+          "delta": 11.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "哈利波特/IP趣味",
+      "keywords": [
+        "哈利波特",
+        "HPTI",
+        "原神角色"
+      ],
+      "psy_code": "",
+      "hit_count": 2,
+      "sum_delta": 68.0,
+      "avg_price": 3.49,
+      "max_delta": 45.0,
+      "buckets": {
+        "streak5": 1,
+        "watch": 1
+      },
+      "urgency_score": 48.2,
+      "has_psy_pack": false,
+      "premium_fit": "low",
+      "suggest_price_band": "¥9.9–19 引流",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a081af9addc2c0001093216",
+          "title": "原神角色性格测试，看看你和哪位角色最像",
+          "price": 1.99,
+          "delta": 23.0,
+          "pool": "WATCH",
+          "bucket": "streak5"
+        },
+        {
+          "goods_id": "6a0d92378bf65900014e731f",
+          "title": "哈利波特 HPTI巫格测评 你是哪个魔法世界的灵魂？你是剧中的谁？",
+          "price": 4.99,
+          "delta": 45.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "九型人格",
+      "keywords": [
+        "九型人格"
+      ],
+      "psy_code": "",
+      "hit_count": 4,
+      "sum_delta": 8.0,
+      "avg_price": 3.54,
+      "max_delta": 3.0,
+      "buckets": {
+        "watch": 4
+      },
+      "urgency_score": 42.8,
+      "has_psy_pack": false,
+      "premium_fit": "mid",
+      "suggest_price_band": "¥29–59",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a350a46413f35000149754d",
+          "title": "九型人格在线测评",
+          "price": 0.99,
+          "delta": 3.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a0dad085566b00001168973",
+          "title": "九型人格测试|自动发货",
+          "price": 1.88,
+          "delta": 2.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a00a019dd034c0001377072",
+          "title": "你的专属九型人格报告｜性格分析与成长潜能探索",
+          "price": 3.39,
+          "delta": 2.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a70440c74bf00000112d0f5",
+          "title": "【全新！外盒微脏】九型人格柔雾唇泥！效期到26.12或27.1随机发",
+          "price": 7.9,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
         }
       ]
     },
@@ -1028,32 +1892,62 @@
       "has_psy_pack": true,
       "premium_fit": "mid",
       "suggest_price_band": "¥29–59",
+      "source": "curated",
       "top": [
         {
           "goods_id": "6a292017cf6c7d00018ee9ba",
           "title": "【自动发货】霍兰德测试线上专业全面测评",
           "price": 1.0,
-          "sold": 288,
           "delta": 8.0,
-          "gr": 2.86,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 42.6,
-          "theme": "霍兰德职业兴趣"
+          "bucket": "watch"
         },
         {
           "goods_id": "6a2177753e80020001c1eccd",
           "title": "【专业版】霍兰德职业测试|兴趣选择|赛道方向|人生规划|个人分析",
           "price": 1.9,
-          "sold": 289,
           "delta": 1.0,
-          "gr": 0.35,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 26.1,
-          "theme": "霍兰德职业兴趣"
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "ABO/同人趣味",
+      "keywords": [
+        "ABO人格",
+        "ABO测试",
+        "同人女"
+      ],
+      "psy_code": "abo",
+      "hit_count": 2,
+      "sum_delta": 3.0,
+      "avg_price": 1.48,
+      "max_delta": 2.0,
+      "buckets": {
+        "watch": 2
+      },
+      "urgency_score": 34.4,
+      "has_psy_pack": true,
+      "premium_fit": "low",
+      "suggest_price_band": "¥9.9 引流",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a7d95afd37c8900017fc06a",
+          "title": "同人女XP对决分析测试模板",
+          "price": 1.98,
+          "delta": 2.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a7d6f09532d770001b17743",
+          "title": "同人女XP对决分析测试",
+          "price": 0.99,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
         }
       ]
     },
@@ -1076,19 +1970,44 @@
       "has_psy_pack": true,
       "premium_fit": "mid",
       "suggest_price_band": "¥39–69",
+      "source": "curated",
       "top": [
         {
           "goods_id": "6a3751ae963cbb00016127bb",
           "title": "【原创】引导型恋爱分析讨好型恋爱分析数据ppt",
           "price": 1.99,
-          "sold": 198,
           "delta": 4.0,
-          "gr": 2.06,
           "pool": "WATCH",
-          "bucket": "watch",
-          "bw": 5,
-          "advice_score": 36.2,
-          "theme": "职场PUA/讨好型"
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "童年创伤",
+      "keywords": [
+        "童年创伤"
+      ],
+      "psy_code": "tncs",
+      "hit_count": 1,
+      "sum_delta": 5.0,
+      "avg_price": 1.99,
+      "max_delta": 5.0,
+      "buckets": {
+        "watch": 1
+      },
+      "urgency_score": 15.6,
+      "has_psy_pack": true,
+      "premium_fit": "avoid",
+      "suggest_price_band": "合规包装·慎做旗舰",
+      "source": "curated",
+      "top": [
+        {
+          "goods_id": "6a5049df4382e20001e433eb",
+          "title": "童年创伤/童年阴影/CPTSD评估心理测试/自动发货",
+          "price": 1.99,
+          "delta": 5.0,
+          "pool": "WATCH",
+          "bucket": "watch"
         }
       ]
     },
@@ -1107,6 +2026,7 @@
       "has_psy_pack": true,
       "premium_fit": "high",
       "suggest_price_band": "¥39–79",
+      "source": "curated",
       "top": []
     },
     {
@@ -1125,6 +2045,7 @@
       "has_psy_pack": true,
       "premium_fit": "high",
       "suggest_price_band": "¥39–79",
+      "source": "curated",
       "top": []
     },
     {
@@ -1144,6 +2065,7 @@
       "has_psy_pack": true,
       "premium_fit": "high",
       "suggest_price_band": "¥49–99",
+      "source": "curated",
       "top": []
     },
     {
@@ -1162,6 +2084,7 @@
       "has_psy_pack": true,
       "premium_fit": "high",
       "suggest_price_band": "¥39–79",
+      "source": "curated",
       "top": []
     },
     {
@@ -1181,24 +2104,7 @@
       "has_psy_pack": true,
       "premium_fit": "mid",
       "suggest_price_band": "¥29–59",
-      "top": []
-    },
-    {
-      "name": "奶茶/咖啡人格趣味",
-      "keywords": [
-        "奶茶人格",
-        "咖啡人格"
-      ],
-      "psy_code": "ncrg",
-      "hit_count": 0,
-      "sum_delta": 0,
-      "avg_price": null,
-      "max_delta": 0,
-      "buckets": {},
-      "urgency_score": 25.0,
-      "has_psy_pack": true,
-      "premium_fit": "low",
-      "suggest_price_band": "¥1.99 引流",
+      "source": "curated",
       "top": []
     },
     {
@@ -1218,24 +2124,7 @@
       "has_psy_pack": true,
       "premium_fit": "high",
       "suggest_price_band": "¥39–79",
-      "top": []
-    },
-    {
-      "name": "该不该复合",
-      "keywords": [
-        "该不该复合",
-        "复合测试"
-      ],
-      "psy_code": "gbfh",
-      "hit_count": 0,
-      "sum_delta": 0,
-      "avg_price": null,
-      "max_delta": 0,
-      "buckets": {},
-      "urgency_score": 25.0,
-      "has_psy_pack": true,
-      "premium_fit": "high",
-      "suggest_price_band": "¥39–79",
+      "source": "curated",
       "top": []
     },
     {
@@ -1254,6 +2143,7 @@
       "has_psy_pack": true,
       "premium_fit": "high",
       "suggest_price_band": "¥39–79",
+      "source": "curated",
       "top": []
     },
     {
@@ -1272,7 +2162,434 @@
       "has_psy_pack": true,
       "premium_fit": "mid",
       "suggest_price_band": "¥39–69",
+      "source": "curated",
       "top": []
+    },
+    {
+      "name": "奶茶/咖啡人格趣味",
+      "keywords": [
+        "奶茶人格",
+        "咖啡人格"
+      ],
+      "psy_code": "ncrg",
+      "hit_count": 0,
+      "sum_delta": 0,
+      "avg_price": null,
+      "max_delta": 0,
+      "buckets": {},
+      "urgency_score": 21.2,
+      "has_psy_pack": true,
+      "premium_fit": "low",
+      "suggest_price_band": "¥1.99 引流",
+      "source": "curated",
+      "top": []
+    }
+  ],
+  "discovered_themes": [
+    {
+      "name": "发现·趣味测试",
+      "keywords": [
+        "趣味测试"
+      ],
+      "psy_code": "",
+      "hit_count": 9,
+      "sum_delta": 443.0,
+      "avg_price": 2.65,
+      "max_delta": 189.0,
+      "buckets": {
+        "streak15": 1,
+        "streak3": 1,
+        "watch": 7
+      },
+      "urgency_score": 206.0,
+      "has_psy_pack": false,
+      "premium_fit": "low",
+      "suggest_price_band": "¥1.99–9.9 趣味",
+      "source": "discovered",
+      "top": [
+        {
+          "goods_id": "6a3e652c8cb63f0001302a53",
+          "title": "【米大师授权】你最趁手的兵器-趣味测试网页模板",
+          "price": 3.0,
+          "delta": 183.0,
+          "pool": "WATCH",
+          "bucket": "streak15"
+        },
+        {
+          "goods_id": "68baee9e74032300016ccc07",
+          "title": "趣味测试个人心理形象",
+          "price": 1.99,
+          "delta": 189.0,
+          "pool": "WATCH",
+          "bucket": "streak3"
+        },
+        {
+          "goods_id": "6a55ea0be371ff00015f51ea",
+          "title": "趣味测试了解自己的原型",
+          "price": 2.99,
+          "delta": 31.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a377b5b39d60d0001eee7af",
+          "title": "【米大师授权】你适合大厂吗？趣味测试网页模板",
+          "price": 3.0,
+          "delta": 16.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a680529c6180800017bfdd1",
+          "title": "趣味测试，了解自己的原型",
+          "price": 2.98,
+          "delta": 10.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "发现·社会化程度匹配趣味测试",
+      "keywords": [
+        "社会化程度匹配趣味测试"
+      ],
+      "psy_code": "",
+      "hit_count": 2,
+      "sum_delta": 159.0,
+      "avg_price": 2.99,
+      "max_delta": 136.0,
+      "buckets": {
+        "streak5": 1,
+        "watch": 1
+      },
+      "urgency_score": 73.1,
+      "has_psy_pack": false,
+      "premium_fit": "low",
+      "suggest_price_band": "¥1.99–9.9 趣味",
+      "source": "discovered",
+      "top": [
+        {
+          "goods_id": "6a1d5719f2340f00010cf760",
+          "title": "社会化程度匹配趣味测试 I 自动发货",
+          "price": 2.99,
+          "delta": 136.0,
+          "pool": "WATCH",
+          "bucket": "streak5"
+        },
+        {
+          "goods_id": "6a622f15ab4daa0001f58098",
+          "title": "社会化程度匹配趣味测试|自动发货09",
+          "price": 2.99,
+          "delta": 23.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "发现·自测人格",
+      "keywords": [
+        "自测人格"
+      ],
+      "psy_code": "",
+      "hit_count": 3,
+      "sum_delta": 16.0,
+      "avg_price": 2.93,
+      "max_delta": 9.0,
+      "buckets": {
+        "streak7": 1,
+        "watch": 2
+      },
+      "urgency_score": 51.4,
+      "has_psy_pack": false,
+      "premium_fit": "low",
+      "suggest_price_band": "¥1.99–9.9 趣味",
+      "source": "discovered",
+      "top": [
+        {
+          "goods_id": "6a59edf88846460001e624c3",
+          "title": "【测试】如果灵魂有形状，你会是什么？——自测人格网",
+          "price": 1.99,
+          "delta": 9.0,
+          "pool": "WATCH",
+          "bucket": "streak7"
+        },
+        {
+          "goods_id": "6a55c69101c1af00015ac469",
+          "title": "【2.0版原创】Floral Soul你的本命花是什么？｜自测人格网页模版",
+          "price": 1.99,
+          "delta": 6.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a55c9fd11bb8700010dfe0f",
+          "title": "【ST原创】主体性评分 Subjective Test｜自测人格网页模版",
+          "price": 4.8,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "发现·你的水果塑人格",
+      "keywords": [
+        "你的水果塑人格"
+      ],
+      "psy_code": "",
+      "hit_count": 2,
+      "sum_delta": 2.0,
+      "avg_price": 3.99,
+      "max_delta": 1.0,
+      "buckets": {
+        "watch": 2
+      },
+      "urgency_score": 29.2,
+      "has_psy_pack": false,
+      "premium_fit": "low",
+      "suggest_price_band": "¥1.99–9.9 趣味",
+      "source": "discovered",
+      "top": [
+        {
+          "goods_id": "6a59effde9f0b100017744f8",
+          "title": "【原创测试】你的水果塑人格是什么|趣味自测人格网页模板",
+          "price": 3.99,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a4d1bf244362a00016b4197",
+          "title": "【21种水果结果】你的水果塑人格是什么|趣味自测人格网页模板",
+          "price": 3.99,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "发现·人格优缺点测评",
+      "keywords": [
+        "人格优缺点测评"
+      ],
+      "psy_code": "",
+      "hit_count": 2,
+      "sum_delta": 36.0,
+      "avg_price": 0.99,
+      "max_delta": 20.0,
+      "buckets": {
+        "watch": 2
+      },
+      "urgency_score": 20.5,
+      "has_psy_pack": false,
+      "premium_fit": "low",
+      "suggest_price_band": "¥1.99–9.9 趣味",
+      "source": "discovered",
+      "top": [
+        {
+          "goods_id": "6a5b854d437d3400014e239c",
+          "title": "【原创正版】人格优缺点测评 | 雷达图+深度解析",
+          "price": 0.99,
+          "delta": 20.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a78afafb7d66f0001f5cbd6",
+          "title": "【原创】人格优缺点测评 | 雷达图+深度解析",
+          "price": 0.99,
+          "delta": 16.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "发现·十六人格",
+      "keywords": [
+        "十六人格"
+      ],
+      "psy_code": "",
+      "hit_count": 3,
+      "sum_delta": 4.0,
+      "avg_price": 14.66,
+      "max_delta": 2.0,
+      "buckets": {
+        "watch": 3
+      },
+      "urgency_score": 16.1,
+      "has_psy_pack": false,
+      "premium_fit": "mid",
+      "suggest_price_band": "待评估·先观察",
+      "source": "discovered",
+      "top": [
+        {
+          "goods_id": "676573c1c6c20a0001a78f27",
+          "title": "十六人格之【INTJ 黑暗为我加冕】小众香氛喷雾",
+          "price": 10.99,
+          "delta": 2.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "69b1494347c2d500010e39d2",
+          "title": "十六人格心智阶段",
+          "price": 3.99,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "673c79a9684ff20001664e26",
+          "title": "十六人格之【ISFP 像猫一样的人类】小众香氛喷雾",
+          "price": 28.99,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "发现·丨趣味性格测试",
+      "keywords": [
+        "丨趣味性格测试"
+      ],
+      "psy_code": "",
+      "hit_count": 2,
+      "sum_delta": 6.0,
+      "avg_price": 0.9,
+      "max_delta": 3.0,
+      "buckets": {
+        "watch": 2
+      },
+      "urgency_score": 13.5,
+      "has_psy_pack": false,
+      "premium_fit": "low",
+      "suggest_price_band": "¥1.99–9.9 趣味",
+      "source": "discovered",
+      "top": [
+        {
+          "goods_id": "6a44eb98c4c16c00013cf058",
+          "title": "【原创】测测你的ABO信息素是什么味道？丨趣味性格测试网页模板",
+          "price": 0.9,
+          "delta": 3.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "6a4a7d7f6370dc00012277c8",
+          "title": "【原创】什么是你的最强欲望？丨趣味性格测试网页模板",
+          "price": 0.9,
+          "delta": 3.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        }
+      ]
+    },
+    {
+      "name": "发现·职业能力倾向测验",
+      "keywords": [
+        "职业能力倾向测验"
+      ],
+      "psy_code": "",
+      "hit_count": 2,
+      "sum_delta": 2.0,
+      "avg_price": 6.55,
+      "max_delta": 1.0,
+      "buckets": {
+        "watch": 2
+      },
+      "urgency_score": 12.3,
+      "has_psy_pack": false,
+      "premium_fit": "mid",
+      "suggest_price_band": "待评估·先观察",
+      "source": "discovered",
+      "top": [
+        {
+          "goods_id": "68f9da59c074c500011554d7",
+          "title": "内蒙古事业单位《综合应用能力》《职业能力倾向测验》近10年真题",
+          "price": 3.3,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        },
+        {
+          "goods_id": "67b048abc3cf0a0001a48a3a",
+          "title": "广西事业单位编《职业能力倾向测验》、《综合应用能力》备考资料",
+          "price": 9.8,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch"
+        }
+      ]
+    }
+  ],
+  "catalog_gap": [
+    {
+      "name": "吸渣体质",
+      "psy_code": "xzzt",
+      "has_psy_pack": true,
+      "premium_fit": "high",
+      "suggest_price_band": "¥39–79"
+    },
+    {
+      "name": "职业倦怠",
+      "psy_code": "zyjd",
+      "has_psy_pack": true,
+      "premium_fit": "high",
+      "suggest_price_band": "¥39–79"
+    },
+    {
+      "name": "情感安全感",
+      "psy_code": "qgaq",
+      "has_psy_pack": true,
+      "premium_fit": "high",
+      "suggest_price_band": "¥49–99"
+    },
+    {
+      "name": "被爱体质/桃花体质",
+      "psy_code": "batz",
+      "has_psy_pack": true,
+      "premium_fit": "high",
+      "suggest_price_band": "¥39–79"
+    },
+    {
+      "name": "脱单/母单",
+      "psy_code": "mdnd",
+      "has_psy_pack": true,
+      "premium_fit": "mid",
+      "suggest_price_band": "¥29–59"
+    },
+    {
+      "name": "正缘/真心",
+      "psy_code": "zytz",
+      "has_psy_pack": true,
+      "premium_fit": "high",
+      "suggest_price_band": "¥39–79"
+    },
+    {
+      "name": "分手自愈/前任执念",
+      "psy_code": "fszy",
+      "has_psy_pack": true,
+      "premium_fit": "high",
+      "suggest_price_band": "¥39–79"
+    },
+    {
+      "name": "35岁危机",
+      "psy_code": "wl35",
+      "has_psy_pack": true,
+      "premium_fit": "mid",
+      "suggest_price_band": "¥39–69"
+    },
+    {
+      "name": "奶茶/咖啡人格趣味",
+      "psy_code": "ncrg",
+      "has_psy_pack": true,
+      "premium_fit": "low",
+      "suggest_price_band": "¥1.99 引流"
     }
   ],
   "top_items": [
@@ -1285,6 +2602,46 @@
       "pool": "WATCH",
       "advice_score": 80.0,
       "theme": "原生家庭"
+    },
+    {
+      "goods_id": "6a3a9b08cde0db0001927695",
+      "title": "面部分析颜值测试",
+      "price": 2.0,
+      "sold": 8280,
+      "delta": 455.0,
+      "pool": "WATCH",
+      "advice_score": 62.7,
+      "theme": "颜值/骨相皮相"
+    },
+    {
+      "goods_id": "6a1be09442db800001ec76b8",
+      "title": "【深层恐惧探测】在线测试·秒发人格认知探测内心深处可重复测",
+      "price": 0.99,
+      "sold": 1916,
+      "delta": 266.0,
+      "pool": "WATCH",
+      "advice_score": 78.5,
+      "theme": "人格阴影/腹黑"
+    },
+    {
+      "goods_id": "6a5977a21a0aff0001bbf351",
+      "title": "全新独特版MBT测试|60道题目|32种独特结果|趣味自测人格网页模板",
+      "price": 6.99,
+      "sold": 240,
+      "delta": 56.0,
+      "pool": "WATCH",
+      "advice_score": 76.3,
+      "theme": "MBTI十六型人格"
+    },
+    {
+      "goods_id": "6a3e652c8cb63f0001302a53",
+      "title": "【米大师授权】你最趁手的兵器-趣味测试网页模板",
+      "price": 3.0,
+      "sold": null,
+      "delta": 183.0,
+      "pool": "WATCH",
+      "advice_score": null,
+      "theme": "发现·趣味测试"
     },
     {
       "goods_id": "6a44729b3e43a00001b93a6d",
@@ -1307,6 +2664,66 @@
       "theme": "七宗罪/危险人格"
     },
     {
+      "goods_id": "6a1d8854b6178b00010bcb64",
+      "title": "性格城市 cp匹配趣味测验｜自动发货",
+      "price": 0.99,
+      "sold": 6244,
+      "delta": 113.0,
+      "pool": "WATCH",
+      "advice_score": 60.5,
+      "theme": "性格城市匹配"
+    },
+    {
+      "goods_id": "6a4e116a40226b00015ca528",
+      "title": "测测你是哪种动物系人格/动物塑测试/趣味小测试",
+      "price": 0.9,
+      "sold": 1061,
+      "delta": 49.0,
+      "pool": "WATCH",
+      "advice_score": 51.8,
+      "theme": "动物塑/动物人格"
+    },
+    {
+      "goods_id": "6a65d44288464600011e0be9",
+      "title": "动物塑测试｜网页模板",
+      "price": 0.99,
+      "sold": 932,
+      "delta": 18.0,
+      "pool": "WATCH",
+      "advice_score": 43.8,
+      "theme": "动物塑/动物人格"
+    },
+    {
+      "goods_id": "6a59edf88846460001e624c3",
+      "title": "【测试】如果灵魂有形状，你会是什么？——自测人格网",
+      "price": 1.99,
+      "sold": null,
+      "delta": 9.0,
+      "pool": "WATCH",
+      "advice_score": null,
+      "theme": "发现·自测人格"
+    },
+    {
+      "goods_id": "698dc1dc64479e000184a3b1",
+      "title": "1V1情感分析在线分析情感问题分手复合挽回指导",
+      "price": 5.98,
+      "sold": 1311,
+      "delta": 8.0,
+      "pool": "WATCH",
+      "advice_score": 38.6,
+      "theme": "该不该复合"
+    },
+    {
+      "goods_id": "69b78f0be95b340001abcfc9",
+      "title": "动物性格测试问卷趣味性格分析",
+      "price": 0.99,
+      "sold": 504,
+      "delta": 8.0,
+      "pool": "WATCH",
+      "advice_score": 39.5,
+      "theme": "动物塑/动物人格"
+    },
+    {
       "goods_id": "6a5e2b218cb63f0001a46c63",
       "title": "SCL-90心理健康自测量表/抑郁焦虑筛查/自动发电子版+解读",
       "price": 0.99,
@@ -1314,7 +2731,7 @@
       "delta": 6.0,
       "pool": "WATCH",
       "advice_score": 46.7,
-      "theme": "SCL-90完整90题"
+      "theme": "抑郁焦虑筛查包装"
     },
     {
       "goods_id": "6a6ad70089d8ff0001b3a931",
@@ -1327,6 +2744,26 @@
       "theme": "MBTI十六型人格"
     },
     {
+      "goods_id": "6a4ba802a9e8d300012a3bd2",
+      "title": "动物性格人格分析",
+      "price": 1.88,
+      "sold": 9886,
+      "delta": 153.0,
+      "pool": "WATCH",
+      "advice_score": 43.3,
+      "theme": "动物塑/动物人格"
+    },
+    {
+      "goods_id": "6a1d5719f2340f00010cf760",
+      "title": "社会化程度匹配趣味测试 I 自动发货",
+      "price": 2.99,
+      "sold": null,
+      "delta": 136.0,
+      "pool": "WATCH",
+      "advice_score": null,
+      "theme": "发现·社会化程度匹配趣味测试"
+    },
+    {
       "goods_id": "6a3b330ce2951e0001dc08f5",
       "title": "抑郁焦虑躯体化SCL90线上专业心理测评|下单自动发货",
       "price": 0.99,
@@ -1334,7 +2771,7 @@
       "delta": 96.0,
       "pool": "WATCH",
       "advice_score": 48.2,
-      "theme": "SCL-90完整90题"
+      "theme": "抑郁焦虑筛查包装"
     },
     {
       "goods_id": "6a311129963cbb0001d86392",
@@ -1357,6 +2794,16 @@
       "theme": "SCL-90完整90题"
     },
     {
+      "goods_id": "6a603926aa62b50001653c80",
+      "title": "人格阴影鉴定人格含解读报告",
+      "price": 1.88,
+      "sold": 4929,
+      "delta": 86.0,
+      "pool": "WATCH",
+      "advice_score": 63.0,
+      "theme": "人格阴影/腹黑"
+    },
+    {
       "goods_id": "6a55bed05705e10001a9d059",
       "title": "MBTI16人格测试最新版",
       "price": 1.98,
@@ -1365,6 +2812,16 @@
       "pool": "WATCH",
       "advice_score": 64.1,
       "theme": "MBTI十六型人格"
+    },
+    {
+      "goods_id": "6a22f9ebe42cc40001a563d2",
+      "title": "你最像哪个文学人物测评链接｜可永久重复测试",
+      "price": 9.99,
+      "sold": 6928,
+      "delta": 77.0,
+      "pool": "WATCH",
+      "advice_score": 61.6,
+      "theme": "山海经/历史人物趣味"
     },
     {
       "goods_id": "6a4255e7654b390001f6ae4d",
@@ -1387,6 +2844,26 @@
       "theme": "SCL-90完整90题"
     },
     {
+      "goods_id": "6a3d6e3d362a910001589a8a",
+      "title": "【原创升级版】测测你的腹黑人格鉴定解读 趣味可重复测试",
+      "price": 1.99,
+      "sold": 4104,
+      "delta": 67.0,
+      "pool": "WATCH",
+      "advice_score": 51.0,
+      "theme": "人格阴影/腹黑"
+    },
+    {
+      "goods_id": "6a40d70724d4bb0001a08a80",
+      "title": "动物塑性格|在线测试模板",
+      "price": 1.99,
+      "sold": 1674,
+      "delta": 62.0,
+      "pool": "WATCH",
+      "advice_score": 63.2,
+      "theme": "动物塑/动物人格"
+    },
+    {
       "goods_id": "6a32c9c73222c60001615a84",
       "title": "【新版原创】你的心理年龄是几岁/心理年龄测试",
       "price": 1.99,
@@ -1407,14 +2884,14 @@
       "theme": "MBTI十六型人格"
     },
     {
-      "goods_id": "6a55abb2884646000187ecc0",
-      "title": "MBTI 16人格测试 · 拍下即测 · 可重复测试 · 可分享给朋友",
-      "price": 1.99,
-      "sold": 984,
-      "delta": 41.0,
+      "goods_id": "6a4dafbc44362a000173557c",
+      "title": "【自动发货】DT-70黑暗三角人格测试",
+      "price": 0.99,
+      "sold": 3461,
+      "delta": 42.0,
       "pool": "WATCH",
-      "advice_score": 50.3,
-      "theme": "MBTI十六型人格"
+      "advice_score": 52.2,
+      "theme": "黑暗三角人格"
     },
     {
       "goods_id": "6a3d4288d4b9a600015d7b58",
@@ -1427,6 +2904,16 @@
       "theme": "MBTI十六型人格"
     },
     {
+      "goods_id": "6a33c30839d60d0001a091fd",
+      "title": "大明王朝主题人格测试解读",
+      "price": 0.99,
+      "sold": 689,
+      "delta": 36.0,
+      "pool": "WATCH",
+      "advice_score": 59.5,
+      "theme": "山海经/历史人物趣味"
+    },
+    {
       "goods_id": "686cefc980b7300001bcb55f",
       "title": "武志红3天原生家庭自我突破训练营【报名后看短信未找到找客服】",
       "price": 29.9,
@@ -1437,14 +2924,14 @@
       "theme": "原生家庭"
     },
     {
-      "goods_id": "6a47317a9f30700001998f3b",
-      "title": "【自动发货】SCL-90抑郁焦虑专业线上心理测评/在线测试",
-      "price": 1.99,
-      "sold": 940,
-      "delta": 32.0,
+      "goods_id": "6a55c4a38c0a3e0001a9a726",
+      "title": "【自动发货】测测你最像哪位历史人物/人格测试/趣味测试",
+      "price": 2.88,
+      "sold": 508,
+      "delta": 34.0,
       "pool": "WATCH",
-      "advice_score": 40.8,
-      "theme": "SCL-90完整90题"
+      "advice_score": 60.6,
+      "theme": "山海经/历史人物趣味"
     },
     {
       "goods_id": "6a5fb18901c1af0001346d6d",
@@ -1457,24 +2944,34 @@
       "theme": "SCL-90完整90题"
     },
     {
-      "goods_id": "6a57425e7308b50001a35569",
-      "title": "MBTI性格测试ENFP快乐小狗品种测评趣味测试",
-      "price": 3.9,
-      "sold": 588,
-      "delta": 24.0,
+      "goods_id": "6a3bf2f524d4bb0001012c43",
+      "title": "八大维度全面评测工作性价比测试速递报告",
+      "price": 2.0,
+      "sold": 1858,
+      "delta": 27.0,
       "pool": "WATCH",
-      "advice_score": 46.9,
-      "theme": "MBTI十六型人格"
+      "advice_score": 52.6,
+      "theme": "工作性价比/这b班"
     },
     {
-      "goods_id": "6a37ecb45200e70001a2b26a",
-      "title": "【自动发货】SCL-90抑郁焦虑躯体化在线测评专业线上心理测评",
+      "goods_id": "6a081af9addc2c0001093216",
+      "title": "原神角色性格测试，看看你和哪位角色最像",
       "price": 1.99,
-      "sold": 1059,
+      "sold": 338,
       "delta": 23.0,
       "pool": "WATCH",
-      "advice_score": 37.6,
-      "theme": "SCL-90完整90题"
+      "advice_score": 54.6,
+      "theme": "哈利波特/IP趣味"
+    },
+    {
+      "goods_id": "68baee9e74032300016ccc07",
+      "title": "趣味测试个人心理形象",
+      "price": 1.99,
+      "sold": null,
+      "delta": 189.0,
+      "pool": "WATCH",
+      "advice_score": null,
+      "theme": "发现·趣味测试"
     },
     {
       "goods_id": "69a1309b4d1dca0001b3baf0",
@@ -1497,6 +2994,46 @@
       "theme": "心理年龄"
     },
     {
+      "goods_id": "6a67194dd8558500016fcb70",
+      "title": "山海经108异兽•人格原型报告",
+      "price": 4.99,
+      "sold": 476,
+      "delta": 40.0,
+      "pool": "WATCH",
+      "advice_score": 61.7,
+      "theme": "山海经/历史人物趣味"
+    },
+    {
+      "goods_id": "6a1ec5ff44bec000010dde10",
+      "title": "你最像哪个历史人物原型测评结果报告模板",
+      "price": 4.99,
+      "sold": 5122,
+      "delta": 32.0,
+      "pool": "WATCH",
+      "advice_score": 54.7,
+      "theme": "山海经/历史人物趣味"
+    },
+    {
+      "goods_id": "6a60a1bdf8b2fa0001a0ac6e",
+      "title": "性格测试生活偏好城市匹配度评估 75种国内外城市结果",
+      "price": 2.15,
+      "sold": 131,
+      "delta": 18.0,
+      "pool": "WATCH",
+      "advice_score": 55.4,
+      "theme": "性格城市匹配"
+    },
+    {
+      "goods_id": "6a13b92748fd3d0001342623",
+      "title": "升级版天赋测评+职业测评 测测你有什么天赋 职场人专用测评！",
+      "price": 5.99,
+      "sold": 16000,
+      "delta": 1000.0,
+      "pool": "WATCH",
+      "advice_score": 65.8,
+      "theme": "天赋/职业测评"
+    },
+    {
       "goods_id": "6a6ae1616cbefa0001251a4f",
       "title": "七宗罪分布测试(全新) +七美德测试（全新）",
       "price": 0.99,
@@ -1505,6 +3042,16 @@
       "pool": "WATCH",
       "advice_score": 46.5,
       "theme": "七宗罪/危险人格"
+    },
+    {
+      "goods_id": "6a545e9e8c0a3e00018649e9",
+      "title": "笔记同款｜性格城市匹配测试课件资料包 40种城市结果",
+      "price": 0.99,
+      "sold": 939,
+      "delta": 583.0,
+      "pool": "WATCH",
+      "advice_score": 60.7,
+      "theme": "性格城市匹配"
     },
     {
       "goods_id": "6a6eb4e42bf2dc0001137d39",
@@ -1517,24 +3064,34 @@
       "theme": "七宗罪/危险人格"
     },
     {
-      "goods_id": "6a7858b42f88c60001cbeae8",
-      "title": "七宗罪七美德测试（全新）",
-      "price": 1.68,
-      "sold": 776,
-      "delta": 63.0,
+      "goods_id": "6a4fb9f231d9b80001da5077",
+      "title": "你适合考研/读博吗？专业升学适配性测评 6维评估升学潜力与方向",
+      "price": 3.99,
+      "sold": 1457,
+      "delta": 105.0,
       "pool": "WATCH",
-      "advice_score": 44.8,
-      "theme": "七宗罪/危险人格"
+      "advice_score": 60.0,
+      "theme": "考研/读博适配"
     },
     {
-      "goods_id": "6a73542abfe8a50001b33d0a",
-      "title": "七宗罪七美德性格测试 | 含多维解析报告",
-      "price": 0.99,
-      "sold": 889,
-      "delta": 49.0,
+      "goods_id": "6a16ceb07125f70001a60dbe",
+      "title": "【原创正版】他有多喜欢你丨暗恋·暧昧期指数评估",
+      "price": 3.98,
+      "sold": 1200,
+      "delta": 51.0,
       "pool": "WATCH",
-      "advice_score": 42.0,
-      "theme": "七宗罪/危险人格"
+      "advice_score": 52.0,
+      "theme": "暧昧段位/暧昧拉扯"
+    },
+    {
+      "goods_id": "6a0d92378bf65900014e731f",
+      "title": "哈利波特 HPTI巫格测评 你是哪个魔法世界的灵魂？你是剧中的谁？",
+      "price": 4.99,
+      "sold": 2134,
+      "delta": 45.0,
+      "pool": "WATCH",
+      "advice_score": 45.3,
+      "theme": "哈利波特/IP趣味"
     },
     {
       "goods_id": "69295349b8c50800019bb44c",
@@ -1577,34 +3134,54 @@
       "theme": "精神内耗/职场内耗"
     },
     {
-      "goods_id": "6a23e460461097000156ae41",
-      "title": "【原创】测测你的危险人格 | 趣味自测人格网页模板",
-      "price": 1.98,
-      "sold": 9467,
+      "goods_id": "6a55ea0be371ff00015f51ea",
+      "title": "趣味测试了解自己的原型",
+      "price": 2.99,
+      "sold": null,
+      "delta": 31.0,
+      "pool": "WATCH",
+      "advice_score": null,
+      "theme": "发现·趣味测试"
+    },
+    {
+      "goods_id": "6a622f15ab4daa0001f58098",
+      "title": "社会化程度匹配趣味测试|自动发货09",
+      "price": 2.99,
+      "sold": null,
+      "delta": 23.0,
+      "pool": "WATCH",
+      "advice_score": null,
+      "theme": "发现·社会化程度匹配趣味测试"
+    },
+    {
+      "goods_id": "6a5cb77b6cbefa000161680a",
+      "title": "新版动物塑人格测试|60题完整版",
+      "price": 0.99,
+      "sold": 351,
       "delta": 20.0,
       "pool": "WATCH",
-      "advice_score": 32.5,
-      "theme": "七宗罪/危险人格"
+      "advice_score": 47.3,
+      "theme": "动物塑/动物人格"
     },
     {
-      "goods_id": "6a59af728846460001de2735",
-      "title": "SCL90心理测评在线测试 抑郁焦虑专业评估问卷",
-      "price": 1.99,
-      "sold": 324,
-      "delta": 18.0,
+      "goods_id": "6a5b854d437d3400014e239c",
+      "title": "【原创正版】人格优缺点测评 | 雷达图+深度解析",
+      "price": 0.99,
+      "sold": null,
+      "delta": 20.0,
       "pool": "WATCH",
-      "advice_score": 39.4,
-      "theme": "抑郁焦虑筛查包装"
+      "advice_score": null,
+      "theme": "发现·人格优缺点测评"
     },
     {
-      "goods_id": "688205cbf9d7c80001b478c6",
-      "title": "情绪片抑郁焦虑舒缓促多巴胺缓解紧张压力躯体化EMO好睡眠",
-      "price": 183.0,
-      "sold": 1728,
-      "delta": 18.0,
+      "goods_id": "6a63324f6cbefa00014fea9a",
+      "title": "天赋自测-挖掘人类十大天赋领域-附详细解析 仅资料费用",
+      "price": 0.99,
+      "sold": 161,
+      "delta": 19.0,
       "pool": "WATCH",
-      "advice_score": 38.1,
-      "theme": "抑郁焦虑筛查包装"
+      "advice_score": 60.3,
+      "theme": "天赋/职业测评"
     },
     {
       "goods_id": "6a435d7588d1c10001154f1f",
@@ -1627,13 +3204,43 @@
       "theme": "松弛感"
     },
     {
-      "goods_id": "6a29e49e9e51f00001a7898f",
-      "title": "【自动发货】SCL-90 线上专业抑郁焦虑全面心理测评PPT",
-      "price": 2.88,
-      "sold": 2325,
+      "goods_id": "6a377b5b39d60d0001eee7af",
+      "title": "【米大师授权】你适合大厂吗？趣味测试网页模板",
+      "price": 3.0,
+      "sold": null,
+      "delta": 16.0,
+      "pool": "WATCH",
+      "advice_score": null,
+      "theme": "发现·趣味测试"
+    },
+    {
+      "goods_id": "6a78afafb7d66f0001f5cbd6",
+      "title": "【原创】人格优缺点测评 | 雷达图+深度解析",
+      "price": 0.99,
+      "sold": null,
+      "delta": 16.0,
+      "pool": "WATCH",
+      "advice_score": null,
+      "theme": "发现·人格优缺点测评"
+    },
+    {
+      "goods_id": "6a6dab3474bf000001df50d6",
+      "title": "SCL-90线上心理状态自测/焦虑/抑郁/全面评估工具自动发",
+      "price": 0.49,
+      "sold": 60,
       "delta": 15.0,
       "pool": "WATCH",
-      "advice_score": 40.3,
+      "advice_score": 66.1,
+      "theme": "SCL-90完整90题"
+    },
+    {
+      "goods_id": "6a4d195881cd0b0001fb161e",
+      "title": "【自动发货】SCL-90线上专业抑郁焦虑全面心理测评",
+      "price": 0.98,
+      "sold": 148,
+      "delta": 14.0,
+      "pool": "WATCH",
+      "advice_score": 51.3,
       "theme": "抑郁焦虑筛查包装"
     },
     {
@@ -1645,6 +3252,66 @@
       "pool": "WATCH",
       "advice_score": 47.1,
       "theme": "七宗罪/危险人格"
+    },
+    {
+      "goods_id": "6a264fc23af1890001e1db3f",
+      "title": "人类十大天赋测试|趣味自测人格网页模板",
+      "price": 1.99,
+      "sold": 1919,
+      "delta": 14.0,
+      "pool": "WATCH",
+      "advice_score": 48.7,
+      "theme": "天赋/职业测评"
+    },
+    {
+      "goods_id": "69b67cec325083000176cfc9",
+      "title": "焦虑抑郁躯体化在线测试|SCL-90线上专业心理健康测评|自动发货",
+      "price": 0.99,
+      "sold": 229,
+      "delta": 13.0,
+      "pool": "WATCH",
+      "advice_score": 51.5,
+      "theme": "SCL-90完整90题"
+    },
+    {
+      "goods_id": "690f51675c4f19000119fdf4",
+      "title": "动物塑原型测试ppt",
+      "price": 0.99,
+      "sold": 1297,
+      "delta": 13.0,
+      "pool": "WATCH",
+      "advice_score": 32.1,
+      "theme": "动物塑/动物人格"
+    },
+    {
+      "goods_id": "6a38d6a446109700010ece25",
+      "title": "16型人格心智阶位测试测试",
+      "price": 2.99,
+      "sold": 607,
+      "delta": 11.0,
+      "pool": "WATCH",
+      "advice_score": 41.6,
+      "theme": "新16人格/心智阶位"
+    },
+    {
+      "goods_id": "6a4dc293b5de6c00015162cd",
+      "title": "小学山海经手抄报儿童画丨5张全套",
+      "price": 5.99,
+      "sold": 29,
+      "delta": 11.0,
+      "pool": "WATCH",
+      "advice_score": 43.8,
+      "theme": "山海经/历史人物趣味"
+    },
+    {
+      "goods_id": "6a127e2b017ffc0001e7a23e",
+      "title": "【米大师授权】你适合读博吗-学术测试网页模板",
+      "price": 3.0,
+      "sold": 2376,
+      "delta": 11.0,
+      "pool": "WATCH",
+      "advice_score": 41.1,
+      "theme": "考研/读博适配"
     },
     {
       "goods_id": "6a55ff387308b5000188f772",
@@ -1677,6 +3344,26 @@
       "theme": "依恋类型"
     },
     {
+      "goods_id": "6a680529c6180800017bfdd1",
+      "title": "趣味测试，了解自己的原型",
+      "price": 2.98,
+      "sold": null,
+      "delta": 10.0,
+      "pool": "WATCH",
+      "advice_score": null,
+      "theme": "发现·趣味测试"
+    },
+    {
+      "goods_id": "6a2ea5b4461097000125599d",
+      "title": "16型人格 ·心智阶位 32题附带雷达图等详细解析 自动发货",
+      "price": 1.99,
+      "sold": 462,
+      "delta": 9.0,
+      "pool": "WATCH",
+      "advice_score": 43.5,
+      "theme": "新16人格/心智阶位"
+    },
+    {
       "goods_id": "6a719b8a9fb4c8000176176c",
       "title": "【准测】你的心理年龄多少岁？/客服窗口在线发货",
       "price": 0.88,
@@ -1687,6 +3374,26 @@
       "theme": "心理年龄"
     },
     {
+      "goods_id": "6a1418a64245e30001e3da33",
+      "title": "暗恋测试TA是否也在偷偷喜欢你",
+      "price": 0.99,
+      "sold": 570,
+      "delta": 9.0,
+      "pool": "WATCH",
+      "advice_score": 42.7,
+      "theme": "暗恋指数"
+    },
+    {
+      "goods_id": "6a6f39f834eabf0001f6767a",
+      "title": "七宗罪人格模板/客服窗口查收",
+      "price": 1.99,
+      "sold": 96,
+      "delta": 8.0,
+      "pool": "WATCH",
+      "advice_score": 47.1,
+      "theme": "七宗罪/危险人格"
+    },
+    {
       "goods_id": "6a292017cf6c7d00018ee9ba",
       "title": "【自动发货】霍兰德测试线上专业全面测评",
       "price": 1.0,
@@ -1695,6 +3402,36 @@
       "pool": "WATCH",
       "advice_score": 42.6,
       "theme": "霍兰德职业兴趣"
+    },
+    {
+      "goods_id": "6a5d12484f6fde0001857bcd",
+      "title": "性格城市匹配测试丨你最适合哪个城市丨城市五行测试丨升级版",
+      "price": 1.99,
+      "sold": 349,
+      "delta": 8.0,
+      "pool": "WATCH",
+      "advice_score": 42.4,
+      "theme": "性格城市匹配"
+    },
+    {
+      "goods_id": "6a70531b89d8ff00012a9b41",
+      "title": "【自动发货】SCL-90抑郁焦虑专业线上心理测评|在线测试！！",
+      "price": 2.99,
+      "sold": 43,
+      "delta": 7.0,
+      "pool": "WATCH",
+      "advice_score": 51.8,
+      "theme": "SCL-90完整90题"
+    },
+    {
+      "goods_id": "6a539e5de9f0b10001ece63f",
+      "title": "16人格测试｜你内心隐藏的特质是什么？拍下秒发链接",
+      "price": 1.99,
+      "sold": 36,
+      "delta": 7.0,
+      "pool": "WATCH",
+      "advice_score": 60.9,
+      "theme": "MBTI十六型人格"
     },
     {
       "goods_id": "69ff40b4377d170001059687",
@@ -1715,6 +3452,106 @@
       "pool": "WATCH",
       "advice_score": 31.0,
       "theme": "依恋类型"
+    },
+    {
+      "goods_id": "6a76b3472f88c60001a55cad",
+      "title": "暗恋测试/TA是否也在偷偷地喜欢你",
+      "price": 0.99,
+      "sold": 47,
+      "delta": 7.0,
+      "pool": "WATCH",
+      "advice_score": 50.8,
+      "theme": "暗恋指数"
+    },
+    {
+      "goods_id": "69a907430635fd000178f746",
+      "title": "个人分析恋爱挽回指导分手复合",
+      "price": 3.28,
+      "sold": 1016,
+      "delta": 7.0,
+      "pool": "WATCH",
+      "advice_score": 34.6,
+      "theme": "该不该复合"
+    },
+    {
+      "goods_id": "69a53f8696d31a0001a11f74",
+      "title": "黑暗三角人格测试报告  在线测试 售后不退 秒出结果 黑暗人格测",
+      "price": 0.99,
+      "sold": 111,
+      "delta": 6.0,
+      "pool": "WATCH",
+      "advice_score": 39.3,
+      "theme": "黑暗三角人格"
+    },
+    {
+      "goods_id": "6a37fa1b65e82f0001f4e2d0",
+      "title": "新版·黑暗三角人格·趣味自测人格网页模板",
+      "price": 1.99,
+      "sold": 1348,
+      "delta": 6.0,
+      "pool": "WATCH",
+      "advice_score": 28.2,
+      "theme": "黑暗三角人格"
+    },
+    {
+      "goods_id": "6a6f4f44d8558500014d267f",
+      "title": "2026最新版天赋测评+职业测评 测测你有什么天赋 职场人专用测评",
+      "price": 1.99,
+      "sold": 22,
+      "delta": 6.0,
+      "pool": "WATCH",
+      "advice_score": 56.7,
+      "theme": "天赋/职业测评"
+    },
+    {
+      "goods_id": "6a6721d9f3a9e20001210f2c",
+      "title": "趣味测试了解自己的历史人物原型",
+      "price": 0.99,
+      "sold": 95,
+      "delta": 6.0,
+      "pool": "WATCH",
+      "advice_score": 43.2,
+      "theme": "山海经/历史人物趣味"
+    },
+    {
+      "goods_id": "6a55c69101c1af00015ac469",
+      "title": "【2.0版原创】Floral Soul你的本命花是什么？｜自测人格网页模版",
+      "price": 1.99,
+      "sold": null,
+      "delta": 6.0,
+      "pool": "WATCH",
+      "advice_score": null,
+      "theme": "发现·自测人格"
+    },
+    {
+      "goods_id": "6a6c9bb984b8ee0001bbde16",
+      "title": "【自动发货】抑郁焦虑躯体化SCL-90专业在线测试｜线上心理测试",
+      "price": 1.2,
+      "sold": 18,
+      "delta": 5.0,
+      "pool": "WATCH",
+      "advice_score": 56.4,
+      "theme": "SCL-90完整90题"
+    },
+    {
+      "goods_id": "6a5049df4382e20001e433eb",
+      "title": "童年创伤/童年阴影/CPTSD评估心理测试/自动发货",
+      "price": 1.99,
+      "sold": 1405,
+      "delta": 5.0,
+      "pool": "WATCH",
+      "advice_score": 23.6,
+      "theme": "童年创伤"
+    },
+    {
+      "goods_id": "6a71a9e9f3369d00013c76f5",
+      "title": "七宗罪性格测试入口",
+      "price": 0.99,
+      "sold": 20,
+      "delta": 5.0,
+      "pool": "WATCH",
+      "advice_score": 56.8,
+      "theme": "七宗罪/危险人格"
     },
     {
       "goods_id": "6a685aa434eabf00015715e9",
@@ -1767,6 +3604,46 @@
       "theme": "职场PUA/讨好型"
     },
     {
+      "goods_id": "6a0ee40200127100018e088c",
+      "title": "分手复合概率测试/在线测/秒出答案",
+      "price": 0.99,
+      "sold": 139,
+      "delta": 4.0,
+      "pool": "WATCH",
+      "advice_score": 35.8,
+      "theme": "该不该复合"
+    },
+    {
+      "goods_id": "6a3b9cc046109700014fcb63",
+      "title": "【原创】测测你的心理人格阴影|心理趣味测试模板",
+      "price": 1.98,
+      "sold": 990,
+      "delta": 4.0,
+      "pool": "WATCH",
+      "advice_score": 34.7,
+      "theme": "人格阴影/腹黑"
+    },
+    {
+      "goods_id": "6a719f2cf3369d00013b7578",
+      "title": "你最像哪个历史人物人格类型六大模块解析测评报告模板",
+      "price": 4.99,
+      "sold": 46,
+      "delta": 4.0,
+      "pool": "WATCH",
+      "advice_score": 43.8,
+      "theme": "山海经/历史人物趣味"
+    },
+    {
+      "goods_id": "6a6f17fc89d8ff000115409d",
+      "title": "测一测你的危险人格类型",
+      "price": 0.88,
+      "sold": 16,
+      "delta": 3.0,
+      "pool": "WATCH",
+      "advice_score": 49.8,
+      "theme": "七宗罪/危险人格"
+    },
+    {
       "goods_id": "6a2134ddb8334e0001c46c16",
       "title": "原生家庭健康度测试•测测你的原生家庭对你的伤害",
       "price": 0.99,
@@ -1797,274 +3674,446 @@
       "theme": "高敏感"
     },
     {
-      "goods_id": "6a210261c354cc0001413b8f",
-      "title": "恋爱脑指 数 趣味分析资料鉴定ppt",
-      "price": 1.99,
-      "sold": 71,
-      "delta": 2.0,
+      "goods_id": "694b68bfb1e6660001876aab",
+      "title": "情感军师分析感情问题分手复合挽回指导",
+      "price": 1.9,
+      "sold": 272,
+      "delta": 3.0,
       "pool": "WATCH",
-      "advice_score": 28.8,
-      "theme": "恋爱人格/恋爱脑/心软"
+      "advice_score": 37.9,
+      "theme": "该不该复合"
     },
     {
-      "goods_id": "6a4f86968cb63f0001110d4d",
-      "title": "原声家庭印记测试/成长模式/内在力量/测出你的原生家庭印记",
-      "price": 0.87,
-      "sold": 114,
-      "delta": 2.0,
-      "pool": "WATCH",
-      "advice_score": 29.2,
-      "theme": "原生家庭"
-    },
-    {
-      "goods_id": "6a07e9ee67d5950001ad53c8",
-      "title": "依恋类型测试|自动发货",
-      "price": 1.88,
-      "sold": 36,
-      "delta": 2.0,
-      "pool": "WATCH",
-      "advice_score": 33.5,
-      "theme": "依恋类型"
-    },
-    {
-      "goods_id": "69d87e67a57e4e00012fbcad",
-      "title": "高敏感+内驱力科学育儿体系3-15岁养出情绪稳定的自主娃",
-      "price": 349.0,
-      "sold": 336,
-      "delta": 2.0,
-      "pool": "WATCH",
-      "advice_score": 19.4,
-      "theme": "高敏感"
-    },
-    {
-      "goods_id": "6920888af2c0f5000185d45b",
-      "title": "开启高敏感孩子的天赋  高敏感是种与生俱来的气质  教养实战书",
-      "price": 25.0,
-      "sold": 493,
-      "delta": 2.0,
-      "pool": "WATCH",
-      "advice_score": 32.3,
-      "theme": "高敏感"
-    },
-    {
-      "goods_id": "69faaca0a5715f0001e35559",
-      "title": "13款免费可商用手写字体合集松弛感字体 设计素材 PPT素材",
-      "price": 4.8,
-      "sold": 34,
-      "delta": 2.0,
-      "pool": "WATCH",
-      "advice_score": 32.4,
-      "theme": "松弛感"
-    },
-    {
-      "goods_id": "68882a6b02d7b00001d0d72d",
-      "title": "婚恋情人主题布置恋爱脑VS清醒脑宫团建游戏道具氛围装饰背景墙kt",
-      "price": 293.0,
-      "sold": 18,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 27.3,
-      "theme": "恋爱人格/恋爱脑/心软"
-    },
-    {
-      "goods_id": "6a4e263ea9e8d300011cd135",
-      "title": "恋爱依恋类型人格/恋爱类型/测出你的恋爱人格",
-      "price": 0.87,
-      "sold": 41,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 28.0,
-      "theme": "恋爱人格/恋爱脑/心软"
-    },
-    {
-      "goods_id": "6a422ff09f3070000130ec64",
-      "title": "【原创】测测你的恋爱人格类型 | 趣味性格测试网页模板",
-      "price": 1.98,
-      "sold": 152,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 27.6,
-      "theme": "恋爱人格/恋爱脑/心软"
-    },
-    {
-      "goods_id": "6a68657bcef2250001590667",
-      "title": "原生家庭恋爱模式趣味测试",
-      "price": 0.99,
-      "sold": 10,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 38.1,
-      "theme": "原生家庭"
-    },
-    {
-      "goods_id": "696a45d15d15630001d14e55",
-      "title": "心理疗愈【原生家庭健康度测试】原创正版链接｜拍下秒发货",
-      "price": 1.99,
-      "sold": 104,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 24.4,
-      "theme": "原生家庭"
-    },
-    {
-      "goods_id": "698c2ff984b90b00015a850c",
-      "title": "【原生家庭】3次情感咨询/每次50分钟/一对一咨询",
-      "price": 9.9,
-      "sold": 1080,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 24.9,
-      "theme": "原生家庭"
-    },
-    {
-      "goods_id": "6a462a6746a14a0015215648",
-      "title": "别费那个劲 没那么多事值得你在乎 反鸡汤清醒指南 摆脱精神内耗",
-      "price": 29.9,
-      "sold": 15,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 32.6,
-      "theme": "精神内耗/职场内耗"
-    },
-    {
-      "goods_id": "68babd4d581ea200151c730b",
-      "title": "与自己和解 做情绪稳定的成年人 停止精神内耗 告别内耗",
-      "price": 29.8,
-      "sold": 117,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 26.4,
-      "theme": "精神内耗/职场内耗"
-    },
-    {
-      "goods_id": "67b71f83e4ed1f0015813a7d",
-      "title": "【正版现货】 放自己一马 心理学家丛非从教你摆脱精神内耗",
-      "price": 29.5,
-      "sold": 372,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 25.8,
-      "theme": "精神内耗/职场内耗"
-    },
-    {
-      "goods_id": "66026ac94318440001950182",
-      "title": "糟糕,今天内耗又超标 梁爽,内耗,心理励志 摆脱精神内耗",
-      "price": 35.8,
-      "sold": 1011,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 25.6,
-      "theme": "精神内耗/职场内耗"
-    },
-    {
-      "goods_id": "6a60390caa62b50001653a89",
-      "title": "测一测：你是哪种依恋类型？自动发货+分析报告",
-      "price": 2.49,
-      "sold": 14,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 31.0,
-      "theme": "依恋类型"
-    },
-    {
-      "goods_id": "6a253733461097000177d9fe",
-      "title": "了解你的依恋类型 依恋型人格测试 自动发货",
-      "price": 1.76,
-      "sold": 44,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 18.4,
-      "theme": "依恋类型"
-    },
-    {
-      "goods_id": "6a4b8033c4c16c0001c677d4",
-      "title": "回避型依恋互动评估工具/了解关系互动依恋模式/成人依恋类型自测",
-      "price": 0.49,
-      "sold": 133,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 29.5,
-      "theme": "依恋类型"
-    },
-    {
-      "goods_id": "69b7a500180bf40001a8a044",
-      "title": "分裂的自我2026 回避型人格、高敏感、存在性焦虑人群必读。",
-      "price": 27.5,
-      "sold": 4,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 49.8,
-      "theme": "高敏感"
-    },
-    {
-      "goods_id": "6a3e574f79e41000155b4e96",
-      "title": "有些事情 不需要答案 高敏感 易内耗 习惯性反思者的心理止损指南",
-      "price": 33.03,
-      "sold": 7,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 41.0,
-      "theme": "高敏感"
-    },
-    {
-      "goods_id": "68d9985a702da1000152476a",
-      "title": "高敏感训练营 录播课+答疑群",
-      "price": 2500.0,
-      "sold": 19,
-      "delta": 1.0,
-      "pool": "WATCH",
-      "advice_score": 29.2,
-      "theme": "高敏感"
-    },
-    {
-      "goods_id": "6946b9bf1f22d20001c27588",
-      "title": "高敏感是种天赋 [丹麦]伊尔斯桑德 肯定自己的独特感 高敏感治愈",
-      "price": 25.0,
-      "sold": 95,
-      "delta": 1.0,
+      "goods_id": "6a1f8ccab9717f00015349b0",
+      "title": "分手复合几率自评｜多维度35道自查题｜电子版报告",
+      "price": 3.39,
+      "sold": 327,
+      "delta": 3.0,
       "pool": "WATCH",
       "advice_score": 30.0,
-      "theme": "高敏感"
+      "theme": "该不该复合"
     },
     {
-      "goods_id": "6a2177753e80020001c1eccd",
-      "title": "【专业版】霍兰德职业测试|兴趣选择|赛道方向|人生规划|个人分析",
+      "goods_id": "6a60a4afe371ff00014c3825",
+      "title": "性格城市匹配测试·资料包·在线测试",
+      "price": 2.99,
+      "sold": 24,
+      "delta": 3.0,
+      "pool": "WATCH",
+      "advice_score": 46.3,
+      "theme": "性格城市匹配"
+    },
+    {
+      "goods_id": "6a58a973437d3400011014b8",
+      "title": "性格城市匹配测试 40城市结果 | 自动发货 | 找到你的灵魂栖息地",
+      "price": 1.51,
+      "sold": 30,
+      "delta": 3.0,
+      "pool": "WATCH",
+      "advice_score": 43.5,
+      "theme": "性格城市匹配"
+    },
+    {
+      "goods_id": "6a75935ac9142a0001f064a0",
+      "title": "天赋测试-挖掘自身天赋潜能（自动发货，随测随得，地址随便填）",
+      "price": 1.51,
+      "sold": 9,
+      "delta": 3.0,
+      "pool": "WATCH",
+      "advice_score": 50.9,
+      "theme": "天赋/职业测评"
+    },
+    {
+      "goods_id": "6a5b8808d09fb6000118cbcb",
+      "title": "动物塑人格测评60题在线测试-专业版拍下秒发电子版",
+      "price": 1.99,
+      "sold": 12,
+      "delta": 3.0,
+      "pool": "WATCH",
+      "advice_score": 50.8,
+      "theme": "动物塑/动物人格"
+    },
+    {
+      "goods_id": "6a350a46413f35000149754d",
+      "title": "九型人格在线测评",
+      "price": 0.99,
+      "sold": 81,
+      "delta": 3.0,
+      "pool": "WATCH",
+      "advice_score": 33.0,
+      "theme": "九型人格"
+    },
+    {
+      "goods_id": "6a44eb98c4c16c00013cf058",
+      "title": "【原创】测测你的ABO信息素是什么味道？丨趣味性格测试网页模板",
+      "price": 0.9,
+      "sold": null,
+      "delta": 3.0,
+      "pool": "WATCH",
+      "advice_score": null,
+      "theme": "发现·丨趣味性格测试"
+    },
+    {
+      "goods_id": "6a4a7d7f6370dc00012277c8",
+      "title": "【原创】什么是你的最强欲望？丨趣味性格测试网页模板",
+      "price": 0.9,
+      "sold": null,
+      "delta": 3.0,
+      "pool": "WATCH",
+      "advice_score": null,
+      "theme": "发现·丨趣味性格测试"
+    },
+    {
+      "goods_id": "6a660e53ab4daa000149eaee",
+      "title": "抑郁焦虑躯体化在线测试slc90线上专业心理测评 |自动发货",
+      "price": 1.63,
+      "sold": 7,
+      "delta": 2.0,
+      "pool": "WATCH",
+      "advice_score": 48.3,
+      "theme": "抑郁焦虑筛查包装"
+    },
+    {
+      "goods_id": "6a64b1fd84b8ee000170869d",
+      "title": "【自动发货】16人格心智阶位|未觉醒初中高阶|附赠标准MBTI93题",
+      "price": 4.99,
+      "sold": 41,
+      "delta": 2.0,
+      "pool": "WATCH",
+      "advice_score": 35.6,
+      "theme": "新16人格/心智阶位"
+    },
+    {
+      "goods_id": "6a2ace9e65e82f0001591b37",
+      "title": "黑暗三角人格 马基雅维利测试| 在线完成 | 秒出报告 |不退不换",
+      "price": 0.99,
+      "sold": 35,
+      "delta": 2.0,
+      "pool": "WATCH",
+      "advice_score": 31.5,
+      "theme": "黑暗三角人格"
+    }
+  ],
+  "uncategorized_top": [
+    {
+      "goods_id": "6a2e8e4f5200e70001c6714b",
+      "title": "OC本命花测试（MUMU模板)",
+      "price": 1.99,
+      "delta": 17.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a32afad46109700018d396d",
+      "title": "智商/测评网页在线模板/在线答题，自动出结果",
+      "price": 1.99,
+      "delta": 12.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a4a1cf040cf290001eedaf8",
+      "title": "【原创测试】你的小猫塑是什么  |趣味自测人格网页模板",
+      "price": 3.99,
+      "delta": 9.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a2e8f9128ad2700011051b4",
+      "title": "本命花测试（MUMU模板）",
+      "price": 1.99,
+      "delta": 7.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a4317cef764ee00013145a9",
+      "title": "天赋自评-挖掘自身天赋领域教案（不发快递，地址手机随便填）",
+      "price": 1.99,
+      "delta": 324.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a4b267ef7c8040001d9cd3f",
+      "title": "趣味小测试更了解自己心理",
+      "price": 1.99,
+      "delta": 75.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a51a0018cb63f000191ff5a",
+      "title": "韩国16型色彩测试色彩诊断-四季型色彩测试穿搭分析模版",
+      "price": 3.99,
+      "delta": 29.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a4f86cf1f5d3000019b7eb3",
+      "title": "【正版】福报指数测评 精准解析人生方向",
       "price": 1.9,
-      "sold": 289,
-      "delta": 1.0,
+      "delta": 21.0,
       "pool": "WATCH",
-      "advice_score": 26.1,
-      "theme": "霍兰德职业兴趣"
+      "theme": "未归类"
     },
     {
-      "goods_id": "6a5f0b7c11bb870001d887f9",
-      "title": "《玫瑰窃贼》扯梨子 步步为营 暗恋成真 暧昧拉扯 撬墙角 修罗场",
-      "price": 21.4,
-      "sold": 5,
-      "delta": 1.0,
+      "goods_id": "6a75ada55bea4e0001679e68",
+      "title": "【原创】来测你的信息素是什么味道|趣味性格测试网页模板",
+      "price": 0.9,
+      "delta": 16.0,
       "pool": "WATCH",
-      "advice_score": 46.9,
-      "theme": "暧昧段位/暧昧拉扯"
+      "theme": "未归类"
     },
     {
-      "goods_id": "68c054b9e7229000014cbe9c",
-      "title": "10款松弛感手写风中文字体｜免·费商用",
+      "goods_id": "6a0ad5973283480001bedd1f",
+      "title": "升级版城市+国家测评 附深度分析 职场人选对地方超重要! PPT模板",
+      "price": 3.51,
+      "delta": 24.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "69d5b612d0151a000176f7e7",
+      "title": "200词了解哲学、艺术、心理学 简体中文 200词系列",
+      "price": 164.7,
+      "delta": 23.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "697afc123cfba3001548d951",
+      "title": "知音 静心篇 走出焦虑陷阱+摆脱内耗黑洞 克服自卑敏感心理学书",
+      "price": 49.8,
+      "delta": 21.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a6b018d7350260001cf7bf0",
+      "title": "安全的依恋：养出情绪健康、有韧性的孩子",
+      "price": 32.0,
+      "delta": 20.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "69faf3f3a5715f0001ecf2c8",
+      "title": "美千通过率测试看下概率",
+      "price": 2.99,
+      "delta": 20.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a7591a6c9a3610001e48267",
+      "title": "趣味心理小测试ppt",
+      "price": 2.99,
+      "delta": 18.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a479843bf15d200017ff54e",
+      "title": "浪姐性格匹配趣味测试",
+      "price": 2.99,
+      "delta": 18.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "69dcc13f98fb9300011706bc",
+      "title": "觉岛原创设计课题分离卡牌心理学卡牌练习边界感内耗觉察自我成长",
+      "price": 39.9,
+      "delta": 18.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a5a10e96cbefa000128e746",
+      "title": "测测你的oc 属性s & m 角色倾向棱镜测试",
+      "price": 1.75,
+      "delta": 17.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a4afdddfcf4ce0001785558",
+      "title": "RPI恋爱占有欲指数|双视角性格分析测试",
+      "price": 0.85,
+      "delta": 17.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a57b90f437d340001fa29d9",
+      "title": "拼多多求职：27届拼多多测评（含测评、性格测试、管培生面试）",
       "price": 12.9,
-      "sold": 102,
-      "delta": 1.0,
+      "delta": 15.0,
       "pool": "WATCH",
-      "advice_score": 27.1,
-      "theme": "松弛感"
+      "theme": "未归类"
     },
     {
-      "goods_id": "69fb581430d0860001a13c79",
-      "title": "12款小红书风格松弛感字体丨会呼吸的字体 设计素材 PPT素材",
-      "price": 5.8,
-      "sold": 412,
-      "delta": 1.0,
+      "goods_id": "6a6d6c8834eabf0001caad9f",
+      "title": "回避型依恋互动判断工具/了解关系依恋模式/成人依恋互动类型自测",
+      "price": 0.49,
+      "delta": 14.0,
       "pool": "WATCH",
-      "advice_score": 19.0,
-      "theme": "松弛感"
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a64c7a36cbefa00017395bd",
+      "title": "关系气场分析妹感姐感测试【自动发货】",
+      "price": 0.99,
+      "delta": 14.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a64ac8a74bf000001150bcc",
+      "title": "【电子版】一本解析中医心理学PDF完整版",
+      "price": 4.9,
+      "delta": 13.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a759f3d0020da000119935c",
+      "title": "超火本命兵器性格测试",
+      "price": 1.81,
+      "delta": 12.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "69cf4909add7e5000153e7a4",
+      "title": "【主题班会】人际交往、心理健康、学习激励等中小学主题班会PPT",
+      "price": 4.9,
+      "delta": 12.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "69db457646d60b0001b46834",
+      "title": "峡谷本命英雄匹配测试||追寻你的天选英雄",
+      "price": 2.99,
+      "delta": 11.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a21b58d0871190001d2f96c",
+      "title": "测测你的喜欢程度？/ins风测试/可重复使用/免费测试",
+      "price": 0.99,
+      "delta": 11.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6745d9ce996a2c0001930f67",
+      "title": "狗狗+主人 情绪压力测评",
+      "price": 0.1,
+      "delta": 11.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a5e5fac01c1af000115015e",
+      "title": "你是哪位修仙小说主角测评链接模板",
+      "price": 2.99,
+      "delta": 11.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a3f4ea08879a000018c1c91",
+      "title": "27考研PPT心理学312+347全程PPT｜多机构PPT｜持续更新｜赠26年",
+      "price": 12.88,
+      "delta": 10.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a2ed9d53222c60001fc8488",
+      "title": "OC印象香测试（MUMU模板）",
+      "price": 1.99,
+      "delta": 10.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6954dbeabd92f5000106aa1b",
+      "title": "公益·心理咨询/心理疏导（3次丨50分钟/次丨无额外费用）",
+      "price": 9.6,
+      "delta": 10.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a20de621978d90001d882d1",
+      "title": "【状态评估】婚姻评估｜亲密关系｜婚姻情感｜个人成长等分析测评",
+      "price": 9.9,
+      "delta": 9.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a1111024245e300018a3246",
+      "title": "我们还有机会复合吗｜分手和好恋爱心理深度自检与分析",
+      "price": 3.39,
+      "delta": 9.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "69f350060511b500012cc92b",
+      "title": "【原创】Beck测试模版｜21道单选题模版｜仅供娱乐参考",
+      "price": 0.99,
+      "delta": 9.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "693c1051f994e6000181de06",
+      "title": "1V1情感分析感情修复恋爱分手挽回",
+      "price": 1.9,
+      "delta": 9.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "672c7d122ccde20001bcbd6e",
+      "title": "超级个体：AI 时代的天赋发现与能力倍增课",
+      "price": 99.0,
+      "delta": 9.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a18f60cbd63a300012647b6",
+      "title": "猫猫人格·马克杯系列",
+      "price": 57.8,
+      "delta": 9.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "6a4dbd528cb63f0001e3afa6",
+      "title": "2026/27版西安名校小升初分班考测试｜PDF电子版",
+      "price": 8.6,
+      "delta": 9.0,
+      "pool": "WATCH",
+      "theme": "未归类"
+    },
+    {
+      "goods_id": "69d379fe9bbf240001c3b02e",
+      "title": "酸涩文艺风暗恋重逢破镜BE/HE/等网站网络小说封面BG/BL/GB/GL",
+      "price": 6.6,
+      "delta": 9.0,
+      "pool": "WATCH",
+      "theme": "未归类"
     }
   ],
   "premium_shortlist": [
@@ -2073,6 +4122,7 @@
       "psy_code": "ysjt",
       "urgency_score": 316.3,
       "hit_count": 8,
+      "sum_delta": 121.0,
       "avg_price": 13.05,
       "max_delta": 73.0,
       "has_psy_pack": true,
@@ -2080,10 +4130,23 @@
       "premium_fit": "high"
     },
     {
+      "name": "该不该复合",
+      "psy_code": "gbfh",
+      "urgency_score": 145.3,
+      "hit_count": 11,
+      "sum_delta": 31.0,
+      "avg_price": 4.45,
+      "max_delta": 8.0,
+      "has_psy_pack": true,
+      "suggest_price_band": "¥39–79",
+      "premium_fit": "high"
+    },
+    {
       "name": "恋爱人格/恋爱脑/心软",
       "psy_code": "lxrx",
       "urgency_score": 116.9,
       "hit_count": 6,
+      "sum_delta": 22.0,
       "avg_price": 50.14,
       "max_delta": 10.0,
       "has_psy_pack": true,
@@ -2095,6 +4158,7 @@
       "psy_code": "ydnh",
       "urgency_score": 102.3,
       "hit_count": 6,
+      "sum_delta": 102.0,
       "avg_price": 29.12,
       "max_delta": 61.0,
       "has_psy_pack": true,
@@ -2106,6 +4170,7 @@
       "psy_code": "yllx",
       "urgency_score": 92.3,
       "hit_count": 8,
+      "sum_delta": 27.0,
       "avg_price": 1.55,
       "max_delta": 10.0,
       "has_psy_pack": true,
@@ -2113,12 +4178,25 @@
       "premium_fit": "high"
     },
     {
+      "name": "暗恋指数",
+      "psy_code": "taxh",
+      "urgency_score": 82.4,
+      "hit_count": 4,
+      "sum_delta": 68.0,
+      "avg_price": 1.74,
+      "max_delta": 51.0,
+      "has_psy_pack": true,
+      "suggest_price_band": "¥39–79",
+      "premium_fit": "high"
+    },
+    {
       "name": "暧昧段位/暧昧拉扯",
       "psy_code": "amdw",
-      "urgency_score": 50.1,
-      "hit_count": 1,
-      "avg_price": 21.4,
-      "max_delta": 1.0,
+      "urgency_score": 67.2,
+      "hit_count": 2,
+      "sum_delta": 52.0,
+      "avg_price": 12.69,
+      "max_delta": 51.0,
       "has_psy_pack": true,
       "suggest_price_band": "¥39–99",
       "premium_fit": "high"

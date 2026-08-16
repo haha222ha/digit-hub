@@ -35,11 +35,35 @@ def load_selection_intel(*, theme: str | None = None) -> dict[str, Any]:
     theme_q = (theme or "").strip()
     if theme_q:
         themes = [t for t in (data.get("themes") or []) if theme_q in str(t.get("name") or "")]
-        items = [i for i in (data.get("top_items") or []) if theme_q in str(i.get("theme") or "")]
+        discovered = [
+            t for t in (data.get("discovered_themes") or []) if theme_q in str(t.get("name") or "")
+        ]
+        items = [
+            i
+            for i in (data.get("top_items") or [])
+            if theme_q in str(i.get("theme") or "") or theme_q in str(i.get("title") or "")
+        ]
+        uncat = [
+            i
+            for i in (data.get("uncategorized_top") or [])
+            if theme_q in str(i.get("title") or "")
+        ]
+        tiers = data.get("action_tiers") or {}
+        filtered_tiers = {}
+        for key in ("high", "mid", "avoid", "discover"):
+            filtered_tiers[key] = [
+                t for t in (tiers.get(key) or []) if theme_q in str(t.get("name") or "")
+            ]
         data = {
             **data,
             "themes": themes,
+            "discovered_themes": discovered,
             "top_items": items,
+            "uncategorized_top": uncat,
+            "action_tiers": filtered_tiers,
+            "premium_shortlist": filtered_tiers.get("high") or [
+                t for t in (data.get("premium_shortlist") or []) if theme_q in str(t.get("name") or "")
+            ],
             "filter_theme": theme_q,
         }
     data["_path"] = str(path)

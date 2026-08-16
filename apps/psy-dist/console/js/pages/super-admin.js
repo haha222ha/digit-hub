@@ -510,109 +510,178 @@ function _fitLabel(fit) {
   return m[fit] || fit || "—";
 }
 
+function _themeRows(list, onPick) {
+  if (!list || !list.length) return el("p", { className: "muted", text: "暂无" });
+  return table(
+    ["主题", "命中", "增量Σ", "均价", "紧急度", "题包", "建议价带"],
+    list.map((t) =>
+      el(
+        "tr",
+        {
+          style: onPick ? "cursor:pointer" : "",
+          title: onPick ? "点击过滤下方明细" : "",
+          onClick: onPick
+            ? () => {
+                onPick(t.name || "");
+              }
+            : undefined,
+        },
+        [
+          el("td", { text: t.name || "—" }),
+          el("td", { text: String(t.hit_count ?? 0) }),
+          el("td", { text: String(t.sum_delta ?? 0) }),
+          el("td", { text: t.avg_price != null ? `¥${t.avg_price}` : "—" }),
+          el("td", { text: String(t.urgency_score ?? 0) }),
+          el("td", { text: t.has_psy_pack ? `有(${t.psy_code || ""})` : "无" }),
+          el("td", { text: t.suggest_price_band || "—" }),
+        ]
+      )
+    )
+  );
+}
+
 export async function renderSaSelectionReports(root) {
   if (!guard()) return;
   const errHost = el("div");
   const bodyHost = el("div");
-  const themeFilter = el("input", { placeholder: "按主题名过滤（可选）", style: "min-width:200px" });
+  const themeFilter = el("input", { placeholder: "主题名过滤（点主题行也可）", style: "min-width:220px" });
   let sortKey = "urgency_score";
+  let fitFilter = "active"; // active | high | mid | low | avoid | all
+  let hideZero = true;
+  let pickTheme = "";
+
+  function setPick(name) {
+    pickTheme = name || "";
+    themeFilter.value = pickTheme;
+    reload();
+  }
 
   async function reload() {
     bodyHost.replaceChildren(el("p", { className: "muted", text: "加载测评选品报告…" }));
     try {
-      const data = await api.saSelectionReports((themeFilter.value || "").trim());
+      const q = (themeFilter.value || pickTheme || "").trim();
+      const data = await api.saSelectionReports(q);
       const meta = (data && data.meta) || {};
-      const themes = [...((data && data.themes) || [])];
-      const shortlist = (data && data.premium_shortlist) || [];
-      const items = (data && data.top_items) || [];
-      themes.sort((a, b) => {
-        const av = Number(a[sortKey] ?? 0);
-        const bv = Number(b[sortKey] ?? 0);
-        return bv - av;
-      });
-      const avgAll =
-        themes.length > 0
-          ? (
-              themes.reduce((s, t) => s + Number(t.avg_price || 0) * Number(t.hit_count || 0), 0) /
-              Math.max(
-                1,
-                themes.reduce((s, t) => s + Number(t.hit_count || 0), 0)
-              )
-            ).toFixed(2)
-          : "—";
+      const tiers = (data && data.action_tiers) || {};
+      const high = tiers.high || (data && data.premium_shortlist) || [];
+      const mid = tiers.mid || [];
+      const avoid = tiers.avoid || [];
+      const discover = tiers.discover || (data && data.discovered_themes) || [];
+      let themes = [...((data && data.themes) || [])];
+      const discovered = [...((data && data.discovered_themes) || [])];
+      const gap = (data && data.catalog_gap) || [];
+      let items = [...((data && data.top_items) || [])];
+      const uncat = (data && data.uncategorized_top) || [];
+
+      if (hideZero) themes = themes.filter((t) => Number(t.hit_count || 0) > 0);
+      if (fitFilter === "active") {
+        /* already hit>0 if hideZero */
+      } else if (fitFilter !== "all") {
+        themes = themes.filter((t) => t.premium_fit === fitFilter);
+      }
+      themes.sort((a, b) => Number(b[sortKey] ?? 0) - Number(a[sortKey] ?? 0));
+      if (q) {
+        items = items.filter((it) => String(it.theme || "").includes(q) || String(it.title || "").includes(q));
+      }
+
+      const hitN = Number(meta.assess_hit_count || 0);
+      const assigned = Number(meta.curated_assigned || 0);
+      const coverPct = hitN > 0 ? Math.round((assigned / hitN) * 100) : 0;
+
+      const fitBtn = (key, label) =>
+        el("button", {
+          className: "btn" + (fitFilter === key ? " btn-primary" : ""),
+          type: "button",
+          text: label,
+          style: "width:auto",
+          onClick: () => {
+            fitFilter = key;
+            reload();
+          },
+        });
+      const sortBtn = (key, label) =>
+        el("button", {
+          className: "btn" + (sortKey === key ? " btn-primary" : ""),
+          type: "button",
+          text: label,
+          style: "width:auto",
+          onClick: () => {
+            sortKey = key;
+            reload();
+          },
+        });
 
       bodyHost.replaceChildren(
-        el("div", { className: "stat-row cols-3", style: "margin-bottom:12px" }, [
+        el("div", { className: "stat-row cols-4", style: "margin-bottom:12px" }, [
           el("div", { className: "stat" }, [
             el("div", { className: "k", text: "报告日" }),
             el("div", { className: "v", style: "font-size:1.1rem", text: String(meta.report_date || "—") }),
           ]),
           el("div", { className: "stat" }, [
-            el("div", { className: "k", text: "测评命中 / 建议总量" }),
+            el("div", { className: "k", text: "测评池 / 建议总量" }),
             el("div", {
               className: "v",
               style: "font-size:1.1rem",
-              text: `${meta.assess_hit_count ?? 0} / ${meta.advice_total ?? 0}`,
+              text: `${hitN} / ${meta.advice_total ?? 0}`,
             }),
           ]),
           el("div", { className: "stat" }, [
-            el("div", { className: "k", text: "加权均价(元)" }),
-            el("div", { className: "v", text: avgAll === "—" ? "—" : `¥${avgAll}` }),
+            el("div", { className: "k", text: "固化归类覆盖" }),
+            el("div", {
+              className: "v",
+              style: "font-size:1.1rem",
+              text: `${assigned}（${coverPct}%）`,
+            }),
+          ]),
+          el("div", { className: "stat" }, [
+            el("div", { className: "k", text: "发现主题 / 未归类" }),
+            el("div", {
+              className: "v",
+              style: "font-size:1.1rem",
+              text: `${meta.discovered_theme_count ?? discovered.length} / ${meta.uncategorized_count ?? uncat.length}`,
+            }),
           ]),
         ]),
         el("p", {
           className: "muted",
-          text: `源：${meta.source_dir || "—"} · 生成于 ${meta.generated_at || "—"}`,
+          text: `${meta.source_name || ""} · 去噪 ${meta.noise_filtered ?? 0} · 活跃主题 ${meta.active_theme_count ?? "—"}/${meta.theme_count ?? "—"} · 生成 ${meta.generated_at || "—"}`,
         }),
+
         el("div", { className: "panel" }, [
-          el("h3", { text: "高客单短名单（适合 ¥39–99 音视频旗舰）" }),
-          shortlist.length === 0
-            ? el("p", { className: "muted", text: "暂无 premium_fit=high 主题" })
-            : table(
-                ["主题", "命中", "增量Σ", "均价", "紧急度", "题包", "建议价带"],
-                shortlist.map((t) =>
-                  el("tr", {}, [
-                    el("td", { text: t.name || "—" }),
-                    el("td", { text: String(t.hit_count ?? 0) }),
-                    el("td", { text: String(t.sum_delta ?? 0) }),
-                    el("td", { text: t.avg_price != null ? `¥${t.avg_price}` : "—" }),
-                    el("td", { text: String(t.urgency_score ?? 0) }),
-                    el("td", { text: t.has_psy_pack ? `有(${t.psy_code || ""})` : "无" }),
-                    el("td", { text: t.suggest_price_band || "—" }),
-                  ])
-                )
-              ),
+          el("h3", { text: "① 今日决策（先看这里）" }),
+          el("p", {
+            className: "muted",
+            text: "P0 做高客单音视频 · P1 标准品跟进 · 合规回避 · 市场新发现待评估。点击主题可过滤下方明细。",
+          }),
+          el("h4", { text: "P0 · 高客单旗舰（¥39–99）", style: "margin-top:12px" }),
+          _themeRows(high, setPick),
+          el("h4", { text: "P1 · 中客单可做", style: "margin-top:16px" }),
+          _themeRows(mid, setPick),
+          el("h4", { text: "合规回避", style: "margin-top:16px" }),
+          _themeRows(avoid, setPick),
+          el("h4", { text: "市场新发现（未固化，先观察）", style: "margin-top:16px" }),
+          _themeRows(discover.slice(0, 12), setPick),
         ]),
+
         el("div", { className: "panel" }, [
-          el("h3", { text: "主题紧急度" }),
-          el("div", { className: "filter-bar", style: "margin-bottom:8px" }, [
+          el("h3", { text: "② 固化主题全景" }),
+          el("div", { className: "filter-bar", style: "margin-bottom:8px;flex-wrap:wrap;gap:6px" }, [
+            fitBtn("active", "仅有命中"),
+            fitBtn("high", "高客单"),
+            fitBtn("mid", "中客单"),
+            fitBtn("low", "引流"),
+            fitBtn("avoid", "回避"),
+            fitBtn("all", "全部含0命中"),
+            sortBtn("urgency_score", "紧急度"),
+            sortBtn("sum_delta", "增量"),
+            sortBtn("avg_price", "均价"),
             el("button", {
-              className: "btn" + (sortKey === "urgency_score" ? " btn-primary" : ""),
+              className: "btn" + (hideZero ? " btn-primary" : ""),
               type: "button",
-              text: "按紧急度",
+              text: hideZero ? "已隐藏0命中" : "显示0命中",
               style: "width:auto",
               onClick: () => {
-                sortKey = "urgency_score";
-                reload();
-              },
-            }),
-            el("button", {
-              className: "btn" + (sortKey === "sum_delta" ? " btn-primary" : ""),
-              type: "button",
-              text: "按增量",
-              style: "width:auto",
-              onClick: () => {
-                sortKey = "sum_delta";
-                reload();
-              },
-            }),
-            el("button", {
-              className: "btn" + (sortKey === "avg_price" ? " btn-primary" : ""),
-              type: "button",
-              text: "按均价",
-              style: "width:auto",
-              onClick: () => {
-                sortKey = "avg_price";
+                hideZero = !hideZero;
                 reload();
               },
             }),
@@ -620,23 +689,63 @@ export async function renderSaSelectionReports(root) {
           themes.length === 0
             ? el("p", { className: "muted", text: "无主题数据" })
             : table(
-                ["主题", "命中", "增量Σ", "均价", "紧急度", "客单适配", "题包", "建议价带"],
+                ["主题", "命中", "增量Σ", "均价", "紧急度", "客单", "题包", "建议价带"],
                 themes.map((t) =>
-                  el("tr", {}, [
-                    el("td", { text: t.name || "—" }),
-                    el("td", { text: String(t.hit_count ?? 0) }),
-                    el("td", { text: String(t.sum_delta ?? 0) }),
-                    el("td", { text: t.avg_price != null ? `¥${t.avg_price}` : "—" }),
-                    el("td", { text: String(t.urgency_score ?? 0) }),
-                    el("td", { text: _fitLabel(t.premium_fit) }),
-                    el("td", { text: t.has_psy_pack ? `有(${t.psy_code || ""})` : "无" }),
-                    el("td", { text: t.suggest_price_band || "—" }),
-                  ])
-                ),
+                  el(
+                    "tr",
+                    {
+                      style: "cursor:pointer",
+                      title: "点击过滤明细",
+                      onClick: () => setPick(t.name || ""),
+                    },
+                    [
+                      el("td", { text: t.name || "—" }),
+                      el("td", { text: String(t.hit_count ?? 0) }),
+                      el("td", { text: String(t.sum_delta ?? 0) }),
+                      el("td", { text: t.avg_price != null ? `¥${t.avg_price}` : "—" }),
+                      el("td", { text: String(t.urgency_score ?? 0) }),
+                      el("td", { text: _fitLabel(t.premium_fit) }),
+                      el("td", { text: t.has_psy_pack ? `有(${t.psy_code || ""})` : "无" }),
+                      el("td", { text: t.suggest_price_band || "—" }),
+                    ]
+                  )
+                )
               ),
         ]),
+
+        gap.length
+          ? el("div", { className: "panel" }, [
+              el("h3", { text: "③ 已有题包 · 今日热库未命中" }),
+              el("p", { className: "muted", text: "题库有货但当日建议池无热度信号，可暂缓投放。" }),
+              table(
+                ["主题", "题包", "客单", "建议价带"],
+                gap.map((t) =>
+                  el("tr", {}, [
+                    el("td", { text: t.name || "—" }),
+                    el("td", { text: t.psy_code || "—" }),
+                    el("td", { text: _fitLabel(t.premium_fit) }),
+                    el("td", { text: t.suggest_price_band || "—" }),
+                  ])
+                )
+              ),
+            ])
+          : el("div"),
+
         el("div", { className: "panel" }, [
-          el("h3", { text: "Top 商品明细" }),
+          el("h3", { text: q ? `④ 商品明细（过滤：${q}）` : "④ 商品明细（Top）" }),
+          el("div", { className: "filter-bar", style: "margin-bottom:8px" }, [
+            el("button", {
+              className: "btn",
+              type: "button",
+              text: "清除主题过滤",
+              style: "width:auto",
+              onClick: () => {
+                pickTheme = "";
+                themeFilter.value = "";
+                reload();
+              },
+            }),
+          ]),
           items.length === 0
             ? el("p", { className: "muted", text: "无明细" })
             : table(
@@ -651,8 +760,25 @@ export async function renderSaSelectionReports(root) {
                     el("td", { text: String(it.advice_score ?? "—") }),
                     el("td", { text: String(it.goods_id || "—") }),
                   ])
-                ),
+                )
               ),
+          uncat.length && !q
+            ? el("div", { style: "margin-top:16px" }, [
+                el("h4", { text: "未归类高增量（噪声已剔除，供人工补词）" }),
+                table(
+                  ["标题", "价", "增量", "池", "goods_id"],
+                  uncat.slice(0, 25).map((it) =>
+                    el("tr", {}, [
+                      el("td", { text: it.title || "—" }),
+                      el("td", { text: it.price != null ? `¥${it.price}` : "—" }),
+                      el("td", { text: String(it.delta ?? 0) }),
+                      el("td", { text: it.pool || "—" }),
+                      el("td", { text: String(it.goods_id || "—") }),
+                    ])
+                  )
+                ),
+              ])
+            : el("div"),
         ])
       );
     } catch (e) {
@@ -665,12 +791,12 @@ export async function renderSaSelectionReports(root) {
       el("h1", { className: "page-title", text: "测评选品报告" }),
       el("p", {
         className: "page-lead",
-        text: "热库测评类成交/紧急度情报 · 仅超管 · 用于挑选高客单音视频主题",
+        text: "热库全量测评选题 · 决策分层 + 发现池 · 仅超管",
       }),
       errHost,
       el("div", { className: "filter-bar" }, [
-        el("div", { className: "field", style: "margin:0;min-width:220px" }, [
-          el("label", { text: "主题过滤" }),
+        el("div", { className: "field", style: "margin:0;min-width:240px" }, [
+          el("label", { text: "主题 / 标题过滤" }),
           themeFilter,
         ]),
         el("button", {
