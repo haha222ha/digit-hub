@@ -1610,16 +1610,14 @@ def save_ship_snapshot(user_id: int, device_label: str, snapshot: dict) -> dict:
     label = (device_label or "default").strip() or "default"
     if not isinstance(snapshot, dict):
         raise ValueError("snapshot 必须是对象")
-    import json as _json
-
-    payload = _json.dumps(snapshot, ensure_ascii=False, separators=(",", ":"))
+    payload = json.dumps(snapshot, ensure_ascii=False, separators=(",", ":"))
     if len(payload) > 8_000_000:
-        raise ValueError("快照过大（>8MB）")
+        raise ValueError("快照过大")
     now = _now()
     if _USE_PG:
         conn = _pg_conn()
-        c = _pg_cur(conn)
         try:
+            c = _pg_cur(conn)
             c.execute(
                 """INSERT INTO dist_ship_snapshots (user_id, device_label, payload, updated_at)
                    VALUES (%s,%s,%s,NOW())
@@ -1635,8 +1633,8 @@ def save_ship_snapshot(user_id: int, device_label: str, snapshot: dict) -> dict:
             conn.close()
     else:
         conn = _sqlite_conn()
-        c = conn.cursor()
         try:
+            c = conn.cursor()
             c.execute(
                 """INSERT INTO dist_ship_snapshots (user_id, device_label, payload, updated_at)
                    VALUES (?,?,?,?)
@@ -1654,15 +1652,14 @@ def save_ship_snapshot(user_id: int, device_label: str, snapshot: dict) -> dict:
 
 
 def load_ship_snapshot(user_id: int, device_label: str = "default") -> dict | None:
+    """读取发货助手换机快照；无则返回 None"""
     init_dist_tables()
     uid = int(user_id)
     label = (device_label or "default").strip() or "default"
-    import json as _json
-
     if _USE_PG:
         conn = _pg_conn()
-        c = _pg_cur(conn)
         try:
+            c = _pg_cur(conn)
             c.execute(
                 """SELECT payload, updated_at FROM dist_ship_snapshots
                    WHERE user_id=%s AND device_label=%s LIMIT 1""",
@@ -1673,8 +1670,8 @@ def load_ship_snapshot(user_id: int, device_label: str = "default") -> dict | No
             conn.close()
     else:
         conn = _sqlite_conn()
-        c = conn.cursor()
         try:
+            c = conn.cursor()
             c.execute(
                 """SELECT payload, updated_at FROM dist_ship_snapshots
                    WHERE user_id=? AND device_label=? LIMIT 1""",
@@ -1685,17 +1682,20 @@ def load_ship_snapshot(user_id: int, device_label: str = "default") -> dict | No
             conn.close()
     if not row:
         return None
-    payload = row["payload"] if isinstance(row, dict) else row[0]
-    updated = row["updated_at"] if isinstance(row, dict) else row[1]
+    data = _row_dict(row) or {}
+    raw = data.get("payload") or "{}"
     try:
-        data = _json.loads(payload)
-    except Exception as e:
-        raise ValueError(f"快照损坏: {e}") from e
+        snap = json.loads(raw) if isinstance(raw, str) else (raw or {})
+    except Exception:
+        snap = {}
+    if not isinstance(snap, dict):
+        snap = {}
     return {
+        "snapshot": snap,
+        "updated_at": str(data.get("updated_at") or ""),
         "device_label": label,
-        "updated_at": str(updated or ""),
-        "snapshot": data,
     }
+
 
 
 def sync_seen_orders(user_id: int, orders: list[dict]) -> dict:
@@ -2183,11 +2183,11 @@ def get_unlimited_session(token: str) -> dict | None:
         conn.close()
         data = _row_dict(row)
     else:
-    conn = _sqlite_conn()
-    c = conn.cursor()
-    c.execute("SELECT * FROM dist_unlimited_sessions WHERE token=?", (token,))
-    row = c.fetchone()
-    conn.close()
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute("SELECT * FROM dist_unlimited_sessions WHERE token=?", (token,))
+        row = c.fetchone()
+        conn.close()
         data = _row_dict(row)
     if not data:
         return None
@@ -2520,21 +2520,21 @@ def list_links_page(
         c = _pg_cur(conn)
         c.execute(f"SELECT COUNT(*) AS c FROM dist_links WHERE {wh}", tuple(params))
         total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
-            c.execute(
+        c.execute(
             f"SELECT * FROM dist_links WHERE {wh} ORDER BY {order_sql} LIMIT %s OFFSET %s",
             tuple(params + [per_page, offset]),
-            )
+        )
         rows = c.fetchall()
         conn.close()
-        else:
+    else:
         conn = _sqlite_conn()
         c = conn.cursor()
         c.execute(f"SELECT COUNT(*) AS c FROM dist_links WHERE {wh}", tuple(params))
         total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
-            c.execute(
+        c.execute(
             f"SELECT * FROM dist_links WHERE {wh} ORDER BY {order_sql} LIMIT ? OFFSET ?",
             tuple(params + [per_page, offset]),
-            )
+        )
         rows = c.fetchall()
         conn.close()
     links = [_map_link(_row_dict(r)) for r in rows]
@@ -2619,8 +2619,8 @@ def revoke_links(user_id: int, link_ids: list[int]) -> dict:
         finally:
             conn.close()
     else:
-    conn = _sqlite_conn()
-    c = conn.cursor()
+        conn = _sqlite_conn()
+        c = conn.cursor()
         try:
             c.execute("SELECT quota, used_quota FROM dist_distributors WHERE user_id=?", (uid,))
             drow = _row_dict(c.fetchone()) or {}
@@ -2634,7 +2634,7 @@ def revoke_links(user_id: int, link_ids: list[int]) -> dict:
                 if (link.get("status") or "") == "revoked":
                     continue
                 do_refund = int(link.get("used_count") or 0) == 0
-        c.execute(
+                c.execute(
                     "UPDATE dist_links SET status='revoked', revoked_at=? WHERE id=?",
                     (now, lid),
                 )
@@ -2772,9 +2772,9 @@ def export_links_rows(
             conn = _sqlite_conn()
             c = conn.cursor()
             c.execute(sql, tuple(params))
-    rows = c.fetchall()
-    conn.close()
-    return [_map_link(_row_dict(r)) for r in rows]
+            rows = c.fetchall()
+            conn.close()
+        return [_map_link(_row_dict(r)) for r in rows]
     all_links: list[dict] = []
     page_i = 1
     total = 0
@@ -2860,8 +2860,8 @@ def list_test_results_page(
         rows = [_map_test_result(_row_dict(r)) for r in c.fetchall()]
         conn.close()
     else:
-    conn = _sqlite_conn()
-    c = conn.cursor()
+        conn = _sqlite_conn()
+        c = conn.cursor()
         c.execute(f"SELECT COUNT(*) AS c FROM dist_test_results WHERE {wh}", tuple(params))
         total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
         c.execute(
@@ -2909,7 +2909,7 @@ def list_test_results_admin(
         c = _pg_cur(conn)
         c.execute(f"SELECT COUNT(*) AS c FROM dist_test_results r{wh}", tuple(params))
         total = int((_row_dict(c.fetchone()) or {}).get("c") or 0)
-    c.execute(
+        c.execute(
             f"""SELECT r.id, r.link_id, r.token, r.test_code, r.user_id, r.perspective, r.unlimited,
                        r.completed_at, u.username
                 FROM dist_test_results r
@@ -2923,7 +2923,7 @@ def list_test_results_admin(
             item = _map_test_result(_row_dict(r))
             item["username"] = (_row_dict(r) or {}).get("username")
             rows.append(item)
-    conn.close()
+        conn.close()
     else:
         conn = _sqlite_conn()
         c = conn.cursor()
