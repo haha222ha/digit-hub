@@ -1,0 +1,23 @@
+---
+description: 闲鱼相关改动时保护虚拟自动发货；实体代发走新模块；对照 restore 还原点
+alwaysApply: false
+globs:
+  - "**/xianyu*/**"
+  - "**/_tmp_xy_*.py"
+  - "**/restore/**"
+  - "**/*delivery*"
+  - "**/*captcha*"
+---
+
+# 闲鱼虚拟发货保护（digit-hub）
+
+涉及闲鱼上架/发货/滑块脚本时：
+
+1. **禁止改坏虚拟卡密自动发货**主路径。  
+2. 实体代发 = **新模块 + 虚实分流**，不要塞进卡券发货。  
+3. 还原点与提示词：
+
+`D:\选品报告\资料生产工厂\digit-hub-restore-xianyu-20260816`  
+- tag: `restore/xianyu-listing-delivery-20260816`  
+- `restore/VIRTUAL_SAFE_PROMPTS.md`（可整段贴给 AI）  
+- IM 补丁：`restore/xianyu-patches/.../connection_manager.py`
