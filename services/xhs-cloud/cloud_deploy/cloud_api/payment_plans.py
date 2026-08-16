@@ -282,6 +282,22 @@ PSY_DIST_PAYMENT_PLANS: tuple[dict, ...] = (
     },
 )
 
+# 仅当 XHS_PAY_ENABLE_TEST_PLAN=1 时展示，用于分销额度支付回调联调
+PSY_DIST_TEST_PLAN: dict = {
+    "plan_code": "psy_quota_test",
+    "label": "分销额度·支付测试",
+    "label_en": "Quota · pay test",
+    "duration_days": 1,
+    "amount": "1.00",
+    "price_yuan": 1,
+    "prices": {"CNY": "1.00"},
+    "quota_amount": 1,
+    "summary": "1 元联调（1 次额度，验证支付回调与首购返利）",
+    "summary_en": "¥1 pay callback test · 1 credit",
+    "product": "psy_dist",
+    "is_test": True,
+}
+
 # 国家/地区 → 默认币种（ISO 3166-1 alpha-2）
 COUNTRY_CURRENCY: dict[str, str] = {
     "CN": "CNY",
@@ -315,6 +331,7 @@ PLAN_BY_CODE = {
     for p in (*PAYMENT_PLANS, *PAYMENT_ADDON_PLANS, *ASSESS_PAYMENT_PLANS, *PSY_DIST_PAYMENT_PLANS)
 }
 PLAN_BY_CODE[PAYMENT_TEST_PLAN["plan_code"]] = PAYMENT_TEST_PLAN
+PLAN_BY_CODE[PSY_DIST_TEST_PLAN["plan_code"]] = PSY_DIST_TEST_PLAN
 # 第三方发卡专用 plan（不在收银台展示，仅授权码生成）
 PLAN_BY_CODE["assess_code"] = {
     "plan_code": "assess_code",
@@ -348,8 +365,11 @@ def is_psy_dist_plan(plan_code: str) -> bool:
 
 
 def list_psy_dist_plans() -> list[dict]:
-    """收银台展示的分销额度套餐（排除兑换码专用大额档）。"""
-    return [p for p in PSY_DIST_PAYMENT_PLANS if not p.get("redeem_only")]
+    """收银台展示的分销额度套餐（排除兑换码专用大额档；测试档受环境变量控制）。"""
+    plans = [p for p in PSY_DIST_PAYMENT_PLANS if not p.get("redeem_only")]
+    if test_plan_enabled():
+        plans = [PSY_DIST_TEST_PLAN, *plans]
+    return plans
 
 
 def normalize_currency(currency: str | None, *, country: str | None = None) -> str:
@@ -436,7 +456,7 @@ def entitlements_note_for_payment_plan(plan_code: str) -> str | None:
 
 def get_plan(plan_code: str) -> dict | None:
     code = str(plan_code or "").strip()
-    if code == PAYMENT_TEST_PLAN["plan_code"] and not test_plan_enabled():
+    if code in (PAYMENT_TEST_PLAN["plan_code"], PSY_DIST_TEST_PLAN["plan_code"]) and not test_plan_enabled():
         return None
     plan = PLAN_BY_CODE.get(code)
     if plan:

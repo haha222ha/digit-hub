@@ -249,7 +249,7 @@ export function renderRegister(root) {
   });
 
   root.append(
-    authShell("注册商家账号", "注册即送少量试用额度；邀请奖励在好友首次购额后按比例返还。", box, [
+    authShell("注册商家账号", "注册即送少量试用额度；填写邀请码仅绑定关系，邀请人在你首次购额后按比例获返利。", box, [
       el("a", { href: "/login", text: "已有账号？登录", onClick: (e) => linkClick(e, "/login") }),
       homeLink("营销首页"),
     ])

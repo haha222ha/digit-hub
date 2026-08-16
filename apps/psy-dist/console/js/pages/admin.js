@@ -771,7 +771,7 @@ function buildFillMissingPanel(tests, quota) {
     el("h2", { style: "font-size:18px;margin:0 0 8px", text: "一键补齐未生成测题" }),
     el("p", {
       className: "muted",
-      text: `为还没有任何链接的测题批量生成（可按测题单独设定条数）。当前剩余额度：${quota.remaining_quota ?? "—"}。`,
+      text: `为还没有任何链接的测题批量生成。改「默认每测题条数」会同步到下方表格；也可单独改某一题。当前剩余额度：${quota.remaining_quota ?? "—"}。`,
     }),
     errHost,
     el("div", { className: "grid-2", style: "margin-top:12px" }, [
@@ -2030,7 +2030,7 @@ export async function renderInvite(root) {
       el("h1", { className: "page-title", text: "邀请推广" }),
       el("p", {
         className: "page-lead",
-        text: "分享专属链接：好友注册双方各得 5 点额度；好友首次购买额度时，你再获购额 20% 返利。",
+        text: "分享专属链接：好友注册只绑定邀请关系；其首次购额成功后，你按配置比例获返利（默认 20%）。",
       }),
       errHost,
       el("div", { className: "stat-row cols-3" }, [
