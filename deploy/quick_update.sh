@@ -8,15 +8,33 @@ XHS_ROOT="${XHS_ROOT:-/opt/xhs-cloud}"
 SRC="${DIGIT_HUB}/services/xhs-cloud/cloud_deploy"
 BRANCH="${BRANCH:-main}"
 
+if [[ "$(id -u)" -ne 0 ]]; then
+  echo "ERROR: 请用 sudo 运行（需写 /opt/xhs-cloud 并 systemctl restart）:"
+  echo "  sudo bash ${DIGIT_HUB}/deploy/quick_update.sh"
+  exit 1
+fi
+
 echo "==> git pull ${DIGIT_HUB}"
 cd "${DIGIT_HUB}"
-git fetch origin
-git checkout "${BRANCH}"
-git pull --ff-only origin "${BRANCH}"
+# 若仓库曾被 root 拉过，先交回 admin，避免下次 admin git pull 再 Permission denied
+if id admin >/dev/null 2>&1; then
+  chown -R admin:admin "${DIGIT_HUB}" 2>/dev/null || true
+fi
+# git 操作尽量用 admin，避免再次把 .git 写成 root
+if id admin >/dev/null 2>&1; then
+  sudo -u admin git fetch origin
+  sudo -u admin git checkout "${BRANCH}"
+  sudo -u admin git pull --ff-only origin "${BRANCH}"
+else
+  git fetch origin
+  git checkout "${BRANCH}"
+  git pull --ff-only origin "${BRANCH}"
+fi
 
 echo "==> sync API code (keep .env / data / venv)"
 mkdir -p "${XHS_ROOT}/cloud_deploy" "${XHS_ROOT}/data"
-rsync -a --delete \
+# --no-group/--no-owner：避免目标目录属组不可改时报一堆 chgrp
+rsync -a --delete --no-owner --no-group \
   --exclude venv --exclude data --exclude .env --exclude '__pycache__' --exclude '*.pyc' \
   "${SRC}/" "${XHS_ROOT}/cloud_deploy/"
 touch "${XHS_ROOT}/cloud_deploy/__init__.py" 2>/dev/null || true
@@ -31,7 +49,9 @@ if [[ -f "${DIGIT_HUB}/packages/psy-dist/selection-intel/latest.json" ]]; then
     "${XHS_ROOT}/cloud_deploy/assets/psy-dist/selection-intel/latest.json"
   echo "==> synced selection-intel/latest.json"
 fi
-chown -R admin:admin "${XHS_ROOT}/cloud_deploy/assets" 2>/dev/null || true
+if id admin >/dev/null 2>&1; then
+  chown -R admin:admin "${XHS_ROOT}/cloud_deploy/assets" 2>/dev/null || true
+fi
 
 ENV_OUT="${XHS_ROOT}/.env"
 if [[ -f "${ENV_OUT}" ]]; then
