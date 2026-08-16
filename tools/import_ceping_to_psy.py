@@ -435,6 +435,51 @@ def strip_auth_ui(html: str) -> str:
     return html
 
 
+ORPHAN_ADDEVENT_RE = re.compile(
+    r"(?m)^\s*\.addEventListener\(\s*['\"]click['\"]\s*,\s*function\s*\(\s*\)\s*\{[\s\S]*?\}\s*\)\s*;\s*",
+)
+ORPHAN_ADDEVENT_NAMED_RE = re.compile(
+    r"(?m)^\s*\.addEventListener\(\s*['\"]click['\"]\s*,\s*([A-Za-z_$][\w$]*)\s*\)\s*;\s*",
+)
+DOUBLE_START_BTN_RE = re.compile(
+    r"document\.getElementById\(\s*['\"]start-btn['\"]\s*\)\s*\.document\.getElementById\(\s*['\"]start-btn['\"]\s*\)",
+)
+SYS_AUTH_OPEN_RE = re.compile(
+    r"var\s+modal\s*=\s*document\.getElementById\(\s*['\"]sys-auth-modal['\"]\s*\)\s*;"
+    r"\s*if\s*\(\s*modal\s*\)\s*\{"
+    r"\s*modal\.style\.display\s*=\s*['\"]flex['\"]\s*;"
+    r"\s*var\s+inp\s*=\s*document\.getElementById\(\s*['\"]sys-auth-code['\"]\s*\)\s*;"
+    r"\s*if\s*\(\s*inp\s*\)\s*inp\.focus\s*\(\s*\)\s*;"
+    r"\s*\}",
+)
+
+
+def repair_imported_js(html: str) -> str:
+    """Fix common breakage left after stripping legacy auth chrome."""
+    html = ORPHAN_ADDEVENT_RE.sub("\n", html)
+    # Restore named listeners when we can guess a control id (unlock / auth).
+    def _named(m: re.Match[str]) -> str:
+        fn = m.group(1)
+        if fn == "unlockPage":
+            return (
+                "var __unlockBtn=document.getElementById('unlock-btn')"
+                "||document.querySelector('.unlock-btn');"
+                "if(__unlockBtn)__unlockBtn.addEventListener('click', unlockPage);\n"
+            )
+        return "\n"
+
+    html = ORPHAN_ADDEVENT_NAMED_RE.sub(_named, html)
+    html = DOUBLE_START_BTN_RE.sub(
+        "document.getElementById('start-btn')",
+        html,
+    )
+    html = SYS_AUTH_OPEN_RE.sub("", html)
+    if 'id="global-auth-modal"' in html or "id='global-auth-modal'" in html:
+        html = GLOBAL_AUTH_MODAL_RE.sub("", html)
+    html = COMMON_CSS_RE.sub("", html)
+    return html
+
+
 def _replace_balanced_function(html: str, name: str, replacement: str) -> str:
     m = re.search(rf"function\s+{name}\s*\(\s*\)\s*\{{", html)
     if not m:
@@ -567,10 +612,29 @@ def apply_unique_skin(html: str, dest: Path, code: str = "") -> str:
 def transform_index(html: str, code: str, dest: Path) -> str:
     html = strip_auth_ui(html)
     html = adapt_auth_page_flow(html)
+    html = repair_imported_js(html)
     html = fix_home_nav(html)
     html = apply_unique_skin(html, dest, code)
     html = inject_bridge(html, code)
     return html
+
+
+def repair_existing_pack(code: str, dry_run: bool) -> bool:
+    dest = OUT_TESTS / code
+    index = dest / "index.html"
+    if not index.exists():
+        return False
+    html = index.read_text(encoding="utf-8", errors="ignore")
+    new_html = repair_imported_js(html)
+    new_html = fix_home_nav(new_html)
+    if new_html == html:
+        return False
+    if dry_run:
+        print(f"[dry-run] repair {code}")
+        return True
+    index.write_text(new_html, encoding="utf-8")
+    print(f"repaired {code}")
+    return True
 
 
 def resolve_src(legacy_root: Path, app_name: str, code: str) -> Path:
@@ -717,7 +781,7 @@ def main() -> None:
     ap.add_argument("--title", default=None)
     ap.add_argument(
         "--batch",
-        choices=["priority", "wave2", "wave3", "reskin", "all", "thin"],
+        choices=["priority", "wave2", "wave3", "reskin", "all", "thin", "repair"],
         default=None,
     )
     ap.add_argument("--dry-run", action="store_true")
@@ -748,6 +812,13 @@ def main() -> None:
             ("松弛感指数测试", "scgz", "松弛感指数测试"),
         ]
         jobs = thin
+    elif args.batch == "repair":
+        n = 0
+        for d in sorted(OUT_TESTS.iterdir()):
+            if d.is_dir() and repair_existing_pack(d.name, args.dry_run):
+                n += 1
+        print(f"repair done: {n} packs changed")
+        return
     elif args.batch == "reskin":
         entries_r: list[dict] = []
         for code in RESKIN_CODES:
@@ -763,7 +834,7 @@ def main() -> None:
     elif args.app and args.code:
         jobs = [(args.app, args.code, args.title or args.app)]
     else:
-        ap.error("需要 --batch priority|wave2|wave3|reskin|thin|all 或 --app + --code")
+        ap.error("需要 --batch priority|wave2|wave3|reskin|thin|repair|all 或 --app + --code")
 
     entries = []
     for app_name, code, title in jobs:

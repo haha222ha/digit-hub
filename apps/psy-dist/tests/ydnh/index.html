@@ -7,8 +7,8 @@
     <style>
 
         .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
-        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
-        .nav-home:hover{color:#764ba2}
+        .nav-home{color:var(--primary);text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:var(--primary-dark, var(--primary))}
         .nav-title{color:#333;font-size:14px;font-weight:700}
 
         :root { --primary: #A55EEA; --primary-dark: #8854D0; --bg-gradient-start: #F5F0FF; --bg-gradient-end: #EDE7F6; --text-main: #2D3436; --text-sub: #636E72; }
@@ -155,7 +155,7 @@ function handleAnswer(dim,val){scores[dim]+=val;if(currIdx<currQList.length-1){c
 function finishTest(){document.getElementById('page-test').style.display='none';setTimeout(()=>{document.getElementById('page-result').style.display='block';calculateResult();},2000);}
 function calculateResult(){let total=Object.values(scores).reduce((a,b)=>a+b,0);let finalScore=Math.round(total);let lvl=levels.find(l=>finalScore<=l.max)||levels[levels.length-1];let start=0;const timer=setInterval(()=>{start++;document.getElementById('res-score').innerText=start;if(start>=finalScore)clearInterval(timer);},20);document.getElementById('res-level').innerText=lvl.l;document.getElementById('res-level').style.background=lvl.c;document.getElementById('res-desc').innerText=lvl.d;document.getElementById('compare-now').innerText=finalScore;const trend=finalScore<lastMonthScore?'↓':(finalScore>lastMonthScore?'↑':'→');document.getElementById('trend-arrow').innerText=trend;document.getElementById('trend-arrow').style.color=trend==='↓'?'#2ED573':(trend==='↑'?'#FF7675':'#95a5a6');const trendText=finalScore<lastMonthScore?'相比上月下降了'+(lastMonthScore-finalScore)+'分，内耗明显减少！':(finalScore>lastMonthScore?'相比上月上升了'+(finalScore-lastMonthScore)+'分，内耗有所增加，需要注意。':'和上月持平，内耗维持在中等水平。');document.getElementById('trend-desc').innerText=trendText;}
 async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(165,94,234);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('月度精神内耗复测报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});let y=55;const score=parseInt(document.getElementById('res-score').innerText);const lvl=levels.find(l=>score<=l.max)||levels[levels.length-1];doc.setTextColor(0,0,0);doc.setFontSize(16);doc.text(`内耗等级：${lvl.l}`,15,y);y+=10;doc.setFontSize(12);doc.text(lvl.d.substring(0,150)+'...',15,y);doc.save('月度精神内耗复测.pdf');}
-document.getElementById('start-btn').document.getElementById('start-btn').addEventListener('click',function(){var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}startTest();document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';});document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+document.getElementById('start-btn').addEventListener('click',function(){startTest();document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';});document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
 </script>
 
 

@@ -957,10 +957,8 @@ window.addEventListener('DOMContentLoaded', function() {
     if (sessionStorage.getItem('unlocked_' + pageId)) {
         updateLimitUI();
     }
-
-    .addEventListener('click', unlockPage);
-
-    document.getElementById('start-btn').addEventListener('click', function() {
+var __unlockBtn=document.getElementById('unlock-btn')||document.querySelector('.unlock-btn');if(__unlockBtn)__unlockBtn.addEventListener('click', unlockPage);
+document.getElementById('start-btn').addEventListener('click', function() {
         
  goToDemo(); });
     document.getElementById('init-test-btn').addEventListener('click', initTest);

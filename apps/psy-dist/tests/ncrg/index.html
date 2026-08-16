@@ -86,7 +86,7 @@ const milkTeas = [
     {icon:'🧋',name:'芋泥波波',desc:'你是软糯甜蜜的代表！性格温柔可爱，是甜甜的girl。你善于倾听，是朋友的情感垃圾桶。你总是默默关心身边的人，超级暖心！',traits:['温柔','暖心','倾听','细腻']},
     {icon:'🧋',name:'生椰拿铁',desc:'你是高级感代表！性格低调但有品位。你追求品质生活，不将就但也不张扬。你是那种默默努力，然后惊艳所有人的类型。',traits:['高级','低调','品质','自律']}
 ];
-document.getElementById('start-btn').addEventListener('click',function(){var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}
+document.getElementById('start-btn').addEventListener('click',function(){
     const result=milkTeas[Math.floor(Math.random()*milkTeas.length)];
     document.getElementById('page-intro').style.display='none';
     document.getElementById('page-result').style.display='block';
