@@ -34,6 +34,7 @@ const SUPER_NAV = [
   { path: "/super-admin/users", label: "分销商" },
   { path: "/super-admin/orders", label: "订单" },
   { path: "/super-admin/payment-stats", label: "支付统计" },
+  { path: "/super-admin/selection-reports", label: "测评选品报告" },
   { path: "/super-admin/packages", label: "套餐" },
   { path: "/super-admin/redeem-codes", label: "兑换码" },
   { path: "/super-admin/invite-stats", label: "邀请统计" },

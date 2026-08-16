@@ -25,6 +25,12 @@ if [[ -f "${DIGIT_HUB}/packages/psy-dist/tests-catalog.json" ]]; then
   cp -f "${DIGIT_HUB}/packages/psy-dist/tests-catalog.json" \
     "${XHS_ROOT}/cloud_deploy/assets/psy-dist/tests-catalog.json"
 fi
+if [[ -f "${DIGIT_HUB}/packages/psy-dist/selection-intel/latest.json" ]]; then
+  mkdir -p "${XHS_ROOT}/cloud_deploy/assets/psy-dist/selection-intel"
+  cp -f "${DIGIT_HUB}/packages/psy-dist/selection-intel/latest.json" \
+    "${XHS_ROOT}/cloud_deploy/assets/psy-dist/selection-intel/latest.json"
+  echo "==> synced selection-intel/latest.json"
+fi
 chown -R admin:admin "${XHS_ROOT}/cloud_deploy/assets" 2>/dev/null || true
 
 ENV_OUT="${XHS_ROOT}/.env"

@@ -484,6 +484,24 @@ def sa_pay_stats_range(request: Request, start_date: str = "", end_date: str = "
     return _ok(dist_ops.payment_stats_range(start_date, end_date))
 
 
+@ops_router.get("/api/super-admin/selection-reports")
+def sa_selection_reports(request: Request, theme: str = ""):
+    """测评类选品/成交情报（热库快照），仅超管。"""
+    try:
+        _require_super(request)
+    except HTTPException as e:
+        return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
+    try:
+        from cloud_deploy.cloud_api.selection_intel import load_selection_intel
+
+        data = load_selection_intel(theme=theme or None)
+    except FileNotFoundError as e:
+        return JSONResponse(_fail(str(e), code=404), status_code=200)
+    except Exception as e:
+        return JSONResponse(_fail(f"读取选品快照失败: {e}", code=500), status_code=200)
+    return _ok(data, "测评选品报告")
+
+
 @ops_router.get("/api/super-admin/payment-config")
 def sa_pay_config(request: Request):
     try:

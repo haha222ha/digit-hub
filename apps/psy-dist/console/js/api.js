@@ -397,6 +397,10 @@ export const api = {
   saRedeemRevoke: (code) =>
     request("/api/super-admin/redeem-codes/revoke", { method: "POST", auth: true, body: { code } }),
   saPaymentStats: () => request("/api/super-admin/payment-stats", { auth: true }),
+  saSelectionReports: (theme = "") => {
+    const q = theme ? `?theme=${encodeURIComponent(theme)}` : "";
+    return request(`/api/super-admin/selection-reports${q}`, { auth: true });
+  },
   saPaymentStatsRange: (params = {}) => {
     const q = new URLSearchParams();
     if (params.startDate || params.start_date) q.set("start_date", params.startDate || params.start_date);

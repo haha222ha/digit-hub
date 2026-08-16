@@ -505,6 +505,188 @@ export async function renderSaPaymentStats(root) {
   await loadRange();
 }
 
+function _fitLabel(fit) {
+  const m = { high: "高客单", mid: "中客单", low: "引流", avoid: "回避" };
+  return m[fit] || fit || "—";
+}
+
+export async function renderSaSelectionReports(root) {
+  if (!guard()) return;
+  const errHost = el("div");
+  const bodyHost = el("div");
+  const themeFilter = el("input", { placeholder: "按主题名过滤（可选）", style: "min-width:200px" });
+  let sortKey = "urgency_score";
+
+  async function reload() {
+    bodyHost.replaceChildren(el("p", { className: "muted", text: "加载测评选品报告…" }));
+    try {
+      const data = await api.saSelectionReports((themeFilter.value || "").trim());
+      const meta = (data && data.meta) || {};
+      const themes = [...((data && data.themes) || [])];
+      const shortlist = (data && data.premium_shortlist) || [];
+      const items = (data && data.top_items) || [];
+      themes.sort((a, b) => {
+        const av = Number(a[sortKey] ?? 0);
+        const bv = Number(b[sortKey] ?? 0);
+        return bv - av;
+      });
+      const avgAll =
+        themes.length > 0
+          ? (
+              themes.reduce((s, t) => s + Number(t.avg_price || 0) * Number(t.hit_count || 0), 0) /
+              Math.max(
+                1,
+                themes.reduce((s, t) => s + Number(t.hit_count || 0), 0)
+              )
+            ).toFixed(2)
+          : "—";
+
+      bodyHost.replaceChildren(
+        el("div", { className: "stat-row cols-3", style: "margin-bottom:12px" }, [
+          el("div", { className: "stat" }, [
+            el("div", { className: "k", text: "报告日" }),
+            el("div", { className: "v", style: "font-size:1.1rem", text: String(meta.report_date || "—") }),
+          ]),
+          el("div", { className: "stat" }, [
+            el("div", { className: "k", text: "测评命中 / 建议总量" }),
+            el("div", {
+              className: "v",
+              style: "font-size:1.1rem",
+              text: `${meta.assess_hit_count ?? 0} / ${meta.advice_total ?? 0}`,
+            }),
+          ]),
+          el("div", { className: "stat" }, [
+            el("div", { className: "k", text: "加权均价(元)" }),
+            el("div", { className: "v", text: avgAll === "—" ? "—" : `¥${avgAll}` }),
+          ]),
+        ]),
+        el("p", {
+          className: "muted",
+          text: `源：${meta.source_dir || "—"} · 生成于 ${meta.generated_at || "—"}`,
+        }),
+        el("div", { className: "panel" }, [
+          el("h3", { text: "高客单短名单（适合 ¥39–99 音视频旗舰）" }),
+          shortlist.length === 0
+            ? el("p", { className: "muted", text: "暂无 premium_fit=high 主题" })
+            : table(
+                ["主题", "命中", "增量Σ", "均价", "紧急度", "题包", "建议价带"],
+                shortlist.map((t) =>
+                  el("tr", {}, [
+                    el("td", { text: t.name || "—" }),
+                    el("td", { text: String(t.hit_count ?? 0) }),
+                    el("td", { text: String(t.sum_delta ?? 0) }),
+                    el("td", { text: t.avg_price != null ? `¥${t.avg_price}` : "—" }),
+                    el("td", { text: String(t.urgency_score ?? 0) }),
+                    el("td", { text: t.has_psy_pack ? `有(${t.psy_code || ""})` : "无" }),
+                    el("td", { text: t.suggest_price_band || "—" }),
+                  ])
+                )
+              ),
+        ]),
+        el("div", { className: "panel" }, [
+          el("h3", { text: "主题紧急度" }),
+          el("div", { className: "filter-bar", style: "margin-bottom:8px" }, [
+            el("button", {
+              className: "btn" + (sortKey === "urgency_score" ? " btn-primary" : ""),
+              type: "button",
+              text: "按紧急度",
+              style: "width:auto",
+              onClick: () => {
+                sortKey = "urgency_score";
+                reload();
+              },
+            }),
+            el("button", {
+              className: "btn" + (sortKey === "sum_delta" ? " btn-primary" : ""),
+              type: "button",
+              text: "按增量",
+              style: "width:auto",
+              onClick: () => {
+                sortKey = "sum_delta";
+                reload();
+              },
+            }),
+            el("button", {
+              className: "btn" + (sortKey === "avg_price" ? " btn-primary" : ""),
+              type: "button",
+              text: "按均价",
+              style: "width:auto",
+              onClick: () => {
+                sortKey = "avg_price";
+                reload();
+              },
+            }),
+          ]),
+          themes.length === 0
+            ? el("p", { className: "muted", text: "无主题数据" })
+            : table(
+                ["主题", "命中", "增量Σ", "均价", "紧急度", "客单适配", "题包", "建议价带"],
+                themes.map((t) =>
+                  el("tr", {}, [
+                    el("td", { text: t.name || "—" }),
+                    el("td", { text: String(t.hit_count ?? 0) }),
+                    el("td", { text: String(t.sum_delta ?? 0) }),
+                    el("td", { text: t.avg_price != null ? `¥${t.avg_price}` : "—" }),
+                    el("td", { text: String(t.urgency_score ?? 0) }),
+                    el("td", { text: _fitLabel(t.premium_fit) }),
+                    el("td", { text: t.has_psy_pack ? `有(${t.psy_code || ""})` : "无" }),
+                    el("td", { text: t.suggest_price_band || "—" }),
+                  ])
+                ),
+              ),
+        ]),
+        el("div", { className: "panel" }, [
+          el("h3", { text: "Top 商品明细" }),
+          items.length === 0
+            ? el("p", { className: "muted", text: "无明细" })
+            : table(
+                ["主题", "标题", "价", "增量", "池", "得分", "goods_id"],
+                items.map((it) =>
+                  el("tr", {}, [
+                    el("td", { text: it.theme || "—" }),
+                    el("td", { text: it.title || "—" }),
+                    el("td", { text: it.price != null ? `¥${it.price}` : "—" }),
+                    el("td", { text: String(it.delta ?? 0) }),
+                    el("td", { text: it.pool || "—" }),
+                    el("td", { text: String(it.advice_score ?? "—") }),
+                    el("td", { text: String(it.goods_id || "—") }),
+                  ])
+                ),
+              ),
+        ])
+      );
+    } catch (e) {
+      bodyHost.replaceChildren(flash("error", e.message || "加载失败"));
+    }
+  }
+
+  root.append(
+    shell("/super-admin/selection-reports", [
+      el("h1", { className: "page-title", text: "测评选品报告" }),
+      el("p", {
+        className: "page-lead",
+        text: "热库测评类成交/紧急度情报 · 仅超管 · 用于挑选高客单音视频主题",
+      }),
+      errHost,
+      el("div", { className: "filter-bar" }, [
+        el("div", { className: "field", style: "margin:0;min-width:220px" }, [
+          el("label", { text: "主题过滤" }),
+          themeFilter,
+        ]),
+        el("button", {
+          className: "btn btn-primary",
+          type: "button",
+          text: "刷新",
+          style: "width:auto",
+          onClick: () => reload(),
+        }),
+      ]),
+      bodyHost,
+    ])
+  );
+  await reload();
+}
+
 export async function renderSaPackages(root) {
   if (!guard()) return;
   const errHost = el("div");
