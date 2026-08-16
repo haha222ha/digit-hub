@@ -510,31 +510,57 @@ function _fitLabel(fit) {
   return m[fit] || fit || "—";
 }
 
-function _themeRows(list, onPick) {
+function _trendLabel(trend) {
+  const m = {
+    rising: "↑上升",
+    falling: "↓回落",
+    stable: "→平稳",
+    new: "★新冒",
+    fading: "⋯消退",
+    none: "—",
+  };
+  return m[trend] || trend || "—";
+}
+
+function _themeRows(list, onPick, { multi = false } = {}) {
   if (!list || !list.length) return el("p", { className: "muted", text: "暂无" });
+  const headers = multi
+    ? ["主题", "趋势", "出日", "跨日命中", "跨日增量", "综合紧急度", "题包", "建议价带"]
+    : ["主题", "命中", "增量Σ", "均价", "紧急度", "题包", "建议价带"];
   return table(
-    ["主题", "命中", "增量Σ", "均价", "紧急度", "题包", "建议价带"],
+    headers,
     list.map((t) =>
       el(
         "tr",
         {
           style: onPick ? "cursor:pointer" : "",
-          title: onPick ? "点击过滤下方明细" : "",
+          title: onPick ? "点击联动过滤" : "",
           onClick: onPick
             ? () => {
                 onPick(t.name || "");
               }
             : undefined,
         },
-        [
-          el("td", { text: t.name || "—" }),
-          el("td", { text: String(t.hit_count ?? 0) }),
-          el("td", { text: String(t.sum_delta ?? 0) }),
-          el("td", { text: t.avg_price != null ? `¥${t.avg_price}` : "—" }),
-          el("td", { text: String(t.urgency_score ?? 0) }),
-          el("td", { text: t.has_psy_pack ? `有(${t.psy_code || ""})` : "无" }),
-          el("td", { text: t.suggest_price_band || "—" }),
-        ]
+        multi
+          ? [
+              el("td", { text: t.name || "—" }),
+              el("td", { text: `${_trendLabel(t.trend)} ${t.spark || ""}` }),
+              el("td", { text: String(t.days_present ?? "—") }),
+              el("td", { text: String(t.total_hits ?? t.hit_count ?? 0) }),
+              el("td", { text: String(t.total_delta ?? t.sum_delta ?? 0) }),
+              el("td", { text: String(t.urgency_score ?? 0) }),
+              el("td", { text: t.has_psy_pack ? `有(${t.psy_code || ""})` : "无" }),
+              el("td", { text: t.suggest_price_band || "—" }),
+            ]
+          : [
+              el("td", { text: t.name || "—" }),
+              el("td", { text: String(t.hit_count ?? 0) }),
+              el("td", { text: String(t.sum_delta ?? 0) }),
+              el("td", { text: t.avg_price != null ? `¥${t.avg_price}` : "—" }),
+              el("td", { text: String(t.urgency_score ?? 0) }),
+              el("td", { text: t.has_psy_pack ? `有(${t.psy_code || ""})` : "无" }),
+              el("td", { text: t.suggest_price_band || "—" }),
+            ]
       )
     )
   );
@@ -544,11 +570,15 @@ export async function renderSaSelectionReports(root) {
   if (!guard()) return;
   const errHost = el("div");
   const bodyHost = el("div");
-  const themeFilter = el("input", { placeholder: "主题名过滤（点主题行也可）", style: "min-width:220px" });
+  const themeFilter = el("input", {
+    placeholder: "主题名过滤（点主题行也可）",
+    style: "min-width:220px",
+  });
   let sortKey = "urgency_score";
-  let fitFilter = "active"; // active | high | mid | low | avoid | all
+  let fitFilter = "active";
   let hideZero = true;
   let pickTheme = "";
+  let pickDay = "";
 
   function setPick(name) {
     pickTheme = name || "";
@@ -556,37 +586,52 @@ export async function renderSaSelectionReports(root) {
     reload();
   }
 
+  function setDay(day) {
+    pickDay = day || "";
+    reload();
+  }
+
   async function reload() {
-    bodyHost.replaceChildren(el("p", { className: "muted", text: "加载测评选品报告…" }));
+    bodyHost.replaceChildren(el("p", { className: "muted", text: "加载热库联动选品报告…" }));
     try {
       const q = (themeFilter.value || pickTheme || "").trim();
-      const data = await api.saSelectionReports(q);
+      const data = await api.saSelectionReports(q, pickDay);
       const meta = (data && data.meta) || {};
       const tiers = (data && data.action_tiers) || {};
+      const digest = (data && data.daily_digest) || [];
       const high = tiers.high || (data && data.premium_shortlist) || [];
       const mid = tiers.mid || [];
       const avoid = tiers.avoid || [];
+      const rising = tiers.rising || [];
+      const watchlist = tiers.watchlist || [];
       const discover = tiers.discover || (data && data.discovered_themes) || [];
       let themes = [...((data && data.themes) || [])];
       const discovered = [...((data && data.discovered_themes) || [])];
       const gap = (data && data.catalog_gap) || [];
       let items = [...((data && data.top_items) || [])];
       const uncat = (data && data.uncategorized_top) || [];
+      const isMulti = Number(meta.day_count || 1) > 1 || meta.scope === "hotlib_all";
 
-      if (hideZero) themes = themes.filter((t) => Number(t.hit_count || 0) > 0);
-      if (fitFilter === "active") {
-        /* already hit>0 if hideZero */
-      } else if (fitFilter !== "all") {
+      if (hideZero) {
+        themes = themes.filter((t) =>
+          isMulti ? Number(t.days_present || 0) > 0 : Number(t.hit_count || 0) > 0
+        );
+      }
+      if (fitFilter === "rising") {
+        themes = themes.filter((t) => t.trend === "rising");
+      } else if (fitFilter !== "active" && fitFilter !== "all") {
         themes = themes.filter((t) => t.premium_fit === fitFilter);
       }
       themes.sort((a, b) => Number(b[sortKey] ?? 0) - Number(a[sortKey] ?? 0));
       if (q) {
-        items = items.filter((it) => String(it.theme || "").includes(q) || String(it.title || "").includes(q));
+        items = items.filter(
+          (it) => String(it.theme || "").includes(q) || String(it.title || "").includes(q)
+        );
       }
 
-      const hitN = Number(meta.assess_hit_count || 0);
-      const assigned = Number(meta.curated_assigned || 0);
-      const coverPct = hitN > 0 ? Math.round((assigned / hitN) * 100) : 0;
+      const pickedThemeObj =
+        themes.find((t) => t.name === q) || discovered.find((t) => t.name === q) || null;
+      const series = (pickedThemeObj && pickedThemeObj.day_series) || [];
 
       const fitBtn = (key, label) =>
         el("button", {
@@ -614,71 +659,141 @@ export async function renderSaSelectionReports(root) {
       bodyHost.replaceChildren(
         el("div", { className: "stat-row cols-4", style: "margin-bottom:12px" }, [
           el("div", { className: "stat" }, [
-            el("div", { className: "k", text: "报告日" }),
-            el("div", { className: "v", style: "font-size:1.1rem", text: String(meta.report_date || "—") }),
-          ]),
-          el("div", { className: "stat" }, [
-            el("div", { className: "k", text: "测评池 / 建议总量" }),
+            el("div", { className: "k", text: "覆盖区间" }),
             el("div", {
               className: "v",
-              style: "font-size:1.1rem",
-              text: `${hitN} / ${meta.advice_total ?? 0}`,
+              style: "font-size:1.05rem",
+              text: `${meta.day_range || meta.latest_day || "—"}（${meta.day_count || 1}日）`,
             }),
           ]),
           el("div", { className: "stat" }, [
-            el("div", { className: "k", text: "固化归类覆盖" }),
+            el("div", { className: "k", text: "跨日测评命中Σ" }),
             el("div", {
               className: "v",
               style: "font-size:1.1rem",
-              text: `${assigned}（${coverPct}%）`,
+              text: String(meta.assess_hit_count ?? 0),
             }),
           ]),
           el("div", { className: "stat" }, [
-            el("div", { className: "k", text: "发现主题 / 未归类" }),
+            el("div", { className: "k", text: "最新日命中" }),
             el("div", {
               className: "v",
               style: "font-size:1.1rem",
-              text: `${meta.discovered_theme_count ?? discovered.length} / ${meta.uncategorized_count ?? uncat.length}`,
+              text: String(meta.assess_hit_latest ?? meta.assess_hit_count ?? 0),
+            }),
+          ]),
+          el("div", { className: "stat" }, [
+            el("div", { className: "k", text: "活跃主题 / 上升" }),
+            el("div", {
+              className: "v",
+              style: "font-size:1.1rem",
+              text: `${meta.active_theme_count ?? 0} / ${rising.length}`,
             }),
           ]),
         ]),
         el("p", {
           className: "muted",
-          text: `${meta.source_name || ""} · 去噪 ${meta.noise_filtered ?? 0} · 活跃主题 ${meta.active_theme_count ?? "—"}/${meta.theme_count ?? "—"} · 生成 ${meta.generated_at || "—"}`,
+          text: `${meta.source_name || ""} · 最新 ${meta.latest_day || ""} · 去噪Σ ${meta.noise_filtered ?? 0} · ${meta.note || ""} · ${meta.generated_at || ""}`,
         }),
 
         el("div", { className: "panel" }, [
-          el("h3", { text: "① 今日决策（先看这里）" }),
+          el("h3", { text: "① 日期轴（联动观测）" }),
           el("p", {
             className: "muted",
-            text: "P0 做高客单音视频 · P1 标准品跟进 · 合规回避 · 市场新发现待评估。点击主题可过滤下方明细。",
+            text: "点日期看当日明细；点「全库」回到跨日综合。与下方主题过滤可叠加。",
           }),
-          el("h4", { text: "P0 · 高客单旗舰（¥39–99）", style: "margin-top:12px" }),
-          _themeRows(high, setPick),
-          el("h4", { text: "P1 · 中客单可做", style: "margin-top:16px" }),
-          _themeRows(mid, setPick),
-          el("h4", { text: "合规回避", style: "margin-top:16px" }),
-          _themeRows(avoid, setPick),
-          el("h4", { text: "市场新发现（未固化，先观察）", style: "margin-top:16px" }),
-          _themeRows(discover.slice(0, 12), setPick),
+          el(
+            "div",
+            { className: "filter-bar", style: "flex-wrap:wrap;gap:6px;margin-bottom:8px" },
+            [
+              el("button", {
+                className: "btn" + (!pickDay ? " btn-primary" : ""),
+                type: "button",
+                text: "全库联动",
+                style: "width:auto",
+                onClick: () => setDay(""),
+              }),
+              ...digest.map((d) =>
+                el("button", {
+                  className: "btn" + (pickDay === d.day ? " btn-primary" : ""),
+                  type: "button",
+                  text: `${d.day}·${d.assess_hit_count ?? 0}`,
+                  style: "width:auto",
+                  title: `${d.report_date || ""} 活跃主题 ${d.active_theme_count ?? 0}`,
+                  onClick: () => setDay(d.day),
+                })
+              ),
+            ]
+          ),
+          pickDay
+            ? (() => {
+                const d = digest.find((x) => x.day === pickDay);
+                if (!d) return el("p", { className: "muted", text: "无该日摘要" });
+                return el("div", {}, [
+                  el("p", {
+                    text: `${d.source_name} · 测评命中 ${d.assess_hit_count} · 建议总量 ${d.advice_total} · 活跃主题 ${d.active_theme_count}`,
+                  }),
+                  d.top_themes && d.top_themes.length
+                    ? table(
+                        ["当日主题", "命中", "紧急度"],
+                        d.top_themes.map((t) =>
+                          el(
+                            "tr",
+                            {
+                              style: "cursor:pointer",
+                              onClick: () => setPick(t.name || ""),
+                            },
+                            [
+                              el("td", { text: t.name || "—" }),
+                              el("td", { text: String(t.hit_count ?? 0) }),
+                              el("td", { text: String(t.urgency_score ?? 0) }),
+                            ]
+                          )
+                        )
+                      )
+                    : el("p", { className: "muted", text: "当日无主题" }),
+                ]);
+              })()
+            : el("p", {
+                className: "muted",
+                text: "当前为全库视角：综合紧急度 = 最新×0.45 + 均值×0.3 + 出日比例 + 连出奖励",
+              }),
         ]),
 
         el("div", { className: "panel" }, [
-          el("h3", { text: "② 固化主题全景" }),
+          el("h3", { text: "② 联动决策（跨日）" }),
+          el("h4", { text: "持续观察 · 多日出场", style: "margin-top:8px" }),
+          _themeRows(watchlist, setPick, { multi: true }),
+          el("h4", { text: "↑ 上升趋势", style: "margin-top:16px" }),
+          _themeRows(rising, setPick, { multi: true }),
+          el("h4", { text: "P0 · 高客单旗舰", style: "margin-top:16px" }),
+          _themeRows(high, setPick, { multi: true }),
+          el("h4", { text: "P1 · 中客单可做", style: "margin-top:16px" }),
+          _themeRows(mid, setPick, { multi: true }),
+          el("h4", { text: "合规回避", style: "margin-top:16px" }),
+          _themeRows(avoid, setPick, { multi: true }),
+          el("h4", { text: "市场新发现（跨日聚类）", style: "margin-top:16px" }),
+          _themeRows(discover.slice(0, 12), setPick, { multi: true }),
+        ]),
+
+        el("div", { className: "panel" }, [
+          el("h3", { text: "③ 固化主题全景（含趋势火花）" }),
           el("div", { className: "filter-bar", style: "margin-bottom:8px;flex-wrap:wrap;gap:6px" }, [
-            fitBtn("active", "仅有命中"),
+            fitBtn("active", "有出日"),
+            fitBtn("rising", "仅上升"),
             fitBtn("high", "高客单"),
             fitBtn("mid", "中客单"),
             fitBtn("low", "引流"),
             fitBtn("avoid", "回避"),
-            fitBtn("all", "全部含0命中"),
-            sortBtn("urgency_score", "紧急度"),
-            sortBtn("sum_delta", "增量"),
-            sortBtn("avg_price", "均价"),
+            fitBtn("all", "含0出日"),
+            sortBtn("urgency_score", "综合紧急度"),
+            sortBtn("total_delta", "跨日增量"),
+            sortBtn("days_present", "出日数"),
+            sortBtn("latest_urgency", "最新日紧急度"),
             el("button", {
               className: "btn" + (hideZero ? " btn-primary" : ""),
               type: "button",
-              text: hideZero ? "已隐藏0命中" : "显示0命中",
+              text: hideZero ? "已隐藏0出日" : "显示0出日",
               style: "width:auto",
               onClick: () => {
                 hideZero = !hideZero;
@@ -689,34 +804,62 @@ export async function renderSaSelectionReports(root) {
           themes.length === 0
             ? el("p", { className: "muted", text: "无主题数据" })
             : table(
-                ["主题", "命中", "增量Σ", "均价", "紧急度", "客单", "题包", "建议价带"],
+                ["主题", "趋势", "出日", "跨日命中", "跨日Δ", "综合/最新", "客单", "题包"],
                 themes.map((t) =>
                   el(
                     "tr",
                     {
                       style: "cursor:pointer",
-                      title: "点击过滤明细",
+                      title: "点击看日序列 + 过滤明细",
                       onClick: () => setPick(t.name || ""),
                     },
                     [
                       el("td", { text: t.name || "—" }),
-                      el("td", { text: String(t.hit_count ?? 0) }),
-                      el("td", { text: String(t.sum_delta ?? 0) }),
-                      el("td", { text: t.avg_price != null ? `¥${t.avg_price}` : "—" }),
-                      el("td", { text: String(t.urgency_score ?? 0) }),
+                      el("td", { text: `${_trendLabel(t.trend)} ${t.spark || ""}` }),
+                      el("td", {
+                        text: `${t.days_present ?? 0}/${t.day_count ?? meta.day_count ?? "—"}`,
+                      }),
+                      el("td", { text: String(t.total_hits ?? 0) }),
+                      el("td", { text: String(t.total_delta ?? 0) }),
+                      el("td", {
+                        text: `${t.urgency_score ?? 0} / ${t.latest_urgency ?? "—"}`,
+                      }),
                       el("td", { text: _fitLabel(t.premium_fit) }),
                       el("td", { text: t.has_psy_pack ? `有(${t.psy_code || ""})` : "无" }),
-                      el("td", { text: t.suggest_price_band || "—" }),
                     ]
                   )
                 )
               ),
         ]),
 
+        series.length
+          ? el("div", { className: "panel" }, [
+              el("h3", { text: `④ 主题日序列 · ${q}` }),
+              table(
+                ["日", "命中", "增量Σ", "均价", "紧急度"],
+                series.map((p) =>
+                  el(
+                    "tr",
+                    {
+                      style: "cursor:pointer",
+                      onClick: () => setDay(p.day),
+                    },
+                    [
+                      el("td", { text: String(p.day || "—") }),
+                      el("td", { text: String(p.hit_count ?? 0) }),
+                      el("td", { text: String(p.sum_delta ?? 0) }),
+                      el("td", { text: p.avg_price != null ? `¥${p.avg_price}` : "—" }),
+                      el("td", { text: String(p.urgency_score ?? 0) }),
+                    ]
+                  )
+                )
+              ),
+            ])
+          : el("div"),
+
         gap.length
           ? el("div", { className: "panel" }, [
-              el("h3", { text: "③ 已有题包 · 今日热库未命中" }),
-              el("p", { className: "muted", text: "题库有货但当日建议池无热度信号，可暂缓投放。" }),
+              el("h3", { text: "⑤ 已有题包 · 全区间未出场" }),
               table(
                 ["主题", "题包", "客单", "建议价带"],
                 gap.map((t) =>
@@ -732,8 +875,14 @@ export async function renderSaSelectionReports(root) {
           : el("div"),
 
         el("div", { className: "panel" }, [
-          el("h3", { text: q ? `④ 商品明细（过滤：${q}）` : "④ 商品明细（Top）" }),
-          el("div", { className: "filter-bar", style: "margin-bottom:8px" }, [
+          el("h3", {
+            text: pickDay
+              ? `⑥ 商品明细 · 日 ${pickDay}${q ? ` · ${q}` : ""}`
+              : q
+                ? `⑥ 商品明细 · ${q}`
+                : "⑥ 商品明细（跨日 Top）",
+          }),
+          el("div", { className: "filter-bar", style: "margin-bottom:8px;gap:6px" }, [
             el("button", {
               className: "btn",
               type: "button",
@@ -745,34 +894,41 @@ export async function renderSaSelectionReports(root) {
                 reload();
               },
             }),
+            el("button", {
+              className: "btn",
+              type: "button",
+              text: "清除日期聚焦",
+              style: "width:auto",
+              onClick: () => setDay(""),
+            }),
           ]),
           items.length === 0
             ? el("p", { className: "muted", text: "无明细" })
             : table(
-                ["主题", "标题", "价", "增量", "池", "得分", "goods_id"],
+                ["日", "主题", "标题", "价", "增量", "池", "goods_id"],
                 items.map((it) =>
                   el("tr", {}, [
+                    el("td", { text: String(it.day || pickDay || meta.latest_day || "—") }),
                     el("td", { text: it.theme || "—" }),
                     el("td", { text: it.title || "—" }),
                     el("td", { text: it.price != null ? `¥${it.price}` : "—" }),
                     el("td", { text: String(it.delta ?? 0) }),
                     el("td", { text: it.pool || "—" }),
-                    el("td", { text: String(it.advice_score ?? "—") }),
                     el("td", { text: String(it.goods_id || "—") }),
                   ])
                 )
               ),
           uncat.length && !q
             ? el("div", { style: "margin-top:16px" }, [
-                el("h4", { text: "未归类高增量（噪声已剔除，供人工补词）" }),
+                el("h4", { text: "近几日未归类高增量（供补词）" }),
                 table(
-                  ["标题", "价", "增量", "池", "goods_id"],
+                  ["日", "标题", "价", "增量", "goods_id"],
                   uncat.slice(0, 25).map((it) =>
                     el("tr", {}, [
+                      el("td", { text: String(it.day || "—") }),
                       el("td", { text: it.title || "—" }),
                       el("td", { text: it.price != null ? `¥${it.price}` : "—" }),
                       el("td", { text: String(it.delta ?? 0) }),
-                      el("td", { text: it.pool || "—" }),
                       el("td", { text: String(it.goods_id || "—") }),
                     ])
                   )
@@ -791,7 +947,7 @@ export async function renderSaSelectionReports(root) {
       el("h1", { className: "page-title", text: "测评选品报告" }),
       el("p", {
         className: "page-lead",
-        text: "热库全量测评选题 · 决策分层 + 发现池 · 仅超管",
+        text: "热库全量多日联动观测 · 日期轴 × 主题趋势 × 明细钻取 · 仅超管",
       }),
       errHost,
       el("div", { className: "filter-bar" }, [

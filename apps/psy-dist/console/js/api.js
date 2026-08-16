@@ -397,9 +397,12 @@ export const api = {
   saRedeemRevoke: (code) =>
     request("/api/super-admin/redeem-codes/revoke", { method: "POST", auth: true, body: { code } }),
   saPaymentStats: () => request("/api/super-admin/payment-stats", { auth: true }),
-  saSelectionReports: (theme = "") => {
-    const q = theme ? `?theme=${encodeURIComponent(theme)}` : "";
-    return request(`/api/super-admin/selection-reports${q}`, { auth: true });
+  saSelectionReports: (theme = "", day = "") => {
+    const q = new URLSearchParams();
+    if (theme) q.set("theme", theme);
+    if (day) q.set("day", day);
+    const s = q.toString();
+    return request(`/api/super-admin/selection-reports${s ? `?${s}` : ""}`, { auth: true });
   },
   saPaymentStatsRange: (params = {}) => {
     const q = new URLSearchParams();

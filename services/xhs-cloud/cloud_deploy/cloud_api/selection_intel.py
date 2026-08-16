@@ -24,7 +24,7 @@ def _resolve_path() -> Path | None:
     return None
 
 
-def load_selection_intel(*, theme: str | None = None) -> dict[str, Any]:
+def load_selection_intel(*, theme: str | None = None, day: str | None = None) -> dict[str, Any]:
     path = _resolve_path()
     if not path:
         raise FileNotFoundError(
@@ -33,6 +33,23 @@ def load_selection_intel(*, theme: str | None = None) -> dict[str, Any]:
         )
     data = json.loads(path.read_text(encoding="utf-8"))
     theme_q = (theme or "").strip()
+    day_q = (day or "").strip().lstrip("全量")
+
+    # 按日：用 daily_digest 覆盖明细视角
+    if day_q:
+        digest = None
+        for d in data.get("daily_digest") or []:
+            if str(d.get("day") or "") == day_q or day_q in str(d.get("source_name") or ""):
+                digest = d
+                break
+        if digest:
+            data = {
+                **data,
+                "focus_day": day_q,
+                "top_items": digest.get("top_items") or [],
+                "focus_digest": digest,
+            }
+
     if theme_q:
         themes = [t for t in (data.get("themes") or []) if theme_q in str(t.get("name") or "")]
         discovered = [
@@ -43,6 +60,7 @@ def load_selection_intel(*, theme: str | None = None) -> dict[str, Any]:
             for i in (data.get("top_items") or [])
             if theme_q in str(i.get("theme") or "") or theme_q in str(i.get("title") or "")
         ]
+        # 若主题带 day_series，附加到 filter 结果便于前端画趋势
         uncat = [
             i
             for i in (data.get("uncategorized_top") or [])
@@ -50,7 +68,7 @@ def load_selection_intel(*, theme: str | None = None) -> dict[str, Any]:
         ]
         tiers = data.get("action_tiers") or {}
         filtered_tiers = {}
-        for key in ("high", "mid", "avoid", "discover"):
+        for key in ("high", "mid", "avoid", "rising", "new", "watchlist", "discover"):
             filtered_tiers[key] = [
                 t for t in (tiers.get(key) or []) if theme_q in str(t.get("name") or "")
             ]
@@ -61,8 +79,11 @@ def load_selection_intel(*, theme: str | None = None) -> dict[str, Any]:
             "top_items": items,
             "uncategorized_top": uncat,
             "action_tiers": filtered_tiers,
-            "premium_shortlist": filtered_tiers.get("high") or [
-                t for t in (data.get("premium_shortlist") or []) if theme_q in str(t.get("name") or "")
+            "premium_shortlist": filtered_tiers.get("high")
+            or [
+                t
+                for t in (data.get("premium_shortlist") or [])
+                if theme_q in str(t.get("name") or "")
             ],
             "filter_theme": theme_q,
         }

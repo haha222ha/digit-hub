@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 """从热库全量增量生成心象测超管「测评选品报告」精简快照。
 
-覆盖策略：
-  1) 固化选题包（与我们题库对齐）→ themes
-  2) 测评门禁扫全量 advice → 噪声排除 → 未归类自动聚类 → discovered_themes
-  3) 分层短名单：high / mid / avoid / discover
+默认扫热库内所有带 advice_data.js 的日期，聚合成跨日联动观测报告。
+也可单日：python tools/build_psy_selection_intel.py --day 0816
 
 用法:
-  python tools/build_psy_selection_intel.py
-  python tools/build_psy_selection_intel.py --day 0816
+  python tools/build_psy_selection_intel.py              # 全库多日（默认）
+  python tools/build_psy_selection_intel.py --scope all
+  python tools/build_psy_selection_intel.py --day 0816   # 仅单日
 """
 from __future__ import annotations
 
 import argparse
 import json
 import re
-from collections import Counter, defaultdict
+from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -48,7 +47,6 @@ BUCKET_WEIGHT = {
     "decline": 0,
 }
 
-# 宽门禁：标题像「测评/人格/心理…」才进池
 ASSESS_GATE = re.compile(
     r"(测试|测评|测验|量表|人格|心理|MBTI|SCL|霍兰德|依恋|内耗|倦怠|"
     r"安全感|高敏感|原生家庭|暧昧|恋爱脑|吸渣|脱单|母单|正缘|复合|"
@@ -57,7 +55,6 @@ ASSESS_GATE = re.compile(
     re.I,
 )
 
-# 噪声：试卷/校招笔试/实物周边/外教课等，不算我们的测评选品
 NOISE = re.compile(
     r"(单元测试|期末测试|期中|试卷|试题|题库|笔试|校招|社招|实习|"
     r"毕马威|德勤|普华|安永|北森|华为|百度|腾讯|平安测评|"
@@ -69,7 +66,6 @@ NOISE = re.compile(
 )
 
 # (name, keywords, psy_code|None, premium_fit, suggest_price_band)
-# premium_fit: high=音视频旗舰候选 / mid=可做标准品 / low=引流 / avoid=合规回避
 PACKS: list[tuple[str, list[str], str | None, str, str]] = [
     ("SCL-90完整90题", ["SCL-90", "SCL90", "症状自评", "90题", "scl90"], "scl90", "avoid", "仅文字·合规包装"),
     ("抑郁焦虑筛查包装", ["抑郁测试", "焦虑测试", "抑郁焦虑", "双相情感"], None, "avoid", "不做视频旗舰"),
@@ -113,42 +109,52 @@ PACKS: list[tuple[str, list[str], str | None, str, str]] = [
 ]
 
 
-def _find_day_dir(day: str | None) -> Path:
+def _day_key(day_dir: Path) -> str:
+    m = re.search(r"全量(\d{4})", day_dir.name)
+    return m.group(1) if m else day_dir.name
+
+
+def _report_date_from_dir(day_dir: Path) -> str:
+    mmdd = _day_key(day_dir)
+    if not re.fullmatch(r"\d{4}", mmdd):
+        return day_dir.name
+    year = datetime.now().year
+    return f"{year}-{mmdd[:2]}-{mmdd[2:]}"
+
+
+def _list_advice_days() -> list[Path]:
     if not HOTLIB_ROOT.is_dir():
         raise SystemExit(f"找不到热库目录: {HOTLIB_ROOT}")
+    days = [
+        p
+        for p in HOTLIB_ROOT.iterdir()
+        if p.is_dir() and p.name.startswith("全量") and (p / "advice_data.js").is_file()
+    ]
+    return sorted(days, key=lambda p: p.name)
+
+
+def _find_day_dir(day: str | None) -> Path:
     if day:
         day = day.strip().lstrip("全量")
         cand = HOTLIB_ROOT / f"全量{day}"
         if not cand.is_dir():
             raise SystemExit(f"找不到日目录: {cand}")
+        if not (cand / "advice_data.js").is_file():
+            raise SystemExit(f"该日缺少 advice_data.js: {cand}")
         return cand
-    dirs = sorted(
-        [p for p in HOTLIB_ROOT.iterdir() if p.is_dir() and p.name.startswith("全量")],
-        key=lambda p: p.name,
-    )
-    if not dirs:
-        raise SystemExit("热库下没有 全量MMDD 目录")
-    return dirs[-1]
+    days = _list_advice_days()
+    if not days:
+        raise SystemExit("热库下没有带 advice_data.js 的 全量MMDD 目录")
+    return days[-1]
 
 
 def _load_advice(day_dir: Path) -> dict:
     path = day_dir / "advice_data.js"
-    if not path.exists():
-        raise SystemExit(f"缺少 advice_data.js: {path}")
     text = path.read_text(encoding="utf-8", errors="replace")
     i = text.find("{")
     if i < 0:
-        raise SystemExit("advice_data.js 无法解析")
+        raise SystemExit(f"advice_data.js 无法解析: {path}")
     return json.loads(text[i:].rstrip().rstrip(";"))
-
-
-def _report_date_from_dir(day_dir: Path) -> str:
-    m = re.search(r"全量(\d{4})", day_dir.name)
-    if not m:
-        return day_dir.name
-    mmdd = m.group(1)
-    year = datetime.now().year
-    return f"{year}-{mmdd[:2]}-{mmdd[2:]}"
 
 
 def _psy_codes() -> set[str]:
@@ -173,7 +179,7 @@ def _catalog_name_map() -> dict[str, str]:
     return out
 
 
-def _row_from_item(it: dict, gid_buckets: dict[str, set[str]], theme: str) -> dict:
+def _row_from_item(it: dict, gid_buckets: dict[str, set[str]], theme: str, day: str = "") -> dict:
     title = str(it.get("title") or "")
     gid = str(it.get("goods_id") or "")
     bs = gid_buckets.get(gid) or set()
@@ -205,6 +211,7 @@ def _row_from_item(it: dict, gid_buckets: dict[str, set[str]], theme: str) -> di
         "bw": bestw,
         "advice_score": it.get("advice_score"),
         "theme": theme,
+        "day": day,
     }
 
 
@@ -233,6 +240,7 @@ def _theme_payload(
     psy: set[str],
     *,
     source: str = "curated",
+    day: str = "",
 ) -> dict:
     hits = sorted(hits, key=lambda x: (x["bw"], x["delta"], x["gr"]), reverse=True)
     has_pack = bool(psy_code and psy_code in psy)
@@ -255,6 +263,7 @@ def _theme_payload(
         "premium_fit": premium_fit,
         "suggest_price_band": price_band,
         "source": source,
+        "day": day,
         "top": [
             {
                 "goods_id": h["goods_id"],
@@ -263,6 +272,7 @@ def _theme_payload(
                 "delta": h["delta"],
                 "pool": h["pool"],
                 "bucket": h["bucket"],
+                "day": h.get("day") or day,
             }
             for h in hits[:5]
         ],
@@ -274,10 +284,13 @@ def _discover_themes(
     gid_buckets: dict[str, set[str]],
     psy: set[str],
     catalog: dict[str, str],
+    day: str,
 ) -> tuple[list[dict], list[dict]]:
-    """从剩余测评标题聚类；返回 (discovered_themes, still_uncategorized_rows)."""
     phrase_re = re.compile(r"([\u4e00-\u9fffA-Za-z0-9·]{2,12})(?:测试|测评|测验|量表|人格)")
-    junk_in_phrase = ("专业", "官方", "正版", "完整", "免费", "在线", "最新", "高清", "电子", "资料", "合集", "打包", "全套", "趣味自测", "趣味小", "原创")
+    junk_in_phrase = (
+        "专业", "官方", "正版", "完整", "免费", "在线", "最新", "高清", "电子",
+        "资料", "合集", "打包", "全套", "趣味自测", "趣味小", "原创",
+    )
     phrase_hits: dict[str, list[dict]] = defaultdict(list)
     used: set[str] = set()
 
@@ -294,26 +307,22 @@ def _discover_themes(
             phrases.append(phrase)
         if not phrases:
             continue
-        # 取最长短语作为主题名
         phrase = max(phrases, key=len)
-        row = _row_from_item(it, gid_buckets, phrase)
+        row = _row_from_item(it, gid_buckets, phrase, day=day)
         phrase_hits[phrase].append(row)
         used.add(gid)
 
     discovered: list[dict] = []
     for phrase, hits in phrase_hits.items():
         if len(hits) < 2 and max((h["delta"] for h in hits), default=0) < 40:
-            # 单条且增量不高 → 留在未归类
             for h in hits:
                 used.discard(h["goods_id"])
             continue
-        # 尝试映射题库名
         psy_code = None
         for code, cname in catalog.items():
             if phrase[:4] in cname or cname[:4] in phrase:
                 psy_code = code
                 break
-        # 发现池默认 mid（有热度待评估），极低价趣味标 low
         prices = [h["price"] for h in hits if isinstance(h["price"], (int, float))]
         avg = (sum(prices) / len(prices)) if prices else 0
         fit = "low" if avg and avg < 5 else "mid"
@@ -327,6 +336,7 @@ def _discover_themes(
             hits,
             psy,
             source="discovered",
+            day=day,
         )
         discovered.append(theme)
 
@@ -335,13 +345,14 @@ def _discover_themes(
     for it in leftover:
         gid = str(it.get("goods_id") or "")
         if gid and gid not in used:
-            uncategorized.append(_row_from_item(it, gid_buckets, "未归类"))
+            uncategorized.append(_row_from_item(it, gid_buckets, "未归类", day=day))
     uncategorized.sort(key=lambda x: (x["bw"], x["delta"]), reverse=True)
     return discovered[:40], uncategorized[:60]
 
 
-def build(day: str | None = None) -> dict:
-    day_dir = _find_day_dir(day)
+def _analyze_day(day_dir: Path, psy: set[str], catalog: dict[str, str]) -> dict:
+    """单日分析，返回日摘要 + 主题列表 + top 明细。"""
+    day = _day_key(day_dir)
     adv = _load_advice(day_dir)
     items = adv.get("items") or []
     buckets = adv.get("buckets") or {}
@@ -350,10 +361,6 @@ def build(day: str | None = None) -> dict:
         for gid in ids or []:
             gid_buckets[str(gid)].add(str(bname))
 
-    psy = _psy_codes()
-    catalog = _catalog_name_map()
-
-    # 1) 测评门禁 + 去噪
     assess_pool: list[dict] = []
     noise_count = 0
     for it in items:
@@ -369,7 +376,6 @@ def build(day: str | None = None) -> dict:
     themes: list[dict] = []
     top_pool: list[dict] = []
 
-    # 2) 固化选题包
     for name, keys, psy_code, premium_fit, price_band in PACKS:
         hits: list[dict] = []
         for it in assess_pool:
@@ -378,24 +384,23 @@ def build(day: str | None = None) -> dict:
             if not any(k.lower() in tl for k in keys):
                 continue
             gid = str(it.get("goods_id") or "")
-            row = _row_from_item(it, gid_buckets, name)
+            row = _row_from_item(it, gid_buckets, name, day=day)
             hits.append(row)
             if gid:
                 assigned.add(gid)
-        theme = _theme_payload(name, keys, psy_code, premium_fit, price_band, hits, psy)
+        theme = _theme_payload(
+            name, keys, psy_code, premium_fit, price_band, hits, psy, day=day
+        )
         themes.append(theme)
         for h in hits[:8]:
             top_pool.append(h)
 
-    leftover = [
-        it
-        for it in assess_pool
-        if str(it.get("goods_id") or "") not in assigned
-    ]
-    discovered, uncategorized = _discover_themes(leftover, gid_buckets, psy, catalog)
+    leftover = [it for it in assess_pool if str(it.get("goods_id") or "") not in assigned]
+    discovered, uncategorized = _discover_themes(
+        leftover, gid_buckets, psy, catalog, day=day
+    )
     for t in discovered:
         for h in t.get("top") or []:
-            # rebuild minimal for top_pool
             top_pool.append(
                 {
                     **h,
@@ -404,13 +409,14 @@ def build(day: str | None = None) -> dict:
                     "advice_score": None,
                     "sold": None,
                     "theme": t["name"],
+                    "day": day,
                 }
             )
 
     themes.sort(key=lambda t: (t["hit_count"] > 0, t["urgency_score"]), reverse=True)
     discovered.sort(key=lambda t: t["urgency_score"], reverse=True)
-
     top_pool.sort(key=lambda x: (x.get("bw", 0), x.get("delta", 0)), reverse=True)
+
     seen: set[str] = set()
     top_items: list[dict] = []
     for h in top_pool:
@@ -428,111 +434,27 @@ def build(day: str | None = None) -> dict:
                 "pool": h.get("pool"),
                 "advice_score": h.get("advice_score"),
                 "theme": h.get("theme"),
+                "day": day,
             }
         )
-        if len(top_items) >= 120:
+        if len(top_items) >= 80:
             break
 
+    assess_ids = {str(it.get("goods_id") or "") for it in assess_pool if it.get("goods_id")}
     active = [t for t in themes if t["hit_count"] > 0]
-    premium_shortlist = [
-        {
-            "name": t["name"],
-            "psy_code": t["psy_code"],
-            "urgency_score": t["urgency_score"],
-            "hit_count": t["hit_count"],
-            "sum_delta": t["sum_delta"],
-            "avg_price": t["avg_price"],
-            "max_delta": t["max_delta"],
-            "has_psy_pack": t["has_psy_pack"],
-            "suggest_price_band": t["suggest_price_band"],
-            "premium_fit": t["premium_fit"],
-        }
-        for t in active
-        if t["premium_fit"] == "high"
-    ][:15]
-
-    mid_shortlist = [
-        {
-            "name": t["name"],
-            "psy_code": t["psy_code"],
-            "urgency_score": t["urgency_score"],
-            "hit_count": t["hit_count"],
-            "sum_delta": t["sum_delta"],
-            "avg_price": t["avg_price"],
-            "has_psy_pack": t["has_psy_pack"],
-            "suggest_price_band": t["suggest_price_band"],
-            "premium_fit": t["premium_fit"],
-        }
-        for t in active
-        if t["premium_fit"] == "mid"
-    ][:12]
-
-    avoid_list = [
-        {
-            "name": t["name"],
-            "hit_count": t["hit_count"],
-            "sum_delta": t["sum_delta"],
-            "urgency_score": t["urgency_score"],
-            "suggest_price_band": t["suggest_price_band"],
-            "premium_fit": "avoid",
-        }
-        for t in active
-        if t["premium_fit"] == "avoid"
-    ]
-
-    catalog_gap = [
-        {
-            "name": t["name"],
-            "psy_code": t["psy_code"],
-            "has_psy_pack": t["has_psy_pack"],
-            "premium_fit": t["premium_fit"],
-            "suggest_price_band": t["suggest_price_band"],
-        }
-        for t in themes
-        if t["hit_count"] == 0 and t["has_psy_pack"]
-    ]
-
-    report_date = _report_date_from_dir(day_dir)
-    assess_hit_ids = {str(it.get("goods_id") or "") for it in assess_pool if it.get("goods_id")}
-    payload = {
-        "meta": {
-            "report_date": report_date,
-            "source_dir": str(day_dir),
-            "source_name": day_dir.name,
-            "generated_at": datetime.now(timezone.utc).isoformat(),
-            "advice_total": int((adv.get("meta") or {}).get("total") or len(items)),
-            "assess_gate_count": len(assess_pool) + noise_count,
-            "noise_filtered": noise_count,
-            "assess_hit_count": len(assess_hit_ids),
-            "curated_assigned": len(assigned),
-            "discovered_theme_count": len(discovered),
-            "uncategorized_count": len(uncategorized),
-            "theme_count": len(themes),
-            "active_theme_count": len(active),
-            "schema_version": 2,
-        },
-        "action_tiers": {
-            "high": premium_shortlist,
-            "mid": mid_shortlist,
-            "avoid": avoid_list,
-            "discover": [
-                {
-                    "name": t["name"],
-                    "urgency_score": t["urgency_score"],
-                    "hit_count": t["hit_count"],
-                    "sum_delta": t["sum_delta"],
-                    "avg_price": t["avg_price"],
-                    "has_psy_pack": t["has_psy_pack"],
-                    "psy_code": t["psy_code"],
-                    "suggest_price_band": t["suggest_price_band"],
-                    "premium_fit": t["premium_fit"],
-                }
-                for t in discovered[:12]
-            ],
-        },
+    return {
+        "day": day,
+        "report_date": _report_date_from_dir(day_dir),
+        "source_name": day_dir.name,
+        "source_dir": str(day_dir),
+        "advice_total": int((adv.get("meta") or {}).get("total") or len(items)),
+        "assess_gate_count": len(assess_pool) + noise_count,
+        "noise_filtered": noise_count,
+        "assess_hit_count": len(assess_ids),
+        "curated_assigned": len(assigned),
+        "active_theme_count": len(active),
         "themes": themes,
         "discovered_themes": discovered,
-        "catalog_gap": catalog_gap,
         "top_items": top_items,
         "uncategorized_top": [
             {
@@ -542,35 +464,532 @@ def build(day: str | None = None) -> dict:
                 "delta": h["delta"],
                 "pool": h["pool"],
                 "theme": "未归类",
+                "day": day,
             }
-            for h in uncategorized[:40]
+            for h in uncategorized[:30]
         ],
-        "premium_shortlist": premium_shortlist,  # 兼容旧 UI
+    }
+
+
+def _spark(values: list[float], width: int = 8) -> str:
+    if not values:
+        return ""
+    blocks = "▁▂▃▄▅▆▇█"
+    mx = max(values) or 1.0
+    out = []
+    for v in values[-width:]:
+        idx = int(round((v / mx) * (len(blocks) - 1)))
+        out.append(blocks[max(0, min(len(blocks) - 1, idx))])
+    return "".join(out)
+
+
+def _trend_label(series: list[dict]) -> str:
+    """根据紧急度序列判断 rising/falling/stable/new/fading。"""
+    if not series:
+        return "none"
+    urg = [float(p.get("urgency_score") or 0) for p in series]
+    hits = [int(p.get("hit_count") or 0) for p in series]
+    if len(series) <= 2 and hits[-1] > 0:
+        return "new"
+    if hits[-1] == 0 and any(h > 0 for h in hits[:-1]):
+        return "fading"
+    if len(urg) < 3:
+        return "stable"
+    recent = sum(urg[-3:]) / 3
+    prior = sum(urg[:-3]) / max(1, len(urg) - 3)
+    if prior <= 0 and recent > 0:
+        return "rising"
+    if recent >= prior * 1.25:
+        return "rising"
+    if recent <= prior * 0.7:
+        return "falling"
+    return "stable"
+
+
+def _composite_urgency(series: list[dict], days_present: int, day_count: int) -> float:
+    if not series:
+        return 0.0
+    urg = [float(p.get("urgency_score") or 0) for p in series]
+    latest = urg[-1]
+    mean_u = sum(urg) / len(urg)
+    present_ratio = days_present / max(1, day_count)
+    # 连出天数奖励：最近连续命中
+    streak = 0
+    for p in reversed(series):
+        if int(p.get("hit_count") or 0) > 0:
+            streak += 1
+        else:
+            break
+    return round(0.45 * latest + 0.30 * mean_u + 0.15 * present_ratio * 100 + 0.10 * streak * 8, 1)
+
+
+def _aggregate_themes(
+    day_results: list[dict], psy: set[str]
+) -> tuple[list[dict], list[dict]]:
+    """跨日聚合固化主题 + 发现主题。"""
+    day_keys = [d["day"] for d in day_results]
+    day_count = len(day_keys)
+
+    # curated: fixed pack order
+    pack_meta = {
+        name: (keys, psy_code, fit, band) for name, keys, psy_code, fit, band in PACKS
+    }
+    curated_series: dict[str, list[dict]] = {name: [] for name, *_ in PACKS}
+    curated_tops: dict[str, list[dict]] = defaultdict(list)
+
+    for day_res in day_results:
+        by_name = {t["name"]: t for t in day_res["themes"]}
+        for name in curated_series:
+            t = by_name.get(name)
+            if not t:
+                curated_series[name].append(
+                    {
+                        "day": day_res["day"],
+                        "hit_count": 0,
+                        "sum_delta": 0,
+                        "urgency_score": 0,
+                        "avg_price": None,
+                    }
+                )
+                continue
+            curated_series[name].append(
+                {
+                    "day": day_res["day"],
+                    "hit_count": t["hit_count"],
+                    "sum_delta": t["sum_delta"],
+                    "urgency_score": t["urgency_score"],
+                    "avg_price": t["avg_price"],
+                }
+            )
+            for row in t.get("top") or []:
+                curated_tops[name].append(row)
+
+    themes: list[dict] = []
+    for name, keys, psy_code, fit, band in PACKS:
+        series = curated_series[name]
+        hits_total = sum(int(p["hit_count"]) for p in series)
+        delta_total = round(sum(float(p["sum_delta"]) for p in series), 1)
+        days_present = sum(1 for p in series if int(p["hit_count"]) > 0)
+        latest = series[-1] if series else {}
+        has_pack = bool(psy_code and psy_code in psy)
+        # 跨日 top：按 delta 去重
+        tops = sorted(curated_tops[name], key=lambda x: float(x.get("delta") or 0), reverse=True)
+        seen: set[str] = set()
+        top_dedup: list[dict] = []
+        for row in tops:
+            gid = str(row.get("goods_id") or "")
+            if not gid or gid in seen:
+                continue
+            seen.add(gid)
+            top_dedup.append(row)
+            if len(top_dedup) >= 8:
+                break
+        prices = [
+            float(p["avg_price"])
+            for p in series
+            if isinstance(p.get("avg_price"), (int, float))
+        ]
+        themes.append(
+            {
+                "name": name,
+                "keywords": keys,
+                "psy_code": psy_code or "",
+                "premium_fit": fit,
+                "suggest_price_band": band,
+                "has_psy_pack": has_pack,
+                "source": "curated",
+                "hit_count": int(latest.get("hit_count") or 0),  # 兼容：最新日
+                "sum_delta": float(latest.get("sum_delta") or 0),
+                "avg_price": latest.get("avg_price"),
+                "max_delta": max((float(p.get("sum_delta") or 0) for p in series), default=0),
+                "urgency_score": _composite_urgency(series, days_present, day_count),
+                "latest_urgency": float(latest.get("urgency_score") or 0),
+                "total_hits": hits_total,
+                "total_delta": delta_total,
+                "days_present": days_present,
+                "day_count": day_count,
+                "trend": _trend_label(series),
+                "spark": _spark([float(p.get("urgency_score") or 0) for p in series]),
+                "day_series": series,
+                "top": top_dedup,
+            }
+        )
+
+    # discovered: merge by name across days
+    disc_map: dict[str, list[dict]] = defaultdict(list)
+    disc_meta: dict[str, dict] = {}
+    disc_tops: dict[str, list[dict]] = defaultdict(list)
+    for day_res in day_results:
+        for t in day_res.get("discovered_themes") or []:
+            name = t["name"]
+            disc_map[name].append(
+                {
+                    "day": day_res["day"],
+                    "hit_count": t["hit_count"],
+                    "sum_delta": t["sum_delta"],
+                    "urgency_score": t["urgency_score"],
+                    "avg_price": t["avg_price"],
+                }
+            )
+            disc_meta[name] = t
+            for row in t.get("top") or []:
+                disc_tops[name].append(row)
+
+    discovered: list[dict] = []
+    for name, points in disc_map.items():
+        # align to full day axis (fill zeros)
+        by_day = {p["day"]: p for p in points}
+        series = []
+        for dk in day_keys:
+            series.append(
+                by_day.get(
+                    dk,
+                    {
+                        "day": dk,
+                        "hit_count": 0,
+                        "sum_delta": 0,
+                        "urgency_score": 0,
+                        "avg_price": None,
+                    },
+                )
+            )
+        days_present = sum(1 for p in series if int(p["hit_count"]) > 0)
+        if days_present < 1:
+            continue
+        # 单日偶发且增量低 → 丢掉，减噪
+        total_delta = sum(float(p["sum_delta"]) for p in series)
+        if days_present == 1 and total_delta < 80:
+            continue
+        base = disc_meta[name]
+        latest = series[-1]
+        tops = sorted(disc_tops[name], key=lambda x: float(x.get("delta") or 0), reverse=True)
+        seen = set()
+        top_dedup = []
+        for row in tops:
+            gid = str(row.get("goods_id") or "")
+            if not gid or gid in seen:
+                continue
+            seen.add(gid)
+            top_dedup.append(row)
+            if len(top_dedup) >= 5:
+                break
+        discovered.append(
+            {
+                "name": name,
+                "keywords": base.get("keywords") or [],
+                "psy_code": base.get("psy_code") or "",
+                "premium_fit": base.get("premium_fit") or "mid",
+                "suggest_price_band": base.get("suggest_price_band") or "待评估",
+                "has_psy_pack": bool(base.get("has_psy_pack")),
+                "source": "discovered",
+                "hit_count": int(latest.get("hit_count") or 0),
+                "sum_delta": float(latest.get("sum_delta") or 0),
+                "avg_price": latest.get("avg_price"),
+                "max_delta": max((float(p.get("sum_delta") or 0) for p in series), default=0),
+                "urgency_score": _composite_urgency(series, days_present, day_count),
+                "latest_urgency": float(latest.get("urgency_score") or 0),
+                "total_hits": sum(int(p["hit_count"]) for p in series),
+                "total_delta": round(total_delta, 1),
+                "days_present": days_present,
+                "day_count": day_count,
+                "trend": _trend_label(series),
+                "spark": _spark([float(p.get("urgency_score") or 0) for p in series]),
+                "day_series": series,
+                "top": top_dedup,
+            }
+        )
+
+    themes.sort(
+        key=lambda t: (t["days_present"] > 0, t["urgency_score"], t["total_delta"]),
+        reverse=True,
+    )
+    discovered.sort(key=lambda t: (t["days_present"], t["urgency_score"]), reverse=True)
+    return themes, discovered[:30]
+
+
+def _short_card(t: dict) -> dict:
+    return {
+        "name": t["name"],
+        "psy_code": t.get("psy_code") or "",
+        "urgency_score": t.get("urgency_score"),
+        "latest_urgency": t.get("latest_urgency"),
+        "hit_count": t.get("hit_count"),
+        "total_hits": t.get("total_hits"),
+        "sum_delta": t.get("sum_delta"),
+        "total_delta": t.get("total_delta"),
+        "avg_price": t.get("avg_price"),
+        "max_delta": t.get("max_delta"),
+        "has_psy_pack": t.get("has_psy_pack"),
+        "suggest_price_band": t.get("suggest_price_band"),
+        "premium_fit": t.get("premium_fit"),
+        "days_present": t.get("days_present"),
+        "trend": t.get("trend"),
+        "spark": t.get("spark"),
+    }
+
+
+def build_all() -> dict:
+    days = _list_advice_days()
+    if not days:
+        raise SystemExit("没有可分析的 advice 日目录")
+    psy = _psy_codes()
+    catalog = _catalog_name_map()
+
+    day_results: list[dict] = []
+    for day_dir in days:
+        print(f"... analyzing {day_dir.name}")
+        day_results.append(_analyze_day(day_dir, psy, catalog))
+
+    themes, discovered = _aggregate_themes(day_results, psy)
+    latest = day_results[-1]
+    day_count = len(day_results)
+
+    active = [t for t in themes if t["days_present"] > 0]
+    high = [_short_card(t) for t in active if t["premium_fit"] == "high"][:15]
+    mid = [_short_card(t) for t in active if t["premium_fit"] == "mid"][:12]
+    avoid = [_short_card(t) for t in active if t["premium_fit"] == "avoid"]
+    # 联动优先：连出多日且上升
+    watchlist = sorted(
+        [t for t in active if t["days_present"] >= max(2, day_count // 3)],
+        key=lambda t: (t["trend"] == "rising", t["urgency_score"]),
+        reverse=True,
+    )[:12]
+
+    rising = [_short_card(t) for t in active if t["trend"] == "rising"][:10]
+    new_themes = [_short_card(t) for t in active if t["trend"] == "new"][:8]
+
+    daily_digest = []
+    for d in day_results:
+        top_names = [
+            {"name": t["name"], "urgency_score": t["urgency_score"], "hit_count": t["hit_count"]}
+            for t in d["themes"]
+            if t["hit_count"] > 0
+        ][:8]
+        daily_digest.append(
+            {
+                "day": d["day"],
+                "report_date": d["report_date"],
+                "source_name": d["source_name"],
+                "advice_total": d["advice_total"],
+                "assess_hit_count": d["assess_hit_count"],
+                "noise_filtered": d["noise_filtered"],
+                "active_theme_count": d["active_theme_count"],
+                "top_themes": top_names,
+                "top_items": d["top_items"][:25],
+            }
+        )
+
+    # 跨日 top items：带 day 字段，按 delta
+    all_items = []
+    for d in day_results:
+        all_items.extend(d["top_items"])
+    all_items.sort(key=lambda x: float(x.get("delta") or 0), reverse=True)
+    seen = set()
+    top_items = []
+    for it in all_items:
+        gid = str(it.get("goods_id") or "")
+        key = f"{gid}:{it.get('day')}"
+        if not gid or key in seen:
+            continue
+        seen.add(key)
+        top_items.append(it)
+        if len(top_items) >= 150:
+            break
+
+    catalog_gap = [
+        {
+            "name": t["name"],
+            "psy_code": t["psy_code"],
+            "has_psy_pack": t["has_psy_pack"],
+            "premium_fit": t["premium_fit"],
+            "suggest_price_band": t["suggest_price_band"],
+            "days_present": t["days_present"],
+        }
+        for t in themes
+        if t["days_present"] == 0 and t["has_psy_pack"]
+    ]
+
+    uncat = []
+    for d in day_results[-3:]:  # 近 3 日未归类
+        uncat.extend(d.get("uncategorized_top") or [])
+    uncat.sort(key=lambda x: float(x.get("delta") or 0), reverse=True)
+
+    payload = {
+        "meta": {
+            "scope": "hotlib_all",
+            "report_date": latest["report_date"],
+            "latest_day": latest["day"],
+            "days_covered": [d["day"] for d in day_results],
+            "day_count": day_count,
+            "day_range": f"{day_results[0]['day']}-{day_results[-1]['day']}",
+            "source_dir": HOTLIB_ROOT.as_posix(),
+            "source_name": f"热库全量×{day_count}日",
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "advice_total": sum(d["advice_total"] for d in day_results),
+            "assess_hit_count": sum(d["assess_hit_count"] for d in day_results),
+            "assess_hit_latest": latest["assess_hit_count"],
+            "noise_filtered": sum(d["noise_filtered"] for d in day_results),
+            "curated_assigned": sum(d["curated_assigned"] for d in day_results),
+            "discovered_theme_count": len(discovered),
+            "uncategorized_count": len(uncat),
+            "theme_count": len(themes),
+            "active_theme_count": len(active),
+            "schema_version": 3,
+            "note": "仅含带 advice_data.js 的日期；更早仅有 data.js 的日报未纳入紧急度桶",
+        },
+        "daily_digest": daily_digest,
+        "action_tiers": {
+            "high": high,
+            "mid": mid,
+            "avoid": avoid,
+            "rising": rising,
+            "new": new_themes,
+            "watchlist": [_short_card(t) for t in watchlist],
+            "discover": [_short_card(t) for t in discovered[:12]],
+        },
+        "themes": themes,
+        "discovered_themes": discovered,
+        "catalog_gap": catalog_gap,
+        "top_items": top_items,
+        "latest_top_items": latest["top_items"],
+        "uncategorized_top": uncat[:40],
+        "premium_shortlist": high,
     }
     return payload
 
 
+def build(day: str | None = None) -> dict:
+    """兼容：指定 --day 时只出单日（schema 仍尽量带 day_series 长度1）。"""
+    if day is None:
+        return build_all()
+    day_dir = _find_day_dir(day)
+    psy = _psy_codes()
+    catalog = _catalog_name_map()
+    one = _analyze_day(day_dir, psy, catalog)
+    # wrap as single-day all
+    return build_all_from_results([one], psy)
+
+
+def build_all_from_results(day_results: list[dict], psy: set[str]) -> dict:
+    themes, discovered = _aggregate_themes(day_results, psy)
+    latest = day_results[-1]
+    day_count = len(day_results)
+    active = [t for t in themes if t["days_present"] > 0]
+    high = [_short_card(t) for t in active if t["premium_fit"] == "high"][:15]
+    mid = [_short_card(t) for t in active if t["premium_fit"] == "mid"][:12]
+    avoid = [_short_card(t) for t in active if t["premium_fit"] == "avoid"]
+    daily_digest = [
+        {
+            "day": d["day"],
+            "report_date": d["report_date"],
+            "source_name": d["source_name"],
+            "advice_total": d["advice_total"],
+            "assess_hit_count": d["assess_hit_count"],
+            "noise_filtered": d["noise_filtered"],
+            "active_theme_count": d["active_theme_count"],
+            "top_themes": [
+                {
+                    "name": t["name"],
+                    "urgency_score": t["urgency_score"],
+                    "hit_count": t["hit_count"],
+                }
+                for t in d["themes"]
+                if t["hit_count"] > 0
+            ][:8],
+            "top_items": d["top_items"][:25],
+        }
+        for d in day_results
+    ]
+    return {
+        "meta": {
+            "scope": "single_day" if day_count == 1 else "hotlib_all",
+            "report_date": latest["report_date"],
+            "latest_day": latest["day"],
+            "days_covered": [d["day"] for d in day_results],
+            "day_count": day_count,
+            "day_range": f"{day_results[0]['day']}-{day_results[-1]['day']}",
+            "source_dir": latest["source_dir"],
+            "source_name": latest["source_name"] if day_count == 1 else f"热库全量×{day_count}日",
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "advice_total": sum(d["advice_total"] for d in day_results),
+            "assess_hit_count": sum(d["assess_hit_count"] for d in day_results),
+            "assess_hit_latest": latest["assess_hit_count"],
+            "noise_filtered": sum(d["noise_filtered"] for d in day_results),
+            "curated_assigned": sum(d["curated_assigned"] for d in day_results),
+            "discovered_theme_count": len(discovered),
+            "uncategorized_count": len(latest.get("uncategorized_top") or []),
+            "theme_count": len(themes),
+            "active_theme_count": len(active),
+            "schema_version": 3,
+        },
+        "daily_digest": daily_digest,
+        "action_tiers": {
+            "high": high,
+            "mid": mid,
+            "avoid": avoid,
+            "rising": [_short_card(t) for t in active if t["trend"] == "rising"][:10],
+            "new": [_short_card(t) for t in active if t["trend"] == "new"][:8],
+            "watchlist": [_short_card(t) for t in active if t["days_present"] >= 1][:12],
+            "discover": [_short_card(t) for t in discovered[:12]],
+        },
+        "themes": themes,
+        "discovered_themes": discovered,
+        "catalog_gap": [
+            {
+                "name": t["name"],
+                "psy_code": t["psy_code"],
+                "has_psy_pack": t["has_psy_pack"],
+                "premium_fit": t["premium_fit"],
+                "suggest_price_band": t["suggest_price_band"],
+                "days_present": t["days_present"],
+            }
+            for t in themes
+            if t["days_present"] == 0 and t["has_psy_pack"]
+        ],
+        "top_items": latest["top_items"],
+        "latest_top_items": latest["top_items"],
+        "uncategorized_top": latest.get("uncategorized_top") or [],
+        "premium_shortlist": high,
+    }
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--day", default=None, help="MMDD，如 0816；默认最新全量日")
+    ap.add_argument("--day", default=None, help="MMDD 单日；省略则扫全库有 advice 的日期")
+    ap.add_argument(
+        "--scope",
+        choices=["all", "day"],
+        default=None,
+        help="all=全库（默认）；day=需配合 --day",
+    )
     args = ap.parse_args()
-    payload = build(args.day)
+    if args.scope == "day" and not args.day:
+        raise SystemExit("--scope day 需要同时传 --day MMDD")
+    if args.day:
+        payload = build(args.day)
+    else:
+        payload = build_all()
+
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
     text = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
     latest = OUT_DIR / "latest.json"
     latest.write_text(text, encoding="utf-8")
     (ASSETS_DIR / "latest.json").write_text(text, encoding="utf-8")
-    stamp = OUT_DIR / f"{payload['meta']['report_date'].replace('-', '')}.json"
-    stamp.write_text(text, encoding="utf-8")
+    stamp_name = (
+        f"range_{payload['meta']['day_range']}.json"
+        if payload["meta"].get("day_count", 1) > 1
+        else f"{payload['meta']['report_date'].replace('-', '')}.json"
+    )
+    (OUT_DIR / stamp_name).write_text(text, encoding="utf-8")
     meta = payload["meta"]
     tiers = payload["action_tiers"]
     print(
-        f"OK {meta['source_name']} date={meta['report_date']} "
-        f"assess={meta['assess_hit_count']} (noise={meta['noise_filtered']}) "
-        f"curated_active={meta['active_theme_count']}/{meta['theme_count']} "
-        f"discovered={meta['discovered_theme_count']} uncat={meta['uncategorized_count']} "
-        f"high={len(tiers['high'])} mid={len(tiers['mid'])} "
+        f"OK scope={meta.get('scope')} range={meta.get('day_range')} "
+        f"days={meta.get('day_count')} assess_sum={meta['assess_hit_count']} "
+        f"latest={meta.get('assess_hit_latest')} "
+        f"active={meta['active_theme_count']}/{meta['theme_count']} "
+        f"rising={len(tiers.get('rising') or [])} high={len(tiers['high'])} "
         f"-> {latest}"
     )
 
