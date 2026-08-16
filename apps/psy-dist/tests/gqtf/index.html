@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>搞钱天赋检测 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #FF9F43;
+            --primary-dark: #F39C12;
+            --accent: #00D2D3;
+            --safe: #2ED573;
+            --warning: #FF6B6B;
+            --bg-gradient-start: #FFF5E6;
+            --bg-gradient-end: #FFF0D6;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(255, 159, 67, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 159, 67, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 159, 67, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 159, 67, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#fff3e0 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 38px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ffe0b2; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #ffe0b2; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #fff3e0; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #ffe0b2; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #fff3e0; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #fff3e0; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ffe0b2; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-orange 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ffe0b2; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #ffe0b2; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        canvas { width: 100%; height: auto; }
+        .export-btn { background: #00D2D3; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+    <div id="page-intro" data-screenshot="psych-test-搞钱天赋检测" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">搞钱<br><span>天赋</span>检测</h1>
+        <p class="cover-subtitle">深度解析你的赚钱潜质<br>找到最适合你的搞钱之路</p>
+        <div class="intro-features">
+            <div class="feature-box"><div class="feature-icon">💎</div><div class="feature-title">五维深度分析</div><div class="feature-desc">财商、行动力、风险、洞察、人脉，全面评估。</div></div>
+            <div class="feature-box"><div class="feature-icon">🧠</div><div class="feature-title">成就动机理论</div><div class="feature-desc">基于成就动机理论，科学评估你的赚钱潜质。</div></div>
+            <div class="feature-box"><div class="feature-icon">🎯</div><div class="feature-title">精准定位优势</div><div class="feature-desc">找到你的搞钱优势赛道。</div></div>
+            <div class="feature-box"><div class="feature-icon">💰</div><div class="feature-title">定制化方案</div><div class="feature-desc">提供具体的搞钱路线图。</div></div>
+        </div>
+        <button class="btn" id="start-btn">开始检测 (约需 3 分钟)</button>
+    </div>
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">个人档案建立 💰</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的情况精准评估搞钱天赋。</p>
+        <div class="form-group">
+            <label class="form-label">你目前的年收入？</label>
+            <select id="input-income" class="select-box">
+                <option value="0">10万以下</option>
+                <option value="1">10-30万</option>
+                <option value="2">30-50万</option>
+                <option value="3">50万以上</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">你有多少可支配存款？</label>
+            <select id="input-savings" class="select-box">
+                <option value="0">10万以下</option>
+                <option value="1">10-50万</option>
+                <option value="2">50-100万</option>
+                <option value="3">100万以上</option>
+            </select>
+        </div>
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+    <div id="page-test">
+        <div class="progress-header"><span id="dim-tag">维度：财商</span><span id="progress-text">1 / 20</span></div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">💎 财商</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+    <div id="page-loading"><div style="font-size:50px; animation: pulse-orange 1s infinite;">💰</div><h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的搞钱天赋...</h3><p style="color:#636E72; font-size:14px;">正在扫描五维数据...<br>计算赚钱潜质...<br>生成专属报告...</p></div>
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle"><span class="score-num" id="res-score">0</span><span class="score-label">搞钱天赋值</span></div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+        <div class="card">
+            <div class="card-title">📊 搞钱能力五维雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;"><canvas id="radarChart" width="240" height="240"></canvas></div>
+            <div id="bars-container"></div>
+        </div>
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《搞钱天赋深度分析报告》</button>
+            <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新检测</button>
+        </div>
+    </div>
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header"><div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div><div class="r-h1">搞钱天赋深度分析报告</div><div style="font-size:14px;">专业心理测评 · 2026全新版</div></div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    { d: 'finance', t: '财商', q: "你关注理财和投资信息吗？", o: [{t:"非常关注，系统学习",s:10},{t:"比较关注，了解一些",s:7},{t:"偶尔关注",s:3},{t:"完全不关注",s:0}] },
+    { d: 'finance', t: '财商', q: "你有投资理财的习惯吗？", o: [{t:"有，多年投资经验",s:10},{t:"有，偶尔投资",s:7},{t:"想尝试但没行动",s:3},{t:"完全没有",s:0}] },
+    { d: 'finance', t: '财商', q: "你能看懂财务报表吗？", o: [{t:"非常精通",s:10},{t:"基本能看懂",s:7},{t:"不太懂",s:3},{t:"完全不懂",s:0}] },
+    { d: 'finance', t: '财商', q: "你会主动学习财商知识吗？", o: [{t:"非常主动，系统学习",s:10},{t:"比较主动",s:7},{t:"偶尔学",s:3},{t:"基本不学",s:0}] },
+    { d: 'action', t: '行动力', q: "当你发现一个赚钱机会时？", o: [{t:"立即行动，边做边学",s:10},{t:"会分析后行动",s:7},{t:"想很久但不动",s:3},{t:"只是想想",s:0}] },
+    { d: 'action', t: '行动力', q: "你能在压力下保持执行力吗？", o: [{t:"完全能",s:10},{t:"比较能",s:7},{t:"偶尔能",s:3},{t:"很难",s:0}] },
+    { d: 'action', t: '行动力', q: "你经常拖延吗？", o: [{t:"从不拖延",s:10},{t:"偶尔拖延",s:7},{t:"经常拖延",s:3},{t:"重度拖延",s:0}] },
+    { d: 'action', t: '行动力', q: "你能坚持长期做一件事吗？", o: [{t:"非常能",s:10},{t:"比较能",s:7},{t:"偶尔能",s:3},{t:"很难",s:0}] },
+    { d: 'risk', t: '风险承受', q: "你愿意冒多大风险去赚钱？", o: [{t:"愿意高风险高回报",s:10},{t:"中等风险",s:7},{t:"低风险",s:3},{t:"零风险",s:0}] },
+    { d: 'risk', t: '风险承受', q: "亏损发生时，你会？", o: [{t:"冷静分析，继续尝试",s:10},{t:"会沮丧但会调整",s:7},{t:"会很受打击",s:3},{t:"完全不敢再尝试",s:0}] },
+    { d: 'risk', t: '风险承受', q: "你能接受多大的资金损失？", o: [{t:"50%以上",s:10},{t:"30%左右",s:7},{t:"10%以内",s:3},{t:"完全不能",s:0}] },
+    { d: 'risk', t: '风险承受', q: "你对失败的态度？", o: [{t:"失败是必经之路",s:10},{t:"能接受失败",s:7},{t:"不太能接受",s:3},{t:"完全不能接受",s:0}] },
+    { d: 'insight', t: '洞察力', q: "你能发现市场机会吗？", o: [{t:"经常能发现",s:10},{t:"偶尔能",s:7},{t:"很少",s:3},{t:"完全不能",s:0}] },
+    { d: 'insight', t: '洞察力', q: "你对新趋势敏感吗？", o: [{t:"非常敏感",s:10},{t:"比较敏感",s:7},{t:"不太敏感",s:3},{t:"完全不敏感",s:0}] },
+    { d: 'insight', t: '洞察力', q: "你能预测行业发展吗？", o: [{t:"经常预测准确",s:10},{t:"偶尔准确",s:7},{t:"很少准确",s:3},{t:"完全不能",s:0}] },
+    { d: 'insight', t: '洞察力', q: "你有商业思维吗？", o: [{t:"非常强",s:10},{t:"比较强",s:7},{t:"一般",s:3},{t:"较弱",s:0}] },
+    { d: 'network', t: '人脉', q: "你善于结交高质量人脉吗？", o: [{t:"非常善于",s:10},{t:"比较善于",s:7},{t:"不太善于",s:3},{t:"完全不善于",s:0}] },
+    { d: 'network', t: '人脉', q: "你认识多少创业或投资的人？", o: [{t:"很多",s:10},{t:"有几个",s:7},{t:"很少",s:3},{t:"没有",s:0}] },
+    { d: 'network', t: '人脉', q: "你愿意社交和展示自己吗？", o: [{t:"非常愿意",s:10},{t:"比较愿意",s:7},{t:"不太愿意",s:3},{t:"完全不愿意",s:0}] },
+    { d: 'network', t: '人脉', q: "你能整合资源吗？", o: [{t:"非常能",s:10},{t:"比较能",s:7},{t:"不太能",s:3},{t:"完全不能",s:0}] }
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+const levels = [
+    {max:30,l:"搞钱小白",c:"#FF6B6B",d:"你的搞钱天赋较低，需要从基础开始学习。",advice:"先提升财商，学习基本的理财知识。",points:["系统学习理财知识","培养财务习惯","从小项目开始","寻找导师"]},
+    {max:50,l:"搞钱新手",c:"#FF9F43",d:"你有基本的搞钱潜力，但还需要系统提升。",advice:"开始实践，从低成本项目开始。",points:["提升财商知识","开始小额投资","培养商业思维","拓展人脉"]},
+    {max:70,l:"搞钱进阶",c:"#F39C12",d:"你有较好的搞钱天赋，是可造之材。",advice:"找准方向，开始实际行动。",points:["确定赚钱方向","开始实践尝试","建立个人品牌","扩大人脉圈"]},
+    {max:90,l:"搞钱高手",c:"#2ED573",d:"你有很强的搞钱天赋，潜力很大。",advice:"认真规划，可以考虑副业或创业。",points:["规划职业发展","尝试副业创业","整合资源放大","建立赚钱系统"]},
+    {max:120,l:"搞钱达人",c:"#00D2D3",d:"你是天生搞钱的料，潜力无限。",advice:"可以开始大规模尝试，很可能成功。",points:["全职投入创业","整合优质资源","建立团队","规模化发展"]},
+    {max:200,l:"财富玩家",c:"#A55EEA",d:"你是财富玩家级别，赚钱能力超强。",advice:"你具备成为富人的所有条件。",points:["成为行业标杆","带动更多人","承担社会责任","实现财务自由"]}
+];
+let currQList=[],currIdx=0,userInfo={},scores={finance:0,action:0,risk:0,insight:0,network:0};
+function goToDemo(){document.getElementById('page-intro').style.display='none';document.getElementById('page-demographics').style.display='block';}
+function initTest(){userInfo.income=document.getElementById('input-income').value;userInfo.savings=document.getElementById('input-savings').value;currQList=[...questions];currIdx=0;scores={finance:0,action:0,risk:0,insight:0,network:0};document.getElementById('page-demographics').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=`${currIdx+1}/${currQList.length}`;document.getElementById('progress-fill').style.width=`${(currIdx/currQList.length)*100}%`;document.getElementById('dim-tag').innerText=`维度：${getDimName(q.d)}`;document.getElementById('q-category').innerText=q.t;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(q.d,opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(dim,val){scores[dim]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';document.getElementById('page-loading').style.display='flex';setTimeout(()=>{document.getElementById('page-loading').style.display='none';document.getElementById('page-result').style.display='block';calculateResult();},2500);}
+function resetTest(){document.getElementById('page-result').style.display='none';document.getElementById('page-intro').style.display='flex';currIdx=0;scores={finance:0,action:0,risk:0,insight:0,network:0};}
+function calculateResult(){let totalRaw=Object.values(scores).reduce((a,b)=>a+b,0);let finalScore=Math.round(totalRaw);let lvl=levels.find(l=>finalScore<=l.max)||levels[levels.length-1];const numEl=document.getElementById('res-score');animateValue(numEl,0,finalScore,1500);const badge=document.getElementById('res-level');badge.innerText=lvl.l;badge.style.background=lvl.c;document.getElementById('res-desc').innerText=lvl.d;renderBars(scores);drawRadar(scores);}
+function renderBars(s){const box=document.getElementById('bars-container');const dims=[{k:'finance',n:'财商'},{k:'action',n:'行动'},{k:'risk',n:'风险'},{k:'insight',n:'洞察'},{k:'network',n:'人脉'}];let html='';dims.forEach(d=>{let pct=Math.min((s[d.k]/10)*100,100);let color=pct>60?'#FF9F43':(pct>30?'#F39C12':'#2ED573');let txt=pct>70?'强':(pct>40?'中':'弱');html+=`<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%;background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;});box.innerHTML=html;}
+function getDimName(k){const map={finance:'财商',action:'行动力',risk:'风险承受',insight:'洞察力',network:'人脉'};return map[k];}
+function showReport(){const total=parseInt(document.getElementById('res-score').innerText);const lvl=levels.find(l=>total<=l.max)||levels[levels.length-1];let html=`<div class="report_section"><div class="r-h1">一、搞钱天赋诊断</div><p class="r-p" style="background:#fafafa;padding:12px;border-radius:8px;font-size:14px;border:1px solid #eee;"><strong>📋 个人档案：</strong>收入：${userInfo.income}万 | 存款：${userInfo.savings}万</p><div class="r-box" style="border-left:5px solid ${lvl.c};"><div style="font-size:22px;font-weight:900;color:${lvl.c};margin-bottom:8px;">搞钱天赋等级：${lvl.l}</div><p style="margin:0;font-size:15px;line-height:1.6;color:#555;"><strong>整体评估：</strong>${lvl.d}</p><p style="margin:10px 0 0;font-size:15px;line-height:1.6;color:#555;"><strong>核心建议：</strong>${lvl.advice}</p></div></div><div class="report_section"><div class="r-h2">二、五维能力深度分析</div>${generateDimAnalysis('finance',scores.finance)}${generateDimAnalysis('action',scores.action)}${generateDimAnalysis('risk',scores.risk)}${generateDimAnalysis('insight',scores.insight)}${generateDimAnalysis('network',scores.network)}</div><div class="report_section"><div class="r-h2">三、搞钱路线图</div><div class="r-box"><p class="r-p"><strong>第一阶段（1-3月）</strong>：提升财商，学习理财知识<br><strong>第二阶段（4-6月）</strong>：开始实践，找到适合自己的方向<br><strong>第三阶段（7-12月）</strong>：稳定发展，建立赚钱系统<br><strong>第四阶段（1-2年）</strong>：规模化，实现财富增长</p></div></div><div style="text-align:center;color:#ccc;font-size:12px;margin-top:50px;line-height:1.8;">2026搞钱天赋检测·专业心理测评</div>`;document.getElementById('report-content').innerHTML=html;document.getElementById('report-modal').style.display='block';}
+function closeReport(){document.getElementById('report-modal').style.display='none';}
+function generateDimAnalysis(key,val){let level=val>7?'high':(val>4?'med':'low');const config={high:{color:'#2ED573',bg:'#f0fff4',tag:'🌟 强',titleColor:'#2ED573'},med:{color:'#F39C12',bg:'#fff9e6',tag:'⚡ 中',titleColor:'#F39C12'},low:{color:'#FF6B6B',bg:'#ffe4e6',tag:'⚠️ 弱',titleColor:'#FF6B6B'}};const c=config[level];const texts={finance:{high:"<strong>财商高！</strong>你有很强的理财意识和能力。",med:"<strong>财商中等。</strong>有一定基础，需要继续学习。",low:"<strong>财商低。</strong>建议系统学习理财知识。"},action:{high:"<strong>行动力强！</strong>你执行力强，能把想法变成现实。",med:"<strong>行动力中等。</strong>有一定执行力，需要加强。",low:"<strong>行动力弱。</strong>需要克服拖延，提高执行力。"},risk:{high:"<strong>风险承受力强！</strong>你敢于冒险，能抓住机会。",med:"<strong>风险承受中等。</strong>能接受适度风险。",low:"<strong>风险承受弱。</strong>建议保守一些。"},insight:{high:"<strong>洞察力强！</strong>你能发现别人看不到的机会。",med:"<strong>洞察力中等。</strong>偶尔能发现机会。",low:"<strong>洞察力弱。</strong>需要培养商业思维。"},network:{high:"<strong>人脉强！</strong>你有广泛的人脉和资源整合能力。",med:"<strong>人脉中等。</strong>有一定人脉，需要拓展。",low:"<strong>人脉弱。</strong>需要主动拓展人脉。"}};return`<div style="margin-bottom:20px;padding:16px;background:${c.bg};border-radius:8px;border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor};margin-top:0;">${getDimName(key)} <span style="font-size:12px;opacity:0.8;margin-left:8px;">(得分:${val}/10)</span><span style="float:right;font-size:12px;background:${c.color};color:#fff;padding:2px 8px;border-radius:10px;">${c.tag}</span></div><p class="r-p" style="margin-bottom:0;color:#444;">${texts[key][level]}</p></div>`;}
+function animateValue(obj,start,end,duration){let startTimestamp=null;const step=(timestamp)=>{if(!startTimestamp)startTimestamp=timestamp;const progress=Math.min((timestamp-startTimestamp)/duration,1);obj.innerHTML=Math.floor(progress*(end-start)+start);if(progress<1)window.requestAnimationFrame(step);};window.requestAnimationFrame(step);}
+function drawRadar(s){const c=document.getElementById('radarChart');const ctx=c.getContext('2d');const dpr=window.devicePixelRatio||1;c.style.width='240px';c.style.height='240px';c.width=240*dpr;c.height=240*dpr;ctx.scale(dpr,dpr);const cx=120,cy=120,r=90;const keys=['finance','action','risk','insight','network'];const labels=['财商','行动','风险','洞察','人脉'];ctx.strokeStyle='#ffe0b2';ctx.lineWidth=1;for(let i=1;i<=4;i++){ctx.beginPath();for(let j=0;j<5;j++){let a=(Math.PI*2/5)*j-Math.PI/2;ctx.lineTo(cx+Math.cos(a)*(r/4)*i,cy+Math.sin(a)*(r/4)*i);}ctx.closePath();ctx.stroke();}ctx.beginPath();keys.forEach((k,i)=>{let ratio=Math.min(s[k]/10,1.1);let a=(Math.PI*2/5)*i-Math.PI/2;ctx.lineTo(cx+Math.cos(a)*r*ratio,cy+Math.sin(a)*r*ratio);});ctx.closePath();let grd=ctx.createRadialGradient(cx,cy,0,cx,cy,r);grd.addColorStop(0,"rgba(255,159,67,0.1)");grd.addColorStop(1,"rgba(255,159,67,0.6)");ctx.fillStyle=grd;ctx.fill();ctx.strokeStyle='#FF9F43';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#2D3436';ctx.font='bold 12px system-ui';ctx.textAlign='center';labels.forEach((l,i)=>{let a=(Math.PI*2/5)*i-Math.PI/2;ctx.fillText(l,cx+Math.cos(a)*(r+20),cy+Math.sin(a)*(r+20)+4);});}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFont('simhei','normal');doc.setFillColor(255,159,67);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('搞钱天赋深度分析报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});let y=55;doc.setTextColor(0,0,0);doc.setFontSize(16);doc.text('一、搞钱天赋诊断',15,y);y+=10;const total=parseInt(document.getElementById('res-score').innerText);const lvl=levels.find(l=>total<=l.max)||levels[levels.length-1];doc.setFontSize(12);doc.text(`综合得分：${total}分`,15,y);y+=8;doc.text(`搞钱天赋等级：${lvl.l}`,15,y);y+=8;doc.text(`整体评估：${lvl.d}`,15,y);y+=15;doc.setFontSize(16);doc.text('二、五维能力分析',15,y);y+=10;doc.setFontSize(11);const dims=[{k:'finance',n:'财商',s:scores.finance},{k:'action',n:'行动力',s:scores.action},{k:'risk',n:'风险承受',s:scores.risk},{k:'insight',n:'洞察力',s:scores.insight},{k:'network',n:'人脉',s:scores.network}];dims.forEach(d=>{doc.text(`${d.n}：${d.s}/10分`,15,y);y+=7;});y+=10;doc.setFontSize(16);doc.text('三、核心建议',15,y);y+=10;doc.setFontSize(11);doc.text(lvl.advice,15,y);y+=20;doc.setFontSize(9);doc.setTextColor(150,150,150);doc.text('2026搞钱天赋检测·专业心理测评',105,280,{align:'center'});doc.save('搞钱天赋报告.pdf');}
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });document.getElementById('init-test-btn').addEventListener('click',initTest);document.getElementById('show-report-btn').addEventListener('click',showReport);document.getElementById('close-report-btn').addEventListener('click',closeReport);document.getElementById('reset-test-btn').addEventListener('click',resetTest);document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "gqtf";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

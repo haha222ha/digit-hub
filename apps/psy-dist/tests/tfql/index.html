@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>天赋测试 - 潜力谱系</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --primary-dark: #1a252f;
+            --accent: #c0392b;
+            --accent-hover: #e74c3c;
+            --safe: #27ae60;
+            --warning: #f39c12;
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+            --radius: 16px;
+            --theme-red: #ff2e4c;
+            --theme-red-light: #ff4760;
+            --card-radius: 24px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8f9fa; min-height: 100vh; color: var(--text-main); }
+        .container { max-width: 520px; margin: 0 auto; padding: 20px; position: relative; min-height: 100vh; }
+        .page { display: none; animation: fadeIn 0.5s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(100px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulseRed { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 46, 76, 0.7); } 50% { box-shadow: 0 0 0 15px rgba(255, 46, 76, 0); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .btn { display: block; width: 100%; padding: 18px; border: none; border-radius: 50px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+        .btn-primary { background: var(--primary); color: white; border-radius: var(--radius); }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-theme { background: linear-gradient(90deg, var(--theme-red), var(--theme-red-light)); color: white; box-shadow: 0 8px 20px rgba(255, 46, 76, 0.3); }
+        .btn-theme:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-accent { background: var(--accent); color: white; animation: pulseRed 2s infinite; border-radius: var(--radius); }
+        .btn-accent:active { transform: scale(0.98); background: var(--accent-hover); }
+        .btn-secondary { background: #f1f2f6; color: var(--text-main); border: none; margin-top: 12px; }
+        .btn-secondary:active { transform: scale(0.98); background: #dfe4ea; }
+        .card { background: white; border-radius: var(--radius); padding: 24px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .cover-badge { display: inline-block; background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .cover-title { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+        .cover-title .highlight { color: #3498db; }
+        .cover-subtitle { color: var(--text-sub); font-size: 16px; margin-bottom: 30px; line-height: 1.5; }
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .feature-card { background: white; border-radius: var(--radius); padding: 20px 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .feature-icon { font-size: 32px; margin-bottom: 10px; }
+        .feature-text { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .quiz-dimension { font-size: 14px; font-weight: 600; color: #3498db; }
+        .quiz-progress { font-size: 14px; font-weight: 600; color: var(--text-sub); }
+        .progress-bar { width: 100%; height: 8px; background: #eaecef; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #3498db, #2980b9); border-radius: 4px; transition: width 0.3s ease; }
+        .question-card { animation: slideUp 0.4s ease; }
+        .question-tag { display: inline-block; background: #f1f2f6; color: var(--primary); padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .question-text { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 30px; }
+        .option-btn { display: block; width: 100%; padding: 18px; border: 2px solid #eaecef; border-radius: var(--radius); background: white; font-size: 16px; font-weight: 500; text-align: left; cursor: pointer; margin-bottom: 12px; transition: all 0.2s ease; }
+        .option-btn:hover { border-color: #3498db; }
+        .option-btn.selected { border-color: #3498db; background: rgba(52, 152, 219, 0.05); }
+        .option-btn:active { transform: scale(0.98); }
+        .back-btn { background: transparent; border: none; color: var(--text-sub); font-size: 16px; cursor: pointer; padding: 10px 0; margin-top: 20px; }
+        .loading-container { text-align: center; padding: 50px 20px; }
+        .loading-icon { font-size: 80px; animation: breathe 1.5s infinite; margin-bottom: 30px; }
+        .loading-title { font-size: 24px; font-weight: 700; margin-bottom: 15px; }
+        .loading-subtitle { font-size: 16px; color: var(--text-sub); }
+        .result-top-card { background: linear-gradient(135deg, #3498db, #2980b9); color: white; border-radius: var(--radius); padding: 30px 20px; text-align: center; margin-bottom: 20px; }
+        .level-tag { display: inline-block; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 8px 24px; border-radius: 20px; font-size: 20px; font-weight: 700; margin-bottom: 15px; }
+        .level-desc { font-size: 16px; line-height: 1.5; opacity: 0.95; }
+        .result-match-section { text-align: center; margin: 30px 0; padding: 30px 20px; background: linear-gradient(135deg, #f8f9fa, #fff); border-radius: var(--radius); border: 2px solid #3498db; }
+        .match-title { font-size: 18px; font-weight: 600; color: var(--text-sub); margin-bottom: 10px; }
+        .match-name { font-size: 36px; font-weight: 700; color: #3498db; margin-bottom: 15px; }
+        .match-desc { font-size: 16px; color: var(--text-main); line-height: 1.8; }
+        .match-tags { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+        .match-tag { padding: 6px 16px; background: rgba(52, 152, 219, 0.1); color: #3498db; border-radius: 20px; font-size: 14px; }
+        .score-bar-section { margin: 20px 0; }
+        .score-bar-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; }
+        .score-bar-container { display: flex; gap: 15px; flex-wrap: wrap; }
+        .score-bar-item { flex: 1; min-width: 80px; text-align: center; padding: 15px 10px; background: #f8f9fa; border-radius: 12px; }
+        .score-bar-label { font-size: 14px; color: var(--text-sub); margin-bottom: 8px; }
+        .score-bar-value { font-size: 24px; font-weight: 700; color: #3498db; }
+        .result-actions { position: sticky; bottom: 20px; padding-top: 20px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: none; overflow-y: auto; }
+        .modal.active { display: block; animation: fadeIn 0.3s ease; }
+        .modal-content { background: white; min-height: 100vh; padding: 20px; max-width: 520px; margin: 0 auto; position: relative; padding-top: 80px; }
+        .modal-close { position: fixed; top: 20px; right: calc(50% - 260px); font-size: 32px; background: white; border: none; cursor: pointer; color: var(--text-sub); z-index: 2001; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.15); transition: all 0.2s ease; }
+        @media (max-width: 520px) { .modal-close { right: 20px; } }
+        .modal-close:hover { color: #3498db; transform: scale(1.1); }
+        .report-header { background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 40px 20px 30px; margin: -20px -20px 30px; border-radius: 0 0 var(--radius) var(--radius); text-align: center; }
+        .report-title { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+        .report-subtitle { font-size: 16px; opacity: 0.9; }
+        .report-section { margin-bottom: 35px; }
+        .report-section-title { font-size: 18px; font-weight: 700; color: #3498db; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #f1f2f6; }
+        .report-content { font-size: 15px; line-height: 1.9; color: var(--text-main); }
+        .report-content p { margin-bottom: 12px; }
+        .report-highlight { background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), rgba(41, 128, 185, 0.05)); border-left: 4px solid #3498db; padding: 15px; margin: 20px 0; border-radius: 0 var(--radius) var(--radius) 0; }
+        .report-list { padding-left: 20px; }
+        .report-list li { margin-bottom: 10px; line-height: 1.7; }
+    </style>
+</head>
+<body>
+
+    <div class="container" data-screenshot="psych-test-天赋潜力测试">
+        <div id="coverPage" class="page active">
+            <div class="cover-badge">潜力发现版</div>
+            <h1 class="cover-title">你的<br><span class="highlight">天赋潜力</span></h1>
+            <p class="cover-subtitle">基于多元智能理论的深度潜力分析，发现你的核心天赋与无限可能</p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <div class="feature-text">8大智能</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-text">精准分析</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💡</div>
+                    <div class="feature-text">深度挖掘</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-text">千字报告</div>
+                </div>
+            </div>
+            <button id="startBtn" class="btn btn-primary">开始测试 (约需 3 分钟)</button>
+        </div>
+        <div id="profilePage" class="page">
+            <div class="card">
+                <h2 style="font-size:24px; font-weight:700; margin-bottom:15px;">你的基本信息 📋</h2>
+                <p style="color:var(--text-sub); margin-bottom:30px; line-height:1.6;">请如实填写，以便更精准分析。</p>
+                <div class="form-group">
+                    <label class="form-label">你的年龄？</label>
+                    <select id="age" class="form-select">
+                        <option value="teen">青少年(13-18)</option>
+                        <option value="young">青年(19-30)</option>
+                        <option value="mid">中年(31-50)</option>
+                        <option value="senior">中老年(50+)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">你的学历？</label>
+                    <select id="edu" class="form-select">
+                        <option value="high">高中及以下</option>
+                        <option value="college">大专/本科</option>
+                        <option value="master">硕士</option>
+                        <option value="phd">博士及以上</option>
+                    </select>
+                </div>
+            </div>
+            <button id="generateQuizBtn" class="btn btn-primary">开始测评</button>
+        </div>
+        <div id="quizPage" class="page">
+            <div class="quiz-header">
+                <div class="quiz-dimension" id="dimensionLabel">能力倾向</div>
+                <div class="quiz-progress" id="progressLabel">1 / 18</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+            <div class="card question-card" id="questionCard">
+                <div class="question-tag" id="questionTag">🧠 能力分析</div>
+                <div class="question-text" id="questionText">题目加载中...</div>
+                <div id="optionsContainer"></div>
+            </div>
+            <button id="backQuestionBtn" class="back-btn" style="display:none;">← 返回上一题</button>
+        </div>
+        <div id="loadingPage" class="page">
+            <div class="loading-container">
+                <div class="loading-icon">🧠</div>
+                <div class="loading-title">正在分析你的潜力...</div>
+                <div class="loading-subtitle">结合多元智能模型运算中...</div>
+            </div>
+        </div>
+        <div id="resultPage" class="page">
+            <div class="result-top-card">
+                <div class="level-tag" id="levelTag">核心天赋：语言智能</div>
+                <div class="level-desc" id="resultLevelDesc">根据你的测评结果，你最突出的是...</div>
+            </div>
+            <div class="result-match-section">
+                <div class="match-title">最佳匹配</div>
+                <div class="match-name" id="matchName">语言智能</div>
+                <div class="match-desc" id="matchDesc">你在语言表达方面有突出的天赋...</div>
+                <div class="match-tags" id="matchTags"></div>
+            </div>
+            <div class="score-bar-section">
+                <div class="score-bar-title">八大智能分布</div>
+                <div class="score-bar-container" id="talentScores"></div>
+            </div>
+            <div class="result-actions">
+                <button id="reportBtn" class="btn btn-accent">📄 查看千字深度报告</button>
+                <button id="resetBtn" class="btn btn-secondary">🔄 重新测试</button>
+            </div>
+        </div>
+    </div>
+    <div id="reportModal" class="modal">
+        <button class="modal-close" id="closeModal">&times;</button>
+        <div class="modal-content">
+            <div class="report-header">
+                <div class="report-title">天赋潜力分析报告</div>
+                <div class="report-subtitle">深度发现与开发建议</div>
+            </div>
+            <div id="reportContent" class="report-content"></div>
+        </div>
+    </div>
+    <script>
+        const QUESTIONS = [
+            { dimension: "language", tag: "🗣️ 语言", text: "你更喜欢哪种活动？", options: [
+                { text: "写作、演讲、辩论", score: { language: 10, logic: 5, body: 3, music: 4, space: 4, nature: 4, people: 5, self: 5 } },
+                { text: "数学、科学分析", score: { language: 4, logic: 10, body: 4, music: 3, space: 5, nature: 5, people: 4, self: 4 } },
+                { text: "运动、体育活动", score: { language: 3, logic: 4, body: 10, music: 4, space: 4, nature: 5, people: 4, self: 4 } },
+                { text: "音乐、弹唱", score: { language: 4, logic: 3, body: 4, music: 10, space: 5, nature: 4, people: 4, self: 5 } }
+            ]},
+            { dimension: "logic", tag: "🔢 逻辑", text: "你更擅长解决什么问题？", options: [
+                { text: "复杂的逻辑难题", score: { language: 4, logic: 10, body: 3, music: 3, space: 5, nature: 5, people: 4, self: 5 } },
+                { text: "语言沟通问题", score: { language: 10, logic: 4, body: 3, music: 4, space: 4, nature: 4, people: 6, self: 5 } },
+                { text: "创意设计问题", score: { language: 5, logic: 5, body: 3, music: 4, space: 10, nature: 4, people: 4, self: 5 } },
+                { text: "人际社交问题", score: { language: 5, logic: 4, body: 4, music: 4, space: 4, nature: 4, people: 10, self: 6 } }
+            ]},
+            { dimension: "body", tag: "🏃 运动", text: "你更喜欢哪种休闲方式？", options: [
+                { text: "运动健身", score: { language: 3, logic: 4, body: 10, music: 4, space: 4, nature: 5, people: 4, self: 5 } },
+                { text: "音乐欣赏", score: { language: 5, logic: 3, body: 3, music: 10, space: 5, nature: 4, people: 4, self: 5 } },
+                { text: "阅读思考", score: { language: 8, logic: 6, body: 3, music: 4, space: 5, nature: 5, people: 4, self: 6 } },
+                { text: "社交活动", score: { language: 5, logic: 4, body: 4, music: 4, space: 4, nature: 4, people: 10, self: 5 } }
+            ]},
+            { dimension: "music", tag: "🎵 音乐", text: "你对音乐的感受是？", options: [
+                { text: "对音乐非常敏感", score: { language: 4, logic: 3, body: 4, music: 10, space: 4, nature: 4, people: 4, self: 6 } },
+                { text: "一般，偶尔听听", score: { language: 5, logic: 5, body: 5, music: 5, space: 5, nature: 5, people: 5, self: 5 } },
+                { text: "更喜欢安静", score: { language: 6, logic: 5, body: 4, music: 3, space: 5, nature: 5, people: 5, self: 6 } },
+                { text: "无感", score: { language: 5, logic: 5, body: 5, music: 3, space: 5, nature: 5, people: 5, self: 5 } }
+            ]},
+            { dimension: "space", tag: "🎨 空间", text: "你更擅长什么？", options: [
+                { text: "绘画、设计", score: { language: 4, logic: 4, body: 3, music: 3, space: 10, nature: 4, people: 4, self: 5 } },
+                { text: "数学运算", score: { language: 4, logic: 10, body: 4, music: 3, space: 5, nature: 5, people: 4, self: 4 } },
+                { text: "写作表达", score: { language: 10, logic: 5, body: 3, music: 4, space: 5, nature: 4, people: 5, self: 5 } },
+                { text: "组织协调", score: { language: 6, logic: 5, body: 4, music: 4, space: 4, nature: 4, people: 10, self: 5 } }
+            ]},
+            { dimension: "nature", tag: "🌿 自然", text: "你喜欢什么环境？", options: [
+                { text: "大自然、山水", score: { language: 4, logic: 5, body: 5, music: 4, space: 4, nature: 10, people: 4, self: 5 } },
+                { text: "都市、繁华", score: { language: 5, logic: 5, body: 4, music: 4, space: 6, nature: 3, people: 6, self: 5 } },
+                { text: "安静室内", score: { language: 6, logic: 5, body: 4, music: 5, space: 5, nature: 4, people: 4, self: 6 } },
+                { text: "都可以", score: { language: 5, logic: 5, body: 5, music: 5, space: 5, nature: 5, people: 5, self: 5 } }
+            ]},
+            { dimension: "people", tag: "🤝 人际", text: "你更偏好什么工作方式？", options: [
+                { text: "团队合作", score: { language: 5, logic: 4, body: 4, music: 4, space: 4, nature: 4, people: 10, self: 5 } },
+                { text: "独立完成", score: { language: 6, logic: 6, body: 5, music: 4, space: 5, nature: 5, people: 4, self: 6 } },
+                { text: "带领团队", score: { language: 6, logic: 5, body: 5, music: 4, space: 4, nature: 4, people: 9, self: 6 } },
+                { text: "辅助支持", score: { language: 5, logic: 5, body: 5, music: 5, space: 5, nature: 5, people: 6, self: 5 } }
+            ]},
+            { dimension: "self", tag: "🧘 自省", text: "你更注重什么？", options: [
+                { text: "自我成长和反思", score: { language: 5, logic: 5, body: 4, music: 5, space: 5, nature: 4, people: 4, self: 10 } },
+                { text: "外部成就和认可", score: { language: 6, logic: 6, body: 5, music: 4, space: 5, nature: 4, people: 6, self: 5 } },
+                { text: "内心平静", score: { language: 5, logic: 4, body: 5, music: 6, space: 4, nature: 6, people: 4, self: 7 } },
+                { text: "两者都要", score: { language: 6, logic: 6, body: 5, music: 5, space: 5, nature: 5, people: 5, self: 7 } }
+            ]},
+            { dimension: "learning", tag: "📚 学习", text: "你更喜欢哪种学习方式？", options: [
+                { text: "阅读学习", score: { language: 10, logic: 6, body: 3, music: 4, space: 5, nature: 4, people: 4, self: 5 } },
+                { text: "动手实践", score: { language: 4, logic: 6, body: 10, music: 3, space: 6, nature: 6, people: 4, self: 4 } },
+                { text: "听讲学习", score: { language: 6, logic: 7, body: 4, music: 5, space: 4, nature: 5, people: 5, self: 5 } },
+                { text: "观察学习", score: { language: 5, logic: 5, body: 5, music: 5, space: 6, nature: 6, people: 6, self: 6 } }
+            ]},
+            { dimension: "memory", tag: "📝 记忆", text: "你更擅长记忆什么？", options: [
+                { text: "文字、语言", score: { language: 10, logic: 5, body: 3, music: 5, space: 4, nature: 4, people: 4, self: 5 } },
+                { text: "数字、公式", score: { language: 4, logic: 10, body: 4, music: 3, space: 5, nature: 5, people: 4, self: 4 } },
+                { text: "图像、场景", score: { language: 5, logic: 5, body: 4, music: 4, space: 10, nature: 5, people: 4, self: 5 } },
+                { text: "旋律、节奏", score: { language: 4, logic: 4, body: 4, music: 10, space: 5, nature: 4, people: 4, self: 5 } }
+            ]},
+            { dimension: "creation", tag: "💡 创造", text: "你更擅长什么类型的创作？", options: [
+                { text: "文字创作", score: { language: 10, logic: 4, body: 3, music: 4, space: 6, nature: 4, people: 4, self: 5 } },
+                { text: "科学发明", score: { language: 4, logic: 10, body: 5, music: 3, space: 7, nature: 6, people: 4, self: 4 } },
+                { text: "艺术设计", score: { language: 5, logic: 5, body: 4, music: 5, space: 10, nature: 4, people: 4, self: 5 } },
+                { text: "表演创作", score: { language: 6, logic: 4, body: 7, music: 8, space: 5, nature: 4, people: 6, self: 5 } }
+            ]},
+            { dimension: "communication", tag: "💬 沟通", text: "你的沟通能力？", options: [
+                { text: "非常擅长表达", score: { language: 10, logic: 4, body: 4, music: 4, space: 4, nature: 4, people: 6, self: 5 } },
+                { text: "倾听为主", score: { language: 5, logic: 5, body: 4, music: 5, space: 5, nature: 5, people: 6, self: 6 } },
+                { text: "不善表达", score: { language: 4, logic: 5, body: 5, music: 4, space: 5, nature: 5, people: 5, self: 5 } },
+                { text: "看场合", score: { language: 6, logic: 5, body: 5, music: 5, space: 5, nature: 5, people: 7, self: 6 } }
+            ]},
+            { dimension: "emotion", tag: "💗 情感", text: "你更容易被什么打动？", options: [
+                { text: "语言文字", score: { language: 10, logic: 3, body: 3, music: 6, space: 5, nature: 4, people: 5, self: 6 } },
+                { text: "音乐艺术", score: { language: 5, logic: 3, body: 4, music: 10, space: 5, nature: 5, people: 4, self: 6 } },
+                { text: "自然风景", score: { language: 5, logic: 4, body: 5, music: 5, space: 6, nature: 10, people: 4, self: 5 } },
+                { text: "人际故事", score: { language: 6, logic: 4, body: 4, music: 5, space: 4, nature: 4, people: 10, self: 7 } }
+            ]},
+            { dimension: "problem", tag: "🔧 问题解决", text: "你解决问题的方式是？", options: [
+                { text: "逻辑分析", score: { language: 5, logic: 10, body: 4, music: 3, space: 5, nature: 5, people: 4, self: 5 } },
+                { text: "直觉感受", score: { language: 4, logic: 4, body: 5, music: 6, space: 5, nature: 6, people: 5, self: 8 } },
+                { text: "寻求帮助", score: { language: 5, logic: 5, body: 4, music: 4, space: 4, nature: 4, people: 10, self: 5 } },
+                { text: "动手尝试", score: { language: 4, logic: 6, body: 10, music: 4, space: 6, nature: 6, people: 4, self: 4 } }
+            ]},
+            { dimension: "leadership", tag: "👑 领导力", text: "你在团队中更倾向什么角色？", options: [
+                { text: "领导者、决策者", score: { language: 6, logic: 6, body: 5, music: 4, space: 4, nature: 4, people: 9, self: 6 } },
+                { text: "执行者、行动派", score: { language: 5, logic: 6, body: 9, music: 4, space: 5, nature: 5, people: 5, self: 5 } },
+                { text: "智囊、顾问", score: { language: 7, logic: 8, body: 4, music: 4, space: 6, nature: 5, people: 6, self: 5 } },
+                { text: "协调者、和事佬", score: { language: 6, logic: 5, body: 4, music: 5, space: 4, nature: 4, people: 10, self: 6 } }
+            ]},
+            { dimension: "concentration", tag: "🎯 专注力", text: "你更擅长什么状态的专注？", options: [
+                { text: "长时间深度专注", score: { language: 7, logic: 8, body: 5, music: 5, space: 6, nature: 5, people: 4, self: 7 } },
+                { text: "多任务快速切换", score: { language: 6, logic: 6, body: 6, music: 5, space: 5, nature: 5, people: 7, self: 6 } },
+                { text: "短时间高效专注", score: { language: 6, logic: 7, body: 6, music: 5, space: 5, nature: 5, people: 5, self: 5 } },
+                { text: "随时随地能专注", score: { language: 5, logic: 6, body: 7, music: 5, space: 5, nature: 6, people: 5, self: 6 } }
+            ]},
+            { dimension: "stress", tag: "⚡ 压力", text: "面对压力你更倾向于？", options: [
+                { text: "冷静分析找方案", score: { language: 6, logic: 10, body: 5, music: 4, space: 5, nature: 5, people: 5, self: 7 } },
+                { text: "找人倾诉", score: { language: 5, logic: 4, body: 5, music: 5, space: 4, nature: 4, people: 10, self: 6 } },
+                { text: "运动释放", score: { language: 4, logic: 4, body: 10, music: 5, space: 5, nature: 6, people: 4, self: 5 } },
+                { text: "自我消化", score: { language: 5, logic: 5, body: 5, music: 6, space: 5, nature: 5, people: 5, self: 10 } }
+            ]}
+        ];
+
+        const state = {
+            currentQuestionIndex: 0,
+            answers: [],
+            profileData: {},
+            scores: {},
+            totalScore: 0,
+            resultType: ''
+        };
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function initEventListeners() {
+            document.getElementById('startBtn').addEventListener('click', () => showPage('profilePage'));
+            
+            document.getElementById('generateQuizBtn').addEventListener('click', () => {
+                state.profileData.age = document.getElementById('age').value;
+                state.profileData.edu = document.getElementById('edu').value;
+                state.currentQuestionIndex = 0;
+                state.answers = [];
+                renderQuestion(0);
+                showPage('quizPage');
+            });
+
+            document.getElementById('backQuestionBtn').addEventListener('click', () => {
+                if (state.currentQuestionIndex> 0) renderQuestion(state.currentQuestionIndex - 1);
+            });
+
+            document.getElementById('reportBtn').addEventListener('click', () => {
+                generateReport();
+                document.getElementById('reportModal').classList.add('active');
+            });
+
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                state.currentQuestionIndex = 0;
+                state.answers = [];
+                state.scores = {};
+                showPage('profilePage');
+            });
+
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('reportModal').classList.remove('active');
+            });
+
+            document.getElementById('reportModal').addEventListener('click', (e) => {
+                if (e.target.id === 'reportModal') {
+                    document.getElementById('reportModal').classList.remove('active');
+                }
+            });
+        }
+
+        function renderQuestion(index) {
+            if (index>= QUESTIONS.length) {
+                calculateScores();
+                showPage('loadingPage');
+                setTimeout(() => {
+                    renderResults();
+                    showPage('resultPage');
+                }, 3000);
+                return;
+            }
+
+            state.currentQuestionIndex = index;
+            const q = QUESTIONS[index];
+            document.getElementById('dimensionLabel').textContent = q.tag;
+            document.getElementById('progressLabel').textContent = `${index + 1} / ${QUESTIONS.length}`;
+            document.getElementById('progressFill').style.width = `${((index + 1) / QUESTIONS.length) * 100}%`;
+            document.getElementById('questionTag').textContent = q.tag;
+            document.getElementById('questionText').textContent = q.text;
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn' + (state.answers[index] === i ? ' selected' : '');
+                btn.textContent = opt.text;
+                btn.onclick = () => {
+                    state.answers[index] = i;
+                    container.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    setTimeout(() => renderQuestion(index + 1), 300);
+                };
+                container.appendChild(btn);
+            });
+
+            document.getElementById('backQuestionBtn').style.display = index> 0 ? 'block' : 'none';
+        }
+
+        function calculateScores() {
+            const talents = ['language', 'logic', 'body', 'music', 'space', 'nature', 'people', 'self'];
+            state.scores = {};
+            talents.forEach(t => state.scores[t] = 0);
+
+            QUESTIONS.forEach((q, i) => {
+                if (state.answers[i] !== undefined) {
+                    const scores = q.options[state.answers[i]].score;
+                    Object.keys(scores).forEach(talent => {
+                        state.scores[talent] = (state.scores[talent] || 0) + scores[talent];
+                    });
+                }
+            });
+
+            const maxPossible = 18 * 10;
+            Object.keys(state.scores).forEach(talent => {
+                state.scores[talent] = Math.round((state.scores[talent] / maxPossible) * 100);
+            });
+
+            const sorted = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
+            state.resultType = sorted[0][0];
+        }
+
+        function renderResults() {
+            const talentNames = {
+                language: '语言智能', logic: '逻辑智能', body: '身体运动智能', music: '音乐智能',
+                space: '空间智能', nature: '自然智能', people: '人际智能', self: '内省智能'
+            };
+            const talentDescs = {
+                language: '你在语言表达方面有突出的天赋，擅长文字沟通和表达。',
+                logic: '你在逻辑分析方面有突出的天赋，擅长数学和理性思考。',
+                body: '你在身体运动方面有突出的天赋，动手能力强，协调性好。',
+                music: '你在音乐感知方面有突出的天赋，对节奏和旋律敏感。',
+                space: '你在空间想象方面有突出的天赋，擅长绘画和设计。',
+                nature: '你在自然观察方面有突出的天赋，喜欢探索和研究。',
+                people: '你在人际交往方面有突出的天赋，擅长沟通和组织。',
+                self: '你在自我认知方面有突出的天赋，善于反思和内省。'
+            };
+            const talentTags = {
+                language: ['表达', '写作', '沟通'], logic: ['分析', '数学', '理性'],
+                body: ['运动', '动手', '协调'], music: ['音乐', '节奏', '旋律'],
+                space: ['想象', '设计', '绘画'], nature: ['探索', '观察', '研究'],
+                people: ['社交', '领导', '沟通'], self: ['反思', '内省', '成长']
+            };
+
+            const result = state.resultType;
+            document.getElementById('levelTag').textContent = '核心天赋：' + talentNames[result];
+            document.getElementById('resultLevelDesc').textContent = '根据你的测评结果，你最突出的是';
+            document.getElementById('matchName').textContent = talentNames[result];
+            document.getElementById('matchDesc').textContent = talentDescs[result];
+            
+            const tagsContainer = document.getElementById('matchTags');
+            tagsContainer.innerHTML = (talentTags[result] || []).map(tag => `<span class="match-tag">${tag}</span>`).join('');
+
+            const sorted = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
+            const talentsContainer = document.getElementById('talentScores');
+            talentsContainer.innerHTML = sorted.map(([talent, score]) => `
+                <div class="score-bar-item">
+                    <div class="score-bar-label">${talentNames[talent]}</div>
+                    <div class="score-bar-value">${score}%</div>
+                </div>
+            `).join('');
+        }
+
+        function generateReport() {
+            const talentNames = {
+                language: '语言智能', logic: '逻辑智能', body: '身体运动智能', music: '音乐智能',
+                space: '空间智能', nature: '自然智能', people: '人际智能', self: '内省智能'
+            };
+            const result = talentNames[state.resultType] || state.resultType;
+            const sorted = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
+            
+            const html = `
+                <div class="report-section">
+                    <h3 class="report-section-title">📋 测评基础信息</h3>
+                    <p>• 测试时间：${new Date().toLocaleString()}</p>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">📊 测评结果总览</h3>
+                    <div class="report-highlight">
+                        <p style="font-size:18px; font-weight:700; margin-bottom:10px;">🎯 核心天赋：${result}</p>
+                        <p style="margin:0;">根据多元智能理论，${result}是你最突出的天赋领域。这代表你在这些方面有更大的发展潜力。</p>
+                    </div>
+                    <p style="margin-top:20px;"><strong>智能分布：</strong></p>
+                    <ul class="report-list">
+                        ${sorted.map(([talent, score], i) => `<li>${i+1}. ${talentNames[talent]}：${score}%</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">🧠 天赋分析</h3>
+                    <p>${getTalentAnalysis(state.resultType)}</p>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">💡 开发建议</h3>
+                    <p>${getDevelopmentSuggestions(state.resultType)}</p>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">🎯 职业建议</h3>
+                    <p>${getCareerSuggestions(state.resultType)}</p>
+                </div>
+            `;
+
+            document.getElementById('reportContent').innerHTML = html;
+        }
+
+        function getTalentAnalysis(talent) {
+            const analyses = {
+                language: '语言智能是指你对语言的敏感度和运用能力。你擅长用语言表达自己的想法，喜欢阅读、写作和口头交流。这类人通常适合从事需要大量语言表达的工作，如教师、作家、演讲家、主持人、记者、律师等。',
+                logic: '逻辑智能是指你的逻辑思维和数学推理能力。你擅长分析问题、解决复杂的逻辑难题，对数字和科学有较强的理解力。这类人通常适合从事需要严谨思维的工作，如程序员、科学家、工程师、会计师、分析师等。',
+                body: '身体运动智能是指你的身体控制能力和动手能力。你擅长通过身体动作来学习和表达，动手能力强，喜欢运动。这类人通常适合从事需要动手操作的工作，如运动员、舞者、外科医生、厨师、手工艺者等。',
+                music: '音乐智能是指你对音乐的感知、理解和表现能力。你对音乐非常敏感，能够感知旋律、节奏和音色。这类人通常适合从事与音乐相关的工作，如音乐家、歌手、音乐制作人、音乐教师等。',
+                space: '空间智能是指你对空间和视觉的感知能力。你擅长在头脑中构建图像，喜欢绘画、设计和想象。这类人通常适合从事需要空间想象的工作，如设计师、建筑师、摄影师、画家、司机等。',
+                nature: '自然智能是指你对自然和科学的兴趣与感知能力。你喜欢观察自然现象，对动植物和科学实验感兴趣。这类人通常适合从事与自然相关的工作，如科学家、生物学家、环保工作者、医生、农业工作者等。',
+                people: '人际智能是指你理解和与他人相处的能力。你擅长理解他人的情感和意图，喜欢与人交往。这类人通常适合从事需要大量人际交往的工作，如销售、教师、管理者、HR、导游、公关等。',
+                self: '内省智能是指你对自身的认知和理解能力。你善于反思，了解自己的优势和不足。这类人通常适合从事需要独立思考的工作，如心理咨询师、作家、哲学家、研究者等。'
+            };
+            return analyses[talent] || '';
+        }
+
+        function getDevelopmentSuggestions(talent) {
+            const suggestions = {
+                language: '<p>1. 每天坚持阅读和写作</p><p>2. 参加演讲或辩论活动</p><p>3. 学习外语提升语言能力</p><p>4. 尝试写日记或博客</p>',
+                logic: '<p>1. 练习数学和逻辑推理题</p><p>2. 学习编程培养逻辑思维</p><p>3. 玩棋类策略游戏</p><p>4. 尝试解决生活中的问题</p>',
+                body: '<p>1. 坚持一项运动</p><p>2. 学习跳舞或武术</p><p>3. 做手工艺或手工制作</p><p>4. 通过运动释放压力</p>',
+                music: '<p>1. 学习一门乐器</p><p>2. 每天听音乐</p><p>3. 尝试音乐创作</p><p>4. 参加合唱或音乐活动</p>',
+                space: '<p>1. 练习绘画或素描</p><p>2. 玩积木或拼图</p><p>3. 学习设计软件</p><p>4. 练习方向感和空间感知</p>',
+                nature: '<p>1. 多接触大自然</p><p>2. 养植物或宠物</p><p>3. 阅读科普书籍</p><p>4. 参与科学实验或观察</p>',
+                people: '<p>1. 参加社交活动</p><p>2. 练习沟通技巧</p><p>3. 学习团队合作</p><p>4. 尝试组织活动</p>',
+                self: '<p>1. 坚持写日记</p><p>2. 练习冥想和反思</p><p>3. 设定个人目标</p><p>4. 定期回顾和总结</p>'
+            };
+            return suggestions[talent] || '';
+        }
+
+        function getCareerSuggestions(talent) {
+            const careers = {
+                language: '<p>适合职业：作家、记者、教师、律师、主持人、演讲家、编辑、翻译、外交官</p>',
+                logic: '<p>适合职业：程序员、科学家、工程师、会计师、分析师、数学家、研究员</p>',
+                body: '<p>适合职业：运动员、舞者、外科医生、厨师、手工艺者、健身教练、演员</p>',
+                music: '<p>适合职业：音乐家、歌手、音乐制作人、音乐教师、声乐教练、DJ</p>',
+                space: '<p>适合职业：设计师、建筑师、摄影师、画家、飞行员、驾驶员、规划师</p>',
+                nature: '<p>适合职业：科学家、生物学家、医生、环保工作者、农业专家、地理学家</p>',
+                people: '<p>适合职业：销售、HR、管理者、导游、公关、教师、咨询师、社会工作者</p>',
+                self: '<p>适合职业：心理咨询师、作家、哲学家、研究者、策划、顾问</p>'
+            };
+            return careers[talent] || '';
+        }
+
+        initEventListeners();
+    </script>
+    <script>
+        try { initEventListeners(); } catch(e) {}
+    </script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "tfql";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

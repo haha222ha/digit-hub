@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>原生家庭影响深度测试 | 2026专业心理测评</title>
+    <style>
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600}
+        :root { --primary: #2D3436; --accent: #636e72; --safe: #00B894; --warning: #FDCB6E; --family: #74b9ff; --bg-gradient-start: #DFE6E9; --bg-gradient-end: #B2BEC3; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-dark { 0% { box-shadow: 0 0 0 0 rgba(116, 185, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(116, 185, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(116, 185, 255, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(45, 52, 54, 0.3); transition: transform 0.1s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 60px 24px 40px; text-align: center; min-height: 100vh; }
+        .cover-tag { display: inline-block; background: var(--family); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; }
+        .cover-title { font-size: 34px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--family); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #dfe6e9; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; }
+        #page-demo { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--family); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #dfe6e9; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; cursor: pointer; border: 2px solid #dfe6e9; transition: all 0.2s; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #dfe6e9; border-color: var(--family); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #dfe6e9; padding-bottom: 120px; overflow-y: auto; min-height: 100vh; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #dfe6e9; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; }
+        .score-num { font-size: 48px; font-weight: 900; color: var(--family); }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; }
+        .level-badge { background: var(--family); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; }
+        .card-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--family); }
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 80px; }
+        .dim-name { font-size: 14px; font-weight: 700; }
+        .dim-bar-bg { flex: 1; height: 10px; background: #f0f2f5; border-radius: 5px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 5px; }
+        .dim-val { width: 40px; text-align: right; font-size: 13px; font-weight: 700; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--family); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-dark 2s infinite; cursor: pointer; }
+        .export-btn { background: var(--primary); margin-top: 10px; }
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--family); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 40px; }
+        .r-h1 { font-size: 26px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 20px; font-weight: 800; margin: 25px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #dfe6e9; }
+        .r-p { font-size: 15px; line-height: 1.8; color: #555; margin-bottom: 12px; }
+        .r-box { background: #fafafa; border: 1px solid #dfe6e9; padding: 18px; border-radius: 10px; margin: 12px 0; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav"><a href="https://psy.xhs365.cn/" class="nav-home">🏠 首页</a></nav>
+    <div class="container">
+        <div id="page-intro" data-screenshot="psych-test-原生家庭影响测试" class="fade-in">
+            <div class="cover-tag">FAMILY ANALYSIS</div>
+            <h1 class="cover-title">原生家庭<span>影响</span>测试</h1>
+            <p class="cover-subtitle">深度分析原生家庭对你的影响<br>走出原生家庭的束缚</p>
+            <div class="intro-features">
+                <div class="feature-box"><div class="feature-icon">🔮</div><div class="feature-title">影响模式分析</div><div class="feature-desc">识别家庭影响模式</div></div>
+                <div class="feature-box"><div class="feature-icon">💔</div><div class="feature-title">创伤识别</div><div class="feature-desc">发现潜在心理创伤</div></div>
+                <div class="feature-box"><div class="feature-icon">🧠</div><div class="feature-title">心理分析</div><div class="feature-desc">了解性格形成原因</div></div>
+                <div class="feature-box"><div class="feature-icon">🌱</div><div class="feature-title">成长方案</div><div class="feature-desc">提供自我疗愈策略</div></div>
+            </div>
+            <button class="btn" id="start-btn">开始测试 (约需 4 分钟)</button>
+        </div>
+        <div id="page-demo">
+            <h2 style="font-size:26px;font-weight:800;margin-bottom:10px;">📋 背景信息</h2>
+            <p style="color:#636E72;font-size:14px;margin-bottom:30px;">系统将根据你的情况分析原生家庭影响</p>
+            <div class="form-group">
+                <label class="form-label">你的家庭氛围如何？</label>
+                <select id="input-years" class="select-box">
+                    <option value="warm">温暖和睦</option>
+                    <option value="normal">一般</option>
+                    <option value="cold">冷淡疏离</option>
+                    <option value="conflict">冲突不断</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">你和父母的关系如何？</label>
+                <select id="input-level" class="select-box">
+                    <option value="close">非常亲密</option>
+                    <option value="ok">一般</option>
+                    <option value="distant">比较疏远</option>
+                    <option value="poor">很差</option>
+                </select>
+            </div>
+            <button class="btn" id="next-btn">开始答题</button>
+        </div>
+        <div id="page-test">
+            <div class="progress-header"><span id="dim-tag">维度：依恋模式</span><span id="progress-text">1 / 18</span></div>
+            <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+            <div id="question-wrapper" class="slide-up question-card">
+                <div class="question-tag" id="q-category">🔗 依恋模式</div>
+                <div class="question-text" id="question-text">题目加载中...</div>
+                <div id="options-box"></div>
+            </div>
+        </div>
+        <div id="page-result">
+            <div class="result-header">
+                <div class="score-circle"><span class="score-num" id="res-score">0</span><span class="score-label">影响指数</span></div>
+                <div class="level-badge" id="res-level">分析中...</div>
+                <div class="level-desc" id="res-desc">...</div>
+            </div>
+            <div class="card">
+                <div class="card-title">📊 四维影响雷达</div>
+                <div id="bars-container"></div>
+            </div>
+            <div class="bottom-dock">
+                <button class="unlock-btn" id="show-report-btn">📄 解锁深度报告</button>
+                <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+            </div>
+        </div>
+        <div id="report-modal">
+            <button class="report-close" id="close-report-btn">×</button>
+            <div class="report-header"><div style="font-size:12px; opacity:0.8;">2026 PSYCHOLOGY REPORT</div><div class="r-h1">原生家庭影响深度分析报告</div><div style="font-size:14px;">专业心理测评 · 2026全新版</div></div>
+            <div class="report-body" id="report-content"></div>
+        </div>
+    </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    {d:'attachment',t:'🔗 依恋模式',q:"你小时候和父母的关系是？",o:[{t:"亲密依恋，充满安全感",s:0},{t:"比较正常",s:2},{t:"有些疏离",s:5},{t:"严重缺乏安全感",s:8}]},
+    {d:'attachment',t:'🔗 依恋模式',q:"在亲密关系中你是否害怕被抛弃？",o:[{t:"完全不怕",s:0},{t:"偶尔有点担心",s:2},{t:"经常担心",s:5},{t:"极度恐惧被抛弃",s:8}]},
+    {d:'attachment',t:'🔗 依恋模式',q:"你容易在人际关系中建立信任吗？",o:[{t:"很容易信任他人",s:0},{t:"一般能信任",s:2},{t:"很难信任",s:5},{t:"完全无法信任",s:8}]},
+    {d:'attachment',t:'🔗 依恋模式',q:"面对分离你的反应是？",o:[{t:"能平静接受",s:0},{t:"稍微难过",s:2},{t:"非常痛苦",s:5},{t:"极度恐惧分离",s:8}]},
+    {d:'attachment',t:'🔗 依恋模式',q:"你是否经常担心伴侣不爱你？",o:[{t:"很少担心",s:0},{t:"偶尔",s:2},{t:"经常担心",s:5},{t:"总是焦虑不安",s:8}]},
+    {d:'emotion',t:'💔 情感模式',q:"你父母会用情感来控制你吗？",o:[{t:"完全不会",s:0},{t:"偶尔",s:2},{t:"经常",s:5},{t:"非常严重",s:8}]},
+    {d:'emotion',t:'💔 情感模式',q:"你是否觉得必须讨好才能被爱？",o:[{t:"完全没这种感觉",s:0},{t:"偶尔",s:2},{t:"经常",s:5},{t:"总是这样",s:8}]},
+    {d:'emotion',t:'💔 情感模式',q:"你会压抑自己的情绪来满足他人吗？",o:[{t:"很少",s:0},{t:"偶尔",s:2},{t:"经常",s:5},{t:"总是",s:8}]},
+    {d:'emotion',t:'💔 情感模式',q:"你的情绪表达受到过限制吗？",o:[{t:"完全没有，可以自由表达",s:0},{t:"稍微限制",s:2},{t:"经常被限制",s:5},{t:"完全不被允许表达",s:8}]},
+    {d:'self',t:'🧠 自我认知',q:"你经常自我否定吗？",o:[{t:"很少",s:0},{t:"偶尔",s:2},{t:"经常",s:5},{t:"总是",s:8}]},
+    {d:'self',t:'🧠 自我认知',q:"你觉得自己值得被爱吗？",o:[{t:"完全值得",s:0},{t:"大部分时候觉得",s:2},{t:"偶尔觉得",s:5},{t:"完全不值得",s:8}]},
+    {d:'self',t:'🧠 自我认知',q:"面对批评你会过度自责吗？",o:[{t:"理性看待",s:0},{t:"稍微难过",s:2},{t:"经常自责",s:5},{t:"严重自我否定",s:8}]},
+    {d:'self',t:'🧠 自我认知',q:"你是否对自己要求过于苛刻？",o:[{t:"不会，适度就好",s:0},{t:"偶尔苛刻",s:2},{t:"经常苛刻",s:5},{t:"永远不满意自己",s:8}]},
+    {d:'boundaries',t:'🚧 边界感',q:"你很难对别人说"不"吗？",o:[{t:"能轻松拒绝",s:0},{t:"一般能",s:2},{t:"很难拒绝",s:5},{t:"完全不会拒绝",s:8}]},
+    {d:'boundaries',t:'🚧 边界感',q:"你会为了维持关系而牺牲自己吗？",o:[{t:"很少",s:0},{t:"偶尔",s:2},{t:"经常",s:5},{t:"总是牺牲自己",s:8}]},
+    {d:'boundaries',t:'🚧 边界感',q:"你能保护自己的私人空间吗？",o:[{t:"完全能",s:0},{t:"基本能",s:2},{t:"很难",s:5},{t:"完全不能",s:8}]},
+    {d:'boundaries',t:'🚧 边界感',q:"别人侵犯你的边界时你会？",o:[{t:"立即制止",s:0},{t:"表达不满",s:2},{t:"隐忍",s:5},{t:"完全默默承受",s:8}]},
+    {d:'repetition',t:'🔄 重复模式',q:"你发现自己和父母的相处模式在重复吗？",o:[{t:"完全不会",s:0},{t:"偶尔相似",s:2},{t:"经常重复",s:5},{t:"完全复制",s:8}]}
+];
+const levels = [
+    {max:35,l:"影响较小",c:"#00B894",d:"你的原生家庭影响相对较小，拥有健康的心理模式。",advice:"继续保持这种状态，同时关注下一代的教育方式。",points:["保持心理健康","关注下一代","持续成长"]},
+    {max:70,l:"轻度影响",c:"#00CEC9",d:"你受到一定的原生家庭影响，但影响程度可控。",advice:"通过自我觉察和持续成长，可以逐渐化解这些影响。",points:["加强自我觉察","建立健康关系","寻求专业支持"]},
+    {max:100,l:"中度影响",c:"#FDCB6E",d:"你受到较明显的原生家庭影响，已经影响到生活各个方面。",advice:"建议寻求专业帮助，同时通过阅读和自我反思来逐步疗愈。",points:["寻求专业帮助","阅读相关书籍","进行心理疗愈"]},
+    {max:144,l:"影响较深",c:"#e17055",d:"你的原生家庭影响较深，已经形成较固定的心理模式。",advice:"建议寻求专业心理咨询和治疗，这是走出创伤的重要一步。",points:["寻求专业治疗","进行深度疗愈","建立支持系统","自我关怀"]}
+];
+let currQList=[],currIdx=0,scores={attachment:0,emotion:0,self:0,boundaries:0,repetition:0};
+function goToDemo(){document.getElementById('page-intro').style.display='none';document.getElementById('page-demo').style.display='block';}
+function initTest(){currQList=[...questions];currIdx=0;scores={attachment:0,emotion:0,self:0,boundaries:0,repetition:0};document.getElementById('page-demo').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=currIdx+1+'/'+currQList.length;document.getElementById('progress-fill').style.width=(currIdx/currQList.length)*100+'%';document.getElementById('dim-tag').innerText='维度：'+q.t;document.getElementById('q-category').innerText=q.t;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(q.d,opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(dim,val){scores[dim]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';setTimeout(()=>{document.getElementById('page-result').style.display='block';calculateResult();},2000);}
+function calculateResult(){let total=Object.values(scores).reduce((a,b)=>a+b,0);let finalScore=Math.round(total);let lvl=levels.find(l=>finalScore<=l.max)||levels[levels.length-1];let start=0;const timer=setInterval(()=>{start++;document.getElementById('res-score').innerText=start;if(start>=finalScore)clearInterval(timer);},15);document.getElementById('res-level').innerText=lvl.l;document.getElementById('res-level').style.background=lvl.c;document.getElementById('res-desc').innerText=lvl.d;renderBars(scores);}
+function renderBars(s){const box=document.getElementById('bars-container');const dims=[{k:'attachment',n:'依恋'},{k:'emotion',n:'情感'},{k:'self',n:'自我'},{k:'boundaries',n:'边界'},{k:'repetition',n:'重复'}];let html='';dims.forEach(d=>{let maxScore=d.k==='attachment'?40:d.k==='emotion'?32:d.k==='self'?32:d.k==='boundaries'?32:8;let pct=Math.min((s[d.k]/maxScore)*100,100);let color=pct<=25?'#00B894':(pct<=50?'#FDCB6E':'#e17055');html+=`<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%;background:${color};"></div></div><div class="dim-val" style="color:${color}">${Math.round(pct)}%</div></div>`;});box.innerHTML=html;}
+function showReport(){const total=parseInt(document.getElementById('res-score').innerText);const lvl=levels.find(l=>total<=l.max)||levels[levels.length-1];let html=`<div class="report_section"><div class="r-h1">一、原生家庭影响诊断</div><div class="r-box" style="border-left:5px solid ${lvl.c};"><div style="font-size:20px;font-weight:900;color:${lvl.c};margin-bottom:8px;">影响等级：${lvl.l}</div><p style="margin:0;font-size:14px;line-height:1.6;color:#555;">${lvl.d}</p><p style="margin:10px 0 0;font-size:14px;"><strong>核心建议：</strong>${lvl.advice}</p></div></div><div class="report_section"><div class="r-h2">二、五维度影响分析</div>${Object.entries(scores).map(([k,v])=>{let maxScore=k==='attachment'?40:k==='emotion'?32:k==='self'?32:k==='boundaries'?32:8;let level=v/maxScore<=0.25?'较低':(v/maxScore<=0.5?'中等':'较高');let color=v/maxScore<=0.25?'#00B894':(v/maxScore<=0.5?'#FDCB6E':'#e17055');return`<div style="margin-bottom:15px;padding:12px;background:#fafafa;border-radius:8px;"><div style="font-weight:700;margin-bottom:5px;">${['依恋模式','情感模式','自我认知','边界感','重复模式'][['attachment','emotion','self','boundaries','repetition'].indexOf(k)]}</div><div style="height:6px;background:#eee;border-radius:3px;"><div style="height:100%;width:${(v/maxScore)*100}%;background:${color};border-radius:3px;"></div></div><div style="font-size:12px;color:#999;">影响程度：<span style="color:${color}">${level}</span></div></div>`}).join('')}</div><div class="report_section"><div class="r-h2">三、疗愈建议</div><div class="r-box"><ul style="margin:0;padding-left:20px;line-height:2;">${lvl.points.map(p=>`<li>${p}</li>`).join('')}</ul></div></div><div style="text-align:center;color:#ccc;font-size:12px;margin-top:40px;">2026原生家庭影响测试·专业心理测评</div>`;document.getElementById('report-content').innerHTML=html;document.getElementById('report-modal').style.display='block';}
+function closeReport(){document.getElementById('report-modal').style.display='none';}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(116,185,255);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('原生家庭影响深度分析报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});let y=55;const lvl=levels.find(l=>parseInt(document.getElementById('res-score').innerText)<=l.max)||levels[levels.length-1];doc.setTextColor(0,0,0);doc.setFontSize(16);doc.text('影响等级：'+lvl.l,15,y);y+=10;doc.setFontSize(12);doc.text(lvl.d.substring(0,150)+'...',15,y);doc.save('原生家庭影响报告.pdf');}
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });document.getElementById('next-btn').addEventListener('click',initTest);document.getElementById('show-report-btn').addEventListener('click',showReport);document.getElementById('close-report-btn').addEventListener('click',closeReport);document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "ysjtyx";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

@@ -1,0 +1,146 @@
+[
+    {
+        "title": "你的脸型更接近？",
+        "options": [
+            {"text": "线条流畅的鹅蛋脸/瓜子脸", "score": 0},
+            {"text": "棱角分明的方脸/菱形脸", "score": 5},
+            {"text": "圆润的圆脸", "score": 2},
+            {"text": "骨骼明显的高颧骨", "score": 5}
+        ]
+    },
+    {
+        "title": "你更适合什么妆容？",
+        "options": [
+            {"text": "清透自然的裸妆", "score": 0},
+            {"text": "浓墨重彩的浓妆", "score": 3},
+            {"text": "强调轮廓的修容", "score": 5},
+            {"text": "适合各种妆容", "score": 2}
+        ]
+    },
+    {
+        "title": "你的五官特点？",
+        "options": [
+            {"text": "甜美柔和型", "score": 0},
+            {"text": "立体硬朗型", "score": 5},
+            {"text": "清秀淡雅型", "score": 1},
+            {"text": "明艳大气型", "score": 3}
+        ]
+    },
+    {
+        "title": "你面部最突出的优点是？",
+        "options": [
+            {"text": "皮肤好，很细腻", "score": 0},
+            {"text": "骨骼分明，有轮廓感", "score": 5},
+            {"text": "眼睛有神", "score": 1},
+            {"text": "气质出众", "score": 2}
+        ]
+    },
+    {
+        "title": "你侧脸最明显的是？",
+        "options": [
+            {"text": "流畅柔和的侧脸线条", "score": 0},
+            {"text": "立体的骨骼感", "score": 5},
+            {"text": "圆润的脸颊", "score": 1},
+            {"text": "下巴线条明显", "score": 3}
+        ]
+    },
+    {
+        "title": "你觉得自己越看越耐看吗？",
+        "options": [
+            {"text": "非常耐看", "score": 0},
+            {"text": "第一眼很惊艳", "score": 2},
+            {"text": "看久了会腻", "score": 3},
+            {"text": "没有明显感觉", "score": 1}
+        ]
+    },
+    {
+        "title": "你适合的发型是？",
+        "options": [
+            {"text": "长发卷发", "score": 0},
+            {"text": "短发精干", "score": 3},
+            {"text": "有层次的中长发", "score": 1},
+            {"text": "各种都能驾驭", "score": 2}
+        ]
+    },
+    {
+        "title": "你的笑容给人什么感觉？",
+        "options": [
+            {"text": "甜美温柔", "score": 0},
+            {"text": "有感染力", "score": 2},
+            {"text": "大气明媚", "score": 3},
+            {"text": "青涩可爱", "score": 1}
+        ]
+    },
+    {
+        "title": "你的脸最抗老的部位是？",
+        "options": [
+            {"text": "皮肤状态", "score": 0},
+            {"text": "骨骼支撑", "score": 5},
+            {"text": "肉肉的脸颊", "score": 1},
+            {"text": "没有特别感觉", "score": 2}
+        ]
+    },
+    {
+        "title": "你更在意自己哪里？",
+        "options": [
+            {"text": "皮肤状态要好", "score": 0},
+            {"text": "轮廓要明显", "score": 5},
+            {"text": "五官要精致", "score": 2},
+            {"text": "整体气质", "score": 1}
+        ]
+    },
+    {
+        "title": "你适合什么风格的穿搭？",
+        "options": [
+            {"text": "甜美温柔风", "score": 0},
+            {"text": "中性酷帅风", "score": 5},
+            {"text": "优雅气质风", "score": 1},
+            {"text": "明艳御姐风", "score": 3}
+        ]
+    },
+    {
+        "title": "你觉得自己10年后会？",
+        "options": [
+            {"text": "更成熟有韵味", "score": 3},
+            {"text": "依然美丽变化不大", "score": 1},
+            {"text": "脸会更有味道", "score": 5},
+            {"text": "需要保养维持", "score": 2}
+        ]
+    },
+    {
+        "title": "你被夸赞最多的是？",
+        "options": [
+            {"text": "皮肤好", "score": 0},
+            {"text": "有气质", "score": 2},
+            {"text": "长得很高级", "score": 5},
+            {"text": "甜美可爱", "score": 1}
+        ]
+    },
+    {
+        "title": "你驾驭浓妆的能力？",
+        "options": [
+            {"text": "适合淡妆", "score": 0},
+            {"text": "适合浓妆", "score": 5},
+            {"text": "都能驾驭", "score": 2},
+            {"text": "都不太适合", "score": 3}
+        ]
+    },
+    {
+        "title": "你整体给人什么感觉？",
+        "options": [
+            {"text": "亲和力强", "score": 0},
+            {"text": "高级感", "score": 5},
+            {"text": "气质优雅", "score": 1},
+            {"text": "明艳动人", "score": 3}
+        ]
+    },
+    {
+        "title": "你更想成为？",
+        "options": [
+            {"text": "耐看型女神", "score": 0},
+            {"text": "高级脸", "score": 5},
+            {"text": "甜美女孩", "score": 1},
+            {"text": "御姐范", "score": 3}
+        ]
+    }
+]

@@ -31,7 +31,7 @@ sudo bash deploy/quick_update.sh
 
 ## 3. 代码部署
 
-同上 `quick_update.sh`。Smoke 期望含：`psy_dist_tests: 36`
+同上 `quick_update.sh`。Smoke 期望含：`psy_dist_tests: 65`
 
 ## 4. 完整业务链路验收
 

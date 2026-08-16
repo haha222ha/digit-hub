@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MBTI地理版 | 2026你最适配的外国城市</title>
+    <style>
+        :root {
+            /* 2026 MBTI地理旅行风格 */
+            --primary: #165DFF; 
+            --primary-dark: #0E42D2;
+            --accent: #00B42A; 
+            --accent-hover: #009A25;
+            --safe: #36CFC9;
+            --warning: #FF7D00;
+            --bg-gradient-start: #F5F7FA;
+            --bg-gradient-end: #E8EDF2;
+            --text-main: #1D2129;
+            --text-sub: #4E5969;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.15);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(22, 93, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(22, 93, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(22, 93, 255, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(22, 93, 255, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#D6E4FF 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 40px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #1D2129;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: #4E5969; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #E8EDF2;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #1D2129; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #86909C; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #1D2129; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #E8EDF2; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #1D2129; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #86909C; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #E8EDF2; color: #4E5969; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #1D2129; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #1D2129; cursor: pointer; border: 2px solid #E8EDF2; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #F5F7FA; }
+        .option-btn.selected { background: #E6FFEF; border-color: var(--accent); color: var(--accent); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #F5F7FA; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #E8EDF2;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--primary); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #86909C; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: #165DFF; color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #4E5969; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #1D2129; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #1D2129; display: block; }
+        .dim-sub { font-size: 10px; color: #86909C; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #4E5969; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-blue 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #4E5969; width: 100%; padding: 10px;
+            border: 1px solid #BDCCD4; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: #165DFF; color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #1D2129; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #E8EDF2; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #1D2129; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #4E5969; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #F8F9FA; border: 1px solid #E8EDF2; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #4E5969; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-MBTI地理人格" class="fade-in">
+        <div class="cover-tag">2026 GLOBAL TRAVEL</div>
+        <h1 class="cover-title">MBTI<span>地理版</span><br>你最适配的外国城市</h1>
+        <p class="cover-subtitle">基于MBTI16型人格+2026全球旅行趋势<br>精准匹配你的灵魂归宿城市</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🌍</div>
+                <div class="feature-title">四维度测算</div>
+                <div class="feature-desc">E/I、S/N、T/F、J/P，精准定位你的MBTI人格。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🏙️</div>
+                <div class="feature-title">城市匹配</div>
+                <div class="feature-desc">16种人格对应全球热门/小众外国城市。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">✨</div>
+                <div class="feature-title">2026趋势</div>
+                <div class="feature-desc">结合最新旅行潮流，定制专属旅居/旅行方案。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">千字报告</div>
+                <div class="feature-desc">深度解析人格与城市的灵魂契合度。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始测试 (约需 2 分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#1D2129; margin-bottom:10px;">旅行档案 🧳</h2>
+        <p style="color:#4E5969; font-size:14px; margin-bottom:30px;">系统将根据你的偏好匹配最适配的外国城市。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的旅行偏好是？</label>
+            <select id="input-travel" class="select-box">
+                <option value="city">都市探索 (打卡地标/美食)</option>
+                <option value="nature">自然治愈 (山野/海边/森林)</option>
+                <option value="art">文艺复古 (艺术/历史/小众)</option>
+                <option value="relax">慵懒躺平 (慢生活/休闲)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你理想的生活节奏？</label>
+            <select id="input-life" class="select-box">
+                <option value="fast">快节奏 (高效/繁华/机遇)</option>
+                <option value="middle">中等节奏 (平衡/舒适)</option>
+                <option value="slow">慢节奏 (慵懒/自由/随性)</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成MBTI测试题</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：外向/内向</span>
+            <span id="progress-text">1 / 20</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🌍 外向/内向</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-blue 1s infinite; border-radius:50%;">✈️</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#1D2129;">正在匹配你的灵魂城市...</h3>
+        <p style="color:#4E5969; font-size:14px; line-height:1.8;">正在测算MBTI人格...<br>匹配全球城市...<br>生成2026专属报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">契合度</span>
+            </div>
+            <div class="level-badge" id="res-level">MBTI ?</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 MBTI四维度雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《2026全球城市适配》完整报告</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新测试 匹配新城市</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 MBTI GEO REPORT</div>
+            <div class="r-h1">MBTI地理版·全球城市适配报告</div>
+            <div style="font-size:14px;">2026全球旅行趋势专属版</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 千字以上报告 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const pageId = window.location.pathname;
+
+// MBTI四维度题库
+const questions = [
+    // E/I 外向/内向
+    { d: 'ei', t: '外向/内向', q: "旅行时你更倾向？", o: [
+        {t:"结交新朋友，参与热闹活动", s:10},
+        {t:"偶尔社交，大部分时间独处", s:5},
+        {t:"独自探索，享受安静时光", s:0}
+    ]},
+    { d: 'ei', t: '外向/内向', q: "你喜欢的城市氛围是？", o: [
+        {t:"繁华热闹，人来人往", s:10},
+        {t:"动静结合，恰到好处", s:5},
+        {t:"安静小众，人烟稀少", s:0}
+    ]},
+    { d: 'ei', t: '外向/内向', q: "空闲时间你会？", o: [
+        {t:"出门社交，参加活动", s:10},
+        {t:"和好友小聚", s:5},
+        {t:"宅家独处，放松自己", s:0}
+    ]},
+    { d: 'ei', t: '外向/内向', q: "面对陌生环境你会？", o: [
+        {t:"主动融入，快速适应", s:10},
+        {t:"观察后再行动", s:5},
+        {t:"感到紧张，需要时间适应", s:0}
+    ]},
+    { d: 'ei', t: '外向/内向', q: "你更享受？", o: [
+        {t:"人群中的热闹", s:10},
+        {t:"小圈子的温馨", s:5},
+        {t:"一个人的自由", s:0}
+    ]},
+
+    // S/N 实感/直觉
+    { d: 'sn', t: '实感/直觉', q: "规划旅行你会？", o: [
+        {t:"详细攻略，打卡所有景点", s:10},
+        {t:"简单规划，灵活调整", s:5},
+        {t:"随心而行，不做计划", s:0}
+    ]},
+    { d: 'sn', t: '实感/直觉', q: "你更关注城市的？", o: [
+        {t:"现实设施，生活便利", s:10},
+        {t:"文化氛围，生活方式", s:5},
+        {t:"灵魂气质，未来可能", s:0}
+    ]},
+    { d: 'sn', t: '实感/直觉', q: "你喜欢的旅行方式？", o: [
+        {t:"按部就班，体验经典项目", s:10},
+        {t:"尝试新鲜，兼顾经典", s:5},
+        {t:"探索未知，小众秘境", s:0}
+    ]},
+    { d: 'sn', t: '实感/直觉', q: "你更相信？", o: [
+        {t:"亲眼所见的事实", s:10},
+        {t:"经验与感受", s:5},
+        {t:"直觉与灵感", s:0}
+    ]},
+    { d: 'sn', t: '实感/直觉', q: "你对城市的要求？", o: [
+        {t:"务实便利，生活舒适", s:10},
+        {t:"有特色，有温度", s:5},
+        {t:"有梦想，有未来感", s:0}
+    ]},
+
+    // T/F 思考/情感
+    { d: 'tf', t: '思考/情感', q: "选择城市你更看重？", o: [
+        {t:"发展机遇，客观条件", s:10},
+        {t:"平衡发展与感受", s:5},
+        {t:"情感共鸣，心灵契合", s:0}
+    ]},
+    { d: 'tf', t: '思考/情感', q: "面对城市的不足你会？", o: [
+        {t:"理性分析，解决问题", s:10},
+        {t:"包容理解，调整心态", s:5},
+        {t:"注重感受，无法妥协", s:0}
+    ]},
+    { d: 'tf', t: '思考/情感', q: "你喜欢的城市人文？", o: [
+        {t:"理性高效，规则清晰", s:10},
+        {t:"友善包容，温暖和谐", s:5},
+        {t:"感性浪漫，自由随性", s:0}
+    ]},
+    { d: 'tf', t: '思考/情感', q: "做决定时你？", o: [
+        {t:"以逻辑为先", s:10},
+        {t:"逻辑与感受兼顾", s:5},
+        {t:"以内心感受为先", s:0}
+    ]},
+    { d: 'tf', t: '思考/情感', q: "你向往的城市关系？", o: [
+        {t:"独立平等，互不打扰", s:10},
+        {t:"互助友好，温暖相处", s:5},
+        {t:"亲密联结，心灵相通", s:0}
+    ]},
+
+    // J/P 判断/感知
+    { d: 'jp', t: '判断/感知', q: "你的生活态度？", o: [
+        {t:"规划清晰，井然有序", s:10},
+        {t:"灵活规划，随机应变", s:5},
+        {t:"随心所欲，顺其自然", s:0}
+    ]},
+    { d: 'jp', t: '判断/感知', q: "你喜欢的城市管理？", o: [
+        {t:"秩序井然，规则完善", s:10},
+        {t:"宽松有序，人性化", s:5},
+        {t:"自由随性，无拘无束", s:0}
+    ]},
+    { d: 'jp', t: '判断/感知', q: "面对变化你会？", o: [
+        {t:"提前准备，应对变化", s:10},
+        {t:"接受变化，灵活调整", s:5},
+        {t:"享受变化，随遇而安", s:0}
+    ]},
+    { d: 'jp', t: '判断/感知', q: "你理想的城市节奏？", o: [
+        {t:"高效规律，目标明确", s:10},
+        {t:"张弛有度，平衡舒适", s:5},
+        {t:"自由散漫，无拘无束", s:0}
+    ]},
+    { d: 'jp', t: '判断/感知', q: "你更偏爱？", o: [
+        {t:"确定的生活与未来", s:10},
+        {t:"半确定半自由的状态", s:5},
+        {t:"充满未知的惊喜", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+// MBTI城市匹配库（2026热门外国城市）
+const mbtiCities = {
+    INTJ: {name:"斯德哥尔摩",desc:"理性先锋·北欧智慧之都",color:"#165DFF"},
+    INTP: {name:"柏林",desc:"自由思想·艺术创意之都",color:"#722ED1"},
+    ENTJ: {name:"纽约",desc:"王者格局·全球金融之都",color:"#FF7D00"},
+    ENTP: {name:"伦敦",desc:"创新多元·复古潮流之都",color:"#00B42A"},
+    INFJ: {name:"京都",desc:"灵魂治愈·日式禅意之都",color:"#36CFC9"},
+    INFP: {name:"里斯本",desc:"浪漫诗意·南欧温柔之都",color:"#FF6B81"},
+    ENFJ: {name:"悉尼",desc:"温暖包容·阳光活力之都",color:"#FFC107"},
+    ENFP: {name:"巴塞罗那",desc:"热情奔放·艺术浪漫之都",color:"#E84393"},
+    ISTJ: {name:"东京",desc:"严谨秩序·亚洲精致之都",color:"#4E5969"},
+    ISFJ: {name:"温哥华",desc:"温柔治愈·宜居天堂之都",color:"#86909C"},
+    ESTJ: {name:"新加坡",desc:"高效务实·国际花园之都",color:"#0E42D2"},
+    ESFJ: {name:"墨尔本",desc:"热情友善·人文宜居之都",color:"#FF9800"},
+    ISTP: {name:"奥克兰",desc:"自由冒险·自然野性之都",color:"#27AE60"},
+    ISFP: {name:"布拉格",desc:"文艺复古·中世纪童话之都",color:"#9C27B0"},
+    ESTP: {name:"迪拜",desc:"奢华先锋·未来科技之都",color:"#FF4757"},
+    ESFP: {name:"曼谷",desc:"烟火人间·热带快乐之都",color:"#FFC107"}
+};
+
+// 全局变量
+let currQList = [...questions];
+let currIdx = 0;
+let userTravel = '';
+let userLife = '';
+let scores = { ei:0, sn:0, tf:0, jp:0 };
+let userMbti = '';
+let userCity = {};
+
+// 页面切换
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userTravel = document.getElementById('input-travel').value;
+    userLife = document.getElementById('input-life').value;
+    
+    currIdx = 0;
+    scores = { ei:0, sn:0, tf:0, jp:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { ei:0, sn:0, tf:0, jp:0 };
+    userMbti = '';
+    userCity = {};
+}
+
+// 计算MBTI类型+城市匹配
+function calculateResult() {
+    // 判定四维度
+    const ei = scores.ei> 25 ? 'E' : 'I';
+    const sn = scores.sn> 25 ? 'S' : 'N';
+    const tf = scores.tf> 25 ? 'T' : 'F';
+    const jp = scores.jp> 25 ? 'J' : 'P';
+    userMbti = ei + sn + tf + jp;
+    userCity = mbtiCities[userMbti];
+
+    // 契合度分数
+    let totalScore = Math.round((Object.values(scores).reduce((a,b)=>a+b,0) / 200) * 100);
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, totalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = `${userMbti} · ${userCity.name}`;
+    badge.style.background = userCity.color;
+    
+    document.getElementById('res-desc').innerText = userCity.desc;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'ei', n:'社交'}, {k:'sn', n:'认知'}, 
+        {k:'tf', n:'决策'}, {k:'jp', n:'生活'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 50) * 100, 100);
+        let color = pct> 60 ? '#165DFF' : (pct> 30 ? '#00B42A' : '#36CFC9');
+        let txt = getDimResult(d.k, s[d.k]);
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {ei:'外向/内向', sn:'实感/直觉', tf:'思考/情感', jp:'判断/感知'};
+    return map[k];
+}
+
+function getDimResult(k, val) {
+    if(k==='ei') return val>25 ? 'E' : 'I';
+    if(k==='sn') return val>25 ? 'S' : 'N';
+    if(k==='tf') return val>25 ? 'T' : 'F';
+    if(k==='jp') return val>25 ? 'J' : 'P';
+}
+
+// 生成千字以上报告
+function showReport() {
+    const matchScore = parseInt(document.getElementById('res-score').innerText);
+    const { name, desc, color } = userCity;
+    
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、2026 MBTI人格与城市适配诊断</div>
+        <p class="r-p" style="background:#F8F9FA; padding:12px; border-radius:8px; font-size:14px; border:1px solid #E8EDF2;">
+            <strong>🧳 旅行偏好：</strong>${userTravel==='city'?'都市探索':userTravel==='nature'?'自然治愈':userTravel==='art'?'文艺复古':'慵懒躺平'} <br>
+            <strong>⏱️ 生活节奏：</strong>${userLife==='fast'?'快节奏':userLife==='middle'?'中等节奏':'慢节奏'} <br>
+            <strong>🧩 MBTI人格：</strong>${userMbti} · ${desc}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${color}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:22px; font-weight:900; color:${color}; margin-bottom:8px;">${name} · 你的灵魂归宿城市</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#86909C; margin-right:8px;">灵魂契合度</span>
+                <span style="font-size:36px; font-weight:900; color:#1D2129; font-family:'DIN Alternate', sans-serif;">${matchScore}</span>
+                <span style="font-size:14px; color:#86909C;">/ 100</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#4E5969;"><strong>2026旅行建议：</strong>这是最贴合你灵魂的外国城市，无论是短期旅行还是长期旅居，都能让你找到归属感。</p>
+        </div>
+
+        <p class="r-p">2026年全球旅行趋势已从「打卡式旅游」转向「灵魂适配型旅居」，本次测试基于MBTI16型人格心理学、2026全球城市发展报告、旅行消费大数据，为你精准匹配到了<b>${name}</b>——这座城市的气质、节奏、文化与你的人格特质完美契合，是专属于你的2026年度旅行目的地。</p>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、MBTI人格深度解析（2026专属版）</div>
+        <p style="font-size:12px; color:#86909C; margin-bottom:20px; font-style:italic;">*基于荣格心理学+现代人格测评理论</p>
+        ${generateMbtiAnalysis()}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、${name}城市深度适配报告（2026）</div>
+        <p class="r-p"><b>${name}</b>作为2026年全球最受欢迎的外国城市之一，凭借独特的城市气质，成为${userMbti}人格的终极适配地。从生活节奏、人文氛围、自然环境到发展机遇，每一处都精准贴合你的内心需求。</p>
+        
+        <div class="r-box">
+            <div class="r-h3">🏙️ 城市气质与人格契合点</div>
+            <p class="r-p">${getCityTrait()}</p>
+        </div>
+
+        <div class="r-box" style="background:#E6FFEF; border-color:#00B42A;">
+            <div class="r-h3" style="color:#00B42A;">✨ 2026年必体验项目</div>
+            <ul class="r-list">
+                <li>打卡城市核心地标，感受当地文化内核</li>
+                <li>体验本地人生活方式，融入城市节奏</li>
+                <li>探索小众秘境，收获专属旅行记忆</li>
+                <li>品尝特色美食，解锁城市烟火气息</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="report-section">
+        <div class="r-h2">四、2026旅行/旅居实用指南</div>
+        <div class="r-box">
+            <div class="r-h3">🛡️ 出行建议</div>
+            <ul class="r-list">
+                <li>最佳旅行时间：选择当地春秋季节，气候舒适体验感最佳</li>
+                <li>旅行方式：${userLife==='slow'?'慢节奏深度游，无需赶行程':'灵活规划，兼顾打卡与休闲'}</li>
+                <li>住宿选择：${userMbti.includes('I')?'小众民宿/安静酒店':'市中心便捷酒店/社交公寓'}</li>
+                <li>消费指南：理性消费，优先体验当地特色文化与生活</li>
+            </ul>
+        </div>
+        
+        <div class="r-box" style="background:#D6E4FF; border-color:#165DFF;">
+            <div class="r-h3" style="color:#165DFF;">🌟 心灵成长价值</div>
+            <p class="r-p">在${name}，你会找到最真实的自己。这座城市会治愈你的内心焦虑，满足你的精神需求，让你在旅行中获得心灵的成长与蜕变。2026年，放下疲惫，奔赴属于你的灵魂城市，开启一场与自我对话的旅程。</p>
+        </div>
+    </div>
+
+    <div style="text-align:center; color:#86909C; font-size:12px; margin-top:50px; line-height:1.8;">
+        本报告由2026 MBTI地理算法自动生成<br>
+        愿你走遍世界，终能找到心灵的归宿
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+// MBTI解析
+function generateMbtiAnalysis() {
+    const traits = {
+        E: "外向型：热爱社交，享受热闹，从人群中获取能量，喜欢开放包容的城市氛围",
+        I: "内向型：享受独处，从安静中获取能量，喜欢小众、有深度、不喧嚣的城市",
+        S: "实感型：注重现实，热爱经典，喜欢务实、便利、有秩序的城市生活",
+        N: "直觉型：热爱创新，追求梦想，喜欢有艺术感、未来感、小众独特的城市",
+        T: "思考型：理性客观，注重逻辑，喜欢高效、规则清晰、发展机遇多的城市",
+        F: "情感型：感性温柔，注重感受，喜欢温暖、包容、有心灵共鸣的城市",
+        J: "判断型：规划清晰，喜欢秩序，喜欢井然有序、生活规律的城市",
+        P: "感知型：随性自由，喜欢变化，喜欢无拘无束、充满惊喜的城市"
+    };
+    let text = `<p class="r-p">你的MBTI类型为 <b>${userMbti}</b>，由四大核心人格维度构成：</p>`;
+    userMbti.split('').forEach(t => {
+        text += `<p class="r-p" style="padding-left:16px; border-left:3px solid #165DFF; margin-left:8px;">${traits[t]}</p>`;
+    });
+    return text;
+}
+
+// 城市特质文案
+function getCityTrait() {
+    const cityTraits = {
+        斯德哥尔摩:"北欧理性与极简的代表，秩序井然、科技发达、生活舒适，完美适配INTJ的理性思维与高阶追求，2026年更是全球可持续发展标杆城市。",
+        柏林:"自由、包容、创意无限，没有束缚的艺术氛围，精准匹配INTP的思想自由与探索欲，是2026年全球创意青年的首选城市。",
+        纽约:"全球金融中心，节奏飞快、机遇无限，契合ENTJ的王者格局与野心，2026年依旧是全球精英的梦想之地。",
+        伦敦:"复古与潮流碰撞，多元文化交融，符合ENTP的创新思维与社交需求，2026年旅行热度持续攀升。",
+        京都:"日式禅意与千年古韵，安静治愈，适配INFJ的灵魂追求，是2026年最适合心灵疗愈的外国城市。",
+        里斯本:"南欧阳光、浪漫诗意、慢节奏生活，完美贴合INFP的浪漫天性，2026年欧洲小众旅行顶流。",
+        悉尼:"阳光沙滩、温暖包容、活力四射，契合ENFJ的温暖与社交属性，2026年全球宜居城市榜首。",
+        巴塞罗那:"热情奔放、艺术浪漫、烟火气十足，适配ENFP的自由与热情，2026年欧洲旅行热门目的地。",
+        东京:"严谨秩序、精致细节、高效便利，完美匹配ISTJ的务实与严谨，2026年亚洲最宜居都市。",
+        温哥华:"自然与城市完美融合，温柔治愈、安全宜居，适配ISFJ的温柔与细腻，2026年全球幸福城市。",
+        新加坡:"高效务实、干净整洁、国际范十足，契合ESTJ的理性与秩序，2026年东南亚第一都市。",
+        墨尔本:"人文友善、艺术氛围拉满、生活舒适，适配ESFJ的热情与包容，2026年全球最宜居城市。",
+        奥克兰:"自然野性、自由冒险、慢节奏生活，匹配ISTP的独立与探索欲，2026年户外爱好者天堂。",
+        布拉格:"中世纪童话、文艺复古、浪漫唯美，适配ISFP的艺术与浪漫，2026年欧洲最美古城。",
+        迪拜:"奢华科技、未来感十足、机遇无限，契合ESTP的冒险与先锋，2026年全球未来城市标杆。",
+        曼谷:"热带烟火、热情快乐、性价比拉满，适配ESFP的随性与快乐，2026年东南亚旅行首选。"
+    };
+    return cityTraits[userCity.name];
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+// 动画
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// 雷达图
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['ei','sn','tf','jp'];
+    const labels = ['社交','认知','决策','生活'];
+    
+    ctx.strokeStyle = '#E8EDF2';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<4; j++) {
+            let a = (Math.PI*2/4)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 50, 1); 
+        let a = (Math.PI*2/4)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(22, 93, 255, 0.1)");
+    grd.addColorStop(1, "rgba(22, 93, 255, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#165DFF'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#1D2129'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/4)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+// 锁屏功能
+function updateLimitUI() {
+    document.getElementById('limit-hint').innerText = `本设备剩余可用次数：${remaining}次`;
+}
+
+msg.style.opacity = 0;
+    
+    document.getElementById('load-layer').style.display = 'flex';
+    setTimeout(() => {
+        sessionStorage.setItem('unlocked_' + pageId, 'true');
+        setTimeout(() => { 
+        }, 500);
+    }, 2000);
+}
+
+// 绑定事件
+window.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('unlocked_' + pageId)) {
+        updateLimitUI();
+    }
+
+    .addEventListener('click', unlockPage);
+
+    document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+    document.getElementById('init-test-btn').addEventListener('click', initTest);
+    document.getElementById('prev-btn').addEventListener('click', prevQuestion);
+    document.getElementById('show-report-btn').addEventListener('click', showReport);
+    document.getElementById('close-report-btn').addEventListener('click', closeReport);
+    document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "mbtidili";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>今天吃什么 | 2026美食趣味无聊测试</title>
+    <style>
+        :root {
+            /* 美食趣味测试风格 */
+            --primary: #ff9800; 
+            --primary-dark: #f57c00;
+            --accent: #ff5722; /* 美食橙红 */
+            --accent-hover: #e64a19;
+            --safe: #4caf50;
+            --warning: #ffc107;
+            --bg-gradient-start: #fff8e1;
+            --bg-gradient-end: #ffe0b2;
+            --text-main: #3e2723;
+            --text-sub: #6d4c41;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.1);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-food { 0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#ffe0b2 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 40px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #3e2723;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: #6d4c41; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #fff0c2;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #3e2723; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #8d6e63; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #3e2723; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #fff0c2; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #3e2723; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #8d6e63; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #fff0c2; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #fff0c2; color: #6d4c41; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #3e2723; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #5d4037; cursor: pointer; border: 2px solid #fff0c2; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #fff8e1; }
+        .option-btn.selected { background: #fff4e5; border-color: var(--accent); color: var(--accent); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #fff8e1; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #fff0c2;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--accent); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #8d6e63; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: #3e2723; color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #6d4c41; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #3e2723; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #3e2723; display: block; }
+        .dim-sub { font-size: 10px; color: #8d6e63; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #fff0c2; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #6d4c41; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-food 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #8d6e63; width: 100%; padding: 10px;
+            border: 1px solid #bdc3c7; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: #3e2723; color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #3e2723; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #fff0c2; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #5d4037; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fff8e1; border: 1px solid #ffe0b2; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #555; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-吃什么" class="fade-in">
+        <div class="cover-tag">2026 FOOD EDITION</div>
+        <h1 class="cover-title">今天吃<span>什么</span><br>趣味无聊测试</h1>
+        <p class="cover-subtitle">30道美食灵魂考题<br>精准匹配全国菜系，解决你的干饭选择困难症</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🍜</div>
+                <div class="feature-title">五维美食雷达</div>
+                <div class="feature-desc">口味、场景、地域、食材、烹饪，全方位匹配。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🥘</div>
+                <div class="feature-title">全国菜系推荐</div>
+                <div class="feature-desc">八大菜系+特色小吃，专属干饭指南。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🍱</div>
+                <div class="feature-title">场景适配</div>
+                <div class="feature-desc">单人/聚餐/外卖/居家，全场景推荐。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">千字报告</div>
+                <div class="feature-desc">2026专属美食报告，详细菜系特色解析。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始测试 (约需2分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#3e2723; margin-bottom:10px;">干饭档案建立 🍚</h2>
+        <p style="color:#6d4c41; font-size:14px; margin-bottom:30px;">系统将根据你的用餐场景精准推荐美食。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的用餐场景是？</label>
+            <select id="input-status" class="select-box">
+                <option value="alone">单人干饭 (独享美食)</option>
+                <option value="party">朋友聚餐 (多人共享)</option>
+                <option value="takeout">外卖宅家 (懒人干饭)</option>
+                <option value="cook">居家下厨 (自己动手)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的基础口味是？</label>
+            <select id="input-title" class="select-box">
+                <option value="spicy">重口辣星人</option>
+                <option value="light">清淡养生党</option>
+                <option value="sweet">甜口爱好者</option>
+                <option value="random">不挑食干饭王</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：口味偏好</span>
+            <span id="progress-text">1 / 35</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🍛 口味偏好</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-food 1s infinite; border-radius:50%;">🍔</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#3e2723;">正在匹配专属美食...</h3>
+        <p style="color:#6d4c41; font-size:14px; line-height:1.8;">正在分析口味偏好...<br>匹配全国菜系...<br>生成干饭指南...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">干饭匹配度</span>
+            </div>
+            <div class="level-badge" id="res-level">Level ?</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维美食偏好雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《2026全国美食干饭指南》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 换个场景 再测一次</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 FOOD GUIDE</div>
+            <div class="r-h1">全国美食干饭指南</div>
+            <div style="font-size:14px;">专属美食推荐报告 · 2026完整版</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const MAX_USES = 6; // 同一设备限制6次
+const pageId = window.location.pathname;
+const usageKey = 'usage_count_' + pageId;
+
+// 30道美食测试题库（5大维度）
+const questions = [
+    // 维度1：口味偏好
+    { d: 'taste', t: '口味偏好', q: "你更偏爱哪种基础口味？", o: [
+        {t:"麻辣鲜香，无辣不欢", s:10},
+        {t:"清淡鲜甜，原汁原味", s:7},
+        {t:"酸甜开胃，口感丰富", s:5},
+        {t:"咸香厚重，酱香浓郁", s:3}
+    ]},
+    { d: 'taste', t: '口味偏好', q: "吃饭时你能接受的辣度是？", o: [
+        {t:"特辣/魔鬼辣", s:10},
+        {t:"中辣", s:7},
+        {t:"微辣", s:4},
+        {t:"完全不辣", s:1}
+    ]},
+    { d: 'taste', t: '口味偏好', q: "你对甜食的接受程度？", o: [
+        {t:"超爱甜食，顿顿想吃", s:10},
+        {t:"偶尔吃，很喜欢", s:7},
+        {t:"一般，可吃可不吃", s:4},
+        {t:"不喜欢甜食", s:1}
+    ]},
+    { d: 'taste', t: '口味偏好', q: "你更喜欢酸口食物吗？", o: [
+        {t:"非常喜欢，开胃解腻", s:10},
+        {t:"还不错，能接受", s:6},
+        {t:"一般，不太爱吃", s:3},
+        {t:"完全不喜欢", s:1}
+    ]},
+    { d: 'taste', t: '口味偏好', q: "你偏爱重口味还是清淡口？", o: [
+        {t:"重油重盐重口味", s:10},
+        {t:"适中即可", s:6},
+        {t:"清淡少油少盐", s:2}
+    ]},
+    { d: 'taste', t: '口味偏好', q: "你喜欢吃卤味/酱香味食物吗？", o: [
+        {t:"超爱，必备下饭菜", s:10},
+        {t:"喜欢，偶尔吃", s:6},
+        {t:"一般，不太吃", s:3},
+        {t:"不喜欢", s:1}
+    ]},
+    { d: 'taste', t: '口味偏好', q: "你能接受香菜/葱蒜等调味吗？", o: [
+        {t:"必须加，灵魂调味", s:10},
+        {t:"可以接受，不加也行", s:5},
+        {t:"完全不能接受", s:1}
+    ]},
+
+    // 维度2：场景适配
+    { d: 'scene', t: '场景适配', q: "你吃饭更注重什么？", o: [
+        {t:"方便快捷，省时省力", s:10},
+        {t:"仪式感，摆盘精致", s:7},
+        {t:"性价比，吃饱为主", s:5},
+        {t:"健康营养，养生优先", s:3}
+    ]},
+    { d: 'scene', t: '场景适配', q: "你更喜欢堂食还是外卖？", o: [
+        {t:"必须堂食，口感第一", s:10},
+        {t:"都可以，看心情", s:6},
+        {t:"外卖宅家，懒人快乐", s:3}
+    ]},
+    { d: 'scene', t: '场景适配', q: "用餐时你会搭配饮品吗？", o: [
+        {t:"必须搭配，奶茶/汽水", s:10},
+        {t:"白开水/茶水即可", s:5},
+        {t:"不搭配，直接干饭", s:2}
+    ]},
+    { d: 'scene', t: '场景适配', q: "你吃饭的速度通常是？", o: [
+        {t:"暴风吸入，快速干饭", s:10},
+        {t:"正常速度", s:6},
+        {t:"细嚼慢咽，慢慢吃", s:3}
+    ]},
+    { d: 'scene', t: '场景适配', q: "你会为了美食排队很久吗？", o: [
+        {t:"愿意，美食值得等待", s:10},
+        {t:"半小时内可以接受", s:6},
+        {t:"绝不排队，直接走人", s:2}
+    ]},
+
+    // 维度3：地域倾向
+    { d: 'region', t: '地域倾向', q: "你印象中最好吃的菜系是？", o: [
+        {t:"川菜/湘菜（麻辣）", s:10},
+        {t:"粤菜/闽菜（清淡）", s:7},
+        {t:"苏菜/浙菜（鲜甜）", s:5},
+        {t:"鲁菜/徽菜（厚重）", s:3}
+    ]},
+    { d: 'region', t: '地域倾向', q: "你喜欢北方面食还是南方米饭？", o: [
+        {t:"北方面食，面条馒头", s:10},
+        {t:"南方米饭，顿顿米饭", s:7},
+        {t:"都喜欢，不挑食", s:5}
+    ]},
+    { d: 'region', t: '地域倾向', q: "你喜欢吃海鲜吗？", o: [
+        {t:"超爱海鲜，顿顿想吃", s:10},
+        {t:"喜欢，偶尔吃", s:6},
+        {t:"一般，可吃可不吃", s:3},
+        {t:"不喜欢海鲜", s:1}
+    ]},
+    { d: 'region', t: '地域倾向', q: "你偏爱小吃还是正餐？", o: [
+        {t:"特色小吃，种类越多越好", s:10},
+        {t:"正餐为主，吃饱为主", s:6},
+        {t:"都喜欢", s:4}
+    ]},
+    { d: 'region', t: '地域倾向', q: "你喜欢火锅/烧烤类美食吗？", o: [
+        {t:"最爱，每周必吃", s:10},
+        {t:"喜欢，偶尔吃", s:6},
+        {t:"一般，不太吃", s:3},
+        {t:"不喜欢", s:1}
+    ]},
+    { d: 'region', t: '地域倾向', q: "你喜欢喝汤吗？", o: [
+        {t:"无汤不欢，每顿必喝", s:10},
+        {t:"喜欢，养生必备", s:6},
+        {t:"一般，偶尔喝", s:3},
+        {t:"不喜欢喝汤", s:1}
+    ]},
+
+    // 维度4：食材喜好
+    { d: 'food', t: '食材喜好', q: "你最喜欢的肉类是？", o: [
+        {t:"猪肉（家常百搭）", s:10},
+        {t:"牛肉（高蛋白）", s:8},
+        {t:"鸡肉（低脂健康）", s:6},
+        {t:"羊肉（鲜香温补）", s:4}
+    ]},
+    { d: 'food', t: '食材喜好', q: "你喜欢吃蔬菜吗？", o: [
+        {t:"超爱蔬菜，素食也可", s:10},
+        {t:"喜欢，荤素搭配", s:7},
+        {t:"一般，只吃爱吃的", s:4},
+        {t:"不爱吃蔬菜", s:1}
+    ]},
+    { d: 'food', t: '食材喜好', q: "你喜欢吃豆制品（豆腐/豆干）吗？", o: [
+        {t:"非常喜欢", s:10},
+        {t:"可以接受", s:6},
+        {t:"不喜欢", s:2}
+    ]},
+    { d: 'food', t: '食材喜好', q: "你喜欢吃粉面类食物吗？", o: [
+        {t:"超爱，天天吃都不腻", s:10},
+        {t:"喜欢，经常吃", s:7},
+        {t:"一般，偶尔吃", s:4},
+        {t:"不喜欢", s:1}
+    ]},
+    { d: 'food', t: '食材喜好', q: "你能接受动物内脏吗？", o: [
+        {t:"完全接受，超爱吃", s:10},
+        {t:"可以接受部分", s:6},
+        {t:"完全不能接受", s:1}
+    ]},
+    { d: 'food', t: '食材喜好', q: "你喜欢吃蛋类食物吗？", o: [
+        {t:"必须吃，每餐必备", s:10},
+        {t:"喜欢，经常吃", s:6},
+        {t:"一般，可吃可不吃", s:3},
+        {t:"不喜欢", s:1}
+    ]},
+
+    // 维度5：烹饪方式
+    { d: 'cook', t: '烹饪方式', q: "你最喜欢的烹饪方式是？", o: [
+        {t:"爆炒（鲜香入味）", s:10},
+        {t:"清蒸/水煮（原汁原味）", s:7},
+        {t:"煎炸（酥脆口感）", s:5},
+        {t:"炖煮（软烂入味）", s:3}
+    ]},
+    { d: 'cook', t: '烹饪方式', q: "你喜欢吃凉拌菜吗？", o: [
+        {t:"超爱，开胃解腻", s:10},
+        {t:"喜欢，夏天必吃", s:6},
+        {t:"一般，不太吃", s:3},
+        {t:"不喜欢", s:1}
+    ]},
+    { d: 'cook', t: '烹饪方式', q: "你喜欢吃干锅/焖锅类食物吗？", o: [
+        {t:"最爱，香气十足", s:10},
+        {t:"喜欢，偶尔吃", s:6},
+        {t:"一般，可吃可不吃", s:3},
+        {t:"不喜欢", s:1}
+    ]},
+    { d: 'cook', t: '烹饪方式', q: "你喜欢吃腌制/腊味食物吗？", o: [
+        {t:"超爱，风味独特", s:10},
+        {t:"喜欢，偶尔吃", s:6},
+        {t:"一般，不太吃", s:3},
+        {t:"不喜欢", s:1}
+    ]},
+];
+
+// 场景特供题（总题数30道）
+const roleSpecific = {
+    alone: [
+        { d: 'scene', t: '单人干饭', q: "【单人特供】你会为自己精心准备一餐吗？", o: [{t:"会，仪式感拉满",s:10},{t:"随便吃点，省事",s:5}]},
+        { d: 'taste', t: '单人干饭', q: "【单人特供】单人吃饭你首选？", o: [{t:"快餐简餐",s:10},{t:"精致小份菜",s:7},{t:"泡面/零食",s:3}]},
+    ],
+    party: [
+        { d: 'scene', t: '朋友聚餐', q: "【聚餐特供】聚餐你首选什么类型？", o: [{t:"火锅/烧烤",s:10},{t:"正餐宴席",s:7},{t:"特色小吃",s:5}]},
+        { d: 'region', t: '朋友聚餐', q: "【聚餐特供】你会尝试新菜系吗？", o: [{t:"必须尝试",s:10},{t:"看情况",s:6},{t:"只吃爱吃的",s:2}]},
+    ],
+    takeout: [
+        { d: 'scene', t: '外卖宅家', q: "【外卖特供】你点外卖最看重？", o: [{t:"配送速度",s:10},{t:"口味好吃",s:7},{t:"价格便宜",s:4}]},
+        { d: 'food', t: '外卖宅家', q: "【外卖特供】你首选外卖类型？", o: [{t:"米饭套餐",s:10},{t:"粉面",s:7},{t:"小吃炸鸡",s:5}]},
+    ],
+    cook: [
+        { d: 'cook', t: '居家下厨', q: "【下厨特供】你喜欢复杂还是简单菜品？", o: [{t:"简单快手菜",s:10},{t:"复杂硬菜",s:6},{t:"都喜欢",s:8}]},
+        { d: 'food', t: '居家下厨', q: "【下厨特供】你下厨首选食材？", o: [{t:"蔬菜鸡蛋",s:10},{t:"肉类",s:7},{t:"海鲜",s:5}]},
+    ]
+};
+
+// 干饭等级评级
+const levels = [
+    { max: 30, l: "Lv.1 佛系干饭人", c: "#4caf50", d: "吃饭随缘，不挑不拣，吃饱就行。", advice: "推荐家常简餐，快速解决干饭烦恼。" },
+    { max: 50, l: "Lv.2 快乐干饭人", c: "#8bc34a", d: "有基础口味偏好，喜欢常见美食，不踩雷即可。", advice: "推荐大众菜系，闭眼冲不踩坑。" },
+    { max: 70, l: "Lv.3 美食爱好者", c: "#ffc107", d: "有明确口味追求，喜欢探索特色美食，懂吃会吃。", advice: "推荐地域特色菜系，精准匹配味蕾。" },
+    { max: 90, l: "Lv.4 资深吃货", c: "#ff9800", d: "美食重度爱好者，挑剔味蕾，只吃对的美食。", advice: "推荐高端特色菜系，满足极致味蕾。" },
+    { max: 120, l: "Lv.5 干饭王者", c: "#ff5722", d: "骨灰级美食家，走遍全国只为一口正宗美味。", advice: "推荐非遗/正宗老字号菜系，顶级享受。" },
+];
+
+// 全局变量
+let currQList = [];
+let currIdx = 0;
+let userRole = '';
+let userTitle = '';
+let scores = { taste:0, scene:0, region:0, food:0, cook:0 };
+
+// 页面切换
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userRole = document.getElementById('input-status').value;
+    userTitle = document.getElementById('input-title').value;
+    currQList = [...questions, ...roleSpecific[userRole]];
+    currIdx = 0;
+    scores = { taste:0, scene:0, region:0, food:0, cook:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up'); void wrapper.offsetWidth; wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    currIdx < currQList.length - 1 ? (currIdx++, renderQuestion()) : finishTest();
+}
+
+function prevQuestion() { currIdx> 0 && (currIdx--, renderQuestion()); }
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0; scores = { taste:0, scene:0, region:0, food:0, cook:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.min(Math.round(totalRaw / 2.5), 120);
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+    
+    animateValue(document.getElementById('res-score'), 0, finalScore, 1500);
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l; badge.style.background = lvl.c;
+    document.getElementById('res-desc').innerText = lvl.d;
+    
+    renderBars(scores); drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'taste', n:'口味'}, {k:'scene', n:'场景'}, 
+        {k:'region', n:'地域'}, {k:'food', n:'食材'}, {k:'cook', n:'烹饪'}
+    ];
+    let html = '';
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 50) * 100, 100);
+        let color = pct> 60 ? '#ff5722' : (pct> 30 ? '#ff9800' : '#4caf50');
+        let txt = pct> 70 ? '超高' : (pct> 40 ? '中等' : '一般');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {taste:'口味', scene:'场景', region:'地域', food:'食材', cook:'烹饪'};
+    return map[k];
+}
+
+// 千字2026美食报告生成
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、2026专属干饭性格诊断书</div>
+        <p class="r-p" style="background:#fff8e1; padding:12px; border-radius:8px; font-size:14px; border:1px solid #ffe0b2;">
+            <strong>🍚 干饭场景：</strong>${userRole==='alone'?'单人干饭':userRole==='party'?'朋友聚餐':userRole==='takeout'?'外卖宅家':'居家下厨'} <br>
+            <strong>🍛 基础口味：</strong>${userTitle==='spicy'?'重口辣星人':userTitle==='light'?'清淡养生党':userTitle==='sweet'?'甜口爱好者':'不挑食干饭王'}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#8d6e63; margin-right:8px;">美食匹配度</span>
+                <span style="font-size:36px; font-weight:900; color:#3e2723;">${total}</span>
+                <span style="font-size:14px; color:#8d6e63;">/ 120</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>干饭建议：</strong>${lvl.advice}</p>
+        </div>
+
+        <p class="r-p">本次测试基于30道美食灵魂考题，从口味、场景、地域、食材、烹饪五大维度深度分析，为你精准匹配2026年最适合你的全国菜系，彻底解决「今天吃什么」的世纪难题！</p>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维美食偏好深度解析</div>
+        ${generateDimAnalysis('taste', scores.taste)}
+        ${generateDimAnalysis('scene', scores.scene)}
+        ${generateDimAnalysis('region', scores.region)}
+        ${generateDimAnalysis('food', scores.food)}
+        ${generateDimAnalysis('cook', scores.cook)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、2026全国八大菜系推荐+特色解析</div>
+        <p class="r-p">中国八大菜系各具特色，根据你的口味偏好，为你定制专属美食推荐，每一款都精准适配你的味蕾！</p>
+        
+        <div class="r-box">
+            <div class="r-h3">🥘 川菜（麻辣鲜香）</div>
+            <p class="r-p">【特色】：重油重辣，麻辣鲜香，调味丰富，代表菜品：麻婆豆腐、水煮鱼、火锅。<br>【推荐指数】：${scores.taste>50?'⭐⭐⭐⭐⭐':'⭐⭐⭐'}</p>
+        </div>
+        <div class="r-box">
+            <div class="r-h3">🍲 粤菜（清淡鲜嫩）</div>
+            <p class="r-p">【特色】：原汁原味，清淡养生，注重食材本味，代表菜品：白切鸡、烧鹅、老火靓汤。<br>【推荐指数】：${scores.taste<30?'⭐⭐⭐⭐⭐':'⭐⭐⭐'}</p>
+        </div>
+        <div class="r-box">
+            <div class="r-h3">🍜 苏菜/浙菜（鲜甜清爽）</div>
+            <p class="r-p">【特色】：清鲜香甜，刀工精细，江南风味，代表菜品：东坡肉、西湖醋鱼、小笼包。<br>【推荐指数】：${userTitle==='sweet'?'⭐⭐⭐⭐⭐':'⭐⭐⭐'}</p>
+        </div>
+        <div class="r-box">
+            <div class="r-h3">🍖 鲁菜/徽菜（咸香厚重）</div>
+            <p class="r-p">【特色】：酱香浓郁，火候考究，北方代表菜系，代表菜品：糖醋鲤鱼、臭鳜鱼、一品豆腐。<br>【推荐指数】：${scores.region>40?'⭐⭐⭐⭐⭐':'⭐⭐⭐'}</p>
+        </div>
+        <div class="r-box">
+            <div class="r-h3">🦞 闽菜（海鲜鲜甜）</div>
+            <p class="r-p">【特色】：擅长海鲜，酸甜适口，代表菜品：佛跳墙、荔枝肉。<br>【推荐指数】：${scores.food>45?'⭐⭐⭐⭐⭐':'⭐⭐⭐'}</p>
+        </div>
+        <div class="r-box">
+            <div class="r-h3">🌶️ 湘菜（香辣醇厚）</div>
+            <p class="r-p">【特色】：香辣入味，无辣不欢，代表菜品：剁椒鱼头、辣椒炒肉。<br>【推荐指数】：${userTitle==='spicy'?'⭐⭐⭐⭐⭐':'⭐⭐⭐'}</p>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">四、全场景干饭终极指南</div>
+        <div class="r-box">
+            <div class="r-h3">🍽️ ${userRole==='alone'?'单人干饭':userRole==='party'?'朋友聚餐':userRole==='takeout'?'外卖宅家':'居家下厨'} 专属推荐</div>
+            <ul class="r-list">
+                ${getFoodAdvice(userRole, userTitle)}
+            </ul>
+        </div>
+        <p class="r-p">2026年美食趋势：健康、特色、便捷成为主流，无论你是懒人干饭、精致吃货，都能找到属于自己的美味！希望这份报告能帮你永远告别「今天吃什么」的烦恼，干饭快乐！</p>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        本报告由2026美食算法自动生成<br>
+        
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 35 ? 'high' : (val> 20 ? 'med' : 'low');
+    const config = { high: { color: '#ff5722', bg: '#fff4e5', tag: '🌟 超高偏好' }, med: { color: '#ff9800', bg: '#fff8e1', tag: '👍 中等偏好' }, low: { color: '#4caf50', bg: '#f1f8e9', tag: '✅ 一般偏好' } };
+    const c = config[riskLevel];
+    const texts = {
+        taste: { high:"你是极致口味党，对味道有超高要求，只吃符合自己味蕾的美食！", med:"你有明确的口味偏好，会选择性品尝美食，不盲目干饭！", low:"你是佛系口味党，不挑食物，吃饱就是最大的快乐！"},
+        scene: { high:"你对用餐场景有超高要求，仪式感/便捷性缺一不可！", med:"你会根据场景选择美食，兼顾实用与体验！", low:"你不在意用餐场景，有饭吃就满足！"},
+        region: { high:"你是地域美食爱好者，偏爱特定菜系，喜欢探索地方特色！", med:"你喜欢常见地域美食，不排斥尝试新口味！", low:"你对地域菜系无偏好，全国美食都能接受！"},
+        food: { high:"你对食材有超高要求，只吃自己喜欢的食材，挑剔又会吃！", med:"你有喜欢的食材，荤素搭配，均衡干饭！", low:"你对食材无要求，百搭干饭人！"},
+        cook: { high:"你对烹饪方式有执念，只吃符合自己口感的做法！", med:"你喜欢多种烹饪方式，美食包容性强！", low:"你不在意烹饪方式，怎么好吃怎么来！"}
+    };
+    return `<div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.color}; margin-top:0;">${getDimName(key)} (得分: ${Math.round(val)}) <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span></div><p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][riskLevel]}</p></div>`;
+}
+
+function getFoodAdvice(role, title) {
+    const map = {
+        alone: {spicy:"<li>首选：川味小份菜、麻辣香锅（单人份）</li><li>备选：酸辣粉、麻辣拌面</li>", light:"<li>首选：粤式简餐、清蒸小份菜</li><li>备选：白粥配菜、清汤面</li>", sweet:"<li>首选：苏式小点心、甜口简餐</li><li>备选：桂花糕、糖水铺</li>", random:"<li>首选：家常快餐、荤素套餐</li><li>备选：各类小吃，闭眼冲</li>"},
+        party: {spicy:"<li>首选：重庆火锅、湘菜馆、烧烤摊</li><li>备选：麻辣香锅、串串香</li>", light:"<li>首选：粤菜馆、海鲜大排档、养生汤锅</li><li>备选：江南菜馆、清淡宴席</li>", sweet:"<li>首选：江浙菜馆、甜品火锅、点心局</li><li>备选：桂花糖藕、甜汤系列</li>", random:"<li>首选：全国菜系融合餐厅，满足所有人</li><li>备选：自助餐、美食广场</li>"},
+        takeout: {spicy:"<li>首选：麻辣外卖、火锅外卖、炸鸡</li><li>备选：螺蛳粉、酸辣粉</li>", light:"<li>首选：轻食沙拉、粤式外卖、养生粥</li><li>备选：清蒸便当、清汤粉面</li>", sweet:"<li>首选：甜品外卖、奶茶+点心、甜口便当</li><li>备选：桂花糕、双皮奶</li>", random:"<li>首选：家常外卖、快餐套餐、小吃合集</li><li>备选：泡面+卤味，懒人快乐</li>"},
+        cook: {spicy:"<li>首选：麻辣豆腐、辣椒炒肉、水煮蛋</li><li>备选：自制火锅、麻辣拌面</li>", light:"<li>首选：清蒸鸡蛋、清炒时蔬、养生汤</li><li>备选：白灼青菜、番茄鸡蛋面</li>", sweet:"<li>首选：桂花糖藕、甜汤、南瓜粥</li><li>备选：自制小点心、水果捞</li>", random:"<li>首选：家常小炒、荤素搭配、快手菜</li><li>备选：简单面食、鸡蛋炒饭</li>"}
+    };
+    return map[role][title];
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null; const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    }; window.requestAnimationFrame(step);
+}
+
+// 美食雷达图
+function drawRadar(s) {
+    const c = document.getElementById('radarChart'); const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1; c.style.width='240px'; c.style.height='240px'; c.width=240*dpr; c.height=240*dpr; ctx.scale(dpr,dpr);
+    const cx=120,cy=120,r=90; const keys=['taste','scene','region','food','cook']; const labels=['口味','场景','地域','食材','烹饪'];
+    ctx.strokeStyle='#ffe0b2'; ctx.lineWidth=1; for(let i=1;i<=4;i++){ctx.beginPath();for(let j=0;j<5;j++){let a=(Math.PI*2/5)*j-Math.PI/2;let rad=(r/4)*i;ctx.lineTo(cx+Math.cos(a)*rad,cy+Math.sin(a)*rad);}ctx.closePath();ctx.stroke();}
+    ctx.beginPath(); keys.forEach((k,i)=>{let val=s[k];let ratio=Math.min(val/50,1.1);let a=(Math.PI*2/5)*i-Math.PI/2;ctx.lineTo(cx+Math.cos(a)*r*ratio,cy+Math.sin(a)*r*ratio);});ctx.closePath();
+    let grd=ctx.createRadialGradient(cx,cy,0,cx,cy,r); grd.addColorStop(0,"rgba(255,152,0,0.1)"); grd.addColorStop(1,"rgba(255,152,0,0.6)"); ctx.fillStyle=grd; ctx.fill();
+    ctx.strokeStyle='#ff9800'; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle='#3e2723'; ctx.font='bold 12px system-ui'; ctx.textAlign='center'; labels.forEach((l,i)=>{let a=(Math.PI*2/5)*i-Math.PI/2;ctx.fillText(l,cx+Math.cos(a)*(r+20),cy+Math.sin(a)*(r+20)+4);});
+}
+
+// 绑定事件
+window.addEventListener('DOMContentLoaded',function(){
+    document.getElementById('start-btn').onclick=goToDemo;
+    document.getElementById('init-test-btn').onclick=initTest;
+    document.getElementById('prev-btn').onclick=prevQuestion;
+    document.getElementById('show-report-btn').onclick=showReport;
+    document.getElementById('close-report-btn').onclick=closeReport;
+    document.getElementById('reset-test-btn').onclick=resetTest;
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "chish";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>考研VS考公 职业选择深度检测 | 精准职业规划</title>
+    <style>
+        :root {
+            /* 考研考公 职业测试风格 */
+            --primary: #165DFF; 
+            --primary-dark: #0E42D2;
+            --accent: #36CFC9; /* 青蓝主色 */
+            --accent-hover: #0FC6C2;
+            --safe: #00B42A;
+            --warning: #FF7D00;
+            --bg-gradient-start: #F5F7FA;
+            --bg-gradient-end: #E5E6EB;
+            --text-main: #1D2129;
+            --text-sub: #4E5969;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.15);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(22, 93, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(22, 93, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(22, 93, 255, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(22, 93, 255, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#E8F3FF 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 40px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #1D2129;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: #4E5969; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #E5E6EB;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #1D2129; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #86909C; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #1D2129; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #E5E6EB; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #1D2129; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #86909C; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #F2F3F5; color: #4E5969; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #1D2129; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #1D2129; cursor: pointer; border: 2px solid #E5E6EB; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #F5F7FA; }
+        .option-btn.selected { background: #E8F3FF; border-color: var(--accent); color: var(--primary); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #F5F7FA; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #E5E6EB;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--primary); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #86909C; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: #165DFF; color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #4E5969; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #1D2129; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #1D2129; display: block; }
+        .dim-sub { font-size: 10px; color: #86909C; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #4E5969; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-blue 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #4E5969; width: 100%; padding: 10px;
+            border: 1px solid #C9CDD4; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: #165DFF; color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #1D2129; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #E5E6EB; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #1D2129; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #4E5969; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #F8F9FA; border: 1px solid #E5E6EB; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #4E5969; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-考研适配测试" class="fade-in">
+        <div class="cover-tag">2026 Career Edition</div>
+        <h1 class="cover-title">考研<span>VS</span>考公<br>职业选择深度检测</h1>
+        <p class="cover-subtitle">基于职业心理学的34题深度扫描<br>精准匹配你的最优职业方向</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">五维雷达图</div>
+                <div class="feature-desc">学术、稳定、抗压、规划、实践，全方位职业适配分析。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-title">精准定位</div>
+                <div class="feature-desc">科学判断你更适合考研深造还是考公上岸。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">👨‍🎓</div>
+                <div class="feature-title">身份适配</div>
+                <div class="feature-desc">针对应届生/在职/二战考生定制专属测评算法。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">千字报告</div>
+                <div class="feature-desc">深度解析你的职业性格，定制备考规划方案。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始深度检测 (约需3分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#1D2129; margin-bottom:10px;">建立职业档案 📚</h2>
+        <p style="color:#4E5969; font-size:14px; margin-bottom:30px;">系统将根据您的身份调整评分权重，生成更精准的结果。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的当前身份是？</label>
+            <select id="input-status" class="select-box">
+                <option value="fresh">应届生 (即将毕业)</option>
+                <option value="work">在职备考 (边工作边备考)</option>
+                <option value="repeat">二战/脱产备考 (全职备考)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的职业性格是？</label>
+            <select id="input-title" class="select-box">
+                <option value="study">学术钻研型 (喜欢研究、学习)</option>
+                <option value="stable">稳定求安型 (追求安稳、体制内)</option>
+                <option value="practice">实践拼搏型 (喜欢实战、挑战)</option>
+                <option value="flex">灵活规划型 (综合考虑、灵活选择)</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成职业测试题</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：学术适配度</span>
+            <span id="progress-text">1 / 34</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">📖 学术适配度</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-blue 1s infinite; border-radius:50%;">🎓</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#1D2129;">正在演算职业适配系数...</h3>
+        <p style="color:#4E5969; font-size:14px; line-height:1.8;">正在分析职业性格...<br>匹配考研/考公倾向...<br>生成专属职业规划报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">适配指数</span>
+            </div>
+            <div class="level-badge" id="res-level">Level ?</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维职业适配雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《考研VS考公》完整职业规划报告</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 更换身份/性格 再测一次</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">CAREER PLANNING GUIDE</div>
+            <div class="r-h1">考研VS考公 职业规划指南</div>
+            <div style="font-size:14px;">定制化职业选择报告 · 2026版</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 千字以上报告 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const pageId = window.location.pathname;
+
+// 测试题库：5大核心维度
+const questions = [
+    // 维度1：学术适配度 (考研倾向)
+    { d: 'academic', t: '学术适配度', q: "你对专业知识深入研究的兴趣是？", o: [
+        {t:"毫无兴趣，只想快速毕业工作", s:0},
+        {t:"一般，能学就行，不追求深度", s:3},
+        {t:"比较感兴趣，愿意深入钻研", s:7},
+        {t:"极度热爱，享受学术研究的过程", s:10}
+    ]},
+    { d: 'academic', t: '学术适配度', q: "你能接受长期泡在图书馆/实验室学习吗？", o: [
+        {t:"完全不能，坐不住", s:0},
+        {t:"偶尔可以，不能长期坚持", s:3},
+        {t:"可以接受，为了学习愿意付出", s:7},
+        {t:"非常享受，乐在其中", s:10}
+    ]},
+    { d: 'academic', t: '学术适配度', q: "你对学历提升/学术深造的看法是？", o: [
+        {t:"没必要，学历够用就行", s:0},
+        {t:"可有可无，不排斥也不追求", s:3},
+        {t:"很有必要，提升核心竞争力", s:7},
+        {t:"人生必选项，必须深造", s:10}
+    ]},
+    { d: 'academic', t: '学术适配度', q: "你擅长理论学习、论文写作吗？", o: [
+        {t:"非常不擅长，极度抵触", s:0},
+        {t:"一般，勉强能完成", s:3},
+        {t:"比较擅长，愿意学习提升", s:7},
+        {t:"非常擅长，是我的优势", s:10}
+    ]},
+    { d: 'academic', t: '学术适配度', q: "你希望未来从事科研/技术/专业类工作吗？", o: [
+        {t:"完全不希望", s:0},
+        {t:"无所谓，都行", s:3},
+        {t:"比较希望，符合职业规划", s:7},
+        {t:"极度渴望，这是我的目标", s:10}
+    ]},
+    { d: 'academic', t: '学术适配度', q: "你能接受读研2-3年的时间成本吗？", o: [
+        {t:"不能，时间太久", s:0},
+        {t:"犹豫，觉得时间成本高", s:3},
+        {t:"可以接受，值得投资", s:7},
+        {t:"完全接受，时间不是问题", s:10}
+    ]},
+
+    // 维度2：稳定需求度 (考公倾向)
+    { d: 'stable', t: '稳定需求度', q: "你对工作稳定性的追求是？", o: [
+        {t:"无所谓，喜欢挑战不稳定的工作", s:0},
+        {t:"一般，能接受合理的变动", s:3},
+        {t:"比较看重，希望工作稳定", s:7},
+        {t:"极度看重，必须铁饭碗/体制内", s:10}
+    ]},
+    { d: 'stable', t: '稳定需求度', q: "你能接受私企/企业的裁员风险吗？", o: [
+        {t:"完全能接受，挑战自我", s:0},
+        {t:"勉强能接受，有心理准备", s:3},
+        {t:"不能接受，害怕失业", s:7},
+        {t:"极度排斥，绝不去私企", s:10}
+    ]},
+    { d: 'stable', t: '稳定需求度', q: "你向往体制内的福利、保障、退休待遇吗？", o: [
+        {t:"不向往，觉得束缚", s:0},
+        {t:"一般，可有可无", s:3},
+        {t:"比较向往，很有吸引力", s:7},
+        {t:"极度向往，这是核心追求", s:10}
+    ]},
+    { d: 'stable', t: '稳定需求度', q: "你喜欢规律、朝九晚五的工作节奏吗？", o: [
+        {t:"不喜欢，喜欢自由灵活", s:0},
+        {t:"一般，都能适应", s:3},
+        {t:"比较喜欢，规律更安心", s:7},
+        {t:"极度喜欢，拒绝加班/变动", s:10}
+    ]},
+    { d: 'stable', t: '稳定需求度', q: "你在意社会地位/家人对体制内的认可吗？", o: [
+        {t:"不在意，只看自己喜好", s:0},
+        {t:"有点在意，但不影响选择", s:3},
+        {t:"比较在意，希望得到认可", s:7},
+        {t:"非常在意，必须满足家人期待", s:10}
+    ]},
+    { d: 'stable', t: '稳定需求度', q: "你能接受体制内按部就班的晋升模式吗？", o: [
+        {t:"不能，喜欢快速晋升", s:0},
+        {t:"勉强能接受", s:3},
+        {t:"可以接受，稳扎稳打", s:7},
+        {t:"非常接受，适合自己", s:10}
+    ]},
+
+    // 维度3：抗压能力
+    { d: 'pressure', t: '抗压能力', q: "面对长期高强度备考，你的心态是？", o: [
+        {t:"崩溃放弃，无法坚持", s:0},
+        {t:"焦虑不安，勉强支撑", s:3},
+        {t:"平稳心态，坚持备考", s:7},
+        {t:"游刃有余，抗压能力极强", s:10}
+    ]},
+    { d: 'pressure', t: '抗压能力', q: "考试失利后，你能快速调整心态重新出发吗？", o: [
+        {t:"不能，一蹶不振", s:0},
+        {t:"需要很久才能调整", s:3},
+        {t:"短期调整，重新开始", s:7},
+        {t:"立刻调整，越挫越勇", s:10}
+    ]},
+    { d: 'pressure', t: '抗压能力', q: "你能承受备考期间的孤独、压力和质疑吗？", o: [
+        {t:"不能，容易被影响", s:0},
+        {t:"有点难受，但能坚持", s:3},
+        {t:"可以承受，专注自我", s:7},
+        {t:"完全不在乎，内心强大", s:10}
+    ]},
+    { d: 'pressure', t: '抗压能力', q: "面对竞争激烈的考试，你的心态是？", o: [
+        {t:"害怕竞争，想逃避", s:0},
+        {t:"有点紧张，平常心对待", s:3},
+        {t:"积极面对，全力备考", s:7},
+        {t:"享受竞争，挑战自我", s:10}
+    ]},
+    { d: 'pressure', t: '抗压能力', q: "你能接受备考没有社交、娱乐的生活吗？", o: [
+        {t:"不能，无法接受", s:0},
+        {t:"勉强接受，偶尔放松", s:3},
+        {t:"可以接受，为了目标牺牲", s:7},
+        {t:"完全接受，专注备考", s:10}
+    ]},
+
+    // 维度4：规划清晰度
+    { d: 'plan', t: '规划清晰度', q: "你对未来3-5年的职业规划清晰吗？", o: [
+        {t:"完全迷茫，没有规划", s:0},
+        {t:"有点模糊，边走边看", s:3},
+        {t:"比较清晰，有大致方向", s:7},
+        {t:"极度清晰，目标明确", s:10}
+    ]},
+    { d: 'plan', t: '规划清晰度', q: "你选择考研/考公是经过理性思考的吗？", o: [
+        {t:"不是，跟风选择", s:0},
+        {t:"有点犹豫，半跟风", s:3},
+        {t:"理性思考，符合自身情况", s:7},
+        {t:"深度规划，唯一目标", s:10}
+    ]},
+    { d: 'plan', t: '规划清晰度', q: "你能制定详细的备考计划并严格执行吗？", o: [
+        {t:"不能，毫无计划", s:0},
+        {t:"能制定，但很难执行", s:3},
+        {t:"能制定并基本执行", s:7},
+        {t:"完美执行，自律性极强", s:10}
+    ]},
+    { d: 'plan', t: '规划清晰度', q: "你清楚考研/考公的备考流程和难度吗？", o: [
+        {t:"完全不清楚", s:0},
+        {t:"略知一二，不了解细节", s:3},
+        {t:"比较了解，做过功课", s:7},
+        {t:"极度了解，专业级认知", s:10}
+    ]},
+
+    // 维度5：实践倾向度
+    { d: 'practice', t: '实践倾向度', q: "你更喜欢实战工作还是理论学习？", o: [
+        {t:"更喜欢理论学习", s:0},
+        {t:"两者都喜欢，均衡", s:3},
+        {t:"更喜欢实战工作", s:7},
+        {t:"极度喜欢实战，讨厌理论", s:10}
+    ]},
+    { d: 'practice', t: '实践倾向度', q: "你想尽快进入社会积累工作经验吗？", o: [
+        {t:"不想，想继续读书", s:0},
+        {t:"无所谓，都行", s:3},
+        {t:"想，早点工作赚钱", s:7},
+        {t:"极度想，不想浪费时间", s:10}
+    ]},
+    { d: 'practice', t: '实践倾向度', q: "你擅长人际交往、体制内沟通规则吗？", o: [
+        {t:"不擅长，内向社恐", s:0},
+        {t:"一般，能正常沟通", s:3},
+        {t:"比较擅长，情商在线", s:7},
+        {t:"非常擅长，如鱼得水", s:10}
+    ]},
+    { d: 'practice', t: '实践倾向度', q: "你能接受体制内的工作内容和规则吗？", o: [
+        {t:"不能，觉得枯燥束缚", s:0},
+        {t:"勉强能接受", s:3},
+        {t:"可以接受，适应力强", s:7},
+        {t:"非常接受，适合自己", s:10}
+    ]}
+];
+
+// 身份特供题
+const roleSpecific = {
+    fresh: [
+        { d: 'academic', t: '应届生学术', q: "【应届生特供】你想利用校园环境继续深造吗？", o: [
+            {t:"不想，想尽快工作", s:0}, {t:"一般", s:3}, {t:"想", s:7}, {t:"非常想", s:10}
+        ]},
+        { d: 'stable', t: '应届生稳定', q: "【应届生特供】你想毕业直接进体制内吗？", o: [
+            {t:"不想", s:0}, {t:"一般", s:3}, {t:"想", s:7}, {t:"必须进", s:10}
+        ]},
+        { d: 'pressure', t: '应届生抗压', q: "【应届生特供】你能全身心投入备考吗？", o: [
+            {t:"不能", s:0}, {t:"一般", s:3}, {t:"能", s:7}, {t:"完全能", s:10}
+        ]},
+        { d: 'plan', t: '应届生规划', q: "【应届生特供】你对毕业去向有明确规划吗？", o: [
+            {t:"没有", s:0}, {t:"模糊", s:3}, {t:"清晰", s:7}, {t:"极度清晰", s:10}
+        ]},
+        { d: 'practice', t: '应届生实践', q: "【应届生特供】你想提前积累职场经验吗？", o: [
+            {t:"不想", s:0}, {t:"一般", s:3}, {t:"想", s:7}, {t:"非常想", s:10}
+        ]}
+    ],
+    work: [
+        { d: 'academic', t: '在职学术', q: "【在职特供】你能边工作边备考读研吗？", o: [
+            {t:"不能，精力不足", s:0}, {t:"勉强", s:3}, {t:"能", s:7}, {t:"完全能", s:10}
+        ]},
+        { d: 'stable', t: '在职稳定', q: "【在职特供】你想换稳定的体制内工作吗？", o: [
+            {t:"不想", s:0}, {t:"一般", s:3}, {t:"想", s:7}, {t:"必须换", s:10}
+        ]},
+        { d: 'pressure', t: '在职抗压', q: "【在职特供】你能承受工作+备考的双重压力吗？", o: [
+            {t:"不能", s:0}, {t:"勉强", s:3}, {t:"能", s:7}, {t:"完全能", s:10}
+        ]},
+        { d: 'plan', t: '在职规划', q: "【在职特供】你备考是为了职业晋升吗？", o: [
+            {t:"不是", s:0}, {t:"一般", s:3}, {t:"是", s:7}, {t:"核心目标", s:10}
+        ]},
+        { d: 'practice', t: '在职实践', q: "【在职特供】你更看重工作稳定还是薪资？", o: [
+            {t:"薪资", s:0}, {t:"均衡", s:3}, {t:"稳定", s:7}, {t:"只看稳定", s:10}
+        ]}
+    ],
+    repeat: [
+        { d: 'academic', t: '二战学术', q: "【二战特供】你坚持考研是因为热爱学术吗？", o: [
+            {t:"不是", s:0}, {t:"一般", s:3}, {t:"是", s:7}, {t:"极度热爱", s:10}
+        ]},
+        { d: 'stable', t: '二战稳定', q: "【二战特供】你愿意为了考公脱产备考吗？", o: [
+            {t:"不愿意", s:0}, {t:"犹豫", s:3}, {t:"愿意", s:7}, {t:"完全愿意", s:10}
+        ]},
+        { d: 'pressure', t: '二战抗压', q: "【二战特供】你能承受二战的心理压力吗？", o: [
+            {t:"不能", s:0}, {t:"勉强", s:3}, {t:"能", s:7}, {t:"完全能", s:10}
+        ]},
+        { d: 'plan', t: '二战规划', q: "【二战特供】你今年必须上岸吗？", o: [
+            {t:"不是", s:0}, {t:"希望", s:3}, {t:"必须", s:7}, {t:"誓死上岸", s:10}
+        ]},
+        { d: 'practice', t: '二战实践', q: "【二战特供】你更适合学术还是体制工作？", o: [
+            {t:"学术", s:0}, {t:"均衡", s:3}, {t:"体制", s:7}, {t:"绝对体制", s:10}
+        ]}
+    ]
+};
+
+// 评级体系：分数越低越偏考研，越高越偏考公
+const levels = [
+    { max: 25, l: "Lv.1 极致考研倾向", c: "#0FC6C2", d: "天生学术型人才，100%适合考研深造，不建议考公。", advice: "全力备战考研，深耕学术，未来可期。" },
+    { max: 40, l: "Lv.2 强烈考研倾向", c: "#36CFC9", d: "学术适配度极高，考研是最优选择，考公适配度低。", advice: "以考研为主，无需考虑考公。" },
+    { max: 55, l: "Lv.3 偏考研倾向", c: "#165DFF", d: "更适合学术深造，考研成功率远高于考公。", advice: "主攻考研，可轻度了解考公。" },
+    { max: 70, l: "Lv.4 均衡选择", c: "#722ED1", d: "考研考公适配度均衡，可根据自身情况灵活选择。", advice: "结合自身条件，双备或择一备考。" },
+    { max: 85, l: "Lv.5 偏考公倾向", c: "#FF7D00", d: "更适合体制内，考公成功率远高于考研。", advice: "主攻考公，可轻度了解考研。" },
+    { max: 100, l: "Lv.6 强烈考公倾向", c: "#FF4D4F", d: "稳定需求度极高，考公是最优选择，考研适配度低。", advice: "全力备战考公，追求稳定铁饭碗。" },
+    { max: 999, l: "Lv.7 极致考公倾向", c: "#F53F3F", d: "天生体制型人才，100%适合考公上岸，不建议考研。", advice: "专注考公，稳定一生，是最佳路径。" }
+];
+
+// 全局变量
+let currQList = [];
+let currIdx = 0;
+let userRole = '';
+let userTitle = '';
+let scores = { academic:0, stable:0, pressure:0, plan:0, practice:0 };
+
+// 页面切换
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userRole = document.getElementById('input-status').value;
+    userTitle = document.getElementById('input-title').value;
+    
+    currQList = [...questions, ...roleSpecific[userRole]];
+    currIdx = 0;
+    scores = { academic:0, stable:0, pressure:0, plan:0, practice:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    let weight = 1.0;
+    if (userRole === 'repeat') weight = 1.1;
+    scores[dim] += val * weight;
+
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { academic:0, stable:0, pressure:0, plan:0, practice:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw / 2.5); 
+    if(finalScore> 120) finalScore = 120;
+
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'academic', n:'学术'}, {k:'stable', n:'稳定'}, 
+        {k:'pressure', n:'抗压'}, {k:'plan', n:'规划'}, {k:'practice', n:'实践'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 60) * 100, 100);
+        let color = pct> 60 ? '#FF7D00' : (pct> 30 ? '#165DFF' : '#00B42A');
+        let txt = d.k==='stable' ? (pct>60?'考公倾向':pct>30?'均衡':'考研倾向') : 
+                 d.k==='academic' ? (pct>60?'考研倾向':pct>30?'均衡':'考公倾向') : 
+                 (pct>70?'优秀':pct>40?'中等':'一般');
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {academic:'学术适配度', stable:'稳定需求度', pressure:'抗压能力', plan:'规划清晰度', practice:'实践倾向度'};
+    return map[k];
+}
+
+// 千字以上报告生成
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+    let careerDirection = total < 40 ? '考研' : total> 80 ? '考公' : '考研/考公均衡选择';
+
+    let envStatus = '';
+    let envClass = '';
+    if (total < 40) {
+        envStatus = '📖 最优选择：考研深造 (学术型人才)';
+        envClass = 'color:#0FC6C2; font-weight:900;';
+    } else if (total> 80) {
+        envStatus = '🏛️ 最优选择：考公上岸 (稳定型人才)';
+        envClass = 'color:#FF4D4F; font-weight:900;';
+        envStatus = '⚖️ 灵活选择：考研考公双适配 (综合型人才)';
+        envClass = 'color:#722ED1; font-weight:800;';
+    }
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、考研VS考公 职业性格诊断书</div>
+        <p class="r-p" style="background:#F8F9FA; padding:12px; border-radius:8px; font-size:14px; border:1px solid #E5E6EB;">
+            <strong>👤 个人档案：</strong>${userRole==='fresh'?'应届生 (即将毕业)':userRole==='work'?'在职备考 (边工作边备考)':'二战/脱产备考 (全职备考)'} <br>
+            <strong>🎯 职业性格：</strong>${getTitleName(userTitle)}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#86909C; margin-right:8px;">职业适配总分</span>
+                <span style="font-size:36px; font-weight:900; color:#1D2129; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#86909C;">/ 120</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#4E5969;"><strong>核心建议：</strong>${lvl.advice}</p>
+        </div>
+
+        <div style="margin-top:20px; padding:15px; background:#fff; border-radius:8px; border:1px solid #E5E6EB;">
+            <p style="margin:0 0 10px 0; font-size:14px; color:#86909C;">职业方向定性：</p>
+            <div style="${envClass} font-size:17px; margin-bottom:12px;">${envStatus}</div>
+            <p class="r-p" style="font-size:15px; margin:0;">
+                经过34项职业指标的深度扫描，系统检测到你的核心优势位于 <span style="background:${lvl.c}; color:#fff; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:13px;">${getDimFullCN(maxDimKey)}</span> 维度。
+                ${total < 40 ? '你的学术能力、钻研精神极强，考研是最适合你的人生路径，能最大化实现个人价值。' : total> 80 ? '你的稳定需求、抗压能力、人际适配度极高，考公是最适合你的选择，能获得长久的职业安全感。' : '你是综合型人才，考研考公均可成功，建议结合自身时间、精力、家庭情况灵活选择。'}
+            </p>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维职业适配机制深度解构</div>
+        <p style="font-size:12px; color:#86909C; margin-bottom:20px; font-style:italic;">*基于职业心理学、就业大数据的深度分析</p>
+        ${generateDimAnalysis('academic', scores.academic)}
+        ${generateDimAnalysis('stable', scores.stable)}
+        ${generateDimAnalysis('pressure', scores.pressure)}
+        ${generateDimAnalysis('plan', scores.plan)}
+        ${generateDimAnalysis('practice', scores.practice)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、定制化备考规划与职业发展策略</div>
+        <div class="r-box" style="border-color:#C9CDD4;">
+            <div class="r-h3">🎯 核心方向定位</div>
+            <ul class="r-list">
+                <li><strong>最优职业路径：</strong> ${careerDirection}，这是与你职业性格、能力、需求最匹配的选择，上岸成功率提升60%以上。</li>
+                <li><strong>能力匹配度：</strong> 你的核心优势与${careerDirection}的要求高度契合，备考过程会更轻松，上岸后职业幸福感更强。</li>
+                <li><strong>风险提示：</strong> 避免盲目跟风选择，坚持最优方向，拒绝内耗，专注备考才能快速上岸。</li>
+            </ul>
+        </div>
+        
+        <div class="r-box" style="background:#F5F7FF; border-color:#165DFF;">
+            <div class="r-h3" style="color:#165DFF;">
+                🚀 专属备考方案：${userRole==='fresh'?'应届生专属':userRole==='work'?'在职备考专属':'二战/脱产专属'}
+            </div>
+            ${userRole==='fresh' ? getFreshAdvice(careerDirection) : userRole==='work' ? getWorkAdvice(careerDirection) : getRepeatAdvice(careerDirection)}
+        </div>
+
+        <div class="r-box" style="background:#F0FDF4; border-color:#00B42A;">
+            <div class="r-h3" style="color:#00B42A;">
+                🌟 长期职业发展规划
+            </div>
+            <p class="r-p">如果你选择<strong>${careerDirection}</strong>：</p>
+            <ul class="r-list">
+                <li>${careerDirection==='考研'?'读研期间深耕专业，发表论文、参与科研，提升学术能力，毕业后可选择读博、进大厂、高校任教，职业选择多元化。':'考上公务员后，深耕体制内规则，积累工作经验，稳步晋升，享受终身稳定的福利、保障和社会地位。'}</li>
+                <li>坚持自律，保持学习习惯，无论选择哪条路，持续提升自己都是核心竞争力。</li>
+                <li>结合自身性格优势，扬长避短，在适合自己的赛道上，你一定会闪闪发光。</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="report-section">
+        <div class="r-h2">四、总结与寄语</div>
+        <p class="r-p">考研和考公没有绝对的对错，只有适合与不适合。本次测试通过科学的职业性格分析，为你找到了最契合自身的人生方向。</p>
+        <p class="r-p">无论你选择考研深造，还是考公上岸，只要坚定目标、全力以赴，就一定能实现自己的理想。愿你不负韶华，成功上岸，在属于自己的赛道上绽放光彩！</p>
+    </div>
+    
+    <div style="text-align:center; color:#C9CDD4; font-size:12px; margin-top:50px; line-height:1.8;">
+        本报告由职业选择算法自动生成 · 全文1500+字<br>
+        祝愿每一位追光者，都能得偿所愿
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function getTitleName(t) {
+    const m = {
+        study: '学术钻研型 (热爱研究、学习)', 
+        stable: '稳定求安型 (追求安稳、体制内)', 
+        practice: '实践拼搏型 (喜欢实战、挑战)', 
+        flex: '灵活规划型 (综合考虑、灵活选择)'
+    };
+    return m[t] || t;
+}
+
+function getDimFullCN(k) {
+    const m = {
+        academic: '学术适配度 (考研核心优势)', 
+        stable: '稳定需求度 (考公核心优势)', 
+        pressure: '抗压能力 (备考核心素质)', 
+        plan: '规划清晰度 (上岸核心能力)', 
+        practice: '实践倾向度 (职场核心素养)'
+    };
+    return m[k];
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 40 ? 'high' : (val> 20 ? 'med' : 'low');
+    
+    const config = {
+        high: { color: '#165DFF', bg: '#E8F3FF', tag: '🌟 核心优势', titleColor: '#165DFF' },
+        med: { color: '#FF7D00', bg: '#FFF7E6', tag: '⚖️ 中等水平', titleColor: '#FF7D00' },
+        low: { color: '#F53F3F', bg: '#FFF2F2', tag: '⚠️ 待提升', titleColor: '#F53F3F' }
+    };
+    
+    const c = config[riskLevel];
+    
+    const texts = {
+        academic: {
+            high: "<strong>学术适配度拉满！</strong> 你具备极强的学术钻研能力、理论学习能力，对专业知识充满热情，是天生的考研型人才，读研会让你如鱼得水，学术道路一片光明。",
+            med: "<strong>学术适配度中等。</strong> 你具备一定的学习能力，对学术研究不排斥，考研有一定成功率，可根据自身需求选择。",
+            low: "<strong>学术适配度较低。</strong> 你对理论学习、学术研究兴趣不高，抵触长期深造，考研对你来说难度较大，不建议作为首选。"
+        },
+        stable: {
+            high: "<strong>稳定需求度拉满！</strong> 你极度追求工作稳定、福利保障，向往体制内的生活，是天生的考公型人才，体制内会给你满满的安全感，职业发展长久稳定。",
+            med: "<strong>稳定需求度中等。</strong> 你对工作稳定性有一定要求，能接受体制内的规则，考公有一定成功率，可作为备选方向。",
+            low: "<strong>稳定需求度较低。</strong> 你喜欢自由、挑战、灵活的工作，排斥体制内的束缚，考公对你来说不适合，不建议首选。"
+        },
+        pressure: {
+            high: "<strong>抗压能力极强！</strong> 你能承受长期备考的高强度压力、孤独和质疑，心态稳定、自律性强，无论考研还是考公，你都能坚持到最后，上岸概率极高。",
+            med: "<strong>抗压能力中等。</strong> 你能承受一定的备考压力，偶尔会焦虑，但可以调整心态坚持备考，需要加强自律。",
+            low: "<strong>抗压能力较弱。</strong> 你容易被压力影响心态，难以坚持长期备考，建议调整心态，制定轻松的备考计划。"
+        },
+        plan: {
+            high: "<strong>规划清晰度极高！</strong> 你对未来职业目标明确，备考计划清晰且能严格执行，目标感极强，这是上岸的核心保障，成功近在咫尺。",
+            med: "<strong>规划清晰度中等。</strong> 你有大致的职业方向，能制定简单的备考计划，但执行力有待提升，需要加强目标管理。",
+            low: "<strong>规划清晰度较低。</strong> 你对未来比较迷茫，备考缺乏计划，容易跟风选择，建议先明确目标再备考。"
+        },
+        practice: {
+            high: "<strong>实践倾向度拉满！</strong> 你擅长人际交往、实战工作，适应体制内的沟通规则和工作内容，考公上岸后能快速适应工作，职业发展顺利。",
+            med: "<strong>实践倾向度中等。</strong> 你具备基本的实践能力和沟通能力，能适应职场工作，无论学术还是职场都能适配。",
+            low: "<strong>实践倾向度较低。</strong> 你更擅长理论学习，不擅长人际交往和实战工作，更适合学术深造，走科研/技术路线。"
+        }
+    };
+    
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimFullCN(key)} 
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)})</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#1D2129;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+// 专属建议
+function getFreshAdvice(direction) {
+    return `
+    <ul class="r-list">
+        <li><strong>应届生优势：</strong> 拥有完整的备考时间、校园学习环境，记忆力和学习能力处于巅峰，是上岸的黄金时期。</li>
+        <li><strong>${direction==='考研'?'考研方案：':'考公方案：'}</strong> ${direction==='考研'?'从大三大四开始系统备考，利用图书馆、自习室学习，跟着学长学姐经验，深耕专业课和公共课，一次上岸成功率极高。':'全力备战国考/省考，利用应届生身份优势（岗位多、竞争小），重点学习行测申论，争取一次上岸。'}</li>
+        <li><strong>避坑指南：</strong> 不要盲目跟风考研考公，坚定最优方向；不要沉迷娱乐，珍惜应届生身份，全力以赴备考。</li>
+    </ul>`;
+}
+
+function getWorkAdvice(direction) {
+    return `
+    <ul class="r-list">
+        <li><strong>在职优势：</strong> 有经济基础、职场经验，备考更理性，目标更明确，上岸后职业选择更精准。</li>
+        <li><strong>${direction==='考研'?'考研方案：':'考公方案：'}</strong> ${direction==='考研'?'选择非全日制/在职研究生，利用下班、周末时间备考，平衡工作与学习，提升学历同时不中断收入。':'利用碎片时间学习行测申论，重点备考事业单位/省考，选择竞争小的岗位，稳步上岸。'}</li>
+        <li><strong>避坑指南：</strong> 不要因为工作忙放弃备考；不要熬夜透支身体，制定合理的碎片化学习计划。</li>
+    </ul>`;
+}
+
+function getRepeatAdvice(direction) {
+    return `
+    <ul class="r-list">
+        <li><strong>二战优势：</strong> 有备考经验、知识基础，熟悉考试流程，心态更成熟，上岸概率远超新手。</li>
+        <li><strong>${direction==='考研'?'考研方案：':'考公方案：'}</strong> ${direction==='考研'?'复盘去年失利原因，针对性补短板，全职备考，聚焦目标院校，今年必上岸。':'总结备考经验，调整学习方法，全职备考，选择适合自己的岗位，全力以赴一次上岸。'}</li>
+        <li><strong>避坑指南：</strong> 不要焦虑内耗，相信自己的经验；不要盲目换方向，坚持最适合自己的路径，胜利就在眼前。</li>
+    </ul>`;
+}
+
+// 动画
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// 雷达图
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['academic','stable','pressure','plan','practice'];
+    const labels = ['学术','稳定','抗压','规划','实践'];
+    
+    ctx.strokeStyle = '#E5E6EB';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 60, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(22, 93, 255, 0.1)");
+    grd.addColorStop(1, "rgba(22, 93, 255, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#165DFF'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#1D2129'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+// 锁屏功能
+function updateLimitUI() {
+    document.getElementById('limit-hint').innerText = `本设备剩余可用次数：${remaining}次`;
+}
+
+msg.style.opacity = 0;
+    
+    document.getElementById('load-layer').style.display = 'flex';
+    const txt = document.getElementById('load-text');
+    
+    setTimeout(() => { txt.innerText = "正在加载职业测试..."; }, 800);
+    setTimeout(() => { 
+        txt.innerText = `加载成功！(剩余${left}次)`; 
+        txt.style.color = "#165DFF"; 
+    }, 1500);
+    
+    setTimeout(() => {
+        sessionStorage.setItem('unlocked_' + pageId, 'true');
+        setTimeout(() => { 
+        }, 500);
+    }, 2500);
+}
+
+function shakeCard() {
+    const card = document.getElementById('main-card');
+    card.style.animation = 'shake 0.3s';
+    setTimeout(() => { card.style.animation = ''; }, 300);
+}
+
+// 绑定事件
+window.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('unlocked_' + pageId)) {
+        updateLimitUI();
+    }
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    document.getElementById('start-btn').addEventListener('click', function() {var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}
+        goToDemo();
+    });
+
+    document.getElementById('init-test-btn').addEventListener('click', function() {
+        initTest();
+    });
+
+    document.getElementById('prev-btn').addEventListener('click', function() {
+        prevQuestion();
+    });
+
+    document.getElementById('show-report-btn').addEventListener('click', function() {
+        showReport();
+    });
+
+    document.getElementById('close-report-btn').addEventListener('click', function() {
+        closeReport();
+    });
+
+    document.getElementById('reset-test-btn').addEventListener('click', function() {
+        resetTest();
+    });
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "kysp";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

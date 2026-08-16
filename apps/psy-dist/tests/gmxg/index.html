@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>闺蜜性格反差测试 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:var(--primary);text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:var(--primary-dark, var(--primary))}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root { --primary: #FF6B81; --primary-dark: #FF4757; --bg-gradient-start: #FFE4E8; --bg-gradient-end: #FFD1DC; --text-main: #2D3436; --text-sub: #636E72; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 107, 129, 0.3); transition: transform 0.1s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 60px 24px 40px; text-align: center; min-height: 100vh; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ffe4e8; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #ffe4e8; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 20px; font-weight: 800; line-height: 1.4; margin-bottom: 25px; color: #2D3436; }
+        .option-btn { background: #fdfdfd; padding: 18px 16px; border-radius: 12px; margin-bottom: 14px; font-size: 15px; color: #2D3436; cursor: pointer; border: 2px solid #ffe4e8; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #ffe4e8; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #ffe4e8; padding-bottom: 120px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-card { background: #fff; margin: 20px; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .contrast-title { font-size: 28px; font-weight: 900; color: var(--primary); text-align: center; margin-bottom: 30px; }
+        .contrast-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .contrast-item { text-align: center; padding: 20px; border-radius: 15px; }
+        .contrast-item.me { background: #ffe4e8; }
+        .contrast-item.friend { background: #E8F4FF; }
+        .contrast-icon { font-size: 40px; margin-bottom: 10px; }
+        .contrast-name { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .contrast-desc { font-size: 13px; color: #666; line-height: 1.5; }
+        .match-score { text-align: center; padding: 20px; background: linear-gradient(135deg, #ffe4e8, #ffd1dc); border-radius: 15px; margin-bottom: 20px; }
+        .score-num { font-size: 48px; font-weight: 900; color: var(--primary); }
+        .score-label { font-size: 14px; color: #666; }
+        .insight-box { background: #fff; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        .insight-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--primary); }
+        .insight-text { font-size: 14px; color: #666; line-height: 1.7; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .export-btn { background: #70A1FF; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+    <div id="page-intro" data-screenshot="psych-test-闺蜜性格反差测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">闺蜜性格<br><span>反差</span>测试</h1>
+        <p class="cover-subtitle">你和闺蜜的性格反差有多大？<br>揭秘你们的互补与默契</p>
+        <div class="intro-features">
+            <div class="feature-box"><div class="feature-icon">🔍</div><div class="feature-title">人格心理学</div><div class="feature-desc">基于人格心理学理论分析。</div></div>
+            <div class="feature-box"><div class="feature-icon">✨</div><div class="feature-title">性格反差</div><div class="feature-desc">找到你们性格的差异点。</div></div>
+            <div class="feature-box"><div class="feature-icon">💕</div><div class="feature-title">互补分析</div><div class="feature-desc">揭秘互补带来的默契。</div></div>
+            <div class="feature-box"><div class="feature-icon">🎯</div><div class="feature-title">相处建议</div><div class="feature-desc">提供更好的相处方式。</div></div>
+        </div>
+        <button class="btn" id="start-btn">开始测试 (约需 2 分钟)</button>
+    </div>
+    <div id="page-test">
+        <div class="progress-header"><span id="dim-tag">维度：外向性</span><span id="progress-text">1 / 10</span></div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🔍 外向性</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+    <div id="page-result">
+        <div class="result-card">
+            <div class="contrast-title">你们的性格反差</div>
+            <div class="contrast-grid">
+                <div class="contrast-item me">
+                    <div class="contrast-icon">👩</div>
+                    <div class="contrast-name">你</div>
+                    <div class="contrast-desc" id="me-desc">加载中...</div>
+                </div>
+                <div class="contrast-item friend">
+                    <div class="contrast-icon">👩‍❤️‍👩</div>
+                    <div class="contrast-name">闺蜜</div>
+                    <div class="contrast-desc" id="friend-desc">加载中...</div>
+                </div>
+            </div>
+            <div class="match-score">
+                <div class="score-num" id="res-score">0%</div>
+                <div class="score-label">互补契合度</div>
+            </div>
+            <div class="insight-box">
+                <div class="insight-title">💡 反差解读</div>
+                <div class="insight-text" id="insight-text">...</div>
+            </div>
+        </div>
+        <div class="bottom-dock">
+            <button class="btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+            <button class="btn" id="retry-btn" style="background:#fff;color:#666;border:1px solid #ddd;">🔄 重新测试</button>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    {d:'extrovert',t:'外向性',q:"你更愿意用哪种方式交朋友？",o:[{t:"主动搭话，快速熟络",s:3},{t:"慢慢接触，熟悉后放开",s:2},{t:"等别人主动",s:1},{t:"只和认识的人玩",s:0}]},
+    {d:'extrovert',t:'外向性',q:"在聚会中你通常？",o:[{t:"活跃气氛，带动话题",s:3},{t:"和熟悉的人聊天",s:2},{t:"安静观察",s:1},{t:"想快点离开",s:0}]},
+    {d:'decision',t:'决策力',q:"出门旅游谁负责规划？",o:[{t:"我来做计划",s:3},{t:"我提建议，一起决定",s:2},{t:"听对方的",s:1},{t:"走一步看一步",s:0}]},
+    {d:'decision',t:'决策力',q:"遇到选择困难时？",o:[{t:"快速决定",s:3},{t:"分析后决定",s:2},{t:"纠结很久",s:1},{t:"让别人决定",s:0}]},
+    {d:'emotion',t:'情绪表达',q:"你表达情绪的方式？",o:[{t:"直接说出来",s:3},{t:"写下来或找人说",s:2},{t:"自己消化",s:1},{t:"压抑着",s:0}]},
+    {d:'emotion',t:'情绪表达',q:"哭的时候你会？",o:[{t:"大声哭出来",s:3},{t:"偷偷流泪",s:2},{t:"忍回去",s:1},{t:"不会哭",s:0}]},
+    {d:'lifestyle',t:'生活方式',q:"你的房间通常？",o:[{t:"整洁有序",s:3},{t:"大致整洁",s:2},{t:"比较乱",s:1},{t:"很乱但自己找得到",s:0}]},
+    {d:'lifestyle',t:'生活方式',q:"你更喜欢？",o:[{t:"计划性强",s:3},{t:"有些计划",s:2},{t:"随性而为",s:1},{t:"完全随机",s:0}]},
+    {d:'communication',t:'沟通风格',q:"你们吵架后会？",o:[{t:"立刻和好",s:3},{t:"冷静后沟通",s:2},{t:"等对方先道歉",s:1},{t:"冷战后和好",s:0}]},
+    {d:'communication',t:'沟通风格',q:"你更喜欢哪种沟通？",o:[{t:"面对面聊天",s:3},{t:"发消息沟通",s:2},{t:"文字表达",s:1},{t:"不太沟通",s:0}]}
+];
+const profiles = [
+    {name:'社交达人',desc:'外向活泼，喜欢结交新朋友，擅长活跃气氛，是聚会中的焦点。'},
+    {name:'慢热内向',desc:'熟悉后才会展现真实一面，表面安静其实内心丰富，需要时间来建立信任。'},
+    {name:'理性决策者',desc:'遇事冷静，善于分析利弊，做决定果断，是团队中的主心骨。'},
+    {name:'随性自由派',desc:'喜欢随遇而安，不喜欢被束缚，享受过程大于追求结果。'},
+    {name:'情感丰富',desc:'共情能力强，容易被感动，情绪外露但真诚，是朋友的情感支撑。'},
+    {name:'内敛沉稳',desc:'情绪不外露，但内心细腻善于观察，是值得信赖的倾听者。'},
+    {name:'计划控',desc:'喜欢一切井井有条，有强烈的掌控感，是生活中的靠谱担当。'},
+    {name:'随性派',desc:'喜欢灵活自由，不喜欢被计划束缚，是生活中的开心果。'}
+];
+let currQList=[],currIdx=0,myScores={extrovert:0,decision:0,emotion:0,lifestyle:0,communication:0};
+function startTest(){currQList=[...questions];currIdx=0;myScores={extrovert:0,decision:0,emotion:0,lifestyle:0,communication:0};document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=`${currIdx+1}/${currQList.length}`;document.getElementById('progress-fill').style.width=`${(currIdx/currQList.length)*100}%`;document.getElementById('dim-tag').innerText=`维度：${q.t}`;document.getElementById('q-category').innerText=q.t;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(q.d,opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(dim,val){myScores[dim]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';setTimeout(()=>{document.getElementById('page-result').style.display='block';calculateResult();},1000);}
+function calculateResult(){let total=Object.values(myScores).reduce((a,b)=>a+b,0);let myType=profiles[Math.floor(Math.random()*profiles.length)];let friendType=profiles[Math.floor(Math.random()*profiles.length)];let contrast=100-Math.abs(total%30-15)*3;document.getElementById('me-desc').innerText=myType.name+':'+myType.desc;document.getElementById('friend-desc').innerText=friendType.name+':'+friendType.desc;document.getElementById('res-score').innerText=contrast+'%';document.getElementById('insight-text').innerText=`你们的性格反差为${contrast}%。${contrast>70?'你们是完美互补型！一个外向一个内向，一个主导一个配合，这样的组合往往能互相补充，共同成长。':'你们的性格有一定差异，但正是这种差异让你们的关系更加丰富多彩。学会欣赏对方的不同，互补会让你们更默契。'}`;}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(255,107,129);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('闺蜜性格反差测试报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});let y=55;doc.setTextColor(0,0,0);doc.setFontSize(14);doc.text('你们是完美互补型闺蜜！',15,y);y+=10;doc.setFontSize(10);doc.text('性格反差让你们的友谊更加深厚。',15,y);doc.save('闺蜜性格反差报告.pdf');}
+document.getElementById('start-btn').document.getElementById('start-btn').addEventListener('click',function(){var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}startTest();document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';});document.getElementById('retry-btn').addEventListener('click',()=>location.reload());document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "gmxg";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

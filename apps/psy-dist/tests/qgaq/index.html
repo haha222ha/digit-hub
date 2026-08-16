@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>情感安全感测试 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #3498DB;
+            --primary-dark: #2980B9;
+            --accent: #2980B9;
+            --safe: #27AE60;
+            --warning: #F39C12;
+            --danger: #E74C3C;
+            --bg-gradient-start: #EBF5FB;
+            --bg-gradient-end: #D4E6F1;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(52, 152, 219, 0); } 100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); } }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#d4e6f1 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #d4e6f1; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #d4e6f1; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #d4e6f1; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #d4e6f1; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #ebf5fb; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        #page-result { display: none; background: #d4e6f1; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #d4e6f1; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-blue 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #d4e6f1; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #d4e6f1; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-情感安全感测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">情感安全感<br><span>测试</span> 🔐</h1>
+        <p class="cover-subtitle">科学评估你在亲密关系中的安全感<br>基于存在主义心理学与依恋理论</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🛡️</div>
+                <div class="feature-title">四维深度分析</div>
+                <div class="feature-desc">信任感、自我价值、关系稳定性、沟通开放度，全面扫描情感安全感。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💙</div>
+                <div class="feature-title">依恋理论</div>
+                <div class="feature-desc">基于依恋理论和存在主义心理学，科学评估你的情感安全感。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🔐</div>
+                <div class="feature-title">精准定位原因</div>
+                <div class="feature-desc">帮助你认识到情感不安全感的深层原因。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💡</div>
+                <div class="feature-title">提升安全感指南</div>
+                <div class="feature-desc">提供科学的提升情感安全感的方法。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始检测 (约需 3 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">💙 档案建立</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的情况精准评估情感安全感。</p>
+
+        <div class="form-group">
+            <label class="form-label">你在这段感情中多久了？</label>
+            <select id="input-duration" class="select-box">
+                <option value="new">不到三个月</option>
+                <option value="short">3-6个月</option>
+                <option value="medium">6个月-1年</option>
+                <option value="long">1-3年</option>
+                <option value="verylong">3年以上</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的感情状态是？</label>
+            <select id="input-status" class="select-box">
+                <option value="dating">恋爱中（初期）</option>
+                <option value="stable">稳定恋爱中</option>
+                <option value="longterm">长期伴侣关系</option>
+                <option value="engaged">订婚</option>
+                <option value="married">已婚</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你之前有过几次恋爱经历？</label>
+            <select id="input-past" class="select-box">
+                <option value="none">没有，这是第一次</option>
+                <option value="one">1次</option>
+                <option value="two">2次</option>
+                <option value="three">3-5次</option>
+                <option value="many">5次以上</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：信任感</span>
+            <span id="progress-text">1 / 16</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🛡️ 信任感</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+
+    <div id="page-loading">
+        <div style="font-size:50px; animation: pulse-blue 1s infinite;">💙</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的情感安全感...</h3>
+        <p style="color:#636E72; font-size:14px;">正在扫描四维数据...<br>计算安全感指数...<br>生成专属报告...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">安全感指数</span>
+            </div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 情感安全感四维雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《情感安全感深度分析报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新检测</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div>
+            <div class="r-h1">情感安全感深度分析报告</div>
+            <div style="font-size:14px;">专业心理测评 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+
+</div>
+
+<script>
+const questions = [
+    { d: 'trust', t: '信任感', q: "当男朋友没有及时回复你的消息时，你会？", o: [
+        {t:"非常焦虑，不断刷新手机，担心发生了不好的事", s:10},
+        {t:"有点担心，会再发一条消息询问", s:8},
+        {t:"有点在意，但会耐心等待", s:5},
+        {t:"不太在意，知道他忙完会回复", s:2},
+        {t:"完全不担心，信任他有自己的安排", s:0}
+    ]},
+    { d: 'trust', t: '信任感', q: "你对男朋友的信任程度如何？", o: [
+        {t:"完全不信任，总觉得他可能在骗我", s:10},
+        {t:"不太信任，需要不断验证", s:8},
+        {t:"有一定的信任，但偶尔会怀疑", s:5},
+        {t:"比较信任，相信他是真诚的", s:2},
+        {t:"完全信任，毫无保留地相信他", s:0}
+    ]},
+    { d: 'trust', t: '信任感', q: "当男朋友和其他女性正常交往时，你会？", o: [
+        {t:"非常不安，质问他和对方的关系", s:10},
+        {t:"会感到不舒服，想知道更多细节", s:8},
+        {t:"有点介意，但会试着理解", s:5},
+        {t:"能够接受，知道这是正常的社交", s:2},
+        {t:"完全不在意，相信他的为人", s:0}
+    ]},
+    { d: 'trust', t: '信任感', q: "你愿意让男朋友查看你的手机吗？", o: [
+        {t:"绝对不行，他一定能看到我不想被看到的东西", s:10},
+        {t:"不太愿意，担心引起误会", s:8},
+        {t:"可以接受，但希望他不要看", s:5},
+        {t:"基本可以，没什么秘密", s:2},
+        {t:"完全可以，彼此坦诚相待", s:0}
+    ]},
+    
+    { d: 'selfworth', t: '自我价值', q: "如果男朋友对你冷淡了一些，你会怎么想？", o: [
+        {t:"一定是我的问题，我哪里做得不够好", s:10},
+        {t:"可能是我做错了什么，让他不开心了", s:8},
+        {t:"他可能只是累了或心情不好", s:5},
+        {t:"可能是他的问题，与我无关", s:2},
+        {t:"这很正常，不代表什么，我依然有价值", s:0}
+    ]},
+    { d: 'selfworth', t: '自我价值', q: "你觉得自己值得被爱吗？", o: [
+        {t:"不值得，他可能随时会发现我的缺点而离开", s:10},
+        {t:"不太值得，需要不断努力才能留住他", s:8},
+        {t:"偶尔觉得自己值得，但不确定", s:5},
+        {t:"基本觉得自己值得被爱", s:2},
+        {t:"当然值得，我是独一无二的存在", s:0}
+    ]},
+    { d: 'selfworth', t: '自我价值', q: "在一段关系中，你更倾向于？", o: [
+        {t:"完全围绕他转，失去自我", s:10},
+        {t:"大部分时间围着他转", s:8},
+        {t:"有一半时间属于自己，一半属于他", s:5},
+        {t:"保持自己的独立性，也能享受亲密", s:2},
+        {t:"有完整的自我，同时珍惜这段关系", s:0}
+    ]},
+    { d: 'selfworth', t: '自我价值', q: "当男朋友提出分手时，你的反应可能是？", o: [
+        {t:"觉得自己毫无价值，没有人会在乎我", s:10},
+        {t:"非常害怕，觉得世界会崩塌", s:8},
+        {t:"会难过，但相信自己会好起来", s:5},
+        {t:"虽然难过，但知道自己值得更好的", s:2},
+        {t:"尊重彼此的选择，相信自己值得幸福", s:0}
+    ]},
+    
+    { d: 'stability', t: '关系稳定性', q: "你如何定义这段感情的未来？", o: [
+        {t:"完全没有安全感，不知道明天会怎样", s:10},
+        {t:"不太确定，走一步看一步", s:8},
+        {t:"有一点信心，但不确定", s:5},
+        {t:"相信我们会走下去", s:2},
+        {t:"非常确定，我们有共同的未来规划", s:0}
+    ]},
+    { d: 'stability', t: '关系稳定性', q: "当出现矛盾和争吵时，你担心这段关系会破裂吗？", o: [
+        {t:"每次吵架都担心会分手", s:10},
+        {t:"经常担心，虽然知道不应该", s:8},
+        {t:"偶尔会担心", s:5},
+        {t:"不太担心，相信我们能解决问题", s:2},
+        {t:"完全不担心，知道争吵是正常的", s:0}
+    ]},
+    { d: 'stability', t: '关系稳定性', q: "你觉得这段关系能经受住时间和困难的考验吗？", o: [
+        {t:"完全没信心，随时可能结束", s:10},
+        {t:"信心不足，不知道能走多远", s:8},
+        {t:"有一些信心，但不确定", s:5},
+        {t:"比较有信心", s:2},
+        {t:"非常有信心，我们能一起面对一切", s:0}
+    ]},
+    { d: 'stability', t: '关系稳定性', q: "你和他讨论过长期规划（比如结婚、生活目标）吗？", o: [
+        {t:"从来没有，不敢提这个话题", s:10},
+        {t:"提过，但他回避了，我也很担心", s:8},
+        {t:"偶尔谈论，但没有深入", s:5},
+        {t:"有讨论过，有一些共识", s:2},
+        {t:"深入讨论过，我们有清晰的共同目标", s:0}
+    ]},
+    
+    { d: 'communication', t: '沟通开放度', q: "你愿意向他表达自己的真实感受吗？", o: [
+        {t:"完全不敢，怕他会嘲笑或看不起我", s:10},
+        {t:"不太敢，担心说出来会破坏关系", s:8},
+        {t:"有时候会说，但保留一些", s:5},
+        {t:"大部分时候能坦诚表达", s:2},
+        {t:"完全能敞开心扉，毫无保留", s:0}
+    ]},
+    { d: 'communication', t: '沟通开放度', q: "当你对这段关系有不满时，你会怎么做？", o: [
+        {t:"不敢说，憋在心里，越想越难受", s:10},
+        {t:"想说但不敢，怕引起冲突", s:8},
+        {t:"会说一些，但不敢说全部", s:5},
+        {t:"能够表达自己的不满", s:2},
+        {t:"坦诚沟通，一起寻找解决方案", s:0}
+    ]},
+    { d: 'communication', t: '沟通开放度', q: "你愿意向他展示自己脆弱的一面吗？", o: [
+        {t:"绝对不会，那样会显得我很弱", s:10},
+        {t:"不太愿意，怕他因此看不起我", s:8},
+        {t:"有时候会，但不太自然", s:5},
+        {t:"可以展示，觉得他能够理解", s:2},
+        {t:"完全接受，在他面前可以做真实的自己", s:0}
+    ]},
+    { d: 'communication', t: '沟通开放度', q: "你们之间出现问题时，通常能通过沟通解决吗？", o: [
+        {t:"几乎不能，每次沟通都会更糟", s:10},
+        {t:"很少能解决，经常冷战", s:8},
+        {t:"有时候能，有时候不能", s:5},
+        {t:"大部分时候能沟通清楚", s:2},
+        {t:"几乎每次都能通过沟通达成理解", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const levels = [
+    { max: 40, l: "极度安全", c: "#27AE60", d: "你在感情中拥有极高的安全感。你信任伴侣、认可自我价值、对关系有稳定预期、能够开放沟通。这是一种健康的依恋模式。", advice: "继续保持这种安全型的依恋模式，同时注意在关系中保持自我成长的空间。" },
+    { max: 80, l: "安全型", c: "#2ECC71", d: "你在感情中总体上感到安全。有较好的信任感和自我价值感，能够享受亲密关系带来的幸福感。", advice: "你的安全感水平良好，可以继续加强自我成长和关系维护。" },
+    { max: 120, l: "焦虑型", c: "#F39C12", d: "你在感情中表现出一定程度的焦虑。可能会过度依赖伴侣的认可，对关系稳定性缺乏信心，在沟通中有所保留。", advice: "建议更多关注自我成长，建立独立的自我价值体系，同时学习更健康的沟通方式。" },
+    { max: 160, l: "高度焦虑", c: "#E74C3C", d: "你在感情中表现出高度的不安全感。经常感到焦虑、担心被抛弃、缺乏自我价值感、难以信任伴侣、沟通受阻。这可能源于早期的依恋创伤。", advice: "强烈建议寻求专业心理咨询帮助，深入探索不安全感的根源，学习建立更健康的依恋模式。" }
+];
+
+let currQList = [];
+let currIdx = 0;
+let userInfo = {};
+let scores = { trust: 0, selfworth: 0, stability: 0, communication: 0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userInfo.duration = document.getElementById('input-duration').value;
+    userInfo.status = document.getElementById('input-status').value;
+    userInfo.past = document.getElementById('input-past').value;
+    
+    currQList = [...questions];
+    currIdx = 0;
+    scores = { trust: 0, selfworth: 0, stability: 0, communication: 0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { trust: 0, selfworth: 0, stability: 0, communication: 0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+    
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'trust', n:'信任感'}, {k:'selfworth', n:'自我价值'}, 
+        {k:'stability', n:'稳定性'}, {k:'communication', n:'沟通'}
+    ];
+    let html = '';
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 40) * 100, 100);
+        let color = pct> 60 ? '#E74C3C' : (pct> 30 ? '#F39C12' : '#27AE60');
+        let txt = pct> 70 ? '高度焦虑' : (pct> 40 ? '中等焦虑' : '安全');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {trust:'信任感', selfworth:'自我价值', stability:'关系稳定性', communication:'沟通开放度'};
+    return map[k];
+}
+
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、情感安全感诊断</div>
+        <p class="r-p" style="background:#fafafa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>📋 感情档案：</strong>在一起时长：${getDurationName(userInfo.duration)} | 感情状态：${getStatusName(userInfo.status)} | 过往恋情：${getPastName(userInfo.past)}
+        </p>
+        <div class="r-box" style="border-left:5px solid ${lvl.c};">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">安全感等级：${lvl.l}</div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>安全感评估：</strong>${lvl.d}</p>
+            <p style="margin:10px 0 0; font-size:15px; line-height:1.6; color:#555;"><strong>核心建议：</strong>${lvl.advice}</p>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">二、四维度深度分析</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px;">*基于依恋理论和存在主义心理学的科学分析</p>
+        ${generateDimAnalysis('trust', scores.trust, '反映你在亲密关系中对伴侣的信任程度，以及对被背叛的担忧程度。')}
+        ${generateDimAnalysis('selfworth', scores.selfworth, '反映你在关系中的自我价值感，包括是否依赖伴侣的认可来确认自己的价值。')}
+        ${generateDimAnalysis('stability', scores.stability, '反映你对这段关系长期稳定性的预期和信心程度。')}
+        ${generateDimAnalysis('communication', scores.communication, '反映你在关系中表达真实想法和情感的能力，以及解决问题的沟通质量。')}
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">三、情感安全感缺失的心理学解析</div>
+        <div class="r-box" style="background:#ebf5fb; border-color:#3498DB;">
+            <div class="r-h3" style="color:#3498DB;">💡 为什么你在感情中缺乏安全感？</div>
+            <p class="r-p">
+                <strong>依恋理论</strong>认为，我们在婴幼儿时期与主要照顾者形成的依恋模式，会深刻影响成年后的亲密关系。安全型依恋的人相信自己值得被爱，相信他人是可信的；而焦虑型依恋的人则常常担心被抛弃，需要不断的确认来获得安全感。
+            </p>
+            <p class="r-p">
+                <strong>存在主义心理学</strong>指出，安全感本质上是对"存在"的认可。当我们过度依赖外部关系来确认自我价值时，一旦关系出现波动，就会产生强烈的焦虑和恐惧。真正的安全感来自于对自我的深刻认知和接纳。
+            </p>
+        </div>
+        
+        <div class="r-box" style="background:#fef9f0; border-color:#F39C12;">
+            <div class="r-h3" style="color:#F39C12;">🔍 情感不安全感形成的常见原因</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>早期依恋创伤</strong>：幼年时期照顾者的不稳定或忽视</li>
+                <li><strong>前任情感创伤</strong>：过去恋爱中的背叛或抛弃经历</li>
+                <li><strong>自我认同薄弱</strong>：没有形成稳定的自我价值体系</li>
+                <li><strong>社会比较压力</strong>：过度关注他人感情生活产生的焦虑</li>
+                <li><strong>完美主义倾向</strong>：对关系有过高期待，难以接受不完美</li>
+            </ul>
+        </div>
+
+        <div class="r-box" style="background:#fdf2f2; border-color:#E74C3C;">
+            <div class="r-h3" style="color:#E74C3C;">⚠️ 高度焦虑型依恋的典型表现</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li>过度解读伴侣的行为，总是往负面方向解读</li>
+                <li>需要不断确认伴侣的爱意，否则就会焦虑</li>
+                <li>害怕被抛弃，以至于不敢表达真实需求</li>
+                <li>在关系中失去自我，完全围绕对方转</li>
+                <li>频繁查看伴侣的手机或社交媒体</li>
+                <li>面对冲突时，要么过度讨好，要么情绪爆发</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">四、提升情感安全感的方法</div>
+        ${getImprovementSection(lvl.l)}
+        
+        <div class="r-box">
+            <div class="r-h3">🛡️ 建立安全型依恋的实践指南</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:15px;">
+                <div style="background:#ebf5fb; padding:15px; border-radius:8px;">
+                    <div style="font-weight:800; color:#3498DB; margin-bottom:8px;">💙 认知层面</div>
+                    <ul style="margin:0; padding-left:15px; font-size:13px; color:#555; line-height:1.8;">
+                        <li>识别并挑战负面自动思维</li>
+                        <li>区分"感受"和"事实"</li>
+                        <li>接受关系的不确定性</li>
+                        <li>建立独立的自我价值感</li>
+                    </ul>
+                </div>
+                <div style="background:#eafaf1; padding:15px; border-radius:8px;">
+                    <div style="font-weight:800; color:#27AE60; margin-bottom:8px;">💚 行为层面</div>
+                    <ul style="margin:0; padding-left:15px; font-size:13px; color:#555; line-height:1.8;">
+                        <li>学会独处，不过度依赖伴侣</li>
+                        <li>培养自己的兴趣爱好</li>
+                        <li>设定健康的边界</li>
+                        <li>逐步暴露于"可控的不安全感"</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="r-box" style="background:#fafafa; border-color:#ddd;">
+            <div class="r-h3" style="color:#636E72;">💬 健康沟通的黄金法则</div>
+            <p class="r-p" style="margin-bottom:10px;"><strong>1. 使用"我"开头的陈述：</strong></p>
+            <p style="font-size:14px; color:#666; margin:0 0 15px 20px;">❌ "你总是这样不关心我"<br>✓ "当我发消息你没回时，我会感到不安"</p>
+            <p class="r-p" style="margin-bottom:10px;"><strong>2. 表达需求而非指责：</strong></p>
+            <p style="font-size:14px; color:#666; margin:0 0 15px 20px;">❌ "你从不在乎我的感受"<br>✓ "我希望我们每天能花10分钟聊聊今天的事"</p>
+            <p class="r-p" style="margin-bottom:10px;"><strong>3. 接纳情绪，允许脆弱：</strong></p>
+            <p style="font-size:14px; color:#666; margin:0;">✓ "我现在有点害怕，可以抱抱我吗？"</p>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">五、写给渴望安全感的你</div>
+        <div class="r-box" style="background:linear-gradient(135deg, #ebf5fb 0%, #d4e6f1 100%); border-color:#3498DB; text-align:center; padding:30px;">
+            <p style="font-size:16px; line-height:2; color:#2D3436; margin:0;">
+                💙 亲爱的，你值得被爱，值得拥有一段让你感到安全的关系。<br><br>
+                🔐 真正的安全感，不是来自伴侣的不断承诺，而是来自你内心深处对自己的认可和接纳。<br><br>
+                🌱 改变需要时间，但每一步都值得。允许自己慢慢来，也允许自己在改变中犯错。<br><br>
+                ✨ 你比你想象中更强大。
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026情感安全感测试 · 专业心理测评<br>
+        愿你找到内心的平静，拥有安全而自由的爱
+    </div>
+    `;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function getDurationName(d) {
+    const m = {'new':'不到三个月','short':'3-6个月','medium':'6个月-1年','long':'1-3年','verylong':'3年以上'};
+    return m[d] || d;
+}
+function getStatusName(s) {
+    const m = {'dating':'恋爱中（初期）','stable':'稳定恋爱中','longterm':'长期伴侣关系','engaged':'订婚','married':'已婚'};
+    return m[s] || s;
+}
+function getPastName(p) {
+    const m = {'none':'没有，这是第一次','one':'1次','two':'2次','three':'3-5次','many':'5次以上'};
+    return m[p] || p;
+}
+
+function generateDimAnalysis(key, val, explanation) {
+    let level = val> 28 ? 'high' : (val> 14 ? 'med' : 'low');
+    const config = {
+        high: { color: '#E74C3C', bg: '#fdf2f2', tag: '⚠️ 高度焦虑', titleColor: '#E74C3C' },
+        med: { color: '#F39C12', bg: '#fef9f0', tag: '⚡ 中等焦虑', titleColor: '#F39C12' },
+        low: { color: '#27AE60', bg: '#eafaf1', tag: '✅ 安全', titleColor: '#27AE60' }
+    };
+    const c = config[level];
+    const texts = {
+        trust: { 
+            high: "<strong>信任感严重不足！</strong>你在关系中充满不信任，常常担心伴侣会背叛你。这种不信任可能源于过去的创伤经历。", 
+            med: "<strong>信任感有待提升。</strong>你对伴侣有一定的信任，但内心仍有担忧和不安全感。", 
+            low: "<strong>信任感良好。</strong>你能够信任伴侣，相信他是真诚的，这种信任为关系奠定了良好基础。" 
+        },
+        selfworth: { 
+            high: "<strong>自我价值感严重不足！</strong>你过度依赖伴侣的认可来确认自己的价值，这让你在关系中处于被动地位。", 
+            med: "<strong>自我价值感有待提升。</strong>你在某些时候会怀疑自己的价值，需要伴侣的认可来获得安全感。", 
+            low: "<strong>自我价值感良好。</strong>你有清晰的自我认知，能够在关系中保持独立的自我。" 
+        },
+        stability: { 
+            high: "<strong>关系稳定性信心严重不足！</strong>你对这段关系的未来充满担忧，常常害怕关系会突然结束。", 
+            med: "<strong>关系稳定性信心有待提升。</strong>你对关系的未来有一些担忧，不确定能走多远。", 
+            low: "<strong>关系稳定性信心良好。</strong>你对这段关系有稳定的预期，相信你们能够一起面对未来的挑战。" 
+        },
+        communication: { 
+            high: "<strong>沟通开放度严重不足！</strong>你不敢在关系中表达真实的自己，担心说出来会破坏关系。", 
+            med: "<strong>沟通开放度有待提升。</strong>你能够进行一定的沟通，但仍有保留，不敢完全敞开。", 
+            low: "<strong>沟通开放度良好。</strong>你能够在关系中坦诚表达自己，这是建立深度亲密的基础。" 
+        }
+    };
+    return `<div style="margin-bottom:20px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor}; margin-top:0;">${getDimName(key)} <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${val}/40)</span><span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span></div><p style="font-size:13px; color:#888; margin-bottom:8px;">${explanation}</p><p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][level]}</p></div>`;
+}
+
+function getImprovementSection(level) {
+    const sections = {
+        '极度安全': `<div class="r-box" style="border-left:5px solid #27AE60;">
+            <div class="r-h3" style="color:#27AE60;">✨ 你的安全感已经很高了</div>
+            <p class="r-p">作为安全型依恋者，你的任务是在保持安全感的同时，继续促进个人成长和关系的深化。</p>
+            <p class="r-p" style="margin-bottom:0;"><strong>可以继续探索：</strong></p>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li>如何在关系中创造更多情感联结</li>
+                <li>支持伴侣成长成为更好的自己</li>
+                <li>共同规划未来的生活愿景</li>
+                <li>在安全的基础上尝试更多情感冒险</li>
+            </ul>
+        </div>`,
+        '安全型': `<div class="r-box" style="border-left:5px solid #2ECC71;">
+            <div class="r-h3" style="color:#2ECC71;">💚 继续保持，你已经走在正确的路上</div>
+            <p class="r-p">你的安全感水平良好，继续保持这种状态，同时关注以下几个方面可以让你更幸福。</p>
+            <p class="r-p" style="margin-bottom:0;"><strong>建议关注：</strong></p>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li>保持独立的生活空间和个人时间</li>
+                <li>持续培养自己的兴趣爱好</li>
+                <li>与伴侣建立更多共同回忆</li>
+                <li>学会处理偶尔出现的不安全感</li>
+            </ul>
+        </div>`,
+        '焦虑型': `<div class="r-box" style="border-left:5px solid #F39C12;">
+            <div class="r-h3" style="color:#F39C12;">💛 是时候关注自己的内心了</div>
+            <p class="r-p">你表现出一定程度的情感焦虑，这可能是由于对关系的过度依赖或早期经历的影响。以下方法可以帮助你建立更安全的依恋模式：</p>
+            <p class="r-p" style="margin-bottom:0;"><strong>针对性行动计划：</strong></p>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>练习延迟回应：</strong>当感到焦虑想要立刻联系伴侣时，先深呼吸，给自己10分钟的独处时间</li>
+                <li><strong>记录安全证据：</strong>每天记录3件伴侣让你感到安全的小事，培养积极视角</li>
+                <li><strong>建立支持系统：</strong>发展除伴侣以外的人际关系，减少对单一关系的依赖</li>
+                <li><strong>自我安抚练习：</strong>学习用正念冥想等方式自我安抚，不再依赖伴侣来平复情绪</li>
+                <li><strong>渐进式暴露：</strong>尝试适度减少查看手机频率，逐步建立信任</li>
+            </ul>
+        </div>`,
+        '高度焦虑': `<div class="r-box" style="border-left:5px solid #E74C3C;">
+            <div class="r-h3" style="color:#E74C3C;">💔 你值得被更好地对待</div>
+            <p class="r-p">你的情感不安全感程度较高，这可能给你的生活带来很大困扰。请记住：这不是你的错，但你可以选择改变。</p>
+            <p class="r-p" style="margin-bottom:0;"><strong>第一步行动建议：</strong></p>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>寻求专业帮助：</strong>强烈建议预约心理咨询师，深入探索不安全感的根源</li>
+                <li><strong>理解自己的依恋模式：</strong>阅读关于依恋理论的书籍，了解自己的反应模式</li>
+                <li><strong>停止自我批评：</strong>当你感到焦虑时，不要责怪自己"太敏感"，而是温柔地接纳这种感受</li>
+                <li><strong>建立基本信任：</strong>从最小的事情开始，比如相信伴侣说他在忙</li>
+                <li><strong>寻找支持团体：</strong>加入有类似困扰的互助小组，感受自己并不孤单</li>
+            </ul>
+        </div>`
+    };
+    return sections[level] || sections['安全型'];
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    const cx=120, cy=120, r=90;
+    const keys = ['trust','selfworth','stability','communication'];
+    const labels = ['信任感','自我价值','稳定性','沟通'];
+    
+    ctx.strokeStyle = '#d4e6f1'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<4; j++) {
+            let a = (Math.PI*2/4)*j - Math.PI/2;
+            ctx.lineTo(cx + Math.cos(a)*(r/4)*i, cy + Math.sin(a)*(r/4)*i);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let ratio = Math.min(s[k] / 40, 1.1); 
+        let a = (Math.PI*2/4)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(52, 152, 219, 0.1)");
+    grd.addColorStop(1, "rgba(52, 152, 219, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.strokeStyle = '#3498DB'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/4)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "qgaq";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

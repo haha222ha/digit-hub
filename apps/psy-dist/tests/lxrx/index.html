@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>恋爱心软指数检测 Pro | 恋爱性格深度评估</title>
+    <style>
+        :root {
+            /* 恋爱心动 Pro 风格 */
+            --primary: #2c3e50; 
+            --primary-dark: #1a252f;
+            --accent: #ff6b81; /* 心动粉 */
+            --accent-hover: #ff4757;
+            --safe: #27ae60;
+            --warning: #f39c12;
+            --bg-gradient-start: #f3f5f7;
+            --bg-gradient-end: #dfe6e9;
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.15);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255, 107, 129, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 107, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 107, 129, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#ffd6e0 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 40px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #2c3e50;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: #7f8c8d; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ecf0f1;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2c3e50; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2c3e50; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #ecf0f1; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #2c3e50; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #ecf0f1; color: #7f8c8d; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2c3e50; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #34495e; cursor: pointer; border: 2px solid #ecf0f1; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #fef5f7; border-color: var(--accent); color: var(--accent); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #ecf0f1; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ecf0f1;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--accent); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: #2c3e50; color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #7f8c8d; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2c3e50; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2c3e50; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #7f8c8d; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-red 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #7f8c8d; width: 100%; padding: 10px;
+            border: 1px solid #bdc3c7; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: #2c3e50; color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2c3e50; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ecf0f1; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #34495e; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #f8f9fa; border: 1px solid #ecf0f1; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #555; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-lianai_xinruan" class="fade-in">
+        <div class="cover-tag">2026 Love Edition</div>
+        <h1 class="cover-title">恋爱<span>心软指数</span><br>深度检测 Pro</h1>
+        <p class="cover-subtitle">基于恋爱心理学的 30+ 题深度扫描<br>精准量化你的恋爱心软程度</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">💘</div>
+                <div class="feature-title">五维雷达图</div>
+                <div class="feature-desc">情绪、付出、原谅、边界、承诺，全方位无死角扫描。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🛡️</div>
+                <div class="feature-title">恋爱指南</div>
+                <div class="feature-desc">根据你的心软等级，生成定制化恋爱自保策略。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💑</div>
+                <div class="feature-title">身份分流</div>
+                <div class="feature-desc">针对单身/恋爱中/已婚的不同心软算法。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">万字报告</div>
+                <div class="feature-desc">深度解析你心软背后的恋爱性格密码。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始深度检测 (约需 3 分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2c3e50; margin-bottom:10px;">建立恋爱档案 💌</h2>
+        <p style="color:#7f8c8d; font-size:14px; margin-bottom:30px;">系统将根据您的恋爱状态调整评分权重。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的恋爱状态是？</label>
+            <select id="input-status" class="select-box">
+                <option value="single">单身 (期待甜甜的恋爱)</option>
+                <option value="love">恋爱中 (正在享受/磨合)</option>
+                <option value="married">已婚 (稳定长期关系)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的恋爱性格是？</label>
+            <select id="input-title" class="select-box">
+                <option value="cold">高冷型 (慢热，不易动心)</option>
+                <option value="gentle">温柔型 (共情力强，体贴他人)</option>
+                <option value="direct">直球型 (敢爱敢恨，不拖泥带水)</option>
+                <option value="passive">被动型 (习惯妥协，随遇而安)</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成恋爱测试题</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：情绪心软</span>
+            <span id="progress-text">1 / 34</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">❤️ 情绪心软</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-red 1s infinite; border-radius:50%;">💘</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2c3e50;">正在演算心软系数...</h3>
+        <p style="color:#7f8c8d; font-size:14px; line-height:1.8;">正在分析恋爱性格...<br>匹配心软程度...<br>生成专属报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">心软指数</span>
+            </div>
+            <div class="level-badge" id="res-level">Level ?</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维心软雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《恋爱心软自救指南》完整报告</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 换个状态/性格 再测一次</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">LOVE SURVIVAL GUIDE</div>
+            <div class="r-h1">恋爱心软自救指南</div>
+            <div style="font-size:14px;">定制化恋爱策略报告 · 2026版</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const MAX_USES = 6; // 同一设备限制次数
+const pageId = window.location.pathname;
+const usageKey = 'usage_count_' + pageId;
+
+// 测试题库配置
+const questions = [
+    // --- 维度：情绪心软 (Emotion) ---
+    { d: 'emotion', t: '情绪心软', q: "对方难过流泪时，你会？", o: [
+        {t:"理性安慰，不会被情绪带偏", s:0},
+        {t:"有点心疼，但保持理智", s:3},
+        {t:"立刻心软，跟着难过", s:7},
+        {t:"心都化了，无条件妥协", s:10}
+    ]},
+    { d: 'emotion', t: '撒娇心软', q: "对方对你撒娇/卖萌求原谅，你会？", o: [
+        {t:"不为所动，该说还是说", s:0},
+        {t:"有点无奈，但会原谅", s:3},
+        {t:"立刻心软，原谅对方", s:7},
+        {t:"毫无抵抗力，完全妥协", s:10}
+    ]},
+    { d: 'emotion', t: '愧疚心软', q: "对方说\"我都是为了你\"，你会？", o: [
+        {t:"清醒判断，不被绑架", s:0},
+        {t:"有点愧疚，但保持理智", s:3},
+        {t:"心生愧疚，开始妥协", s:7},
+        {t:"完全愧疚，无条件满足", s:10}
+    ]},
+    { d: 'emotion', t: '委屈心软', q: "对方说自己受了委屈，你会？", o: [
+        {t:"先了解事实，再安慰", s:0},
+        {t:"安慰对方，不盲目心软", s:3},
+        {t:"立刻心软，觉得对方可怜", s:7},
+        {t:"心疼到失控，全听对方的", s:10}
+    ]},
+    { d: 'emotion', t: '冷漠心软', q: "对方突然冷漠不理你，你会？", o: [
+        {t:"冷静沟通，不卑微", s:0},
+        {t:"主动问问，但不妥协", s:3},
+        {t:"心慌心软，主动认错", s:7},
+        {t:"极度不安，无条件讨好", s:10}
+    ]},
+    { d: 'emotion', t: '回忆心软', q: "对方提起你们的甜蜜回忆求复合，你会？", o: [
+        {t:"理性拒绝，不回头", s:0},
+        {t:"有点动摇，但不复合", s:3},
+        {t:"心软犹豫，考虑复合", s:7},
+        {t:"立刻心软，马上复合", s:10}
+    ]},
+
+    // --- 维度：付出心软 (Give) ---
+    { d: 'give', t: '付出心软', q: "对方说自己没钱/困难，你会？", o: [
+        {t:"理性帮助，不盲目掏钱", s:0},
+        {t:"适当帮忙，量力而行", s:2},
+        {t:"心软掏钱，尽力满足", s:6},
+        {t:"倾其所有，无条件付出", s:10}
+    ]},
+    { d: 'give', t: '时间心软', q: "对方占用你所有私人时间，你会？", o: [
+        {t:"拒绝，保留自己空间", s:0},
+        {t:"偶尔配合，不会全给", s:2},
+        {t:"心软配合，牺牲自己时间", s:6},
+        {t:"完全放弃自己时间，全陪对方", s:10}
+    ]},
+    { d: 'give', t: '礼物心软', q: "对方想要贵重礼物，你会？", o: [
+        {t:"拒绝，量力而行", s:0},
+        {t:"偶尔买，不勉强", s:2},
+        {t:"心软买下，透支也买", s:6},
+        {t:"无条件满足，负债也买", s:10}
+    ]},
+    { d: 'give', t: '帮忙心软', q: "对方让你帮他做麻烦的事，你会？", o: [
+        {t:"拒绝，不想麻烦", s:0},
+        {t:"偶尔帮，不勉强", s:2},
+        {t:"心软答应，硬着头皮做", s:7},
+        {t:"无条件答应，再麻烦也做", s:10}
+    ]},
+    { d: 'give', t: '妥协心软', q: "对方让你放弃自己的爱好/朋友，你会？", o: [
+        {t:"坚决拒绝，坚守底线", s:0},
+        {t:"适当妥协，不完全放弃", s:3},
+        {t:"心软放弃，迎合对方", s:8},
+        {t:"立刻放弃，完全顺从", s:10}
+    ]},
+    { d: 'give', t: '包容心软', q: "对方犯了小错，你会？", o: [
+        {t:"指出错误，理性沟通", s:0},
+        {t:"包容一次，下不为例", s:2},
+        {t:"心软包容，不追究", s:6},
+        {t:"无条件包容，永远原谅", s:9}
+    ]},
+
+    // --- 维度：原谅心软 (Forgive) ---
+    { d: 'forgive', t: '犯错心软', q: "对方撒谎骗了你，道歉后你会？", o: [
+        {t:"绝不原谅，直接分开", s:0},
+        {t:"观察表现，谨慎原谅", s:2},
+        {t:"心软原谅，给一次机会", s:6},
+        {t:"立刻原谅，毫无芥蒂", s:9}
+    ]},
+    { d: 'forgive', t: '冷战心软', q: "你们冷战后，对方主动找你，你会？", o: [
+        {t:"冷静处理，不轻易和好", s:0},
+        {t:"慢慢缓和，不立刻原谅", s:2},
+        {t:"心软原谅，马上和好", s:7},
+        {t:"立刻原谅，主动道歉", s:10}
+    ]},
+    { d: 'forgive', t: '伤害心软', q: "对方言语伤害了你，道歉后你会？", o: [
+        {t:"记在心里，不轻易原谅", s:0},
+        {t:"表面原谅，内心介意", s:3},
+        {t:"心软原谅，不再计较", s:7},
+        {t:"立刻原谅，觉得是自己错", s:10}
+    ]},
+    { d: 'forgive', t: '反复心软', q: "对方反复犯同样的错，你会？", o: [
+        {t:"彻底失望，果断离开", s:0},
+        {t:"警告一次，再犯就分", s:3},
+        {t:"每次都心软原谅", s:8},
+        {t:"永远原谅，无底线包容", s:10}
+    ]},
+    { d: 'forgive', t: '分手心软', q: "分手后对方求复合，你会？", o: [
+        {t:"坚决拒绝，绝不回头", s:0},
+        {t:"考虑清楚，不轻易复合", s:2},
+        {t:"心软犹豫，同意复合", s:7},
+        {t:"立刻心软，马上复合", s:10}
+    ]},
+
+    // --- 维度：边界心软 (Boundary) ---
+    { d: 'boundary', t: '底线心软', q: "对方触碰你的底线，你会？", o: [
+        {t:"坚决反击，绝不退让", s:0},
+        {t:"严肃警告，坚守底线", s:3},
+        {t:"心软退让，降低底线", s:8},
+        {t:"无底线妥协，放弃原则", s:10}
+    ]},
+    { d: 'boundary', t: '拒绝心软', q: "你想拒绝对方的要求，你会？", o: [
+        {t:"直接拒绝，不犹豫", s:0},
+        {t:"委婉拒绝，保持立场", s:3},
+        {t:"心软不好意思拒绝", s:7},
+        {t:"永远不会拒绝，全答应", s:10}
+    ]},
+    { d: 'boundary', t: '干涉心软', q: "对方过度干涉你的生活，你会？", o: [
+        {t:"反抗，保持独立", s:0},
+        {t:"沟通，保持边界", s:3},
+        {t:"心软接受，任由干涉", s:7},
+        {t:"完全顺从，失去自我", s:10}
+    ]},
+    { d: 'boundary', t: '讨好心软', q: "你会为了让对方开心而讨好吗？", o: [
+        {t:"绝不讨好，做自己", s:0},
+        {t:"偶尔讨好，不卑微", s:2},
+        {t:"经常心软讨好对方", s:7},
+        {t:"无时无刻不在讨好", s:10}
+    ]},
+    { d: 'boundary', t: '自我心软', q: "对方否定你，你会怀疑自己吗？", o: [
+        {t:"坚信自己，不怀疑", s:0},
+        {t:"偶尔怀疑，很快清醒", s:2},
+        {t:"经常心软否定自己", s:7},
+        {t:"完全失去自我，全听对方", s:10}
+    ]},
+
+    // --- 维度：承诺心软 (Promise) ---
+    { d: 'promise', t: '画饼心软', q: "对方给你画未来的大饼，你会？", o: [
+        {t:"不信，只看实际行动", s:0},
+        {t:"听听而已，不较真", s:3},
+        {t:"心软相信，充满期待", s:7},
+        {t:"完全相信，无条件等待", s:10}
+    ]},
+    { d: 'promise', t: '承诺心软', q: "对方没兑现承诺，解释后你会？", o: [
+        {t:"不再相信，保持距离", s:0},
+        {t:"半信半疑，观察表现", s:2},
+        {t:"心软相信，原谅对方", s:7},
+        {t:"完全相信，毫无防备", s:10}
+    ]},
+    { d: 'promise', t: '等待心软', q: "对方让你无限期等待，你会？", o: [
+        {t:"拒绝等待，及时止损", s:0},
+        {t:"等待一段时间，不等了", s:3},
+        {t:"心软等待，不愿放弃", s:7},
+        {t:"无条件等待，一辈子也等", s:10}
+    ]},
+    { d: 'promise', t: '改变心软', q: "对方承诺会改变，你会？", o: [
+        {t:"不信，看实际行动", s:0},
+        {t:"给一次机会，不抱期待", s:2},
+        {t:"心软相信，全力支持", s:7},
+        {t:"完全相信，赌上一切", s:10}
+    ]}
+];
+
+// 恋爱状态特供题
+const roleSpecific = {
+    single: [
+        { d: 'emotion', t: '单身心软', q: "【单身特供】陌生人对你温柔关心，你会？", o: [
+            {t:"保持警惕，不轻易动心", s:0},
+            {t:"有点好感，理性相处", s:3},
+            {t:"心软动心，快速沦陷", s:7},
+            {t:"立刻爱上，无条件付出", s:10}
+        ]},
+        { d: 'boundary', t: '单身边界', q: "【单身特供】刚认识的人约你，你会？", o: [
+            {t:"拒绝，保持距离", s:0},
+            {t:"谨慎答应，多人同行", s:3},
+            {t:"心软答应，单独赴约", s:7},
+            {t:"立刻答应，毫无防备", s:10}
+        ]},
+        { d: 'give', t: '单身付出', q: "【单身特供】刚认识的人找你借钱，你会？", o: [
+            {t:"直接拒绝，绝不借", s:0},
+            {t:"委婉拒绝，不借", s:3},
+            {t:"心软犹豫，想借", s:7},
+            {t:"立刻借钱，无条件帮", s:10}
+        ]},
+        { d: 'forgive', t: '单身原谅', q: "【单身特供】刚认识的人冒犯你，道歉后你会？", o: [
+            {t:"绝不原谅，拉黑删除", s:0},
+            {t:"表面原谅，不再联系", s:3},
+            {t:"心软原谅，继续相处", s:7},
+            {t:"立刻原谅，加倍热情", s:10}
+        ]},
+        { d: 'promise', t: '单身承诺', q: "【单身特供】对方说喜欢你，你会？", o: [
+            {t:"理性观察，不轻易信", s:0},
+            {t:"有点开心，保持理智", s:3},
+            {t:"心软相信，快速投入", s:7},
+            {t:"完全相信，付出一切", s:10}
+        ]}
+    ],
+    love: [
+        { d: 'emotion', t: '恋爱情绪', q: "【恋爱特供】对方和异性走得近，你生气后对方道歉，你会？", o: [
+            {t:"严肃沟通，绝不姑息", s:0},
+            {t:"原谅，但要求保持距离", s:3},
+            {t:"心软原谅，不再追究", s:7},
+            {t:"立刻原谅，觉得自己错", s:10}
+        ]},
+        { d: 'boundary', t: '恋爱边界', q: "【恋爱特供】对方查你手机，你会？", o: [
+            {t:"坚决拒绝，保护隐私", s:0},
+            {t:"偶尔给看，保持边界", s:3},
+            {t:"心软答应，任由查看", s:7},
+            {t:"主动上交，毫无隐私", s:10}
+        ]},
+        { d: 'give', t: '恋爱付出', q: "【恋爱特供】对方让你放弃工作陪他，你会？", o: [
+            {t:"坚决拒绝，坚守事业", s:0},
+            {t:"犹豫，不会放弃", s:3},
+            {t:"心软考虑，想放弃", s:7},
+            {t:"立刻放弃，全力陪他", s:10}
+        ]},
+        { d: 'forgive', t: '恋爱原谅', q: "【恋爱特供】对方冷暴力你，事后道歉，你会？", o: [
+            {t:"绝不原谅，果断分手", s:0},
+            {t:"原谅，但心存芥蒂", s:3},
+            {t:"心软原谅，彻底释怀", s:7},
+            {t:"立刻原谅，主动讨好", s:10}
+        ]},
+        { d: 'promise', t: '恋爱承诺', q: "【恋爱特供】对方说以后娶你/嫁你，你会？", o: [
+            {t:"不信，只看当下", s:0},
+            {t:"听听而已，不较真", s:3},
+            {t:"心软相信，规划未来", s:7},
+            {t:"完全相信，赌上人生", s:10}
+        ]}
+    ],
+    married: [
+        { d: 'emotion', t: '婚情绪', q: "【已婚特供】对方吵架说伤人的话，事后道歉，你会？", o: [
+            {t:"严肃沟通，绝不纵容", s:0},
+            {t:"原谅，但要求改正", s:3},
+            {t:"心软原谅，自我安慰", s:7},
+            {t:"立刻原谅，觉得自己错", s:10}
+        ]},
+        { d: 'boundary', t: '婚边界', q: "【已婚特供】对方干涉你和娘家/婆家来往，你会？", o: [
+            {t:"坚决反抗，坚守亲情", s:0},
+            {t:"沟通，保持平衡", s:3},
+            {t:"心软妥协，减少来往", s:7},
+            {t:"完全顺从，断绝来往", s:10}
+        ]},
+        { d: 'give', t: '婚付出', q: "【已婚特供】对方让你放弃所有社交，你会？", o: [
+            {t:"坚决拒绝，保留社交", s:0},
+            {t:"适当减少，不放弃", s:3},
+            {t:"心软放弃，迎合对方", s:7},
+            {t:"立刻放弃，与世隔绝", s:10}
+        ]},
+        { d: 'forgive', t: '婚原谅', q: "【已婚特供】对方犯了原则性错误，道歉后你会？", o: [
+            {t:"绝不原谅，离婚", s:0},
+            {t:"为了孩子，勉强原谅", s:3},
+            {t:"心软原谅，自我欺骗", s:8},
+            {t:"无条件原谅，全力挽回", s:10}
+        ]},
+        { d: 'promise', t: '婚承诺', q: "【已婚特供】对方承诺以后会对你好，你会？", o: [
+            {t:"不信，看实际行动", s:0},
+            {t:"半信半疑，观察表现", s:3},
+            {t:"心软相信，充满期待", s:7},
+            {t:"完全相信，毫无保留", s:10}
+        ]}
+    ]
+};
+
+// 恋爱心软评级文案
+const levels = [
+    { max: 20, l: "Lv.1 铁石心肠", c: "#2ecc71", d: "恋爱清醒天花板，绝不心软，爱自己胜过一切。", advice: "保持清醒，你是恋爱中的王者。" },
+    { max: 35, l: "Lv.2 偶尔心软", c: "#27ae60", d: "理智占主导，只有在极致温柔下才会轻微心软。", advice: "理性温柔并存，刚刚好的恋爱状态。" },
+    { max: 50, l: "Lv.3 中度心软", c: "#f1c40f", d: "共情力强，容易被感动，有底线但会偶尔退让。", advice: "守住底线，你的温柔很珍贵。" },
+    { max: 60, l: "Lv.4 极易心软", c: "#f39c12", d: "恋爱脑初显，对方一示弱就会无条件妥协。", advice: "学会拒绝，不要让温柔变成软肋。" },
+    { max: 70, l: "Lv.5 心软达人", c: "#e67e22", d: "毫无抵抗力，对方说什么都信，永远在原谅。", advice: "及时止损，爱别人前先爱自己。" },
+    { max: 80, l: "Lv.6 恋爱脑心软", c: "#d35400", d: "失去自我，无底线包容，心软到没有原则。", advice: "找回自我，你的价值不需要妥协证明。" },
+    { max: 90, l: "Lv.7 心软狂魔", c: "#ff6b81", d: "被伤害也会原谅，付出所有也心甘情愿。", advice: "警惕PUA，你的心软正在伤害自己。" },
+    { max: 100, l: "Lv.8 恋爱卑微怪", c: "#ff4757", d: "无条件讨好，无底线妥协，完全失去自我。", advice: "立刻清醒，你值得被平等对待。" },
+    { max: 110, l: "Lv.9 心软恋爱奴", c: "#e84393", d: "被PUA也不自知，心软到自我否定。", advice: "寻求帮助，重建自信，离开消耗你的人。" },
+    { max: 999, l: "Lv.10 心软天花板", c: "#2c3e50", d: "恋爱中最心软的人，永远在受伤，永远在原谅。", advice: "停止内耗，你的温柔要留给值得的人。" }
+];
+
+// 全局变量
+let currQList = [];
+let currIdx = 0;
+let userRole = '';
+let userTitle = '';
+let scores = { emotion:0, give:0, forgive:0, boundary:0, promise:0 };
+
+// 页面切换函数
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userRole = document.getElementById('input-status').value;
+    userTitle = document.getElementById('input-title').value;
+    
+    currQList = [...questions, ...roleSpecific[userRole]];
+    currIdx = 0;
+    scores = { emotion:0, give:0, forgive:0, boundary:0, promise:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    let weight = 1.0;
+    if (userRole === 'married') {
+        if (dim === 'boundary') weight = 1.2;
+        if (dim === 'forgive') weight = 1.2;
+    } else if (userRole === 'single') {
+        if (dim === 'promise') weight = 1.1;
+        if (dim === 'emotion') weight = 1.1;
+    }
+
+    scores[dim] += val * weight;
+
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { emotion:0, give:0, forgive:0, boundary:0, promise:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw / 2.8); 
+    if(finalScore> 120) finalScore = 120;
+
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'emotion', n:'情绪'}, {k:'give', n:'付出'}, 
+        {k:'forgive', n:'原谅'}, {k:'boundary', n:'边界'}, {k:'promise', n:'承诺'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 65) * 100, 100);
+        let color = pct> 60 ? '#ff6b81' : (pct> 30 ? '#f39c12' : '#27ae60');
+        let txt = pct> 70 ? '高危' : (pct> 40 ? '中等' : '安全');
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {emotion:'情绪', give:'付出', forgive:'原谅', boundary:'边界', promise:'承诺'};
+    return map[k];
+}
+
+// 报告生成函数
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let envStatus = '';
+    let envClass = '';
+    if (total> 80) {
+        envStatus = '☢️ 极度高危：恋爱脑心软狂魔 (无底线妥协)';
+        envClass = 'color:#ff4757; font-weight:900;';
+    } else if (total> 60) {
+        envStatus = '⚠️ 严重警告：极易心软恋爱脑 (失去自我)';
+        envClass = 'color:#e67e22; font-weight:800;';
+    } else if (total> 40) {
+        envStatus = '⚖️ 风险可控：中度心软 (有底线但易退让)';
+        envClass = 'color:#f39c12; font-weight:700;';
+        envStatus = '🌿 良性恋爱：理性心软 (爱自己也爱别人)';
+        envClass = 'color:#27ae60; font-weight:700;';
+    }
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、恋爱心软性格诊断书</div>
+        <p class="r-p" style="background:#f8f9fa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>💌 样本档案：</strong>${userRole==='single'?'单身 (期待恋爱)':userRole==='love'?'恋爱中 (磨合阶段)':'已婚 (长期关系)'} <br>
+            <strong>💘 恋爱性格：</strong>${getTitleName(userTitle)}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#999; margin-right:8px;">综合心软指数</span>
+                <span style="font-size:36px; font-weight:900; color:#2c3e50; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#999;">/ 120</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>恋爱建议：</strong>${lvl.advice}</p>
+        </div>
+
+        <div style="margin-top:20px; padding:15px; background:#fff; border-radius:8px; border:1px solid #eee;">
+            <p style="margin:0 0 10px 0; font-size:14px; color:#999;">恋爱性格定性：</p>
+            <div style="${envClass} font-size:17px; margin-bottom:12px;">${envStatus}</div>
+            <p class="r-p" style="font-size:15px; margin:0;">
+                经过 34 项恋爱指标的深度扫描，系统检测到你的核心心软痛点位于 <span style="background:#ff6b81; color:#fff; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:13px;">${getDimFullCN(maxDimKey)}</span> 维度。
+                ${total> 60 ? '你的心软正在变成软肋，容易在恋爱中被消耗、被PUA，一定要学会自保。' : '你的心软恰到好处，是温柔的表现，不会失去自我。'}
+            </p>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维心软机制深度解构</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px; font-style:italic;">*基于恋爱心理学视角的深度分析</p>
+        ${generateDimAnalysis('emotion', scores.emotion)}
+        ${generateDimAnalysis('give', scores.give)}
+        ${generateDimAnalysis('forgive', scores.forgive)}
+        ${generateDimAnalysis('boundary', scores.boundary)}
+        ${generateDimAnalysis('promise', scores.promise)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、恋爱心软自救生存策略</div>
+        <div class="r-box" style="border-color:#bdc3c7;">
+            <div class="r-h3">🛡️ 防御篇：建立恋爱护城河</div>
+            <ul class="r-list">
+                <li><strong>底线固化 (Bottom Line)：</strong> 明确自己的恋爱底线，绝不因为心软而无底线退让，你的原则比讨好更重要。</li>
+                <li><strong>心理防火墙 (Psychological Firewall)：</strong> 区分温柔与卑微，对方的示弱、道歉不代表你要无条件妥协，保持清醒的自我认知。</li>
+                <li><strong>自我优先 (Self First)：</strong> 爱别人前先爱自己，你的时间、金钱、情绪都比迎合对方更珍贵，不要为了心软牺牲自我。</li>
+            </ul>
+        </div>
+        
+        <div class="r-box" style="background:#fef5f7; border-color:#ffd6e0;">
+            <div class="r-h3" style="color:#ff6b81;">
+                🚀 突围篇：${userRole==='single'?'单身·清醒脱单':userRole==='love'?'恋爱·守住自我':'已婚·平衡关系'}
+            </div>
+            ${userRole==='single' ? getSingleAdvice() : userRole==='love' ? getLoveAdvice() : getMarriedAdvice()}
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        本报告由恋爱心软算法自动生成<br>
+        祝愿每一份温柔，都能被真心以待
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function getTitleName(t) {
+    const m = {
+        cold: '高冷理性型 (不易动心)', 
+        gentle: '温柔共情型 (体贴他人)', 
+        direct: '直球洒脱型 (敢爱敢恨)', 
+        passive: '被动妥协型 (随遇而安)'
+    };
+    return m[t] || t;
+}
+
+function getDimFullCN(k) {
+    const m = {
+        emotion: '情绪心软 (易被感动)', 
+        give: '付出心软 (无条件给予)', 
+        forgive: '原谅心软 (无底线包容)', 
+        boundary: '边界心软 (失去自我)', 
+        promise: '承诺心软 (轻信画饼)'
+    };
+    return m[k];
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 45 ? 'high' : (val> 25 ? 'med' : 'low');
+    
+    const config = {
+        high: { color: '#ff4757', bg: '#fdecea', tag: '☠️ 极度高危', titleColor: '#ff4757' },
+        med: { color: '#e67e22', bg: '#fef5e7', tag: '⚠️ 中度风险', titleColor: '#d35400' },
+        low: { color: '#27ae60', bg: '#e8f8f5', tag: '✅ 相对安全', titleColor: '#27ae60' }
+    };
+    
+    const c = config[riskLevel];
+    
+    const texts = {
+        emotion: {
+            high: "<strong>你是情绪心软的重灾区。</strong> 对方的眼泪、撒娇、委屈能瞬间击溃你的防线，你会因为情绪波动无条件妥协，完全失去理智，极易被PUA操控。",
+            med: "<strong>情绪容易被带动。</strong> 你会被对方的情绪影响，偶尔心软妥协，虽然有理智，但很容易被感动，需要学会控制自己的情绪。",
+            low: "<strong>情绪理性派。</strong> 你不会被情绪绑架，能保持清醒的头脑，温柔但有锋芒，是非常健康的恋爱状态。"
+        },
+        give: {
+            high: "<strong>付出型心软狂魔。</strong> 你会无条件付出时间、金钱、精力，倾其所有迎合对方，甚至牺牲自己的利益，最终只会被对方理所当然地消耗。",
+            med: "<strong>愿意付出但有节制。</strong> 你会为对方付出，但不会透支自己，懂得量力而行，是健康的恋爱付出方式。",
+            low: "<strong>理性付出派。</strong> 你坚守付出平等的原则，不会盲目心软付出，爱自己永远是第一位的。"
+        },
+        forgive: {
+            high: "<strong>无底线原谅心软。</strong> 无论对方犯什么错，只要道歉你就会原谅，反复被伤害也不放手，自我欺骗式包容，最终只会遍体鳞伤。",
+            med: "<strong>懂得包容但有原则。</strong> 你会原谅小错，但原则性错误绝不姑息，有自己的底线，不会盲目心软。",
+            low: "<strong>理性原谅派。</strong> 你不会轻易原谅错误，知错能改才会给机会，绝不纵容对方的伤害行为。"
+        },
+        boundary: {
+            high: "<strong>边界感完全丧失。</strong> 你因为心软放弃所有边界，任由对方干涉你的生活、工作、社交，彻底失去自我，变成对方的附属品。",
+            med: "<strong>边界感较弱。</strong> 你偶尔会因为心软退让边界，但还能保持基本的自我，需要加强边界感保护。",
+            low: "<strong>边界感极强。</strong> 你坚守自己的生活边界，绝不因为心软妥协，独立又自信。"
+        },
+        promise: {
+            high: "<strong>轻信承诺心软。</strong> 对方画的大饼、空头承诺你都会无条件相信，心甘情愿等待、付出，最终只会被欺骗和辜负。",
+            med: "<strong>半信半疑。</strong> 你会听听对方的承诺，但不会完全当真，更看重实际行动，不容易被画饼欺骗。",
+            low: "<strong>理性不信画饼。</strong> 你只相信实际行动，绝不因为承诺心软，清醒又独立。"
+        }
+    };
+    
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimFullCN(key)} 
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)})</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+function getSingleAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>清醒脱单 (Stay Sober)：</strong> 单身时不要因为心软轻易动心，陌生人的温柔不代表真心，保持警惕，不要快速投入感情。</li>
+        <li><strong>守住边界 (Keep Boundary)：</strong> 刚认识的人提出借钱、单独约会等要求，不要心软答应，保护好自己的财产和安全。</li>
+        <li><strong>慢热相处 (Slow Love)：</strong> 感情要慢慢来，不要因为一时心软快速沦陷，日久见人心才是真理。</li>
+    </ul>`;
+}
+
+function getLoveAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>坚守自我 (Be Yourself)：</strong> 恋爱中不要因为心软放弃工作、社交、爱好，你的自我比迎合对方更重要。</li>
+        <li><strong>拒绝讨好 (No Flattery)：</strong> 不要因为心软卑微讨好，平等的恋爱才会长久，卑微换不来真心。</li>
+        <li><strong>及时止损 (Stop Loss)：</strong> 对方反复伤害你，不要心软原谅，及时止损才是对自己最好的保护。</li>
+    </ul>`;
+}
+
+function getMarriedAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>平衡关系 (Balance)：</strong> 已婚不要因为心软妥协亲情、底线，婚姻是平等的，不是单方面的牺牲。</li>
+        <li><strong>理性沟通 (Communicate)：</strong> 对方吵架说伤人的话，不要心软自我否定，理性沟通，绝不纵容语言暴力。</li>
+        <li><strong>坚守原则 (Principle)：</strong> 原则性错误绝不因为心软原谅，婚姻需要忠诚，不是无底线包容。</li>
+    </ul>`;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// 雷达图绘制
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['emotion','give','forgive','boundary','promise'];
+    const labels = ['情绪','付出','原谅','边界','承诺'];
+    
+    // 背景网格
+    ctx.strokeStyle = '#dfe6e9';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    // 数据层
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 65, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    // 渐变填充
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(255, 107, 129, 0.1)");
+    grd.addColorStop(1, "rgba(255, 107, 129, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#ff6b81'; ctx.lineWidth = 2; ctx.stroke();
+    
+    // 文字
+    ctx.fillStyle = '#2c3e50'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    // 主测试流程按钮绑定
+    document.getElementById('start-btn').addEventListener('click', function() {var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}
+        goToDemo();
+    });
+
+    document.getElementById('init-test-btn').addEventListener('click', function() {
+        initTest();
+    });
+
+    document.getElementById('prev-btn').addEventListener('click', function() {
+        prevQuestion();
+    });
+
+    document.getElementById('show-report-btn').addEventListener('click', function() {
+        showReport();
+    });
+
+    document.getElementById('close-report-btn').addEventListener('click', function() {
+        closeReport();
+    });
+
+    document.getElementById('reset-test-btn').addEventListener('click', function() {
+        resetTest();
+    });
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "lxrx";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

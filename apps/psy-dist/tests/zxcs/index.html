@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>哲学人格测试 Pro | 思维类型深度解析</title>
+    <style>
+        :root {
+            /* 哲学思维 Pro 风格 */
+            --primary: #4a148c; 
+            --primary-dark: #2c0a5c;
+            --accent: #7c4dff; /* 理性紫 */
+            --accent-hover: #651fff;
+            --safe: #27ae60;
+            --warning: #f39c12;
+            --bg-gradient-start: #1a1a2e;
+            --bg-gradient-end: #16213e;
+            --text-main: #e0e0e0;
+            --text-sub: #9e9e9e;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #0f0f23;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.5);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-purple { 0% { box-shadow: 0 0 0 0 rgba(124, 77, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(124, 77, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(124, 77, 255, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(124, 77, 255, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--accent-hover); }
+        .btn-outline {
+            background: transparent;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#3a2a5a 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 40px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #e0e0e0;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: #9e9e9e; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #3a2a5a;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #e0e0e0; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #9e9e9e; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #0f0f23; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #e0e0e0; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #3a2a5a; border-radius: 10px;
+            font-size: 16px; background: #1a1a2e; outline: none; appearance: none;
+            color: #e0e0e0; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--accent); background: #1a1a2e; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #0f0f23;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #9e9e9e; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #3a2a5a; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #3a2a5a; color: #9e9e9e; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #e0e0e0; }
+        
+        .option-btn {
+            background: #1a1a2e; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #e0e0e0; cursor: pointer; border: 2px solid #3a2a5a; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #2a2a4e; }
+        .option-btn.selected { background: #3a2a5a; border-color: var(--accent); color: var(--accent); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #1a1a2e; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #0f0f23; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #3a2a5a;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--accent); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #9e9e9e; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #9e9e9e; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #0f0f23; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .card-title { font-size: 18px; font-weight: 800; color: #e0e0e0; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #e0e0e0; display: block; }
+        .dim-sub { font-size: 10px; color: #9e9e9e; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #3a2a5a; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #9e9e9e; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,15,35,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #3a2a5a;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-purple 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #0f0f23; color: #9e9e9e; width: 100%; padding: 10px;
+            border: 1px solid #3a2a5a; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #0f0f23; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: var(--primary); color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; color: #e0e0e0; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #e0e0e0; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #3a2a5a; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #e0e0e0; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #b0b0b0; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #1a1a2e; border: 1px solid #3a2a5a; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #b0b0b0; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-哲学测试" class="fade-in">
+        <div class="cover-tag">2026 Philosophy Edition</div>
+        <h1 class="cover-title">哲学<span>人格测试</span><br>思维类型解析</h1>
+        <p class="cover-subtitle">基于西方哲学史的 30+ 题深度扫描<br>精准定位你的哲学思维原型</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🏛️</div>
+                <div class="feature-title">五维思维模型</div>
+                <div class="feature-desc">理性、经验、存在、功利、怀疑，全方位解析你的思维倾向。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📜</div>
+                <div class="feature-title">哲学家原型</div>
+                <div class="feature-desc">匹配史上最契合你的哲学家，解锁专属思想标签。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">认知分流</div>
+                <div class="feature-desc">针对不同思维场景调整分析权重，深度适配你的认知模式。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">万字思想报告</div>
+                <div class="feature-desc">深度解构你的哲学基因，提供2026年版认知升级指南。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始思维解析 (约需 3 分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#e0e0e0; margin-bottom:10px;">建立思想档案 📜</h2>
+        <p style="color:#9e9e9e; font-size:14px; margin-bottom:30px;">系统将根据您的认知场景调整分析权重。</p>
+
+        <div class="form-group">
+            <label class="form-label">你更常思考的场景是？</label>
+            <select id="input-status" class="select-box">
+                <option value="daily">日常抉择 (生活中的道德与选择)</option>
+                <option value="academic">学术探索 (知识的本质与来源)</option>
+                <option value="social">社会观察 (群体与个体的关系)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的认知倾向是？</label>
+            <select id="input-title" class="select-box">
+                <option value="logic">逻辑优先 (相信推理与演绎)</option>
+                <option value="sense">经验优先 (相信观察与实践)</option>
+                <option value="intuition">直觉优先 (相信内心与感受)</option>
+                <option value="doubt">怀疑优先 (相信质疑与批判)</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成哲学测试题</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：理性主义</span>
+            <span id="progress-text">1 / 35</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🏛️ 理性主义</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#0f0f23;">
+        <div style="font-size:50px; animation: pulse-purple 1s infinite; border-radius:50%;">🏛️</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#e0e0e0;">正在解构思维基因...</h3>
+        <p style="color:#9e9e9e; font-size:14px; line-height:1.8;">正在分析哲学倾向...<br>匹配思想原型...<br>生成深度报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">哲思指数</span>
+            </div>
+            <div class="level-badge" id="res-level">Level ?</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维思维雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《哲学思维深度报告》完整报告</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 换个场景/倾向 再测一次</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">PHILOSOPHY THINKING REPORT</div>
+            <div class="r-h1">哲学思维深度报告</div>
+            <div style="font-size:14px;">定制化认知升级指南 · 2026版</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const MAX_USES = 6; // 同一设备限制次数
+const pageId = window.location.pathname;
+const usageKey = 'usage_count_' + pageId;
+
+// 测试题库配置
+const questions = [
+    // --- 维度：理性主义 (Rationalism) ---
+    { d: 'rationalism', t: '理性主义', q: "你更相信通过逻辑推理得出的结论，还是亲身经历的事实？", o: [
+        {t:"完全相信逻辑推理", s:10},
+        {t:"更相信逻辑推理", s:7},
+        {t:"两者结合，偏向逻辑", s:3},
+        {t:"更相信亲身经历", s:0}
+    ]},
+    { d: 'rationalism', t: '天赋观念', q: "你认为人生来就有一些不证自明的真理（如数学公理）吗？", o: [
+        {t:"完全同意，天赋观念存在", s:10},
+        {t:"同意，有一些先天认知", s:7},
+        {t:"不确定，可能有也可能没有", s:3},
+        {t:"不同意，所有知识都来自经验", s:0}
+    ]},
+    { d: 'rationalism', t: '演绎vs归纳', q: "在探索未知时，你更倾向于从普遍原理推导出具体结论，还是从具体现象归纳出普遍规律？", o: [
+        {t:"完全倾向演绎", s:10},
+        {t:"更倾向演绎", s:7},
+        {t:"两者结合，偏向归纳", s:3},
+        {t:"完全倾向归纳", s:0}
+    ]},
+    { d: 'rationalism', t: '数学真理', q: "你认为数学真理是独立于物质世界存在的，还是人类对经验的总结？", o: [
+        {t:"完全独立于物质世界", s:10},
+        {t:"大部分独立", s:7},
+        {t:"小部分独立", s:3},
+        {t:"完全是经验总结", s:0}
+    ]},
+    { d: 'rationalism', t: '理性认知', q: "你认为通过理性可以认识事物的本质吗？", o: [
+        {t:"完全可以，理性是最高认知能力", s:10},
+        {t:"大部分可以", s:7},
+        {t:"小部分可以", s:3},
+        {t:"完全不可以，只能认识现象", s:0}
+    ]},
+
+    // --- 维度：经验主义 (Empiricism) ---
+    { d: 'empiricism', t: '经验主义', q: "你认为所有知识最终都来源于人的感官经验吗？", o: [
+        {t:"完全同意，知识源于经验", s:10},
+        {t:"同意，大部分知识源于经验", s:7},
+        {t:"不确定，可能有例外", s:3},
+        {t:"不同意，有超越经验的知识", s:0}
+    ]},
+    { d: 'empiricism', t: '观察优先', q: "在研究一个新事物时，你更倾向于先观察它的现象，还是先构建理论框架？", o: [
+        {t:"完全先观察现象", s:10},
+        {t:"更倾向先观察", s:7},
+        {t:"两者结合，偏向理论", s:3},
+        {t:"完全先构建理论", s:0}
+    ]},
+    { d: 'empiricism', t: '实验验证', q: "你认为一个观点只有经过实验或观察验证后才能被称为真理吗？", o: [
+        {t:"完全同意，必须验证", s:10},
+        {t:"同意，需要验证", s:7},
+        {t:"不确定，有些观点不需要", s:3},
+        {t:"不同意，逻辑自洽即可", s:0}
+    ]},
+    { d: 'empiricism', t: '白板说', q: "你认为人出生时心灵像一块白板，所有观念都来自后天经验吗？", o: [
+        {t:"完全同意，心灵是白板", s:10},
+        {t:"同意，大部分观念来自后天", s:7},
+        {t:"不确定，可能有先天内容", s:3},
+        {t:"不同意，有先天观念", s:0}
+    ]},
+    { d: 'empiricism', t: '归纳推理', q: "你更信任通过大量观察归纳出的结论，还是通过逻辑演绎出的结论？", o: [
+        {t:"完全信任归纳结论", s:10},
+        {t:"更信任归纳", s:7},
+        {t:"两者结合，偏向演绎", s:3},
+        {t:"完全信任演绎", s:0}
+    ]},
+
+    // --- 维度：存在主义 (Existentialism) ---
+    { d: 'existentialism', t: '存在主义', q: "你认为存在先于本质，即人首先存在，然后通过自己的选择创造自己的本质吗？", o: [
+        {t:"完全同意，人创造自己的本质", s:10},
+        {t:"同意，选择塑造本质", s:7},
+        {t:"不确定，可能有先天本质", s:3},
+        {t:"不同意，本质先于存在", s:0}
+    ]},
+    { d: 'existentialism', t: '自由选择', q: "你认为人是绝对自由的，必须为自己的所有选择负责吗？", o: [
+        {t:"完全同意，人绝对自由且负责", s:10},
+        {t:"同意，人有很大自由并负责", s:7},
+        {t:"不确定，自由受限于环境", s:3},
+        {t:"不同意，人没有绝对自由", s:0}
+    ]},
+    { d: 'existentialism', t: '荒谬感', q: "你认为人生本质上是荒谬的，没有预设的意义，意义需要自己赋予吗？", o: [
+        {t:"完全同意，意义由自己赋予", s:10},
+        {t:"同意，人生有荒谬性", s:7},
+        {t:"不确定，可能有预设意义", s:3},
+        {t:"不同意，人生有预设意义", s:0}
+    ]},
+    { d: 'existentialism', t: '向死而生', q: "你认为对死亡的思考能让人更清醒地面对生活，做出更本真的选择吗？", o: [
+        {t:"完全同意，死亡是最好的老师", s:10},
+        {t:"同意，思考死亡有意义", s:7},
+        {t:"不确定，可能没什么用", s:3},
+        {t:"不同意，思考死亡没用", s:0}
+    ]},
+    { d: 'existentialism', t: '本真生活', q: "你认为人应该摆脱他人和社会的期待，过一种本真的、属于自己的生活吗？", o: [
+        {t:"完全同意，要过本真生活", s:10},
+        {t:"同意，要部分摆脱期待", s:7},
+        {t:"不确定，可能需要兼顾", s:3},
+        {t:"不同意，要适应社会期待", s:0}
+    ]},
+
+    // --- 维度：功利主义 (Utilitarianism) ---
+    { d: 'utilitarianism', t: '功利主义', q: "你认为判断一个行为是否道德，应该看它是否能带来最大多数人的最大幸福吗？", o: [
+        {t:"完全同意，最大幸福是标准", s:10},
+        {t:"同意，幸福很重要", s:7},
+        {t:"不确定，可能有其他标准", s:3},
+        {t:"不同意，道德有其他标准", s:0}
+    ]},
+    { d: 'utilitarianism', t: '结果论', q: "你更看重行为的结果，还是行为的动机？", o: [
+        {t:"完全看重结果", s:10},
+        {t:"更看重结果", s:7},
+        {t:"两者结合，偏向动机", s:3},
+        {t:"完全看重动机", s:0}
+    ]},
+    { d: 'utilitarianism', t: '幸福计算', q: "你认为幸福是可以量化和计算的，从而可以比较不同行为的好坏吗？", o: [
+        {t:"完全同意，幸福可以量化", s:10},
+        {t:"同意，幸福可以大致比较", s:7},
+        {t:"不确定，可能无法量化", s:3},
+        {t:"不同意，幸福无法量化", s:0}
+    ]},
+    { d: 'utilitarianism', t: '牺牲少数', q: "你认为为了大多数人的幸福，牺牲少数人的利益是可以接受的吗？", o: [
+        {t:"完全同意，可以牺牲少数", s:10},
+        {t:"同意，在必要时可以", s:7},
+        {t:"不确定，要看具体情况", s:3},
+        {t:"不同意，少数利益不可牺牲", s:0}
+    ]},
+    { d: 'utilitarianism', t: '长远利益', q: "你认为在做决策时，应该更看重长远的整体利益，还是眼前的局部利益？", o: [
+        {t:"完全看重长远利益", s:10},
+        {t:"更看重长远利益", s:7},
+        {t:"两者结合，偏向眼前", s:3},
+        {t:"完全看重眼前利益", s:0}
+    ]},
+
+    // --- 维度：怀疑主义 (Skepticism) ---
+    { d: 'skepticism', t: '怀疑主义', q: "你认为我们永远无法确定任何知识的真实性，只能保持怀疑吗？", o: [
+        {t:"完全同意，知识无法确定", s:10},
+        {t:"同意，大部分知识值得怀疑", s:7},
+        {t:"不确定，可能有确定的知识", s:3},
+        {t:"不同意，有确定的知识", s:0}
+    ]},
+    { d: 'skepticism', t: '感官怀疑', q: "你怀疑自己的感官经验吗？比如你怎么确定现在不是在做梦？", o: [
+        {t:"完全怀疑，感官不可靠", s:10},
+        {t:"经常怀疑，感官可能出错", s:7},
+        {t:"偶尔怀疑，大部分时候可靠", s:3},
+        {t:"从不怀疑，感官完全可靠", s:0}
+    ]},
+    { d: 'skepticism', t: '权威怀疑', q: "你对权威的观点持什么态度？", o: [
+        {t:"完全怀疑，权威也可能错", s:10},
+        {t:"经常怀疑，需要自己验证", s:7},
+        {t:"偶尔怀疑，大部分时候相信", s:3},
+        {t:"从不怀疑，权威是对的", s:0}
+    ]},
+    { d: 'skepticism', t: '归纳怀疑', q: "你怀疑通过归纳得出的结论吗？比如过去太阳每天升起，不代表未来也会。", o: [
+        {t:"完全怀疑，归纳不可靠", s:10},
+        {t:"经常怀疑，归纳有局限", s:7},
+        {t:"偶尔怀疑，大部分时候相信", s:3},
+        {t:"从不怀疑，归纳完全可靠", s:0}
+    ]},
+    { d: 'skepticism', t: '悬置判断', q: "你认为在没有足够证据时，应该悬置判断，不做肯定或否定的结论吗？", o: [
+        {t:"完全同意，悬置判断是明智的", s:10},
+        {t:"同意，应该谨慎判断", s:7},
+        {t:"不确定，可能需要做判断", s:3},
+        {t:"不同意，应该做出判断", s:0}
+    ]}
+];
+
+// 认知场景特供题
+const roleSpecific = {
+    daily: [
+        { d: 'existentialism', t: '日常抉择', q: "【日常特供】在做生活中的重要选择时，你更倾向于？", o: [
+            {t:"完全听从内心，选择自己想要的", s:10},
+            {t:"大部分听从内心", s:7},
+            {t:"兼顾内心和他人期待", s:3},
+            {t:"完全听从他人期待", s:0}
+        ]},
+        { d: 'utilitarianism', t: '日常道德', q: "【日常特供】当朋友遇到困难向你求助，你会优先考虑？", o: [
+            {t:"帮助他能带来的整体幸福", s:10},
+            {t:"大部分考虑结果", s:7},
+            {t:"兼顾结果和动机", s:3},
+            {t:"完全出于帮助的动机", s:0}
+        ]},
+        { d: 'skepticism', t: '日常信息', q: "【日常特供】看到社交媒体上的热门消息，你会？", o: [
+            {t:"完全怀疑，等待验证", s:10},
+            {t:"经常怀疑，不轻信", s:7},
+            {t:"偶尔怀疑，大部分相信", s:3},
+            {t:"从不怀疑，直接相信", s:0}
+        ]},
+        { d: 'rationalism', t: '日常逻辑', q: "【日常特供】在和人争论时，你更看重？", o: [
+            {t:"逻辑是否自洽", s:10},
+            {t:"大部分看重逻辑", s:7},
+            {t:"兼顾逻辑和事实", s:3},
+            {t:"完全看重事实", s:0}
+        ]},
+        { d: 'empiricism', t: '日常经验', q: "【日常特供】学习一项新技能时，你更倾向于？", o: [
+            {t:"完全通过实践摸索", s:10},
+            {t:"大部分通过实践", s:7},
+            {t:"兼顾实践和理论", s:3},
+            {t:"完全先学理论", s:0}
+        ]}
+    ],
+    academic: [
+        { d: 'rationalism', t: '学术理性', q: "【学术特供】在学术研究中，你更倾向于？", o: [
+            {t:"从理论出发，演绎推导", s:10},
+            {t:"大部分从理论出发", s:7},
+            {t:"兼顾理论和经验", s:3},
+            {t:"完全从经验出发", s:0}
+        ]},
+        { d: 'empiricism', t: '学术经验', q: "【学术特供】你认为一个好的学术理论最重要的是？", o: [
+            {t:"能被经验观察验证", s:10},
+            {t:"大部分需要验证", s:7},
+            {t:"兼顾验证和逻辑", s:3},
+            {t:"完全逻辑自洽", s:0}
+        ]},
+        { d: 'skepticism', t: '学术怀疑', q: "【学术特供】面对已有的学术权威理论，你会？", o: [
+            {t:"完全怀疑，批判性审视", s:10},
+            {t:"经常怀疑，寻找漏洞", s:7},
+            {t:"偶尔怀疑，大部分接受", s:3},
+            {t:"从不怀疑，完全接受", s:0}
+        ]},
+        { d: 'existentialism', t: '学术意义', q: "【学术特供】你认为学术研究的意义在于？", o: [
+            {t:"探索自己真正感兴趣的问题", s:10},
+            {t:"大部分出于兴趣", s:7},
+            {t:"兼顾兴趣和社会需求", s:3},
+            {t:"完全满足社会需求", s:0}
+        ]},
+        { d: 'utilitarianism', t: '学术价值', q: "【学术特供】你评价一个研究的价值主要看？", o: [
+            {t:"它能带来的实际应用和好处", s:10},
+            {t:"大部分看实际价值", s:7},
+            {t:"兼顾实际和理论价值", s:3},
+            {t:"完全看理论价值", s:0}
+        ]}
+    ],
+    social: [
+        { d: 'utilitarianism', t: '社会功利', q: "【社会特供】在评价一项社会政策时，你更看重？", o: [
+            {t:"它能带来的最大多数人的幸福", s:10},
+            {t:"大部分看整体幸福", s:7},
+            {t:"兼顾整体和个体", s:3},
+            {t:"完全看个体权利", s:0}
+        ]},
+        { d: 'existentialism', t: '社会存在', q: "【社会特供】你认为个体在社会中应该？", o: [
+            {t:"保持本真，不被社会同化", s:10},
+            {t:"大部分保持本真", s:7},
+            {t:"兼顾本真和适应", s:3},
+            {t:"完全适应社会", s:0}
+        ]},
+        { d: 'skepticism', t: '社会舆论', q: "【社会特供】面对社会上的主流舆论，你会？", o: [
+            {t:"完全怀疑，独立思考", s:10},
+            {t:"经常怀疑，不跟风", s:7},
+            {t:"偶尔怀疑，大部分相信", s:3},
+            {t:"从不怀疑，完全相信", s:0}
+        ]},
+        { d: 'rationalism', t: '社会理性', q: "【社会特供】你认为解决社会问题主要靠？", o: [
+            {t:"理性的制度设计和规划", s:10},
+            {t:"大部分靠理性", s:7},
+            {t:"兼顾理性和经验", s:3},
+            {t:"完全靠经验摸索", s:0}
+        ]},
+        { d: 'empiricism', t: '社会经验', q: "【社会特供】你认为了解社会最好的方式是？", o: [
+            {t:"深入观察和体验社会生活", s:10},
+            {t:"大部分靠观察", s:7},
+            {t:"兼顾观察和理论", s:3},
+            {t:"完全靠理论学习", s:0}
+        ]}
+    ]
+};
+
+// 哲学思维评级文案
+const levels = [
+    { max: 20, l: "Lv.1 混沌思维者", c: "#9e9e9e", d: "对哲学问题没有明确倾向，思维处于探索阶段。", advice: "保持好奇心，多接触不同哲学思想。" },
+    { max: 35, l: "Lv.2 萌芽思考者", c: "#27ae60", d: "开始对哲学问题有初步思考，有模糊的思维倾向。", advice: "深入阅读哲学入门书籍，明确自己的兴趣。" },
+    { max: 50, l: "Lv.3 多元探索者", c: "#f1c40f", d: "对多个哲学流派都有兴趣，思维开放且包容。", advice: "继续探索，寻找最契合自己的思想。" },
+    { max: 60, l: "Lv.4 倾向明确者", c: "#f39c12", d: "有明确的哲学思维倾向，开始形成自己的观点。", advice: "深入研究相关流派，构建自己的思想体系。" },
+    { max: 70, l: "Lv.5 思想践行者", c: "#e67e22", d: "不仅思考哲学问题，还能将思想应用于生活。", advice: "继续践行，让哲学成为生活的指引。" },
+    { max: 80, l: "Lv.6 体系构建者", c: "#d35400", d: "开始构建自己的哲学思想体系，有独特的见解。", advice: "记录思考，与他人交流，完善自己的体系。" },
+    { max: 90, l: "Lv.7 深度哲思者", c: "#7c4dff", d: "对哲学有深度思考，能提出有价值的问题。", advice: "深入研究哲学史，与伟大的思想家对话。" },
+    { max: 100, l: "Lv.8 哲学原型者", c: "#651fff", d: "思维高度契合某一哲学流派，堪称当代原型。", advice: "分享你的思想，影响更多人。" },
+    { max: 110, l: "Lv.9 思想创新者", c: "#4a148c", d: "在继承的基础上创新，有自己独特的哲学贡献。", advice: "继续创新，推动哲学思想的发展。" },
+    { max: 999, l: "Lv.10 当代智者", c: "#000000", d: "思维深邃，智慧通达，堪称当代的哲学智者。", advice: "保持谦逊，继续追求真理。" }
+];
+
+// 全局变量
+let currQList = [];
+let currIdx = 0;
+let userRole = '';
+let userTitle = '';
+let scores = { rationalism:0, empiricism:0, existentialism:0, utilitarianism:0, skepticism:0 };
+
+// 页面切换函数
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userRole = document.getElementById('input-status').value;
+    userTitle = document.getElementById('input-title').value;
+    
+    currQList = [...questions, ...roleSpecific[userRole]];
+    currIdx = 0;
+    scores = { rationalism:0, empiricism:0, existentialism:0, utilitarianism:0, skepticism:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    let weight = 1.0;
+    if (userRole === 'academic') {
+        if (dim === 'rationalism') weight = 1.2;
+        if (dim === 'empiricism') weight = 1.2;
+    } else if (userRole === 'daily') {
+        if (dim === 'existentialism') weight = 1.1;
+        if (dim === 'utilitarianism') weight = 1.1;
+    }
+
+    scores[dim] += val * weight;
+
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { rationalism:0, empiricism:0, existentialism:0, utilitarianism:0, skepticism:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw / 2.8); 
+    if(finalScore> 120) finalScore = 120;
+
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'rationalism', n:'理性'}, {k:'empiricism', n:'经验'}, 
+        {k:'existentialism', n:'存在'}, {k:'utilitarianism', n:'功利'}, {k:'skepticism', n:'怀疑'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 65) * 100, 100);
+        let color = pct> 60 ? '#7c4dff' : (pct> 30 ? '#f39c12' : '#27ae60');
+        let txt = pct> 70 ? '突出' : (pct> 40 ? '中等' : '基础');
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {rationalism:'理性', empiricism:'经验', existentialism:'存在', utilitarianism:'功利', skepticism:'怀疑'};
+    return map[k];
+}
+
+// 报告生成函数
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let envStatus = '';
+    let envClass = '';
+    if (total> 80) {
+        envStatus = '🏛️ 深度哲思：思想体系高度成熟 (当代哲学原型)';
+        envClass = 'color:#7c4dff; font-weight:900;';
+    } else if (total> 60) {
+        envStatus = '🧠 思想践行者：有明确思维倾向并能应用于生活';
+        envClass = 'color:#e67e22; font-weight:800;';
+    } else if (total> 40) {
+        envStatus = '🔍 多元探索者：思维开放，对多个哲学流派感兴趣';
+        envClass = 'color:#f39c12; font-weight:700;';
+        envStatus = '🌱 萌芽思考者：开始哲学思考，思维处于探索阶段';
+        envClass = 'color:#27ae60; font-weight:700;';
+    }
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、哲学思维诊断书</div>
+        <p class="r-p" style="background:#1a1a2e; padding:12px; border-radius:8px; font-size:14px; border:1px solid #3a2a5a;">
+            <strong>🏛️ 思想档案：</strong>${userRole==='daily'?'日常抉择 (生活中的道德与选择)':userRole==='academic'?'学术探索 (知识的本质与来源)':'社会观察 (群体与个体的关系)'} <br>
+            <strong>🧠 认知倾向：</strong>${getTitleName(userTitle)}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#0f0f23; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#9e9e9e; margin-right:8px;">综合哲思指数</span>
+                <span style="font-size:36px; font-weight:900; color:#e0e0e0; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#9e9e9e;">/ 120</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#b0b0b0;"><strong>思想建议：</strong>${lvl.advice}</p>
+        </div>
+
+        <div style="margin-top:20px; padding:15px; background:#0f0f23; border-radius:8px; border:1px solid #3a2a5a;">
+            <p style="margin:0 0 10px 0; font-size:14px; color:#9e9e9e;">思维类型定性：</p>
+            <div style="${envClass} font-size:17px; margin-bottom:12px;">${envStatus}</div>
+            <p class="r-p" style="font-size:15px; margin:0;">
+                经过 35 项哲学指标的深度扫描，系统检测到你的核心思维痛点位于 <span style="background:#7c4dff; color:#fff; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:13px;">${getDimFullCN(maxDimKey)}</span> 维度。
+                ${total> 60 ? '你的思想已经形成体系，尝试将其应用于生活，让哲学成为你的行动指南。' : '你的思维正在成长，多阅读、多思考，探索属于自己的哲学道路。'}
+            </p>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维思维机制深度解构</div>
+        <p style="font-size:12px; color:#9e9e9e; margin-bottom:20px; font-style:italic;">*基于西方哲学史视角的深度分析</p>
+        ${generateDimAnalysis('rationalism', scores.rationalism)}
+        ${generateDimAnalysis('empiricism', scores.empiricism)}
+        ${generateDimAnalysis('existentialism', scores.existentialism)}
+        ${generateDimAnalysis('utilitarianism', scores.utilitarianism)}
+        ${generateDimAnalysis('skepticism', scores.skepticism)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、2026年认知升级生存策略</div>
+        <div class="r-box" style="border-color:#3a2a5a;">
+            <div class="r-h3">🛡️ 防御篇：建立思想护城河</div>
+            <ul class="r-list">
+                <li><strong>思维固化 (Mind Solidification)：</strong> 明确自己的核心思维原则，但不要固步自封，保持开放的心态，接纳不同的观点。</li>
+                <li><strong>认知防火墙 (Cognitive Firewall)：</strong> 区分事实与观点，对未经证实的信息保持警惕，用理性和经验双重检验。</li>
+                <li><strong>自我优先 (Self First)：</strong> 在吸收他人思想前，先建立自己的判断标准，不要被他人的观点完全左右，保持思想的独立性。</li>
+            </ul>
+        </div>
+        
+        <div class="r-box" style="background:#1a1a2e; border-color:#3a2a5a;">
+            <div class="r-h3" style="color:#7c4dff;">
+                🚀 突围篇：${userRole==='daily'?'日常·本真生活':userRole==='academic'?'学术·追求真理':'社会·理性观察'}
+            </div>
+            ${userRole==='daily' ? getDailyAdvice() : userRole==='academic' ? getAcademicAdvice() : getSocialAdvice()}
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#666; font-size:12px; margin-top:50px; line-height:1.8;">
+        本报告由哲学思维算法自动生成<br>
+        祝愿每一次思考，都能接近真理
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function getTitleName(t) {
+    const m = {
+        logic: '逻辑优先型 (相信推理与演绎)', 
+        sense: '经验优先型 (相信观察与实践)', 
+        intuition: '直觉优先型 (相信内心与感受)', 
+        doubt: '怀疑优先型 (相信质疑与批判)'
+    };
+    return m[t] || t;
+}
+
+function getDimFullCN(k) {
+    const m = {
+        rationalism: '理性主义 (逻辑与演绎)', 
+        empiricism: '经验主义 (观察与实践)', 
+        existentialism: '存在主义 (自由与选择)', 
+        utilitarianism: '功利主义 (最大幸福)', 
+        skepticism: '怀疑主义 (批判与悬置)'
+    };
+    return m[k];
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 45 ? 'high' : (val> 25 ? 'med' : 'low');
+    
+    const config = {
+        high: { color: '#7c4dff', bg: '#1a1a2e', tag: '🏛️ 核心维度', titleColor: '#7c4dff' },
+        med: { color: '#e67e22', bg: '#1a1a2e', tag: '⚠️ 重要维度', titleColor: '#d35400' },
+        low: { color: '#27ae60', bg: '#1a1a2e', tag: '✅ 基础维度', titleColor: '#27ae60' }
+    };
+    
+    const c = config[riskLevel];
+    
+    const texts = {
+        rationalism: {
+            high: "<strong>你是纯粹的理性主义者。</strong> 你坚信理性是最高的认知能力，通过逻辑推理可以认识事物的本质，数学和逻辑真理在你心中具有至高无上的地位。代表哲学家：笛卡尔、斯宾诺莎、莱布尼茨。核心观点：\"我思故我在\"，通过怀疑找到确定的知识，用理性构建哲学体系。",
+            med: "<strong>你有较强的理性主义倾向。</strong> 你重视逻辑和推理，但也不排斥经验的作用，认为理性和经验可以结合起来认识世界。代表哲学家：康德（调和理性与经验）。核心观点：知识始于经验，但不源于经验，是知性范畴整理感性材料的结果。",
+            low: "<strong>理性主义倾向较弱。</strong> 你更看重经验和实践，认为知识主要来源于观察和归纳，逻辑只是辅助工具。代表哲学家：洛克、贝克莱、休谟（经验论传统）。核心观点：心灵是白板，所有知识都来自经验，归纳推理是知识的主要来源。"
+        },
+        empiricism: {
+            high: "<strong>你是彻底的经验主义者。</strong> 你坚信所有知识最终都来源于感官经验，心灵像一块白板，实践和观察是检验真理的唯一标准。代表哲学家：洛克、贝克莱、休谟。核心观点：\"存在就是被感知\"，知识源于经验，因果关系只是习惯联想。",
+            med: "<strong>你有明显的经验主义倾向。</strong> 你重视经验和实践，但也不否认理性的作用，认为知识需要经验和理性的结合。代表哲学家：波普尔（批判理性主义，重视经验证伪）。核心观点：科学理论不能被证实，只能被证伪，通过试错法推进知识。",
+            low: "<strong>经验主义倾向较弱。</strong> 你更看重理性和逻辑，认为有超越经验的真理存在，演绎推理比归纳更可靠。代表哲学家：笛卡尔、斯宾诺莎（唯理论传统）。核心观点：真理的标准是清楚明白，通过理性直观和演绎获得确定的知识。"
+        },
+        existentialism: {
+            high: "<strong>你是坚定的存在主义者。</strong> 你坚信存在先于本质，人是绝对自由的，必须通过自己的选择创造意义，面对荒谬和焦虑是生活的常态。代表哲学家：萨特、波伏娃、加缪。核心观点：\"存在先于本质\"，\"人被判定为自由\"，在荒谬中反抗，创造自己的意义。",
+            med: "<strong>你有较强的存在主义倾向。</strong> 你重视个人的选择和自由，认为意义需要自己赋予，但也不否认环境的限制。代表哲学家：海德格尔（基础存在论）。核心观点：\"向死而生\"，通过对死亡的领悟，本真地面对生活，摆脱常人的沉沦。",
+            low: "<strong>存在主义倾向较弱。</strong> 你更相信有预设的意义和本质，认为人应该适应社会和自然的规律，而不是完全由自己选择。代表哲学家：黑格尔（绝对唯心主义）。核心观点：\"凡是现实的都是合理的\"，历史是绝对精神的自我展开，个人是时代精神的体现。"
+        },
+        utilitarianism: {
+            high: "<strong>你是典型的功利主义者。</strong> 你坚信最大多数人的最大幸福是道德的最高标准，结果比动机更重要，幸福是可以量化和计算的。代表哲学家：边沁、密尔。核心观点：\"最大幸福原则\"，道德的目的是实现最多的幸福和最少的痛苦，通过计算选择最优行为。",
+            med: "<strong>你有明显的功利主义倾向。</strong> 你重视行为的结果和整体幸福，但也不否认动机的重要性，认为道德需要兼顾结果和动机。代表哲学家：西季威克（直觉功利主义）。核心观点：功利原则是自明的，需要结合直觉和功利，平衡个人幸福与普遍幸福。",
+            low: "<strong>功利主义倾向较弱。</strong> 你更看重行为的动机和道德原则，认为有些事情即使结果不好也应该做，道德不是计算幸福的工具。代表哲学家：康德（义务论伦理学）。核心观点：\"善良意志\"，道德的价值在于出于义务的行动，而不是结果，人是目的而不是手段。"
+        },
+        skepticism: {
+            high: "<strong>你是彻底的怀疑主义者。</strong> 你坚信我们永远无法确定任何知识的真实性，对感官、权威、归纳都持怀疑态度，悬置判断是最明智的选择。代表哲学家：皮浪、休谟、波普尔。核心观点：\"悬置判断\"，对一切保持怀疑，避免独断论，在怀疑中保持心灵的宁静。",
+            med: "<strong>你有较强的怀疑主义倾向。</strong> 你重视批判性思维，不轻易接受任何信念，但也不认为所有知识都不可知，保持适度的怀疑。代表哲学家：笛卡尔（方法论的怀疑）。核心观点：通过怀疑找到不可怀疑的起点，怀疑是方法而不是目的，重建知识的大厦。",
+            low: "<strong>怀疑主义倾向较弱。</strong> 你更相信知识的确定性，认为感官和权威是可靠的，不需要对所有事情都保持怀疑。代表哲学家：黑格尔（辩证法，扬弃怀疑）。核心观点：真理是全体，通过辩证的过程，怀疑被扬弃在更高的知识中，达到绝对知识。"
+        }
+    };
+    
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimFullCN(key)} 
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)})</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#b0b0b0;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+function getDailyAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>本真生活 (Authenticity)：</strong> 在日常抉择中，多倾听自己内心的声音，不要被他人和社会的期待完全左右，过属于自己的生活。</li>
+        <li><strong>理性思考 (Rationality)：</strong> 遇到问题时，先冷静分析，用逻辑和理性指导自己的决策，同时结合实际经验，做出最适合的选择。</li>
+        <li><strong>适度怀疑 (Skepticism)：</strong> 面对社交媒体上的信息，保持适度的怀疑，不要轻易相信，多验证、多思考，避免被误导。</li>
+    </ul>`;
+}
+
+function getAcademicAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>批判思维 (Critical Thinking)：</strong> 在学术研究中，保持批判性思维，不迷信权威，敢于质疑已有的理论，在怀疑中探索真理。</li>
+        <li><strong>理论与实践结合 (Theory and Practice)：</strong> 兼顾理性演绎和经验归纳，既重视理论构建，也重视实验验证，让学术研究更有价值。</li>
+        <li><strong>兴趣驱动 (Interest Driven)：</strong> 选择自己真正感兴趣的研究问题，让学术研究成为探索真理的过程，而不是满足外界期待的工具。</li>
+    </ul>`;
+}
+
+function getSocialAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>整体与个体兼顾 (Whole and Individual)：</strong> 在评价社会政策时，既考虑最大多数人的幸福，也尊重个体的权利，避免为了整体牺牲少数。</li>
+        <li><strong>独立思考 (Independent Thinking)：</strong> 面对社会主流舆论，保持独立思考，不盲目跟风，用自己的理性和经验判断是非。</li>
+        <li><strong>理性设计与经验摸索结合 (Rational Design and Empirical Exploration)：</strong> 解决社会问题时，既重视理性的制度设计，也重视经验的摸索，在实践中不断完善。</li>
+    </ul>`;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// 雷达图绘制
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['rationalism','empiricism','existentialism','utilitarianism','skepticism'];
+    const labels = ['理性','经验','存在','功利','怀疑'];
+    
+    // 背景网格
+    ctx.strokeStyle = '#3a2a5a';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    // 数据层
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 65, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    // 渐变填充
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(124, 77, 255, 0.1)");
+    grd.addColorStop(1, "rgba(124, 77, 255, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#7c4dff'; ctx.lineWidth = 2; ctx.stroke();
+    
+    // 文字
+    ctx.fillStyle = '#e0e0e0'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    // 主测试流程按钮绑定
+    document.getElementById('start-btn').addEventListener('click', function() {var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}
+        goToDemo();
+    });
+
+    document.getElementById('init-test-btn').addEventListener('click', function() {
+        initTest();
+    });
+
+    document.getElementById('prev-btn').addEventListener('click', function() {
+        prevQuestion();
+    });
+
+    document.getElementById('show-report-btn').addEventListener('click', function() {
+        showReport();
+    });
+
+    document.getElementById('close-report-btn').addEventListener('click', function() {
+        closeReport();
+    });
+
+    document.getElementById('reset-test-btn').addEventListener('click', function() {
+        resetTest();
+    });
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "zxcs";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

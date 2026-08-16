@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>暧昧段位深度检测 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #FF6B81; --primary-dark: #FF4757;
+            --accent: #26C7CD; --safe: #2ED573;
+            --bg-gradient-start: #FFF0F3; --bg-gradient-end: #FFE4E9;
+            --text-main: #2D3436; --text-sub: #636E72;
+        }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; margin: 0 auto; box-shadow: 0 0 60px rgba(0,0,0,0.15); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-pink { 0% { box-shadow: 0 0 0 0 rgba(255, 107, 129, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 107, 129, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 107, 129, 0.3); }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#ffe6eb 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; }
+        .cover-title { font-size: 38px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ffe6eb; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; }
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #ffe6eb; border-radius: 10px; font-size: 16px; background: #fdfdfd; color: #2D3436; font-weight: 500; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-tag { display: inline-block; background: #f8f0f3; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #ffe6eb; transition: all 0.2s; font-weight: 500; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #fff0f3; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #f8f0f3; padding-bottom: 100px; min-height: 100vh; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ffe6eb; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; }
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; }
+        .card-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-pink 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; cursor: pointer; }
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ffe6eb; }
+        .r-h3 { font-size: 18px; font-weight: 700; margin: 20px 0 10px; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #eee; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+    <div id="page-intro" data-screenshot="psych-test-暧昧段位深度检测" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">暧昧段位<br><span>深度</span>检测</h1>
+        <p class="cover-subtitle">你在暧昧中是什么段位<br>能否掌握主动权</p>
+        <div class="intro-features">
+            <div class="feature-box"><div class="feature-icon">🎯</div><div class="feature-title">五维深度分析</div><div class="feature-desc">博弈、心理学、聊天、边界、心态全解析。</div></div>
+            <div class="feature-box"><div class="feature-icon">🧠</div><div class="feature-title">博弈论支撑</div><div class="feature-desc">基于博弈论，科学评估暧昧段位。</div></div>
+            <div class="feature-box"><div class="feature-icon">📊</div><div class="feature-title">精准定位段位</div><div class="feature-desc">找到你的暧昧等级。</div></div>
+            <div class="feature-box"><div class="feature-icon">💡</div><div class="feature-title">提升方案</div><div class="feature-desc">教你在暧昧中掌握主动。</div></div>
+        </div>
+        <button class="btn" id="start-btn">开始检测 (约需 3 分钟)</button>
+    </div>
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; margin-bottom:10px;">个人档案建立 💕</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的情况精准评估暧昧段位。</p>
+        <div class="form-group">
+            <label class="form-label">你的暧昧经验？</label>
+            <select id="input-experience" class="select-box">
+                <option value="0">0次 (小白)</option>
+                <option value="1">1-2次 (新人)</option>
+                <option value="2">3-5次 (老手)</option>
+                <option value="3">5次以上 (高手)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">你通常是？</label>
+            <select id="input-type" class="select-box">
+                <option value="passive">被动等待型</option>
+                <option value="active">主动出击型</option>
+                <option value="equal">看情况型</option>
+            </select>
+        </div>
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+    <div id="page-test">
+        <div class="progress-header"><span id="dim-tag">维度：博弈能力</span><span id="progress-text">1 / 20</span></div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🎯 博弈能力</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+    <div id="page-loading">
+        <div style="font-size:50px; animation: pulse-pink 1s infinite;">💕</div>
+        <h3 style="margin-top:20px; font-weight:800;">正在分析你的暧昧段位...</h3>
+    </div>
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle"><span class="score-num" id="res-score">0</span><span class="score-label">暧昧段位</span></div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+        <div class="card">
+            <div class="card-title">📊 暧昧能力五维雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;"><canvas id="radarChart" width="240" height="240"></canvas></div>
+            <div id="bars-container"></div>
+        </div>
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《暧昧段位深度分析报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新检测</button>
+        </div>
+    </div>
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8;">2026 PSYCHOLOGY REPORT</div>
+            <div class="r-h1">暧昧段位深度分析报告</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+</div>
+<script>
+const questions = [
+    { d: 'game', t: '博弈能力', q: "暧昧中你会主动还是被动？", o: [{t:"完全主动，掌握节奏", s:10}, {t:"比较主动，偶尔", s:7}, {t:"比较被动，等对方", s:3}, {t:"完全被动，被牵鼻子", s:0}] },
+    { d: 'game', t: '博弈能力', q: "对方不回消息你会？", o: [{t:"淡定，不在意", s:10}, {t:"稍等，正常的", s:7}, {t:"会追问，较真", s:3}, {t:"焦虑，很慌张", s:0}] },
+    { d: 'game', t: '博弈能力', q: "你会吊着对方吗？", o: [{t:"很会，很擅长", s:10}, {t:"偶尔，适度", s:7}, {t:"不太会，较直白", s:3}, {t:"不会，直接表达", s:0}] },
+    { d: 'game', t: '博弈能力', q: "暧昧中你会欲擒故纵吗？", o: [{t:"很擅长，游刃有余", s:10}, {t:"会用但不熟练", s:7}, {t:"很少用，较直接", s:3}, {t:"完全不会", s:0}] },
+    { d: 'psych', t: '心理战术', q: "你能读懂对方心理吗？", o: [{t:"完全能，很清楚", s:10}, {t:"比较能，大致", s:7}, {t:"不太能，看不懂", s:3}, {t:"完全不懂", s:0}] },
+    { d: 'psych', t: '心理战术', q: "你会制造心理落差吗？", o: [{t:"很会，情绪高手", s:10}, {t:"偶尔会用", s:7}, {t:"很少用", s:3}, {t:"完全不会", s:0}] },
+    { d: 'psych', t: '心理战术', q: "你知道怎么让对方上头吗？", o: [{t:"非常懂高手", s:10}, {t:"比较懂", s:7}, {t:"不太懂", s:3}, {t:"完全不懂", s:0}] },
+    { d: 'psych', t: '心理战术', q: "你能控制节奏吗？", o: [{t:"完全能，掌控", s:10}, {t:"比较能，适度", s:7}, {t:"不太能，被动", s:3}, {t:"完全不能", s:0}] },
+    { d: 'chat', t: '聊天能力', q: "你聊天很厉害吗？", o: [{t:"非常厉害，暧昧高手", s:10}, {t:"比较厉害", s:7}, {t:"一般，较普通", s:3}, {t:"不太会聊天", s:0}] },
+    { d: 'chat', t: '聊天能力', q: "你会聊一些暧昧的话吗？", o: [{t:"很会，很擅长", s:10}, {t:"偶尔，适度", s:7}, {t:"很少，较保守", s:3}, {t:"完全不会", s:0}] },
+    { d: 'chat', t: '聊天能力', q: "你能用文字调动情绪吗？", o: [{t:"非常会，情绪高手", s:10}, {t:"比较会", s:7}, {t:"不太会", s:3}, {t:"完全不会", s:0}] },
+    { d: 'chat', t: '聊天能力', q: "你会用表情包聊天吗？", o: [{t:"很会，擅长", s:10}, {t:"比较会", s:7}, {t:"不太会", s:3}, {t:"不会，较枯燥", s:0}] },
+    { d: 'boundary', t: '边界把控', q: "你会设置边界吗？", o: [{t:"很会，清晰", s:10}, {t:"比较会，适度", s:7}, {t:"不太会，较模糊", s:3}, {t:"完全不会", s:0}] },
+    { d: 'boundary', t: '边界把控', q: "你能把握亲密尺度吗？", o: [{t:"完全能，很精准", s:10}, {t:"比较能，ok", s:7}, {t:"不太能，把握不好", s:3}, {t:"完全不能", s:0}] },
+    { d: 'boundary', t: '边界把控', q: "你会欲拒还迎吗？", o: [{t:"很会，高手", s:10}, {t:"偶尔，适度", s:7}, {t:"很少用", s:3}, {t:"不会，较直接", s:0}] },
+    { d: 'boundary', t: '边界把控', q: "你能让对方患得患失吗？", o: [{t:"非常会，情绪掌控", s:10}, {t:"比较会", s:7}, {t:"不太会", s:3}, {t:"完全不会", s:0}] },
+    { d: 'mind', t: '心态建设', q: "暧昧中你心态稳吗？", o: [{t:"非常稳，淡定", s:10}, {t:"比较稳", s:7}, {t:"不太稳，较慌", s:3}, {t:"完全不稳", s:0}] },
+    { d: 'mind', t: '心态建设', q: "你能接受忽冷忽热吗？", o: [{t:"完全能，没问题", s:10}, {t:"比较能，ok", s:7}, {t:"不太能，会在意", s:3}, {t:"完全不能，会抓狂", s:0}] },
+    { d: 'mind', t: '心态建设', q: "你会患得患失吗？", o: [{t:"完全不会，很淡", s:10}, {t:"很少，较少", s:7}, {t:"偶尔，会焦虑", s:3}, {t:"经常患得患失", s:0}] },
+    { d: 'mind', t: '心态建设', q: "��能��受不确定吗？", o: [{t:"完全能，很享受", s:10}, {t:"比较能，接受", s:7}, {t:"不太能，焦虑", s:3}, {t:"完全不能，要确定", s:0}] }
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+const levels = [
+    { max: 30, l: "青铜段位", c: "#95A5A6", d: "你是暧昧小白，需要提升段位。", advice: "建议多学习暧昧技巧，提升心理战术。", points: ["学习聊天技巧", "练习心理战术", "建立自信", "不要过于主动", "保持神秘感"] },
+    { max: 50, l: "白银段位", c: "#BDC3C7", d: "你有基础暧昧能力，还需要提升。", advice: "建议加强博弈能力和心态建设。", points: ["学习欲擒故纵", "加强聊天技巧", "练习心态建设", "把握尺度", "多实战"] },
+    { max: 70, l: "黄金段位", c: "#F1C40F", d: "你有较强的暧昧能力，段位不错。", advice: "继续提升，成为高手。", points: ["精进聊天", "加强心理战术", "保持优势", "适度主动", "注意边界"] },
+    { max: 90, l: "铂金段位", c: "#2ECC71", d: "你是暧昧高手，段位较高。", advice: "你已经超过大多数人。", points: ["保持节奏", "精进博弈", "帮助闺蜜", "注意分寸", "不要玩过火"] },
+    { max: 120, l: "钻石段位", c: "#9B59B6", d: "你是暧昧高手段位，能力很强。", advice: "你已经超过了大多数人。", points: ["你是高手", "精进技术", "引导他人", "注意分寸", "别太渣"] },
+    { max: 200, l: "王者段位", c: "#E74C3C", d: "你是暧昧王者，顶级存在。", advice: "你是顶级存在，注意不要伤害太多人。", points: ["你是顶级大神", "寂寞高手", "引导他人", "保持低调", "积德行善"] }
+];
+let currQList = [], currIdx = 0, userInfo = {}, scores = { game:0, psych:0, chat:0, boundary:0, mind:0 };
+function goToDemo() { document.getElementById('page-intro').style.display = 'none'; document.getElementById('page-demographics').style.display = 'block'; }
+function initTest() {
+    userInfo.experience = document.getElementById('input-experience').value;
+    userInfo.type = document.getElementById('input-type').value;
+    currQList = [...questions]; currIdx = 0; scores = { game:0, psych:0, chat:0, boundary:0, mind:0 };
+    document.getElementById('page-demographics').style.display = 'none'; document.getElementById('page-test').style.display = 'flex'; renderQuestion();
+}
+function renderQuestion() {
+    const q = currQList[currIdx];
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    const wrapper = document.getElementById('question-wrapper'); wrapper.classList.remove('slide-up'); void wrapper.offsetWidth; wrapper.classList.add('slide-up');
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box'); box.innerHTML = '';
+    q.o.forEach(opt => {
+        const btn = document.createElement('div'); btn.className = 'option-btn'; btn.innerText = opt.t;
+        btn.onclick = () => { Array.from(box.children).forEach(c => c.classList.remove('selected')); btn.classList.add('selected'); setTimeout(() => handleAnswer(q.d, opt.s), 200); };
+        box.appendChild(btn);
+    });
+}
+function handleAnswer(dim, val) { scores[dim] += val; if (currIdx < currQList.length - 1) { currIdx++; renderQuestion(); } else { finishTest(); } }
+function finishTest() { document.getElementById('page-test').style.display = 'none'; document.getElementById('page-loading').style.display = 'flex'; setTimeout(() => { document.getElementById('page-loading').style.display = 'none'; document.getElementById('page-result').style.display = 'block'; calculateResult(); }, 2500); }
+function resetTest() { document.getElementById('page-result').style.display = 'none'; document.getElementById('page-intro').style.display = 'flex'; currIdx = 0; scores = { game:0, psych:0, chat:0, boundary:0, mind:0 }; }
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0); let finalScore = Math.round(totalRaw);
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+    const numEl = document.getElementById('res-score'); animateValue(numEl, 0, finalScore, 1500);
+    const badge = document.getElementById('res-level'); badge.innerText = lvl.l; badge.style.background = lvl.c;
+    document.getElementById('res-desc').innerText = lvl.d; renderBars(scores); drawRadar(scores);
+}
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [{k:'game', n:'博弈'}, {k:'psych', n:'心理'}, {k:'chat', n:'聊天'}, {k:'boundary', n:'边界'}, {k:'mind', n:'心态'}];
+    let html = ''; dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 10) * 100, 100);
+        let color = pct> 60 ? '#FF6B81' : (pct> 30 ? '#F1C40F' : '#2ED573');
+        let txt = pct> 70 ? '突出' : (pct> 40 ? '中等' : '普通');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    }); box.innerHTML = html;
+}
+function getDimName(k) { const map = {game:'博弈能力', psych:'心理战术', chat:'聊天能力', boundary:'边界把控', mind:'心态建设'}; return map[k]; }
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    let html = `<div class="report-section"><div class="r-h1">一、暧昧段位诊断</div><p class="r-p" style="background:#fafafa; padding:12px; border-radius:8px; font-size:14px;">📋 个人档案：经验${userInfo.experience} | 类型${userInfo.type}</p><div class="r-box" style="border-left:5px solid ${lvl.c};"><div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">暧昧段位：${lvl.l}</div><p style="margin:0; font-size:15px;">${lvl.d}</p><p style="margin:10px 0 0;">${lvl.advice}</p></div></div><div class="report_section"><div class="r-h2">二、五维能力深度分析</div>${generateDimAnalysis('game', scores.game)}${generateDimAnalysis('psych', scores.psych)}${generateDimAnalysis('chat', scores.chat)}${generateDimAnalysis('boundary', scores.boundary)}${generateDimAnalysis('mind', scores.mind)}</div><div class="report_section"><div class="r-h2">三、暧昧提升方案</div><div class="r-box"><div class="r-h3">💡 提升建议</div><ul>${lvl.points.map(p => `<li>${p}</li>`).join('')}</ul></div></div><div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px;">2026暧昧段位检测 · 专业心理测评</div>`;
+    document.getElementById('report-content').innerHTML = html; document.getElementById('report-modal').style.display = 'block';
+}
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+function generateDimAnalysis(key, val) {
+    let level = val> 7 ? 'high' : (val> 4 ? 'med' : 'low');
+    const config = { high: { color: '#FF6B81', bg: '#fff0f3', tag: '🌟 突出', titleColor: '#FF6B81' }, med: { color: '#F1C40F', bg: '#fef9e7', tag: '✨ 一般', titleColor: '#F1C40F' }, low: { color: '#2ED573', bg: '#f0fff4', tag: '🌿 普通', titleColor: '#2ED573' } };
+    const c = config[level];
+    return `<div style="margin-bottom:20px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor}; margin-top:0;">${getDimName(key)} <span style="font-size:12px; margin-left:8px;">(得分:${val}/10)</span><span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span></div></div>`;
+}
+function animateValue(obj, start, end, duration) { let startTimestamp = null; const step = (timestamp) => { if (!startTimestamp) startTimestamp = timestamp; const progress = Math.min((timestamp - startTimestamp) / duration, 1); obj.innerHTML = Math.floor(progress * (end - start) + start); if (progress < 1) window.requestAnimationFrame(step); }; window.requestAnimationFrame(step); }
+function drawRadar(s) {
+    const c = document.getElementById('radarChart'); const ctx = c.getContext('2d'); const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px'; c.width = 240 * dpr; c.height = 240 * dpr; ctx.scale(dpr, dpr);
+    const cx=120, cy=120, r=90, keys = ['game','psych','chat','boundary','mind'], labels = ['博弈','心理','聊天','边界','心态'];
+    ctx.strokeStyle = '#ffe6eb'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) { ctx.beginPath(); for(let j=0; j<5; j++) { let a = (Math.PI*2/5)*j - Math.PI/2; ctx.lineTo(cx + Math.cos(a)*(r/4)*i, cy + Math.sin(a)*(r/4)*i); } ctx.closePath(); ctx.stroke(); }
+    ctx.beginPath(); keys.forEach((k, i) => { let ratio = Math.min(s[k] / 10, 1.1); let a = (Math.PI*2/5)*i - Math.PI/2; ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio); }); ctx.closePath();
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r); grd.addColorStop(0, "rgba(255, 107, 129, 0.1)"); grd.addColorStop(1, "rgba(255, 107, 129, 0.6)");
+    ctx.fillStyle = grd; ctx.fill(); ctx.strokeStyle = '#FF6B81'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => { let a = (Math.PI*2/5)*i - Math.PI/2; ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4); });
+}
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "amdw";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026咖啡人格测试 | 找到属于你的那一杯</title>
+    <style>
+        :root {
+            --primary: #4a3728; 
+            --primary-dark: #32251a;
+            --accent: #c89f74;
+            --accent-hover: #b88a5f;
+            --safe: #8b5a2b;
+            --warning: #d4b996;
+            --bg-gradient-start: #f8f4ef;
+            --bg-gradient-end: #e6ddd0;
+            --text-main: #2d241b;
+            --text-sub: #7a6a5c;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.15);
+        }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-coffee { 0% { box-shadow: 0 0 0 0 rgba(200, 159, 116, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(200, 159, 116, 0); } 100% { box-shadow: 0 0 0 0 rgba(200, 159, 116, 0); } }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 55, 40, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#e6ddd0 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 40px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #4a3728;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: #7a6a5c; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ecf0f1;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #4a3728; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #4a3728; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #ecf0f1; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #4a3728; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #ecf0f1; color: #7a6a5c; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #4a3728; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #34495e; cursor: pointer; border: 2px solid #ecf0f1; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #f8f4ef; border-color: var(--accent); color: var(--accent); font-weight: 700; }
+        
+        #page-result {
+            display: none; background: #e6ddd0; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #e6ddd0;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--accent); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: #4a3728; color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #7a6a5c; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #4a3728; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #4a3728; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #7a6a5c; }
+
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-coffee 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #7a6a5c; width: 100%; padding: 10px;
+            border: 1px solid #bdc3c7; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: #4a3728; color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #4a3728; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ecf0f1; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #34495e; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #f8f4ef; border: 1px solid #e6ddd0; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #555; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+    <div id="page-intro" data-screenshot="psych-test-咖啡人格" class="fade-in">
+        <div class="cover-tag">2026 COFFEE EDITION</div>
+        <h1 class="cover-title">咖啡<span>人格</span><br>深度测试</h1>
+        <p class="cover-subtitle">找到属于你的那一杯<br>测测你是一杯什么咖啡？</p>
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">☕</div>
+                <div class="feature-title">五维雷达图</div>
+                <div class="feature-desc">浓郁度、社交型、治愈力、独立度、仪式感</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">✨</div>
+                <div class="feature-title">人格匹配</div>
+                <div class="feature-desc">精准匹配咖啡类型，解读隐藏性格</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🥤</div>
+                <div class="feature-title">生活指南</div>
+                <div class="feature-desc">定制2026专属生活适配方案</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">千字报告</div>
+                <div class="feature-desc">2026深度解析，完整人格报告</div>
+            </div>
+        </div>
+        <button class="btn" id="start-btn">开始测试（约2分钟）</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size:26px; font-weight:800; color:#4a3728;">建立人格档案 ☕</h2>
+        <p style="color:#7a6a5c; font-size:14px; margin-bottom:30px;">系统将按你的状态匹配咖啡人格</p>
+        <div class="form-group">
+            <label class="form-label">你的生活状态？</label>
+            <select id="input-status" class="select-box">
+                <option value="single">独居自由</option>
+                <option value="love">二人相伴</option>
+                <option value="busy">忙碌职场</option>
+                <option value="relax">慢享生活</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">你的核心性格？</label>
+            <select id="input-title" class="select-box">
+                <option value="cold">冷静独立</option>
+                <option value="gentle">温柔治愈</option>
+                <option value="direct">直率洒脱</option>
+                <option value="romantic">浪漫精致</option>
+            </select>
+        </div>
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：浓郁度</span>
+            <span id="progress-text">1 / 32</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">☕ 浓郁度</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <div id="page-loading" class="hidden" style="height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#fff;">
+        <div style="font-size:50px;animation:pulse-coffee 1s infinite;">☕</div>
+        <h3 style="margin-top:20px;font-weight:800;color:#4a3728;">正在萃取你的咖啡人格...</h3>
+        <p style="color:#7a6a5c;">分析性格维度 · 匹配专属咖啡 · 生成深度报告</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">人格指数</span>
+            </div>
+            <div class="level-badge" id="res-level">咖啡类型?</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+        <div class="card">
+            <div class="card-title">📊 五维咖啡人格雷达</div>
+            <div style="height:240px;text-align:center;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁2026咖啡人格深度报告</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新测试</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px;opacity:0.8;">COFFEE PERSONALITY REPORT 2026</div>
+            <div class="r-h1">咖啡人格深度报告</div>
+            <div style="font-size:14px;">找到属于你的那一杯</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+</div>
+
+</div>
+
+<script>
+const pageId = window.location.pathname;
+
+const questions = [
+    { d: 'strong', t: '浓郁度', q: '你更喜欢哪种口感的咖啡？', o: [
+        {t:'清淡无负担',s:0},{t:'适中平衡',s:3},{t:'浓郁醇厚',s:7},{t:'极致浓烈',s:10}
+    ]},
+    { d: 'strong', t: '浓郁度', q: '面对社交场合你的态度？', o: [
+        {t:'低调旁观',s:0},{t:'适度参与',s:3},{t:'主动交流',s:7},{t:'全场焦点',s:10}
+    ]},
+    { d: 'strong', t: '浓郁度', q: '你的情绪表达风格？', o: [
+        {t:'克制隐忍',s:0},{t:'温和表达',s:3},{t:'直接坦率',s:7},{t:'热烈外放',s:10}
+    ]},
+    { d: 'strong', t: '浓郁度', q: '你对自我风格的追求？', o: [
+        {t:'低调朴素',s:0},{t:'简约舒适',s:3},{t:'个性鲜明',s:7},{t:'极致独特',s:10}
+    ]},
+    { d: 'strong', t: '浓郁度', q: '遇到喜欢的事物你会？', o: [
+        {t:'默默喜欢',s:0},{t:'偶尔提及',s:3},{t:'主动分享',s:7},{t:'全力追求',s:10}
+    ]},
+    { d: 'social', t: '社交型', q: '你喝咖啡更喜欢？', o: [
+        {t:'独自享受',s:0},{t:'1-2好友小聚',s:3},{t:'热闹咖啡馆',s:7},{t:'社交局分享',s:10}
+    ]},
+    { d: 'social', t: '社交型', q: '空闲时间你更愿意？', o: [
+        {t:'宅家独处',s:0},{t:'亲密好友小聚',s:3},{t:'参加社交活动',s:7},{t:'组织聚会',s:10}
+    ]},
+    { d: 'social', t: '社交型', q: '你在朋友眼中的标签？', o: [
+        {t:'独立神秘',s:0},{t:'温柔贴心',s:3},{t:'人缘超好',s:7},{t:'气氛担当',s:10}
+    ]},
+    { d: 'social', t: '社交型', q: '陌生人搭话你会？', o: [
+        {t:'礼貌回避',s:0},{t:'简单回应',s:3},{t:'热情聊天',s:7},{t:'主动攀谈',s:10}
+    ]},
+    { d: 'social', t: '社交型', q: '群体活动中你通常是？', o: [
+        {t:'安静跟随',s:0},{t:'适度参与',s:3},{t:'积极带动',s:7},{t:'主导全场',s:10}
+    ]},
+    { d: 'heal', t: '治愈力', q: '朋友难过时你会？', o: [
+        {t:'理性分析',s:0},{t:'默默陪伴',s:3},{t:'温柔安慰',s:7},{t:'全力治愈',s:10}
+    ]},
+    { d: 'heal', t: '治愈力', q: '你的生活态度？', o: [
+        {t:'理性务实',s:0},{t:'平和淡然',s:3},{t:'温暖治愈',s:7},{t:'温柔包容',s:10}
+    ]},
+    { d: 'heal', t: '治愈力', q: '你对小美好敏感度？', o: [
+        {t:'很低',s:0},{t:'一般',s:3},{t:'很高',s:7},{t:'极致敏感',s:10}
+    ]},
+    { d: 'heal', t: '治愈力', q: '看到弱小事物你会？', o: [
+        {t:'无感',s:0},{t:'有点心疼',s:3},{t:'心生柔软',s:7},{t:'极度心软',s:10}
+    ]},
+    { d: 'heal', t: '治愈力', q: '你化解负面情绪的方式？', o: [
+        {t:'自我消化',s:0},{t:'慢慢释怀',s:3},{t:'温柔自愈',s:7},{t:'拥抱不开心',s:10}
+    ]},
+    { d: 'independent', t: '独立度', q: '做决定时你会？', o: [
+        {t:'完全自主',s:10},{t:'自己做主',s:7},{t:'征求意见',s:3},{t:'依赖他人',s:0}
+    ]},
+    { d: 'independent', t: '独立度', q: '面对困难你的选择？', o: [
+        {t:'独自解决',s:10},{t:'自己尝试',s:7},{t:'寻求帮助',s:3},{t:'完全依赖',s:0}
+    ]},
+    { d: 'independent', t: '独立度', q: '你对个人空间需求？', o: [
+        {t:'极高',s:10},{t:'较高',s:7},{t:'一般',s:3},{t:'很低',s:0}
+    ]},
+    { d: 'independent', t: '独立度', q: '生活琐事你会？', o: [
+        {t:'全部自理',s:10},{t:'自己搞定',s:7},{t:'习惯帮忙',s:3},{t:'完全依赖',s:0}
+    ]},
+    { d: 'independent', t: '独立度', q: '独处时你的感受？', o: [
+        {t:'极度舒适',s:10},{t:'轻松自在',s:7},{t:'偶尔孤单',s:3},{t:'难熬',s:0}
+    ]},
+    { d: 'ritual', t: '仪式感', q: '你喝咖啡的方式？', o: [
+        {t:'随意冲泡',s:0},{t:'简单准备',s:3},{t:'精心搭配',s:7},{t:'器具齐全',s:10}
+    ]},
+    { d: 'ritual', t: '仪式感', q: '你对生活细节要求？', o: [
+        {t:'随性自在',s:0},{t:'简单整洁',s:3},{t:'精致讲究',s:7},{t:'完美主义',s:10}
+    ]},
+    { d: 'ritual', t: '仪式感', q: '你会创造生活小惊喜吗？', o: [
+        {t:'几乎不会',s:0},{t:'偶尔',s:3},{t:'经常',s:7},{t:'每天',s:10}
+    ]},
+    { d: 'ritual', t: '仪式感', q: '你对穿搭用餐要求？', o: [
+        {t:'随意舒适',s:0},{t:'干净得体',s:3},{t:'精致美观',s:7},{t:'完美精致',s:10}
+    ]},
+    { d: 'ritual', t: '仪式感', q: '特殊日子你会？', o: [
+        {t:'和平常一样',s:0},{t:'简单纪念',s:3},{t:'精心准备',s:7},{t:'极致筹备',s:10}
+    ]}
+];
+
+const roleSpecific = {
+    single: [
+        { d: 'independent', t: '独立度', q: '独居时你最享受？', o: [
+            {t:'完全自由',s:10},{t:'安静自在',s:7},{t:'偶尔孤单',s:3},{t:'渴望陪伴',s:0}
+        ]},
+        { d: 'ritual', t: '仪式感', q: '独居你会布置房间吗？', o: [
+            {t:'随意摆放',s:0},{t:'简单收拾',s:3},{t:'精心布置',s:7},{t:'极致精致',s:10}
+        ]}
+    ],
+    love: [
+        { d: 'heal', t: '治愈力', q: '和伴侣相处你更注重？', o: [
+            {t:'互相陪伴',s:10},{t:'轻松快乐',s:7},{t:'理性相处',s:3},{t:'各自独立',s:0}
+        ]},
+        { d: 'social', t: '社交型', q: '恋爱后你的社交圈？', o: [
+            {t:'保持不变',s:10},{t:'适当缩小',s:7},{t:'以伴侣为中心',s:3},{t:'放弃社交',s:0}
+        ]}
+    ],
+    busy: [
+        { d: 'ritual', t: '仪式感', q: '忙碌工作中你会？', o: [
+            {t:'抽空仪式感',s:10},{t:'简单放松',s:7},{t:'专注工作',s:3},{t:'毫无生活',s:0}
+        ]},
+        { d: 'heal', t: '治愈力', q: '压力大时你会？', o: [
+            {t:'自我治愈',s:10},{t:'慢慢消化',s:7},{t:'需要安慰',s:3},{t:'情绪崩溃',s:0}
+        ]}
+    ],
+    relax: [
+        { d: 'social', t: '社交型', q: '慢生活中你的社交？', o: [
+            {t:'小圈子相聚',s:10},{t:'偶尔社交',s:7},{t:'随缘社交',s:3},{t:'几乎不社交',s:0}
+        ]}
+    ]
+};
+
+const levels = [
+    { max: 25, l: "美式清冽人格", c: "#8b5a2b", d: "冷静独立、低调内敛，纯粹清醒。", advice: "保持清醒，独立是你的魅力。" },
+    { max: 40, l: "冷萃沉稳人格", c: "#6f4e37", d: "温和内敛、沉稳可靠，慢热有深度。", advice: "慢下来，温柔会被看见。" },
+    { max: 55, l: "拿铁温柔人格", c: "#c89f74", d: "治愈温暖、善解人意，平衡舒适。", advice: "你的温柔是宝藏。" },
+    { max: 70, l: "卡布奇诺浪漫人格", c: "#d4b996", d: "浪漫精致、热爱生活，有仪式感。", advice: "保持浪漫，生活因你美好。" },
+    { max: 85, l: "摩卡甜酷人格", c: "#a67c52", d: "直率洒脱、可甜可酷，有趣吸睛。", advice: "做自己，独特无可替代。" },
+    { max: 100, l: "意式浓缩人格", c: "#4a3728", d: "气场强大、目标明确，天生领袖。", advice: "坚守初心，光芒难掩。" },
+    { max: 999, l: "特调创意人格", c: "#b88a5f", d: "独一无二、脑洞大开，不被定义。", advice: "大胆做自己，你是限量版。" }
+];
+
+let currQList = [];
+let currIdx = 0;
+let userRole = '';
+let userTitle = '';
+let scores = { strong:0, social:0, heal:0, independent:0, ritual:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userRole = document.getElementById('input-status').value;
+    userTitle = document.getElementById('input-title').value;
+    currQList = [...questions, ...roleSpecific[userRole]];
+    currIdx = 0;
+    scores = { strong:0, social:0, heal:0, independent:0, ritual:0 };
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${(currIdx/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${q.t}`;
+    document.getElementById('q-category').innerText = `☕ ${q.t}`;
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up'); void wrapper.offsetWidth; wrapper.classList.add('slide-up');
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            box.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) { currIdx--; renderQuestion(); }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0; scores = { strong:0, social:0, heal:0, independent:0, ritual:0 };
+}
+
+function calculateResult() {
+    const totalRaw = Object.values(scores).reduce((a,b)=>a+b,0);
+    const finalScore = Math.min(Math.round(totalRaw/2.5), 120);
+    const lvl = levels.find(l => finalScore <= l.max) || levels.at(-1);
+    animateValue(document.getElementById('res-score'), 0, finalScore, 1500);
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    document.getElementById('res-desc').innerText = lvl.d;
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const dims = [
+        {k:'strong',n:'浓郁'},{k:'social',n:'社交'},{k:'heal',n:'治愈'},{k:'independent',n:'独立'},{k:'ritual',n:'仪式'}
+    ];
+    let html = '';
+    dims.forEach(d => {
+        const pct = Math.min((s[d.k]/50)*100,100);
+        const color = pct>60?'#c89f74':pct>30?'#8b5a2b':'#d4b996';
+        const txt = pct>70?'突出':pct>40?'中等':'平和';
+        html += `
+        <div class="dim-row">
+            <div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${d.n}度</span></div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    document.getElementById('bars-container').innerHTML = html;
+}
+
+function showReport() {
+    const total = +document.getElementById('res-score').innerText;
+    const lvl = levels.find(l => total <= l.max) || levels.at(-1);
+    const maxDim = Object.keys(scores).reduce((a,b)=>scores[a]>scores[b]?a:b);
+    const html = `
+    <div class="report-section">
+        <div class="r-h1">一、2026咖啡人格诊断书</div>
+        <p class="r-p" style="background:#f8f4ef;padding:12px;border-radius:8px;">
+            <strong>生活档案：</strong>${userRole==='single'?'独居自由':userRole==='love'?'二人相伴':userRole==='busy'?'忙碌职场':'慢享生活'}<br>
+            <strong>核心性格：</strong>${{cold:'冷静独立型',gentle:'温柔治愈型',direct:'直率洒脱型',romantic:'浪漫精致型'}[userTitle]}
+        </p>
+        <div class="r-box" style="border-left:5px solid ${lvl.c};">
+            <div style="font-size:22px;font-weight:900;color:${lvl.c}">${lvl.l}</div>
+            <div style="display:flex;align-items:center;margin:10px 0;">
+                <span style="font-size:14px;color:#999;">综合人格指数</span>
+                <span style="font-size:36px;font-weight:900;color:#4a3728;margin:0 8px;">${total}</span>
+                <span style="font-size:14px;color:#999;">/ 120</span>
+            </div>
+            <p style="margin:0;"><strong>2026建议：</strong>${lvl.advice}</p>
+        </div>
+        <p class="r-p">2026年，咖啡早已不止是饮品，更是人格气质的外化符号。本次32题深度测试，从浓郁度、社交型、治愈力、独立度、仪式感五个核心维度对你进行完整扫描，最终匹配出你的专属咖啡人格：<strong>${lvl.l}</strong>。你的性格底色、社交偏好、情绪模式与生活态度，都和这款咖啡的风味特质高度吻合。</p>
+        <p class="r-p">在快节奏的当下，认清自己的人格特质，远比盲目迎合更重要。你不需要变成别人喜欢的口味，只需要坚守属于自己的醇香，自然会遇到懂得欣赏你的人。2026年，愿你按照自己的节奏生活，不慌不忙，自在舒展。</p>
+    </div>
+    <div class="report-section">
+        <div class="r-h2">二、五维人格深度解析</div>
+        ${genDim('strong',scores.strong)}
+        ${genDim('social',scores.social)}
+        ${genDim('heal',scores.heal)}
+        ${genDim('independent',scores.independent)}
+        ${genDim('ritual',scores.ritual)}
+    </div>
+    <div class="report-section">
+        <div class="r-h2">三、2026生活适配指南</div>
+        <div class="r-box">
+            <div class="r-h3">☕ 社交与人际建议</div>
+            <ul class="r-list">
+                <li>你适合${scores.social>60?'开放多元':'小众安静'}的社交圈，不必强迫自己融入不适合的环境</li>
+                <li>与人相处保持${scores.independent>60?'适度距离':'温暖陪伴'}，关系会更长久舒服</li>
+                <li>不必刻意讨好，同频的人自然会被你的特质吸引</li>
+            </ul>
+        </div>
+        <div class="r-box" style="background:#f8f4ef;">
+            <div class="r-h3" style="color:#c89f74;">✨ 2026年度成长方向</div>
+            <ul class="r-list">
+                <li>发挥你的<strong>${{strong:'性格气场',social:'社交魅力',heal:'治愈能力',independent:'独立思考',ritual:'生活审美'}[maxDim]}</strong>优势</li>
+                <li>不必焦虑追赶，像咖啡萃取一样，慢慢来才更醇香</li>
+                <li>守住自我边界，同时保留温柔，这是最舒服的人生状态</li>
+                <li>接纳自己的全部，不完美的你，同样独一无二</li>
+            </ul>
+        </div>
+        <p class="r-p">人生就像一杯咖啡，苦与甜、浓与淡，都是它本来的样子。不必强迫自己变得浓烈，也不必刻意假装温柔，你本来的样子，就值得被认真对待。2026年，愿你活得像一杯专属咖啡，有自己的风味，有自己的温度，不被定义，自在随心。</p>
+        <p class="r-p">愿你在平凡的日子里，保持热爱，保持清醒，也保持温柔。愿有人懂你的沉默，也有人爱你的全部。愿你的生活，回甘绵长，温暖明亮。</p>
+    </div>
+    <div style="text-align:center;color:#ccc;font-size:12px;margin-top:40px;">2026咖啡人格深度报告 · 自动生成</div>`;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function genDim(key, val) {
+    const level = val>35?'high':val>20?'med':'low';
+    const color = {high:'#c89f74',med:'#8b5a2b',low:'#d4b996'}[level];
+    const bg = {high:'#f8f4ef',med:'#f0ebe4',low:'#f9f6f2'}[level];
+    const tag = {high:'🌟 突出',med:'⚖️ 中等',low:'☕ 平和'}[level];
+    const name = {strong:'浓郁度（性格气场）',social:'社交型（人际适配）',heal:'治愈力（温暖共情）',independent:'独立度（自我边界）',ritual:'仪式感（生活审美）'}[key];
+    const text = {
+        strong:{high:'性格浓烈气场强，外向鲜明，自带存在感',med:'性格平衡有分寸，张弛有度，舒适自然',low:'低调内敛温润，安静克制，不张扬'},
+        social:{high:'社交达人缘极好，擅长沟通，气氛核心',med:'社交舒适进退有度，小圈相处，轻松自在',low:'偏爱独处爱安静，独立自在，不喜热闹'},
+        heal:{high:'治愈力强超温柔，共情力满，温暖他人',med:'温和善解人意，懂得倾听，让人舒服',low:'理性务实偏冷静，逻辑清晰，清醒独立'},
+        independent:{high:'极度独立有主见，内心强大，边界清晰',med:'独立适度能自处，也能接受陪伴',low:'温和依赖重感情，喜欢陪伴，愿意倾听'},
+        ritual:{high:'仪式感满爱精致，注重细节，生活有质感',med:'适度仪式重品质，偶尔创造小美好',low:'随性自在极简风，务实简单，不被束缚'}
+    }[key][level];
+    return `
+    <div style="padding:16px;background:${bg};border-radius:8px;border-left:4px solid ${color};margin-bottom:20px;">
+        <div class="r-h3" style="color:${color};margin-top:0;">${name} <span style="font-size:12px;">(${val})</span>
+        <span style="float:right;font-size:12px;background:${color};color:#fff;padding:2px 8px;border-radius:10px;">${tag}</span></div>
+        <p class="r-p" style="margin:0;">${text}</p>
+    </div>`;
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function animateValue(obj, start, end, dur) {
+    let s = null;
+    const step = t => {
+        if(!s)s=t;
+        const p = Math.min((t-s)/dur,1);
+        obj.innerText = Math.floor(p*(end-start)+start);
+        if(p<1)requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = devicePixelRatio||1;
+    c.style.width='240px';c.style.height='240px';
+    c.width=240*dpr;c.height=240*dpr;
+    ctx.scale(dpr,dpr);
+    const cx=120,cy=120,r=90;
+    const keys=['strong','social','heal','independent','ritual'];
+    const labels=['浓郁','社交','治愈','独立','仪式'];
+    ctx.strokeStyle='#e6ddd0';
+    for(let i=1;i<=4;i++){
+        ctx.beginPath();
+        for(let j=0;j<5;j++){
+            const a=Math.PI*2/5*j-Math.PI/2;
+            ctx.lineTo(cx+Math.cos(a)*r/4*i,cy+Math.sin(a)*r/4*i);
+        }
+        ctx.closePath();ctx.stroke();
+    }
+    ctx.beginPath();
+    keys.forEach((k,i)=>{
+        const a=Math.PI*2/5*i-Math.PI/2;
+        const rt=Math.min(s[k]/50,1.1)*r;
+        ctx.lineTo(cx+Math.cos(a)*rt,cy+Math.sin(a)*rt);
+    });
+    ctx.closePath();
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+    g.addColorStop(0,'rgba(200,159,116,0.1)');
+    g.addColorStop(1,'rgba(200,159,116,0.6)');
+    ctx.fillStyle=g;ctx.fill();
+    ctx.strokeStyle='#c89f74';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='#4a3728';ctx.font='bold 12px sans-serif';ctx.textAlign='center';
+    labels.forEach((t,i)=>{
+        const a=Math.PI*2/5*i-Math.PI/2;
+        ctx.fillText(t,cx+Math.cos(a)*(r+20),cy+Math.sin(a)*(r+20)+4);
+    });
+}
+
+    document.getElementById('load-layer').style.display='flex';
+    setTimeout(()=>{
+        sessionStorage.setItem('unlocked','1');
+    },1500);
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+    document.getElementById('start-btn').onclick=goToDemo;
+    document.getElementById('init-test-btn').onclick=initTest;
+    document.getElementById('prev-btn').onclick=prevQuestion;
+    document.getElementById('show-report-btn').onclick=showReport;
+    document.getElementById('close-report-btn').onclick=closeReport;
+    document.getElementById('reset-test-btn').onclick=resetTest;
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "kfrg";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

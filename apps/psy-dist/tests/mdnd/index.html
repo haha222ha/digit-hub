@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>母胎单身脱单难度检测 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #F06292;
+            --primary-dark: #EC407A;
+            --accent: #FF7D00;
+            --safe: #2ED573;
+            --warning: #FF4757;
+            --bg-gradient-start: #FFF0F5;
+            --bg-gradient-end: #FCE4EC;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-pink { 0% { box-shadow: 0 0 0 0 rgba(240, 98, 146, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(240, 98, 146, 0); } 100% { box-shadow: 0 0 0 0 rgba(240, 98, 146, 0); } }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(240, 98, 146, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#fce4ec 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #fce4ec; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #fce4ec; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #fce4ec; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #fce4ec; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #fce4ec; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        #page-result { display: none; background: #fce4ec; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #fce4ec; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-pink 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #fce4ec; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #fce4ec; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-母单脱单难度测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">母胎单身<br><span>脱单难度</span>检测</h1>
+        <p class="cover-subtitle">科学分析你的单身原因<br>找到脱单的核心障碍</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🔍</div>
+                <div class="feature-title">六维深度分析</div>
+                <div class="feature-desc">依恋模式、自我认知、社交能力、择偶标准、情感需求、心理障碍全面扫描。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">社会交换理论</div>
+                <div class="feature-desc">基于社会交换理论，科学评估你的婚恋价值与匹配度。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">⚠️</div>
+                <div class="feature-title">精准定位原因</div>
+                <div class="feature-desc">找到你一直单身的根本原因。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💡</div>
+                <div class="feature-title">专属解决方案</div>
+                <div class="feature-desc">提供针对性的脱单建议和行动计划。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始检测 (约需 4 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">个人档案建立 💕</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的背景信息精准评估脱单难度。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的年龄范围是？</label>
+            <select id="input-age" class="select-box">
+                <option value="18-22">18-22岁 (青春年华)</option>
+                <option value="23-26">23-26岁 (适婚年龄)</option>
+                <option value="27-30">27-30岁 (黄金期)</option>
+                <option value="31+">31岁以上 (成熟期)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的学历是？</label>
+            <select id="input-edu" class="select-box">
+                <option value="high">高中及以下</option>
+                <option value="college">专科/本科</option>
+                <option value="master">硕士</option>
+                <option value="phd">博士及以上</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你目前的社交圈活跃度？</label>
+            <select id="input-social" class="select-box">
+                <option value="low">很少社交 (宅)</option>
+                <option value="medium">偶尔社交</option>
+                <option value="high">经常社交</option>
+                <option value="veryhigh">社交达人</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：依恋模式</span>
+            <span id="progress-text">1 / 24</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🔍 依恋模式</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+
+    <div id="page-loading">
+        <div style="font-size:50px; animation: pulse-pink 1s infinite;">💕</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的脱单难度...</h3>
+        <p style="color:#636E72; font-size:14px;">正在扫描六维数据...<br>计算单身持续指数...<br>生成专属报告...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">脱单难度指数</span>
+            </div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 脱单难度六维雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《母胎单身深度分析报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新检测</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div>
+            <div class="r-h1">母胎单身深度分析报告</div>
+            <div style="font-size:14px;">专业心理测评 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+
+</div>
+
+<script>
+const questions = [
+    { d: 'attachment', t: '依恋模式', q: "当你喜欢一个人时，你通常会？", o: [
+        {t:"主动表白，追求对方", s:0},
+        {t:"主动接近，但不敢表白", s:5},
+        {t:"默默喜欢，等待对方主动", s:10},
+        {t:"不敢接近，远远观望", s:15}
+    ]},
+    { d: 'attachment', t: '依恋模式', q: "面对喜欢的人的示好，你会？", o: [
+        {t:"开心接受，积极回应", s:0},
+        {t:"有点紧张，但会回应", s:5},
+        {t:"不敢相信，怀疑对方意图", s:10},
+        {t:"本能回避，不敢接受", s:15}
+    ]},
+    { d: 'attachment', t: '依恋模式', q: "你害怕在感情中被拒绝吗？", o: [
+        {t:"不怕，被拒绝也无所谓", s:0},
+        {t:"有点怕，但能接受", s:5},
+        {t:"很怕，尽量避免被拒", s:10},
+        {t:"极度恐惧，不敢尝试", s:15}
+    ]},
+    { d: 'attachment', t: '依恋模式', q: "你理想中的亲密关系是？", o: [
+        {t:"相互独立，也相互依赖", s:0},
+        {t:"对方多付出，我享受被爱", s:7},
+        {t:"被对方完全照顾", s:10},
+        {t:"不确定，没想过", s:12}
+    ]},
+    
+    { d: 'self', t: '自我认知', q: "你清楚自己想要的伴侣类型吗？", o: [
+        {t:"非常清楚，有明确标准", s:0},
+        {t:"比较清楚，大致方向有", s:5},
+        {t:"不太清楚，感觉对了就行", s:10},
+        {t:"完全不知道，随缘", s:15}
+    ]},
+    { d: 'self', t: '自我认知', q: "你认为自己在婚恋市场的竞争力如何？", o: [
+        {t:"很有竞争力，很有信心", s:0},
+        {t:"还行，中等偏上", s:5},
+        {t:"一般，没什么优势", s:10},
+        {t:"没信心，觉得自己不够好", s:15}
+    ]},
+    { d: 'self', t: '自我认知', q: "你能客观评价自己的优缺点吗？", o: [
+        {t:"能，很了解自己", s:0},
+        {t:"大概了解", s:5},
+        {t:"不太了解自己", s:10},
+        {t:"完全不了解", s:15}
+    ]},
+    { d: 'self', t: '自我认知', q: "你对单身状态的态度是？", o: [
+        {t:"享受单身，等待合适的人", s:0},
+        {t:"可以接受，但不拒绝脱单", s:5},
+        {t:"有点焦虑，想脱单", s:10},
+        {t:"非常焦虑，很着急", s:15}
+    ]},
+    
+    { d: 'social', t: '社交能力', q: "在陌生人聚会中，你通常？", o: [
+        {t:"主动社交，很快融入", s:0},
+        {t:"能社交，但需要时间", s:5},
+        {t:"比较被动，等待别人来搭话", s:10},
+        {t:"很尴尬，想早点离开", s:15}
+    ]},
+    { d: 'social', t: '社交能力', q: "你有多少可以发展恋情的异性朋友？", o: [
+        {t:"5个以上，选择很多", s:0},
+        {t:"2-5个，有一定选择", s:5},
+        {t:"1-2个，选择较少", s:10},
+        {t:"几乎没有", s:15}
+    ]},
+    { d: 'social', t: '社交能力', q: "你擅长开启聊天话题吗？", o: [
+        {t:"非常擅长，话题源源不断", s:0},
+        {t:"还行，能聊下去", s:5},
+        {t:"一般，经常冷场", s:10},
+        {t:"很困难，不知道说什么", s:15}
+    ]},
+    { d: 'social', t: '社交能力', q: "你多久参加一次社交活动（聚会、相亲等）？", o: [
+        {t:"每周至少一次", s:0},
+        {t:"每月2-3次", s:5},
+        {t:"偶尔（每季度1-2次）", s:10},
+        {t:"几乎不参加", s:15}
+    ]},
+    
+    { d: 'standard', t: '择偶标准', q: "你对伴侣的要求有多具体？", o: [
+        {t:"非常具体，有详细标准", s:0},
+        {t:"有基本要求，但可调整", s:5},
+        {t:"要求较多，很难满足", s:10},
+        {t:"追求完美，十全十美", s:15}
+    ]},
+    { d: 'standard', t: '择偶标准', q: "你更看重伴侣的哪些特质？", o: [
+        {t:"人品、性格等内在", s:0},
+        {t:"能力和上进心", s:5},
+        {t:"外表和经济条件", s:10},
+        {t:"所有方面都要好", s:15}
+    ]},
+    { d: 'standard', t: '择偶标准', q: "如果遇到一个对你很好但条件一般的人，你会？", o: [
+        {t:"考虑接受，给彼此机会", s:0},
+        {t:"犹豫，但可能接受", s:5},
+        {t:"不太愿意，条件不够", s:10},
+        {t:"直接拒绝，不考虑", s:15}
+    ]},
+    { d: 'standard', t: '择偶标准', q: "你对"合适"的理解是？", o: [
+        {t:"性格合拍，互相喜欢", s:0},
+        {t:"条件相当，可以磨合", s:5},
+        {t:"各个方面都要匹配", s:10},
+        {t:"要有心动感觉", s:8}
+    ]},
+    
+    { d: 'need', t: '情感需求', q: "你对亲密关系的依赖程度？", o: [
+        {t:"独立，有无伴侣都可以", s:0},
+        {t:"适度依赖，需要陪伴", s:5},
+        {t:"比较依赖，离不开对方", s:10},
+        {t:"极度依赖，完全依赖对方", s:15}
+    ]},
+    { d: 'need', t: '情感需求', q: "你对"被爱"的需求强烈吗？", o: [
+        {t:"一般，有当然好，没有也行", s:0},
+        {t:"比较强烈，需要被爱", s:5},
+        {t:"非常强烈，极度渴望", s:10},
+        {t:"渴望但不敢承认", s:12}
+    ]},
+    { d: 'need', t: '情感需求', q: "你愿意为感情做出哪些改变？", o: [
+        {t:"愿意改变很多，适应对方", s:0},
+        {t:"愿意适当调整", s:5},
+        {t:"很少改变，坚持自己", s:10},
+        {t:"完全不想改变自己", s:15}
+    ]},
+    { d: 'need', t: '情感需求', q: "面对感情中的矛盾，你会？", o: [
+        {t:"主动沟通，解决矛盾", s:0},
+        {t:"等冷静后再沟通", s:5},
+        {t:"逃避，等待对方先道歉", s:10},
+        {t:"冷战或直接放弃", s:15}
+    ]},
+    
+    { d: 'barrier', t: '心理障碍', q: "你曾经有过不愉快的感情经历吗？", o: [
+        {t:"没有，这是第一次", s:0},
+        {t:"有一些，但已释怀", s:5},
+        {t:"有一些，影响到现在", s:10},
+        {t:"有，严重影响至今", s:15}
+    ]},
+    { d: 'barrier', t: '心理障碍', q: "你父母或其他家人的婚姻对你有影响吗？", o: [
+        {t:"没有影响，对婚姻有信心", s:0},
+        {t:"有一点影响，但不影响择偶", s:5},
+        {t:"有影响，对婚姻有些担忧", s:10},
+        {t:"严重影响，不敢进入婚姻", s:15}
+    ]},
+    { d: 'barrier', t: '心理障碍', q: "你是否有"恐婚"心理？", o: [
+        {t:"完全没有，很期待", s:0},
+        {t:"有一点，但可以克服", s:5},
+        {t:"比较恐婚", s:10},
+        {t:"极度恐婚，不敢想", s:15}
+    ]},
+    { d: 'barrier', t: '心理障碍', q: "你对自己的婚恋前景持什么态度？", o: [
+        {t:"乐观，相信会遇到合适的人", s:0},
+        {t:"谨慎乐观，随缘", s:5},
+        {t:"悲观，觉得很难找到", s:10},
+        {t:"绝望，觉得会一直单身", s:15}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const levels = [
+    { max: 80, l: "脱单困难户", c: "#FF4757", d: "你脱单的难度非常高，存在多重阻碍因素。", advice: "建议从多个维度同时突破，重点改善社交圈和调整心态。", points: [
+        "扩大社交圈，主动参与社交活动",
+        "降低不切实际的择偶标准",
+        "提升自我认知，明确自身优势",
+        "必要时寻求专业心理咨询",
+        "学习社交技巧和沟通能力"
+    ]},
+    { max: 140, l: "脱单较难", c: "#FF7D00", d: "你脱单的难度较高，有几个关键障碍需要突破。", advice: "建议你针对性改善薄弱环节。", points: [
+        "分析自己的核心障碍是什么",
+        "有针对性地提升社交能力",
+        "调整不合理的择偶预期",
+        "多渠道认识新朋友",
+        "保持积极心态，相信缘分"
+    ]},
+    { max: 200, l: "脱单有挑战", c: "#F06292", d: "你有一定的脱单难度，但通过努力可以改善。", advice: "建议保持开放心态，积极拓展社交圈。", points: [
+        "继续提升自我价值",
+        "主动参与更多社交活动",
+        "适当调整择偶标准",
+        "学习情感沟通技巧",
+        "保持耐心，不要急于求成"
+    ]},
+    { max: 280, l: "脱单较容易", c: "#2ED573", d: "你脱单的难度较低，具备良好的脱单条件。", advice: "继续保持优势，适度主动。", points: [
+        "保持现有的社交活跃度",
+        "遇到合适的人要主动把握",
+        "继续提升自我魅力",
+        "适当扩大交友渠道",
+        "保持对感情的信心"
+    ]},
+    { max: 360, l: "脱单很容易", c: "#00B42A", d: "你脱单非常容易，具备很强的婚恋竞争力。", advice: "你的条件很好，珍惜每一次缘分。", points: [
+        "把握优质缘分，不要错过",
+        "继续保持社交优势",
+        "提升情感经营能力",
+        "帮助身边单身朋友",
+        "享受恋爱过程"
+    ]}
+];
+
+let currQList = [];
+let currIdx = 0;
+let userInfo = {};
+let scores = { attachment:0, self:0, social:0, standard:0, need:0, barrier:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userInfo.age = document.getElementById('input-age').value;
+    userInfo.edu = document.getElementById('input-edu').value;
+    userInfo.social = document.getElementById('input-social').value;
+    
+    currQList = [...questions];
+    currIdx = 0;
+    scores = { attachment:0, self:0, social:0, standard:0, need:0, barrier:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { attachment:0, self:0, social:0, standard:0, need:0, barrier:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+    
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'attachment', n:'依恋'}, {k:'self', n:'自我'}, 
+        {k:'social', n:'社交'}, {k:'standard', n:'标准'}, 
+        {k:'need', n:'需求'}, {k:'barrier', n:'障碍'}
+    ];
+    let html = '';
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 15) * 100, 100);
+        let color = pct> 60 ? '#F06292' : (pct> 30 ? '#FF7D00' : '#2ED573');
+        let txt = pct> 70 ? '高难度' : (pct> 40 ? '中等' : '较低');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {attachment:'依恋模式', self:'自我认知', social:'社交能力', standard:'择偶标准', need:'情感需求', barrier:'心理障碍'};
+    return map[k];
+}
+
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、母胎单身诊断</div>
+        <p class="r-p" style="background:#fafafa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>📋 个人档案：</strong>年龄：${userInfo.age} | 学历：${userInfo.edu} | 社交活跃度：${userInfo.social}
+        </p>
+        <div class="r-box" style="border-left:5px solid ${lvl.c};">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">脱单难度等级：${lvl.l}</div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>难度评估：</strong>${lvl.d}</p>
+            <p style="margin:10px 0 0; font-size:15px; line-height:1.6; color:#555;"><strong>核心建议：</strong>${lvl.advice}</p>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">二、六维脱单障碍深度分析</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px;">*基于社会交换理论的深度分析</p>
+        ${generateDimAnalysis('attachment', scores.attachment, '你与他人的情感连接模式，影响你在亲密关系中的主动性和安全感。')}
+        ${generateDimAnalysis('self', scores.self, '你对自己的了解和评价，影响你的择偶信心和吸引力。')}
+        ${generateDimAnalysis('social', scores.social, '你的人际交往能力，决定了你认识新人的机会多少。')}
+        ${generateDimAnalysis('standard', scores.standard, '你的择偶标准是否合理，影响匹配成功率。')}
+        ${generateDimAnalysis('need', scores.need, '你对亲密关系的依赖程度，影响关系的健康度。')}
+        ${generateDimAnalysis('barrier', scores.barrier, '你的心理障碍和过往经历，可能成为脱单的隐形阻力。')}
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">三、社会交换理论解析</div>
+        <div class="r-box" style="background:#fdf5f7; border-color:#F06292;">
+            <div class="r-h3" style="color:#F06292;">💡 什么是社会交换理论？</div>
+            <p class="r-p">
+                <strong>社会交换理论</strong>认为，人际关系的本质是"成本"与"收益"的交换。在婚恋中：
+            </p>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>你的婚恋价值</strong> = 外貌 + 经济条件 + 性格 + 社会资源</li>
+                <li><strong>期望收益</strong> = 你希望从伴侣那里获得的价值</li>
+                <li><strong>脱单成功率</strong> = 你的价值 ÷ 你的期望值</li>
+            </ul>
+            <p class="r-p" style="margin-top:15px;">
+                <strong>给你的启示：</strong>想要脱单，要么提升自己的婚恋价值，要么调整对伴侣的期望，使其更加现实。
+            </p>
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">四、专业脱单建议</div>
+        <div class="r-box">
+            <div class="r-h3">🎯 针对性行动计划</div>
+            <p class="r-p">根据你的测评结果，以下建议可能对你有帮助：</p>
+            ${lvl.points.map((p, i) => `<p style="margin:8px 0; padding-left:20px; position:relative;"><span style="position:absolute; left:0; color:#F06292; font-weight:bold;">${i+1}.</span> ${p}</p>`).join('')}
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">五、心理学小知识</div>
+        <div class="r-box" style="background:#f9f9f9;">
+            <div class="r-h3">📚 依恋类型与单身</div>
+            <p class="r-p">
+                <strong>依恋理论</strong>最早由心理学家鲍尔比提出，后由安斯沃斯等研究者发展完善。研究发现：
+            </p>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>安全型依恋</strong>的人更容易建立健康的亲密关系</li>
+                <li><strong>焦虑型依恋</strong>的人渴望亲密但害怕被抛弃</li>
+                <li><strong>回避型依恋</strong>的人对亲密关系有抵触</li>
+            </ul>
+            <p class="r-p" style="margin-top:10px;">
+                了解自己的依恋类型，可以帮助你更好地理解自己在感情中的行为模式，从而做出改变。
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026母胎单身脱单难度检测 · 专业心理测评<br>
+        愿你早日遇见对的人
+    </div>
+    `;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function generateDimAnalysis(key, val, explanation) {
+    let level = val> 10 ? 'high' : (val> 5 ? 'med' : 'low');
+    const config = {
+        high: { color: '#FF4757', bg: '#ffe4e6', tag: '⚠️ 高障碍', titleColor: '#FF4757' },
+        med: { color: '#FF7D00', bg: '#fff8e6', tag: '⚡ 中等', titleColor: '#FF7D00' },
+        low: { color: '#2ED573', bg: '#f0fff4', tag: '✅ 低障碍', titleColor: '#2ED573' }
+    };
+    const c = config[level];
+    const texts = {
+        attachment: { high: "<strong>依恋障碍严重！</strong>你对亲密关系有较强的恐惧或回避倾向，需要先解决这个问题。", med: "<strong>依恋一般。</strong>你在亲密关系中有些谨慎，可以尝试更开放一些。", low: "<strong>依恋健康。</strong>你能够较好地建立亲密关系。" },
+        self: { high: "<strong>自我认知不足！</strong>你可能不了解自己的真正需求，或者对自己的评价偏低。", med: "<strong>自我认知一般。</strong>你对自己有基本了解，但可以更深入。", low: "<strong>自我认知清晰。</strong>你很清楚自己的优势和需求。" },
+        social: { high: "<strong>社交能力较弱！</strong>你认识新人的渠道较少，需要主动拓展社交圈。", med: "<strong>社交能力一般。</strong>你有基本的社交能力，但可以更活跃。", low: "<strong>社交能力强。</strong>你有很多认识新人的机会。" },
+        standard: { high: "<strong>择偶标准过高！</strong>你的标准可能超出了你的实际情况，建议适当调整。", med: "<strong>择偶标准一般。</strong>你的要求基本合理，可以适度优化。", low: "<strong>择偶标准合理。</strong>你的标准务实，更容易找到合适的人。" },
+        need: { high: "<strong>情感需求过高！</strong>你可能对伴侣的依赖过重，这会影响关系的健康发展。", med: "<strong>情感需求一般。</strong>你的需求比较正常。", low: "<strong>情感需求健康。</strong>你能独立也能依赖，关系会更稳定。" },
+        barrier: { high: "<strong>心理障碍较多！</strong>过去的经历或家庭影响可能在潜意识里阻碍你进入感情。", med: "<strong>心理障碍一般。</strong>有一些顾虑，但可以克服。", low: "<strong>心理状态健康。</strong>你没有明显的心理障碍，更容易开始新感情。" }
+    };
+    return `<div style="margin-bottom:20px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor}; margin-top:0;">${getDimName(key)} <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${val}/15)</span><span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span></div><p style="font-size:13px; color:#888; margin-bottom:8px;">${explanation}</p><p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][level]}</p></div>`;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    const cx=120, cy=120, r=90;
+    const keys = ['attachment','self','social','standard','need','barrier'];
+    const labels = ['依恋','自我','社交','标准','需求','障碍'];
+    
+    ctx.strokeStyle = '#fce4ec'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<6; j++) {
+            let a = (Math.PI*2/6)*j - Math.PI/2;
+            ctx.lineTo(cx + Math.cos(a)*(r/4)*i, cy + Math.sin(a)*(r/4)*i);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let ratio = Math.min(s[k] / 15, 1.1); 
+        let a = (Math.PI*2/6)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(240, 98, 146, 0.1)");
+    grd.addColorStop(1, "rgba(240, 98, 146, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.strokeStyle = '#F06292'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/6)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "mdnd";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

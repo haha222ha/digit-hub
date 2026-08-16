@@ -1,0 +1,155 @@
+[
+    {
+        "title": "当你对象没回消息时，你会怎么想？",
+        "options": [
+            {"text": "可能正在忙", "score": 0},
+            {"text": "有点担心但理解", "score": 1},
+            {"text": "会很焦虑不安", "score": 3},
+            {"text": "认为TA不爱我了", "score": 5}
+        ]
+    },
+    {
+        "title": "TA和异性接触时，你会？",
+        "options": [
+            {"text": "完全信任不在意", "score": 0},
+            {"text": "稍微有点醋意", "score": 1},
+            {"text": "会很紧张不安", "score": 3},
+            {"text": "会立即追问查岗", "score": 5}
+        ]
+    },
+    {
+        "title": "你经常查看TA手机吗？",
+        "options": [
+            {"text": "从不", "score": 0},
+            {"text": "偶尔看一下", "score": 1},
+            {"text": "经常看", "score": 3},
+            {"text": "每天都要看", "score": 5}
+        ]
+    },
+    {
+        "title": "TA赞美别人时你会？",
+        "options": [
+            {"text": "很正常的事", "score": 0},
+            {"text": "稍微有点小吃醋", "score": 1},
+            {"text": "会很在意", "score": 3},
+            {"text": "会很害怕失去TA", "score": 5}
+        ]
+    },
+    {
+        "title": "你对这段关系的未来感到？",
+        "options": [
+            {"text": "很有信心", "score": 0},
+            {"text": "有点期待", "score": 1},
+            {"text": "不太确定", "score": 3},
+            {"text": "很担忧焦虑", "score": 5}
+        ]
+    },
+    {
+        "title": "TA加班或外出时你会？",
+        "options": [
+            {"text": "完全放心", "score": 0},
+            {"text": "偶尔担心", "score": 1},
+            {"text": "经常担心", "score": 3},
+            {"text": "会一直追问在哪", "score": 5}
+        ]
+    },
+    {
+        "title": "你会在关系中妥协退让吗？",
+        "options": [
+            {"text": "有底线会坚持", "score": 0},
+            {"text": "偶尔会", "score": 1},
+            {"text": "经常让步", "score": 3},
+            {"text": "总是委曲求全", "score": 5}
+        ]
+    },
+    {
+        "title": "你害怕失去TA吗？",
+        "options": [
+            {"text": "不怕", "score": 0},
+            {"text": "有点担心", "score": 1},
+            {"text": "很害怕", "score": 3},
+            {"text": "极度恐惧", "score": 5}
+        ]
+    },
+    {
+        "title": "TA给你空间吗？",
+        "options": [
+            {"text": "给足够空间", "score": 0},
+            {"text": "会给一些", "score": 1},
+            {"text": "管得有点多", "score": 3},
+            {"text": "完全没有空间", "score": 5}
+        ]
+    },
+    {
+        "title": "你觉得自己值得被爱吗？",
+        "options": [
+            {"text": "当然值得", "score": 0},
+            {"text": "应该值得", "score": 1},
+            {"text": "不太确定", "score": 3},
+            {"text": "不值得", "score": 5}
+        ]
+    },
+    {
+        "title": "你和TA吵架后会？",
+        "options": [
+            {"text": "很快和好", "score": 0},
+            {"text": "冷静后和好", "score": 1},
+            {"text": "很久才能和好", "score": 3},
+            {"text": "害怕被抛弃", "score": 5}
+        ]
+    },
+    {
+        "title": "你会在意外表吗？",
+        "options": [
+            {"text": "做自己就好", "score": 0},
+            {"text": "偶尔会", "score": 1},
+            {"text": "经常会在意", "score": 3},
+            {"text": "非常在意害怕被嫌弃", "score": 5}
+        ]
+    },
+    {
+        "title": "你愿意展示脆弱的一面吗？",
+        "options": [
+            {"text": "完全愿意", "score": 0},
+            {"text": "看对象是谁", "score": 1},
+            {"text": "不太敢", "score": 3},
+            {"text": "完全不敢", "score": 5}
+        ]
+    },
+    {
+        "title": "你经常患得患失吗？",
+        "options": [
+            {"text": "从不会", "score": 0},
+            {"text": "偶尔会", "score": 1},
+            {"text": "经常会有", "score": 3},
+            {"text": "一直会", "score": 5}
+        ]
+    },
+    {
+        "title": "你会查TA岗吗？",
+        "options": [
+            {"text": "完全不会", "score": 0},
+            {"text": "偶尔会", "score": 1},
+            {"text": "经常会", "score": 3},
+            {"text": "天天查", "score": 5}
+        ]
+    },
+    {
+        "title": "你对TA有信任危机吗？",
+        "options": [
+            {"text": "完全信任", "score": 0},
+            {"text": "基本信任", "score": 1},
+            {"text": "有点怀疑", "score": 3},
+            {"text": "严重不信任", "score": 5}
+        ]
+    },
+    {
+        "title": "你会被TA的承诺安抚吗？",
+        "options": [
+            {"text": "完全相信", "score": 0},
+            {"text": "会相信一些", "score": 1},
+            {"text": "不太相信", "score": 3},
+            {"text": "完全不相信", "score": 5}
+        ]
+    }
+]

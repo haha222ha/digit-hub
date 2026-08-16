@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>职场讨好型人格检测 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #EC4899;
+            --primary-dark: #DB2777;
+            --accent: #F59E0B;
+            --safe: #10B981;
+            --warning: #EF4444;
+            --bg-gradient-start: #FDF2F8;
+            --bg-gradient-end: #FCE7F3;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-pink { 0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(236, 72, 153, 0); } 100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); } }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#fce7f3 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #fce7f3; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #fce7f3; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #fce7f3; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #fce7f3; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #fce7f3; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        #page-result { display: none; background: #fce7f3; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #fce7f3; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-pink 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #fce7f3; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #fce7f3; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-职场讨好型人格检测" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">职场讨好型<br><span>人格</span>检测</h1>
+        <p class="cover-subtitle">科学识别职场中的讨好型人格<br>找到建立健康边界的途径</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🔍</div>
+                <div class="feature-title">四维深度分析</div>
+                <div class="feature-desc">讨好倾向、边界缺失、自我认同、情绪压抑，全面扫描讨好型特征。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">社会心理学</div>
+                <div class="feature-desc">基于社会心理学理论，科学评估你的讨好倾向。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">⚠️</div>
+                <div class="feature-title">精准识别</div>
+                <div class="feature-desc">帮助你认识到自己是否有人际交往问题。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💡</div>
+                <div class="feature-title">专业解决方案</div>
+                <div class="feature-desc">提供建立健康边界的具体方法。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始检测 (约需 3 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">职场档案建立 💼</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的职场背景精准评估讨好倾向。</p>
+
+        <div class="form-group">
+            <label class="form-label">你在职场中的人际关系如何？</label>
+            <select id="input-relation" class="select-box">
+                <option value="good">很好，大家都很喜欢我</option>
+                <option value="normal">一般，正常相处</option>
+                <option value="bad">不太好，经常被忽视</option>
+                <option value="complex">复杂，说不清</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你是否经常担心别人对你的看法？</label>
+            <select id="input-concern" class="select-box">
+                <option value="always">总是担心</option>
+                <option value="often">经常担心</option>
+                <option value="sometimes">偶尔担心</option>
+                <option value="rarely">很少或从不</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你通常在团队中的角色是？</label>
+            <select id="input-role" class="select-box">
+                <option value="leader">领导者</option>
+                <option value="core">核心成员</option>
+                <option value="normal">普通成员</option>
+                <option value="support">支持型成员</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：讨好倾向</span>
+            <span id="progress-text">1 / 16</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🔍 讨好倾向</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+
+    <div id="page-loading">
+        <div style="font-size:50px; animation: pulse-pink 1s infinite;">💼</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的讨好型倾向...</h3>
+        <p style="color:#636E72; font-size:14px;">正在扫描四维数据...<br>计算讨好指数...<br>生成专属报告...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">讨好指数</span>
+            </div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 讨好型人格四维雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《讨好型人格深度分析报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新检测</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div>
+            <div class="r-h1">职场讨好型人格深度分析报告</div>
+            <div style="font-size:14px;">专业心理测评 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+
+</div>
+
+<script>
+const questions = [
+    { d: 'people', t: '讨好倾向', q: "在职场中，你是否经常为了让他人满意而牺牲自己的时间和精力？", o: [
+        {t:"经常这样", s:10},
+        {t:"有时会", s:7},
+        {t:"偶尔", s:5},
+        {t:"很少或从不", s:0}
+    ]},
+    { d: 'people', t: '讨好倾向', q: "当同事提出不合理的要求时，你会？", o: [
+        {t:"勉强答应，不敢拒绝", s:10},
+        {t:"犹豫后还是答应", s:7},
+        {t:"会尝试沟通拒绝", s:5},
+        {t:"直接拒绝", s:0}
+    ]},
+    { d: 'people', t: '讨好倾向', q: "你会在同事面前隐藏自己的真实情绪吗？", o: [
+        {t:"经常隐藏", s:10},
+        {t:"有时会", s:7},
+        {t:"偶尔", s:5},
+        {t:"很少或从不", s:0}
+    ]},
+    { d: 'people', t: '讨好倾向', q: "你是否经常担心如果拒绝别人，会被讨厌或孤立？", o: [
+        {t:"非常担心", s:10},
+        {t:"比较担心", s:7},
+        {t:"有一点担心", s:5},
+        {t:"不担心", s:0}
+    ]},
+    
+    { d: 'boundary', t: '边界缺失', q: "你是否能勇敢表达与同事不同的意见？", o: [
+        {t:"很难表达", s:10},
+        {t:"不太敢", s:7},
+        {t:"可以但犹豫", s:5},
+        {t:"可以正常表达", s:0}
+    ]},
+    { d: 'boundary', t: '边界缺失', q: "当你的工作被打断时，你会？", o: [
+        {t:"放下自己的工作去帮忙", s:10},
+        {t:"犹豫后去帮忙", s:7},
+        {t:"说明自己在忙", s:5},
+        {t:"礼貌拒绝", s:0}
+    ]},
+    { d: 'boundary', t: '边界缺失', q: "你是否经常承担不属于自己的工作？", o: [
+        {t:"经常", s:10},
+        {t:"有时", s:7},
+        {t:"偶尔", s:5},
+        {t:"很少", s:0}
+    ]},
+    { d: 'boundary', t: '边界缺失', q: "你能否在上司面前坚持自己的观点？", o: [
+        {t:"很难坚持", s:10},
+        {t:"不太敢", s:7},
+        {t:"可以但犹豫", s:5},
+        {t:"可以正常表达", s:0}
+    ]},
+    
+    { d: 'self', t: '自我认同', q: "你对自己的价值判断是否依赖他人的评价？", o: [
+        {t:"非常依赖", s:10},
+        {t:"比较依赖", s:7},
+        {t:"有一点依赖", s:5},
+        {t:"不太依赖", s:0}
+    ]},
+    { d: 'self', t: '自我认同', q: "当有人批评你时，你会？", o: [
+        {t:"非常难过，自我否定", s:10},
+        {t:"比较难过", s:7},
+        {t:"有点难过但能接受", s:5},
+        {t:"能理性对待", s:0}
+    ]},
+    { d: 'self', t: '自我认同', q: "你是否觉得自己必须"有用"才有价值？", o: [
+        {t:"强烈觉得", s:10},
+        {t:"比较觉得", s:7},
+        {t:"有一点", s:5},
+        {t:"不太觉得", s:0}
+    ]},
+    { d: 'self', t: '自我认同', q: "你是否经常为了"被需要"而过度付出？", o: [
+        {t:"经常", s:10},
+        {t:"有时", s:7},
+        {t:"偶尔", s:5},
+        {t:"很少", s:0}
+    ]},
+    
+    { d: 'emotion', t: '情绪压抑', q: "当同事的行为让你不舒服时，你会？", o: [
+        {t:"憋在心里不说", s:10},
+        {t:"忍一段时间后再说", s:7},
+        {t:"找个合适时机说", s:5},
+        {t:"立即沟通", s:0}
+    ]},
+    { d: 'emotion', t: '情绪压抑', q: "你是否会因为担心冲突而回避必要的沟通？", o: [
+        {t:"经常", s:10},
+        {t:"有时", s:7},
+        {t:"偶尔", s:5},
+        {t:"很少", s:0}
+    ]},
+    { d: 'emotion', t: '情绪压抑', q: "当别人取得成绩时，你是否会产生嫉妒或自我怀疑？", o: [
+        {t:"经常", s:10},
+        {t:"有时", s:7},
+        {t:"偶尔", s:5},
+        {t:"很少", s:0}
+    ]},
+    { d: 'emotion', t: '情绪压抑', q: "你是否能接受"不是所有人都喜欢你"这个事实？", o: [
+        {t:"很难接受", s:10},
+        {t:"有点难", s:7},
+        {t:"可以接受", s:5},
+        {t:"完全接受", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const levels = [
+    { max: 30, l: "独立自信型", c: "#10B981", d: "你在职场中能够保持自我，有健康的边界感。", advice: "继续保持这种健康的职场人际模式，你做得很好。" },
+    { max: 60, l: "轻度讨好倾向", c: "#84CC16", d: "你有轻微的讨好倾向，但整体状态良好。", advice: "注意保持边界，适度表达自己的需求。" },
+    { max: 90, l: "中度讨好型", c: "#F59E0B", d: "你表现出明显的中度讨好型人格特征。", advice: "建议开始有意识地练习表达自己的需求，逐步建立边界。" },
+    { max: 120, l: "重度讨好型", c: "#F97316", d: "你表现出严重的讨好型人格特征，可能已影响职业发展。", advice: "建议寻求专业帮助，学习建立健康的自我边界。" },
+    { max: 160, l: "典型讨好型", c: "#EF4444", d: "你具有典型的讨好型人格特征，强烈建议关注自我成长。", advice: "强烈建议寻求心理咨询帮助，深入了解讨好模式的根源。" }
+];
+
+let currQList = [];
+let currIdx = 0;
+let userInfo = {};
+let scores = { people:0, boundary:0, self:0, emotion:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userInfo.relation = document.getElementById('input-relation').value;
+    userInfo.concern = document.getElementById('input-concern').value;
+    userInfo.role = document.getElementById('input-role').value;
+    
+    currQList = [...questions];
+    currIdx = 0;
+    scores = { people:0, boundary:0, self:0, emotion:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { people:0, boundary:0, self:0, emotion:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+    
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'people', n:'讨好'}, {k:'boundary', n:'边界'}, 
+        {k:'self', n:'自我'}, {k:'emotion', n:'情绪'}
+    ];
+    let html = '';
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 40) * 100, 100);
+        let color = pct> 60 ? '#EC4899' : (pct> 30 ? '#F59E0B' : '#10B981');
+        let txt = pct> 70 ? '高' : (pct> 40 ? '中' : '低');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {people:'讨好倾向', boundary:'边界缺失', self:'自我认同', emotion:'情绪压抑'};
+    return map[k];
+}
+
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、讨好型人格诊断</div>
+        <p class="r-p" style="background:#fafafa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>📋 职场档案：</strong>人际关系：${getRelationName(userInfo.relation)} | 担心程度：${getConcernName(userInfo.concern)} | 角色：${getRoleName(userInfo.role)}
+        </p>
+        <div class="r-box" style="border-left:5px solid ${lvl.c};">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">讨好类型：${lvl.l}</div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>特征评估：</strong>${lvl.d}</p>
+            <p style="margin:10px 0 0; font-size:15px; line-height:1.6; color:#555;"><strong>核心建议：</strong>${lvl.advice}</p>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">二、四维讨好特征深度分析</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px;">*基于社会心理学的科学分析</p>
+        ${generateDimAnalysis('people', scores.people, '反映你在职场中取悦他人、寻求认可的倾向程度。')}
+        ${generateDimAnalysis('boundary', scores.boundary, '反映你在职场中建立和维护个人边界的难度。')}
+        ${generateDimAnalysis('self', scores.self, '反映你对自我价值的认同程度，是否依赖外界评价。')}
+        ${generateDimAnalysis('emotion', scores.emotion, '反映你压抑真实情绪、回避冲突的程度。')}
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">三、讨好型人格理论解析</div>
+        <div class="r-box" style="background:#fdf2f8; border-color:#EC4899;">
+            <div class="r-h3" style="color:#EC4899;">💡 什么是讨好型人格？</div>
+            <p class="r-p">
+                <strong>讨好型人格</strong>是一种心理模式，表现为总是试图讨好他人、满足他人的期待，而忽视自己的真实需求。这种模式通常源于童年时期的需求未被满足。
+            </p>
+            <p class="r-p">
+                <strong>讨好者的核心信念是：</strong>"如果我让别人高兴，他们就会喜欢我；如果被拒绝，我就毫无价值。"
+            </p>
+            <p class="r-p">
+                <strong>讨好型人格的特点：</strong>
+            </p>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li>很难拒绝别人的请求</li>
+                <li>过度在意他人的看法和评价</li>
+                <li>总是把别人的需求放在第一位</li>
+                <li>害怕冲突，回避矛盾</li>
+                <li>自我价值感依赖他人的认可</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">四、建立健康边界的建议</div>
+        <div class="r-box">
+            <div class="r-h3">🎯 针对性行动计划</div>
+            <p class="r-p">根据你的测评结果，以下建议可能对你有帮助：</p>
+            ${getRecommendations(lvl.l).map((p, i) => `<p style="margin:8px 0; padding-left:20px; position:relative;"><span style="position:absolute; left:0; color:#EC4899; font-weight:bold;">${i+1}.</span> ${p}</p>`).join('')}
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">五、心理学小知识</div>
+        <div class="r-box" style="background:#f9f9f9;">
+            <div class="r-h3">📚 自我决定理论</div>
+            <p class="r-p">
+                <strong>自我决定理论（Self-Determination Theory）</strong>由德西和瑞安提出，认为人的基本心理需求包括：
+            </p>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>自主需求</strong>：渴望掌控自己的行为和选择</li>
+                <li><strong>胜任需求</strong>：渴望感受到自己的能力和价值</li>
+                <li><strong>归属需求</strong>：渴望与他人建立连接和关系</li>
+            </ul>
+            <p class="r-p" style="margin-top:10px;">
+                当这些需求得到满足时，人会感到幸福和满足。讨好型人格的问题在于过度满足"归属需求"，而忽视了"自主需求"。
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026职场讨好型人格检测 · 专业心理测评<br>
+        愿你学会爱自己，建立健康的边界
+    </div>
+    `;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function getRelationName(r) {
+    const m = {'good':'很好','normal':'一般','bad':'不太好','complex':'复杂'};
+    return m[r] || r;
+}
+function getConcernName(c) {
+    const m = {'always':'总是担心','often':'经常担心','sometimes':'偶尔担心','rarely':'很少'};
+    return m[c] || c;
+}
+function getRoleName(r) {
+    const m = {'leader':'领导者','core':'核心成员','normal':'普通成员','support':'支持型'};
+    return m[r] || r;
+}
+
+function generateDimAnalysis(key, val, explanation) {
+    let level = val> 28 ? 'high' : (val> 14 ? 'med' : 'low');
+    const config = {
+        high: { color: '#EF4444', bg: '#fef2f2', tag: '⚠️ 严重', titleColor: '#EF4444' },
+        med: { color: '#F59E0B', bg: '#fffbeb', tag: '⚡ 中等', titleColor: '#F59E0B' },
+        low: { color: '#10B981', bg: '#ecfdf5', tag: '✅ 正常', titleColor: '#10B981' }
+    };
+    const c = config[level];
+    const texts = {
+        people: { high: "<strong>讨好倾向严重！</strong>你过度在意他人评价，总是试图满足所有人。", med: "<strong>讨好倾向中等。</strong>你有时会过度迎合他人。", low: "<strong>讨好倾向较低。</strong>你能较好地平衡自我需求和他人期待。" },
+        boundary: { high: "<strong>边界严重缺失！</strong>你很难拒绝他人，容易被他人越界。", med: "<strong>边界意识一般。</strong>你在某些情况下难以坚持边界。", low: "<strong>边界清晰。</strong>你能较好地维护自己的边界。" },
+        self: { high: "<strong>自我认同严重依赖外界！</strong>你的价值感几乎完全取决于他人评价。", med: "<strong>自我认同部分依赖外界。</strong>你对自己价值的判断在一定程度上受他人影响。", low: "<strong>自我认同稳定。</strong>你有稳定的自我价值感，不易受他人影响。" },
+        emotion: { high: "<strong>情绪严重压抑！</strong>你经常压抑真实情绪，回避冲突。", med: "<strong>情绪有一定压抑。</strong>你有时会压抑自己的真实感受。", low: "<strong>情绪表达健康。</strong>你能较好地表达和处理自己的情绪。" }
+    };
+    return `<div style="margin-bottom:20px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor}; margin-top:0;">${getDimName(key)} <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${val}/40)</span><span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span></div><p style="font-size:13px; color:#888; margin-bottom:8px;">${explanation}</p><p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][level]}</p></div>`;
+}
+
+function getRecommendations(level) {
+    const recs = {
+        '独立自信型': ['继续保持这种健康的模式', '你的边界感和自我认同都很稳定', '可以帮助身边有讨好倾向的朋友'],
+        '轻度讨好倾向': ['学会在小事上练习说"不"', '关注自己的感受而不是只考虑他人', '给自己一些"不讨好"的空间'],
+        '中度讨好型': ['从拒绝一个小请求开始练习', '记录自己每次"讨好"后的感受', '学习非暴力沟通技巧'],
+        '重度讨好型': ['建议寻求专业心理咨询帮助', '从认知层面重新审视自己的信念', '建立"我值得被爱"的核心信念'],
+        '典型讨好型': ['强烈建议寻求心理咨询深入探索', '了解讨好模式形成的根源', '在安全的关系中练习表达真实自我']
+    };
+    return recs[level] || recs['轻度讨好倾向'];
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    const cx=120, cy=120, r=90;
+    const keys = ['people','boundary','self','emotion'];
+    const labels = ['讨好','边界','自我','情绪'];
+    
+    ctx.strokeStyle = '#fce7f3'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<4; j++) {
+            let a = (Math.PI*2/4)*j - Math.PI/2;
+            ctx.lineTo(cx + Math.cos(a)*(r/4)*i, cy + Math.sin(a)*(r/4)*i);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let ratio = Math.min(s[k] / 40, 1.1); 
+        let a = (Math.PI*2/4)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(236, 72, 153, 0.1)");
+    grd.addColorStop(1, "rgba(236, 72, 153, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.strokeStyle = '#EC4899'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/4)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "zcth";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

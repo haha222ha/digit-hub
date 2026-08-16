@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>他真的喜欢你吗？- 深度解析</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #ff6b6b; --text-main: #2d3436; --text-sub: #636e72; --radius: 16px; --theme-red: #ff6b6b; --theme-red-light: #ee5a5a; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f8f9fa; min-height: 100vh; color: var(--text-main); }
+        .container { max-width: 520px; margin: 0 auto; padding: 20px; min-height: 100vh; }
+        .page { display: none; animation: fadeIn 0.5s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(100px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulseRed { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); } 50% { box-shadow: 0 0 0 15px rgba(255, 107, 107, 0); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .btn { display: block; width: 100%; padding: 18px; border: none; border-radius: 50px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+        .btn-primary { background: var(--primary); color: white; border-radius: var(--radius); }
+        .btn-theme { background: linear-gradient(90deg, var(--theme-red), var(--theme-red-light)); color: white; box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3); }
+        .btn-accent { background: var(--accent); color: white; animation: pulseRed 2s infinite; border-radius: var(--radius); }
+        .btn-secondary { background: #f1f2f6; color: var(--text-main); border: none; margin-top: 12px; }
+        .card { background: white; border-radius: var(--radius); padding: 24px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .cover-badge { display: inline-block; background: linear-gradient(135deg, #ff6b6b, #ee5a5a); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .cover-title { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+        .cover-title .highlight { color: #ff6b6b; }
+        .cover-subtitle { color: var(--text-sub); font-size: 16px; margin-bottom: 30px; line-height: 1.5; }
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .feature-card { background: white; border-radius: var(--radius); padding: 20px 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .feature-icon { font-size: 32px; margin-bottom: 10px; }
+        .feature-text { font-size: 14px; font-weight: 600; }
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+        .form-select { width: 100%; padding: 16px; border: 2px solid #eaecef; border-radius: var(--radius); font-size: 16px; background: white; }
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .quiz-dimension { font-size: 14px; font-weight: 600; color: #ff6b6b; }
+        .quiz-progress { font-size: 14px; color: var(--text-sub); }
+        .progress-bar { width: 100%; height: 8px; background: #eaecef; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #ff6b6b, #ee5a5a); border-radius: 4px; transition: width 0.3s ease; }
+        .question-card { animation: slideUp 0.4s ease; }
+        .question-tag { display: inline-block; background: #ffeaea; color: #ff6b6b; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .question-text { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 30px; }
+        .option-btn { display: block; width: 100%; padding: 18px; border: 2px solid #eaecef; border-radius: var(--radius); background: white; font-size: 16px; font-weight: 500; text-align: left; cursor: pointer; margin-bottom: 12px; transition: all 0.2s ease; }
+        .option-btn:hover { border-color: #ff6b6b; }
+        .option-btn.selected { border-color: #ff6b6b; background: rgba(255, 107, 107, 0.05); }
+        .back-btn { background: transparent; border: none; color: var(--text-sub); font-size: 16px; cursor: pointer; padding: 10px 0; margin-top: 20px; }
+        .loading-container { text-align: center; padding: 50px 20px; }
+        .loading-icon { font-size: 80px; animation: breathe 1.5s infinite; margin-bottom: 30px; }
+        .loading-title { font-size: 24px; font-weight: 700; margin-bottom: 15px; }
+        .loading-subtitle { font-size: 16px; color: var(--text-sub); }
+        .result-top-card { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); color: white; border-radius: var(--radius); padding: 30px 20px; text-align: center; margin-bottom: 20px; }
+        .level-tag { display: inline-block; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 8px 24px; border-radius: 20px; font-size: 20px; font-weight: 700; margin-bottom: 15px; }
+        .level-desc { font-size: 16px; line-height: 1.5; opacity: 0.95; }
+        .result-match-section { text-align: center; margin: 30px 0; padding: 30px 20px; background: linear-gradient(135deg, #fff5f5, #fff); border-radius: var(--radius); border: 2px solid #ff6b6b; }
+        .match-name { font-size: 36px; font-weight: 700; color: #ff6b6b; margin-bottom: 15px; }
+        .match-desc { font-size: 16px; color: var(--text-main); line-height: 1.8; }
+        .match-tags { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+        .match-tag { padding: 6px 16px; background: rgba(255, 107, 107, 0.1); color: #ff6b6b; border-radius: 20px; font-size: 14px; }
+        .result-actions { position: sticky; bottom: 20px; padding-top: 20px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: none; overflow-y: auto; }
+        .modal.active { display: block; animation: fadeIn 0.3s ease; }
+        .modal-content { background: white; min-height: 100vh; padding: 20px; max-width: 520px; margin: 0 auto; position: relative; padding-top: 80px; }
+        .modal-close { position: fixed; top: 20px; right: calc(50% - 260px); font-size: 32px; background: white; border: none; cursor: pointer; color: var(--text-sub); z-index: 2001; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+        @media (max-width: 520px) { .modal-close { right: 20px; } }
+        .report-header { background: linear-gradient(135deg, #ff6b6b, #c0392b); color: white; padding: 40px 20px 30px; margin: -20px -20px 30px; border-radius: 0 0 var(--radius) var(--radius); text-align: center; }
+        .report-title { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+        .report-subtitle { font-size: 16px; opacity: 0.9; }
+        .report-section { margin-bottom: 35px; }
+        .report-section-title { font-size: 18px; font-weight: 700; color: #ff6b6b; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #ffeaea; }
+        .report-content { font-size: 15px; line-height: 1.9; }
+        .report-content p { margin-bottom: 12px; }
+        .report-highlight { background: #fff5f5; border-left: 4px solid #ff6b6b; padding: 15px; margin: 20px 0; border-radius: 0 var(--radius) var(--radius) 0; }
+        .report-list { padding-left: 20px; }
+        .report-list li { margin-bottom: 10px; line-height: 1.7; }
+    </style>
+</head>
+<body>
+
+    <div class="container" data-screenshot="psych-test-TA喜欢什么">
+        <div id="coverPage" class="page active">
+            <div class="cover-badge">情感探测版</div>
+            <h1 class="cover-title">他真的<br><span class="highlight">喜欢你吗？</span></h1>
+            <p class="cover-subtitle">从细节读懂他的真心，告别单恋和暧昧的困惑</p>
+            <div class="feature-grid">
+                <div class="feature-card"><div class="feature-icon">🔍</div><div class="feature-text">行为分析</div></div>
+                <div class="feature-card"><div class="feature-icon">💓</div><div class="feature-text">真心识别</div></div>
+                <div class="feature-card"><div class="feature-icon">📊</div><div class="feature-text">多维判断</div></div>
+                <div class="feature-card"><div class="feature-icon">📝</div><div class="feature-text">千字报告</div></div>
+            </div>
+            <button id="startBtn" class="btn btn-primary">开始深度分析 (约需 4 分钟)</button>
+        </div>
+        <div id="profilePage" class="page">
+            <div class="card">
+                <h2 style="font-size:24px; font-weight:700; margin-bottom:15px;">你们的关系背景 💕</h2>
+                <p style="color:var(--text-sub); margin-bottom:30px; line-height:1.6;">请根据实际情况选择，系统将据此调整分析。</p>
+                <div class="form-group">
+                    <label class="form-label">你们目前的关系？</label>
+                    <select id="relationship" class="form-select">
+                        <option value="crush">我暗恋他</option>
+                        <option value="chasing">正在追求中</option>
+                        <option value="dating">暧昧中</option>
+                        <option value="together">已在一起</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">认识多长时间？</label>
+                    <select id="time" class="form-select">
+                        <option value="new">不到1个月</option>
+                        <option value="month">1-3个月</option>
+                        <option value="half">3-6个月</option>
+                        <option value="year">半年以上</option>
+                    </select>
+                </div>
+            </div>
+            <button id="generateQuizBtn" class="btn btn-primary">开始测评</button>
+        </div>
+        <div id="quizPage" class="page">
+            <div class="quiz-header">
+                <div class="quiz-dimension" id="dimensionLabel">行为观察</div>
+                <div class="quiz-progress" id="progressLabel">1 / 20</div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+            <div class="card question-card">
+                <div class="question-tag" id="questionTag">👀 眼神信号</div>
+                <div class="question-text" id="questionText">加载中...</div>
+                <div id="optionsContainer"></div>
+            </div>
+            <button id="backQuestionBtn" class="back-btn" style="display:none;">← 返回上一题</button>
+        </div>
+        <div id="loadingPage" class="page">
+            <div class="loading-container">
+                <div class="loading-icon">🔮</div>
+                <div class="loading-title">正在分析他的心意...</div>
+                <div class="loading-subtitle">结合行为心理学运算中...</div>
+            </div>
+        </div>
+        <div id="resultPage" class="page">
+            <div class="result-top-card">
+                <div class="level-tag" id="levelTag">分析中</div>
+                <div class="level-desc" id="resultLevelDesc">正在解析他的真心程度...</div>
+            </div>
+            <div class="result-match-section">
+                <div class="match-name" id="matchName">分析中</div>
+                <div class="match-desc" id="matchDesc"></div>
+                <div class="match-tags" id="matchTags"></div>
+            </div>
+            <div class="result-actions">
+                <button id="reportBtn" class="btn btn-accent">📄 查看千字深度报告</button>
+                <button id="resetBtn" class="btn btn-secondary">🔄 重新测评</button>
+            </div>
+        </div>
+    </div>
+    <div id="reportModal" class="modal">
+        <button class="modal-close" id="closeModal">&times;</button>
+        <div class="modal-content">
+            <div class="report-header">
+                <div class="report-title">他的真心程度分析</div>
+                <div class="report-subtitle">行为分析与关系建议报告</div>
+            </div>
+            <div id="reportContent" class="report-content"></div>
+        </div>
+    </div>
+    <script>
+        const QUESTIONS = [
+            { dimension: "eye", tag: "👀 眼神信号", text: "他和你说话时，眼神会看向哪里？", options: [
+                { text: "一直看着你的眼睛", score: 10 },
+                { text: "偶尔对视，会闪躲", score: 7 },
+                { text: "看着其他地方", score: 4 },
+                { text: "很少看我", score: 1 }
+            ]},
+            { dimension: "contact", tag: "🤝 肢体接触", text: "他是否会主动和你有肢体接触？", options: [
+                { text: "经常，找机会接近", score: 10 },
+                { text: "偶尔，不经意间", score: 7 },
+                { text: "很少，很被动", score: 4 },
+                { text: "完全没有", score: 1 }
+            ]},
+            { dimension: "message", tag: "💬 消息回复", text: "他给你发消息的频率和速度？", options: [
+                { text: "主动找话题，秒回", score: 10 },
+                { text: "会回复，但不一定主动", score: 7 },
+                { text: "偶尔回复，很久才回", score: 4 },
+                { text: "很少回复或已读不回", score: 1 }
+            ]},
+            { dimension: "time", tag: "⏰ 时间投入", text: "他愿意花时间陪你吗？", options: [
+                { text: "总想和你在一起", score: 10 },
+                { text: "有时间会陪你", score: 7 },
+                { text: "需要邀请才出来", score: 4 },
+                { text: "很忙，没时间", score: 1 }
+            ]},
+            { dimension: "attention", tag: "👂 关注程度", text: "他记得你的喜好和细节吗？", options: [
+                { text: "记得很清楚，很用心", score: 10 },
+                { text: "记得一些重要细节", score: 7 },
+                { text: "不太记得", score: 4 },
+                { text: "完全不在意", score: 1 }
+            ]},
+            { dimension: "jealous", tag: "醋 吃醋反应", text: "你和异性接触时，他有什么反应？", options: [
+                { text: "很明显吃醋，会表现", score: 10 },
+                { text: "会有点在意但不说", score: 7 },
+                { text: "完全不在意", score: 4 },
+                { text: "会生气或冷战", score: 6 }
+            ]},
+            { dimension: "future", tag: "🔮 未来规划", text: "他提到过你们的未来吗？", options: [
+                { text: "经常规划我们的未来", score: 10 },
+                { text: "偶尔提到过", score: 7 },
+                { text: "从来没有", score: 4 },
+                { text: "回避这个话题", score: 2 }
+            ]},
+            { dimension: "social", tag: "🌐 社交公开", text: "他在社交媒体上会公开你们的关系吗？", options: [
+                { text: "会主动公开，大方秀", score: 10 },
+                { text: "愿意公开但不发太多", score: 7 },
+                { text: "不太愿意公开", score: 4 },
+                { text: "完全不愿意", score: 1 }
+            ]},
+            { dimension: "friend", tag: "👥 朋友介绍", text: "他把你介绍给朋友认识吗？", options: [
+                { text: "主动介绍，很重视", score: 10 },
+                { text: "愿意介绍但不主动", score: 7 },
+                { text: "不太愿意", score: 4 },
+                { text: "完全不会", score: 1 }
+            ]},
+            { dimension: "help", tag: "💪 帮忙意愿", text: "你遇到困难时，他的反应？", options: [
+                { text: "立即主动帮忙", score: 10 },
+                { text: "会帮忙但需要你说", score: 7 },
+                { text: "敷衍或推脱", score: 4 },
+                { text: "完全不管", score: 1 }
+            ]},
+            { dimension: "comfort", tag: "💕 关心程度", text: "他平时关心你的方式？", options: [
+                { text: "很细心，很体贴", score: 10 },
+                { text: "偶尔关心，但不细心", score: 7 },
+                { text: "很少关心", score: 4 },
+                { text: "只有需要时才关心", score: 3 }
+            ]},
+            { dimension: "share", tag: "📱 分享日常", text: "他会和你分享日常琐事吗？", options: [
+                { text: "每天分享很多", score: 10 },
+                { text: "会分享一些", score: 7 },
+                { text: "很少分享", score: 4 },
+                { text: "基本不分享", score: 1 }
+            ]},
+            { dimension: "remember", tag: "🎂 重要日期", text: "他记得你们的重要日期吗？", options: [
+                { text: "记得很清楚，会准备惊喜", score: 10 },
+                { text: "记得但不会准备什么", score: 7 },
+                { text: "不太记得", score: 4 },
+                { text: "完全忘记", score: 1 }
+            ]},
+            { dimension: "support", tag: "🎯 支持你的", text: "你做重要决定时，他支持你吗？", options: [
+                { text: "全力支持，鼓励你", score: 10 },
+                { text: "会给出建议但尊重选择", score: 7 },
+                { text: "不太关心", score: 4 },
+                { text: "会否定你", score: 2 }
+            ]},
+            { dimension: "tease", tag: "😏 逗你方式", text: "他和你相处时，是什么风格？", options: [
+                { text: "温柔体贴，很照顾", score: 10 },
+                { text: "偶尔开玩笑", score: 7 },
+                { text: "比较冷淡", score: 4 },
+                { text: "喜欢怼你", score: 5 }
+            ]},
+            { dimension: "plan", tag: "📅 约会安排", text: "约会通常谁安排？", options: [
+                { text: "他主动安排", score: 10 },
+                { text: "轮流安排", score: 7 },
+                { text: "需要你提醒", score: 4 },
+                { text: "基本你安排", score: 2 }
+            ]},
+            { dimension: "care", tag: "🥰 细节关怀", text: "他会在细节上关心你吗？", options: [
+                { text: "很注重细节，很贴心", score: 10 },
+                { text: "有一些细节关怀", score: 7 },
+                { text: "很少注意细节", score: 4 },
+                { text: "完全不注意", score: 1 }
+            ]},
+            { dimension: "conflict", tag: "😤 冲突处理", text: "你们吵架后，通常谁先妥协？", options: [
+                { text: "他先道歉", score: 10 },
+                { text: "轮流或看情况", score: 7 },
+                { text: "通常你先妥协", score: 4 },
+                { text: "冷战，谁也不理谁", score: 2 }
+            ]},
+            { dimension: "promise", tag: "🤞 承诺兑现", text: "他承诺过的事情会做到吗？", options: [
+                { text: "基本都做到", score: 10 },
+                { text: "大部分能做到", score: 7 },
+                { text: "经常食言", score: 4 },
+                { text: "从不兑现", score: 1 }
+            ]},
+            { dimension: "compare", tag: "⚖️ 付出对比", text: "在这段关系中，谁付出更多？", options: [
+                { text: "他付出更多", score: 10 },
+                { text: "基本平衡", score: 7 },
+                { text: "你付出更多", score: 4 },
+                { text: "严重不平衡", score: 2 }
+            ]}
+        ];
+
+        const state = { currentQuestionIndex: 0, answers: [], profileData: {}, likeScore: 0, resultType: '' };
+
+        function showPage(pageId) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(pageId).classList.add('active'); }
+
+        function initEventListeners() {
+            document.getElementById('startBtn').addEventListener('click', () => showPage('profilePage'));
+            document.getElementById('generateQuizBtn').addEventListener('click', () => {
+                state.profileData.relationship = document.getElementById('relationship').value;
+                state.profileData.time = document.getElementById('time').value;
+                state.currentQuestionIndex = 0; state.answers = [];
+                renderQuestion(0); showPage('quizPage');
+            });
+            document.getElementById('backQuestionBtn').addEventListener('click', () => { if (state.currentQuestionIndex> 0) renderQuestion(state.currentQuestionIndex - 1); });
+            document.getElementById('reportBtn').addEventListener('click', () => { generateReport(); document.getElementById('reportModal').classList.add('active'); });
+            document.getElementById('resetBtn').addEventListener('click', () => { state.currentQuestionIndex = 0; state.answers = []; state.likeScore = 0; showPage('profilePage'); });
+            document.getElementById('closeModal').addEventListener('click', () => document.getElementById('reportModal').classList.remove('active'));
+            document.getElementById('reportModal').addEventListener('click', (e) => { if (e.target.id === 'reportModal') document.getElementById('reportModal').classList.remove('active'); });
+        }
+
+        function renderQuestion(index) {
+            if (index>= QUESTIONS.length) { calculateScores(); showPage('loadingPage'); setTimeout(() => { renderResults(); showPage('resultPage'); }, 3000); return; }
+            state.currentQuestionIndex = index;
+            const q = QUESTIONS[index];
+            document.getElementById('dimensionLabel').textContent = q.tag;
+            document.getElementById('progressLabel').textContent = `${index + 1} / ${QUESTIONS.length}`;
+            document.getElementById('progressFill').style.width = `${((index + 1) / QUESTIONS.length) * 100}%`;
+            document.getElementById('questionTag').textContent = q.tag;
+            document.getElementById('questionText').textContent = q.text;
+            const container = document.getElementById('optionsContainer'); container.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn' + (state.answers[index] === i ? ' selected' : '');
+                btn.textContent = opt.text;
+                btn.onclick = () => { state.answers[index] = i; container.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); setTimeout(() => renderQuestion(index + 1), 300); };
+                container.appendChild(btn);
+            });
+            document.getElementById('backQuestionBtn').style.display = index> 0 ? 'block' : 'none';
+        }
+
+        function calculateScores() {
+            let total = 0;
+            QUESTIONS.forEach((q, i) => { if (state.answers[i] !== undefined) total += q.options[state.answers[i]].score; });
+            state.likeScore = Math.round((total / (QUESTIONS.length * 10)) * 100);
+        }
+
+        function renderResults() {
+            const results = {
+                high: { name: '他很爱你', desc: '从各种行为来看，他对你用情很深。他会主动关心你、陪你、为你付出。好好珍惜这段感情！', tags: ['真心喜欢', '用心付出', '值得珍惜'] },
+                medium: { name: '他有点喜欢你', desc: '他对你的喜欢程度中等，可能还不够确定自己的心意。你需要给他更多时间，也给自己一些耐心。', tags: ['有好感', '需要确认', '可以发展'] },
+                low: { name: '他可能没那么喜欢你', desc: '从目前的表现来看，他对你可能只是普通朋友或者礼貌性相处。建议你重新审视这段关系。', tags: ['需要观察', '可能只是朋友', '谨慎投入'] }
+            };
+            let result; if (state.likeScore>= 70) result = results.high; else if (state.likeScore>= 45) result = results.medium; else result = results.low;
+            document.getElementById('levelTag').textContent = result.name;
+            document.getElementById('resultLevelDesc').textContent = '真心程度：' + state.likeScore + '%';
+            document.getElementById('matchName').textContent = result.name;
+            document.getElementById('matchDesc').textContent = result.desc;
+            document.getElementById('matchTags').innerHTML = result.tags.map(t => `<span class="match-tag">${t}</span>`).join('');
+        }
+
+        function generateReport() {
+            const relMap = { crush: '暗恋', chasing: '追求中', dating: '暧昧', together: '已在一起' };
+            const timeMap = { new: '不到1个月', month: '1-3个月', half: '3-6个月', year: '半年以上' };
+            const level = state.likeScore>= 70 ? '非常喜欢你' : state.likeScore>= 45 ? '有点喜欢你' : '没那么喜欢你';
+            const html = `
+                <div class="report-section"><h3 class="report-section-title">📋 基础信息</h3>
+                <p>• 关系状态：${relMap[state.profileData.relationship] || '暗恋'}</p>
+                <p>• 认识时间：${timeMap[state.profileData.time] || '不到1个月'}</p>
+                <p>• 真心程度：${state.likeScore}%</p>
+                <p>• 测试时间：${new Date().toLocaleString()}</p></div>
+                <div class="report-section"><h3 class="report-section-title">💕 核心结论：他${level}</h3>
+                <div class="report-highlight"><p style="font-size:17px; font-weight:700;">${state.likeScore>= 70 ? '✅ 他真的很喜欢你！从行为细节可以看出他对你的用心，珍惜这份感情。' : state.likeScore>= 45 ? '📌 他对你有好感，但还在观察阶段。建议给他一些时间和信号。' : '⚠️ 他对你的喜欢程度可能不高，建议你重新评估这段关系。'}</p></div></div>
+                <div class="report-section"><h3 class="report-section-title">🔍 行为信号分析</h3>
+                <p><strong>1. 沟通方面：</strong>${state.likeScore>= 70 ? '他愿意主动找你聊天，回复及时，说明很在乎与你的联系。' : state.likeScore>= 45 ? '他会回复你的消息，但不会太主动，说明有好感但不确定。' : '他回复消息较慢或不主动，说明可能只是礼貌性回复。'}</p>
+                <p style="margin-top:15px;"><strong>2. 相处时间：</strong>${state.likeScore>= 70 ? '他愿意花大量时间陪你，说明你在他心里很重要。' : state.likeScore>= 45 ? '他会抽时间陪你，但有自己的生活，说明还在平衡阶段。' : '他很少花时间陪你，可能只是把你当普通朋友。'}</p>
+                <p style="margin-top:15px;"><strong>3. 关心程度：</strong>${state.likeScore>= 70 ? '他很关心你的细节，会记住你的喜好，说明用心了。' : state.likeScore>= 45 ? '他会关心你，但可能不够细心，还需要更多观察。' : '他不太关心你的细节，说明可能没那么在意。'}</p>
+                <p style="margin-top:15px;"><strong>4. 未来规划：</strong>${state.likeScore>= 70 ? '他会把你们的关系规划进未来，说明是认真的。' : state.likeScore>= 45 ? '他偶尔提到未来，说明有考虑但还不确定。' : '他从不提未来，说明可能只是走一步看一步。'}</p></div>
+                <div class="report-section"><h3 class="report-section-title">💡 针对性建议</h3>
+                ${state.likeScore>= 70 ? '<p>1. <strong>珍惜当下：</strong>他真的很在乎你，好好享受这段感情。</p><p>2. <strong>回应表达：</strong>也适当表达你的喜欢，让他感受到你的回应。</p><p>3. <strong>保持独立：</strong>即使在一起，也要保持自己的个人空间和魅力。</p><p>4. <strong>沟通需求：</strong>有什么想法可以直接沟通，健康的沟通让感情更长久。</p>' : state.likeScore>= 45 ? '<p>1. <strong>主动出击：</strong>适当给他一些积极的信号，让他知道你也对他有兴趣。</p><p>2. <strong>不要太快投入：</strong>保持一定距离，让感情自然发展。</p><p>3. <strong>创造机会：</strong>可以主动约他，创造更多相处的机会。</p><p>4. <strong>观察细节：</strong>继续观察他的行为，不要太快下结论。</p>' : '<p>1. <strong>重新评估：</strong>建议重新审视这段关系，可能只是你的一厢情愿。</p><p>2. <strong>降低期望：</strong>不要投入太多感情，保护好自己。</p><p>3. <strong>转移注意力：</strong>把精力放在自己身上，提升自我价值。</p><p>4. <strong>考虑放弃：</strong>如果真的不喜欢你，及时止损是明智的选择。</p>'}</div>
+                <div class="report-section"><h3 class="report-section-title">⚠️ 注意事项</h3>
+                <ul class="report-list"><li>不要只看甜言蜜语，要看实际行动</li><li>保持自我，不要为了迎合对方失去自我</li><li>如果发现对方是"中央空调"，要及时止损</li><li>真正的喜欢是让你变得更好，而不是患得患失</li></ul></div>
+                <div class="report-section"><h3 class="report-section-title">💪 行动建议</h3>
+                <ul class="report-list"><li>继续观察：不要急于下结论，时间会证明一切</li><li>主动沟通：如果有疑问可以直接问，坦诚沟通很重要</li><li>提升自己：无论结果如何，让自己变得更优秀</li><li>保持心态：爱情需要缘分，强求不来</li></ul>
+                <p style="margin-top:20px; text-align:center; color:var(--text-sub);">愿你能找到真正爱你的人 💕</p></div>`;
+            document.getElementById('reportContent').innerHTML = html;
+        }
+
+        initEventListeners();
+    </script>
+    <script>
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initEventListeners);
+            initEventListeners();
+        }
+    </script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "taxh";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

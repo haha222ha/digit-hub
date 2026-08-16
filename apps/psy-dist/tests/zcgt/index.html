@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>职场沟通风格测试 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #4A90D9;
+            --primary-dark: #357ABD;
+            --accent: #FF7D00;
+            --safe: #2ED573;
+            --warning: #FF4757;
+            --bg-gradient-start: #F0F7FF;
+            --bg-gradient-end: #E8F4FD;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(74, 144, 217, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(74, 144, 217, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 144, 217, 0); } }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(74, 144, 217, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 15px; }
+
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#e3f2fd 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #e3f2fd; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #e3f2fd; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #e3f2fd; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #e3f2fd; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #e3f2fd; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        #page-result { display: none; background: #e3f2fd; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #e3f2fd; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-blue 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #e3f2fd; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #e3f2fd; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+        
+        .export-btn { background: #2ED573; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-职场沟通风格测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">职场沟通<br><span>风格</span>测试</h1>
+        <p class="cover-subtitle">深度解析你的职场沟通模式<br>找到最适合你的表达方式</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🗣️</div>
+                <div class="feature-title">五维深度分析</div>
+                <div class="feature-desc">倾听、表达、反馈、冲突、影响力，全面扫描你的沟通风格。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">沟通心理学</div>
+                <div class="feature-desc">基于沟通心理学理论，科学评估你的沟通能力。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💡</div>
+                <div class="feature-title">精准定位优势</div>
+                <div class="feature-desc">找到你的沟通优势，提升职场竞争力。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-title">定制化建议</div>
+                <div class="feature-desc">针对弱项提供具体改进方案。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始检测 (约需 3 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">个人档案建立 💼</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的情况精准评估沟通风格。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的工作年限？</label>
+            <select id="input-experience" class="select-box">
+                <option value="0-1">0-1年 (新人)</option>
+                <option value="1-3">1-3年 (初级)</option>
+                <option value="3-5">3-5年 (中级)</option>
+                <option value="5+">5年以上 (高级)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的主要沟通场景？</label>
+            <select id="input-scenario" class="select-box">
+                <option value="team">团队协作为主</option>
+                <option value="client">客户对接为主</option>
+                <option value="management">管理汇报为主</option>
+                <option value="mixed">多场景混合</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你经常在多大团队中工作？</label>
+            <select id="input-team" class="select-box">
+                <option value="small">小团队 (≤5人)</option>
+                <option value="medium">中等团队 (6-20人)</option>
+                <option value="large">大团队 (20人以上)</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：倾听能力</span>
+            <span id="progress-text">1 / 20</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🗣️ 倾听能力</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+
+    <div id="page-loading">
+        <div style="font-size:50px; animation: pulse-blue 1s infinite;">🗣️</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的沟通风格...</h3>
+        <p style="color:#636E72; font-size:14px;">正在扫描五维数据...<br>计算沟通风格指数...<br>生成专属报告...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">沟通风格得分</span>
+            </div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 沟通能力五维雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《职场沟通风格深度分析报告》</button>
+            <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新检测</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div>
+            <div class="r-h1">职场沟通风格深度分析报告</div>
+            <div style="font-size:14px;">专业心理测评 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    // 倾听能力 (0-3)
+    { d: 'listening', t: '倾听能力', q: "当同事向你倾诉烦恼时，你会怎么做？", o: [
+        {t:"认真倾听，不打断，给予回应", s:10},
+        {t:"倾听，但有时会急于给建议", s:7},
+        {t:"倾听，但会不时看手机", s:3},
+        {t:"不耐烦，想快点结束", s:0}
+    ]},
+    { d: 'listening', t: '倾听能力', q: "会议上领导发言时，你通常？", o: [
+        {t:"全神贯注记录要点", s:10},
+        {t:"认真听，偶尔走神", s:7},
+        {t:"边听边处理其他事", s:3},
+        {t:"很少认真听", s:0}
+    ]},
+    { d: 'listening', t: '倾听能力', q: "别人说话时，你能记住多少细节？", o: [
+        {t:"能记住大部分细节", s:10},
+        {t:"能记住关键信息", s:7},
+        {t:"只能记住大概", s:3},
+        {t:"经常听后就忘", s:0}
+    ]},
+    { d: 'listening', t: '倾听能力', q: "你会主动确认自己理解正确吗？", o: [
+        {t:"经常复述确认", s:10},
+        {t:"偶尔会确认", s:7},
+        {t:"很少确认", s:3},
+        {t:"从不确认", s:0}
+    ]},
+    
+    // 表达能力 (4-7)
+    { d: 'expressing', t: '表达能力', q: "你能清晰表达自己的想法吗？", o: [
+        {t:"非常清晰，有条理", s:10},
+        {t:"比较清晰，有时混乱", s:7},
+        {t:"不太清晰，常被误解", s:3},
+        {t:"很难表达清楚", s:0}
+    ]},
+    { d: 'expressing', t: '表达能力', q: "向领导汇报工作时，你通常？", o: [
+        {t:"逻辑清晰，重点突出", s:10},
+        {t:"比较清晰，偶尔紧张", s:7},
+        {t:"有时说不清楚", s:3},
+        {t:"经常混乱，没重点", s:0}
+    ]},
+    { d: 'expressing', t: '表达能力', q: "写邮件或文档时，你的表达？", o: [
+        {t:"简洁准确，易读易懂", s:10},
+        {t:"比较清晰，偶有冗余", s:7},
+        {t:"有时含糊不清", s:3},
+        {t:"经常表达不清", s:0}
+    ]},
+    { d: 'expressing', t: '表达能力', q: "向新同事介绍工作时，你能？", o: [
+        {t:"快速让对方理解", s:10},
+        {t:"基本能让对方理解", s:7},
+        {t:"有时需要反复解释", s:3},
+        {t:"很难让人理解", s:0}
+    ]},
+    
+    // 反馈能力 (8-11)
+    { d: 'feedback', t: '反馈能力', q: "收到他人反馈时，你的反应？", o: [
+        {t:"感谢并认真思考", s:10},
+        {t:"会听但不一定改", s:7},
+        {t:"有时会辩解", s:3},
+        {t:"本能排斥反驳", s:0}
+    ]},
+    { d: 'feedback', t: '反馈能力', q: "你会主动给同事反馈吗？", o: [
+        {t:"经常主动给予建设性反馈", s:10},
+        {t:"偶尔会给予反馈", s:7},
+        {t:"很少主动反馈", s:3},
+        {t:"从不给反馈", s:0}
+    ]},
+    { d: 'feedback', t: '反馈能力', q: "你给出反馈的方式通常是？", o: [
+        {t:"建设性，关注解决方案", s:10},
+        {t:"比较委婉，但有时不明确", s:7},
+        {t:"直接但可能伤人", s:3},
+        {t:"很少具体反馈", s:0}
+    ]},
+    { d: 'feedback', t: '反馈能力', q: "面对批评，你的处理方式？", o: [
+        {t:"冷静分析，有则改之", s:10},
+        {t:"会反思但有时纠结", s:7},
+        {t:"容易情绪化", s:3},
+        {t:"强烈抵触", s:0}
+    ]},
+    
+    // 冲突处理 (12-15)
+    { d: 'conflict', t: '冲突处理', q: "与同事意见不一致时，你通常？", o: [
+        {t:"寻求双赢解决方案", s:10},
+        {t:"讨论协商各退一步", s:7},
+        {t:"坚持自己观点", s:3},
+        {t:"避免冲突，妥协", s:0}
+    ]},
+    { d: 'conflict', t: '冲突处理', q: "遇到职场冲突，你会？", o: [
+        {t:"主动沟通解决", s:10},
+        {t:"看情况再处理", s:7},
+        {t:"能躲就躲", s:3},
+        {t:"等对方主动", s:0}
+    ]},
+    { d: 'conflict', t: '冲突处理', q: "当众被质疑时，你的反应？", o: [
+        {t:"保持冷静，理性回应", s:10},
+        {t:"有点紧张但能应对", s:7},
+        {t:"容易紧张回避", s:3},
+        {t:"当场情绪化", s:0}
+    ]},
+    { d: 'conflict', t: '冲突处理', q: "你善于把尴尬局面化解吗？", o: [
+        {t:"非常善于", s:10},
+        {t:"比较善于", s:7},
+        {t:"不太善于", s:3},
+        {t:"完全不行", s:0}
+    ]},
+    
+    // 影响力 (16-19)
+    { d: 'influence', t: '影响力', q: "开会时，你的发言容易被采纳吗？", o: [
+        {t:"经常被采纳", s:10},
+        {t:"有时被采纳", s:7},
+        {t:"偶尔被采纳", s:3},
+        {t:"很少被采纳", s:0}
+    ]},
+    { d: 'influence', t: '影响力', q: "你能说服他人接受你的观点吗？", o: [
+        {t:"经常能说服", s:10},
+        {t:"有时能说服", s:7},
+        {t:"偶尔能说服", s:3},
+        {t:"很难说服", s:0}
+    ]},
+    { d: 'influence', t: '影响力', q: "同事遇到问题会咨询你吗？", o: [
+        {t:"经常被咨询", s:10},
+        {t:"偶尔被咨询", s:7},
+        {t:"很少被咨询", s:3},
+        {t:"基本没有", s:0}
+    ]},
+    { d: 'influence', t: '影响力', q: "你擅长调动团队氛围吗？", o: [
+        {t:"非常擅长", s:10},
+        {t:"比较擅长", s:7},
+        {t:"不太擅长", s:3},
+        {t:"完全不行", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const levels = [
+    { max: 30, l: "沟通待提升", c: "#FF4757", d: "你的沟通能力有较大提升空间，建议重点加强倾听和反馈能力。", advice: "从最基本的倾听开始，每天练习复述对方观点。", points: [
+        "每天花10分钟练习积极倾听",
+        "记录自己表达不清的例子并改进",
+        "学习建设性反馈技巧",
+        "从小范围会议开始练习发言"
+    ]},
+    { max: 50, l: "沟通有基础", c: "#FF7D00", d: "你有基本的沟通能力，但在某些方面还需提升。", advice: "针对弱项进行专项训练。", points: [
+        "加强深度倾听能力",
+        "练习结构化表达",
+        "学习非暴力沟通",
+        "主动承担汇报任务"
+    ]},
+    { max: 70, l: "沟通较优秀", c: "#4A90D9", d: "你具备较好的沟通能力，是团队中的有效沟通者。", advice: "继续保持优势，关注影响力的提升。", points: [
+        "保持现有优势",
+        "学习冲突转化技巧",
+        "提升演讲和影响力",
+        "帮助新人提升沟通"
+    ]},
+    { max: 90, l: "沟通高手", c: "#2ED573", d: "你是职场沟通高手，具备出色的表达和影响力。", advice: "尝试带领团队沟通培训，输出经验。", points: [
+        "保持高水准沟通",
+        "培养战略性沟通思维",
+        "分享沟通经验",
+        "承担更多管理角色"
+    ]},
+    { max: 120, l: "沟通专家", c: "#165DFF", d: "你是职场沟通专家，具备卓越的沟通技巧和影响力。", advice: "你已经达到专家级别，可以考虑转型做沟通培训。", points: [
+        "继续精进",
+        "担任沟通导师",
+        "系统总结方法论",
+        "影响更多人提升"
+    ]},
+    { max: 200, l: "超级沟通者", c: "#A55EEA", d: "你是罕见的超级沟通者，职场影响力极强。", advice: "你的沟通能力已经炉火纯青，是团队的宝贵财富。", points: [
+        "继续保持",
+        "成为团队沟通标杆",
+        "帮助组织提升沟通文化",
+        "考虑领导力发展"
+    ]}
+];
+
+let currQList = [];
+let currIdx = 0;
+let userInfo = {};
+let scores = { listening:0, expressing:0, feedback:0, conflict:0, influence:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userInfo.experience = document.getElementById('input-experience').value;
+    userInfo.scenario = document.getElementById('input-scenario').value;
+    userInfo.team = document.getElementById('input-team').value;
+    
+    currQList = [...questions];
+    currIdx = 0;
+    scores = { listening:0, expressing:0, feedback:0, conflict:0, influence:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { listening:0, expressing:0, feedback:0, conflict:0, influence:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+    
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'listening', n:'倾听'}, {k:'expressing', n:'表达'}, 
+        {k:'feedback', n:'反馈'}, {k:'conflict', n:'冲突'}, {k:'influence', n:'影响'}
+    ];
+    let html = '';
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 10) * 100, 100);
+        let color = pct> 60 ? '#4A90D9' : (pct> 30 ? '#FF7D00' : '#2ED573');
+        let txt = pct> 70 ? '优秀' : (pct> 40 ? '一般' : '待提升');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {listening:'倾听能力', expressing:'表达能力', feedback:'反馈能力', conflict:'冲突处理', influence:'影响力'};
+    return map[k];
+}
+
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、职场沟通风格诊断</div>
+        <p class="r-p" style="background:#fafafa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>📋 个人档案：</strong>工作年限：${userInfo.experience} | 场景：${userInfo.scenario} | 团队：${userInfo.team}
+        </p>
+        <div class="r-box" style="border-left:5px solid ${lvl.c};">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">沟通风格等级：${lvl.l}</div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>整体评估：</strong>${lvl.d}</p>
+            <p style="margin:10px 0 0; font-size:15px; line-height:1.6; color:#555;"><strong>核心建议：</strong>${lvl.advice}</p>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">二、五维沟通能力深度分析</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px;">*基于沟通心理学的深度分析</p>
+        ${generateDimAnalysis('listening', scores.listening)}
+        ${generateDimAnalysis('expressing', scores.expressing)}
+        ${generateDimAnalysis('feedback', scores.feedback)}
+        ${generateDimAnalysis('conflict', scores.conflict)}
+        ${generateDimAnalysis('influence', scores.influence)}
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">三、沟通能力提升方案</div>
+        <div class="r-box" style="background:#f0f7ff; border-color:#4A90D9;">
+            <div class="r-h3" style="color:#4A90D9;">📈 能力提升路线图</div>
+            <ul style="margin:0; padding-left:20px; line-height:2;">
+                <li><strong>第一阶段（1-2周）</strong>：专注倾听，练习复述和确认</li>
+                <li><strong>第二阶段（3-4周）</strong>：提升表达，练习结构化表达</li>
+                <li><strong>第三阶段（5-6周）</strong>：学习反馈，掌握非暴力沟通</li>
+                <li><strong>第四阶段（7-8周）</strong>：实战演练，主动承担沟通场景</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">四、推荐学习资源</div>
+        <div class="r-box">
+            <div class="r-h3">📚 沟通必读书籍</div>
+            <p class="r-p">
+                <strong>1. 《非暴力沟通》</strong> - 马歇尔·卢森堡<br>
+                <strong>2. 《沟通的艺术》</strong> - 罗纳德·B·阿德勒<br>
+                <strong>3. 《关键对话》</strong> - 科里·帕特森<br>
+                <strong>4. 《即兴演讲》</strong> - 朱迪思·汉弗莱
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026职场沟通风格测试 · 专业心理测评<br>
+        愿你成为职场沟通高手
+    </div>
+    `;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function generateDimAnalysis(key, val) {
+    let level = val> 7 ? 'high' : (val> 4 ? 'med' : 'low');
+    const config = {
+        high: { color: '#2ED573', bg: '#f0fff4', tag: '🌟 优秀', titleColor: '#2ED573' },
+        med: { color: '#FF7D00', bg: '#fff8e6', tag: '⚡ 一般', titleColor: '#FF7D00' },
+        low: { color: '#FF4757', bg: '#ffe4e6', tag: '⚠️ 待提升', titleColor: '#FF4757' }
+    };
+    const c = config[level];
+    const texts = {
+        listening: { high: "<strong>倾听能力出色！</strong>你能真正听进去他人的话，并给予有效回应。", med: "<strong>倾听能力一般。</strong>你有基本倾听能力，但还有提升空间。", low: "<strong>倾听能力待提升。</strong>建议加强倾听练习。" },
+        expressing: { high: "<strong>表达能力出色！</strong>你能清晰准确地表达自己的想法。", med: "<strong>表达能力一般。</strong>基本能表达清楚，但有时不够清晰。", low: "<strong>表达能力待提升。</strong>建议多练习结构化表达。" },
+        feedback: { high: "<strong>反馈能力出色！</strong>你能给出建设性反馈，也能很好地接受反馈。", med: "<strong>反馈能力一般。</strong>有基本反馈能力，但方式方法可以改进。", low: "<strong>反馈能力待提升。</strong>建议学习非暴力沟通技巧。" },
+        conflict: { high: "<strong>冲突处理出色！</strong>你能有效化解冲突，转化为合作机会。", med: "<strong>冲突处理一般。</strong>能处理一般冲突，但技巧可以提升。", low: "<strong>冲突处理待提升。</strong>建议学习冲突管理技巧。" },
+        influence: { high: "<strong>影响力出色！</strong>你的意见容易被采纳，具有领导力潜质。", med: "<strong>影响力一般。</strong>有一定影响力，但可以更强。", low: "<strong>影响力待提升。</strong>建议多争取发言机会，展示能力。" }
+    };
+    return `<div style="margin-bottom:20px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor}; margin-top:0;">${getDimName(key)} <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${val}/10)</span><span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span></div><p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][level]}</p></div>`;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    const cx=120, cy=120, r=90;
+    const keys = ['listening','expressing','feedback','conflict','influence'];
+    const labels = ['倾听','表达','反馈','冲突','影响'];
+    
+    ctx.strokeStyle = '#e3f2fd'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            ctx.lineTo(cx + Math.cos(a)*(r/4)*i, cy + Math.sin(a)*(r/4)*i);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let ratio = Math.min(s[k] / 10, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(74, 144, 217, 0.1)");
+    grd.addColorStop(1, "rgba(74, 144, 217, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.strokeStyle = '#4A90D9'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+async function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.setFont('simhei', 'normal');
+    
+    doc.setFillColor(74, 144, 217);
+    doc.rect(0, 0, 210, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.text('职场沟通风格深度分析报告', 105, 25, { align: 'center' });
+    
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(10);
+    doc.text('专业心理测评 · 2026全新版', 105, 35, { align: 'center' });
+    
+    let y = 55;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(16);
+    doc.text('一、沟通风格诊断', 15, y);
+    y += 10;
+    
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    doc.setFontSize(12);
+    doc.text(`综合得分：${total}分`, 15, y);
+    y += 8;
+    doc.text(`沟通风格等级：${lvl.l}`, 15, y);
+    y += 8;
+    doc.text(`整体评估：${lvl.d}`, 15, y);
+    y += 15;
+    
+    doc.setFontSize(16);
+    doc.text('二、五维能力分析', 15, y);
+    y += 10;
+    
+    doc.setFontSize(11);
+    const dims = [
+        {k:'listening', n:'倾听能力', s:scores.listening},
+        {k:'expressing', n:'表达能力', s:scores.expressing},
+        {k:'feedback', n:'反馈能力', s:scores.feedback},
+        {k:'conflict', n:'冲突处理', s:scores.conflict},
+        {k:'influence', n:'影响力', s:scores.influence}
+    ];
+    
+    dims.forEach(d => {
+        doc.text(`${d.n}：${d.s}/10分`, 15, y);
+        y += 7;
+    });
+    
+    y += 10;
+    doc.setFontSize(16);
+    doc.text('三、核心建议', 15, y);
+    y += 10;
+    
+    doc.setFontSize(11);
+    doc.text(lvl.advice, 15, y);
+    y += 20;
+    
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    doc.text('2026职场沟通风格测试 · 专业心理测评', 105, 280, { align: 'center' });
+    
+    doc.save('职场沟通风格报告.pdf');
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+document.getElementById('export-pdf-btn').addEventListener('click', exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "zcgt";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

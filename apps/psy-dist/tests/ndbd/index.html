@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>你适合读博吗？- 学术潜力分析</title>
+    <style>
+        :root { --primary: #2c3e50; --primary-dark: #1a252f; --accent: #8e44ad; --accent-hover: #9b59b6; --safe: #27ae60; --warning: #f39c12; --text-main: #2d3436; --text-sub: #636e72; --radius: 16px; --theme-red: #9b59b6; --theme-red-light: #a569bd; --card-radius: 24px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8f9fa; min-height: 100vh; color: var(--text-main); }
+        .container { max-width: 520px; margin: 0 auto; padding: 20px; position: relative; min-height: 100vh; }
+        .page { display: none; animation: fadeIn 0.5s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(100px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulseRed { 0%, 100% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0.7); } 50% { box-shadow: 0 0 0 15px rgba(155, 89, 182, 0); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .btn { display: block; width: 100%; padding: 18px; border: none; border-radius: 50px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+        .btn-primary { background: var(--primary); color: white; border-radius: var(--radius); }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-theme { background: linear-gradient(90deg, var(--theme-red), var(--theme-red-light)); color: white; box-shadow: 0 8px 20px rgba(155, 89, 182, 0.3); }
+        .btn-theme:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-accent { background: var(--accent); color: white; animation: pulseRed 2s infinite; border-radius: var(--radius); }
+        .btn-accent:active { transform: scale(0.98); }
+        .btn-secondary { background: #f1f2f6; color: var(--text-main); border: none; margin-top: 12px; }
+        .btn-secondary:active { transform: scale(0.98); }
+        .card { background: white; border-radius: var(--radius); padding: 24px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .cover-badge { display: inline-block; background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .cover-title { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+        .cover-title .highlight { color: #9b59b6; }
+        .cover-subtitle { color: var(--text-sub); font-size: 16px; margin-bottom: 30px; line-height: 1.5; }
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .feature-card { background: white; border-radius: var(--radius); padding: 20px 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .feature-icon { font-size: 32px; margin-bottom: 10px; }
+        .feature-text { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 10px; color: var(--text-main); }
+        .form-select { width: 100%; padding: 16px; border: 2px solid #eaecef; border-radius: var(--radius); font-size: 16px; background: white; cursor: pointer; }
+        .form-select:focus { outline: none; border-color: var(--primary); }
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .quiz-dimension { font-size: 14px; font-weight: 600; color: #9b59b6; }
+        .quiz-progress { font-size: 14px; font-weight: 600; color: var(--text-sub); }
+        .progress-bar { width: 100%; height: 8px; background: #eaecef; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #9b59b6, #a569bd); border-radius: 4px; transition: width 0.3s ease; }
+        .question-card { animation: slideUp 0.4s ease; }
+        .question-tag { display: inline-block; background: #f1f2f6; color: var(--primary); padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .question-text { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 30px; }
+        .option-btn { display: block; width: 100%; padding: 18px; border: 2px solid #eaecef; border-radius: var(--radius); background: white; font-size: 16px; font-weight: 500; text-align: left; cursor: pointer; margin-bottom: 12px; transition: all 0.2s ease; }
+        .option-btn:hover { border-color: #9b59b6; }
+        .option-btn.selected { border-color: #9b59b6; background: rgba(155, 89, 182, 0.05); }
+        .option-btn:active { transform: scale(0.98); }
+        .back-btn { background: transparent; border: none; color: var(--text-sub); font-size: 16px; cursor: pointer; padding: 10px 0; margin-top: 20px; }
+        .loading-container { text-align: center; padding: 50px 20px; }
+        .loading-icon { font-size: 80px; animation: breathe 1.5s infinite; margin-bottom: 30px; }
+        .loading-title { font-size: 24px; font-weight: 700; margin-bottom: 15px; }
+        .loading-subtitle { font-size: 16px; color: var(--text-sub); }
+        .result-top-card { background: linear-gradient(135deg, #9b59b6, #a569bd); color: white; border-radius: var(--radius); padding: 30px 20px; text-align: center; margin-bottom: 20px; }
+        .level-tag { display: inline-block; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 8px 24px; border-radius: 20px; font-size: 20px; font-weight: 700; margin-bottom: 15px; }
+        .level-desc { font-size: 16px; line-height: 1.5; opacity: 0.95; }
+        .result-match-section { text-align: center; margin: 30px 0; padding: 30px 20px; background: linear-gradient(135deg, #f8f9fa, #fff); border-radius: var(--radius); border: 2px solid #9b59b6; }
+        .match-title { font-size: 18px; font-weight: 600; color: var(--text-sub); margin-bottom: 10px; }
+        .match-name { font-size: 36px; font-weight: 700; color: #9b59b6; margin-bottom: 15px; }
+        .match-desc { font-size: 16px; color: var(--text-main); line-height: 1.8; }
+        .match-tags { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+        .match-tag { padding: 6px 16px; background: rgba(155, 89, 182, 0.1); color: #9b59b6; border-radius: 20px; font-size: 14px; }
+        .score-bar-section { margin: 20px 0; }
+        .score-bar-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; }
+        .score-bar-container { display: flex; gap: 15px; }
+        .score-bar-item { flex: 1; text-align: center; padding: 15px 10px; background: #f8f9fa; border-radius: 12px; }
+        .score-bar-label { font-size: 14px; color: var(--text-sub); margin-bottom: 8px; }
+        .score-bar-value { font-size: 24px; font-weight: 700; color: #9b59b6; }
+        .result-actions { position: sticky; bottom: 20px; padding-top: 20px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: none; overflow-y: auto; }
+        .modal.active { display: block; animation: fadeIn 0.3s ease; }
+        .modal-content { background: white; min-height: 100vh; padding: 20px; max-width: 520px; margin: 0 auto; position: relative; padding-top: 80px; }
+        .modal-close { position: fixed; top: 20px; right: calc(50% - 260px); font-size: 32px; background: white; border: none; cursor: pointer; color: var(--text-sub); z-index: 2001; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+        @media (max-width: 520px) { .modal-close { right: 20px; } }
+        .modal-close:hover { color: #9b59b6; transform: scale(1.1); }
+        .report-header { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; padding: 40px 20px 30px; margin: -20px -20px 30px; border-radius: 0 0 var(--radius) var(--radius); text-align: center; }
+        .report-title { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+        .report-subtitle { font-size: 16px; opacity: 0.9; }
+        .report-section { margin-bottom: 35px; }
+        .report-section-title { font-size: 18px; font-weight: 700; color: #9b59b6; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #f1f2f6; }
+        .report-content { font-size: 15px; line-height: 1.9; color: var(--text-main); }
+        .report-content p { margin-bottom: 12px; }
+        .report-highlight { background: linear-gradient(135deg, rgba(155, 89, 182, 0.05), rgba(142, 68, 173, 0.05)); border-left: 4px solid #9b59b6; padding: 15px; margin: 20px 0; border-radius: 0 var(--radius) var(--radius) 0; }
+        .report-list { padding-left: 20px; }
+        .report-list li { margin-bottom: 10px; line-height: 1.7; }
+    </style>
+</head>
+<body>
+
+    <div class="container" data-screenshot="psych-test-你读不懂">
+        <div id="coverPage" class="page active">
+            <div class="cover-badge">学术潜力评估版</div>
+            <h1 class="cover-title">你适合<br><span class="highlight">读博吗？</span></h1>
+            <p class="cover-subtitle">深度解析你的学术潜力、人格特质与科研适配度</p>
+            <div class="feature-grid">
+                <div class="feature-card"><div class="feature-icon">🧠</div><div class="feature-text">学术潜力评估</div></div>
+                <div class="feature-card"><div class="feature-icon">🔬</div><div class="feature-text">科研适配分析</div></div>
+                <div class="feature-card"><div class="feature-icon">📊</div><div class="feature-text">多维数据</div></div>
+                <div class="feature-card"><div class="feature-icon">📝</div><div class="feature-text">千字报告</div></div>
+            </div>
+            <button id="startBtn" class="btn btn-primary">开始潜力评估 (约需 5 分钟)</button>
+        </div>
+        <div id="profilePage" class="page">
+            <div class="card">
+                <h2 style="font-size:24px; font-weight:700; margin-bottom:15px;">你的学术背景 📚</h2>
+                <p style="color:var(--text-sub); margin-bottom:30px; line-height:1.6;">系统将根据你的背景调整分析维度。</p>
+                <div class="form-group">
+                    <label class="form-label">你的学历？</label>
+                    <select id="education" class="form-select">
+                        <option value="bachelor">本科在读</option>
+                        <option value="bachelorGrad">本科已毕业</option>
+                        <option value="master">硕士在读</option>
+                        <option value="masterGrad">硕士已毕业</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">你的专业大类？</label>
+                    <select id="major" class="form-select">
+                        <option value="science">理工科</option>
+                        <option value="liberal">文科</option>
+                        <option value="social">社科</option>
+                        <option value="medical">医科</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">是否有科研经历？</label>
+                    <select id="research" class="form-select">
+                        <option value="none">无任何科研经历</option>
+                        <option value="some">有少量经历（如课程设计）</option>
+                        <option value="more">有较多经历（如大创、论文）</option>
+                        <option value="rich">科研经历丰富</option>
+                    </select>
+                </div>
+            </div>
+            <button id="generateQuizBtn" class="btn btn-primary">开始测评</button>
+        </div>
+        <div id="quizPage" class="page">
+            <div class="quiz-header">
+                <div class="quiz-dimension" id="dimensionLabel">学术特质</div>
+                <div class="quiz-progress" id="progressLabel">1 / 22</div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+            <div class="card question-card">
+                <div class="question-tag" id="questionTag">🧠 学术动机</div>
+                <div class="question-text" id="questionText">加载中...</div>
+                <div id="optionsContainer"></div>
+            </div>
+            <button id="backQuestionBtn" class="back-btn" style="display:none;">← 返回上一题</button>
+        </div>
+        <div id="loadingPage" class="page">
+            <div class="loading-container">
+                <div class="loading-icon">🎓</div>
+                <div class="loading-title">正在分析学术潜力...</div>
+                <div class="loading-subtitle">结合科研能力模型运算中...</div>
+            </div>
+        </div>
+        <div id="resultPage" class="page">
+            <div class="result-top-card">
+                <div class="level-tag" id="levelTag">评估中</div>
+                <div class="level-desc" id="resultLevelDesc">正在分析你的学术潜力...</div>
+            </div>
+            <div class="result-match-section">
+                <div class="match-title">综合评估结果</div>
+                <div class="match-name" id="matchName">分析中</div>
+                <div class="match-desc" id="matchDesc"></div>
+                <div class="match-tags" id="matchTags"></div>
+            </div>
+            <div class="score-bar-section">
+                <div class="score-bar-title">四大维度评分</div>
+                <div class="score-bar-container">
+                    <div class="score-bar-item"><div class="score-bar-label">学术动机</div><div class="score-bar-value" id="motivationScore">-</div></div>
+                    <div class="score-bar-item"><div class="score-bar-label">科研能力</div><div class="score-bar-value" id="researchScore">-</div></div>
+                    <div class="score-bar-item"><div class="score-bar-label">抗压能力</div><div class="score-bar-value" id="pressureScore">-</div></div>
+                    <div class="score-bar-item"><div class="score-bar-label">职业匹配</div><div class="score-bar-value" id="careerScore">-</div></div>
+                </div>
+            </div>
+            <div class="result-actions">
+                <button id="reportBtn" class="btn btn-accent">📄 查看千字深度报告</button>
+                <button id="resetBtn" class="btn btn-secondary">🔄 重新测评</button>
+            </div>
+        </div>
+    </div>
+    <div id="reportModal" class="modal">
+        <button class="modal-close" id="closeModal">&times;</button>
+        <div class="modal-content">
+            <div class="report-header">
+                <div class="report-title">学术潜力深度分析报告</div>
+                <div class="report-subtitle">你的读博适配度与未来发展建议</div>
+            </div>
+            <div id="reportContent" class="report-content"></div>
+        </div>
+    </div>
+    <script>
+        const QUESTIONS = [
+            { dimension: "motivation", tag: "🧠 学术动机", text: "你读博的核心目的是什么？", options: [
+                { text: "追求学术理想，想在领域内有所建树", score: { motivation: 10, research: 8, pressure: 7, career: 9 } },
+                { text: "获得更高学历，提升就业竞争力", score: { motivation: 5, research: 6, pressure: 5, career: 8 } },
+                { text: "跟随大流，别人读我也读", score: { motivation: 2, research: 4, pressure: 3, career: 4 } },
+                { text: "暂时逃避就业，想再读几年", score: { motivation: 1, research: 3, pressure: 2, career: 2 } }
+            ]},
+            { dimension: "interest", tag: "🔬 研究兴趣", text: "你对学术研究的热情程度？", options: [
+                { text: "非常热爱，愿意投入大量时间", score: { motivation: 10, research: 9, pressure: 6, career: 9 } },
+                { text: "比较感兴趣，可以接受", score: { motivation: 7, research: 7, pressure: 6, career: 7 } },
+                { text: "一般般，没什么特别感觉", score: { motivation: 4, research: 5, pressure: 5, career: 5 } },
+                { text: "完全没兴趣，只是为了学位", score: { motivation: 1, research: 2, pressure: 3, career: 3 } }
+            ]},
+            { dimension: "research", tag: "🔍 科研经历", text: "你本科/硕士期间有科研经历吗？", options: [
+                { text: "有多段科研经历，发表过论文", score: { motivation: 8, research: 10, pressure: 7, career: 9 } },
+                { text: "有少量经历，参与过项目", score: { motivation: 6, research: 7, pressure: 6, career: 7 } },
+                { text: "几乎没有，完全没有接触过", score: { motivation: 4, research: 3, pressure: 4, career: 4 } },
+                { text: "很抵触，完全不想做研究", score: { motivation: 1, research: 2, pressure: 3, career: 2 } }
+            ]},
+            { dimension: "independence", tag: "🧩 独立能力", text: "你独立解决问题的能力？", options: [
+                { text: "非常强，习惯独立解决问题", score: { motivation: 8, research: 10, pressure: 8, career: 8 } },
+                { text: "较强，但需要时会求助", score: { motivation: 7, research: 8, pressure: 7, career: 7 } },
+                { text: "一般，习惯依赖他人", score: { motivation: 5, research: 5, pressure: 5, career: 5 } },
+                { text: "较弱，什么都问别人", score: { motivation: 3, research: 3, pressure: 4, career: 3 } }
+            ]},
+            { dimension: "persistence", tag: "⏳ 耐心程度", text: "面对长时间无法解决的问题，你会？", options: [
+                { text: "坚持研究，直到解决为止", score: { motivation: 9, research: 10, pressure: 8, career: 9 } },
+                { text: "会尝试不同方法，坚持一段时间", score: { motivation: 7, research: 8, pressure: 7, career: 7 } },
+                { text: "会焦虑，可能求助或放弃", score: { motivation: 4, research: 5, pressure: 4, career: 5 } },
+                { text: "很快放弃，换课题", score: { motivation: 2, research: 3, pressure: 3, career: 3 } }
+            ]},
+            { dimension: "reading", tag: "📖 文献阅读", text: "你阅读学术论文的频率和习惯？", options: [
+                { text: "每天阅读，已成习惯", score: { motivation: 10, research: 10, pressure: 6, career: 9 } },
+                { text: "每周会读一些，保持关注", score: { motivation: 7, research: 8, pressure: 6, career: 7 } },
+                { text: "偶尔读，需要时才读", score: { motivation: 4, research: 5, pressure: 5, career: 5 } },
+                { text: "基本不读，看到英文就头疼", score: { motivation: 2, research: 2, pressure: 4, career: 3 } }
+            ]},
+            { dimension: "writing", tag: "✍️ 写作能力", text: "你的学术写作能力？", options: [
+                { text: "写过论文，文笔流畅", score: { motivation: 8, research: 10, pressure: 7, career: 8 } },
+                { text: "写过报告，但不太熟练", score: { motivation: 6, research: 7, pressure: 6, career: 6 } },
+                { text: "写过课程论文，但很吃力", score: { motivation: 4, research: 5, pressure: 5, career: 4 } },
+                { text: "几乎没写过，特别抵触", score: { motivation: 2, research: 3, pressure: 4, career: 3 } }
+            ]},
+            { dimension: "pressure", tag: "🔥 抗压能力", text: "面对科研压力和导师push，你会？", options: [
+                { text: "压力就是动力，越战越勇", score: { motivation: 9, research: 8, pressure: 10, career: 8 } },
+                { text: "可以接受，能自我调节", score: { motivation: 7, research: 7, pressure: 8, career: 7 } },
+                { text: "会焦虑，需要时间缓解", score: { motivation: 5, research: 5, pressure: 5, career: 5 } },
+                { text: "压力太大，会崩溃逃避", score: { motivation: 3, research: 3, pressure: 3, career: 3 } }
+            ]},
+            { dimension: "time", tag: "⏰ 时间管理", text: "你的时间管理能力？", options: [
+                { text: "很强，有详细计划并执行", score: { motivation: 8, research: 9, pressure: 8, career: 8 } },
+                { text: "较好，基本能完成任务", score: { motivation: 7, research: 7, pressure: 7, career: 7 } },
+                { text: "一般，经常拖延", score: { motivation: 5, research: 5, pressure: 5, career: 5 } },
+                { text: "很差，总是拖到最后", score: { motivation: 3, research: 3, pressure: 3, career: 3 } }
+            ]},
+            { dimension: "failure", tag: "💪 失败态度", text: "面对科研失败/论文被拒，你会？", options: [
+                { text: "总结经验，继续尝试", score: { motivation: 9, research: 9, pressure: 9, career: 9 } },
+                { text: "会沮丧但会调整继续", score: { motivation: 7, research: 7, pressure: 7, career: 7 } },
+                { text: "很受打击，需要安慰", score: { motivation: 4, research: 5, pressure: 4, career: 5 } },
+                { text: "会很崩溃，想放弃", score: { motivation: 2, research: 3, pressure: 2, career: 3 } }
+            ]},
+            { dimension: "creativity", tag: "💡 创新能力", text: "你的创新能力如何？", options: [
+                { text: "经常有新想法，喜欢创新", score: { motivation: 10, research: 10, pressure: 7, career: 9 } },
+                { text: "偶尔有想法，需要引导", score: { motivation: 7, research: 8, pressure: 6, career: 7 } },
+                { text: "不太会创新，模仿为主", score: { motivation: 4, research: 5, pressure: 5, career: 5 } },
+                { text: "完全不会创新，照做就行", score: { motivation: 2, research: 3, pressure: 4, career: 3 } }
+            ]},
+            { dimension: "communication", tag: "🤝 沟通能力", text: "你与导师/同门的沟通能力？", options: [
+                { text: "善于沟通，能有效表达", score: { motivation: 8, research: 8, pressure: 7, career: 9 } },
+                { text: "还行，能正常交流", score: { motivation: 7, research: 7, pressure: 6, career: 7 } },
+                { text: "一般，不太会表达", score: { motivation: 5, research: 5, pressure: 5, career: 5 } },
+                { text: "很差，害怕沟通", score: { motivation: 3, research: 3, pressure: 4, career: 3 } }
+            ]},
+            { dimension: "career", tag: "💼 职业规划", text: "你对未来的职业规划？", options: [
+                { text: "想走学术道路，高校/科研", score: { motivation: 10, research: 9, pressure: 7, career: 10 } },
+                { text: "都可以，不确定", score: { motivation: 6, research: 7, pressure: 6, career: 7 } },
+                { text: "想进企业，学历只是门槛", score: { motivation: 4, research: 6, pressure: 5, career: 6 } },
+                { text: "完全没想好，走一步看一步", score: { motivation: 3, research: 4, pressure: 4, career: 4 } }
+            ]},
+            { dimension: "finance", tag: "💰 经济考量", text: "你对读博期间经济待遇的期待？", options: [
+                { text: "愿意为学术理想忍受低收入", score: { motivation: 10, research: 8, pressure: 6, career: 8 } },
+                { text: "能接受基本生活保障即可", score: { motivation: 7, research: 7, pressure: 6, career: 7 } },
+                { text: "希望有较好的收入", score: { motivation: 5, research: 6, pressure: 5, career: 6 } },
+                { text: "必须有较高收入才读", score: { motivation: 3, research: 5, pressure: 4, career: 5 } }
+            ]},
+            { dimension: "environment", tag: "🏫 学术环境", text: "你对学术环境的偏好？", options: [
+                { text: "想去顶尖学府/实验室", score: { motivation: 9, research: 9, pressure: 8, career: 9 } },
+                { text: "能去较好的学校就行", score: { motivation: 7, research: 7, pressure: 6, career: 7 } },
+                { text: "无所谓，学校不太重要", score: { motivation: 5, research: 5, pressure: 5, career: 5 } },
+                { text: "随便有个学上就行", score: { motivation: 2, research: 3, pressure: 3, career: 3 } }
+            ]},
+            { dimension: "longevity", tag: "⏱️ 读博周期", text: "你能接受的读博时间？", options: [
+                { text: "4-6年都可以接受", score: { motivation: 9, research: 8, pressure: 7, career: 8 } },
+                { text: "最好4年左右", score: { motivation: 7, research: 7, pressure: 6, career: 7 } },
+                { text: "希望3年内毕业", score: { motivation: 5, research: 6, pressure: 5, career: 5 } },
+                { text: "时间太长不想读", score: { motivation: 2, research: 4, pressure: 4, career: 4 } }
+            ]},
+            { dimension: "competition", tag: "🏆 竞争意识", text: "你对待学术竞争的态度？", options: [
+                { text: "喜欢竞争，能激发动力", score: { motivation: 9, research: 9, pressure: 9, career: 8 } },
+                { text: "可以接受，正常竞争", score: { motivation: 7, research: 7, pressure: 7, career: 7 } },
+                { text: "害怕竞争，想避开", score: { motivation: 4, research: 5, pressure: 4, career: 5 } },
+                { text: "完全不想参与竞争", score: { motivation: 2, research: 3, pressure: 3, career: 3 } }
+            ]},
+            { dimension: "mentor", tag: "👨‍🏫 导师期望", text: "你对导师的期望是？", options: [
+                { text: "希望能得到悉心指导", score: { motivation: 8, research: 8, pressure: 6, career: 8 } },
+                { text: "希望有指导但给自由度", score: { motivation: 7, research: 7, pressure: 6, career: 7 } },
+                { text: "希望放养，自己探索", score: { motivation: 5, research: 6, pressure: 7, career: 6 } },
+                { text: "无所谓，靠自己", score: { motivation: 4, research: 5, pressure: 6, career: 5 } }
+            ]},
+            { dimension: "publication", tag: "📑 发表期待", text: "你对论文发表的期待？", options: [
+                { text: "想发高水平期刊/顶会", score: { motivation: 10, research: 10, pressure: 8, career: 9 } },
+                { text: "能发核心期刊就行", score: { motivation: 7, research: 7, pressure: 6, career: 7 } },
+                { text: "能达到毕业要求即可", score: { motivation: 5, research: 5, pressure: 5, career: 5 } },
+                { text: "不想发，太麻烦", score: { motivation: 2, research: 3, pressure: 4, career: 3 } }
+            ]},
+            { dimension: "purpose", tag: "🎯 读博目的", text: "如果重来，你还会选择读博吗？", options: [
+                { text: "一定会，这是理想", score: { motivation: 10, research: 9, pressure: 7, career: 10 } },
+                { text: "可能会，看情况", score: { motivation: 6, research: 7, pressure: 6, career: 7 } },
+                { text: "不太确定，可能不读", score: { motivation: 4, research: 5, pressure: 5, career: 5 } },
+                { text: "绝对不会", score: { motivation: 1, research: 2, pressure: 3, career: 2 } }
+            ]},
+            { dimension: "transfer", tag: "🔄 转换成本", text: "如果读博中途想退出，你的代价是？", options: [
+                { text: "成本很低，可以随时退出", score: { motivation: 3, research: 4, pressure: 5, career: 5 } },
+                { text: "有一些成本，但可接受", score: { motivation: 5, research: 5, pressure: 6, career: 6 } },
+                { text: "成本较高，会很纠结", score: { motivation: 7, research: 7, pressure: 7, career: 7 } },
+                { text: "成本很高，骑虎难下", score: { motivation: 9, research: 8, pressure: 8, career: 8 } }
+            ]}
+        ];
+
+        const state = { currentQuestionIndex: 0, answers: [], profileData: {}, scores: { motivation: 0, research: 0, pressure: 0, career: 0 }, totalScore: 0, resultType: '' };
+
+        function showPage(pageId) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(pageId).classList.add('active'); }
+
+        function initEventListeners() {
+            document.getElementById('startBtn').addEventListener('click', () => showPage('profilePage'));
+            document.getElementById('generateQuizBtn').addEventListener('click', () => {
+                state.profileData.education = document.getElementById('education').value;
+                state.profileData.major = document.getElementById('major').value;
+                state.profileData.research = document.getElementById('research').value;
+                state.currentQuestionIndex = 0; state.answers = [];
+                renderQuestion(0); showPage('quizPage');
+            });
+            document.getElementById('backQuestionBtn').addEventListener('click', () => { if (state.currentQuestionIndex> 0) renderQuestion(state.currentQuestionIndex - 1); });
+            document.getElementById('reportBtn').addEventListener('click', () => { generateReport(); document.getElementById('reportModal').classList.add('active'); });
+            document.getElementById('resetBtn').addEventListener('click', () => { state.currentQuestionIndex = 0; state.answers = []; state.scores = { motivation: 0, research: 0, pressure: 0, career: 0 }; showPage('profilePage'); });
+            document.getElementById('closeModal').addEventListener('click', () => document.getElementById('reportModal').classList.remove('active'));
+            document.getElementById('reportModal').addEventListener('click', (e) => { if (e.target.id === 'reportModal') document.getElementById('reportModal').classList.remove('active'); });
+        }
+
+        function renderQuestion(index) {
+            if (index>= QUESTIONS.length) { calculateScores(); showPage('loadingPage'); setTimeout(() => { renderResults(); showPage('resultPage'); }, 3000); return; }
+            state.currentQuestionIndex = index;
+            const q = QUESTIONS[index];
+            document.getElementById('dimensionLabel').textContent = q.tag;
+            document.getElementById('progressLabel').textContent = `${index + 1} / ${QUESTIONS.length}`;
+            document.getElementById('progressFill').style.width = `${((index + 1) / QUESTIONS.length) * 100}%`;
+            document.getElementById('questionTag').textContent = q.tag;
+            document.getElementById('questionText').textContent = q.text;
+            const container = document.getElementById('optionsContainer'); container.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn' + (state.answers[index] === i ? ' selected' : '');
+                btn.textContent = opt.text;
+                btn.onclick = () => { state.answers[index] = i; container.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); setTimeout(() => renderQuestion(index + 1), 300); };
+                container.appendChild(btn);
+            });
+            document.getElementById('backQuestionBtn').style.display = index> 0 ? 'block' : 'none';
+        }
+
+        function calculateScores() {
+            state.scores = { motivation: 0, research: 0, pressure: 0, career: 0 };
+            const maxScore = QUESTIONS.length * 10;
+            QUESTIONS.forEach((q, i) => { if (state.answers[i] !== undefined) { const s = q.options[state.answers[i]].score; state.scores.motivation += s.motivation; state.scores.research += s.research; state.scores.pressure += s.pressure; state.scores.career += s.career; } });
+            Object.keys(state.scores).forEach(k => state.scores[k] = Math.round((state.scores[k] / maxScore) * 100));
+            state.totalScore = Math.round(Object.values(state.scores).reduce((a,b) => a + b, 0) / 4);
+        }
+
+        function renderResults() {
+            const results = {
+                high: { name: '非常适合读博', desc: '你具备强烈的学术动机、优秀的科研能力和良好的抗压水平。读博是你实现学术理想的最佳路径。', tags: ['学术型', '研究型人才', '抗压能力强'] },
+                medium: { name: '适合读博', desc: '你具备一定的学术潜力，但在某些方面还需要加强。读博是可行的，但需要做好准备。', tags: ['潜力型', '需加强自律', '可以尝试'] },
+                low: { name: '不太适合读博', desc: '你目前的学术动机和科研能力与读博要求存在一定差距。建议先积累经验或考虑其他发展路径。', tags: ['需谨慎', '建议观望', '其他选择'] }
+            };
+            let result; if (state.totalScore>= 75) result = results.high; else if (state.totalScore>= 55) result = results.medium; else result = results.low;
+            document.getElementById('levelTag').textContent = result.name;
+            document.getElementById('resultLevelDesc').textContent = '综合评估结果';
+            document.getElementById('matchName').textContent = result.name;
+            document.getElementById('matchDesc').textContent = result.desc;
+            document.getElementById('matchTags').innerHTML = result.tags.map(t => `<span class="match-tag">${t}</span>`).join('');
+            document.getElementById('motivationScore').textContent = state.scores.motivation + '%';
+            document.getElementById('researchScore').textContent = state.scores.research + '%';
+            document.getElementById('pressureScore').textContent = state.scores.pressure + '%';
+            document.getElementById('careerScore').textContent = state.scores.career + '%';
+        }
+
+        function generateReport() {
+            const eduMap = { bachelor: '本科在读', bachelorGrad: '本科毕业', master: '硕士在读', masterGrad: '硕士毕业' };
+            const majorMap = { science: '理工科', liberal: '文科', social: '社科', medical: '医科' };
+            const resMap = { none: '无科研经历', some: '少量经历', more: '较多经历', rich: '经历丰富' };
+            const result = state.totalScore>= 75 ? '非常适合' : state.totalScore>= 55 ? '适合但需努力' : '不太建议';
+            const html = `
+                <div class="report-section"><h3 class="report-section-title">📋 测评基础信息</h3>
+                <p>• 学历背景：${eduMap[state.profileData.education] || '本科'}</p>
+                <p>• 专业类型：${majorMap[state.profileData.major] || '理工科'}</p>
+                <p>• 科研经历：${resMap[state.profileData.research] || '无'}</p>
+                <p>• 综合评分：${state.totalScore}/100</p>
+                <p>• 测试时间：${new Date().toLocaleString()}</p></div>
+                <div class="report-section"><h3 class="report-section-title">📊 核心结论：${result}读博</h3>
+                <div class="report-highlight"><p style="font-size:17px; font-weight:700;">${state.totalScore>= 75 ? '🎉 恭喜！你具备优秀的学术潜力，读博是你的理想选择。' : state.totalScore>= 55 ? '📌 你具备一定的学术基础，但需要做好充分准备。' : '⚠️ 读博可能不是最佳选择，建议谨慎考虑。'}</p></div></div>
+                <div class="report-section"><h3 class="report-section-title">📈 四维深度分析</h3>
+                <p><strong>🧠 学术动机 (${state.scores.motivation}%)：</strong>${state.scores.motivation>= 70 ? '你具有强烈的学术追求和明确的读博目标，这是读博成功的核心动力。' : state.scores.motivation>= 50 ? '你的学术动机一般，需要进一步明确自己的目标。' : '你的学术动机较弱，可能需要重新思考是否要读博。'}</p>
+                <p><strong>🔬 科研能力 (${state.scores.research}%)：</strong>${state.scores.research>= 70 ? '你具备优秀的科研素养和独立研究能力，能很好地完成博士阶段的研究任务。' : state.scores.research>= 50 ? '你的科研能力有基础，但仍需加强锻炼。' : '你的科研经验相对欠缺，建议先积累一些科研经历。'}</p>
+                <p><strong>🔥 抗压能力 (${state.scores.pressure}%)：</strong>${state.scores.pressure>= 70 ? '你能很好地应对科研压力和导师push，具备强大的心理素质。' : state.scores.pressure>= 50 ? '你的抗压能力一般，需要学会自我调节。' : '你可能较难承受读博期间的压力，建议慎重。'}</p>
+                <p><strong>💼 职业匹配 (${state.scores.career}%)：</strong>${state.scores.career>= 70 ? '你的职业规划与读博高度匹配，博士学位会为你的职业发展锦上添花。' : state.scores.career>= 50 ? '你的职业规划与读博有一定关联，可以考虑。' : '你的职业目标可能不需要博士学位，建议重新评估。'}</p></div>
+                <div class="report-section"><h3 class="report-section-title">💡 针对性建议</h3>
+                ${state.totalScore>= 75 ? '<p>1. <strong>立即行动：</strong>可以开始准备申博材料，选择目标院校和导师。</p><p>2. <strong>提升背景：</strong>继续积累科研经历，争取发表论文。</p><p>3. <strong>提前联系：</strong>尽早联系目标导师，争取好印象。</p><p>4. <strong>准备语言：</strong>如果申请海外，需要提前准备语言考试。</p>' : state.totalScore>= 55 ? '<p>1. <strong>明确目标：</strong>先想清楚为什么要读博，不要随大流。</p><p>2. <strong>积累经验：</strong>建议先参与一些科研项目，积累经验。</p><p>3. <strong>提升能力：</strong>重点提升科研能力和抗压能力。</p><p>4. <strong>谨慎选择：</strong>选择适合自己能力的学校和导师。</p>' : '<p>1. <strong>重新评估：</strong>建议重新思考职业规划，博士学位是否必要。</p><p>2. <strong>其他选择：</strong>可以考虑直接就业或读硕士。</p><p>3. <strong>如果坚持：</strong>如果一定要读博，需要做好充分准备，尤其是心理建设。</p><p>4. <strong>降低期望：</strong>可以选择相对容易毕业的院校和方向。</p>'}</div>
+                <div class="report-section"><h3 class="report-section-title">⚠️ 读博的风险提示</h3>
+                <ul class="report-list"><li><strong>时间成本：</strong>读博需要3-6年时间，期间收入有限。</li><li><strong>毕业难度：</strong>近年来博士延期率上升，需做好心理准备。</li><li><strong>导师风险：</strong>导师质量参差不齐，遇到不合适的导师会很痛苦。</li><li><li>就业压力：</strong>博士就业并非一片光明，高校竞争激烈。</li><li><strong>身心健康：</strong>长期科研压力可能导致身心健康问题。</li></ul></div>
+                <div class="report-section"><h3 class="report-section-title">📅 行动路线图</h3>
+                <p>如果你决定读博，建议按以下步骤准备：</p>
+                <ul class="report-list"><li><strong>第1步：</strong>确定研究方向和目标院校（1-2个月）</li><li><strong>第2步：</strong>提升背景：发论文、做项目（3-6个月）</li><li><strong>第3步：</strong>准备材料：个人陈述、推荐信（2个月）</li><li><strong>第4步：</strong>联系导师：发送套磁信（2-3个月）</li><li><strong>第5步：</strong>准备考试：专业课、英语（3-6个月）</li><li><strong>第6步：</strong>申请提交：网申、面试（1-2个月）</li></ul></div>
+                <div class="report-section"><h3 class="report-section-title">💪 心理建设</h3>
+                <p>读博是一场马拉松，需要：</p>
+                <ul class="report-list"><li>坚定的学术理想作为内在动力</li><li>良好的时间管理和自律能力</li><li>有效的压力管理和情绪调节</li><li>积极主动的沟通和寻求帮助</li><li>接受失败和挫折的心态</li></ul>
+                <p style="margin-top:20px; text-align:center; color:var(--text-sub);">愿你做出最适合自己的选择！</p></div>`;
+            document.getElementById('reportContent').innerHTML = html;
+        }
+
+        window.onload = initEventListeners;
+    </script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "ndbd";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

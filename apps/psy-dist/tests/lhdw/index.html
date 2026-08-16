@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>灵魂动物测试 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root { --primary: #E17055; --primary-dark: #D63031; --accent: #00CEC9; --safe: #2ED573; --bg-gradient-start: #FFEAA7; --bg-gradient-end: #FDCB6E; --text-main: #2D3436; --text-sub: #636E72; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(225, 112, 85, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(225, 112, 85, 0); } 100% { box-shadow: 0 0 0 0 rgba(225, 112, 85, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(225, 112, 85, 0.3); transition: transform 0.1s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#fff5d6 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 40px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ffeaa7; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #ffeaa7; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #ffeaa7; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #ffeaa7; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #fff5d6; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .animal-icon { font-size: 80px; margin-bottom: 20px; }
+        .animal-name { font-size: 36px; font-weight: 900; color: var(--primary); margin-bottom: 10px; }
+        .animal-subtitle { font-size: 16px; color: #636E72; margin-bottom: 20px; }
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 16px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+        .trait-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .trait-name { width: 80px; font-size: 14px; font-weight: 700; color: #2D3436; }
+        .trait-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .trait-bar-fill { height: 100%; border-radius: 4px; }
+        .trait-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-orange 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ffeaa7; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #ffeaa7; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        .export-btn { background: #00CEC9; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+    <div id="page-intro" data-screenshot="psych-test-灵魂动物测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">灵魂<br><span>动物</span>测试</h1>
+        <p class="cover-subtitle">探索你内心的本质<br>解锁你的灵魂动物原型</p>
+        <div class="intro-features">
+            <div class="feature-box"><div class="feature-icon">🦁</div><div class="feature-title">人格投射理论</div><div class="feature-desc">基于人格投射理论，科学解读你的内心动物。</div></div>
+            <div class="feature-box"><div class="feature-icon">🔮</div><div class="feature-title">深度人格分析</div><div class="feature-desc">5种动物原型，12维度深度解析。</div></div>
+            <div class="feature-box"><div class="feature-icon">✨</div><div class="feature-title">精准定位</div><div class="feature-desc">找到与你灵魂最契合的动物。</div></div>
+            <div class="feature-box"><div class="feature-icon">💫</div><div class="feature-title">成长指引</div><div class="feature-desc">了解优势短板，指明成长方向。</div></div>
+        </div>
+        <button class="btn" id="start-btn">开始探索 (约需 2 分钟)</button>
+    </div>
+    <div id="page-test">
+        <div class="progress-header"><span id="dim-tag">维度：性格</span><span id="progress-text">1 / 15</span></div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🦁 性格</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+    <div id="page-loading"><div style="font-size:50px; animation: pulse-orange 1s infinite;">🔮</div><h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在探索你的灵魂动物...</h3><p style="color:#636E72; font-size:14px;">正在解读你的性格密码...<br>匹配灵魂动物...<br>生成专属报告...</p></div>
+    <div id="page-result">
+        <div class="result-header">
+            <div class="animal-icon" id="res-icon">🦁</div>
+            <div class="animal-name" id="res-name">加载中...</div>
+            <div class="animal-subtitle" id="res-subtitle">...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+        <div class="card">
+            <div class="card-title">✨ 性格特质解析</div>
+            <div id="traits-container"></div>
+        </div>
+        <div class="card">
+            <div class="card-title">💫 灵魂动物解读</div>
+            <div id="animal-desc"></div>
+        </div>
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《灵魂动物深度解读》</button>
+            <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新探索</button>
+        </div>
+    </div>
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header"><div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div><div class="r-h1">灵魂动物深度解读报告</div><div style="font-size:14px;">专业心理测评 · 2026全新版</div></div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    { d: 'leadership', t: '领导力', q: "在团队中，你通常扮演什么角色？", o: [{t:"领导者，指引方向",s:4},{t:"协调者，促进合作",s:3},{t:"执行者，做好任务",s:2},{t:"支持者，帮助他人",s:1}] },
+    { d: 'leadership', t: '领导力', q: "遇到困难时，你会？", o: [{t:"冲在最前面",s:4},{t:"组织大家解决",s:3},{t:"跟随团队行动",s:2},{t:"默默支持",s:1}] },
+    { d: 'independence', t: '独立性', q: "你更倾向于？", o: [{t:"独自行动",s:4},{t:"偶尔合作",s:3},{t:"团队协作",s:2},{t:"依赖他人",s:1}] },
+    { d: 'independence', t: '独立性', q: "做决定时，你通常？", o: [{t:"自己果断决定",s:4},{t:"参考意见后决定",s:3},{t:"希望大家一起决定",s:2},{t:"听别人的",s:1}] },
+    { d: 'social', t: '社交力', q: "你更喜欢哪种社交方式？", o: [{t:"广交新朋友",s:4},{t:"维护少数密友",s:3},{t:"线上交流为主",s:2},{t:"独处更舒服",s:1}] },
+    { d: 'social', t: '社交力', q: "在陌生场合，你会？", o: [{t:"主动搭话",s:4},{t:"观察后再行动",s:3},{t:"等人主动",s:2},{t:"默默观察",s:1}] },
+    { d: 'emotion', t: '情绪管理', q: "当你生气时，会？", o: [{t:"直接表达",s:4},{t:"冷静后再说",s:3},{t:"生闷气",s:2},{t:"压抑情绪",s:1}] },
+    { d: 'emotion', t: '情绪管理', q: "面对压力，你通常？", o: [{t:"迎难而上",s:4},{t:"调整后应对",s:3},{t:"逃避拖延",s:2},{t:"情绪低落",s:1}] },
+    { d: 'adventure', t: '冒险精神', q: "你愿意尝试新事物吗？", o: [{t:"非常愿意",s:4},{t:"比较愿意",s:3},{t:"看情况",s:2},{t:"不太愿意",s:1}] },
+    { d: 'adventure', t: '冒险精神', q: "面对未知，你会？", o: [{t:"充满好奇",s:4},{t:"谨慎探索",s:3},{t:"有点担心",s:2},{t:"害怕逃避",s:1}] },
+    { d: 'loyalty', t: '忠诚度', q: "对朋友，你会？", o: [{t:"非常忠诚",s:4},{t:"比较忠诚",s:3},{t:"看关系深浅",s:2},{t:"比较淡薄",s:1}] },
+    { d: 'loyalty', t: '忠诚度', q: "承诺的事情，你会？", o: [{t:"一定做到",s:4},{t:"尽量做到",s:3},{t:"看情况",s:2},{t:"经常忘记",s:1}] },
+    { d: 'protection', t: '保护欲', q: "看到朋友受欺负，你会？", o: [{t:"立刻出头",s:4},{t:"想办法帮忙",s:3},{t:"同情但不出头",s:2},{t:"假装没看到",s:1}] },
+    { d: 'protection', t: '保护欲', q: "你愿意保护弱势吗？", o: [{t:"非常有保护欲",s:4},{t:"比较愿意",s:3},{t:"看情况",s:2},{t:"不太愿意",s:1}] },
+    { d: 'wisdom', t: '智慧', q: "你解决问题的方式？", o: [{t:"理性分析",s:4},{t:"经验+思考",s:3},{t:"凭直觉",s:2},{t:"问别人",s:1}] }
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+const animals = {
+    lion: {icon:'🦁',name:'狮子',subtitle:'王者领袖型',desc:'你是天生的领导者，具有强大的气场和号召力。你自信、勇敢、有担当，在团队中往往是核心人物。你喜欢掌控局面，有强烈的领地意识。对朋友忠诚护短，但有时可能过于强势。',traits:{leadership:90,independence:85,social:70,emotion:75,adventure:80,loyalty:90,protection:85,wisdom:80}},
+    wolf: {icon:'🐺',name:'狼',subtitle:'团队协作型',desc:'你是高度社会化的动物，重视团队合作和家庭观念。你聪明、敏锐、有耐心，善于观察和等待时机。你对认定的人极度忠诚，但可能警惕性较强，不轻易相信陌生人。你有强烈的竞争意识和领地意识。',traits:{leadership:70,independence:80,social:85,emotion:70,adventure:85,loyalty:95,protection:80,wisdom:85}},
+    cat: {icon:'🐱',name:'猫',subtitle:'独立优雅型',desc:'你是优雅而神秘的代表。表面上独立高冷，内心却渴望被爱和关注。你聪明、有主见、不随波逐流，喜欢按照自己的节奏生活。你对陌生人保持距离，但一旦认定就会非常亲密。',traits:{leadership:60,independence:95,social:55,emotion:85,adventure:65,loyalty:75,protection:60,wisdom:90}},
+    deer: {icon:'🦌',name:'鹿',subtitle:'温和友善型',desc:'你是温和善良的和平使者。你性格温柔、善解人意，总是给人温暖的感觉。你善于倾听，是朋友们的情感垃圾桶。你不喜欢冲突，倾向于回避矛盾。但你有自己的底线和原则。',traits:{leadership:50,independence:60,social:90,emotion:95,adventure:55,loyalty:80,protection:75,wisdom:75}},
+    fox: {icon:'🦊',name:'狐狸',subtitle:'聪明机敏型',desc:'你是聪明、机敏、灵活的代名词。你善于思考、懂得变通，总能找到问题的解决方案。你有很强的适应能力，能在各种环境中生存。你有时候会有点腹黑，但总的来说是有趣的灵魂。',traits:{leadership:65,independence:75,social:80,emotion:75,adventure:90,loyalty:65,protection:55,wisdom:95}}
+};
+let currQList=[],currIdx=0,scores={leadership:0,independence:0,social:0,emotion:0,adventure:0,loyalty:0,protection:0,wisdom:0};
+function startTest(){currQList=[...questions];currIdx=0;scores={leadership:0,independence:0,social:0,emotion:0,adventure:0,loyalty:0,protection:0,wisdom:0};document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=`${currIdx+1}/${currQList.length}`;document.getElementById('progress-fill').style.width=`${(currIdx/currQList.length)*100}%`;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;document.getElementById('q-category').innerText=q.t;document.getElementById('dim-tag').innerText=`维度：${q.t}`;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(q.d,opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(dim,val){scores[dim]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';document.getElementById('page-loading').style.display='flex';setTimeout(()=>{document.getElementById('page-loading').style.display='none';document.getElementById('page-result').style.display='block';calculateResult();},2000);}
+function resetTest(){document.getElementById('page-result').style.display='none';document.getElementById('page-intro').style.display='flex';currIdx=0;scores={leadership:0,independence:0,social:0,emotion:0,adventure:0,loyalty:0,protection:0,wisdom:0};}
+function calculateResult(){const totals={lion:scores.leadership*1.2+scores.protection+scores.adventure*0.8,wolf:scores.social*1.2+scores.loyalty+scores.independence*0.9,cat:scores.independence*1.2+scores.wisdom+scores.emotion*0.8,deer:scores.social*1.1+scores.emotion*1.2+scores.loyalty*0.9,fox:scores.wisdom*1.2+scores.adventure+scores.social*0.9};let maxType='lion',maxVal=0;Object.entries(totals).forEach(([k,v])=>{if(v>maxVal){maxVal=v;maxType=k;}});const animal=animals[maxType];const numEl=document.getElementById('res-icon');document.getElementById('res-icon').innerText=animal.icon;document.getElementById('res-name').innerText=animal.name;document.getElementById('res-subtitle').innerText=animal.subtitle;document.getElementById('res-desc').innerText=animal.desc.split('。')[0]+'。';renderTraits(animal.traits);document.getElementById('animal-desc').innerHTML=`<p style="font-size:15px;line-height:1.8;color:#555;">${animal.desc}</p>`;showReport(maxType,animal);}
+function renderTraits(t){const box=document.getElementById('traits-container');const names={leadership:'领导力',independence:'独立性',social:'社交力',emotion:'情绪管理',adventure:'冒险精神',loyalty:'忠诚度',protection:'保护欲',wisdom:'智慧'};let html='';Object.keys(t).forEach(k=>{let pct=t[k];let color='#E17055';html+=`<div class="trait-row"><div class="trait-name">${names[k]}</div><div class="trait-bar-bg"><div class="trait-bar-fill" style="width:${pct}%;background:${color};"></div></div><div class="trait-val">${pct}%</div></div>`;});box.innerHTML=html;}
+function showReport(type,animal){let html=`<div class="report_section"><div class="r-h1">一、你的灵魂动物</div><div style="text-align:center;padding:30px;"><div style="font-size:80px;">${animal.icon}</div><div style="font-size:32px;font-weight:900;color:#E17055;margin:10px 0;">${animal.name}</div><div style="font-size:16px;color:#636E72;">${animal.subtitle}</div></div><p class="r-p" style="text-align:center;">${animal.desc}</p></div><div class="report_section"><div class="r-h2">二、性格特质详解</div>${Object.keys(animal.traits).map(k=>`<div style="margin-bottom:15px;padding:12px;background:#fafafa;border-radius:8px;"><div style="font-weight:700;margin-bottom:5px;">${['领导力','独立性','社交力','情绪管理','冒险精神','忠诚度','保护欲','智慧'][['leadership','independence','social','emotion','adventure','loyalty','protection','wisdom'].indexOf(k)]}</div><div style="height:6px;background:#eee;border-radius:3px;"><div style="height:100%;width:${animal.traits[k]}%;background:#E17055;border-radius:3px;"></div></div></div>`).join('')}</div><div class="report_section"><div class="r-h2">三、相处建议</div><div class="r-box"><p class="r-p">与${animal.name}类型的人相处：</p><ul style="margin:0;padding-left:20px;line-height:2;"><li>给予足够的尊重和空间</li><li>欣赏他们的优点而非改变他们</li><li>建立信任需要时间，不要急于靠近</li><li>他们是值得深交的朋友</li></ul></div></div><div style="text-align:center;color:#ccc;font-size:12px;margin-top:50px;">2026灵魂动物测试·专业心理测评</div>`;document.getElementById('report-content').innerHTML=html;document.getElementById('report-modal').style.display='block';}
+function closeReport(){document.getElementById('report-modal').style.display='none';}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(225,112,85);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('灵魂动物深度解读报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});const animal=animals[Object.keys(animals)[Math.floor(Math.random()*5)]];let y=55;doc.setFontSize(18);doc.text(`你的灵魂动物：${animal.name}`,15,y);y+=10;doc.setFontSize(12);doc.text(animal.desc.substring(0,150)+'...',15,y);y+=30;doc.setFontSize(14);doc.text('性格特质',15,y);y+=10;doc.setFontSize(10);const traits=['领导力','独立性','社交力','情绪管理','冒险精神','忠诚度','保护欲','智慧'];traits.forEach((t,i)=>{doc.text(`${t}：${60+Math.floor(Math.random()*35)}%`,15,y+i*7);});doc.setFontSize(9);doc.setTextColor(150,150,150);doc.text('2026灵魂动物测试·专业心理测评',105,280,{align:'center'});doc.save('灵魂动物报告.pdf');}
+document.getElementById('start-btn').document.getElementById('start-btn').addEventListener('click',function(){var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}startTest();document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';});document.getElementById('show-report-btn').addEventListener('click',()=>{const type=Object.keys(animals)[Math.floor(Math.random()*5)];showReport(type,animals[type]);});document.getElementById('close-report-btn').addEventListener('click',closeReport);document.getElementById('reset-test-btn').addEventListener('click',resetTest);document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "lhdw";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

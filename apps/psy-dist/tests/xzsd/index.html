@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>吸渣体质深度检测 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #A55EEA;
+            --primary-dark: #8854D0;
+            --accent: #FF7D00;
+            --safe: #2ED573;
+            --warning: #FF4757;
+            --bg-gradient-start: #F5F0FF;
+            --bg-gradient-end: #EDE7F6;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-purple { 0% { box-shadow: 0 0 0 0 rgba(165, 94, 234, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(165, 94, 234, 0); } 100% { box-shadow: 0 0 0 0 rgba(165, 94, 234, 0); } }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(165, 94, 234, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 15px; }
+
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#f3e5f5 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 38px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ede7f6; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #ede7f6; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #f3e5f5; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #ede7f6; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #f3e5f5; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        #page-result { display: none; background: #f3e5f5; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ede7f6; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-purple 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ede7f6; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #ede7f6; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-吸渣体质深度检测" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">吸渣体质<br><span>深度</span>检测</h1>
+        <p class="cover-subtitle">科学识别你是否容易被渣<br>找到吸渣的核心原因</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🔍</div>
+                <div class="feature-title">五维深度分析</div>
+                <div class="feature-desc">依恋、认知、行为、边界、选择，全方位扫描吸渣风险。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">依恋理论支撑</div>
+                <div class="feature-desc">基于依恋理论，科学评估你的吸渣风险。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">⚠️</div>
+                <div class="feature-title">精准定位原因</div>
+                <div class="feature-desc">找到你总是遇到渣男的根本原因。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🛡️</div>
+                <div class="feature-title">自我保护方案</div>
+                <div class="feature-desc">教你建立健康的关系边界。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始检测 (约需 3 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">个人档案建立 💕</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的情史精准评估吸渣体质。</p>
+
+        <div class="form-group">
+            <label class="form-label">你谈过几次恋爱？</label>
+            <select id="input-experience" class="select-box">
+                <option value="0">0次 (从未恋爱)</option>
+                <option value="1">1次 (经验极少)</option>
+                <option value="2-3">2-3次 (经验较少)</option>
+                <option value="4+">4次及以上 (经验丰富)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你遇到过几次"渣"？</label>
+            <select id="input-bad" class="select-box">
+                <option value="0">0次 (运气好)</option>
+                <option value="1">1次 (偶然)</option>
+                <option value="2">2次 (经常)</option>
+                <option value="3+">3次及以上 (高危)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你通常是主动还是被动？</label>
+            <select id="input-role" class="select-box">
+                <option value="passive">被动等待 (等对方追)</option>
+                <option value="active">主动追求 (我追人)</option>
+                <option value="equal">平等相处 (看感觉)</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：依恋类型</span>
+            <span id="progress-text">1 / 20</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🔍 依恋类型</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+
+    <div id="page-loading">
+        <div style="font-size:50px; animation: pulse-purple 1s infinite;">🔍</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的吸渣体质...</h3>
+        <p style="color:#636E72; font-size:14px;">正在扫描五维数据...<br>计算吸渣风险指数...<br>生成专属报告...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">吸渣风险指数</span>
+            </div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 吸渣风险五维雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《吸渣体质深度分析报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新检测</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div>
+            <div class="r-h1">吸渣体质深度分析报告</div>
+            <div style="font-size:14px;">专业心理测评 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+
+</div>
+
+<script>
+const questions = [
+    // 依恋类型 (0-3)
+    { d: 'attachment', t: '依恋类型', q: "在亲密关系中，你通常会过度依赖对方吗？", o: [
+        {t:"非常依赖，时刻需要对方", s:10},
+        {t:"比较依赖，但有个人空间", s:7},
+        {t:"不太依赖，相对独立", s:3},
+        {t:"完全独立，不依赖", s:0}
+    ]},
+    { d: 'attachment', t: '依恋类型', q: "对方不回消息时，你会焦虑吗？", o: [
+        {t:"非常焦虑，坐立不安", s:10},
+        {t:"有点焦虑，能忍受", s:7},
+        {t:"不太焦虑，正常等待", s:3},
+        {t:"完全不焦虑", s:0}
+    ]},
+    { d: 'attachment', t: '依恋类型', q: "分手后，你会长时间走不出来吗？", o: [
+        {t:"会，很久都走不出来", s:10},
+        {t:"会，持续一段时间", s:7},
+        {t:"还好，能较快走出", s:3},
+        {t:"很快就能放下", s:0}
+    ]},
+    { d: 'attachment', t: '依恋类型', q: "你害怕被抛弃吗？", o: [
+        {t:"非常害怕，非常恐惧", s:10},
+        {t:"有点害怕，担心", s:7},
+        {t:"不太害怕，能接受", s:3},
+        {t:"完全不怕", s:0}
+    ]},
+    
+    // 自我认知 (4-7)
+    { d: 'self', t: '自我认知', q: "你能识别对方是"垃圾"吗？", o: [
+        {t:"完全不能，总是受伤", s:10},
+        {t:"不太能，有时看不清", s:7},
+        {t:"比较能，较早发现", s:3},
+        {t:"都能，快速识别", s:0}
+    ]},
+    { d: 'self', t: '自我认知', q: "你知道自己想要什么样的伴侣吗？", o: [
+        {t:"完全不知道", s:10},
+        {t:"不太清楚，模糊", s:7},
+        {t:"比较清楚，有标准", s:3},
+        {t:"非常清楚，明确", s:0}
+    ]},
+    { d: 'self', t: '自我认知', q: "你有底线和原则吗？", o: [
+        {t:"完全没有底线", s:10},
+        {t:"底线很低，常被突破", s:7},
+        {t:"有底线，偶尔妥协", s:3},
+        {t:"底线清晰，不妥协", s:0}
+    ]},
+    { d: 'self', t: '自我认知', q: "你会为了对方改变原则吗？", o: [
+        {t:"经常改变，没原则", s:10},
+        {t:"偶尔会，看情况", s:7},
+        {t:"很少，基本不", s:3},
+        {t:"从不改变", s:0}
+    ]},
+    
+    // 行为模式 (8-11)
+    { d: 'behavior', t: '行为模式', q: "你会在朋友圈秀恩爱吗？", o: [
+        {t:"经常，高调秀", s:10},
+        {t:"偶尔，偶尔", s:7},
+        {t:"很少，较低调", s:3},
+        {t:"从不，私密", s:0}
+    ]},
+    { d: 'behavior', t: '行为模式', q: "对方态度冷淡时，你会怎么做？", o: [
+        {t:"去讨好，拼命挽回", s:10},
+        {t:"询问，试图沟通", s:7},
+        {t:"冷静，观察", s:3},
+        {t:"不在乎，随他去", s:0}
+    ]},
+    { d: 'behavior', t: '行为模式', q: "对方忽冷忽热，你会？", o: [
+        {t:"患得患失，很焦虑", s:10},
+        {t:"有点担心，询问", s:7},
+        {t:"发现问题，及时沟通", s:3},
+        {t:"直接分手", s:0}
+    ]},
+    { d: 'behavior', t: '行为模式', q: "你经常查看对方手机吗？", o: [
+        {t:"经常偷偷查看", s:10},
+        {t:"偶尔想查看", s:7},
+        {t:"很少，基本不", s:3},
+        {t:"完全不会，不care", s:0}
+    ]},
+    
+    // 边界意识 (12-15)
+    { d: 'boundary', t: '边界意识', q: "你能接受对方和异性单独见面吗？", o: [
+        {t:"完全接受，没问题", s:10},
+        {t:"可以接受，较信任", s:7},
+        {t:"不太能，会吃醋", s:3},
+        {t:"完全不能，接受不了", s:0}
+    ]},
+    { d: 'boundary', t: '边界意识', q: "对方借钱，你会借吗？", o: [
+        {t:"会借，很大方", s:10},
+        {t:"看情况借", s:7},
+        {t:"很少借，会考虑", s:3},
+        {t:"不借，保护自己", s:0}
+    ]},
+    { d: 'boundary', t: '边界意识', q: "你会无条件原谅对方出错吗？", o: [
+        {t:"会，无条件原谅", s:10},
+        {t:"会原谅，给机会", s:7},
+        {t:"看错误程度", s:3},
+        {t:"不原谅，有原则", s:0}
+    ]},
+    { d: 'boundary', t: '边界意识', q: "你懂得拒绝吗？", o: [
+        {t:"完全不懂，不会拒绝", s:10},
+        {t:"不太懂，很少拒绝", s:7},
+        {t:"比较懂，适度拒绝", s:3},
+        {t:"很懂，善于拒绝", s:0}
+    ]},
+    
+    // 选择眼光 (16-19)
+    { d: 'choice', t: '选择眼光', q: "你会被花言巧语打动吗？", o: [
+        {t:"完全会，很相信", s:10},
+        {t:"会比较相信", s:7},
+        {t:"不太信，会观察", s:3},
+        {t:"完全不信，看行动", s:0}
+    ]},
+    { d: 'choice', t: '选择眼光', q: "你容易被外表吸引吗？", o: [
+        {t:"非常看重外表", s:10},
+        {t:"比较看重", s:7},
+        {t:"一般，更看内在", s:3},
+        {t:"更看重内在", s:0}
+    ]},
+    { d: 'choice', t: '选择眼光', q: "你选择伴侣最看重什么？", o: [
+        {t:"对我好就行", s:10},
+        {t:"有感觉就行", s:7},
+        {t:"人品和能力", s:3},
+        {t:"综合考量", s:0}
+    ]},
+    { d: 'choice', t: '选择眼光', q: "你会因为寂寞而恋爱吗？", o: [
+        {t:"经常，容易冲动", s:10},
+        {t:"偶尔，偶尔会", s:7},
+        {t:"很少，较理性", s:3},
+        {t:"不会，很理性", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const levels = [
+    { max: 30, l: "极易吸渣体质", c: "#FF4757", d: "你吸渣风险非常高，属于极度容易被渣的类型。", advice: "你急需建立健康的关系边界，提升自我保护意识。", points: [
+        "立即建立清晰的择偶标准",
+        "学会识别渣男的常见特征",
+        "不要轻易付出金钱和感情",
+        "设置关系底线，不轻易突破",
+        "建议寻求专业咨询帮助"
+    ]},
+    { max: 50, l: "高危吸渣体质", c: "#FF7D00", d: "你吸渣风险较高，需要注意提升识别能力。", advice: "你需要学会识别危险信号，保护好自己。", points: [
+        "建立明确的择偶标准",
+        "注意观察对方的行为细节",
+        "不要太快投入感情",
+        "学会设置关系边界",
+        "多听取朋友建议"
+    ]},
+    { max: 70, l: "中等吸渣风险", c: "#A55EEA", d: "你有一定的吸渣风险，需要注意选择眼光。", advice: "建议放慢节奏，多了解再决定。", points: [
+        "多了解再决定关系",
+        "注意对方的行为一致性",
+        "保持理性，不要恋爱脑",
+        "建立健康的关系边界",
+        "多听取身边人建议"
+    ]},
+    { max: 90, l: "轻度吸渣风险", c: #2ED573, d: "你吸渣风险较低，有一定的识别能力。", advice: "保持现有优势，继续提升。", points: [
+        "保持理性判断",
+        "继续建立健康边界",
+        "注意早期危险信号",
+        "选择合适的人",
+        "谨慎投入感情"
+    ]},
+    { max: 120, l: "防渣体质", c: "#00B42A", d: "你具有防渣体质，不容易被渣。", advice: "你有很好的自我保护意识，继续保持。", points: [
+        "保持理性选择",
+        "坚持原则和底线",
+        "选择人品好的伴侣",
+        "建立健康关系",
+        "帮助闺蜜防渣"
+    ]},
+    { max: 200, l: "绝缘吸渣体质", c: "#165DFF", d: "你是绝缘吸渣体质，完全不会被渣。", advice: "你有极强的识别和保护能力，是婚恋高手。", points: [
+        "你是婚恋高手",
+        "有很强的识人能力",
+        "坚持原则和底线",
+        "帮助朋友识别",
+        "建议分享经验"
+    ]}
+];
+
+let currQList = [];
+let currIdx = 0;
+let userInfo = {};
+let scores = { attachment:0, self:0, behavior:0, boundary:0, choice:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userInfo.experience = document.getElementById('input-experience').value;
+    userInfo.bad = document.getElementById('input-bad').value;
+    userInfo.role = document.getElementById('input-role').value;
+    
+    currQList = [...questions];
+    currIdx = 0;
+    scores = { attachment:0, self:0, behavior:0, boundary:0, choice:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { attachment:0, self:0, behavior:0, boundary:0, choice:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+    
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'attachment', n:'依恋'}, {k:'self', n:'认知'}, 
+        {k:'behavior', n:'行为'}, {k:'boundary', n:'边界'}, {k:'choice', n:'眼光'}
+    ];
+    let html = '';
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 10) * 100, 100);
+        let color = pct> 60 ? '#A55EEA' : (pct> 30 ? '#FF7D00' : '#2ED573');
+        let txt = pct> 70 ? '高风险' : (pct> 40 ? '中等' : '较低');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {attachment:'依恋类型', self:'自我认知', behavior:'行为模式', boundary:'边界意识', choice:'选择眼光'};
+    return map[k];
+}
+
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、吸渣体质诊断</div>
+        <p class="r-p" style="background:#fafafa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>📋 个人档案：</strong>恋爱次数：${userInfo.experience} | 遇渣次数：${userInfo.bad} | 角色：${userInfo.role}
+        </p>
+        <div class="r-box" style="border-left:5px solid ${lvl.c};">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">吸渣风险等级：${lvl.l}</div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>风险评估：</strong>${lvl.d}</p>
+            <p style="margin:10px 0 0; font-size:15px; line-height:1.6; color:#555;"><strong>核心建议：</strong>${lvl.advice}</p>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">二、五维吸渣风险深度分析</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px;">*基于依恋理论的深度分析</p>
+        ${generateDimAnalysis('attachment', scores.attachment)}
+        ${generateDimAnalysis('self', scores.self)}
+        ${generateDimAnalysis('behavior', scores.behavior)}
+        ${generateDimAnalysis('boundary', scores.boundary)}
+        ${generateDimAnalysis('choice', scores.choice)}
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">三、渣女识别指南</div>
+        <div class="r-box" style="background:#faf5ff; border-color:#A55EEA;">
+            <div class="r-h3" style="color:#A55EEA;">🚨 渣男常见特征</div>
+            <ul style="margin:0; padding-left:20px; line-height:2;">
+                <li>忽冷忽热，不稳定</li>
+                <li>花言巧语，行动少</li>
+                <li>经常借钱，欺骗</li>
+                <li>神秘，不公开关系</li>
+                <li>经常消失联系不上</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">四、自我保护方案</div>
+        <div class="r-box">
+            <div class="r-h3">🛡️ 建立健康关系边界</div>
+            <p class="r-p">
+                <strong>1. 明确择偶标准</strong>：在开始前明确自己的底线和原则<br>
+                <strong>2. 保持理性</strong>：不要被感情冲昏头脑<br>
+                <strong>3. 观察行为</strong>：看行动而不是听言语<br>
+                <strong>4. 设置边界</strong>：不轻易借钱或付出<br>
+                <strong>5. 及时止损</strong>：发现不对立即离开
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026吸渣体质检测 · 专业心理测评<br>
+        愿你收获健康的爱情，远离伤害
+    </div>
+    `;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function generateDimAnalysis(key, val) {
+    let level = val> 7 ? 'high' : (val> 4 ? 'med' : 'low');
+    const config = {
+        high: { color: '#FF4757', bg: '#ffe4e6', tag: '⚠️ 高风险', titleColor: '#FF4757' },
+        med: { color: '#FF7D00', bg: '#fff8e6', tag: '⚡ 中等', titleColor: '#FF7D00' },
+        low: { color: '#2ED573', bg: '#f0fff4', tag: '✅ 良好', titleColor: '#2ED573' }
+    };
+    const c = config[level];
+    const texts = {
+        attachment: { high: "<strong>依恋问题严重！</strong>你过度依赖，容易被抓住弱点。", med: "<strong>依恋一般。</strong>你有轻度依恋，需要注意。", low: "<strong>依恋健康。</strong>你独立性较好。" },
+        self: { high: "<strong>认知不清！</strong>你缺乏识别能力，容易被骗。", med: "<strong>认知一般。</strong>你有基本识别能力。", low: "<strong>认知清晰。</strong>你善于识别。" },
+        behavior: { high: "<strong>行为危险！</strong>你的行为容易被人利用。", med: "<strong>行为一般。</strong>你有正常行为模式。", low: "<strong>行为健康。</strong>你行为得体。" },
+        boundary: { high: "<strong>边界缺失！</strong>你没有底线，容易被突破。", med: "<strong>边界一般。</strong>你有基本边界。", low: "<strong>边界清晰。</strong>你原则性强。" },
+        choice: { high: "<strong>眼光有问题！</strong>你选择标准有问题。", med: "<strong>眼光一般。</strong>你有正常选择标准。", low: "<strong>眼光好。</strong>你选择得当。" }
+    };
+    return `<div style="margin-bottom:20px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor}; margin-top:0;">${getDimName(key)} <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${val}/10)</span><span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span></div><p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][level]}</p></div>`;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    const cx=120, cy=120, r=90;
+    const keys = ['attachment','self','behavior','boundary','choice'];
+    const labels = ['依恋','认知','行为','边界','眼光'];
+    
+    ctx.strokeStyle = '#ede7f6'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            ctx.lineTo(cx + Math.cos(a)*(r/4)*i, cy + Math.sin(a)*(r/4)*i);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let ratio = Math.min(s[k] / 10, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(165, 94, 234, 0.1)");
+    grd.addColorStop(1, "rgba(165, 94, 234, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.strokeStyle = '#A55EEA'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "xzsd";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

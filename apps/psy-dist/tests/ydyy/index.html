@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>爱的语言匹配测试 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:var(--primary);text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:var(--primary-dark, var(--primary))}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root { --primary: #E84393; --primary-dark: #D63384; --accent: #00CEC9; --bg-gradient-start: #FDECEE; --bg-gradient-end: #F5D6E0; --text-main: #2D3436; --text-sub: #636E72; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-pink { 0% { box-shadow: 0 0 0 0 rgba(232, 67, 147, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(232, 67, 147, 0); } 100% { box-shadow: 0 0 0 0 rgba(232, 67, 147, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(232, 67, 147, 0.3); transition: transform 0.1s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 60px 24px 40px; text-align: center; min-height: 100vh; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #fce4ec; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; }
+        .love-lang-show { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        .lang-icon { width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #fce4ec; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; cursor: pointer; border: 2px solid #fce4ec; transition: all 0.2s; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #fce4ec; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #fce4ec; padding-bottom: 120px; overflow-y: auto; min-height: 100vh; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; }
+        .main-lang { font-size: 60px; margin-bottom: 15px; }
+        .main-lang-name { font-size: 28px; font-weight: 900; color: var(--primary); margin-bottom: 10px; }
+        .main-lang-desc { font-size: 14px; color: #636E72; line-height: 1.6; }
+        .lang-rank { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; }
+        .rank-title { font-size: 16px; font-weight: 700; margin-bottom: 15px; color: var(--primary); }
+        .rank-item { display: flex; align-items: center; margin-bottom: 12px; padding: 10px; background: #fce4ec; border-radius: 8px; }
+        .rank-num { width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; margin-right: 12px; }
+        .rank-icon { font-size: 20px; margin-right: 10px; }
+        .rank-name { font-weight: 600; flex: 1; }
+        .match-box { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 20px; }
+        .match-title { font-size: 16px; font-weight: 700; margin-bottom: 15px; text-align: center; color: var(--primary); }
+        .match-desc { font-size: 14px; color: #555; line-height: 1.7; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-pink 2s infinite; cursor: pointer; }
+        .export-btn { background: #00CEC9; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+    <div id="page-intro" data-screenshot="psych-test-爱的语言匹配" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">爱的语言<br><span>匹配</span>测试</h1>
+        <p class="cover-subtitle">发现你的主要爱语<br>理解彼此的爱的表达方式</p>
+        <div class="love-lang-show">
+            <div class="lang-icon">💝</div>
+            <div class="lang-icon">🤝</div>
+            <div class="lang-icon">🎁</div>
+            <div class="lang-icon">⏰</div>
+            <div class="lang-icon">👁️</div>
+        </div>
+        <div class="intro-features">
+            <div class="feature-box"><div class="feature-icon">📊</div><div class="feature-title">爱的语言理论</div><div class="feature-desc">基于盖瑞·查普曼的爱的五种语言。</div></div>
+            <div class="feature-box"><div class="feature-icon">✨</div><divdiv class="feature-title">精准定位</div><div class="feature-desc">找到你最主要的爱的语言。</div></div>
+            <div class="feature-box"><div class="feature-icon">💑</div><divdiv class="feature-title">情侣匹配</div><div class="feature-desc">了解你和伴侣的匹配度。</div></div>
+            <div class="feature-box"><div class="feature-icon">💡</div><divdiv class="feature-title">相处建议</div><div class="feature-desc">学习用对方需要的方式爱TA。</div></div>
+        </div>
+        <button class="btn" id="start-btn">开始测试 (约需 2 分钟)</button>
+    </div>
+    <div id="page-test">
+        <div class="progress-header"><span id="dim-tag">维度：表达倾向</span><span id="progress-text">1 / 15</span></div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">💝 表达倾向</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+    <div id="page-result">
+        <div class="result-header">
+            <div class="main-lang" id="main-icon">💝</div>
+            <div class="main-lang-name" id="main-name">加载中...</div>
+            <div class="main-lang-desc" id="main-desc">...</div>
+        </div>
+        <div class="lang-rank">
+            <div class="rank-title">📊 你的爱的语言排行</div>
+            <div id="rank-container"></div>
+        </div>
+        <div class="match-box">
+            <div class="match-title">💡 相处建议</div>
+            <div class="match-desc" id="match-desc"></div>
+        </div>
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 查看完整报告</button>
+            <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    {d:'words',t:'肯定的言语',q:"你更喜欢伴侣用话语表达爱意？",o:[{t:"非常喜欢听甜言蜜语",s:4},{t:"偶尔说说就好",s:3},{t:"不太需要",s:2},{t:"完全不需要",s:1}]},
+    {d:'words',t:'肯定的言语',q:"伴侣夸你时你感觉？",o:[{t:"非常开心，充满能量",s:4},{t:"比较开心",s:3},{t:"还好，无所谓",s:2},{t:"不太在意",s:1}]},
+    {d:'time',t:'精心时刻',q:"你更希望伴侣怎么陪伴你？",o:[{t:"两人独处的专注时光",s:4},{t:"偶尔陪伴就好",s:3},{t:"不需要太多",s:2},{t:"不需要",s:1}]},
+    {d:'time',t:'精心时刻',q:"你重视纪念日和生日吗？",o:[{t:"非常重视，需要仪式感",s:4},{t:"比较重视",s:3},{t:"一般重视",s:2},{t:"不太在意",s:1}]},
+    {d:'gift',t:'礼物',q:"你希望伴侣送礼物吗？",o:[{t:"非常希望，礼物是爱的象征",s:4},{t:"偶尔送就好",s:3},{t:"不太需要",s:2},{t:"完全不需要",s:1}]},
+    {d:'gift',t:'礼物',q:"你收到礼物时的感受？",o:[{t:"非常惊喜和感动",s:4},{t:"比较开心",s:3},{t:"还好",s:2},{t:"不太在意",s:1}]},
+    {d:'service',t:'服务行动',q:"你更希望伴侣为你做什么？",o:[{t:"帮我做实事，照顾我",s:4},{t:"偶尔帮忙就好",s:3},{t:"不需要",s:2},{t:"不需要",s:1}]},
+    {d:'service',t:'服务行动',q:"伴侣帮你做事时你感觉？",o:[{t:"非常幸福，被爱着",s:4},{t:"比较开心",s:3},{t:"还好",s:2},{t:"没什么感觉",s:1}]},
+    {d:'touch',t:'身体接触',q:"你希望伴侣多抱抱你吗？",o:[{t:"非常希望，拥抱让我感到安全",s:4},{t:"偶尔就好",s:3},{t:"不太需要",s:2},{t:"不太喜欢",s:1}]},
+    {d:'touch',t:'身体接触',q:"牵手、拥抱对你来说？",o:[{t:"非常重要，爱的表达",s:4},{t:"比较重要",s:3},{t:"一般",s:2},{t:"不太需要",s:1}]},
+    {d:'words',t:'肯定的言语',q:"你经常用话语鼓励伴侣吗？",o:[{t:"经常，很自然就会说",s:4},{t:"偶尔会说",s:3},{t:"很少",s:2},{t:"几乎不说",s:1}]},
+    {d:'time',t:'精心时刻',q:"你会认真听伴侣说话吗？",o:[{t:"非常认真，全程倾听",s:4},{t:"比较认真",s:3},{t:"偶尔会走神",s:2},{t:"经常敷衍",s:1}]},
+    {d:'gift',t:'礼物',q:"你会用心准备礼物吗？",o:[{t:"非常用心，精心挑选",s:4},{t:"比较用心",s:3},{t:"一般",s:2},{t:"不太用心",s:1}]},
+    {d:'service',t:'服务行动',q:"你愿意为伴侣做家务吗？",o:[{t:"非常愿意，主动分担",s:4},{t:"愿意偶尔做",s:3},{t:"不太愿意",s:2},{t:"完全不想做",s:1}]},
+    {d:'touch',t:'身体接触',q:"你表达爱意的方式是？",o:[{t:"通过身体接触，如拥抱",s:4},{t:"偶尔会拥抱",s:3},{t:"很少",s:2},{t:"基本不会",s:1}]}
+];
+const loveLangs = {
+    words: {icon:'💝',name:'肯定的言语',desc:'你最喜欢听甜言蜜语。一句简单的"我爱你"、"你真棒"就能让你感受到深深的爱意。鼓励和赞美对你非常重要。'},
+    time: {icon:'⏰',name:'精心时刻',desc:'你渴望与伴侣共度高质量的时光。专注的陪伴、眼神交流、共同的回忆对你来说比任何礼物都重要。'},
+    gift: {icon:'🎁',name:'礼物',desc:'礼物是你感受爱的重要方式。你喜欢收到礼物，也喜欢为伴侣精心挑选礼物。礼物代表着对方的心意和思念。'},
+    service: {icon:'🤝',name:'服务行动',desc:'你通过行动来感受爱。伴侣为你做实事——做饭、洗碗、揉肩——这些实际的照顾让你感到被爱。'},
+    touch: {icon:'👁️',name:'身体接触',desc:'身体接触是你最主要的爱的语言。拥抱、牵手、亲吻——这些身体接触让你感受到深深的安全感和爱意。'}
+};
+let scores={words:0,time:0,gift:0,service:0,touch:0},currQList=[],currIdx=0;
+function startTest(){currQList=[...questions];currIdx=0;scores={words:0,time:0,gift:0,service:0,touch:0};document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=`${currIdx+1}/${currQList.length}`;document.getElementById('progress-fill').style.width=`${(currIdx/currQList.length)*100}%`;document.getElementById('dim-tag').innerText=`维度：${q.t}`;document.getElementById('q-category').innerText=q.t;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(q.d,opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(dim,val){scores[dim]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';setTimeout(()=>{document.getElementById('page-result').style.display='block';calculateResult();},1500);}
+function calculateResult(){let sorted=Object.entries(scores).sort((a,b)=>b[1]-a[1]);let main=sorted[0][0];let mainLang=loveLangs[main];document.getElementById('main-icon').innerText=mainLang.icon;document.getElementById('main-name').innerText=mainLang.name;document.getElementById('main-desc').innerText=mainLang.desc;const rankContainer=document.getElementById('rank-container');let rankHtml='';sorted.forEach((item,index)=>{let lang=loveLangs[item[0]];rankHtml+=`<div class="rank-item"><div class="rank-num">${index+1}</div><div class="rank-icon">${lang.icon}</div><div class="rank-name">${lang.name}</div></div>`;});rankContainer.innerHTML=rankHtml;const tips={words:'告诉伴侣你希望听到更多鼓励和赞美的话，定期表达欣赏和爱意。',time:'和伴侣安排固定的约会时间，专注于彼此，放下手机。',gift:'在特殊日子准备惊喜礼物，也可以是日常生活中 random 的小礼物。',service:'主动为伴侣做一些实事，比如做饭、按摩、承担家务。',touch:'多拥抱、牵手，给伴侣更多的身体接触。'};document.getElementById('match-desc').innerText=tips[main];}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(232,67,147);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('爱的语言匹配测试报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});let y=55;const mainLang=loveLangs[Object.entries(scores).sort((a,b)=>b[1]-a[1])[0][0]];doc.setTextColor(0,0,0);doc.setFontSize(16);doc.text(`你的主要爱语：${mainLang.name}`,15,y);y+=10;doc.setFontSize(12);doc.text(mainLang.desc.substring(0,150)+'...',15,y);doc.save('爱的语言报告.pdf');}
+document.getElementById('start-btn').document.getElementById('start-btn').addEventListener('click',function(){var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}startTest();document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';});document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "ydyy";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

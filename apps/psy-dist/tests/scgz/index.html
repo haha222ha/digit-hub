@@ -1,0 +1,156 @@
+/* psy-skin-accent */
+html, body { background: linear-gradient(135deg, #f7fee7 0%, #ecfccb 100%) !important; }
+.btn, button.btn, .result-level, .progress-fill {
+  background: linear-gradient(135deg, #65a30d 0%, #4d7c0f 100%) !important;
+  color: #fff !important;
+}
+.question-num, .result-score, h2 { color: #65a30d !important; }
+.option-btn:hover { border-color: #65a30d !important; background: rgba(101,163,13,0.08) !important; }
+.spinner { border-top-color: #65a30d !important; }
+/* /psy-skin-accent */
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>松弛感指数测试</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+    </nav>
+
+    <div id="auth" class="page">
+        <div class="container">
+            <div class="card">
+                <div class="icon">🧘</div>
+                <h2>松弛感指数测试</h2>
+                <p class="subtitle">测测你的松弛感有多少</p>
+                <button onclick="login()">开始测试</button>
+                </div>
+        </div>
+    </div>
+    
+    <div id="test" class="page hidden">
+        <div class="progress-bar">
+            <div class="progress-fill" id="fill"></div>
+        </div>
+        <div class="container">
+            <div class="card">
+                <div class="question-num" id="pro">第 1 题</div>
+                <h3 id="q"></h3>
+                <div id="opts"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="res" class="page hidden">
+        <div class="container">
+            <div class="card result-card">
+                <div class="icon">📊</div>
+                <h2>松弛感评估报告</h2>
+                <div class="score-circle">
+                    <span id="sc">0</span>
+                    <small>分</small>
+                </div>
+                <div class="level-badge" id="lv"></div>
+                <div class="result-text" id="txt"></div>
+                <div class="result-actions">
+                    <button onclick="share()">分享结果</button>
+                    <button class="secondary" onclick="location.reload()">重新测试</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TEST_NAME = "松弛感指数测试";
+        let qs=[],cur=0,score=0;
+        const lv=[
+            {max:25,lv:"超松弛",txt:"你是松弛感王者！你活得很通透，不会在意别人的眼光，也不给自己太大压力。你的心态非常好，是真正懂得生活的人。"},
+            {max:45,lv:"比较松弛",txt:"你的松弛感指数比较高。你能较好地调节自己的心态，在大多数情况下都能保持放松。继续保持这种状态。"},
+            {max:65,lv:"紧绷中",txt:"你处于紧绷和松弛之间。有时候能放松，但经常会陷入焦虑。你需要学会放下一些执念，让自己更轻松。"},
+            {max:100,lv:"非常紧绷",txt:"你目前非常紧绷，活得很累。你对自己要求太高，也太在意别人的眼光。建议尝试放慢脚步，给自己一些空间。"
+            }
+        ];
+        
+        // psy: no auto-load; wait for start
+        
+        async function load(){
+            let r=await fetch("data.json");
+            qs=await r.json();
+            show("test");
+            render();
+        }
+        
+        function login(){
+            Promise.resolve(window.__psyEnsureStart && window.__psyEnsureStart()).then(function(ok){
+                if (ok === false) return;
+                load();
+            }).catch(function(e){ alert((e&&e.message)||'无法开始测试'); });
+        }
+        
+        function render(){
+            let q=qs[cur];
+            document.getElementById("q").textContent=q.title;
+            document.getElementById("pro").textContent=`第 ${cur+1} 题，共 ${qs.length} 题`;
+            document.getElementById("fill").style.width=`${((cur+1)/qs.length)*100}%`;
+            let h="";
+            q.options.forEach((o,i)=>h+=`<button class="option-btn" onclick="sel(${o.score})">${o.text}</button>`);
+            document.getElementById("opts").innerHTML=h;
+        }
+        
+        function sel(s){
+            score+=s;
+            if(cur<qs.length-1){
+                cur++;
+                render();
+            }else{
+                submitResult();
+            }
+        }
+        
+        function submitResult(){
+            show("res");
+            document.getElementById("sc").textContent=score;
+            let t=lv.find(x=>score<=x.max)||lv[3];
+            document.getElementById("lv").textContent=t.lv;
+            document.getElementById("txt").textContent=t.txt;
+            
+            if (window.__psyComplete) window.__psyComplete({ score: score });
+        }
+        
+        function share(){
+            let t=lv.find(x=>score<=x.max)||lv[3];
+            let text=`我在【${TEST_NAME}】测出了「${t.lv}」，得分${score}分！`;
+            if(navigator.share){
+                navigator.share({title:TEST_NAME,text:text});
+            }else{
+                navigator.clipboard.writeText(text);
+                alert("结果已复制到剪贴板！");
+            }
+        }
+        
+        function show(id){
+            document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
+            document.getElementById(id).classList.remove("hidden");
+        }
+        
+        document.addEventListener("keypress",(e)=>{
+            if(e.key>="1" && e.key<="4" && !document.getElementById("test").classList.contains("hidden")){
+                let btns=document.querySelectorAll(".option-btn");
+                let idx=parseInt(e.key)-1;
+                if(btns[idx]) btns[idx].click();
+            }
+        });
+    </script>
+
+
+
+
+<script>window.__PSY_TEST_CODE__ = "scgz";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

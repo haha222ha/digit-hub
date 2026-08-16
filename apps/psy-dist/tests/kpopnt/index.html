@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 KPOP女团练习生选秀 | 爱豆天赋测试</title>
+    <style>
+        :root {
+            /* 2026 KPOP女团梦幻粉紫风格 */
+            --primary: #d488e9; 
+            --primary-dark: #b86fd6;
+            --accent: #ff7eb6; /* 女团甜酷粉 */
+            --accent-hover: #ff5ca8;
+            --safe: #8e96f7;
+            --warning: #f7c3d4;
+            --bg-gradient-start: #fdf4ff;
+            --bg-gradient-end: #f0e8ff;
+            --text-main: #3a2c4d;
+            --text-sub: #7a6b91;
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(212, 136, 233, 0.15);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-pink { 0% { box-shadow: 0 0 0 0 rgba(255, 126, 182, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 126, 182, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 126, 182, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(212, 136, 233, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#f7d4ff 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 42px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #3a2c4d;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: var(--text-sub); margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #f0e8ff;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #3a2c4d; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #7a6b91; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #3a2c4d; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #f0e8ff; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #3a2c4d; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #7a6b91; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0e8ff; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #f0e8ff; color: #7a6b91; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #3a2c4d; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #3a2c4d; cursor: pointer; border: 2px solid #f0e8ff; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #f8f5ff; }
+        .option-btn.selected { background: #fff5f9; border-color: var(--accent); color: var(--accent); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #f8f5ff; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(212, 136, 233, 0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #f0e8ff;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--accent); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #7a6b91; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: #3a2c4d; color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #7a6b91; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #3a2c4d; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #3a2c4d; display: block; }
+        .dim-sub { font-size: 10px; color: #7a6b91; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0e8ff; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #7a6b91; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-pink 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #7a6b91; width: 100%; padding: 10px;
+            border: 1px solid #d4c8e6; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: #3a2c4d; color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #3a2c4d; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #f0e8ff; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #3a2c4d; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #f8f5ff; border: 1px solid #f0e8ff; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #555; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-Kpop女团成员" class="fade-in">
+        <div class="cover-tag">2026 KPOP EDITION</div>
+        <h1 class="cover-title">KPOP女团<span>练习生</span><br>选秀天赋测试</h1>
+        <p class="cover-subtitle">2026韩团选秀标准测评<br>36题精准测算你的爱豆天赋与出道定位</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🎤</div>
+                <div class="feature-title">五维天赋雷达</div>
+                <div class="feature-desc">唱功、舞蹈、颜值、综艺、努力值，全维度测评。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🌟</div>
+                <div class="feature-title">出道定位规划</div>
+                <div class="feature-desc">匹配2026女团趋势，定制专属爱豆定位。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💃</div>
+                <div class="feature-title">练习生分级</div>
+                <div class="feature-desc">素人→ACE→中心位，精准匹配你的天赋等级。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">千字报告</div>
+                <div class="feature-desc">2026官方版选秀深度评估，出道攻略全解析。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始选秀测试 (约3分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#3a2c4d; margin-bottom:10px;">建立练习生档案 🎵</h2>
+        <p style="color:#7a6b91; font-size:14px; margin-bottom:30px;">系统将根据你的身份定制选秀评分标准。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的练习生身份是？</label>
+            <select id="input-status" class="select-box">
+                <option value="new">纯素人 (零基础想出道)</option>
+                <option value="trainee">练习生 (正在公司培训)</option>
+                <option value="pre">预备出道 (即将参与选秀)</option>
+                <option value="member">主力成员 (已入团待出道)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的女团风格是？</label>
+            <select id="input-title" class="select-box">
+                <option value="sweet">甜妹风 (元气可爱)</option>
+                <option value="cool">酷飒风 (盐系高级)</option>
+                <option value="energetic">元气风 (活力满满)</option>
+                <option value="cold">清冷风 (氛围感女神)</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成选秀测试题</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：唱功天赋</span>
+            <span id="progress-text">1 / 36</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🎤 唱功天赋</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-pink 1s infinite; border-radius:50%;">✨</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#3a2c4d;">正在演算爱豆天赋...</h3>
+        <p style="color:#7a6b91; font-size:14px; line-height:1.8;">正在匹配2026女团标准...<br>测算出道定位...<br>生成专属选秀报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">天赋总分</span>
+            </div>
+            <div class="level-badge" id="res-level">Level ?</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维爱豆天赋雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《2026女团选秀出道报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 更换身份/风格 再测一次</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 KPOP IDOL REPORT</div>
+            <div class="r-h1">女团练习生选秀出道报告</div>
+            <div style="font-size:14px;">2026官方版 · 专属天赋评估与出道攻略</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 千字以上报告 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const pageId = window.location.pathname;
+
+// 女团练习生选秀题库 2026版
+const questions = [
+    // 维度：vocal 唱功
+    { d: 'vocal', t: '唱功天赋', q: "面对高音段落，你的表现是？", o: [
+        {t:"完全唱不上去，气息不足", s:0},
+        {t:"勉强唱完，音准不稳", s:3},
+        {t:"稳定演唱，气息充足", s:7},
+        {t:"轻松驾驭，自带共鸣", s:10}
+    ]},
+    { d: 'vocal', t: '音准天赋', q: "清唱无伴奏歌曲，你的音准？", o: [
+        {t:"全程跑调，无法控制", s:0},
+        {t:"偶尔跑调，大部分稳定", s:3},
+        {t:"几乎零失误，音准极佳", s:7},
+        {t:"绝对音感，清唱如录音", s:10}
+    ]},
+    { d: 'vocal', t: '情感表达', q: "演唱抒情曲，你的情感表达？", o: [
+        {t:"毫无感情，机械演唱", s:0},
+        {t:"略有情感，中规中矩", s:3},
+        {t:"情感饱满，打动人心", s:7},
+        {t:"共情力拉满，沉浸式演唱", s:10}
+    ]},
+    { d: 'vocal', t: '舞台唱功', q: "边跳边唱时，你的唱功稳定性？", o: [
+        {t:"气息大乱，完全跑调", s:0},
+        {t:"勉强维持，气息不足", s:3},
+        {t:"稳定发挥，不受舞蹈影响", s:7},
+        {t:"唱跳俱佳，气息全程稳定", s:10}
+    ]},
+    { d: 'vocal', t: '音色天赋', q: "你的音色在人群中？", o: [
+        {t:"普通无特色，容易被淹没", s:0},
+        {t:"音色尚可，无记忆点", s:3},
+        {t:"音色独特，有辨识度", s:7},
+        {t:"天赐音色，一听难忘", s:10}
+    ]},
+    { d: 'vocal', t: '音域广度', q: "你的可演唱音域范围？", o: [
+        {t:"极窄，只能唱简单旋律", s:0},
+        {t:"中等，适配普通歌曲", s:3},
+        {t:"宽广，适配多种曲风", s:7},
+        {t:"超宽音域，全能适配", s:10}
+    ]},
+
+    // 维度：dance 舞蹈
+    { d: 'dance', t: '舞蹈天赋', q: "学习新舞蹈的速度？", o: [
+        {t:"极慢，记不住动作", s:0},
+        {t:"较慢，需要反复练习", s:2},
+        {t:"快速学会，动作标准", s:6},
+        {t:"过目不忘，舞蹈天才", s:10}
+    ]},
+    { d: 'dance', t: '节奏感', q: "你的舞蹈节奏感与卡点？", o: [
+        {t:"完全踩不准节拍", s:0},
+        {t:"偶尔卡点，节奏不稳", s:2},
+        {t:"精准卡点，节奏完美", s:6},
+        {t:"自带律动，卡点封神", s:10}
+    ]},
+    { d: 'dance', t: '肢体表现力', q: "舞台舞蹈的肢体张力？", o: [
+        {t:"僵硬呆板，毫无表现力", s:0},
+        {t:"略有放松，表现力一般", s:2},
+        {t:"肢体舒展，表现力强", s:7},
+        {t:"张力拉满，舞台感染力爆棚", s:10}
+    ]},
+    { d: 'dance', t: '核心力量', q: "舞蹈中的平衡与核心控制？", o: [
+        {t:"重心不稳，容易失误", s:0},
+        {t:"基本稳定，偶尔晃动", s:2},
+        {t:"核心扎实，动作精准", s:7},
+        {t:"核心超强，高难度动作稳如泰山", s:10}
+    ]},
+    { d: 'dance', t: '风格适配', q: "适配多种舞蹈风格的能力？", o: [
+        {t:"只能跳单一风格", s:0},
+        {t:"适配2-3种风格", s:3},
+        {t:"适配大部分女团舞风格", s:8},
+        {t:"全能适配，任何风格都能驾驭", s:10}
+    ]},
+    { d: 'dance', t: '镜头感', q: "舞蹈时的镜头捕捉能力？", o: [
+        {t:"完全避开镜头，无镜头感", s:0},
+        {t:"偶尔看镜头，表现一般", s:2},
+        {t:"精准抓镜头，表现力在线", s:6},
+        {t:"镜头猎人，天生爱豆镜头感", s:9}
+    ]},
+
+    // 维度：visual 颜值气质
+    { d: 'visual', t: '颜值天赋', q: "素颜状态下的颜值打分？", o: [
+        {t:"普通路人，无亮点", s:0},
+        {t:"清秀耐看，小美女", s:2},
+        {t:"惊艳耐看，颜值出众", s:6},
+        {t:"神颜级别，天生爱豆脸", s:10}
+    ]},
+    { d: 'visual', t: '气质氛围', q: "你的整体氛围感与气质？", o: [
+        {t:"毫无气质，普通路人", s:0},
+        {t:"温和气质，无记忆点", s:2},
+        {t:"独特气质，人群中亮眼", s:7},
+        {t:"顶级氛围感，天生爱豆气质", s:10}
+    ]},
+    { d: 'visual', t: '上镜效果', q: "原相机直出的上镜效果？", o: [
+        {t:"不上镜，显胖显普通", s:0},
+        {t:"一般上镜，无优势", s:3},
+        {t:"很上镜，原相机也好看", s:7},
+        {t:"360°无死角，原相机封神", s:10}
+    ]},
+    { d: 'visual', t: '身材比例', q: "你的身材比例与线条？", o: [
+        {t:"比例普通，无优势", s:0},
+        {t:"比例匀称，标准身材", s:3},
+        {t:"比例优越，线条好看", s:7},
+        {t:"黄金比例，天生爱豆身材", s:10}
+    ]},
+    { d: 'visual', t: '造型适配', q: "适配各种爱豆造型的能力？", o: [
+        {t:"只能适配单一造型", s:0},
+        {t:"适配日常造型", s:2},
+        {t:"适配大部分爱豆造型", s:7},
+        {t:"百变造型，完美驾驭所有风格", s:10}
+    ]},
+
+    // 维度：variety 综艺感
+    { d: 'variety', t: '综艺天赋', q: "面对镜头采访，你的表现？", o: [
+        {t:"紧张失语，不知所措", s:0},
+        {t:"勉强回答，中规中矩", s:3},
+        {t:"从容应对，表达流畅", s:7},
+        {t:"综艺天才，控场造梗", s:10}
+    ]},
+    { d: 'variety', t: '亲和力', q: "你的社交亲和力与路人缘？", o: [
+        {t:"高冷疏离，不易亲近", s:0},
+        {t:"温和友善，亲和力一般", s:2},
+        {t:"亲和力拉满，招人喜欢", s:7},
+        {t:"国民好感度，天生路人缘", s:10}
+    ]},
+    { d: 'variety', t: '反应力', q: "综艺游戏中的临场反应力？", o: [
+        {t:"反应迟钝，慢半拍", s:0},
+        {t:"反应一般，偶尔在线", s:2},
+        {t:"反应迅速，灵活应对", s:6},
+        {t:"临场天才，反应超快", s:10}
+    ]},
+    { d: 'variety', t: '表现力', q: "综艺环节的即兴表现力？", o: [
+        {t:"毫无表现，沉默寡言", s:0},
+        {t:"略有表现，不突出", s:3},
+        {t:"表现力强，活跃气氛", s:7},
+        {t:"综艺焦点，自带笑点", s:10}
+    ]},
+
+    // 维度：effort 努力值
+    { d: 'effort', t: '练习毅力', q: "每天坚持练习的时长？", o: [
+        {t:"偶尔练习，三分钟热度", s:0},
+        {t:"1-2小时，偶尔偷懒", s:2},
+        {t:"3-5小时，坚持自律", s:6},
+        {t:"6小时以上，拼命练习", s:10}
+    ]},
+    { d: 'effort', t: '抗压能力', q: "面对选秀压力与批评，你的心态？", o: [
+        {t:"崩溃放弃，无法承受", s:0},
+        {t:"难过但坚持，心态一般", s:2},
+        {t:"抗压能力强，越挫越勇", s:7},
+        {t:"钢铁心态，无视压力全力冲刺", s:10}
+    ]},
+    { d: 'effort', t: '自律性', q: "身材管理与作息自律性？", o: [
+        {t:"毫无自律，暴饮暴食熬夜", s:0},
+        {t:"偶尔自律，经常放纵", s:2},
+        {t:"高度自律，严格管理", s:7},
+        {t:"极致自律，爱豆模范", s:10}
+    ]},
+    { d: 'effort', t: '上进心', q: "对出道的渴望与上进心？", o: [
+        {t:"无所谓，佛系心态", s:0},
+        {t:"有点想出道，动力一般", s:3},
+        {t:"极度渴望，全力拼搏", s:8},
+        {t:"非出道不可，执念拉满", s:10}
+    ]},
+    { d: 'effort', t: '学习能力', q: "提升短板的学习能力？", o: [
+        {t:"无法提升，原地踏步", s:0},
+        {t:"缓慢提升，进步微小", s:2},
+        {t:"快速提升，补齐短板", s:7},
+        {t:"极速成长，全能进化", s:10}
+    ]}
+];
+
+// 身份特供题
+const roleSpecific = {
+    new: [
+        { d: 'vocal', t: '素人唱功', q: "【素人特供】零基础学唱歌的接受度？", o: [
+            {t:"完全接受不了，五音不全", s:0},
+            {t:"勉强接受，进步慢", s:3},
+            {t:"快速入门，天赋初显", s:7},
+            {t:"零基础天才，一学就会", s:10}
+        ]},
+        { d: 'dance', t: '素人舞蹈', q: "【素人特供】零基础学舞蹈的协调性？", o: [
+            {t:"肢体僵硬，协调性极差", s:0},
+            {t:"协调性一般，慢慢适应", s:3},
+            {t:"协调性优秀，快速上手", s:7},
+            {t:"舞蹈天才，零基础秒杀练习生", s:10}
+        ]}
+    ],
+    trainee: [
+        { d: 'effort', t: '练习生努力', q: "【练习生特供】公司高强度训练的坚持度？", o: [
+            {t:"无法坚持，想放弃", s:0},
+            {t:"勉强坚持，经常疲惫", s:3},
+            {t:"全力坚持，自律训练", s:7},
+            {t:"享受训练，越练越强", s:10}
+        ]},
+        { d: 'visual', t: '练习生颜值', q: "【练习生特供】公司造型师对你颜值的评价？", o: [
+            {t:"普通，无包装价值", s:0},
+            {t:"尚可，需要精心包装", s:3},
+            {t:"优秀，天生爱豆脸", s:7},
+            {t:"顶级神颜，公司力捧", s:10}
+        ]}
+    ],
+    pre: [
+        { d: 'variety', t: '预备综艺', q: "【预备出道特供】选秀舞台的镜头表现力？", o: [
+            {t:"紧张到忘动作，无表现", s:0},
+            {t:"正常发挥，无亮点", s:3},
+            {t:"惊艳发挥，镜头感拉满", s:7},
+            {t:"封神舞台，全场焦点", s:10}
+        ]},
+        { d: 'dance', t: '预备舞蹈', q: "【预备出道特供】选秀竞演的舞蹈完成度？", o: [
+            {t:"失误频发，完成度低", s:0},
+            {t:"基本完成，略有失误", s:3},
+            {t:"完美完成，零失误", s:7},
+            {t:"超纲完成，舞蹈封神", s:10}
+        ]}
+    ],
+    member: [
+        { d: 'vocal', t: '成员唱功', q: "【主力成员特供】团队主唱的竞争力？", o: [
+            {t:"垫底，无竞争力", s:0},
+            {t:"中等，不突出", s:3},
+            {t:"顶尖，团队核心主唱", s:7},
+            {t:"顶级，团队灵魂 vocal", s:10}
+        ]},
+        { d: 'effort', t: '成员努力', q: "【主力成员特供】团队中的努力标杆地位？", o: [
+            {t:"最不努力的成员", s:0},
+            {t:"努力程度中等", s:3},
+            {t:"团队努力标杆", s:7},
+            {t:"全队公认的拼命三娘", s:10}
+        ]}
+    ]
+};
+
+// 练习生等级体系 2026版
+const levels = [
+    { max: 25, l: "Lv.1 素人预备役", c: "#8e96f7", d: "零基础天赋，适合入门练习生培训。", advice: "从基础练起，夯实唱跳基本功。" },
+    { max: 40, l: "Lv.2 入门练习生", c: "#8e96f7", d: "天赋初显，具备基础练习生素质。", advice: "针对性提升短板，稳步成长。" },
+    { max: 55, l: "Lv.3 进阶练习生", c: "#f7c3d4", d: "天赋均衡，符合女团选秀基础标准。", advice: "强化优势项，打造个人特色。" },
+    { max: 70, l: "Lv.4 潜力练习生", c: "#f7c3d4", d: "天赋亮眼，选秀节目黑马候选人。", advice: "打磨舞台表现力，冲击出道位。" },
+    { max: 85, l: "Lv.5 主力练习生", c: "#ff7eb6", d: "全能均衡，团队核心主力人选。", advice: "提升领导力，适配团队定位。" },
+    { max: 95, l: "Lv.6 ACE练习生", c: "#ff7eb6", d: "全能天花板，唱跳颜值综艺全优。", advice: "巩固全能优势，争夺中心位。" },
+    { max: 110, l: "Lv.7 中心位候选人", c: "#d488e9", d: "顶级天赋，选秀中心位强力竞争者。", advice: "打造个人IP，引领团队风格。" },
+    { max: 125, l: "Lv.8 顶级ACE", c: "#d488e9", d: "断层领先，天生女团中心位。", advice: "全方位封神，引领2026女团潮流。" },
+    { max: 140, l: "Lv.9 国民爱豆", c: "#b86fd6", d: "全民人气，天生顶流爱豆体质。", advice: "拓展国民度，登顶韩流乐坛。" },
+    { max: 999, l: "Lv.10 传奇爱豆", c: "#3a2c4d", d: "百年一遇的爱豆天才，韩流传奇。", advice: "开创时代，成为KPOP标杆。" }
+];
+
+// 全局变量
+let currQList = [];
+let currIdx = 0;
+let userRole = '';
+let userTitle = '';
+let scores = { vocal:0, dance:0, visual:0, variety:0, effort:0 };
+
+// 页面切换
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userRole = document.getElementById('input-status').value;
+    userTitle = document.getElementById('input-title').value;
+    
+    currQList = [...questions, ...roleSpecific[userRole]];
+    currIdx = 0;
+    scores = { vocal:0, dance:0, visual:0, variety:0, effort:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    let weight = 1.0;
+    if (userRole === 'member') { weight = 1.2; } 
+    else if (userRole === 'pre') { weight = 1.1; }
+
+    scores[dim] += val * weight;
+
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { vocal:0, dance:0, visual:0, variety:0, effort:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw / 2.5); 
+    if(finalScore> 150) finalScore = 150;
+
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'vocal', n:'唱功'}, {k:'dance', n:'舞蹈'}, 
+        {k:'visual', n:'颜值'}, {k:'variety', n:'综艺'}, {k:'effort', n:'努力'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 65) * 100, 100);
+        let color = pct> 60 ? '#ff7eb6' : (pct> 30 ? '#f7c3d4' : '#8e96f7');
+        let txt = pct> 70 ? '顶级' : (pct> 40 ? '优秀' : '基础');
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {vocal:'唱功', dance:'舞蹈', visual:'颜值', variety:'综艺', effort:'努力'};
+    return map[k];
+}
+
+// 2026版 千字以上女团选秀报告
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let envStatus = '';
+    let envClass = '';
+    if (total> 90) {
+        envStatus = '🌟 顶级天赋：天生爱豆 · 断层出道候选人';
+        envClass = 'color:#d488e9; font-weight:900;';
+    } else if (total> 70) {
+        envStatus = '✨ 优秀天赋：ACE练习生 · 出道稳拿';
+        envClass = 'color:#ff7eb6; font-weight:800;';
+    } else if (total> 50) {
+        envStatus = '💫 潜力天赋：进阶练习生 · 选秀黑马';
+        envClass = 'color:#f7c3d4; font-weight:700;';
+        envStatus = '🌱 基础天赋：素人预备役 · 可塑之才';
+        envClass = 'color:#8e96f7; font-weight:700;';
+    }
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、2026 KPOP女团练习生天赋诊断书</div>
+        <p class="r-p" style="background:#f8f5ff; padding:12px; border-radius:8px; font-size:14px; border:1px solid #f0e8ff;">
+            <strong>🎵 练习生档案：</strong>${userRole==='new'?'纯素人(零基础)':userRole==='trainee'?'公司练习生':userRole==='pre'?'预备出道选手':'团队主力成员'} <br>
+            <strong>💖 女团风格：</strong>${getTitleName(userTitle)}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#fff; box-shadow:0 4px 12px rgba(212, 136, 233, 0.05);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#7a6b91; margin-right:8px;">综合天赋总分</span>
+                <span style="font-size:36px; font-weight:900; color:#3a2c4d; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#7a6b91;">/ 150</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>出道建议：</strong>${lvl.advice}</p>
+        </div>
+
+        <div style="margin-top:20px; padding:15px; background:#fff; border-radius:8px; border:1px solid #f0e8ff;">
+            <p style="margin:0 0 10px 0; font-size:14px; color:#7a6b91;">天赋定性评估：</p>
+            <div style="${envClass} font-size:17px; margin-bottom:12px;">${envStatus}</div>
+            <p class="r-p" style="font-size:15px; margin:0;">
+                基于2026年韩国女团选秀最新标准，经过36项核心指标深度测评，系统判定你的核心天赋优势为 <span style="background:#ff7eb6; color:#fff; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:13px;">${getDimFullCN(maxDimKey)}</span>。
+                ${total> 70 ? '你的天赋已达到2026女团出道标准，具备成为ACE/中心位的核心竞争力，只需针对性打磨即可登顶。' : '你的天赋具备可塑空间，结合2026女团趋势提升短板，有望快速进阶为出道级练习生。'}
+            </p>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维爱豆天赋深度解构 (2026官方版)</div>
+        <p style="font-size:12px; color:#7a6b91; margin-bottom:20px; font-style:italic;">*基于韩国SM/YG/JYP三大社选秀标准测评</p>
+        ${generateDimAnalysis('vocal', scores.vocal)}
+        ${generateDimAnalysis('dance', scores.dance)}
+        ${generateDimAnalysis('visual', scores.visual)}
+        ${generateDimAnalysis('variety', scores.variety)}
+        ${generateDimAnalysis('effort', scores.effort)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、2026女团出道定位与生存攻略</div>
+        <div class="r-box" style="border-color:#d4c8e6;">
+            <div class="r-h3">🎯 定位篇：2026女团最优出道定位</div>
+            <ul class="r-list">
+                <li><strong>核心定位：</strong> 根据你的天赋匹配2026女团主流趋势，${maxDimKey==='vocal'?'主唱担当(团队核心vocal)':maxDimKey==='dance'?'主舞担当(舞台核心)':maxDimKey==='visual'?'门面担当(颜值中心)':maxDimKey==='variety'?'综艺担当(人气核心)':'努力担当(团队标杆)'}，是最适合你的出道方向。</li>
+                <li><strong>风格适配：</strong> 2026年女团主打「甜酷融合」「元气高级」风格，你的${getTitleName(userTitle)}完美适配当下韩流审美，无需强行改变风格。</li>
+                <li><strong>人气规划：</strong> 利用核心天赋打造个人记忆点，2026选秀更看重「独特性」，你的优势项将成为吸粉关键。</li>
+            </ul>
+        </div>
+        
+        <div class="r-box" style="background:#fff5f9; border-color:#ffd6e0;">
+            <div class="r-h3" style="color:#ff7eb6;">
+                🚀 提升篇：${userRole==='new'?'素人·快速入门':userRole==='trainee'?'练习生·进阶突破':userRole==='pre'?'预备出道·冲刺出道':'主力成员·登顶ACE'}
+            </div>
+            ${userRole==='new' ? getNewAdvice() : userRole==='trainee' ? getTraineeAdvice() : userRole==='pre' ? getPreAdvice() : getMemberAdvice()}
+        </div>
+
+        <div class="r-box" style="background:#f0e8ff; border-color:#d488e9;">
+            <div class="r-h3" style="color:#d488e9;">
+                🌟 2026女团趋势预测与出道指南
+            </div>
+            <p class="r-p">2026年KPOP女团市场将迎来「全能化+个性化」双趋势，公司不再只看重单一颜值或唱跳，更青睐<strong>唱跳均衡、有综艺感、自律努力</strong>的全能练习生。同时，<strong>个人特色</strong>成为出道核心竞争力，千篇一律的模板化练习生将被淘汰，拥有独特音色、舞蹈风格、气质的练习生更容易脱颖而出。</p>
+            <p class="r-p">选秀赛道方面，生存类选秀、全球线上选秀成为主流，海外练习生机会大幅增加。建议你紧跟趋势，强化核心天赋的同时，补齐短板，打造「一超多强」的全能体质，才能在2026年激烈的女团选秀中成功出道，成为新一代韩流爱豆！</p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        本报告由2026 KPOP女团选秀算法自动生成<br>
+        祝愿每一位练习生，都能站上梦想的舞台
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function getTitleName(t) {
+    const m = {
+        sweet: '甜妹风(元气可爱)', 
+        cool: '酷飒风(盐系高级)', 
+        energetic: '元气风(活力满满)', 
+        cold: '清冷风(氛围感女神)'
+    };
+    return m[t] || t;
+}
+
+function getDimFullCN(k) {
+    const m = {
+        vocal: '唱功天赋(团队主唱)', 
+        dance: '舞蹈天赋(舞台主舞)', 
+        visual: '颜值天赋(门面担当)', 
+        variety: '综艺天赋(人气核心)', 
+        effort: '努力天赋(成长王牌)'
+    };
+    return m[k];
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 45 ? 'high' : (val> 25 ? 'med' : 'low');
+    
+    const config = {
+        high: { color: '#d488e9', bg: '#f0e8ff', tag: '🌟 顶级天赋', titleColor: '#d488e9' },
+        med: { color: '#ff7eb6', bg: '#fff5f9', tag: '✨ 优秀天赋', titleColor: '#ff7eb6' },
+        low: { color: '#8e96f7', bg: '#f8f5ff', tag: '🌱 基础天赋', titleColor: '#8e96f7' }
+    };
+    
+    const c = config[riskLevel];
+    
+    const texts = {
+        vocal: {
+            high: "<strong>天赐唱功，天生主唱命。</strong> 音准、音域、情感表达全优，唱跳稳定性拉满，是2026女团最稀缺的核心vocal人才，公司必捧的主唱担当。",
+            med: "<strong>唱功优秀，潜力无限。</strong> 具备合格的演唱能力，音准稳定，只需加强高音和气息训练，即可成为团队主唱候选人。",
+            low: "<strong>唱功基础薄弱，需重点提升。</strong> 音域、气息存在短板，建议从基础发声、气息控制开始练习，稳步提升演唱能力。"
+        },
+        dance: {
+            high: "<strong>舞蹈天才，舞台主舞。</strong> 节奏感、肢体张力、镜头感全满分，学习速度极快，高难度舞蹈轻松驾驭，是舞台上的绝对焦点。",
+            med: "<strong>舞蹈能力达标，可塑性强。</strong> 动作标准、卡点精准，只需加强肢体表现力和核心力量，就能成为优秀的舞蹈担当。",
+            low: "<strong>舞蹈基础不足，需勤加练习。</strong> 协调性、节奏感有待提升，建议从基础律动、基本功开始打磨，逐步提升舞蹈能力。"
+        },
+        visual: {
+            high: "<strong>神颜门面，天生爱豆脸。</strong> 颜值、身材、氛围感全顶级，原相机无死角，上镜效果封神，是2026女团首选的门面担当。",
+            med: "<strong>颜值出众，耐看型选手。</strong> 五官精致、比例匀称，稍加包装就能成为团队颜值担当，适配各种爱豆造型。",
+            low: "<strong>颜值基础普通，可通过包装提升。</strong> 气质和造型是提升关键，无需焦虑，后天包装可大幅提升上镜效果。"
+        },
+        variety: {
+            high: "<strong>综艺天才，人气发动机。</strong> 镜头感、亲和力、反应力全优，造梗控场能力拉满，是团队吸粉、提升国民度的核心。",
+            med: "<strong>综艺感在线，表现稳定。</strong> 从容应对镜头，亲和力不错，稍加锻炼就能成为团队的综艺小能手。",
+            low: "<strong>综艺感偏弱，需锻炼胆量。</strong> 面对镜头容易紧张，建议多练习表达，提升社交亲和力和临场反应力。"
+        },
+        effort: {
+            high: "<strong>拼命三娘，自律天花板。</strong> 练习时长、抗压能力、自律性全拉满，越挫越勇，是公司最认可的努力型天才，成长速度极快。",
+            med: "<strong>努力程度合格，态度端正。</strong> 能够坚持练习，抗压能力尚可，保持自律就能稳步提升，补齐所有短板。",
+            low: "<strong>自律性不足，需调整心态。</strong> 容易偷懒、抗压能力弱，出道需要极致努力，必须强化自律和上进心。"
+        }
+    };
+    
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimFullCN(key)} 
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)})</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+// 分身份攻略
+function getNewAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>基础夯实 (0-6个月)：</strong> 优先练习唱功基本功、舞蹈律动、体态管理，零基础不要追求高难度动作，稳扎稳打。</li>
+        <li><strong>天赋放大：</strong> 找到你的核心优势项，重点打磨，让优势成为你的第一个记忆点。</li>
+        <li><strong>心态建设：</strong> 素人出道周期较长，保持耐心，坚持自律，你也能逆袭成为练习生。</li>
+    </ul>`;
+}
+function getTraineeAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>短板补齐：</strong> 针对测评中的薄弱项，每天加练1小时，快速缩小与主力练习生的差距。</li>
+        <li><strong>特色打造：</strong> 结合你的女团风格，打造专属舞台小习惯，让导师和粉丝记住你。</li>
+        <li><strong>公司适配：</strong> 紧跟公司训练节奏，提升团队配合能力，为入团出道做准备。</li>
+    </ul>`;
+}
+function getPreAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>舞台封神：</strong> 冲刺选秀舞台，打磨1-2首代表作，争取直拍出圈，锁定出道位。</li>
+        <li><strong>镜头管理：</strong> 强化镜头捕捉能力，2026选秀直拍人气决定出道概率。</li>
+        <li><strong>心态冲刺：</strong> 保持抗压心态，无视负面评价，全力冲刺最终出道名单。</li>
+    </ul>`;
+}
+function getMemberAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>核心引领：</strong> 发挥团队主力作用，带领成员提升整体实力，成为团队的灵魂人物。</li>
+        <li><strong>全能进化：</strong> 巩固全能优势，向ACE和中心位发起冲击，成为团队顶梁柱。</li>
+        <li><strong>人气沉淀：</strong> 拓展综艺、舞台资源，沉淀个人粉丝，为团队出圈贡献力量。</li>
+    </ul>`;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationStep(step);
+        }
+    };
+    window.requestAnimationStep(step);
+}
+
+// 雷达图绘制
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['vocal','dance','visual','variety','effort'];
+    const labels = ['唱功','舞蹈','颜值','综艺','努力'];
+    
+    ctx.strokeStyle = '#f0e8ff';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 65, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(255, 126, 182, 0.1)");
+    grd.addColorStop(1, "rgba(255, 126, 182, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#ff7eb6'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#3a2c4d'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+function updateLimitUI() {
+    document.getElementById('limit-hint').innerText = `本设备剩余可用次数：${remaining}次`;
+}
+
+msg.style.opacity = 0;
+    
+    document.getElementById('load-layer').style.display = 'flex';
+    const txt = document.getElementById('load-text');
+    
+    setTimeout(() => { txt.innerText = "正在加载选秀题库..."; }, 800);
+    setTimeout(() => { 
+        txt.innerText = `加载成功！(剩余${left}次)`; 
+        txt.style.color = "#ff7eb6"; 
+    }, 1500);
+    
+    setTimeout(() => {
+        sessionStorage.setItem('unlocked_' + pageId, 'true');
+        setTimeout(() => { 
+        }, 500);
+    }, 2500);
+}
+
+function shakeCard() {
+    const card = document.getElementById('main-card');
+    card.style.animation = 'shake 0.3s';
+    setTimeout(() => { card.style.animation = ''; }, 300);
+}
+
+// 绑定事件
+window.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('unlocked_' + pageId)) {
+        updateLimitUI();
+    }
+
+    .addEventListener('click', function() {
+        
+    });
+    .addEventListener('click', function() {
+        
+    });
+    .addEventListener('click', function() {
+        
+    });
+    .addEventListener('click', function() {
+        
+    });
+
+    document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+    document.getElementById('init-test-btn').addEventListener('click', initTest);
+    document.getElementById('prev-btn').addEventListener('click', prevQuestion);
+    document.getElementById('show-report-btn').addEventListener('click', showReport);
+    document.getElementById('close-report-btn').addEventListener('click', closeReport);
+    document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "kpopnt";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

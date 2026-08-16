@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026情绪压力自查 | 个人内在成长提升评估</title>
+    <style>
+        :root {
+            /* 情绪心理治愈风格 2026版 */
+            --primary: #4a6fa5; 
+            --primary-dark: #3a5a8c;
+            --accent: #65c1ba; /* 治愈青 */
+            --accent-hover: #4fb0a8;
+            --safe: #51cf66;    /* 健康绿 */
+            --warning: #ff922b; /* 警示橙 */
+            --danger: #ff6b6b;  /* 危险红 */
+            --bg-gradient-start: #f8f9ff;
+            --bg-gradient-end: #eef2f7;
+            --text-main: #2d3748;
+            --text-sub: #718096;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.1);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-cyan { 0% { box-shadow: 0 0 0 0 rgba(101, 193, 186, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(101, 193, 186, 0); } 100% { box-shadow: 0 0 0 0 rgba(101, 193, 186, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 111, 165, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#e0f7f5 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 38px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #2d3748;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: var(--text-sub); margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ecf0f1;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2d3748; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2d3748; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #ecf0f1; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #2d3748; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #ecf0f1; color: #7f8c8d; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2d3748; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #34495e; cursor: pointer; border: 2px solid #ecf0f1; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #f0fdfc; border-color: var(--accent); color: var(--accent); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #f8f9ff; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #eef2f7;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--accent); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: #2d3748; color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #718096; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2d3748; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2d3748; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #718096; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-cyan 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #718096; width: 100%; padding: 10px;
+            border: 1px solid #bdc3c7; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: var(--primary); color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2d3748; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ecf0f1; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #34495e; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #f8f9fa; border: 1px solid #ecf0f1; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #555; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-情绪检查表" class="fade-in">
+        <div class="cover-tag">2026 心理版</div>
+        <h1 class="cover-title">个人<span>情绪压力</span><br>自查与成长评估</h1>
+        <p class="cover-subtitle">2026专业心理测评<br>精准量化你的情绪状态与压力指数 | 内在成长提升</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">多维压力扫描</div>
+                <div class="feature-desc">情绪、压力、调节、焦虑、边界，全方位心理检测。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">精准状态诊断</div>
+                <div class="feature-desc">科学评分体系，定位你的情绪健康等级。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🌱</div>
+                <div class="feature-title">内在成长方案</div>
+                <div class="feature-desc">定制化调节策略，助力心理状态提升。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">千字专业报告</div>
+                <div class="feature-desc">2026深度解析报告，指引长期内在成长。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始专业测评 (约需 3 分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2d3748; margin-bottom:10px;">建立心理档案 📋</h2>
+        <p style="color:#718096; font-size:14px; margin-bottom:30px;">系统将根据你的基础信息优化测评权重。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的年龄段是？</label>
+            <select id="input-age" class="select-box">
+                <option value="young">18-25岁 (青年期)</option>
+                <option value="middle">26-40岁 (中青年)</option>
+                <option value="adult">41-60岁 (中年期)</option>
+                <option value="senior">60岁以上 (老年期)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">当前整体情绪状态？</label>
+            <select id="input-mood" class="select-box">
+                <option value="calm">平静稳定 (心态平和)</option>
+                <option value="upset">烦躁易怒 (情绪波动)</option>
+                <option value="anxious">焦虑不安 (过度担忧)</option>
+                <option value="low">低落消沉 (提不起劲)</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成测评题目</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：情绪稳定性</span>
+            <span id="progress-text">1 / 34</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🧘 情绪稳定性</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-cyan 1s infinite; border-radius:50%;">🧘</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2d3748;">正在分析你的情绪压力...</h3>
+        <p style="color:#718096; font-size:14px; line-height:1.8;">正在演算压力指数...<br>匹配心理状态...<br>生成内在成长报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">压力指数</span>
+            </div>
+            <div class="level-badge" id="res-level">等级 ?</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维心理雷达图</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《2026情绪压力与内在成长报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新测评一次</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PERSONAL GROWTH REPORT</div>
+            <div class="r-h1">情绪压力自查与内在成长报告</div>
+            <div style="font-size:14px;">专业心理评估 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 千字以上报告 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const pageId = window.location.pathname;
+
+// 情绪压力测评题库 5大维度
+const questions = [
+    // 维度1：情绪稳定性
+    { d: 'emotion', t: '情绪稳定性', q: "你最近容易因为小事突然发脾气吗？", o: [
+        {t:"完全不会，心态很平稳", s:0},
+        {t:"偶尔会，能快速平复", s:3},
+        {t:"经常会，情绪失控", s:7},
+        {t:"每天都烦躁，无法控制", s:10}
+    ]},
+    { d: 'emotion', t: '情绪稳定性', q: "你能快速从负面情绪中走出来吗？", o: [
+        {t:"立刻调整，不受影响", s:0},
+        {t:"需要一点时间，能恢复", s:3},
+        {t:"很难走出来，持续低落", s:7},
+        {t:"长期陷在负面情绪里", s:10}
+    ]},
+    { d: 'emotion', t: '情绪稳定性', q: "你最近经常感到莫名的难过吗？", o: [
+        {t:"从未有过，心态积极", s:0},
+        {t:"偶尔有，很快消失", s:3},
+        {t:"经常感到低落消沉", s:7},
+        {t:"每天都难过，无法缓解", s:10}
+    ]},
+    { d: 'emotion', t: '情绪稳定性', q: "你的情绪容易被他人影响吗？", o: [
+        {t:"完全不会，坚守自我", s:0},
+        {t:"轻微影响，能调节", s:3},
+        {t:"很容易被他人带动情绪", s:7},
+        {t:"完全被他人左右情绪", s:10}
+    ]},
+    { d: 'emotion', t: '情绪稳定性', q: "你最近睡眠受情绪影响严重吗？", o: [
+        {t:"毫无影响，睡眠很好", s:0},
+        {t:"轻微影响，正常入睡", s:3},
+        {t:"经常失眠，情绪干扰", s:7},
+        {t:"彻夜难眠，情绪崩溃", s:10}
+    ]},
+    { d: 'emotion', t: '情绪稳定性', q: "你能理性看待生活中的挫折吗？", o: [
+        {t:"非常理性，积极面对", s:0},
+        {t:"偶尔感性，能调整", s:3},
+        {t:"容易崩溃，无法理性", s:7},
+        {t:"遇到挫折就彻底放弃", s:10}
+    ]},
+
+    // 维度2：压力耐受度
+    { d: 'stress', t: '压力耐受度', q: "面对工作/学习压力，你的状态是？", o: [
+        {t:"轻松应对，毫无压力", s:0},
+        {t:"有压力，但能化解", s:2},
+        {t:"压力很大，感到吃力", s:6},
+        {t:"被压垮，无法承受", s:10}
+    ]},
+    { d: 'stress', t: '压力耐受度', q: "压力大时，你会出现身体不适吗？", o: [
+        {t:"完全不会，身体健康", s:0},
+        {t:"偶尔不适，很快恢复", s:2},
+        {t:"经常头痛/胸闷/疲惫", s:6},
+        {t:"身体持续不适，影响生活", s:10}
+    ]},
+    { d: 'stress', t: '压力耐受度', q: "你会主动逃避压力场景吗？", o: [
+        {t:"从不逃避，直面压力", s:0},
+        {t:"偶尔回避，能面对", s:2},
+        {t:"经常逃避，不敢面对", s:6},
+        {t:"彻底逃避，拒绝面对", s:10}
+    ]},
+    { d: 'stress', t: '压力耐受度', q: "多任务并行时，你会感到焦虑吗？", o: [
+        {t:"有条不紊，高效处理", s:0},
+        {t:"轻微焦虑，能完成", s:3},
+        {t:"极度焦虑，手忙脚乱", s:7},
+        {t:"直接崩溃，无法处理", s:10}
+    ]},
+    { d: 'stress', t: '压力耐受度', q: "你觉得当前生活压力超出承受范围了吗？", o: [
+        {t:"完全没有，游刃有余", s:0},
+        {t:"在承受范围内，可控", s:3},
+        {t:"接近极限，快要撑不住", s:7},
+        {t:"已经超出，无法承受", s:10}
+    ]},
+    { d: 'stress', t: '压力耐受度', q: "压力会让你失去动力吗？", o: [
+        {t:"压力让我更有动力", s:0},
+        {t:"动力正常，不受影响", s:2},
+        {t:"动力下降，提不起劲", s:6},
+        {t:"完全失去动力，摆烂", s:9}
+    ]},
+
+    // 维度3：自我调节力
+    { d: 'adjust', t: '自我调节力', q: "你有固定的情绪调节方式吗？", o: [
+        {t:"有，且非常有效", s:0},
+        {t:"有，偶尔有效", s:2},
+        {t:"没有，不知道怎么调节", s:6},
+        {t:"完全无法调节自己", s:9}
+    ]},
+    { d: 'adjust', t: '自我调节力', q: "焦虑时，你能快速让自己平静吗？", o: [
+        {t:"立刻平静，掌控情绪", s:0},
+        {t:"需要时间，能平静", s:3},
+        {t:"很难平静，持续焦虑", s:7},
+        {t:"永远无法平静，越陷越深", s:10}
+    ]},
+    { d: 'adjust', t: '自我调节力', q: "你会主动疏导负面情绪吗？", o: [
+        {t:"主动疏导，积极调整", s:0},
+        {t:"偶尔疏导，被动调整", s:2},
+        {t:"从不疏导，积压情绪", s:6},
+        {t:"任由负面情绪吞噬自己", s:10}
+    ]},
+    { d: 'adjust', t: '自我调节力', q: "你能客观评价自己的状态吗？", o: [
+        {t:"非常客观，清晰认知", s:0},
+        {t:"基本客观，偶尔偏差", s:3},
+        {t:"无法客观，自我否定", s:7},
+        {t:"完全迷失，认知混乱", s:10}
+    ]},
+    { d: 'adjust', t: '自我调节力', q: "你会通过放松方式缓解压力吗？", o: [
+        {t:"经常做，效果很好", s:0},
+        {t:"偶尔做，有点用", s:2},
+        {t:"想做，但没时间/没动力", s:6},
+        {t:"拒绝任何放松方式", s:10}
+    ]},
+
+    // 维度4：焦虑倾向
+    { d: 'anxiety', t: '焦虑倾向', q: "你经常为未发生的事过度担忧吗？", o: [
+        {t:"从不担忧，活在当下", s:0},
+        {t:"偶尔担忧，能控制", s:3},
+        {t:"经常过度担忧未来", s:7},
+        {t:"无时无刻不在焦虑", s:10}
+    ]},
+    { d: 'anxiety', t: '焦虑倾向', q: "你会担心自己做不好所有事吗？", o: [
+        {t:"完全自信，不担心", s:0},
+        {t:"偶尔担心，相信自己", s:3},
+        {t:"经常担心，自我怀疑", s:7},
+        {t:"极度自卑，觉得自己一无是处", s:10}
+    ]},
+    { d: 'anxiety', t: '焦虑倾向', q: "社交场合会让你感到焦虑吗？", o: [
+        {t:"轻松社交，毫无压力", s:0},
+        {t:"轻微紧张，能适应", s:3},
+        {t:"极度紧张，害怕社交", s:7},
+        {t:"回避所有社交，恐惧人群", s:10}
+    ]},
+    { d: 'anxiety', t: '焦虑倾向', q: "你会反复回想不愉快的事吗？", o: [
+        {t:"从不回想，向前看", s:0},
+        {t:"偶尔回想，快速放下", s:3},
+        {t:"经常反复回想，内耗", s:7},
+        {t:"每天内耗，无法自拔", s:10}
+    ]},
+    { d: 'anxiety', t: '焦虑倾向', q: "你对未来感到迷茫和恐慌吗？", o: [
+        {t:"目标清晰，充满希望", s:0},
+        {t:"偶尔迷茫，不恐慌", s:3},
+        {t:"经常迷茫，感到恐慌", s:7},
+        {t:"彻底绝望，看不到希望", s:10}
+    ]},
+
+    // 维度5：心理边界
+    { d: 'boundary', t: '心理边界', q: "你会因为不好意思拒绝别人而内耗吗？", o: [
+        {t:"果断拒绝，毫无内耗", s:0},
+        {t:"偶尔纠结，能拒绝", s:3},
+        {t:"经常不好意思拒绝", s:7},
+        {t:"永远不敢拒绝，委屈自己", s:10}
+    ]},
+    { d: 'boundary', t: '心理边界', q: "你会过度在意别人的评价吗？", o: [
+        {t:"毫不在意，做自己", s:0},
+        {t:"轻微在意，不影响", s:3},
+        {t:"非常在意，自我怀疑", s:7},
+        {t:"活在别人的评价里", s:10}
+    ]},
+    { d: 'boundary', t: '心理边界', q: "你会为了迎合别人牺牲自己吗？", o: [
+        {t:"坚决不，坚守自我", s:0},
+        {t:"偶尔妥协，不牺牲", s:3},
+        {t:"经常牺牲，迎合他人", s:7},
+        {t:"彻底失去自我，全听他人", s:10}
+    ]},
+    { d: 'boundary', t: '心理边界', q: "你能区分自己和他人的情绪责任吗？", o: [
+        {t:"清晰区分，不背锅", s:0},
+        {t:"基本区分，偶尔混淆", s:3},
+        {t:"经常承担他人的情绪", s:7},
+        {t:"为所有人的情绪负责", s:10}
+    ]}
+];
+
+// 个性化题库
+const roleSpecific = {
+    young: [
+        { d: 'anxiety', t: '青年焦虑', q: "【青年特供】你会为前途/学业感到极度焦虑吗？", o: [
+            {t:"毫无焦虑，稳步前行", s:0},
+            {t:"偶尔焦虑，能调节", s:3},
+            {t:"经常焦虑，寝食难安", s:7},
+            {t:"被前途焦虑彻底压垮", s:10}
+        ]},
+        { d: 'stress', t: '青年压力', q: "【青年特供】同辈压力会让你崩溃吗？", o: [
+            {t:"不受影响，专注自己", s:0},
+            {t:"轻微影响，能调整", s:3},
+            {t:"压力巨大，自我否定", s:7},
+            {t:"彻底摆烂，放弃努力", s:10}
+        ]}
+    ],
+    middle: [
+        { d: 'stress', t: '中年压力', q: "【中青年特供】生活多重压力让你喘不过气吗？", o: [
+            {t:"平衡很好，轻松应对", s:0},
+            {t:"有压力，可控范围", s:3},
+            {t:"压力过载，身心俱疲", s:7},
+            {t:"无法承受，濒临崩溃", s:10}
+        ]},
+        { d: 'emotion', t: '中年情绪', q: "【中青年特供】你经常感到孤独和疲惫吗？", o: [
+            {t:"充实快乐，不孤独", s:0},
+            {t:"偶尔孤独，能自愈", s:3},
+            {t:"经常孤独，无人理解", s:7},
+            {t:"长期孤独，绝望无助", s:10}
+        ]}
+    ],
+    adult: [
+        { d: 'anxiety', t: '中年焦虑', q: "【中年特供】你会为健康/家庭过度焦虑吗？", o: [
+            {t:"平常心，积极生活", s:0},
+            {t:"偶尔担心，能调节", s:3},
+            {t:"经常焦虑，影响生活", s:7},
+            {t:"终日惶恐，无法安心", s:10}
+        ]}
+    ],
+    senior: [
+        { d: 'emotion', t: '老年情绪', q: "【老年特供】你能保持积极乐观的心态吗？", o: [
+            {t:"非常乐观，享受生活", s:0},
+            {t:"心态平和，偶尔波动", s:3},
+            {t:"情绪低落，消极度日", s:7},
+            {t:"长期抑郁，毫无乐趣", s:10}
+        ]}
+    ]
+};
+
+// 压力指数评级
+const levels = [
+    { max: 20, l: "Lv.1 零压力状态", c: "#51cf66", d: "情绪极度稳定，心态平和，无任何心理压力，心理状态满分。", advice: "保持当前状态，继续守护积极心态。" },
+    { max: 40, l: "Lv.2 轻度压力", c: "#82c91e", d: "情绪稳定，压力可控，偶尔小波动，属于健康的心理状态。", advice: "轻微调节即可，保持生活平衡。" },
+    { max: 60, l: "Lv.3 中度压力", c: "#ff922b", d: "情绪波动明显，压力感较强，需要及时调节，避免进一步恶化。", advice: "重视情绪管理，主动疏导压力。" },
+    { max: 80, l: "Lv.4 重度压力", c: "#fd7e14", d: "情绪失控、焦虑失眠，压力已影响生活，必须立刻调整状态。", advice: "停止内耗，优先关注心理健康。" },
+    { max: 100, l: "Lv.5 极度压力", c: "#ff6b6b", d: "心理濒临崩溃，身心俱疲，建议寻求专业心理帮助。", advice: "立即休息，必要时咨询心理医生。" },
+    { max: 999, l: "Lv.6 心理过载", c: "#e03131", d: "压力完全超出承受范围，严重影响身心健康，紧急干预。", advice: "放下所有负担，立刻寻求专业支持。" }
+];
+
+// 全局变量
+let currQList = [];
+let currIdx = 0;
+let userAge = '';
+let userMood = '';
+let scores = { emotion:0, stress:0, adjust:0, anxiety:0, boundary:0 };
+
+// 页面切换
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userAge = document.getElementById('input-age').value;
+    userMood = document.getElementById('input-mood').value;
+    
+    currQList = [...questions, ...roleSpecific[userAge]];
+    currIdx = 0;
+    scores = { emotion:0, stress:0, adjust:0, anxiety:0, boundary:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { emotion:0, stress:0, adjust:0, anxiety:0, boundary:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw / 2.5); 
+    if(finalScore> 120) finalScore = 120;
+
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'emotion', n:'情绪'}, {k:'stress', n:'压力'}, 
+        {k:'adjust', n:'调节'}, {k:'anxiety', n:'焦虑'}, {k:'boundary', n:'边界'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 60) * 100, 100);
+        let color = pct> 60 ? '#ff6b6b' : (pct> 30 ? '#ff922b' : '#51cf66');
+        let txt = pct> 70 ? '高危' : (pct> 40 ? '中等' : '健康');
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {emotion:'情绪稳定', stress:'压力耐受', adjust:'自我调节', anxiety:'焦虑倾向', boundary:'心理边界'};
+    return map[k];
+}
+
+// 生成千字以上2026版报告
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let envStatus = '';
+    let envClass = '';
+    if (total> 80) {
+        envStatus = '☢️ 极度危险：心理压力过载 (紧急调节)';
+        envClass = 'color:#ff6b6b; font-weight:900;';
+    } else if (total> 60) {
+        envStatus = '⚠️ 重度风险：压力超标 (立即干预)';
+        envClass = 'color:#fd7e14; font-weight:800;';
+    } else if (total> 40) {
+        envStatus = '⚖️ 中度预警：压力偏高 (及时疏导)';
+        envClass = 'color:#ff922b; font-weight:700;';
+        envStatus = '🌿 健康状态：情绪稳定 (良性心理)';
+        envClass = 'color:#51cf66; font-weight:700;';
+    }
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、2026个人情绪压力诊断书</div>
+        <p class="r-p" style="background:#f8f9fa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>🧬 测评档案：</strong>${userAge==='young'?'18-25岁青年期':userAge==='middle'?'26-40岁中青年':userAge==='adult'?'41-60岁中年期':'60岁以上老年期'} <br>
+            <strong>🧘 基础状态：</strong>${getMoodName(userMood)}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#999; margin-right:8px;">综合压力指数</span>
+                <span style="font-size:36px; font-weight:900; color:#2d3748; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#999;">/ 120</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>成长建议：</strong>${lvl.advice}</p>
+        </div>
+
+        <div style="margin-top:20px; padding:15px; background:#fff; border-radius:8px; border:1px solid #eee;">
+            <p style="margin:0 0 10px 0; font-size:14px; color:#999;">心理状态定性：</p>
+            <div style="${envClass} font-size:17px; margin-bottom:12px;">${envStatus}</div>
+            <p class="r-p" style="font-size:15px; margin:0;">
+                2026版测评通过34项专业心理指标深度扫描，系统检测到你的核心心理痛点位于 <span style="background:#65c1ba; color:#fff; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:13px;">${getDimFullCN(maxDimKey)}</span> 维度。
+                ${total> 60 ? '你的心理压力已严重影响身心健康，长期内耗会导致情绪崩溃、身体不适，必须立刻启动内在成长计划。' : '你的心理状态整体健康，只需针对性微调，即可实现更好的内在成长。'}
+            </p>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维心理状态深度解构（2026专业版）</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px; font-style:italic;">*基于积极心理学、情绪管理理论的深度分析</p>
+        ${generateDimAnalysis('emotion', scores.emotion)}
+        ${generateDimAnalysis('stress', scores.stress)}
+        ${generateDimAnalysis('adjust', scores.adjust)}
+        ${generateDimAnalysis('anxiety', scores.anxiety)}
+        ${generateDimAnalysis('boundary', scores.boundary)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、2026内在成长提升全方案</div>
+        <div class="r-box" style="border-color:#bdc3c7;">
+            <div class="r-h3">🛡️ 基础篇：心理防御与情绪维稳</div>
+            <ul class="r-list">
+                <li><strong>情绪暂停法：</strong> 当负面情绪来袭时，立刻暂停当下行为，深呼吸3分钟，切断情绪失控的连锁反应，守护心理防线。</li>
+                <li><strong>压力剥离术：</strong> 区分「可控制压力」和「不可控制压力」，放下无法改变的事，专注解决力所能及的问题，减少无效内耗。</li>
+                <li><strong>心理边界重建：</strong> 学会温和而坚定地拒绝他人，不再为他人的情绪负责，把时间和精力优先留给自己，守住心理底线。</li>
+            </ul>
+        </div>
+        
+        <div class="r-box" style="background:#f0fdfc; border-color:#65c1ba;">
+            <div class="r-h3" style="color:#65c1ba;">
+                🌱 进阶篇：定制化内在成长策略
+            </div>
+            <ul class="r-list">
+                <li><strong>每日微调节：</strong> 每天预留15分钟专属放松时间，冥想、听音乐、散步均可，长期坚持可大幅提升情绪稳定性与压力耐受度。</li>
+                <li><strong>焦虑断舍离：</strong> 停止对未来的过度担忧，把大目标拆解为每日小任务，用行动替代胡思乱想，从根源消除焦虑倾向。</li>
+                <li><strong>自我接纳练习：</strong> 停止自我否定和完美主义，接受自己的不完美，接纳负面情绪的存在，这是内在成长的核心。</li>
+                <li><strong>长期成长规划：</strong> 建立规律的生活作息、运动习惯和社交圈子，用健康的生活方式滋养心理，实现持续的内在提升。</li>
+            </ul>
+        </div>
+
+        <div class="r-box" style="background:#f8f9ff; border-color:#4a6fa5;">
+            <div class="r-h3" style="color:#4a6fa5;">
+                📅 2026专属执行计划
+            </div>
+            <p class="r-p">
+                第一阶段（1-7天）：执行情绪暂停法+边界重建，快速缓解急性压力；<br>
+                第二阶段（8-30天）：坚持每日微调节，养成情绪管理习惯；<br>
+                第三阶段（31-90天）：完成焦虑断舍离，实现内在成长质变；<br>
+                第四阶段（长期）：保持健康生活方式，守护稳定的心理状态。
+            </p>
+            <p class="r-p">
+                2026年，内在成长不是一蹴而就的改变，而是日复一日的自我呵护。愿你放下过度的压力和焦虑，接纳不完美的自己，在情绪稳定中找到内心的平静，在自我调节中实现持续的成长。心理健康，是人生最宝贵的财富，愿你永远拥有平和、积极、强大的内心。
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        本报告由2026情绪压力算法自动生成
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function getMoodName(t) {
+    const m = {
+        calm: '平静稳定 (心态平和)', 
+        upset: '烦躁易怒 (情绪波动)', 
+        anxious: '焦虑不安 (过度担忧)', 
+        low: '低落消沉 (提不起劲)'
+    };
+    return m[t] || t;
+}
+
+function getDimFullCN(k) {
+    const m = {
+        emotion: '情绪稳定性 (心态掌控力)', 
+        stress: '压力耐受度 (抗压能力)', 
+        adjust: '自我调节力 (情绪疏导)', 
+        anxiety: '焦虑倾向 (过度担忧)', 
+        boundary: '心理边界 (自我保护)'
+    };
+    return m[k];
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 40 ? 'high' : (val> 20 ? 'med' : 'low');
+    
+    const config = {
+        high: { color: '#ff6b6b', bg: '#fdecea', tag: '☠️ 极度高危', titleColor: '#ff6b6b' },
+        med: { color: '#ff922b', bg: '#fef5e7', tag: '⚠️ 中度风险', titleColor: '#fd7e14' },
+        low: { color: '#51cf66', bg: '#e8f8f5', tag: '✅ 健康状态', titleColor: '#51cf66' }
+    };
+    
+    const c = config[riskLevel];
+    
+    const texts = {
+        emotion: {
+            high: "<strong>情绪稳定性极差。</strong> 你极易被小事触发情绪，无法控制脾气和低落感，睡眠、生活都被情绪严重影响，长期处于情绪内耗中。",
+            med: "<strong>情绪波动较大。</strong> 你偶尔会失控，大部分时间能调节，但容易被外界影响，需要加强情绪掌控能力。",
+            low: "<strong>情绪极度稳定。</strong> 你拥有强大的心态掌控力，能理性面对所有情绪，心理状态非常健康。"
+        },
+        stress: {
+            high: "<strong>压力耐受度濒临崩溃。</strong> 你完全无法承受当前压力，身心俱疲，身体出现不适，甚至逃避现实，必须立刻减压。",
+            med: "<strong>压力耐受度一般。</strong> 你能应对基础压力，但过载时会感到吃力，需要提升抗压能力。",
+            low: "<strong>压力耐受度满分。</strong> 你能轻松应对所有压力，化压力为动力，心理素质极强。"
+        },
+        adjust: {
+            high: "<strong>自我调节力完全缺失。</strong> 你没有任何情绪疏导方式，负面情绪长期积压，只会内耗不会调节。",
+            med: "<strong>自我调节力较弱。</strong> 你偶尔能调节情绪，但缺乏固定方法，效果不稳定。",
+            low: "<strong>自我调节力极强。</strong> 你有成熟的调节方式，能快速化解负面情绪，心理自愈能力拉满。"
+        },
+        anxiety: {
+            high: "<strong>重度焦虑倾向。</strong> 你无时无刻不在担忧未来、自我怀疑，社交、生活都被焦虑控制，严重影响身心健康。",
+            med: "<strong>轻微焦虑倾向。</strong> 你偶尔会过度担忧，能自我控制，不会影响正常生活。",
+            low: "<strong>无焦虑倾向。</strong> 你活在当下，自信乐观，没有过度担忧的习惯。"
+        },
+        boundary: {
+            high: "<strong>心理边界完全崩塌。</strong> 你不敢拒绝他人，过度在意评价，彻底失去自我，为迎合他人牺牲一切。",
+            med: "<strong>心理边界模糊。</strong> 你偶尔会委屈自己，能守住基本底线，但需要强化边界感。",
+            low: "<strong>心理边界清晰。</strong> 你果断拒绝不合理要求，专注自我，不被他人左右，拥有强大的自我保护意识。"
+        }
+    };
+    
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimFullCN(key)} 
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)})</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// 雷达图
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['emotion','stress','adjust','anxiety','boundary'];
+    const labels = ['情绪','压力','调节','焦虑','边界'];
+    
+    ctx.strokeStyle = '#eef2f7';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 60, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(101, 193, 186, 0.1)");
+    grd.addColorStop(1, "rgba(101, 193, 186, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#65c1ba'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2d3748'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+// 锁屏功能
+function updateLimitUI() {
+    document.getElementById('limit-hint').innerText = `本设备剩余可用次数：${remaining}次`;
+}
+
+msg.style.opacity = 0;
+    
+    document.getElementById('load-layer').style.display = 'flex';
+    const txt = document.getElementById('load-text');
+    
+    setTimeout(() => { txt.innerText = "正在加载专属测评..."; }, 800);
+    setTimeout(() => { 
+        txt.innerText = `加载成功！(剩余${left}次)`; 
+        txt.style.color = "#65c1ba"; 
+    }, 1500);
+    
+    setTimeout(() => {
+        sessionStorage.setItem('unlocked_' + pageId, 'true');
+        setTimeout(() => { 
+        }, 500);
+    }, 2500);
+}
+
+function shakeCard() {
+    const card = document.getElementById('main-card');
+    card.style.animation = 'shake 0.3s';
+    setTimeout(() => { card.style.animation = ''; }, 300);
+}
+
+// 绑定事件
+window.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('unlocked_' + pageId)) {
+        updateLimitUI();
+    }
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    document.getElementById('start-btn').addEventListener('click', function() {var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}
+        goToDemo();
+    });
+
+    document.getElementById('init-test-btn').addEventListener('click', function() {
+        initTest();
+    });
+
+    document.getElementById('prev-btn').addEventListener('click', function() {
+        prevQuestion();
+    });
+
+    document.getElementById('show-report-btn').addEventListener('click', function() {
+        showReport();
+    });
+
+    document.getElementById('close-report-btn').addEventListener('click', function() {
+        closeReport();
+    });
+
+    document.getElementById('reset-test-btn').addEventListener('click', function() {
+        resetTest();
+    });
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "qxjc";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

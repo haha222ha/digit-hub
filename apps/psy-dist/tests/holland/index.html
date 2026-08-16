@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>霍兰德职业兴趣测试 | 2026专业职业测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:var(--primary);text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:var(--primary-dark, var(--primary))}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #2ECC71;
+            --primary-dark: #27AE60;
+            --primary-light: #58D68D;
+            --accent: #F39C12;
+            --safe: #3498DB;
+            --warning: #E74C3C;
+            --bg-gradient-start: #E8F8F5;
+            --bg-gradient-end: #D5F5E3;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); } 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); } }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#d5f5e3 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #d5f5e3; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        .holland-codes { display: flex; justify-content: center; gap: 12px; margin: 20px 0; flex-wrap: wrap; }
+        .code-item { display: flex; flex-direction: column; align-items: center; padding: 10px 15px; background: #f0f9f4; border-radius: 8px; }
+        .code-letter { font-size: 24px; font-weight: 900; color: var(--primary); }
+        .code-name { font-size: 10px; color: #636E72; margin-top: 4px; }
+        .code-desc { font-size: 11px; color: #95a5a6; margin-top: 2px; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #d5f5e3; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #d5f5e3; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #d5f5e3; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #f0f9f4; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        #page-result { display: none; background: #d5f5e3; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        
+        .holland-code-display { margin: 0 auto 20px; display: flex; justify-content: center; gap: 8px; }
+        .code-char { width: 56px; height: 56px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; font-weight: 900; }
+        .code-char .letter { font-size: 26px; }
+        .code-char .type { font-size: 9px; opacity: 0.9; font-weight: 600; }
+        
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-green 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #d5f5e3; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #d5f5e3; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        
+        .career-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .career-item { background: #f0f9f4; padding: 12px; border-radius: 8px; text-align: center; }
+        .career-item .name { font-size: 14px; font-weight: 700; color: var(--primary-dark); }
+        .career-item .salary { font-size: 11px; color: #95a5a6; margin-top: 4px; }
+
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+
+        .riasec-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 15px 0; }
+        .riasec-item { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #636E72; }
+        .riasec-dot { width: 10px; height: 10px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-霍兰德职业兴趣测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">霍兰德职业<br><span>兴趣</span>测试</h1>
+        <p class="cover-subtitle">基于John Holland的RIASEC职业兴趣理论<br>科学评估你的职业兴趣类型</p>
+        
+        <div class="riasec-legend">
+            <div class="riasec-item"><div class="riasec-dot" style="background:#E74C3C"></div>现实型R</div>
+            <div class="riasec-item"><div class="riasec-dot" style="background:#3498DB"></div>研究型I</div>
+            <div class="riasec-item"><div class="riasec-dot" style="background:#9B59B6"></div>艺术型A</div>
+            <div class="riasec-item"><div class="riasec-dot" style="background:#2ECC71"></div>社会型S</div>
+            <div class="riasec-item"><div class="riasec-dot" style="background:#F39C12"></div>企业型E</div>
+            <div class="riasec-item"><div class="riasec-dot" style="background:#1ABC9C"></div>常规型C</div>
+        </div>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">六维度精准分析</div>
+                <div class="feature-desc">基于RIASEC理论，全面分析你的职业兴趣倾向。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-title">霍兰德代码</div>
+                <div class="feature-desc">生成你的专属三字母代码，精准匹配职业类型。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💼</div>
+                <div class="feature-title">职业推荐</div>
+                <div class="feature-desc">根据你的兴趣类型，推荐匹配的职业方向。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🚀</div>
+                <div class="feature-title">发展建议</div>
+                <div class="feature-desc">提供专业的职业发展指导和成长建议。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始测试 (约需 4 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">职业档案建立 💼</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的背景信息提供更精准的职业建议。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的学历是？</label>
+            <select id="input-education" class="select-box">
+                <option value="high">高中及以下</option>
+                <option value="college">大专</option>
+                <option value="bachelor" selected>本科</option>
+                <option value="master">硕士</option>
+                <option value="doctor">博士及以上</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你有工作或实习经历吗？</label>
+            <select id="input-experience" class="select-box">
+                <option value="none">没有，完全是小白</option>
+                <option value="intern">有实习经历</option>
+                <option value="parttime">有兼职经历</option>
+                <option value="fulltime">有正式工作经验</option>
+                <option value="senior">有多年工作经验</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你最感兴趣的行业类型是？</label>
+            <select id="input-industry" class="select-box">
+                <option value="tech">科技/互联网</option>
+                <option value="finance">金融/银行</option>
+                <option value="education">教育/培训</option>
+                <option value="healthcare">医疗/健康</option>
+                <option value="media">媒体/文化</option>
+                <option value="business">商业/咨询</option>
+                <option value="government">政府/公共事业</option>
+                <option value="creative">艺术/设计</option>
+                <option value="unclear" selected>还没想好</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">开始性格测评</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：现实型R</span>
+            <span id="progress-text">1 / 18</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🔧 现实型R</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+
+    <div id="page-loading">
+        <div style="font-size:50px; animation: pulse-green 1s infinite;">💼</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的职业兴趣...</h3>
+        <p style="color:#636E72; font-size:14px;">正在扫描六维度数据...<br>计算霍兰德代码...<br>匹配职业类型...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div style="font-size:12px; color:#95a5a6; letter-spacing:1px; margin-bottom:10px;">你的霍兰德代码</div>
+            <div class="holland-code-display" id="holland-code-display"></div>
+            <div class="level-desc" id="res-desc">正在分析你的职业兴趣...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 六维度职业兴趣雷达</div>
+            <div style="height:260px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="260" height="260"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《职业发展深度分析报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新测试</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 CAREER REPORT</div>
+            <div class="r-h1">职业兴趣深度分析报告</div>
+            <div style="font-size:14px;">专业职业测评 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+
+</div>
+
+<script>
+const questions = [
+    { d: 'R', t: '现实型R', q: "你享受动手制作东西的过程吗？", o: [
+        {t:"非常享受，这是我的乐趣", s:10},
+        {t:"比较享受", s:8},
+        {t:"一般，看情况", s:5},
+        {t:"不太享受", s:3},
+        {t:"完全不喜欢", s:0}
+    ]},
+    { d: 'R', t: '现实型R', q: "你更喜欢户外运动和体力活动吗？", o: [
+        {t:"非常喜欢，这是我的日常", s:10},
+        {t:"比较喜欢", s:8},
+        {t:"一般", s:5},
+        {t:"不太喜欢", s:3},
+        {t:"完全不喜欢", s:0}
+    ]},
+    { d: 'R', t: '现实型R', q: "你擅长使用工具或机器完成工作吗？", o: [
+        {t:"非常擅长，乐在其中", s:10},
+        {t:"比较擅长", s:8},
+        {t:"一般水平", s:5},
+        {t:"不太擅长", s:3},
+        {t:"完全不擅长", s:0}
+    ]},
+    
+    { d: 'I', t: '研究型I', q: "你喜欢分析和解决复杂的问题吗？", o: [
+        {t:"非常喜欢，越难越有动力", s:10},
+        {t:"比较喜欢", s:8},
+        {t:"一般，看情况", s:5},
+        {t:"不太喜欢", s:3},
+        {t:"完全不喜欢", s:0}
+    ]},
+    { d: 'I', t: '研究型I', q: "你对科学实验或数据研究感兴趣吗？", o: [
+        {t:"非常感兴趣", s:10},
+        {t:"比较感兴趣", s:8},
+        {t:"一般", s:5},
+        {t:"不太感兴趣", s:3},
+        {t:"完全不感兴趣", s:0}
+    ]},
+    { d: 'I', t: '研究型I', q: "你倾向于通过逻辑推理而不是直觉做决定吗？", o: [
+        {t:"完全符合我的思维方式", s:10},
+        {t:"比较符合", s:8},
+        {t:"有时会这样", s:5},
+        {t:"不太符合", s:3},
+        {t:"完全不符合", s:0}
+    ]},
+    
+    { d: 'A', t: '艺术型A', q: "你喜欢自由创作和表达自己的想法吗？", o: [
+        {t:"非常热爱，这是我的生命", s:10},
+        {t:"比较喜欢", s:8},
+        {t:"一般", s:5},
+        {t:"不太喜欢", s:3},
+        {t:"完全不喜欢", s:0}
+    ]},
+    { d: 'A', t: '艺术型A', q: "你享受艺术、设计或创意类的工作吗？", o: [
+        {t:"非常享受", s:10},
+        {t:"比较喜欢", s:8},
+        {t:"一般", s:5},
+        {t:"不太感兴趣", s:3},
+        {t:"完全不感兴趣", s:0}
+    ]},
+    { d: 'A', t: '艺术型A', q: "你希望工作中有更多的灵活性和自主性吗？", o: [
+        {t:"非常渴望，讨厌束缚", s:10},
+        {t:"比较希望", s:8},
+        {t:"无所谓", s:5},
+        {t:"不太希望", s:3},
+        {t:"完全不需要", s:0}
+    ]},
+    
+    { d: 'S', t: '社会型S', q: "你喜欢帮助他人、指导别人成长吗？", o: [
+        {t:"非常热爱，乐在其中", s:10},
+        {t:"比较喜欢", s:8},
+        {t:"一般", s:5},
+        {t:"不太喜欢", s:3},
+        {t:"完全不喜欢", s:0}
+    ]},
+    { d: 'S', t: '社会型S', q: "你擅长与人沟通和建立信任关系吗？", o: [
+        {t:"非常擅长，这是我的优势", s:10},
+        {t:"比较擅长", s:8},
+        {t:"一般", s:5},
+        {t:"不太擅长", s:3},
+        {t:"完全不擅长", s:0}
+    ]},
+    { d: 'S', t: '社会型S', q: "你重视工作中的合作和人际互动吗？", o: [
+        {t:"非常重视，人是核心", s:10},
+        {t:"比较重视", s:8},
+        {t:"一般", s:5},
+        {t:"不太重视", s:3},
+        {t:"完全不需要", s:0}
+    ]},
+    
+    { d: 'E', t: '企业型E', q: "你喜欢领导和影响他人达成目标吗？", o: [
+        {t:"非常喜欢，我有领导欲", s:10},
+        {t:"比较喜欢", s:8},
+        {t:"一般", s:5},
+        {t:"不太喜欢", s:3},
+        {t:"完全不喜欢", s:0}
+    ]},
+    { d: 'E', t: '企业型E', q: "你享受竞争和追求成就感吗？", o: [
+        {t:"非常享受，竞争中成长", s:10},
+        {t:"比较享受", s:8},
+        {t:"一般", s:5},
+        {t:"不太感兴趣", s:3},
+        {t:"完全不感兴趣", s:0}
+    ]},
+    { d: 'E', t: '企业型E', q: "你愿意冒险和承担责任去实现目标吗？", o: [
+        {t:"非常愿意，我敢于冒险", s:10},
+        {t:"比较愿意", s:8},
+        {t:"一般", s:5},
+        {t:"不太愿意", s:3},
+        {t:"完全不愿意", s:0}
+    ]},
+    
+    { d: 'C', t: '常规型C', q: "你喜欢有条理、注重细节的工作吗？", o: [
+        {t:"非常喜欢，秩序让我安心", s:10},
+        {t:"比较喜欢", s:8},
+        {t:"一般", s:5},
+        {t:"不太喜欢", s:3},
+        {t:"完全不喜欢", s:0}
+    ]},
+    { d: 'C', t: '常规型C', q: "你擅长处理数据和文件等事务性工作吗？", o: [
+        {t:"非常擅长，乐在其中", s:10},
+        {t:"比较擅长", s:8},
+        {t:"一般", s:5},
+        {t:"不太擅长", s:3},
+        {t:"完全不擅长", s:0}
+    ]},
+    { d: 'C', t: '常规型C', q: "你偏好按照既定流程和规则完成任务吗？", o: [
+        {t:"非常偏好，规则让我高效", s:10},
+        {t:"比较偏好", s:8},
+        {t:"无所谓", s:5},
+        {t:"不太偏好", s:3},
+        {t:"完全不喜欢", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const typeInfo = {
+    R: { name: '现实型', en: 'Realistic', color: '#E74C3C', desc: '动手操作、机械设备', icon: '🔧' },
+    I: { name: '研究型', en: 'Investigative', color: '#3498DB', desc: '分析研究、科学探索', icon: '🔬' },
+    A: { name: '艺术型', en: 'Artistic', color: '#9B59B6', desc: '创意表达、自由艺术', icon: '🎨' },
+    S: { name: '社会型', en: 'Social', color: '#2ECC71', desc: '人际交往、帮助他人', icon: '🤝' },
+    E: { name: '企业型', en: 'Enterprising', color: '#F39C12', desc: '领导说服、影响他人', icon: '💼' },
+    C: { name: '常规型', en: 'Conventional', color: '#1ABC9C', desc: '组织秩序、细节执行', icon: '📋' }
+};
+
+const careersByType = {
+    R: [
+        { name: '电气工程师', salary: '8-20K' },
+        { name: '机械工程师', salary: '8-18K' },
+        { name: '建筑设计师', salary: '10-25K' },
+        { name: '汽修技师', salary: '6-15K' },
+        { name: '飞行员', salary: '15-50K' },
+        { name: '厨师', salary: '6-20K' }
+    ],
+    I: [
+        { name: '数据分析师', salary: '10-30K' },
+        { name: '医学研究员', salary: '10-25K' },
+        { name: '软件工程师', salary: '12-40K' },
+        { name: '生物科学家', salary: '8-20K' },
+        { name: '金融分析师', salary: '12-35K' },
+        { name: '大学教授', salary: '10-25K' }
+    ],
+    A: [
+        { name: '平面设计师', salary: '8-20K' },
+        { name: 'UI/UX设计师', salary: '12-30K' },
+        { name: '插画师', salary: '8-25K' },
+        { name: '摄影摄像', salary: '8-25K' },
+        { name: '编剧/文案', salary: '8-25K' },
+        { name: '产品设计师', salary: '12-30K' }
+    ],
+    S: [
+        { name: '心理咨询师', salary: '10-30K' },
+        { name: '教师/培训师', salary: '8-20K' },
+        { name: '人力资源', salary: '10-25K' },
+        { name: '护士/医护', salary: '8-18K' },
+        { name: '社工', salary: '6-15K' },
+        { name: '导游', salary: '8-20K' }
+    ],
+    E: [
+        { name: '项目经理', salary: '12-35K' },
+        { name: '销售经理', salary: '10-40K' },
+        { name: '创业者', salary: '不固定' },
+        { name: '律师', salary: '15-50K' },
+        { name: '企业高管', salary: '20-80K' },
+        { name: '市场营销', salary: '10-30K' }
+    ],
+    C: [
+        { name: '会计/审计', salary: '8-20K' },
+        { name: '银行职员', salary: '8-18K' },
+        { name: '行政助理', salary: '6-15K' },
+        { name: '数据录入员', salary: '5-10K' },
+        { name: '图书馆员', salary: '6-12K' },
+        { name: '公务员', salary: '8-15K' }
+    ]
+};
+
+const careerCombos = {
+    'SIA': { name: '社会艺术型', desc: '你善于用创意的方式帮助他人，适合需要人文关怀和审美素养的职业。' },
+    'SIE': { name: '社会企业型', desc: '你既有服务精神又有领导能力，适合管理和培训类的职业。' },
+    'SEC': { name: '社会常规型', desc: '你善于在有序的环境中服务他人，适合行政和服务结合的职业。' },
+    'RIC': { name: '现实常规型', desc: '你擅长在规则框架内进行实际操作，适合技术执行类的职业。' },
+    'RIE': { name: '现实企业型', desc: '你有行动力又有目标感，适合销售和技术结合的职业。' },
+    'IRA': { name: '研究艺术型', desc: '你兼具理性思维和审美能力，适合需要深度分析的设计类职业。' },
+    'IRE': { name: '研究企业型', desc: '你善于用专业知识影响他人，适合咨询和管理的职业。' },
+    'IEC': { name: '研究常规型', desc: '你擅长在系统内进行深度分析，适合专业技术类的职业。' },
+    'ACE': { name: '艺术企业型', desc: '你有创意思维又有商业头脑，适合创意产业的职业。' },
+    'AEC': { name: '艺术常规型', desc: '你在规则内追求美感，适合设计执行类的职业。' },
+    'ECS': { name: '企业常规型', desc: '你在有序环境中追求成就，适合管理执行类的职业。' },
+    'ECR': { name: '企业现实型', desc: '你既有目标感又有动手能力，适合需要执行力的管理类职业。' }
+};
+
+let currIdx = 0;
+let userInfo = {};
+let scores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userInfo.education = document.getElementById('input-education').value;
+    userInfo.experience = document.getElementById('input-experience').value;
+    userInfo.industry = document.getElementById('input-industry').value;
+    
+    currIdx = 0;
+    scores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = questions[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${questions.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx) / questions.length) * 100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${typeInfo[q.d].name}${q.d}`;
+    document.getElementById('q-category').innerText = `${typeInfo[q.d].icon} ${typeInfo[q.d].name}${q.d}`;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < questions.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+}
+
+function calculateResult() {
+    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    const top3 = sorted.slice(0, 3).map(([k]) => k);
+    const hollandCode = top3.join('');
+    
+    renderHollandCode(top3, sorted);
+    renderBars();
+    drawRadar();
+}
+
+function renderHollandCode(top3, sorted) {
+    const display = document.getElementById('holland-code-display');
+    display.innerHTML = '';
+    
+    top3.forEach((code, idx) => {
+        const div = document.createElement('div');
+        div.className = 'code-char';
+        div.style.background = typeInfo[code].color;
+        div.innerHTML = `<span class="letter">${code}</span><span class="type">${typeInfo[code].name}</span>`;
+        div.style.transform = idx === 1 ? 'scale(1.1)' : '';
+        div.style.zIndex = idx === 1 ? 2 : 1;
+        div.style.boxShadow = idx === 1 ? `0 4px 15px ${typeInfo[code].color}50` : '';
+        display.appendChild(div);
+    });
+    
+    const top3Info = top3.map(c => typeInfo[c].name).join(' + ');
+    document.getElementById('res-desc').innerText = `${top3Info} | ${getCodeTypeName(hollandCode)}`;
+}
+
+function getCodeTypeName(code) {
+    const combo = careerCombos[code];
+    if (combo) return combo.name;
+    return getGenericTypeName(code);
+}
+
+function getGenericTypeName(code) {
+    const types = code.split('').map(c => typeInfo[c].name).join('型');
+    return types + '组合';
+}
+
+function renderBars() {
+    const box = document.getElementById('bars-container');
+    const dims = ['R', 'I', 'A', 'S', 'E', 'C'];
+    let html = '';
+    
+    dims.forEach(d => {
+        const pct = Math.min((scores[d] / 30) * 100, 100);
+        const color = typeInfo[d].color;
+        html += `<div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name" style="color:${color}">${typeInfo[d].icon} ${d}</span>
+                <span class="dim-sub">${typeInfo[d].name}</span>
+            </div>
+            <div class="dim-bar-bg">
+                <div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div>
+            </div>
+            <div class="dim-val" style="color:${color}">${scores[d]}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function drawRadar() {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '260px'; c.style.height = '260px';
+    c.width = 260 * dpr; c.height = 260 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx = 130, cy = 130, r = 95;
+    const keys = ['R', 'I', 'A', 'S', 'E', 'C'];
+    const labels = ['现实型R', '研究型I', '艺术型A', '社会型S', '企业型E', '常规型C'];
+    const maxVal = 30;
+    const numAxes = 6;
+    
+    ctx.strokeStyle = '#d5f5e3'; ctx.lineWidth = 1;
+    for (let i = 1; i <= 5; i++) {
+        ctx.beginPath();
+        for (let j = 0; j < numAxes; j++) {
+            let angle = (Math.PI * 2 / numAxes) * j - Math.PI / 2;
+            let x = cx + Math.cos(angle) * (r / 5) * i;
+            let y = cy + Math.sin(angle) * (r / 5) * i;
+            if (j === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    for (let j = 0; j < numAxes; j++) {
+        let angle = (Math.PI * 2 / numAxes) * j - Math.PI / 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+        ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let ratio = Math.min(scores[k] / maxVal, 1);
+        let angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
+        let x = cx + Math.cos(angle) * r * ratio;
+        let y = cy + Math.sin(angle) * r * ratio;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(46, 204, 113, 0.1)");
+    grd.addColorStop(1, "rgba(46, 204, 113, 0.5)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.strokeStyle = '#2ECC71'; ctx.lineWidth = 2.5; ctx.stroke();
+    
+    keys.forEach((k, i) => {
+        let angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
+        let lx = cx + Math.cos(angle) * (r + 22);
+        let ly = cy + Math.sin(angle) * (r + 22);
+        ctx.fillStyle = typeInfo[k].color;
+        ctx.font = 'bold 11px system-ui';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(labels[i], lx, ly);
+    });
+}
+
+function showReport() {
+    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    const top3 = sorted.slice(0, 3).map(([k]) => k);
+    const hollandCode = top3.join('');
+    const top3Info = top3.map(c => typeInfo[c].name).join(' + ');
+    
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、你的霍兰德代码</div>
+        <p class="r-p" style="background:#f0f9f4; padding:12px; border-radius:8px; font-size:14px; border:1px solid #d5f5e3;">
+            <strong>📋 个人档案：</strong>学历：${getEducationName(userInfo.education)} | 经验：${getExperienceName(userInfo.experience)} | 兴趣行业：${getIndustryName(userInfo.industry)}
+        </p>
+        <div class="r-box" style="border-left:5px solid #2ECC71;">
+            <div style="font-size:22px; font-weight:900; color:#2ECC71; margin-bottom:8px;">霍兰德代码：${hollandCode}</div>
+            <div style="font-size:14px; color:#27AE60; margin-bottom:10px;">${top3Info}</div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;">${getCodeDescription(hollandCode)}</p>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">二、六维度详细分析</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px;">*基于霍兰德职业兴趣理论(RIASEC)的科学分析</p>
+        ${generateDimAnalysis('R')}
+        ${generateDimAnalysis('I')}
+        ${generateDimAnalysis('A')}
+        ${generateDimAnalysis('S')}
+        ${generateDimAnalysis('E')}
+        ${generateDimAnalysis('C')}
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">三、匹配职业推荐</div>
+        <div class="r-box" style="background:#f0f9f4; border-color:#2ECC71;">
+            <div class="r-h3" style="color:#27AE60;">🎯 根据你的霍兰德代码推荐的职业</div>
+            <p class="r-p">基于你的职业兴趣类型，以下职业可能非常适合你：</p>
+            <div class="career-grid">
+                ${getRecommendedCareers(top3)}
+            </div>
+        </div>
+        
+        <div class="r-box">
+            <div class="r-h3">💡 职业探索建议</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>深耕主领域</strong>：优先探索与你主导类型匹配的职业</li>
+                <li><strong>组合优势</strong>：关注需要多种兴趣类型组合的职业</li>
+                <li><strong>实践验证</strong>：通过实习、兼职等方式体验真实工作</li>
+                <li><strong>持续调整</strong>：职业兴趣会随着经验增长而发展</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">四、职业发展建议</div>
+        <div class="r-box">
+            <div class="r-h3">🚀 成长路径规划</div>
+            ${getDevelopmentAdvice(top3).map((p, i) => `<p style="margin:8px 0; padding-left:20px; position:relative;"><span style="position:absolute; left:0; color:#2ECC71; font-weight:bold;">${i+1}.</span> ${p}</p>`).join('')}
+        </div>
+        
+        <div class="r-box" style="background:#fef9f0; border-color:#F39C12;">
+            <div class="r-h3" style="color:#F39C12;">⚠️ 注意事项</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li>霍兰德代码仅供参考，不代表唯一选择</li>
+                <li>职业选择需要综合考虑能力、价值观、市场需求</li>
+                <li>你的分数差距不大时，可以探索相邻类型的工作</li>
+                <li>持续学习新技能，拓展职业可能性</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">五、霍兰德六型简介</div>
+        <div class="r-box">
+            ${Object.entries(typeInfo).map(([k, v]) => `
+                <div style="display:flex; align-items:center; margin-bottom:12px; padding-bottom:12px; ${k !== 'C' ? 'border-bottom:1px solid #eee;' : ''}">
+                    <div style="width:40px; height:40px; border-radius:8px; background:${v.color}20; display:flex; align-items:center; justify-content:center; margin-right:12px;">
+                        <span style="font-size:20px;">${v.icon}</span>
+                    </div>
+                    <div>
+                        <div style="font-weight:700; color:${v.color};">${v.name}${k} (${v.en})</div>
+                        <div style="font-size:12px; color:#888;">${v.desc}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026霍兰德职业兴趣测试 · 专业职业测评<br>
+        愿你找到理想的职业方向
+    </div>
+    `;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function getEducationName(e) {
+    const m = {'high':'高中及以下','college':'大专','bachelor':'本科','master':'硕士','doctor':'博士及以上'};
+    return m[e] || e;
+}
+function getExperienceName(e) {
+    const m = {'none':'无经验','intern':'实习经验','parttime':'兼职经验','fulltime':'正式工作','senior':'多年经验'};
+    return m[e] || e;
+}
+function getIndustryName(e) {
+    const m = {'tech':'科技/互联网','finance':'金融','education':'教育','healthcare':'医疗','media':'媒体','business':'商业','government':'政府','creative':'艺术','unclear':'未确定'};
+    return m[e] || e;
+}
+
+function generateDimAnalysis(key) {
+    const val = scores[key];
+    const info = typeInfo[key];
+    const maxVal = 30;
+    const pct = val / maxVal;
+    
+    let level, levelText, bg, color;
+    if (pct>= 0.7) {
+        level = 'high'; levelText = '核心兴趣'; bg = '#f0f9f4'; color = '#27AE60';
+    } else if (pct>= 0.4) {
+        level = 'med'; levelText = '中等兴趣'; bg = '#fef9f0'; color = '#F39C12';
+        level = 'low'; levelText = '较低兴趣'; bg = '#f8f9fa'; color = '#95a5a6';
+    }
+    
+    const descriptions = {
+        R: { high: '你是一个典型的动手派，喜欢用实际行动解决问题。你适合需要动手操作、机械设备或户外活动的工作。', med: '你对实际操作类工作有一定兴趣，可以在合适的条件下尝试这类工作。', low: '你可能更倾向于脑力或人际类工作，对纯体力操作类工作兴趣较低。' },
+        I: { high: '你拥有强烈的好奇心和求知欲，喜欢分析、推理和探索未知。你适合需要深度思考和研究的职业。', med: '你对研究和分析类工作有一定兴趣，可以在需要时发挥这方面的能力。', low: '你可能更擅长直觉性或人际性的工作，对纯研究分析类工作兴趣一般。' },
+        A: { high: '你拥有强烈的创造力和艺术感，追求自由表达和独特性。你适合需要创意和审美的工作。', med: '你对创意表达类工作有一定兴趣，可以在适当的场景中发挥创造力。', low: '你可能更倾向于结构化或人际性的工作，对纯艺术创意类工作兴趣有限。' },
+        S: { high: '你是一个天生的助人者，擅长与人沟通、建立信任和帮助他人成长。你适合需要人际互动的服务类职业。', med: '你对帮助他人类工作有一定兴趣，可以在服务他人的过程中获得满足感。', low: '你可能更倾向于独立工作或操作性工作，对需要大量人际互动的职业兴趣较低。' },
+        E: { high: '你拥有强烈的领导欲望和说服能力，喜欢影响他人、追求成就。你适合需要领导力和说服力的管理类职业。', med: '你对影响和领导类工作有一定兴趣，可以在适当的场合发挥领导能力。', low: '你可能更倾向于专业性或协作性的工作，对需要强势领导的职业兴趣一般。' },
+        C: { high: '你是一个天生的组织者，注重细节、秩序和准确性。你适合需要按规则执行、数据处理的事务性工作。', med: '你对秩序和规则类工作有一定兴趣，可以在结构化的环境中高效工作。', low: '你可能更倾向于自由或创意性的工作，对需要严格遵守规则的事务性工作兴趣较低。' }
+    };
+    
+    return `<div style="margin-bottom:20px; padding:16px; background:${bg}; border-radius:8px; border-left:4px solid ${color};">
+        <div class="r-h3" style="color:${color}; margin-top:0;">
+            ${info.icon} ${info.name}${key} (${info.en})
+            <span style="float:right; font-size:12px; background:${color}; color:#fff; padding:2px 8px; border-radius:10px;">${levelText}</span>
+        </div>
+        <div style="font-size:12px; color:#888; margin-bottom:8px;">得分：${val}/${maxVal}</div>
+        <p class="r-p" style="margin-bottom:0; color:#444;">${descriptions[key][level]}</p>
+    </div>`;
+}
+
+function getRecommendedCareers(top3) {
+    let careers = [];
+    top3.forEach(code => {
+        const typeCareers = careersByType[code];
+        const shuffled = typeCareers.sort(() => Math.random() - 0.5);
+        careers.push(...shuffled.slice(0, 2));
+    });
+    careers = careers.sort(() => Math.random() - 0.5).slice(0, 6);
+    
+    return careers.map(c => `
+        <div class="career-item">
+            <div class="name">${c.name}</div>
+            <div class="salary">薪资：${c.salary}</div>
+        </div>
+    `).join('');
+}
+
+function getDevelopmentAdvice(top3) {
+    const advice = [];
+    
+    const primary = top3[0];
+    const primaryAdvice = {
+        R: ['培养专业技术能力，多参与实践项目', '考取相关职业资格证书', '寻找需要动手技能的实习机会'],
+        I: ['保持好奇心，持续学习新知识', '培养批判性思维和解决问题的能力', '尝试科研项目或数据分析实践'],
+        A: ['持续创作，建立个人作品集', '培养审美能力和创意思维', '寻找创意类实习或自由职业机会'],
+        S: ['提升沟通和人际交往能力', '培养同理心和倾听技巧', '参与志愿服务或培训活动'],
+        E: ['培养领导力和演讲能力', '设定明确的目标和计划', '争取团队管理或项目管理机会'],
+        C: ['提升数据分析和组织能力', '培养细致耐心的工作习惯', '学习使用各类办公和分析工具']
+    };
+    
+    return primaryAdvice[primary] || ['探索自己的兴趣和优势', '积累相关领域的工作经验', '持续学习和提升专业能力'];
+}
+
+function getCodeDescription(code) {
+    const combo = careerCombos[code];
+    if (combo) return combo.desc;
+    
+    const genericDescs = {
+        'RIS': '你兼具务实、研究和社交能力，适合需要专业技术同时又需要人际互动的职业。',
+        'RIA': '你兼具分析能力和艺术感，适合需要创意分析的设计或研究类职业。',
+        'RSA': '你兼具动手能力和社交兴趣，适合需要服务导向的技术类职业。',
+        'REA': '你兼具务实能力和艺术感，适合需要创意执行的技术类职业。',
+        'ASE': '你兼具创意、社交和领导能力，适合需要影响力和创造力的职业。',
+        'SCI': '你兼具服务、分析和组织能力，适合需要专业服务的管理类职业。',
+        'SCE': '你兼具服务、组织和领导能力，适合管理服务类职业。',
+        'ICS': '你兼具研究、组织和社交能力，适合需要专业沟通的职业。',
+        'ICE': '你兼具研究、组织和领导能力，适合专业技术管理类职业。',
+        'ACS': '你兼具创意、组织和社交能力，适合需要创意服务的职业。'
+    };
+    
+    return genericDescs[code] || '你的兴趣类型较为均衡，建议探索多种职业方向，找到最适合自己的道路。';
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "holland";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>分手自愈能力测试 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #E74C3C;
+            --primary-dark: #C0392B;
+            --accent: #C0392B;
+            --safe: #27AE60;
+            --warning: #F39C12;
+            --bg-gradient-start: #FFF5F5;
+            --bg-gradient-end: #FFE8E8;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes heartBeat { 0% { transform: scale(1); } 14% { transform: scale(1.3); } 28% { transform: scale(1); } 42% { transform: scale(1.3); } 56% { transform: scale(1); } }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#ffe8e8 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ffe8e8; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        .hero-emojis { font-size: 48px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #ffe8e8; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #ffe8e8; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #ffe8e8; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #fff5f5; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        #page-result { display: none; background: #ffe8e8; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ffe8e8; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 50px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-red 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ffe8e8; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #ffe8e8; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-分手自愈能力测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <div class="hero-emojis">💔🌱</div>
+        <h1 class="cover-title">分手自愈能力<br><span>测试</span></h1>
+        <p class="cover-subtitle">科学评估你的心理韧性<br>基于创伤心理学与心理韧性理论</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">💔</div>
+                <div class="feature-title">情绪恢复评估</div>
+                <div class="feature-desc">评估你在情感创伤后的情绪稳定性和恢复速度。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">认知调整分析</div>
+                <div class="feature-desc">分析你对分手经历的认知重构能力。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🌱</div>
+                <div class="feature-title">行为改变追踪</div>
+                <div class="feature-desc">评估分手后你采取的积极行为改变。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🤝</div>
+                <div class="feature-title">社会支持系统</div>
+                <div class="feature-desc">评估你的人际关系和社交资源利用情况。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始测试 (约需 3 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">💔 分手档案建立</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的情况精准评估自愈能力。</p>
+
+        <div class="form-group">
+            <label class="form-label">分手多久了？</label>
+            <select id="input-time" class="select-box">
+                <option value="new">不到一个月</option>
+                <option value="short">1-3个月</option>
+                <option value="medium">3-6个月</option>
+                <option value="long">6个月-1年</option>
+                <option value="verylong">1年以上</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">这段感情持续了多久？</label>
+            <select id="input-duration" class="select-box">
+                <option value="short">不到半年</option>
+                <option value="medium">半年-1年</option>
+                <option value="long">1-2年</option>
+                <option value="verylong">2年以上</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">分手是谁提出的？</label>
+            <select id="input-who" class="select-box">
+                <option value="me">我提出</option>
+                <option value="them">对方提出</option>
+                <option value="mutual">双方同意</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：情绪恢复</span>
+            <span id="progress-text">1 / 16</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">💔 情绪恢复</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+
+    <div id="page-loading">
+        <div style="font-size:50px; animation: heartBeat 1.5s infinite;">🌱</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的自愈能力...</h3>
+        <p style="color:#636E72; font-size:14px;">正在扫描四维数据...<br>评估心理韧性...<br>生成专属报告...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">自愈指数</span>
+            </div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 自愈能力四维雷达图</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《分手自愈深度分析报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新测试</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div>
+            <div class="r-h1">分手自愈深度分析报告</div>
+            <div style="font-size:14px;">专业心理测评 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+
+</div>
+
+<script>
+const questions = [
+    { d: 'emotion', t: '情绪恢复', q: "你对分手这件事，现在感觉如何？", o: [
+        {t:"已经完全释怀，能够平静面对", s:10},
+        {t:"大部分释怀，偶尔会想起", s:8},
+        {t:"有时会感到难过，但能控制", s:6},
+        {t:"经常感到痛苦和伤感", s:4},
+        {t:"依然非常痛苦，难以自拔", s:2}
+    ]},
+    { d: 'emotion', t: '情绪恢复', q: "你还会因为这段感情而哭泣吗？", o: [
+        {t:"从不，已经完全放下", s:10},
+        {t:"很少，几乎不会", s:8},
+        {t:"偶尔会，但很快就恢复", s:6},
+        {t:"经常会在独处时哭泣", s:4},
+        {t:"经常哭泣，难以控制情绪", s:2}
+    ]},
+    { d: 'emotion', t: '情绪恢复', q: "分手对你的情绪稳定有影响吗？", o: [
+        {t:"完全没有影响，生活正常", s:10},
+        {t:"影响很小，很快恢复", s:8},
+        {t:"有一些影响，但能调节", s:6},
+        {t:"影响较大，情绪波动明显", s:4},
+        {t:"影响很大，无法正常生活", s:2}
+    ]},
+    { d: 'emotion', t: '情绪恢复', q: "你能正常生活和学习/工作吗？", o: [
+        {t:"完全正常，状态很好", s:10},
+        {t:"基本正常，偶尔分心", s:8},
+        {t:"有些困难，需要时间调整", s:6},
+        {t:"比较困难，效率明显下降", s:4},
+        {t:"完全无法正常生活", s:2}
+    ]},
+    
+    { d: 'cognition', t: '认知调整', q: "你能理性地看待这段感情的结束吗？", o: [
+        {t:"完全能够理性看待，总结经验", s:10},
+        {t:"大部分时候能理性分析", s:8},
+        {t:"有时能，有时会陷入情绪", s:6},
+        {t:"很难理性看待，总是后悔", s:4},
+        {t:"完全无法理性思考", s:2}
+    ]},
+    { d: 'cognition', t: '认知调整', q: "你是否已经接受了"这段感情已经结束"这个事实？", o: [
+        {t:"完全接受，已经翻篇", s:10},
+        {t:"基本接受，向前看", s:8},
+        {t:"部分接受，有时还会幻想", s:6},
+        {t:"难以接受，经常怀念", s:4},
+        {t:"完全无法接受", s:2}
+    ]},
+    { d: 'cognition', t: '认知调整', q: "你能客观评价前任和这段关系吗？", o: [
+        {t:"完全能，客观理性地评价", s:10},
+        {t:"基本能，看到优点也看到不足", s:8},
+        {t:"有时能，有时会美化或丑化", s:6},
+        {t:"很难，总是陷入极端", s:4},
+        {t:"完全无法客观评价", s:2}
+    ]},
+    { d: 'cognition', t: '认知调整', q: "你认为这段分手经历对你来说是？", o: [
+        {t:"成长的机会，让我更成熟", s:10},
+        {t:"痛苦的经历，但有所收获", s:8},
+        {t:"人生的挫折，需要时间消化", s:6},
+        {t:"巨大的打击，难以承受", s:4},
+        {t:"毁灭性的伤害，无法复原", s:2}
+    ]},
+    
+    { d: 'behavior', t: '行为改变', q: "分手后你采取了哪些积极的改变？", o: [
+        {t:"做了很多积极的改变，很充实", s:10},
+        {t:"有一些改变，在慢慢调整", s:8},
+        {t:"偶尔尝试改变，但坚持不下来", s:6},
+        {t:"没什么改变，生活照旧", s:4},
+        {t:"完全没有改变，甚至更糟", s:2}
+    ]},
+    { d: 'behavior', t: '行为改变', q: "你是否有尝试新的兴趣爱好？", o: [
+        {t:"发展了很多新爱好，生活丰富", s:10},
+        {t:"尝试了一些新事物", s:8},
+        {t:"有想法但还没行动", s:6},
+        {t:"没有心思尝试新事物", s:4},
+        {t:"完全提不起兴趣", s:2}
+    ]},
+    { d: 'behavior', t: '行为改变', q: "你的生活习惯有变好/改变吗？", o: [
+        {t:"作息规律，生活更健康", s:10},
+        {t:"有一些改善", s:8},
+        {t:"没什么变化", s:6},
+        {t:"变得不太健康", s:4},
+        {t:"生活习惯完全乱套", s:2}
+    ]},
+    { d: 'behavior', t: '行为改变', q: "你是否开始关注自我成长和提升？", o: [
+        {t:"非常注重自我成长，进步明显", s:10},
+        {t:"开始关注，有所行动", s:8},
+        {t:"有意识，但行动不多", s:6},
+        {t:"没什么心思在这方面", s:4},
+        {t:"完全不在意", s:2}
+    ]},
+    
+    { d: 'social', t: '社会支持', q: "你有可以倾诉的朋友或家人吗？", o: [
+        {t:"有很多支持我的亲友", s:10},
+        {t:"有几个可以倾诉的人", s:8},
+        {t:"偶尔有人可以倾诉", s:6},
+        {t:"很少有人理解我", s:4},
+        {t:"没有人可以倾诉", s:2}
+    ]},
+    { d: 'social', t: '社会支持', q: "分手后你与朋友、家人的关系有变化吗？", o: [
+        {t:"关系更紧密，得到更多支持", s:10},
+        {t:"关系没什么变化", s:8},
+        {t:"有些疏远，但能理解", s:6},
+        {t:"变得更封闭，不愿与人交流", s:4},
+        {t:"完全孤立自己", s:2}
+    ]},
+    { d: 'social', t: '社会支持', q: "你是否愿意接受他人的帮助和安慰？", o: [
+        {t:"非常愿意，积极寻求支持", s:10},
+        {t:"愿意接受，但不会主动", s:8},
+        {t:"有时接受，有时拒绝", s:6},
+        {t:"不太愿意，怕麻烦别人", s:4},
+        {t:"完全拒绝任何帮助", s:2}
+    ]},
+    { d: 'social', t: '社会支持', q: "你是否参与社交活动或与他人互动？", o: [
+        {t:"积极参与，社交生活丰富", s:10},
+        {t:"正常参与社交", s:8},
+        {t:"偶尔参与，但不积极", s:6},
+        {t:"很少参与", s:4},
+        {t:"完全回避社交", s:2}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const levels = [
+    { max: 40, l: "完全自愈", c: "#27AE60", d: "你拥有很强的心理韧性，已经完全从分手中恢复，能够积极面对生活。", advice: "继续保持这种状态，你的自愈能力很强。可以帮助身边有需要的人。" },
+    { max: 80, l: "基本自愈", c: "#2ECC71", d: "你已经基本走出分手的阴影，心理状态良好，正在逐步恢复。", advice: "继续专注于自我成长，相信你会完全恢复。可以尝试设定新的生活目标。" },
+    { max: 120, l: "部分自愈", c: "#F39C12", d: "你正在恢复过程中，但某些方面还需要时间和努力。可能存在一些未处理的情结。", advice: "建议主动寻求支持，不要独自承受。可以考虑与朋友倾诉或寻求专业帮助。" },
+    { max: 160, l: "难以自愈", c: "#E74C3C", d: "分手对你造成了较大的心理创伤，目前恢复较为困难。建议寻求专业帮助。", advice: "强烈建议寻求心理咨询师的帮助。给自己更多时间和耐心，不要急于求成。" }
+];
+
+let currQList = [];
+let currIdx = 0;
+let userInfo = {};
+let scores = { emotion:0, cognition:0, behavior:0, social:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userInfo.time = document.getElementById('input-time').value;
+    userInfo.duration = document.getElementById('input-duration').value;
+    userInfo.who = document.getElementById('input-who').value;
+    
+    currQList = [...questions];
+    currIdx = 0;
+    scores = { emotion:0, cognition:0, behavior:0, social:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { emotion:0, cognition:0, behavior:0, social:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+    
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'emotion', n:'情绪'}, {k:'cognition', n:'认知'}, 
+        {k:'behavior', n:'行为'}, {k:'social', n:'社会'}
+    ];
+    let html = '';
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 40) * 100, 100);
+        let color = pct> 60 ? '#E74C3C' : (pct> 30 ? '#F39C12' : '#27AE60');
+        let txt = pct> 70 ? '恢复困难' : (pct> 40 ? '部分恢复' : '恢复良好');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {emotion:'情绪恢复', cognition:'认知调整', behavior:'行为改变', social:'社会支持'};
+    return map[k];
+}
+
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、分手自愈能力诊断</div>
+        <p class="r-p" style="background:#fafafa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>📋 感情档案：</strong>分手时长：${getTimeName(userInfo.time)} | 感情时长：${getDurationName(userInfo.duration)} | 分手方：${getWhoName(userInfo.who)}
+        </p>
+        <div class="r-box" style="border-left:5px solid ${lvl.c};">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">自愈等级：${lvl.l}</div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>自愈评估：</strong>${lvl.d}</p>
+            <p style="margin:10px 0 0; font-size:15px; line-height:1.6; color:#555;"><strong>核心建议：</strong>${lvl.advice}</p>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">二、四维度深度分析</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px;">*基于创伤心理学与心理韧性理论的科学分析</p>
+        ${generateDimAnalysis('emotion', scores.emotion, '反映你在分手后情绪层面的恢复程度，包括悲伤、愤怒等情绪的调节能力。')}
+        ${generateDimAnalysis('cognition', scores.cognition, '反映你对分手经历的认知重构能力，包括对前任、感情和未来的看法调整。')}
+        ${generateDimAnalysis('behavior', scores.behavior, '反映你在分手后采取的积极行为改变，包括生活习惯、自我提升等方面的表现。')}
+        ${generateDimAnalysis('social', scores.social, '反映你在分手后对社会支持的利用程度，包括人际关系和社交活动的参与情况。')}
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">三、创伤心理学解析</div>
+        <div class="r-box" style="background:#fff5f5; border-color:#E74C3C;">
+            <div class="r-h3" style="color:#E74C3C;">💔 分手创伤的心理学本质</div>
+            <p class="r-p">
+                <strong>依恋理论</strong>指出，亲密关系的断裂会触发与婴儿分离焦虑相同的神经通路。分手不仅是关系的结束，更是对自我认知的重大挑战。
+            </p>
+            <p class="r-p">
+                <strong>心理韧性(Resilience)理论</strong>认为，从创伤中恢复的能力并非天生固定，而是可以通过后天培养的心理资源，包括情绪调节能力、认知灵活性、社会支持等。
+            </p>
+        </div>
+        
+        <div class="r-box" style="background:#fef9f0; border-color:#F39C12;">
+            <div class="r-h3" style="color:#F39C12;">🔍 影响自愈能力的因素</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>依恋类型</strong>：焦虑型依恋者往往更难从分手中恢复</li>
+                <li><strong>自我认同</strong>：把前任作为自我一部分的人，恢复更困难</li>
+                <li><strong>关系质量</strong>：越深入的关系，创伤越大</li>
+                <li><strong>分手方式</strong>：被分手且无预兆的创伤最大</li>
+                <li><strong>支持系统</strong>：社会支持是恢复的关键保护因素</li>
+            </ul>
+        </div>
+
+        <div class="r-box" style="background:#eafaf1; border-color:#27AE60;">
+            <div class="r-h3" style="color:#27AE60;">🌱 自愈的科学过程</div>
+            <p class="r-p">
+                <strong>悲伤阶段模型</strong>认为，健康的恢复需要经历：否认→愤怒→讨价还价→抑郁→接受。但每个人的恢复路径都是独特的，不必强求按顺序经历。
+            </p>
+            <p class="r-p">
+                <strong>成长后创伤</strong>研究表明，经历分手创伤后，许多人会获得心理成长，包括更了解自己、更懂得珍惜关系、更清晰人生目标等。
+            </p>
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">四、加速自愈的方法</div>
+        
+        <div class="r-box">
+            <div class="r-h3">🎯 情绪恢复篇</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>允许悲伤</strong>：不要压抑情绪，给自己时间和空间去感受悲伤</li>
+                <li><strong>情绪记录</strong>：通过写日记整理情绪，帮助理清思绪</li>
+                <li><strong>身体放松</strong>：深呼吸、冥想、运动等方式缓解情绪紧张</li>
+                <li><strong>避免触发</strong>：暂时避开会引发回忆的地点、音乐、照片</li>
+            </ul>
+        </div>
+
+        <div class="r-box">
+            <div class="r-h3">🧠 认知调整篇</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>重构叙事</strong>：尝试从不同角度看待这段感情和分手</li>
+                <li><strong>去理想化</strong>：列出前任的缺点和这段关系的问题</li>
+                <li><strong>聚焦成长</strong>：思考这段经历让你学到了什么</li>
+                <li><strong>放下比较</strong>：不要和前任的新生活比较</li>
+            </ul>
+        </div>
+
+        <div class="r-box">
+            <div class="r-h3">🌱 行为改变篇</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>仪式感结束</strong>：给自己一个正式的告别仪式</li>
+                <li><strong>新习惯建立</strong>：培养运动、学习等新习惯</li>
+                <li><strong>环境改变</strong>：整理房间、改变布局，减少回忆触发</li>
+                <li><strong>目标设定</strong>：为自己设定新的生活目标和计划</li>
+            </ul>
+        </div>
+
+        <div class="r-box">
+            <div class="r-h3">🤝 社会支持篇</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>倾诉释放</strong>：与信任的朋友或家人分享感受</li>
+                <li><strong>专业帮助</strong>：必要时寻求心理咨询师的帮助</li>
+                <li><strong>社交重启</strong>：逐步恢复或扩大社交圈</li>
+                <li><strong>避免依赖</strong>：不要过度依赖某一个人</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">五、给正在恢复的你</div>
+        <div class="r-box" style="background:linear-gradient(135deg, #fff5f5, #ffe8e8); border-color:#E74C3C; text-align:center; padding:30px;">
+            <div style="font-size:48px; margin-bottom:15px;">💔→🌱</div>
+            <p style="font-size:16px; line-height:1.8; color:#555; text-align:center;">
+                分手是痛苦的，但也是成长的契机。<br><br>
+                每个人的恢复节奏都不同，不要和别人比较。<br>
+                允许自己慢慢来，你比自己想象的更强大。<br><br>
+                愿你在伤痛中重生，遇见更好的自己。
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026分手自愈能力测试 · 专业心理测评<br>
+        💔 愿你放下过去 🌱 拥抱新生
+    </div>
+    `;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function getTimeName(t) {
+    const m = {'new':'不到一个月','short':'1-3个月','medium':'3-6个月','long':'6个月-1年','verylong':'1年以上'};
+    return m[t] || t;
+}
+function getDurationName(d) {
+    const m = {'short':'不到半年','medium':'半年-1年','long':'1-2年','verylong':'2年以上'};
+    return m[d] || d;
+}
+function getWhoName(w) {
+    const m = {'me':'我提出','them':'对方提出','mutual':'双方同意'};
+    return m[w] || w;
+}
+
+function generateDimAnalysis(key, val, explanation) {
+    let level = val> 28 ? 'high' : (val> 14 ? 'med' : 'low');
+    const config = {
+        high: { color: '#E74C3C', bg: '#fdf2f2', tag: '⚠️ 恢复困难', titleColor: '#E74C3C' },
+        med: { color: '#F39C12', bg: '#fef9f0', tag: '⚡ 部分恢复', titleColor: '#F39C12' },
+        low: { color: '#27AE60', bg: '#eafaf1', tag: '✅ 恢复良好', titleColor: '#27AE60' }
+    };
+    const c = config[level];
+    const texts = {
+        emotion: { high: "<strong>情绪恢复较慢。</strong>你可能还在经历较强烈的情绪波动，需要更多时间恢复。", med: "<strong>情绪恢复中等。</strong>你的情绪正在逐步稳定，但仍有一些起伏。", low: "<strong>情绪恢复良好。</strong>你已经能够较好地管理情绪，心态平稳。" },
+        cognition: { high: "<strong>认知调整较慢。</strong>你可能还在纠结于过去，难以用积极的视角看待这段经历。", med: "<strong>认知调整中等。</strong>你正在逐步调整对分手的认知，但还需努力。", low: "<strong>认知调整良好。</strong>你已经能够理性看待这段感情，并从中获得成长。" },
+        behavior: { high: "<strong>行为改变较少。</strong>你可能还没有采取足够的行动来帮助自己恢复。", med: "<strong>行为改变中等。</strong>你已经在尝试改变，但可以更加积极主动。", low: "<strong>行为改变积极。</strong>你已经通过实际行动帮助自己恢复，表现很好。" },
+        social: { high: "<strong>社会支持不足。</strong>你可能没有充分利用社会支持系统，建议主动寻求他人帮助。", med: "<strong>社会支持中等。</strong>你有一定的社会支持，但可以更积极地利用。", low: "<strong>社会支持良好。</strong>你善于利用社会资源，这对你的恢复很有帮助。" }
+    };
+    return `<div style="margin-bottom:20px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor}; margin-top:0;">${getDimName(key)} <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${val}/40)</span><span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span></div><p style="font-size:13px; color:#888; margin-bottom:8px;">${explanation}</p><p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][level]}</p></div>`;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    const cx=120, cy=120, r=90;
+    const keys = ['emotion','cognition','behavior','social'];
+    const labels = ['情绪','认知','行为','社交'];
+    
+    ctx.strokeStyle = '#ffe8e8'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<4; j++) {
+            let a = (Math.PI*2/4)*j - Math.PI/2;
+            ctx.lineTo(cx + Math.cos(a)*(r/4)*i, cy + Math.sin(a)*(r/4)*i);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let ratio = Math.min(s[k] / 40, 1.1); 
+        let a = (Math.PI*2/4)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(231, 76, 60, 0.1)");
+    grd.addColorStop(1, "rgba(231, 76, 60, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.strokeStyle = '#E74C3C'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/4)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "fszy";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

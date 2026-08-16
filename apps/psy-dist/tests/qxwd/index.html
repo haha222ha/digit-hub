@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>情绪稳定度月度检测 | 2026专业心理测评</title>
+    <style>
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600}
+        :root { --primary: #2D3436; --accent: #00b894; --safe: #00B894; --warning: #FDCB6E; --unstable: #fdcb6e; --bg-gradient-start: #DFE6E9; --bg-gradient-end: #B2BEC3; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-dark { 0% { box-shadow: 0 0 0 0 rgba(0, 184, 148, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 184, 148, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 184, 148, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(45, 52, 54, 0.3); transition: transform 0.1s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 60px 24px 40px; text-align: center; min-height: 100vh; }
+        .cover-tag { display: inline-block; background: var(--accent); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; }
+        .cover-title { font-size: 34px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #dfe6e9; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; }
+        #page-demo { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #dfe6e9; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; cursor: pointer; border: 2px solid #dfe6e9; transition: all 0.2s; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #dfe6e9; border-color: var(--accent); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #dfe6e9; padding-bottom: 120px; overflow-y: auto; min-height: 100vh; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #dfe6e9; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; }
+        .score-num { font-size: 48px; font-weight: 900; color: var(--accent); }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; }
+        .level-badge { background: var(--accent); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; }
+        .card-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 80px; }
+        .dim-name { font-size: 14px; font-weight: 700; }
+        .dim-bar-bg { flex: 1; height: 10px; background: #f0f2f5; border-radius: 5px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 5px; }
+        .dim-val { width: 40px; text-align: right; font-size: 13px; font-weight: 700; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--accent); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-dark 2s infinite; cursor: pointer; }
+        .export-btn { background: var(--primary); margin-top: 10px; }
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--accent); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 40px; }
+        .r-h1 { font-size: 26px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 20px; font-weight: 800; margin: 25px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #dfe6e9; }
+        .r-p { font-size: 15px; line-height: 1.8; color: #555; margin-bottom: 12px; }
+        .r-box { background: #fafafa; border: 1px solid #dfe6e9; padding: 18px; border-radius: 10px; margin: 12px 0; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav"><a href="https://psy.xhs365.cn/" class="nav-home">🏠 首页</a></nav>
+    <div class="container">
+        <div id="page-intro" data-screenshot="psych-test-情绪稳定度月度检测" class="fade-in">
+            <div class="cover-tag">MONTHLY CHECK</div>
+            <h1 class="cover-title">情绪稳定度<span>月度</span>检测</h1>
+            <p class="cover-subtitle">科学评估你的情绪管理能力<br>掌握情绪，做自己的主人</p>
+            <div class="intro-features">
+                <div class="feature-box"><div class="feature-icon">🌊</div><div class="feature-title">情绪波动检测</div><div class="feature-desc">评估你的情绪稳定程度</div></div>
+                <div class="feature-box"><div class="feature-icon">🎯</div><div class="feature-title">触发因素分析</div><div class="feature-desc">识别情绪波动的触发点</div></div>
+                <div class="feature-box"><div class="feature-icon">🔄</div><div class="feature-title">恢复能力评估</div><div class="feature-desc">测量情绪恢复速度</div></div>
+                <div class="feature-box"><div class="feature-icon">🛠️</div><div class="feature-title">调节方案</div><div class="feature-desc">提供情绪管理策略</div></div>
+            </div>
+            <button class="btn" id="start-btn">开始检测 (约需 4 分钟)</button>
+        </div>
+        <div id="page-demo">
+            <h2 style="font-size:26px;font-weight:800;margin-bottom:10px;">📋 背景信息</h2>
+            <p style="color:#636E72;font-size:14px;margin-bottom:30px;">系统将根据你的情况评估情绪稳定性</p>
+            <div class="form-group">
+                <label class="form-label">最近一个月你的压力大吗？</label>
+                <select id="input-years" class="select-box">
+                    <option value="veryhigh">非常大</option>
+                    <option value="high">比较大</option>
+                    <option value="normal">一般</option>
+                    <option value="low">比较小</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">你的睡眠状况如何？</label>
+                <select id="input-level" class="select-box">
+                    <option value="poor">很差，经常失眠</option>
+                    <option value="fair">不太好，偶尔失眠</option>
+                    <option value="ok">一般</option>
+                    <option value="good">很好</option>
+                </select>
+            </div>
+            <button class="btn" id="next-btn">开始答题</button>
+        </div>
+        <div id="page-test">
+            <div class="progress-header"><span id="dim-tag">维度：情绪波动</span><span id="progress-text">1 / 18</span></div>
+            <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+            <div id="question-wrapper" class="slide-up question-card">
+                <div class="question-tag" id="q-category">🌊 情绪波动</div>
+                <div class="question-text" id="question-text">题目加载中...</div>
+                <div id="options-box"></div>
+            </div>
+        </div>
+        <div id="page-result">
+            <div class="result-header">
+                <div class="score-circle"><span class="score-num" id="res-score">0</span><span class="score-label">稳定度指数</span></div>
+                <div class="level-badge" id="res-level">评估中...</div>
+                <div class="level-desc" id="res-desc">...</div>
+            </div>
+            <div class="card">
+                <div class="card-title">📊 四维情绪雷达</div>
+                <div id="bars-container"></div>
+            </div>
+            <div class="bottom-dock">
+                <button class="unlock-btn" id="show-report-btn">📄 解锁情绪报告</button>
+                <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+            </div>
+        </div>
+        <div id="report-modal">
+            <button class="report-close" id="close-report-btn">×</button>
+            <div class="report-header"><div style="font-size:12px; opacity:0.8;">2026 PSYCHOLOGY REPORT</div><div class="r-h1">情绪稳定度月度检测报告</div><div style="font-size:14px;">专业心理测评 · 月度版</div></div>
+            <div class="report-body" id="report-content"></div>
+        </div>
+    </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    {d:'fluctuation',t:'🌊 情绪波动',q:"你的情绪变化大吗？",o:[{t:"很稳定，很少波动",s:0},{t:"比较稳定",s:2},{t:"波动较大",s:5},{t:"非常不稳定",s:8}]},
+    {d:'fluctuation',t:'🌊 情绪波动',q:"你会因为小事而情绪失控吗？",o:[{t:"几乎不会",s:0},{t:"偶尔",s:2},{t:"经常",s:5},{t:"经常失控",s:8}]},
+    {d:'fluctuation',t:'🌊 情绪波动',q:"你的情绪会在一天内多次变化吗？",o:[{t:"很少变化",s:0},{t:"偶尔有变化",s:2},{t:"经常起伏",s:5},{t:"变化无常",s:8}]},
+    {d:'fluctuation',t:'🌊 情绪波动',q:"面对压力你的情绪反应是？",o:[{t:"能保持冷静",s:0},{t:"稍有焦虑",s:2},{t:"明显焦虑",s:5},{t:"焦虑到崩溃",s:8}]},
+    {d:'fluctuation',t:'🌊 情绪波动',q:"别人能预测你的情绪吗？",o:[{t:"完全不能",s:0},{t:"偶尔能",s:2},{t:"经常能",s:5},{t:"总是能",s:8}]},
+    {d:'trigger',t:'⚡ 触发敏感',q:"睡眠不好会影响你一整天的情绪吗？",o:[{t:"完全不会",s:0},{t:"有一点",s:2},{t:"影响较大",s:5},{t:"严重影响",s:8}]},
+    {d:'trigger',t:'⚡ 触发敏感',q:"天气变化会影响你的情绪吗？",o:[{t:"完全不影响",s:0},{t:"偶尔",s:2},{t:"经常",s:5},{t:"总是影响",s:8}]},
+    {d:'trigger',t:'⚡ 触发敏感',q:"他人的评价会让你情绪波动吗？",o:[{t:"完全不会",s:0},{t:"稍微有点",s:2},{t:"经常",s:5},{t:"非常在意",s:8}]},
+    {d:'trigger',t:'⚡ 触发敏感',q:"社交媒体会让你感到焦虑吗？",o:[{t:"完全不会",s:0},{t:"偶尔",s:2},{t:"经常",s:5},{t:"总是焦虑",s:8}]},
+    {d:'recovery',t:'🔄 恢复能力',q:"情绪低落时你通常需要多久恢复？",o:[{t:"很快，几个小时",s:0},{t:"一天左右",s:2},{t:"需要好几天",s:5},{t:"很长时间走不出来",s:8}]},
+    {d:'recovery',t:'🔄 恢复能力',q:"你有自我调节情绪的方法吗？",o:[{t:"有很多有效方法",s:0},{t:"有一些方法",s:2},{t:"偶尔能调节",s:5},{t:"完全不知道怎么做",s:8}]},
+    {d:'recovery',t:'🔄 恢复能力',q:"运动能帮助你调节情绪吗？",o:[{t:"非常有效",s:0},{t:"比较有效",s:2},{t:"偶尔有效",s:5},{t:"完全无效",s:8}]},
+    {d:'recovery',t:'🔄 恢复能力',q:"你能意识到自己的情绪变化吗？",o:[{t:"非常敏感，能及时察觉",s:0},{t:"一般能察觉",s:2},{t:"有时后知后觉",s:5},{t:"完全察觉不到",s:8}]},
+    {d:'control',t:'🎛️ 情绪控制',q:"生气时你能控制自己的言行吗？",o:[{t:"完全能控制",s:0},{t:"基本能",s:2},{t:"偶尔失控",s:5},{t:"经常失控",s:8}]},
+    {d:'control',t:'🎛️ 情绪控制',q:"你会在情绪激动时做决定吗？",o:[{t:"从来不会",s:0},{t:"很少",s:2},{t:"有时会",s:5},{t:"经常",s:8}]},
+    {d:'control',t:'🎛️ 情绪控制',q:"你能接受负面情绪的存在吗？",o:[{t:"完全接受，这是正常的",s:0},{t:"比较接受",s:2},{t:"试图压制",s:5},{t:"完全无法接受负面情绪",s:8}]},
+    {d:'control',t:'🎛️ 情绪控制',q:"你会因为担心未来而焦虑吗？",o:[{t:"很少，活在当下",s:0},{t:"偶尔",s:2},{t:"经常",s:5},{t:"总是焦虑未来",s:8}]},
+    {d:'control',t:'🎛️ 情绪控制',q:"你经常后悔或纠结过去的事吗？",o:[{t:"很少，放下过去",s:0},{t:"偶尔",s:2},{t:"经常纠结",s:5},{t:"无法放下过去",s:8}]}
+];
+const levels = [
+    {max:35,l:"情绪很稳定",c:"#00B894",d:"你的情绪稳定度非常高！能很好地管理自己的情绪。",advice:"继续保持这种状态，同时关注身边情绪不稳定的人，适时提供支持。",points:["保持现状","定期情绪复盘","帮助他人成长","关注身心平衡"]},
+    {max:70,l:"情绪较稳定",c:"#00CEC9",d:"你的情绪稳定度较好，在大部分情况下能较好地管理情绪。",advice:"注意识别和避开你的情绪触发因素，继续提升情绪管理能力。",points:["识别触发因素","练习情绪觉察","建立支持系统","定期放松"]},
+    {max:100,l:"情绪波动较大",c:"#FDCB6E",d:"你的情绪波动较大，需要关注情绪管理。",advice:"建议学习情绪调节技巧，建立规律的运动和作息习惯。",points:["学习情绪调节","建立规律作息","练习正念冥想","寻求专业支持"]},
+    {max:144,l:"情绪不稳定",c:"#e17055",d:"你的情绪稳定度较低，情绪波动已经影响到生活质量。",advice:"建议寻求专业帮助，同时建立健康的生活方式和情绪支持系统。",points:["寻求专业帮助","建立情绪日记","规律运动","建立支持系统"]}
+];
+let currQList=[],currIdx=0,scores={fluctuation:0,trigger:0,recovery:0,control:0};
+function goToDemo(){document.getElementById('page-intro').style.display='none';document.getElementById('page-demo').style.display='block';}
+function initTest(){currQList=[...questions];currIdx=0;scores={fluctuation:0,trigger:0,recovery:0,control:0};document.getElementById('page-demo').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=`${currIdx+1}/${currQList.length}`;document.getElementById('progress-fill').style.width=`${(currIdx/currQList.length)*100}%`;document.getElementById('dim-tag').innerText=`维度：${q.t}`;document.getElementById('q-category').innerText=q.t;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(q.d,opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(dim,val){scores[dim]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';setTimeout(()=>{document.getElementById('page-result').style.display='block';calculateResult();},2000);}
+function calculateResult(){let total=Object.values(scores).reduce((a,b)=>a+b,0);let finalScore=Math.round(total);let lvl=levels.find(l=>finalScore<=l.max)||levels[levels.length-1];let start=0;const timer=setInterval(()=>{start++;document.getElementById('res-score').innerText=start;if(start>=finalScore)clearInterval(timer);},15);document.getElementById('res-level').innerText=lvl.l;document.getElementById('res-level').style.background=lvl.c;document.getElementById('res-desc').innerText=lvl.d;renderBars(scores);}
+function renderBars(s){const box=document.getElementById('bars-container');const dims=[{k:'fluctuation',n:'波动'},{k:'trigger',n:'敏感'},{k:'recovery',n:'恢复'},{k:'control',n:'控制'}];let html='';dims.forEach(d=>{let maxScore=d.k==='fluctuation'?40:d.k==='trigger'?32:d.k==='recovery'?32:d.k==='control'?32;let pct=Math.min((s[d.k]/maxScore)*100,100);let color=pct<=25?'#00B894':(pct<=50?'#FDCB6E':'#e17055');html+=`<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%;background:${color};"></div></div><div class="dim-val" style="color:${color}">${Math.round(pct)}%</div></div>`;});box.innerHTML=html;}
+function showReport(){const total=parseInt(document.getElementById('res-score').innerText);const lvl=levels.find(l=>total<=l.max)||levels[levels.length-1];let html=`<div class="report_section"><div class="r-h1">一、情绪稳定度诊断</div><div class="r-box" style="border-left:5px solid ${lvl.c};"><div style="font-size:20px;font-weight:900;color:${lvl.c};margin-bottom:8px;">稳定度等级：${lvl.l}</div><p style="margin:0;font-size:14px;line-height:1.6;color:#555;">${lvl.d}</p><p style="margin:10px 0 0;font-size:14px;"><strong>核心建议：</strong>${lvl.advice}</p></div></div><div class="report_section"><div class="r-h2">二、四维情绪分析</div>${Object.entries(scores).map(([k,v])=>{let maxScore=k==='fluctuation'?40:k==='trigger'?32:k==='recovery'?32:32;let level=pct=v/maxScore*100;level=level<=25?'良好':(level<=50?'一般':'需改善');let color=level==='良好'?'#00B894':(level==='一般'?'#FDCB6E':'#e17055');return`<div style="margin-bottom:15px;padding:12px;background:#fafafa;border-radius:8px;"><div style="font-weight:700;margin-bottom:5px;">${['情绪波动度','触发敏感度','情绪恢复力','情绪控制力'][['fluctuation','trigger','recovery','control'].indexOf(k)]}</div><div style="height:6px;background:#eee;border-radius:3px;"><div style="height:100%;width:${(v/maxScore)*100}%;background:${color};border-radius:3px;"></div></div><div style="font-size:12px;color:#999;">状态：<span style="color:${color}">${level}</span></div></div>`}).join('')}</div><div class="report_section"><div class="r-h2">三、提升方案</div><div class="r-box"><ul style="margin:0;padding-left:20px;line-height:2;">${lvl.points.map(p=>`<li>${p}</li>`).join('')}</ul></div></div><div style="text-align:center;color:#ccc;font-size:12px;margin-top:40px;">2026情绪稳定度月度检测·专业心理测评</div>`;document.getElementById('report-content').innerHTML=html;document.getElementById('report-modal').style.display='block';}
+function closeReport(){document.getElementById('report-modal').style.display='none';}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(0,184,148);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('情绪稳定度月度检测报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026月度版',105,35,{align:'center'});let y=55;const lvl=levels.find(l=>parseInt(document.getElementById('res-score').innerText)<=l.max)||levels[levels.length-1];doc.setTextColor(0,0,0);doc.setFontSize(16);doc.text(`稳定度等级：${lvl.l}`,15,y);y+=10;doc.setFontSize(12);doc.text(lvl.d.substring(0,150)+'...',15,y);doc.save('情绪稳定度检测报告.pdf');}
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });document.getElementById('next-btn').addEventListener('click',initTest);document.getElementById('show-report-btn').addEventListener('click',showReport);document.getElementById('close-report-btn').addEventListener('click',closeReport);document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "qxwd";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>电影审美人格检测 | 2026年度深度分析</title>
+    <style>
+        :root {
+            /* 电影黑金风格 */
+            --primary: #0f0f1a; 
+            --primary-dark: #000000;
+            --accent: #d4af37; /* 影院金 */
+            --accent-hover: #f0c94d;
+            --safe: #27ae60;
+            --warning: #f39c12;
+            --bg-gradient-start: #1a1a2e;
+            --bg-gradient-end: #0f0f1a;
+            --text-main: #f1f1f1;
+            --text-sub: #a0a0a0;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #16162a;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.5);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-gold { 0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); } 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--accent);
+            color: var(--primary);
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--accent-hover); }
+        .btn-outline {
+            background: transparent;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#2a2a4a 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 36px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #fff;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: #a0a0a0; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #2a2a4a;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #d4af37; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #888; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #16162a; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #fff; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #2a2a4a; border-radius: 10px;
+            font-size: 16px; background: #1a1a2e; outline: none; appearance: none;
+            color: #fff; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--accent); background: #1f1f3a; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #16162a;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #666; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #2a2a4a; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #2a2a4a; color: #888; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #fff; }
+        
+        .option-btn {
+            background: #1a1a2e; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #ccc; cursor: pointer; border: 2px solid #2a2a4a; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #1f1f3a; }
+        .option-btn.selected { background: #2a2a20; border-color: var(--accent); color: var(--accent); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #0f0f1a; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #16162a; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #2a2a4a;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--accent); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #666; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: var(--accent); color: var(--primary); padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #888; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #16162a; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .card-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #fff; display: block; }
+        .dim-sub { font-size: 10px; color: #666; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #2a2a4a; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #888; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(22, 22, 42, 0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #2a2a4a;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: var(--primary); width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-gold 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: transparent; color: #666; width: 100%; padding: 10px;
+            border: 1px solid #333; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #0f0f1a; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: #16162a; color: #fff; padding: 70px 24px 40px;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(255,255,255,0.1); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; color: #d4af37; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #fff; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #2a2a4a; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #ddd; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #aaa; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #1a1a2e; border: 1px solid #2a2a4a; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #000; margin-right: 8px; vertical-align: middle; background: #d4af37; }
+        .r-list li { margin-bottom: 10px; color: #aaa; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-电影美学类型" class="fade-in">
+        <div class="cover-tag">2026 Cinema Edition</div>
+        <h1 class="cover-title">你的<span>电影人格</span><br>深度检测</h1>
+        <p class="cover-subtitle">基于观影偏好与审美倾向的 30+ 题深度扫描<br>解码专属于你的电影审美人格</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🎬</div>
+                <div class="feature-title">五维雷达</div>
+                <div class="feature-desc">类型、叙事、视觉、情感、习惯，全方位解析你的电影DNA。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🎞️</div>
+                <div class="feature-title">人格定位</div>
+                <div class="feature-desc">从路人观众到电影教父，精准定位你的观影段位。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📽️</div>
+                <div class="feature-title">深度报告</div>
+                <div class="feature-desc">结合2026年电影趋势，生成专属观影指南。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🍿</div>
+                <div class="feature-title">佳片推荐</div>
+                <div class="feature-desc">根据你的人格，精准匹配冷门佳作与必看经典。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始检测 (约需 3 分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#fff; margin-bottom:10px;">建立观影档案 🎥</h2>
+        <p style="color:#888; font-size:14px; margin-bottom:30px;">系统将根据您的观影资历调整评分权重。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的观影资历是？</label>
+            <select id="input-status" class="select-box">
+                <option value="casual">入门观众 (年观影量 < 20部)</option>
+                <option value="enthusiast">资深影迷 (年观影量 20-100部)</option>
+                <option value="hardcore">硬核玩家 (年观影量> 100部)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你更倾向于？</label>
+            <select id="input-title" class="select-box">
+                <option value="story">故事至上 (剧情精彩最重要)</option>
+                <option value="visual">视觉美学 (画面震撼是王道)</option>
+                <option value="emotion">情感共鸣 (能打动我就是好片)</option>
+                <option value="tech">技术控 (摄影/配乐/调度深度爱好者)</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：类型偏好</span>
+            <span id="progress-text">1 / 34</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🎭 类型偏好</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#16162a;">
+        <div style="font-size:50px; animation: pulse-gold 1s infinite; border-radius:50%;">🎬</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#fff;">正在分析电影人格...</h3>
+        <p style="color:#666; font-size:14px; line-height:1.8;">正在解构审美偏好...<br>匹配观影段位...<br>生成2026年度报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">观影指数</span>
+            </div>
+            <div class="level-badge" id="res-level">Level ?</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维电影雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《电影人格深度报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 换个身份 再测一次</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">CINEMA PERSONALITY REPORT</div>
+            <div class="r-h1">电影审美人格白皮书</div>
+            <div style="font-size:14px;">定制化深度分析报告 · 2026版</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const MAX_USES = 6; // 同一设备限制次数 (已修改为6次)
+const pageId = window.location.pathname;
+const usageKey = 'usage_count_' + pageId;
+
+// 测试题库配置 - 电影人格版
+const questions = [
+    // --- 维度：类型偏好 (Genre) ---
+    { d: 'genre', t: '类型偏好', q: "如果只能看一种类型的电影度过余生，你选？", o: [
+        {t:"剧情/人性深度片", s:10},
+        {t:"科幻/奇幻/想象力大作", s:8},
+        {t:"悬疑/犯罪/烧脑片", s:6},
+        {t:"喜剧/爱情/轻松治愈", s:2}
+    ]},
+    { d: 'genre', t: '类型偏好', q: "看恐怖片时，你的真实状态是？", o: [
+        {t:"完全不看，拒绝恐惧", s:0},
+        {t:"偶尔看，主要看剧情", s:3},
+        {t:"喜欢看，追求感官刺激", s:7},
+        {t:"深度爱好者，研究恐怖美学", s:10}
+    ]},
+    { d: 'genre', t: '年代偏好', q: "对于老电影（黑白/2000年前）的态度是？", o: [
+        {t:"完全不看，画质太渣", s:0},
+        {t:"只看最经典的几部", s:4},
+        {t:"经常看，韵味独特", s:8},
+        {t:"主要看老片，新片太浮躁", s:10}
+    ]},
+    { d: 'genre', t: '地域偏好', q: "观影地域倾向是？", o: [
+        {t:"只看华语片", s:2},
+        {t:"主要看好莱坞", s:4},
+        {t:"日韩/欧洲/印度都看", s:8},
+        {t:"全球冷门佳片挖掘者", s:10}
+    ]},
+    { d: 'genre', t: '长短偏好', q: "对于电影时长的接受度？", o: [
+        {t:"超过2小时就坐不住", s:0},
+        {t:"2小时左右刚刚好", s:4},
+        {t:"好片不怕长，3小时也能看", s:8},
+        {t:"钟爱史诗级长篇（4小时+）", s:10}
+    ]},
+    { d: 'genre', t: '续集偏好', q: "对于系列电影/续集的态度？", o: [
+        {t:"必看，有始有终", s:2},
+        {t:"看口碑，好就看", s:6},
+        {t:"大多狗尾续貂，很少看", s:8},
+        {t:"只看原创，拒绝工业化续集", s:10}
+    ]},
+
+    // --- 维度：叙事结构 (Narrative) ---
+    { d: 'narrative', t: '叙事偏好', q: "看电影时，你更在意？", o: [
+        {t:"故事好不好看，精不精彩", s:10},
+        {t:"有没有深度，能不能引人思考", s:8},
+        {t:"情绪/氛围到不到位", s:4},
+        {t:"摄影/配乐/技术层面", s:2}
+    ]},
+    { d: 'narrative', t: '叙事节奏', q: "对于叙事节奏的偏好？", o: [
+        {t:"必须紧凑，全程无尿点", s:2},
+        {t:"张弛有度，有铺垫有高潮", s:8},
+        {t:"喜欢慢节奏，沉浸感强", s:6},
+        {t:"越慢越好，甚至有点闷", s:10}
+    ]},
+    { d: 'narrative', t: '叙事结构', q: "对于非线性叙事（倒叙/多线/环形）的态度？", o: [
+        {t:"不喜欢，看得累", s:0},
+        {t:"不排斥，但别太复杂", s:4},
+        {t:"很喜欢，显得高级", s:8},
+        {t:"刻意追求，越烧脑越爱", s:10}
+    ]},
+    { d: 'narrative', t: '结局偏好', q: "对于电影结局的偏好？", o: [
+        {t:"必须圆满，看着舒服", s:0},
+        {t:"可以悲剧，但要合理", s:6},
+        {t:"喜欢开放式结局，回味无穷", s:8},
+        {t:"越致郁/越绝望越深刻", s:10}
+    ]},
+    { d: 'narrative', t: '台词偏好', q: "对于电影台词的重视程度？", o: [
+        {t:"台词不重要，别太出戏就行", s:2},
+        {t:"有几句金句就很好", s:6},
+        {t:"非常重要，台词是灵魂", s:10},
+        {t:"喜欢话痨片，全程高能对白", s:8}
+    ]},
+    { d: 'narrative', t: '真实感偏好', q: "对于电影真实性的要求？", o: [
+        {t:"必须符合逻辑，不能有bug", s:4},
+        {t:"大体合理，细节可以忽略", s:6},
+        {t:"无所谓，意境到了就行", s:8},
+        {t:"完全架空/超现实也没问题", s:10}
+    ]},
+
+    // --- 维度：视觉风格 (Visual) ---
+    { d: 'visual', t: '视觉重视度', q: "一部电影的画面/摄影对你来说有多重要？", o: [
+        {t:"故事好就行，画面无所谓", s:0},
+        {t:"别太丑，看得过去就行", s:4},
+        {t:"很重要，是电影感的来源", s:8},
+        {t:"最重要，甚至可以为了画面忽略故事", s:10}
+    ]},
+    { d: 'visual', t: '色彩偏好', q: "对于电影色调的偏好？", o: [
+        {t:"明亮/饱和/看着舒服", s:2},
+        {t:"自然/真实/贴近生活", s:6},
+        {t:"暗黑/压抑/有氛围感", s:8},
+        {t:"极致风格化（高对比/单色）", s:10}
+    ]},
+    { d: 'visual', t: '特效态度', q: "对于CGI特效的态度？", o: [
+        {t:"特效越多越好看，越震撼", s:2},
+        {t:"适当用，别太假就行", s:6},
+        {t:"更喜欢实拍/物理特效", s:8},
+        {t:"反感特效，破坏真实感", s:10}
+    ]},
+    { d: 'visual', t: '镜头偏好', q: "对于镜头语言的偏好？", o: [
+        {t:"没什么概念，看得清就行", s:0},
+        {t:"喜欢炫酷的运镜（一镜到底等）", s:6},
+        {t:"更喜欢固定镜头/克制的镜头", s:8},
+        {t:"会主动分析镜头设计", s:10}
+    ]},
+    { d: 'visual', t: '构图偏好', q: "对于画面构图的敏感度？", o: [
+        {t:"完全注意不到", s:0},
+        {t:"觉得好看但说不出为什么", s:4},
+        {t:"会注意到对称/黄金分割等", s:8},
+        {t:"有自己的构图美学偏好", s:10}
+    ]},
+    { d: 'visual', t: '美学倾向', q: "更倾向于哪种美学？", o: [
+        {t:"商业大片/工业美学", s:2},
+        {t:"现实主义/纪录片美学", s:6},
+        {t:"表现主义/形式主义美学", s:8},
+        {t:"先锋/实验/反传统美学", s:10}
+    ]},
+
+    // --- 维度：情感共鸣 (Empathy) ---
+    { d: 'empathy', t: '情感触发', q: "看电影时，你更容易因为什么而感动？", o: [
+        {t:"几乎不会被电影感动", s:0},
+        {t:"亲情/爱情/友情等普世情感", s:6},
+        {t:"宏大的命运感/时代悲歌", s:8},
+        {t:"极致的孤独/存在主义困境", s:10}
+    ]},
+    { d: 'empathy', t: '泪点阈值', q: "你的泪点阈值是？", o: [
+        {t:"看什么都哭，泪点极低", s:2},
+        {t:"碰到点就哭，泪点较低", s:6},
+        {t:"很少哭，但有被戳中过", s:8},
+        {t:"从不流泪，只在内心震撼", s:10}
+    ]},
+    { d: 'empathy', t: '角色代入', q: "对于主角的代入感？", o: [
+        {t:"很难代入，始终是旁观者", s:4},
+        {t:"容易代入，跟着主角情绪走", s:6},
+        {t:"只代入和自己像的角色", s:8},
+        {t:"甚至会代入反派/边缘角色", s:10}
+    ]},
+    { d: 'empathy', t: '观影后效', q: "看完一部好电影后的状态？", o: [
+        {t:"看完就完了，该干嘛干嘛", s:0},
+        {t:"会回味一会儿，很快就过了", s:4},
+        {t:"会沉浸好几天，走不出来", s:8},
+        {t:"会严重影响心情，甚至改变观念", s:10}
+    ]},
+    { d: 'empathy', t: '主题偏好', q: "更偏好哪种主题？", o: [
+        {t:"正能量/治愈/希望", s:2},
+        {t:"中性/客观/不做评判", s:6},
+        {t:"暗黑/揭露人性阴暗面", s:8},
+        {t:"虚无主义/彻底的绝望", s:10}
+    ]},
+    { d: 'empathy', t: '道德观', q: "对于电影中道德观的态度？", o: [
+        {t:"必须三观正，不能有歪理", s:0},
+        {t:"可以有争议，但要有底线", s:6},
+        {t:"喜欢挑战道德底线的电影", s:8},
+        {t:"认为电影不应受道德束缚", s:10}
+    ]},
+
+    // --- 维度：观影习惯 (Habit) ---
+    { d: 'habit', t: '观影渠道', q: "你主要的观影方式是？", o: [
+        {t:"只在电影院看", s:4},
+        {t:"手机/平板/电脑在线看", s:2},
+        {t:"电视/投影/家庭影院", s:8},
+        {t:"会去资料馆/电影节看胶片", s:10}
+    ]},
+    { d: 'habit', t: '观影环境', q: "看电影时的习惯？", o: [
+        {t:"必须安静，全神贯注", s:10},
+        {t:"可以偶尔看手机，但主要在看", s:6},
+        {t:"经常边看边做别的事", s:2},
+        {t:"主要用来下饭/助眠", s:0}
+    ]},
+    { d: 'habit', t: '观影数量', q: "你的年均观影量大约是？", o: [
+        {t:"10部以下", s:0},
+        {t:"10-50部", s:4},
+        {t:"50-200部", s:8},
+        {t:"200部以上", s:10}
+    ]},
+    { d: 'habit', t: '观影选择', q: "选择看哪部电影的主要依据是？", o: [
+        {t:"看热度/票房/大家都在看", s:2},
+        {t:"看评分/口碑/豆瓣/IMDb", s:6},
+        {t:"看导演/演员/主创阵容", s:8},
+        {t:"看口味/题材/自己的体系", s:10}
+    ]},
+    { d: 'habit', t: '观影延伸', q: "看完电影后会做什么？", o: [
+        {t:"什么都不做", s:0},
+        {t:"会去看看影评/讨论", s:6},
+        {t:"会找相关的幕后/解析来看", s:8},
+        {t:"会写影评/拉片/做深度研究", s:10}
+    ]},
+    { d: 'habit', t: '重看习惯', q: "对于重看电影的态度？", o: [
+        {t:"看过了就不会再看", s:0},
+        {t:"特别喜欢的会偶尔重看", s:6},
+        {t:"经常重看，每次都有新发现", s:8},
+        {t:"通过拉片式重看进行学习", s:10}
+    ]}
+];
+
+// 观影资历特供题
+const roleSpecific = {
+    casual: [
+        { d: 'habit', t: '入门习惯', q: "【入门特供】看电影是否快进？", o: [
+            {t:"经常快进，只看精彩部分", s:0},
+            {t:"偶尔快进，太无聊就跳", s:3},
+            {t:"很少快进，尽量看完", s:7},
+            {t:"从不快进，尊重电影", s:10}
+        ]},
+        { d: 'genre', t: '入门选择', q: "【入门特供】是否看外语片？", o: [
+            {t:"不看，只看华语", s:0},
+            {t:"只看英语片", s:3},
+            {t:"看热门外语片", s:7},
+            {t:"各种语言都看", s:10}
+        ]},
+        { d: 'narrative', t: '入门理解', q: "【入门特供】看不懂的电影怎么办？", o: [
+            {t:"直接关掉，不看了", s:0},
+            {t:"硬着头皮看完", s:3},
+            {t:"看完去看解析", s:7},
+            {t:"看不懂更要看，反复看", s:10}
+        ]}
+    ],
+    enthusiast: [
+        { d: 'habit', t: '资深习惯', q: "【资深特供】是否有观影清单？", o: [
+            {t:"没有，想起什么看什么", s:2},
+            {t:"有，收藏想看的", s:6},
+            {t:"有，按导演/类型系统看", s:8},
+            {t:"有，有明确的观影计划", s:10}
+        ]},
+        { d: 'visual', t: '资深视觉', q: "【资深特供】是否注意过摄影指导？", o: [
+            {t:"完全不知道这是什么", s:0},
+            {t:"知道，但不关注", s:4},
+            {t:"会关注几个大神", s:8},
+            {t:"会因为摄影指导选片", s:10}
+        ]},
+        { d: 'narrative', t: '资深剧作', q: "【资深特供】是否关注编剧？", o: [
+            {t:"只看导演", s:2},
+            {t:"会注意一下", s:6},
+            {t:"有喜欢的编剧", s:8},
+            {t:"认为编剧才是核心", s:10}
+        ]}
+    ],
+    hardcore: [
+        { d: 'habit', t: '硬核习惯', q: "【硬核特供】是否看冷门/禁片？", o: [
+            {t:"只看正规渠道能看到的", s:2},
+            {t:"会找一些资源看", s:6},
+            {t:"深度挖掘各种冷门资源", s:8},
+            {t:"以看禁片/地下电影为荣", s:10}
+        ]},
+        { d: 'visual', t: '硬核技术', q: "【硬核特供】是否拉过片？", o: [
+            {t:"不知道什么是拉片", s:0},
+            {t:"听说过，没试过", s:4},
+            {t:"拉过几部经典", s:8},
+            {t:"经常拉片做分析", s:10}
+        ]},
+        { d: 'narrative', t: '硬核理论', q: "【硬核特供】是否阅读电影理论？", o: [
+            {t:"只看电影不看书", s:2},
+            {t:"看过一些影评集", s:6},
+            {t:"看过一些理论著作", s:8},
+            {t:"深度研究电影理论", s:10}
+        ]}
+    ]
+};
+
+// 电影人格评级文案
+const levels = [
+    { max: 20, l: "Lv.1 路人观众", c: "#95a5a6", d: "电影只是消遣，生活大于光影。", advice: "保持轻松的心态，电影是为了快乐。" },
+    { max: 35, l: "Lv.2 普通影迷", c: "#3498db", d: "有自己的口味，但不挑，好看就行。", advice: "可以尝试看看不同类型的电影。" },
+    { max: 50, l: "Lv.3 资深观众", c: "#2ecc71", d: "对电影有要求，有自己的判断标准。", advice: "你已经摸到了电影艺术的门槛。" },
+    { max: 60, l: "Lv.4 电影爱好者", c: "#f1c40f", d: "电影是生活的重要组成部分，主动找片看。", advice: "可以开始关注电影的技术层面了。" },
+    { max: 70, l: "Lv.5 电影发烧友", c: "#e67e22", d: "阅片量惊人，有自己的观影体系。", advice: "尝试拉片，你会发现新的世界。" },
+    { max: 80, l: "Lv.6 电影学者", c: "#d35400", d: "不仅看电影，还研究电影背后的一切。", advice: "可以尝试写影评，输出你的观点。" },
+    { max: 90, l: "Lv.7 电影狂人", c: "#d4af37", d: "电影就是你的宗教，光影就是你的信仰。", advice: "保持热爱，电影会回报你一切。" },
+    { max: 100, l: "Lv.8 电影教父", c: "#e94560", d: "你就是活着的电影百科全书。", advice: "去拍一部电影吧，哪怕是短片。" },
+    { max: 110, l: "Lv.9 电影之神", c: "#9b59b6", d: "你对电影的理解已经超越了凡人。", advice: "请收下我的膝盖。" },
+    { max: 999, l: "Lv.10 电影本身", c: "#000", d: "你就是电影的化身，光影因你而存在。", advice: "..." }
+];
+
+// 全局变量
+let currQList = [];
+let currIdx = 0;
+let userRole = '';
+let userTitle = '';
+let scores = { genre:0, narrative:0, visual:0, empathy:0, habit:0 };
+
+// 页面切换函数
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userRole = document.getElementById('input-status').value;
+    userTitle = document.getElementById('input-title').value;
+    
+    currQList = [...questions, ...roleSpecific[userRole]];
+    currIdx = 0;
+    scores = { genre:0, narrative:0, visual:0, empathy:0, habit:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    let weight = 1.0;
+    if (userRole === 'hardcore') {
+        if (dim === 'visual' || dim === 'narrative') weight = 1.2;
+    } else if (userRole === 'casual') {
+        if (dim === 'empathy' || dim === 'genre') weight = 1.1;
+    }
+
+    scores[dim] += val * weight;
+
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { genre:0, narrative:0, visual:0, empathy:0, habit:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw / 2.8); 
+    if(finalScore> 120) finalScore = 120;
+
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'genre', n:'类型'}, {k:'narrative', n:'叙事'}, 
+        {k:'visual', n:'视觉'}, {k:'empathy', n:'情感'}, {k:'habit', n:'习惯'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 65) * 100, 100);
+        let color = pct> 60 ? '#d4af37' : (pct> 30 ? '#e67e22' : '#3498db');
+        let txt = pct> 70 ? '极致' : (pct> 40 ? '均衡' : '入门');
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {genre:'类型', narrative:'叙事', visual:'视觉', empathy:'情感', habit:'习惯'};
+    return map[k];
+}
+
+// 报告生成函数
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let envStatus = '';
+    let envClass = '';
+    if (total> 80) {
+        envStatus = '🎬 殿堂级：电影是刻在DNA里的信仰';
+        envClass = 'color:#d4af37; font-weight:900;';
+    } else if (total> 60) {
+        envStatus = '🍿 发烧级：光影是生活的刚需';
+        envClass = 'color:#e67e22; font-weight:800;';
+    } else if (total> 40) {
+        envStatus = '🎥 资深级：有品味的观影者';
+        envClass = 'color:#3498db; font-weight:700;';
+        envStatus = '😌 入门级：电影是生活的调味剂';
+        envClass = 'color:#95a5a6; font-weight:700;';
+    }
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、电影人格诊断书</div>
+        <p class="r-p" style="background:#1a1a2e; padding:12px; border-radius:8px; font-size:14px; border:1px solid #2a2a4a;">
+            <strong>🎬 观影档案：</strong>${userRole==='casual'?'入门观众 (年观影量 < 20部)':userRole==='enthusiast'?'资深影迷 (年观影量 20-100部)':'硬核玩家 (年观影量> 100部)'} <br>
+            <strong>🎞️ 审美倾向：</strong>${getTitleName(userTitle)}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#16162a; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#666; margin-right:8px;">综合观影指数</span>
+                <span style="font-size:36px; font-weight:900; color:#d4af37; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#666;">/ 120</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#aaa;"><strong>人格箴言：</strong>${lvl.advice}</p>
+        </div>
+
+        <div style="margin-top:20px; padding:15px; background:#16162a; border-radius:8px; border:1px solid #2a2a4a;">
+            <p style="margin:0 0 10px 0; font-size:14px; color:#666;">2026年度电影人格定性：</p>
+            <div style="${envClass} font-size:17px; margin-bottom:12px;">${envStatus}</div>
+            <p class="r-p" style="font-size:15px; margin:0;">
+                经过 34 项电影审美指标的深度扫描，系统检测到你的核心审美痛点位于 <span style="background:#d4af37; color:#000; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:13px;">${getDimFullCN(maxDimKey)}</span> 维度。
+                ${total> 60 ? '你对电影的理解已经超越了娱乐层面，开始进入艺术与哲学的殿堂。' : '电影是你放松身心的方式，保持这份纯粹的快乐也很好。'}
+            </p>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维电影审美深度解构</div>
+        <p style="font-size:12px; color:#555; margin-bottom:20px; font-style:italic;">*基于2026年电影美学趋势的深度分析</p>
+        ${generateDimAnalysis('genre', scores.genre)}
+        ${generateDimAnalysis('narrative', scores.narrative)}
+        ${generateDimAnalysis('visual', scores.visual)}
+        ${generateDimAnalysis('empathy', scores.empathy)}
+        ${generateDimAnalysis('habit', scores.habit)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、2026年度观影生存策略</div>
+        <div class="r-box" style="border-color:#333;">
+            <div class="r-h3">🎯 视野篇：拓展你的电影地图</div>
+            <ul class="r-list">
+                <li><strong>类型破壁 (Genre Break)：</strong> 如果你只看剧情片，试试科幻；如果你只看悬疑，试试纪录片。打破类型偏见，你会发现新的大陆。</li>
+                <li><strong>地理挖潜 (Geo Diving)：</strong> 除了好莱坞和日韩，试试伊朗、土耳其、罗马尼亚、阿根廷的电影。第三世界的电影往往有惊人的力量。</li>
+                <li><strong>时间考古 (Time Archeology)：</strong> 不要只看新片，老电影是一座金矿。从1920年代的默片到1990年代的独立电影，每个年代都有独特的质感。</li>
+            </ul>
+        </div>
+        
+        <div class="r-box" style="background:#1a1a10; border-color:#2a2a00;">
+            <div class="r-h3" style="color:#d4af37;">
+                🚀 深度篇：${userRole==='casual'?'入门·爱上电影':userRole==='enthusiast'?'资深·理解电影':'硬核·创造电影'}
+            </div>
+            ${userRole==='casual' ? getCasualAdvice() : userRole==='enthusiast' ? getEnthusiastAdvice() : getHardcoreAdvice()}
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#444; font-size:12px; margin-top:50px; line-height:1.8;">
+        本报告由电影人格算法自动生成<br>
+        愿光影永远照耀你的人生
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function getTitleName(t) {
+    const m = {
+        story: '故事至上者 (剧情精彩最重要)', 
+        visual: '视觉美学派 (画面震撼是王道)', 
+        emotion: '情感共鸣体 (能打动我就是好片)', 
+        tech: '技术控 (摄影/配乐/调度深度爱好者)'
+    };
+    return m[t] || t;
+}
+
+function getDimFullCN(k) {
+    const m = {
+        genre: '类型偏好 (口味的广度)', 
+        narrative: '叙事结构 (故事的品味)', 
+        visual: '视觉风格 (眼睛的盛宴)', 
+        empathy: '情感共鸣 (内心的触动)', 
+        habit: '观影习惯 (虔诚的程度)'
+    };
+    return m[k];
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 45 ? 'high' : (val> 25 ? 'med' : 'low');
+    
+    const config = {
+        high: { color: '#d4af37', bg: '#1a1a10', tag: '✨ 极致', titleColor: '#d4af37' },
+        med: { color: '#e67e22', bg: '#1a1410', tag: '⚖️ 均衡', titleColor: '#e67e22' },
+        low: { color: '#3498db', bg: '#10141a', tag: '🌱 入门', titleColor: '#3498db' }
+    };
+    
+    const c = config[riskLevel];
+    
+    const texts = {
+        genre: {
+            high: "<strong>你是类型片的探险家。</strong> 你不满足于单一的口味，从主流商业片到冷门Cult片，从东方含蓄到西方狂野，你的观影地图遍布全球。你深知类型只是框架，好电影能打破一切边界。",
+            med: "<strong>你有稳定的口味，但也愿意尝鲜。</strong> 你有自己的舒适区，但偶尔也会踏出一步，看看不同的风景。你知道好电影不分类型，关键在于诚意。",
+            low: "<strong>你有明确的偏好。</strong> 你知道自己喜欢什么，不喜欢什么，不会浪费时间在不对味的电影上。这很好，看电影首先是为了取悦自己。"
+        },
+        narrative: {
+            high: "<strong>你是故事的鉴赏家。</strong> 简单的线性叙事已经无法满足你，你追求复杂的结构、深刻的主题、耐人寻味的留白。你能从看似平淡的故事中品味出暗流涌动，也能从烧脑的叙事中理出清晰的脉络。",
+            med: "<strong>你对故事有要求。</strong> 你不满足于陈词滥调，希望看到有新意、有深度的故事。你能接受不同的叙事方式，但前提是要能打动你。",
+            low: "<strong>你看重故事的观赏性。</strong> 只要故事精彩、好看，能让你投入其中，就是好电影。这没什么不对，电影的本质就是造梦。"
+        },
+        visual: {
+            high: "<strong>你是眼睛的饕餮者。</strong> 你深知电影首先是视觉的艺术。构图、光影、色彩、运动，每一个细节你都不会放过。你能从一个镜头中读出导演的意图，能从一帧画面中感受到情绪的流动。甚至可以为了绝美的画面，容忍一个不那么完美的故事。",
+            med: "<strong>你对画面有要求。</strong> 你能分辨出什么是美，什么是丑，会被精心设计的镜头所震撼。你认为视觉是电影感的重要来源，但故事依然是根基。",
+            low: "<strong>你更看重内容。</strong> 只要故事好，画面糙一点没关系。这种心态让你能忽略技术的瑕疵，直接触及电影的灵魂。"
+        },
+        empathy: {
+            high: "<strong>你是电影的共振体。</strong> 你看电影时完全投入，将自己的灵魂与角色绑定。你能感受到他们的每一次呼吸、每一次心跳。宏大的命运感让你战栗，极致的孤独让你沉醉。电影结束后，你依然久久无法走出，仿佛过完了一生。",
+            med: "<strong>你是感性的观影者。</strong> 你很容易被电影打动，会为角色的命运揪心，会为真挚的情感流泪。但你依然能保持一定的抽离，不会完全迷失。",
+            low: "<strong>你是理性的旁观者。</strong> 你始终以一个旁观者的姿态审视电影，不会轻易被情绪操控。这让你能更冷静地分析电影的优劣。"
+        },
+        habit: {
+            high: "<strong>你是电影的圣徒。</strong> 观影对你来说是一种仪式。你需要安静的环境、全神贯注的状态，甚至特定的设备。你不仅看电影，还研究电影、分析电影、甚至创造电影。拉片、写影评、参加电影节，你用一切方式表达对电影的忠诚。",
+            med: "<strong>你是认真的影迷。</strong> 你会主动找片看，会做观影清单，会看影评和幕后。电影是你生活中重要的一部分，但不是全部。",
+            low: "<strong>你是轻松的观众。</strong> 电影对你来说是消遣，是放松，是生活的调味剂。想看就看，不想看就不看，这种轻松的心态反而最接近电影的初衷。"
+        }
+    };
+    
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimFullCN(key)} 
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)})</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#000; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#aaa;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+function getCasualAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>从IMDb250/豆瓣Top250开始 (Start with Classics)：</strong> 这些榜单经过时间检验，是入门的最佳捷径。不用按顺序，挑感兴趣的看。</li>
+        <li><strong>找到一个喜欢的导演 (Find a Director)：</strong> 如果你喜欢某部电影，去把这个导演的其他作品都看了。你会发现一个连贯的世界。</li>
+        <li><strong>不要怕看不懂 (Don't Fear Confusion)：</strong> 很多电影第一遍都看不懂，没关系，记住那种感觉，过几年再看，你会懂的。</li>
+    </ul>`;
+}
+
+function getEnthusiastAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>按电影史顺流而下 (Follow History)：</strong> 从意大利新现实主义到法国新浪潮，从新好莱坞到韩国电影崛起，按时间线看，你会理解电影美学的演变。</li>
+        <li><strong>关注幕后主创 (Crew is Key)：</strong> 除了导演，注意摄影指导、配乐师、剪辑师。他们才是电影风格的真正缔造者。</li>
+        <li><strong>尝试写点什么 (Write Something)：</strong> 哪怕只是短评，写下来能帮你理清思路。你会发现很多以为懂了的东西，写出来才发现没懂。</li>
+    </ul>`;
+}
+
+function getHardcoreAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>阅读电影理论 (Read Theory)：</strong> 巴赞、麦茨、德勒兹...理论不会杀死电影，只会让你更爱它。</li>
+        <li><strong>看冷门/地下/禁片 (Go Underground)：</strong> 电影史不仅是由杰作写成的，也是由那些被禁止、被遗忘的电影写成的。</li>
+        <li><strong>自己动手拍 (Just Shoot)：</strong> 现在手机就能拍电影。只有真正拍过，你才知道电影的每一个决定有多难。</li>
+    </ul>`;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// 雷达图绘制
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['genre','narrative','visual','empathy','habit'];
+    const labels = ['类型','叙事','视觉','情感','习惯'];
+    
+    // 背景网格
+    ctx.strokeStyle = '#2a2a4a';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    // 数据层
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 65, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    // 渐变填充
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(212, 175, 55, 0.1)");
+    grd.addColorStop(1, "rgba(212, 175, 55, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 2; ctx.stroke();
+    
+    // 文字
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    // 主测试流程按钮绑定
+    document.getElementById('start-btn').addEventListener('click', function() {var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}
+        goToDemo();
+    });
+
+    document.getElementById('init-test-btn').addEventListener('click', function() {
+        initTest();
+    });
+
+    document.getElementById('prev-btn').addEventListener('click', function() {
+        prevQuestion();
+    });
+
+    document.getElementById('show-report-btn').addEventListener('click', function() {
+        showReport();
+    });
+
+    document.getElementById('close-report-btn').addEventListener('click', function() {
+        closeReport();
+    });
+
+    document.getElementById('reset-test-btn').addEventListener('click', function() {
+        resetTest();
+    });
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "dymx";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

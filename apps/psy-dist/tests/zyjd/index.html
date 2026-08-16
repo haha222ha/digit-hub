@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>职业倦怠程度检测 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #0EA5E9;
+            --primary-dark: #0284C7;
+            --accent: #F59E0B;
+            --safe: #10B981;
+            --warning: #EF4444;
+            --bg-gradient-start: #F0F9FF;
+            --bg-gradient-end: #E0F2FE;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(14, 165, 233, 0); } 100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); } }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#e0f2fe 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #e0f2fe; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #e0f2fe; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #e0f2fe; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #e0f2fe; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #e0f2fe; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        #page-result { display: none; background: #e0f2fe; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #e0f2fe; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-blue 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #e0f2fe; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #e0f2fe; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-职业倦怠程度测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">职业倦怠<br><span>程度</span>检测</h1>
+        <p class="cover-subtitle">科学评估你的职业倦怠水平<br>基于马斯勒职业倦怠理论</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🔍</div>
+                <div class="feature-title">三维倦怠分析</div>
+                <div class="feature-desc">情绪耗竭、去人格化、个人成就感，全面扫描职业倦怠。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">马斯勒理论</div>
+                <div class="feature-desc">基于马斯勒职业倦怠量表，科学评估你的倦怠程度。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">⚠️</div>
+                <div class="feature-title">早期预警</div>
+                <div class="feature-desc">识别倦怠早期信号，防止情况恶化。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💡</div>
+                <div class="feature-title">专业解决方案</div>
+                <div class="feature-desc">提供针对性的职业倦怠缓解方案。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始检测 (约需 3 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">职场档案建立 💼</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的职场背景精准评估倦怠程度。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的工作年限？</label>
+            <select id="input-years" class="select-box">
+                <option value="new">1年以内 (新人)</option>
+                <option value="junior">1-3年 (初级)</option>
+                <option value="mid">3-5年 (中级)</option>
+                <option value="senior">5-10年 (高级)</option>
+                <option value="expert">10年以上 (资深)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的工作强度？</label>
+            <select id="input-intensity" class="select-box">
+                <option value="low">轻松，朝九晚五</option>
+                <option value="normal">正常，偶尔加班</option>
+                <option value="high">较高，经常加班</option>
+                <option value="veryhigh">很高，经常996</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你对目前工作的满意度？</label>
+            <select id="input-satisfaction" class="select-box">
+                <option value="veryhigh">非常满意</option>
+                <option value="high">比较满意</option>
+                <option value="normal">一般</option>
+                <option value="low">不太满意</option>
+                <option value="verylow">很不满意</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：情绪耗竭</span>
+            <span id="progress-text">1 / 15</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🔍 情绪耗竭</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+
+    <div id="page-loading">
+        <div style="font-size:50px; animation: pulse-blue 1s infinite;">💼</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的职业倦怠...</h3>
+        <p style="color:#636E72; font-size:14px;">正在扫描三维数据...<br>计算职业倦怠指数...<br>生成专属报告...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">倦怠指数</span>
+            </div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 职业倦怠三维雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《职业倦怠深度分析报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新检测</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div>
+            <div class="r-h1">职业倦怠深度分析报告</div>
+            <div style="font-size:14px;">专业心理测评 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+
+</div>
+
+<script>
+const questions = [
+    { d: 'exhaustion', t: '情绪耗竭', q: "工作时你是否感到精力被耗尽？", o: [
+        {t:"每天都有这种感觉", s:10},
+        {t:"经常有这种感觉", s:7},
+        {t:"偶尔有这种感觉", s:5},
+        {t:"很少或从来没有", s:0}
+    ]},
+    { d: 'exhaustion', t: '情绪耗竭', q: "下班后你是否感到筋疲力尽？", o: [
+        {t:"每天都很累", s:10},
+        {t:"经常很累", s:7},
+        {t:"偶尔很累", s:5},
+        {t:"很少或从不", s:0}
+    ]},
+    { d: 'exhaustion', t: '情绪耗竭', q: "早上起床面对新的一天工作，你感到？", o: [
+        {t:"非常抗拒和疲惫", s:10},
+        {t:"比较疲惫", s:7},
+        {t:"一般，没什么感觉", s:5},
+        {t:"精神饱满", s:0}
+    ]},
+    { d: 'exhaustion', t: '情绪耗竭', q: "你是否有持续的身体疲劳感？", o: [
+        {t:"长期疲劳，难以恢复", s:10},
+        {t:"经常疲劳", s:7},
+        {t:"偶尔疲劳", s:5},
+        {t:"很少疲劳", s:0}
+    ]},
+    { d: 'exhaustion', t: '情绪耗竭', q: "工作是否让你感到情感被掏空？", o: [
+        {t:"经常感到情感枯竭", s:10},
+        {t:"偶尔感到", s:7},
+        {t:"很少", s:5},
+        {t:"从来没有", s:0}
+    ]},
+    
+    { d: 'cynicism', t: '去人格化', q: "你是否对同事或客户变得冷漠？", o: [
+        {t:"经常变得冷漠", s:10},
+        {t:"偶尔会", s:7},
+        {t:"很少", s:5},
+        {t:"不会，保持热情", s:0}
+    ]},
+    { d: 'cynicism', t: '去人格化', q: "你是否觉得工作只是"混口饭吃"？", o: [
+        {t:"完全是这样想的", s:10},
+        {t:"经常这样想", s:7},
+        {t:"偶尔", s:5},
+        {t:"不这样认为", s:0}
+    ]},
+    { d: 'cynicism', t: '去人格化', q: "你是否开始敷衍工作？", o: [
+        {t:"经常敷衍", s:10},
+        {t:"偶尔敷衍", s:7},
+        {t:"很少", s:5},
+        {t:"认真负责", s:0}
+    ]},
+    { d: 'cynicism', t: '去人格化', q: "你是否对公司的未来持消极态度？", o: [
+        {t:"非常消极", s:10},
+        {t:"比较消极", s:7},
+        {t:"一般", s:5},
+        {t:"积极乐观", s:0}
+    ]},
+    { d: 'cynicism', t: '去人格化', q: "你是否经常抱怨工作？", o: [
+        {t:"每天都在抱怨", s:10},
+        {t:"经常抱怨", s:7},
+        {t:"偶尔抱怨", s:5},
+        {t:"很少抱怨", s:0}
+    ]},
+    
+    { d: 'accomplishment', t: '个人成就感', q: "你是否觉得自己做的事情没有意义？", o: [
+        {t:"经常这样觉得", s:10},
+        {t:"偶尔这样觉得", s:7},
+        {t:"很少", s:5},
+        {t:"不这样觉得", s:0}
+    ]},
+    { d: 'accomplishment', t: '个人成就感', q: "你是否觉得自己无法胜任工作？", o: [
+        {t:"经常这样觉得", s:10},
+        {t:"偶尔这样觉得", s:7},
+        {t:"很少", s:5},
+        {t:"不这样觉得", s:0}
+    ]},
+    { d: 'accomplishment', t: '个人成就感', q: "你是否觉得自己在工作上没有进步？", o: [
+        {t:"完全停滞不前", s:10},
+        {t:"进步很小", s:7},
+        {t:"有一些进步", s:5},
+        {t:"持续在进步", s:0}
+    ]},
+    { d: 'accomplishment', t: '个人成就感', q: "你是否对完成工作缺乏成就感？", o: [
+        {t:"完全没成就感", s:10},
+        {t:"很少成就感", s:7},
+        {t:"有一些成就感", s:5},
+        {t:"很有成就感", s:0}
+    ]},
+    { d: 'accomplishment', t: '个人成就感', q: "你是否觉得自己在浪费职业生涯？", o: [
+        {t:"强烈觉得", s:10},
+        {t:"有时觉得", s:7},
+        {t:"偶尔", s:5},
+        {t:"不这样觉得", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const levels = [
+    { max: 20, l: "精力充沛", c: "#10B981", d: "你对工作充满热情，没有明显的职业倦怠。", advice: "继续保持这种积极状态，注意工作生活平衡。" },
+    { max: 40, l: "轻度倦怠", c: "#84CC16", d: "你有轻微的职业倦怠倾向，但整体状态良好。", advice: "建议适当调整工作节奏，增加休息和放松时间。" },
+    { max: 70, l: "中度倦怠", c: "#F59E0B", d: "你的职业倦怠程度中等，需要引起注意。", advice: "建议认真审视工作状态，考虑寻求改变或支持。" },
+    { max: 100, l: "高度倦怠", c: "#F97316", d: "你的职业倦怠程度较高，需要及时干预。", advice: "强烈建议调整工作状态，必要时考虑换工作或寻求专业帮助。" },
+    { max: 150, l: "极度倦怠", c: "#EF4444", d: "你正在经历严重的职业倦怠，需要立即关注。", advice: "强烈建议立即采取行动，包括寻求心理咨询或考虑职业转型。" }
+];
+
+let currQList = [];
+let currIdx = 0;
+let userInfo = {};
+let scores = { exhaustion:0, cynicism:0, accomplishment:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userInfo.years = document.getElementById('input-years').value;
+    userInfo.intensity = document.getElementById('input-intensity').value;
+    userInfo.satisfaction = document.getElementById('input-satisfaction').value;
+    
+    currQList = [...questions];
+    currIdx = 0;
+    scores = { exhaustion:0, cynicism:0, accomplishment:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { exhaustion:0, cynicism:0, accomplishment:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+    
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'exhaustion', n:'情绪'}, {k:'cynicism', n:'冷漠'}, {k:'accomplishment', n:'成就'}
+    ];
+    let html = '';
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 50) * 100, 100);
+        let color = pct> 60 ? '#0EA5E9' : (pct> 30 ? '#F59E0B' : '#10B981');
+        let txt = pct> 70 ? '高' : (pct> 40 ? '中' : '低');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {exhaustion:'情绪耗竭', cynicism:'去人格化', accomplishment:'个人成就感'};
+    return map[k];
+}
+
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、职业倦怠诊断</div>
+        <p class="r-p" style="background:#fafafa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>📋 职场档案：</strong>年限：${getYearsName(userInfo.years)} | 强度：${getIntensityName(userInfo.intensity)} | 满意度：${getSatisfactionName(userInfo.satisfaction)}
+        </p>
+        <div class="r-box" style="border-left:5px solid ${lvl.c};">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">倦怠等级：${lvl.l}</div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>倦怠评估：</strong>${lvl.d}</p>
+            <p style="margin:10px 0 0; font-size:15px; line-height:1.6; color:#555;"><strong>核心建议：</strong>${lvl.advice}</p>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">二、三维倦怠深度分析</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px;">*基于马斯勒职业倦怠理论的科学分析</p>
+        ${generateDimAnalysis('exhaustion', scores.exhaustion, '反映你在工作中情感资源被消耗的程度，表现为身体和情绪上的疲惫感。')}
+        ${generateDimAnalysis('cynicism', scores.cynicism, '反映你对工作和他人的疏离程度，表现为冷漠、消极和嘲讽态度。')}
+        ${generateDimAnalysis('accomplishment', scores.accomplishment, '反映你对自己工作成就的评价，表现为自我否定和缺乏成就感。')}
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">三、职业倦怠理论解析</div>
+        <div class="r-box" style="background:#f0f9ff; border-color:#0EA5E9;">
+            <div class="r-h3" style="color:#0EA5E9;">💡 什么是马斯勒职业倦怠理论？</div>
+            <p class="r-p">
+                <strong>职业倦怠</strong>是一种由长期工作压力导致的情绪、精神和身体 exhausted 状态。心理学家克里斯蒂娜·马斯勒（Christina Maslach）提出了三维理论：
+            </p>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>情绪耗竭</strong>：感到情感被耗尽，没有精力继续工作</li>
+                <li><strong>去人格化</strong>：对工作和人际关系变得冷漠、消极</li>
+                <li><strong>个人成就感降低</strong>：对自己的工作能力产生怀疑</li>
+            </ul>
+            <p class="r-p" style="margin-top:15px;">
+                职业倦怠不仅影响工作表现，还可能对身体健康造成严重影响，包括失眠、焦虑、抑郁等。
+            </p>
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">四、专业缓解建议</div>
+        <div class="r-box">
+            <div class="r-h3">🎯 针对性行动计划</div>
+            <p class="r-p">根据你的测评结果，以下建议可能对你有帮助：</p>
+            ${getRecommendations(lvl.l).map((p, i) => `<p style="margin:8px 0; padding-left:20px; position:relative;"><span style="position:absolute; left:0; color:#0EA5E9; font-weight:bold;">${i+1}.</span> ${p}</p>`).join('')}
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">五、心理学小知识</div>
+        <div class="r-box" style="background:#f9f9f9;">
+            <div class="r-h3">📚 工作倦怠的预防</div>
+            <p class="r-p">
+                <strong>工作家庭平衡理论</strong>认为，工作和家庭的冲突是导致职业倦怠的重要因素。保持工作和生活的平衡对预防倦怠至关重要。
+            </p>
+            <ul style="margin:10px 0; padding-left:20px; line-height:2; color:#555;">
+                <li>设定明确的工作界限</li>
+                <li>培养工作以外的兴趣爱好</li>
+                <li>保持规律的运动和睡眠</li>
+                <li>建立支持性的人际关系</li>
+                <li>学会说"不"</li>
+            </ul>
+            <p class="r-p" style="margin-top:10px;">
+                记住，你的健康比任何工作都重要。
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026职业倦怠检测 · 专业心理测评<br>
+        愿你找回工作的热情
+    </div>
+    `;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function getYearsName(y) {
+    const m = {'new':'1年以内','junior':'1-3年','mid':'3-5年','senior':'5-10年','expert':'10年以上'};
+    return m[y] || y;
+}
+function getIntensityName(i) {
+    const m = {'low':'轻松','normal':'正常','high':'较高','veryhigh':'很高'};
+    return m[i] || i;
+}
+function getSatisfactionName(s) {
+    const m = {'veryhigh':'非常满意','high':'比较满意','normal':'一般','low':'不太满意','verylow':'很不满意'};
+    return m[s] || s;
+}
+
+function generateDimAnalysis(key, val, explanation) {
+    let level = val> 35 ? 'high' : (val> 20 ? 'med' : 'low');
+    const config = {
+        high: { color: '#EF4444', bg: '#fef2f2', tag: '⚠️ 高风险', titleColor: '#EF4444' },
+        med: { color: '#F59E0B', bg: '#fffbeb', tag: '⚡ 中等', titleColor: '#F59E0B' },
+        low: { color: '#10B981', bg: '#ecfdf5', tag: '✅ 正常', titleColor: '#10B981' }
+    };
+    const c = config[level];
+    const texts = {
+        exhaustion: { high: "<strong>情绪耗竭严重！</strong>你在工作中感到极度疲惫，情感资源已经接近枯竭。", med: "<strong>情绪耗竭中等。</strong>你有一定程度的疲惫感，需要适当休息。", low: "<strong>情绪状态良好。</strong>你的情绪状态比较稳定，能够应对工作压力。" },
+        cynicism: { high: "<strong>去人格化严重！</strong>你对工作和人际关系变得非常冷漠和消极。", med: "<strong>去人格化中等。</strong>你开始对工作产生一些消极态度，需要关注。", low: "<strong>工作态度积极。</strong>你对工作保持热情和积极态度。" },
+        accomplishment: { high: "<strong>成就感严重不足！</strong>你对自己的工作能力产生严重怀疑，缺乏成就感。", med: "<strong>成就感一般。</strong>你对自己的工作有一些怀疑，可以尝试设定更具体的目标。", low: "<strong>成就感充足。</strong>你对自己的工作有积极的评价，能从工作中获得满足感。" }
+    };
+    return `<div style="margin-bottom:20px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor}; margin-top:0;">${getDimName(key)} <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${val}/50)</span><span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span></div><p style="font-size:13px; color:#888; margin-bottom:8px;">${explanation}</p><p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][level]}</p></div>`;
+}
+
+function getRecommendations(level) {
+    const recs = {
+        '精力充沛': ['继续保持这种良好的工作状态', '注意工作生活平衡，避免过度投入', '培养兴趣爱好，丰富业余生活'],
+        '轻度倦怠': ['适当增加休息时间', '尝试学习新技能重新激发兴趣', '与同事沟通，寻求支持'],
+        '中度倦怠': ['认真审视工作状态，考虑是否需要改变', '设定工作界限，避免过度加班', '考虑寻求职业咨询'],
+        '高度倦怠': ['立即采取行动，调整工作状态', '与上级沟通工作压力', '考虑换工作或职业转型'],
+        '极度倦怠': ['立即寻求专业心理咨询', '认真考虑暂停工作休息', '寻求家人和朋友的支持']
+    };
+    return recs[level] || recs['轻度倦怠'];
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    const cx=120, cy=120, r=90;
+    const keys = ['exhaustion','cynicism','accomplishment'];
+    const labels = ['情绪','冷漠','成就'];
+    
+    ctx.strokeStyle = '#e0f2fe'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<3; j++) {
+            let a = (Math.PI*2/3)*j - Math.PI/2;
+            ctx.lineTo(cx + Math.cos(a)*(r/4)*i, cy + Math.sin(a)*(r/4)*i);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let ratio = Math.min(s[k] / 50, 1.1); 
+        let a = (Math.PI*2/3)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(14, 165, 233, 0.1)");
+    grd.addColorStop(1, "rgba(14, 165, 233, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.strokeStyle = '#0EA5E9'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/3)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "zyjd";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>最适配的海外宜居城市 - 深度分析</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --primary-dark: #1a252f;
+            --accent: #c0392b;
+            --accent-hover: #e74c3c;
+            --safe: #27ae60;
+            --warning: #f39c12;
+            --bg-gradient-start: #f3f5f7;
+            --bg-gradient-end: #dfe6e9;
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+            --radius: 16px;
+            --theme-red: #ff2e4c;
+            --theme-red-light: #ff4760;
+            --card-radius: 24px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8f9fa; min-height: 100vh; color: var(--text-main); }
+        .container { max-width: 520px; margin: 0 auto; padding: 20px; position: relative; min-height: 100vh; }
+        .page { display: none; animation: fadeIn 0.5s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(100px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulseRed { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 46, 76, 0.7); } 50% { box-shadow: 0 0 0 15px rgba(255, 46, 76, 0); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .btn { display: block; width: 100%; padding: 18px; border: none; border-radius: 50px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+        .btn-primary { background: var(--primary); color: white; border-radius: var(--radius); }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-theme { background: linear-gradient(90deg, var(--theme-red), var(--theme-red-light)); color: white; box-shadow: 0 8px 20px rgba(255, 46, 76, 0.3); }
+        .btn-theme:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-accent { background: var(--accent); color: white; animation: pulseRed 2s infinite; border-radius: var(--radius); }
+        .btn-accent:active { transform: scale(0.98); background: var(--accent-hover); }
+        .btn-secondary { background: #f1f2f6; color: var(--text-main); border: none; margin-top: 12px; }
+        .btn-secondary:active { transform: scale(0.98); background: #dfe4ea; }
+        .card { background: white; border-radius: var(--radius); padding: 24px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .cover-badge { display: inline-block; background: linear-gradient(135deg, #00b894, #00cec9); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .cover-title { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+        .cover-title .highlight { color: #00b894; }
+        .cover-subtitle { color: var(--text-sub); font-size: 16px; margin-bottom: 30px; line-height: 1.5; }
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .feature-card { background: white; border-radius: var(--radius); padding: 20px 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .feature-icon { font-size: 32px; margin-bottom: 10px; }
+        .feature-text { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 10px; color: var(--text-main); }
+        .form-select { width: 100%; padding: 16px; border: 2px solid #eaecef; border-radius: var(--radius); font-size: 16px; background: white; cursor: pointer; transition: all 0.2s ease; }
+        .form-select:focus { outline: none; border-color: var(--primary); }
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .quiz-dimension { font-size: 14px; font-weight: 600; color: #00b894; }
+        .quiz-progress { font-size: 14px; font-weight: 600; color: var(--text-sub); }
+        .progress-bar { width: 100%; height: 8px; background: #eaecef; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00b894, #00cec9); border-radius: 4px; transition: width 0.3s ease; }
+        .question-card { animation: slideUp 0.4s ease; }
+        .question-tag { display: inline-block; background: #f1f2f6; color: var(--primary); padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .question-text { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 30px; }
+        .option-btn { display: block; width: 100%; padding: 18px; border: 2px solid #eaecef; border-radius: var(--radius); background: white; font-size: 16px; font-weight: 500; text-align: left; cursor: pointer; margin-bottom: 12px; transition: all 0.2s ease; }
+        .option-btn:hover { border-color: #00b894; }
+        .option-btn.selected { border-color: #00b894; background: rgba(0, 184, 148, 0.05); }
+        .option-btn:active { transform: scale(0.98); }
+        .back-btn { background: transparent; border: none; color: var(--text-sub); font-size: 16px; cursor: pointer; padding: 10px 0; margin-top: 20px; }
+        .loading-container { text-align: center; padding: 50px 20px; }
+        .loading-icon { font-size: 80px; animation: breathe 1.5s infinite; margin-bottom: 30px; }
+        .loading-title { font-size: 24px; font-weight: 700; margin-bottom: 15px; }
+        .loading-subtitle { font-size: 16px; color: var(--text-sub); }
+        .result-top-card { background: linear-gradient(135deg, #00b894, #00cec9); color: white; border-radius: var(--radius); padding: 30px 20px; text-align: center; margin-bottom: 20px; }
+        .level-tag { display: inline-block; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 8px 24px; border-radius: 20px; font-size: 20px; font-weight: 700; margin-bottom: 15px; }
+        .level-desc { font-size: 16px; line-height: 1.5; opacity: 0.95; }
+        .result-match-section { text-align: center; margin: 30px 0; padding: 30px 20px; background: linear-gradient(135deg, #f8f9fa, #fff); border-radius: var(--radius); border: 2px solid #00b894; }
+        .match-title { font-size: 18px; font-weight: 600; color: var(--text-sub); margin-bottom: 10px; }
+        .match-name { font-size: 36px; font-weight: 700; color: #00b894; margin-bottom: 15px; }
+        .match-desc { font-size: 16px; color: var(--text-main); line-height: 1.8; }
+        .match-tags { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+        .match-tag { padding: 6px 16px; background: rgba(0, 184, 148, 0.1); color: #00b894; border-radius: 20px; font-size: 14px; }
+        .score-bar-section { margin: 20px 0; }
+        .score-bar-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; }
+        .score-bar-container { display: flex; gap: 15px; }
+        .score-bar-item { flex: 1; text-align: center; padding: 15px 10px; background: #f8f9fa; border-radius: 12px; }
+        .score-bar-label { font-size: 14px; color: var(--text-sub); margin-bottom: 8px; }
+        .score-bar-value { font-size: 24px; font-weight: 700; color: #00b894; }
+        .result-actions { position: sticky; bottom: 20px; padding-top: 20px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: none; overflow-y: auto; }
+        .modal.active { display: block; animation: fadeIn 0.3s ease; }
+        .modal-content { background: white; min-height: 100vh; padding: 20px; max-width: 520px; margin: 0 auto; position: relative; padding-top: 80px; }
+        .modal-close { position: fixed; top: 20px; right: calc(50% - 260px); font-size: 32px; background: white; border: none; cursor: pointer; color: var(--text-sub); z-index: 2001; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.15); transition: all 0.2s ease; }
+        @media (max-width: 520px) { .modal-close { right: 20px; } }
+        .modal-close:hover { color: #00b894; transform: scale(1.1); }
+        .report-header { background: linear-gradient(135deg, #00b894, #00cec9); color: white; padding: 40px 20px 30px; margin: -20px -20px 30px; border-radius: 0 0 var(--radius) var(--radius); text-align: center; }
+        .report-title { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+        .report-subtitle { font-size: 16px; opacity: 0.9; }
+        .report-section { margin-bottom: 35px; }
+        .report-section-title { font-size: 18px; font-weight: 700; color: #00b894; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #f1f2f6; }
+        .report-content { font-size: 15px; line-height: 1.9; color: var(--text-main); }
+        .report-content p { margin-bottom: 12px; }
+        .report-highlight { background: linear-gradient(135deg, rgba(0, 184, 148, 0.05), rgba(0, 206, 201, 0.05)); border-left: 4px solid #00b894; padding: 15px; margin: 20px 0; border-radius: 0 var(--radius) var(--radius) 0; }
+        .report-list { padding-left: 20px; }
+        .report-list li { margin-bottom: 10px; line-height: 1.7; }
+    </style>
+</head>
+<body>
+
+    <div class="container" data-screenshot="psych-test-海外城市适配">
+        <div id="coverPage" class="page active">
+            <div class="cover-badge">2026 海外版</div>
+            <h1 class="cover-title">最适配的<br><span class="highlight">海外宜居城市</span></h1>
+            <p class="cover-subtitle">基于生活方式偏好和价值观的深度分析，找到最适合你的海外定居城市</p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🌏</div>
+                    <div class="feature-text">12城对比</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-text">精准匹配</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💡</div>
+                    <div class="feature-text">深度解析</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-text">千字报告</div>
+                </div>
+            </div>
+            <button id="startBtn" class="btn btn-primary">开始深度分析 (约需 4 分钟)</button>
+        </div>
+        <div id="profilePage" class="page">
+            <div class="card">
+                <h2 style="font-size:24px; font-weight:700; margin-bottom:15px;">你的基本画像 📋</h2>
+                <p style="color:var(--text-sub); margin-bottom:30px; line-height:1.6;">系统将根据你的背景调整分析维度，使结果更精准。</p>
+                <div class="form-group">
+                    <label class="form-label">你的年龄范围？</label>
+                    <select id="age" class="form-select">
+                        <option value="young">20-30岁</option>
+                        <option value="mid">31-45岁</option>
+                        <option value="senior">46-60岁</option>
+                        <option value="retired">60岁以上</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">你的英语水平？</label>
+                    <select id="english" class="form-select">
+                        <option value="basic">基础</option>
+                        <option value="intermediate">中级</option>
+                        <option value="advanced">高级</option>
+                        <option value="native">母语级</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">你的预算范围？</label>
+                    <select id="budget" class="form-select">
+                        <option value="low">预算有限</option>
+                        <option value="medium">中等预算</option>
+                        <option value="high">预算充足</option>
+                    </select>
+                </div>
+            </div>
+            <button id="generateQuizBtn" class="btn btn-primary">开始测评</button>
+        </div>
+        <div id="quizPage" class="page">
+            <div class="quiz-header">
+                <div class="quiz-dimension" id="dimensionLabel">生活方式</div>
+                <div class="quiz-progress" id="progressLabel">1 / 20</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+            <div class="card question-card" id="questionCard">
+                <div class="question-tag" id="questionTag">🌴 生活环境</div>
+                <div class="question-text" id="questionText">题目加载中...</div>
+                <div id="optionsContainer"></div>
+            </div>
+            <button id="backQuestionBtn" class="back-btn" style="display:none;">← 返回上一题</button>
+        </div>
+        <div id="loadingPage" class="page">
+            <div class="loading-container">
+                <div class="loading-icon">✈️</div>
+                <div class="loading-title">正在环游世界...</div>
+                <div class="loading-subtitle">结合宜居城市模型运算中...</div>
+            </div>
+        </div>
+        <div id="resultPage" class="page">
+            <div class="result-top-card">
+                <div class="level-tag" id="levelTag">推荐：东京</div>
+                <div class="level-desc" id="resultLevelDesc">根据你的测评结果，你最适合的城市是...</div>
+            </div>
+            <div class="result-match-section">
+                <div class="match-title">最佳匹配</div>
+                <div class="match-name" id="matchName">东京</div>
+                <div class="match-desc" id="matchDesc">亚洲最具活力的国际大都会...</div>
+                <div class="match-tags" id="matchTags"></div>
+            </div>
+            <div class="score-bar-section">
+                <div class="score-bar-title">城市适配度排行</div>
+                <div class="score-bar-container" id="cityScores"></div>
+            </div>
+            <div class="result-actions">
+                <button id="reportBtn" class="btn btn-accent">📄 查看千字深度报告</button>
+                <button id="resetBtn" class="btn btn-secondary">🔄 重新测评</button>
+            </div>
+        </div>
+    </div>
+    <div id="reportModal" class="modal">
+        <button class="modal-close" id="closeModal">&times;</button>
+        <div class="modal-content">
+            <div class="report-header">
+                <div class="report-title">海外宜居城市选择指南</div>
+                <div class="report-subtitle">深度分析与千字建议报告</div>
+            </div>
+            <div id="reportContent" class="report-content"></div>
+        </div>
+    </div>
+    <script>
+        const QUESTIONS = [
+            { dimension: "climate", tag: "🌤️ 气候偏好", text: "你更偏好什么样的气候？", options: [
+                { text: "四季分明，冬天有雪", score: { tokyo: 6, singapore: 2, london: 8, newyork: 9, sydney: 7, vancouver: 9, berlin: 8, paris: 7, seoul: 7, bangkok: 3, dubai: 4, lisbon: 7 } },
+                { text: "温暖如春，阳光充沛", score: { tokyo: 7, singapore: 9, london: 4, newyork: 4, sydney: 9, vancouver: 5, berlin: 6, paris: 7, seoul: 6, bangkok: 10, dubai: 9, lisbon: 9 } },
+                { text: "凉爽宜人，夏季不热", score: { tokyo: 5, singapore: 2, london: 9, newyork: 6, sydney: 6, vancouver: 8, berlin: 8, paris: 9, seoul: 6, bangkok: 2, dubai: 3, lisbon: 8 } },
+                { text: "无所谓，室内有空调就行", score: { tokyo: 7, singapore: 6, london: 6, newyork: 6, sydney: 6, vancouver: 6, berlin: 6, paris: 6, seoul: 7, bangkok: 5, dubai: 6, lisbon: 6 } }
+            ]},
+            { dimension: "cost", tag: "💰 生活成本", text: "你对生活成本的接受程度？", options: [
+                { text: "预算有限，追求性价比", score: { tokyo: 5, singapore: 7, london: 3, newyork: 3, sydney: 4, vancouver: 4, berlin: 6, paris: 4, seoul: 6, bangkok: 10, dubai: 5, lisbon: 8 } },
+                { text: "中等水平，够用就好", score: { tokyo: 7, singapore: 6, london: 6, newyork: 6, sydney: 6, vancouver: 6, berlin: 8, paris: 7, seoul: 7, bangkok: 8, dubai: 7, lisbon: 7 } },
+                { text: "预算充足，追求品质", score: { tokyo: 9, singapore: 8, london: 8, newyork: 9, sydney: 8, vancouver: 7, berlin: 6, paris: 8, seoul: 7, bangkok: 4, dubai: 9, lisbon: 5 } },
+                { text: "钱不是问题，开心最重要", score: { tokyo: 8, singapore: 7, london: 9, newyork: 10, sydney: 7, vancouver: 6, berlin: 5, paris: 9, seoul: 6, bangkok: 3, dubai: 10, lisbon: 4 } }
+            ]},
+            { dimension: "language", tag: "🗣️ 语言环境", text: "语言对你有多重要？", options: [
+                { text: "非常重要，必须用英语", score: { tokyo: 4, singapore: 10, london: 10, newyork: 10, sydney: 10, vancouver: 10, berlin: 7, paris: 6, seoul: 4, bangkok: 6, dubai: 9, lisbon: 7 } },
+                { text: "可以学当地语言", score: { tokyo: 9, singapore: 6, london: 5, newyork: 5, sydney: 5, vancouver: 5, berlin: 9, paris: 9, seoul: 9, bangkok: 8, dubai: 6, lisbon: 9 } },
+                { text: "有华人社区就行", score: { tokyo: 9, singapore: 8, london: 6, newyork: 7, sydney: 7, vancouver: 8, berlin: 5, paris: 6, seoul: 8, bangkok: 9, dubai: 6, lisbon: 4 } },
+                { text: "无所谓，靠翻译软件", score: { tokyo: 6, singapore: 5, london: 5, newyork: 5, sydney: 5, vancouver: 5, berlin: 5, paris: 5, seoul: 6, bangkok: 6, dubai: 6, lisbon: 5 } }
+            ]},
+            { dimension: "work", tag: "💼 工作机会", text: "你在乎工作机会吗？", options: [
+                { text: "非常重要，需要找工作", score: { tokyo: 8, singapore: 9, london: 8, newyork: 9, sydney: 7, vancouver: 6, berlin: 7, paris: 6, seoul: 7, bangkok: 5, dubai: 8, lisbon: 5 } },
+                { text: "可以远程工作", score: { tokyo: 7, singapore: 7, london: 7, newyork: 7, sydney: 7, vancouver: 7, berlin: 8, paris: 7, seoul: 7, bangkok: 8, dubai: 7, lisbon: 8 } },
+                { text: "退休养老，不工作", score: { tokyo: 6, singapore: 6, london: 6, newyork: 5, sydney: 8, vancouver: 8, berlin: 6, paris: 7, seoul: 5, bangkok: 9, dubai: 6, lisbon: 9 } },
+                { text: "已有足够积蓄", score: { tokyo: 7, singapore: 6, london: 6, newyork: 6, sydney: 7, vancouver: 7, berlin: 6, paris: 7, seoul: 6, bangkok: 7, dubai: 7, lisbon: 7 } }
+            ]},
+            { dimension: "culture", tag: "🎭 文化氛围", text: "你更看重什么文化氛围？", options: [
+                { text: "东方文化，亚洲熟悉感", score: { tokyo: 10, singapore: 8, london: 4, newyork: 4, sydney: 4, vancouver: 5, berlin: 3, paris: 4, seoul: 10, bangkok: 8, dubai: 4, lisbon: 3 } },
+                { text: "西方文化，历史底蕴", score: { tokyo: 4, singapore: 5, london: 9, newyork: 7, sydney: 6, vancouver: 6, berlin: 8, paris: 10, seoul: 4, bangkok: 4, dubai: 5, lisbon: 9 } },
+                { text: "多元文化，融合交汇", score: { tokyo: 7, singapore: 10, london: 9, newyork: 10, sydney: 9, vancouver: 9, berlin: 8, paris: 8, seoul: 6, bangkok: 8, dubai: 9, lisbon: 6 } },
+                { text: "现代都市，时尚前沿", score: { tokyo: 9, singapore: 8, london: 8, newyork: 10, sydney: 7, vancouver: 6, berlin: 7, paris: 9, seoul: 9, bangkok: 6, dubai: 9, lisbon: 5 } }
+            ]},
+            { dimension: "food", tag: "🍜 饮食偏好", text: "你对饮食的要求？", options: [
+                { text: "热爱美食，中餐为主", score: { tokyo: 9, singapore: 9, london: 5, newyork: 7, sydney: 7, vancouver: 8, berlin: 4, paris: 5, seoul: 8, bangkok: 8, dubai: 5, lisbon: 4 } },
+                { text: "西餐为主，接受度高", score: { tokyo: 6, singapore: 7, london: 9, newyork: 9, sydney: 8, vancouver: 8, berlin: 8, paris: 10, seoul: 5, bangkok: 6, dubai: 7, lisbon: 9 } },
+                { text: "当地美食都可以", score: { tokyo: 8, singapore: 8, london: 7, newyork: 7, sydney: 8, vancouver: 7, berlin: 7, paris: 8, seoul: 8, bangkok: 10, dubai: 6, lisbon: 8 } },
+                { text: "简单就好，不挑食", score: { tokyo: 7, singapore: 7, london: 7, newyork: 7, sydney: 7, vancouver: 7, berlin: 7, paris: 7, seoul: 7, bangkok: 7, dubai: 7, lisbon: 7 } }
+            ]},
+            { dimension: "social", tag: "🤝 社交需求", text: "你的社交需求？", options: [
+                { text: "喜欢华人圈子", score: { tokyo: 9, singapore: 8, london: 7, newyork: 8, sydney: 8, vancouver: 9, berlin: 5, paris: 6, seoul: 8, bangkok: 9, dubai: 6, lisbon: 4 } },
+                { text: "融入当地社交", score: { tokyo: 6, singapore: 7, london: 9, newyork: 9, sydney: 8, vancouver: 7, berlin: 9, paris: 9, seoul: 6, bangkok: 6, dubai: 8, lisbon: 8 } },
+                { text: "国际社交，多元朋友圈", score: { tokyo: 8, singapore: 9, london: 10, newyork: 10, sydney: 9, vancouver: 8, berlin: 8, paris: 9, seoul: 7, bangkok: 7, dubai: 9, lisbon: 7 } },
+                { text: "喜欢独处，少社交", score: { tokyo: 7, singapore: 5, london: 6, newyork: 6, sydney: 6, vancouver: 7, berlin: 7, paris: 6, seoul: 7, bangkok: 5, dubai: 5, lisbon: 8 } }
+            ]},
+            { dimension: "safety", tag: "🛡️ 安全考量", text: "你对安全的要求？", options: [
+                { text: "非常重要，治安第一", score: { tokyo: 10, singapore: 10, london: 7, newyork: 6, sydney: 8, vancouver: 8, berlin: 7, paris: 7, seoul: 9, bangkok: 6, dubai: 9, lisbon: 8 } },
+                { text: "还好，注意就行", score: { tokyo: 7, singapore: 8, london: 7, newyork: 7, sydney: 7, vancouver: 7, berlin: 7, paris: 7, seoul: 7, bangkok: 7, dubai: 8, lisbon: 7 } },
+                { text: "差不多就行", score: { tokyo: 5, singapore: 6, london: 6, newyork: 6, sydney: 6, vancouver: 6, berlin: 6, paris: 6, seoul: 5, bangkok: 6, dubai: 7, lisbon: 6 } },
+                { text: "不是主要考虑因素", score: { tokyo: 5, singapore: 5, london: 5, newyork: 5, sydney: 5, vancouver: 5, berlin: 5, paris: 5, seoul: 5, bangkok: 5, dubai: 6, lisbon: 5 } }
+            ]},
+            { dimension: "medical", tag: "🏥 医疗条件", text: "你对医疗的要求？", options: [
+                { text: "非常重要，要有优质医疗", score: { tokyo: 9, singapore: 10, london: 8, newyork: 8, sydney: 8, vancouver: 8, berlin: 9, paris: 9, seoul: 8, bangkok: 6, dubai: 8, lisbon: 7 } },
+                { text: "中等，有医保就行", score: { tokyo: 7, singapore: 7, london: 7, newyork: 7, sydney: 7, vancouver: 7, berlin: 8, paris: 7, seoul: 7, bangkok: 7, dubai: 7, lisbon: 7 } },
+                { text: "不太在意", score: { tokyo: 5, singapore: 5, london: 5, newyork: 5, sydney: 5, vancouver: 5, berlin: 5, paris: 5, seoul: 5, bangkok: 6, dubai: 5, lisbon: 5 } },
+                { text: "年轻，身体好无所谓", score: { tokyo: 6, singapore: 6, london: 6, newyork: 6, sydney: 6, vancouver: 6, berlin: 6, paris: 6, seoul: 6, bangkok: 7, dubai: 6, lisbon: 6 } }
+            ]},
+            { dimension: "education", tag: "📚 教育资源", text: "你有教育需求吗？", options: [
+                { text: "有子女教育需求", score: { tokyo: 8, singapore: 9, london: 10, newyork: 9, sydney: 9, vancouver: 9, berlin: 8, paris: 9, seoul: 7, bangkok: 6, dubai: 8, lisbon: 7 } },
+                { text: "自己还想进修", score: { tokyo: 9, singapore: 8, london: 9, newyork: 9, sydney: 7, vancouver: 7, berlin: 9, paris: 9, seoul: 8, bangkok: 5, dubai: 7, lisbon: 8 } },
+                { text: "不需要，教育与我无关", score: { tokyo: 6, singapore: 6, london: 6, newyork: 6, sydney: 6, vancouver: 6, berlin: 6, paris: 6, seoul: 6, bangkok: 6, dubai: 6, lisbon: 6 } },
+                { text: "考虑以后再说", score: { tokyo: 7, singapore: 7, london: 7, newyork: 7, sydney: 7, vancouver: 7, berlin: 7, paris: 7, seoul: 7, bangkok: 6, dubai: 7, lisbon: 7 } }
+            ]},
+            { dimension: "nature", tag: "🌿 自然环境", text: "你对自然环境的要求？", options: [
+                { text: "喜欢大城市便利", score: { tokyo: 9, singapore: 7, london: 7, newyork: 10, sydney: 6, vancouver: 5, berlin: 7, paris: 8, seoul: 8, bangkok: 6, dubai: 7, lisbon: 6 } },
+                { text: "喜欢亲近自然", score: { tokyo: 5, singapore: 4, london: 6, newyork: 4, sydney: 9, vancouver: 10, berlin: 7, paris: 5, seoul: 4, bangkok: 7, dubai: 3, lisbon: 7 } },
+                { text: "喜欢海滨生活", score: { tokyo: 5, singapore: 6, london: 4, newyork: 4, sydney: 10, vancouver: 7, berlin: 4, paris: 5, seoul: 4, bangkok: 9, dubai: 5, lisbon: 10 } },
+                { text: "无所谓", score: { tokyo: 7, singapore: 7, london: 7, newyork: 7, sydney: 7, vancouver: 7, berlin: 7, paris: 7, seoul: 7, bangkok: 7, dubai: 7, lisbon: 7 } }
+            ]},
+            { dimension: "immigration", tag: "🏳️ 移民难度", text: "你对移民难度的考虑？", options: [
+                { text: "希望容易移民", score: { tokyo: 5, singapore: 7, london: 4, newyork: 4, sydney: 7, vancouver: 8, berlin: 6, paris: 4, seoul: 5, bangkok: 9, dubai: 7, lisbon: 8 } },
+                { text: "可以努力试试", score: { tokyo: 7, singapore: 7, london: 7, newyork: 6, sydney: 7, vancouver: 7, berlin: 7, paris: 6, seoul: 6, bangkok: 6, dubai: 7, lisbon: 7 } },
+                { text: "已有签证渠道", score: { tokyo: 8, singapore: 7, london: 7, newyork: 7, sydney: 7, vancouver: 7, berlin: 7, paris: 7, seoul: 7, bangkok: 6, dubai: 7, lisbon: 7 } },
+                { text: "不考虑移民问题", score: { tokyo: 7, singapore: 6, london: 6, newyork: 6, sydney: 6, vancouver: 6, berlin: 6, paris: 6, seoul: 7, bangkok: 7, dubai: 6, lisbon: 6 } }
+            ]},
+            { dimension: "transport", tag: "🚇 交通便利", text: "你对交通的要求？", options: [
+                { text: "公共交通必须发达", score: { tokyo: 10, singapore: 10, london: 10, newyork: 9, sydney: 7, vancouver: 6, berlin: 9, paris: 10, seoul: 10, bangkok: 6, dubai: 7, lisbon: 7 } },
+                { text: "有车就行", score: { tokyo: 6, singapore: 5, london: 5, newyork: 7, sydney: 8, vancouver: 9, berlin: 7, paris: 6, seoul: 6, bangkok: 7, dubai: 8, lisbon: 7 } },
+                { text: "打车方便就行", score: { tokyo: 8, singapore: 8, london: 7, newyork: 8, sydney: 7, vancouver: 6, berlin: 7, paris: 8, seoul: 8, bangkok: 8, dubai: 9, lisbon: 6 } },
+                { text: "无所谓", score: { tokyo: 6, singapore: 6, london: 6, newyork: 6, sydney: 6, vancouver: 6, berlin: 6, paris: 6, seoul: 6, bangkok: 6, dubai: 6, lisbon: 6 } }
+            ]},
+            { dimension: "lifestyle", tag: "🎪 生活方式", text: "你理想的生活方式？", options: [
+                { text: "快节奏都市精英", score: { tokyo: 10, singapore: 9, london: 8, newyork: 10, sydney: 6, vancouver: 5, berlin: 7, paris: 8, seoul: 9, bangkok: 6, dubai: 9, lisbon: 4 } },
+                { text: "慢节奏享受生活", score: { tokyo: 4, singapore: 5, london: 6, newyork: 4, sydney: 8, vancouver: 8, berlin: 6, paris: 7, seoul: 4, bangkok: 9, dubai: 4, lisbon: 10 } },
+                { text: "平衡工作与生活", score: { tokyo: 7, singapore: 7, london: 8, newyork: 7, sydney: 8, vancouver: 8, berlin: 8, paris: 8, seoul: 7, bangkok: 7, dubai: 7, lisbon: 8 } },
+                { text: "随心所欲", score: { tokyo: 6, singapore: 6, london: 6, newyork: 6, sydney: 7, vancouver: 7, berlin: 6, paris: 6, seoul: 6, bangkok: 7, dubai: 7, lisbon: 7 } }
+            ]},
+            { dimension: "weather", tag: "☀️ 日照需求", text: "你对日照的需求？", options: [
+                { text: "非常喜欢阳光", score: { tokyo: 6, singapore: 9, london: 3, newyork: 5, sydney: 9, vancouver: 4, berlin: 4, paris: 5, seoul: 5, bangkok: 10, dubai: 10, lisbon: 9 } },
+                { text: "无所谓", score: { tokyo: 7, singapore: 6, london: 7, newyork: 7, sydney: 6, vancouver: 7, berlin: 7, paris: 7, seoul: 7, bangkok: 6, dubai: 6, lisbon: 6 } },
+                { text: "不喜欢太晒", score: { tokyo: 7, singapore: 5, london: 8, newyork: 7, sydney: 5, vancouver: 7, berlin: 8, paris: 7, seoul: 7, bangkok: 4, dubai: 4, lisbon: 5 } },
+                { text: "怕冷，需要温暖", score: { tokyo: 6, singapore: 8, london: 4, newyork: 4, sydney: 8, vancouver: 4, berlin: 5, paris: 5, seoul: 5, bangkok: 10, dubai: 9, lisbon: 8 } }
+            ]},
+            { dimension: "internet", tag: "🌐 网络环境", text: "你对网络的要求？", options: [
+                { text: "需要访问国际互联网", score: { tokyo: 7, singapore: 6, london: 10, newyork: 10, sydney: 10, vancouver: 10, berlin: 10, paris: 10, seoul: 7, bangkok: 6, dubai: 6, lisbon: 10 } },
+                { text: "国内网络就够", score: { tokyo: 9, singapore: 8, london: 6, newyork: 6, sydney: 6, vancouver: 6, berlin: 6, paris: 6, seoul: 9, bangkok: 8, dubai: 8, lisbon: 6 } },
+                { text: "无特殊需求", score: { tokyo: 8, singapore: 8, london: 8, newyork: 8, sydney: 8, vancouver: 8, berlin: 8, paris: 8, seoul: 8, bangkok: 8, dubai: 8, lisbon: 8 } },
+                { text: "很少上网", score: { tokyo: 6, singapore: 6, london: 6, newyork: 6, sydney: 6, vancouver: 6, berlin: 6, paris: 6, seoul: 6, bangkok: 6, dubai: 6, lisbon: 6 } }
+            ]},
+            { dimension: "tax", tag: "💵 税收政策", text: "你对税收的关注？", options: [
+                { text: "非常关注，低税很重要", score: { tokyo: 6, singapore: 10, london: 5, newyork: 4, sydney: 5, vancouver: 6, berlin: 5, paris: 4, seoul: 6, bangkok: 9, dubai: 10, lisbon: 8 } },
+                { text: "中等关注", score: { tokyo: 7, singapore: 7, london: 7, newyork: 7, sydney: 7, vancouver: 7, berlin: 7, paris: 7, seoul: 7, bangkok: 7, dubai: 7, lisbon: 7 } },
+                { text: "不太关注", score: { tokyo: 7, singapore: 6, london: 6, newyork: 6, sydney: 6, vancouver: 6, berlin: 6, paris: 6, seoul: 7, bangkok: 6, dubai: 6, lisbon: 6 } },
+                { text: "无所谓", score: { tokyo: 6, singapore: 6, london: 6, newyork: 6, sydney: 6, vancouver: 6, berlin: 6, paris: 6, seoul: 6, bangkok: 6, dubai: 6, lisbon: 6 } }
+            ]},
+            { dimension: "career", tag: "💼 职业发展", text: "你希望在海外从事什么？", options: [
+                { text: "科技/互联网行业", score: { tokyo: 9, singapore: 8, london: 8, newyork: 9, sydney: 6, vancouver: 6, berlin: 8, paris: 7, seoul: 9, bangkok: 4, dubai: 7, lisbon: 5 } },
+                { text: "金融/咨询行业", score: { tokyo: 8, singapore: 10, london: 9, newyork: 10, sydney: 7, vancouver: 6, berlin: 7, paris: 9, seoul: 7, bangkok: 4, dubai: 9, lisbon: 4 } },
+                { text: "教育/文化行业", score: { tokyo: 7, singapore: 7, london: 8, newyork: 7, sydney: 8, vancouver: 8, berlin: 8, paris: 9, seoul: 7, bangkok: 6, dubai: 5, lisbon: 8 } },
+                { text: "不做具体工作", score: { tokyo: 6, singapore: 6, london: 6, newyork: 6, sydney: 7, vancouver: 7, berlin: 6, paris: 6, seoul: 6, bangkok: 7, dubai: 6, lisbon: 7 } }
+            ]},
+            { dimension: "family", tag: "👨‍👩‍👧 家庭因素", text: "你有家人在海外吗？", options: [
+                { text: "有家人在某城市", score: { tokyo: 10, singapore: 10, london: 10, newyork: 10, sydney: 10, vancouver: 10, berlin: 10, paris: 10, seoul: 10, bangkok: 10, dubai: 10, lisbon: 10 } },
+                { text: "无家人，但有朋友", score: { tokyo: 8, singapore: 8, london: 8, newyork: 8, sydney: 8, vancouver: 8, berlin: 8, paris: 8, seoul: 8, bangkok: 8, dubai: 8, lisbon: 8 } },
+                { text: "完全独自前往", score: { tokyo: 6, singapore: 6, london: 6, newyork: 6, sydney: 6, vancouver: 6, berlin: 6, paris: 6, seoul: 6, bangkok: 6, dubai: 6, lisbon: 6 } },
+                { text: "计划带家人一起", score: { tokyo: 8, singapore: 8, london: 8, newyork: 8, sydney: 9, vancouver: 9, berlin: 7, paris: 8, seoul: 8, bangkok: 8, dubai: 8, lisbon: 8 } }
+            ]},
+            { dimension: "future", tag: "🔮 长期规划", text: "你的长期规划是？", options: [
+                { text: "长期定居", score: { tokyo: 8, singapore: 8, london: 8, newyork: 8, sydney: 9, vancouver: 9, berlin: 8, paris: 8, seoul: 8, bangkok: 7, dubai: 7, lisbon: 9 } },
+                { text: "先看看，不行就回", score: { tokyo: 7, singapore: 7, london: 6, newyork: 6, sydney: 6, vancouver: 6, berlin: 6, paris: 6, seoul: 7, bangkok: 8, dubai: 6, lisbon: 6 } },
+                { text: "退休后去养老", score: { tokyo: 6, singapore: 6, london: 6, newyork: 5, sydney: 9, vancouver: 8, berlin: 6, paris: 7, seoul: 5, bangkok: 9, dubai: 6, lisbon: 10 } },
+                { text: "灵活规划，走一步看一步", score: { tokyo: 7, singapore: 7, london: 7, newyork: 7, sydney: 7, vancouver: 7, berlin: 7, paris: 7, seoul: 7, bangkok: 7, dubai: 7, lisbon: 7 } }
+            ]}
+        ];
+
+        const state = {
+            currentQuestionIndex: 0,
+            answers: [],
+            profileData: {},
+            scores: {},
+            totalScore: 0,
+            resultType: ''
+        };
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function initEventListeners() {
+            document.getElementById('startBtn').addEventListener('click', () => showPage('profilePage'));
+            
+            document.getElementById('generateQuizBtn').addEventListener('click', () => {
+                state.profileData.age = document.getElementById('age').value;
+                state.profileData.english = document.getElementById('english').value;
+                state.profileData.budget = document.getElementById('budget').value;
+                state.currentQuestionIndex = 0;
+                state.answers = [];
+                renderQuestion(0);
+                showPage('quizPage');
+            });
+
+            document.getElementById('backQuestionBtn').addEventListener('click', () => {
+                if (state.currentQuestionIndex> 0) renderQuestion(state.currentQuestionIndex - 1);
+            });
+
+            document.getElementById('reportBtn').addEventListener('click', () => {
+                generateReport();
+                document.getElementById('reportModal').classList.add('active');
+            });
+
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                state.currentQuestionIndex = 0;
+                state.answers = [];
+                state.scores = {};
+                showPage('profilePage');
+            });
+
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('reportModal').classList.remove('active');
+            });
+
+            document.getElementById('reportModal').addEventListener('click', (e) => {
+                if (e.target.id === 'reportModal') {
+                    document.getElementById('reportModal').classList.remove('active');
+                }
+            });
+        }
+
+        function renderQuestion(index) {
+            if (index>= QUESTIONS.length) {
+                calculateScores();
+                showPage('loadingPage');
+                setTimeout(() => {
+                    renderResults();
+                    showPage('resultPage');
+                }, 3000);
+                return;
+            }
+
+            state.currentQuestionIndex = index;
+            const q = QUESTIONS[index];
+            document.getElementById('dimensionLabel').textContent = q.tag;
+            document.getElementById('progressLabel').textContent = `${index + 1} / ${QUESTIONS.length}`;
+            document.getElementById('progressFill').style.width = `${((index + 1) / QUESTIONS.length) * 100}%`;
+            document.getElementById('questionTag').textContent = q.tag;
+            document.getElementById('questionText').textContent = q.text;
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn' + (state.answers[index] === i ? ' selected' : '');
+                btn.textContent = opt.text;
+                btn.onclick = () => {
+                    state.answers[index] = i;
+                    container.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    setTimeout(() => renderQuestion(index + 1), 300);
+                };
+                container.appendChild(btn);
+            });
+
+            document.getElementById('backQuestionBtn').style.display = index> 0 ? 'block' : 'none';
+        }
+
+        function calculateScores() {
+            const cities = ['tokyo', 'singapore', 'london', 'newyork', 'sydney', 'vancouver', 'berlin', 'paris', 'seoul', 'bangkok', 'dubai', 'lisbon'];
+            state.scores = {};
+            cities.forEach(city => state.scores[city] = 0);
+
+            QUESTIONS.forEach((q, i) => {
+                if (state.answers[i] !== undefined) {
+                    const scores = q.options[state.answers[i]].score;
+                    cities.forEach(city => {
+                        state.scores[city] += scores[city];
+                    });
+                }
+            });
+
+            const maxPossible = 20 * 10;
+            cities.forEach(city => {
+                state.scores[city] = Math.round((state.scores[city] / maxPossible) * 100);
+            });
+
+            const sorted = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
+            state.resultType = sorted[0][0];
+        }
+
+        function renderResults() {
+            const cityNames = {
+                tokyo: '东京', singapore: '新加坡', london: '伦敦', newyork: '纽约', sydney: '悉尼', vancouver: '温哥华', berlin: '柏林', paris: '巴黎', seoul: '首尔', bangkok: '曼谷', dubai: '迪拜', lisbon: '里斯本'
+            };
+            const cityDescs = {
+                tokyo: '亚洲最具活力的国际大都会，融合了传统与现代，安全便利。',
+                singapore: '东南亚花园城市，种族多元，治安极佳，美食天堂。',
+                newyork: '世界金融中心，机会多多，文化多元，永不眠的城市。',
+                london: '世界文化之都，历史与现代交融，教育资源丰富。',
+                sydney: '澳洲最大城市，阳光海岸，宜居天堂，生活节奏适中。',
+                vancouver: '北美宜居之城，自然风光优美，华人社区成熟。',
+                paris: '浪漫之都，艺术氛围浓厚，生活品质高。',
+                berlin: '欧洲创新之都，包容开放，生活成本相对较低。',
+                seoul: '韩流文化中心，科技发达，生活便利。',
+                bangkok: '东南亚物价洼地，美食丰富，生活成本低。',
+                dubai: '中东购物天堂，奢华都市，税率极低。',
+                lisbon: '南欧温暖小城，养老圣地，移民门槛低。'
+            };
+            const cityTags = {
+                tokyo: ['便利', '安全', '精致'],
+                singapore: ['安全', '多元', '发达'],
+                london: ['文化', '教育', '国际'],
+                newyork: ['机会', '多元', '繁华'],
+                sydney: ['阳光', '自然', '宜居'],
+                vancouver: ['自然', '华人', '舒适'],
+                paris: ['浪漫', '艺术', '品质'],
+                berlin: ['创新', '包容', '性价比'],
+                seoul: ['科技', '潮流', '便利'],
+                bangkok: ['便宜', '美食', '温暖'],
+                dubai: ['奢华', '免税', '现代'],
+                lisbon: ['养老', '温暖', '移民易']
+            };
+
+            const result = state.resultType;
+            document.getElementById('levelTag').textContent = '推荐：' + cityNames[result];
+            document.getElementById('resultLevelDesc').textContent = '根据你的测评结果，你最适合的城市是';
+            document.getElementById('matchName').textContent = cityNames[result];
+            document.getElementById('matchDesc').textContent = cityDescs[result];
+            
+            const tagsContainer = document.getElementById('matchTags');
+            tagsContainer.innerHTML = (cityTags[result] || []).map(tag => `<span class="match-tag">${tag}</span>`).join('');
+
+            const sorted = Object.entries(state.scores).sort((a, b) => b[1] - a[1]).slice(0, 6);
+            const cityScoresContainer = document.getElementById('cityScores');
+            cityScoresContainer.innerHTML = sorted.map(([city, score]) => `
+                <div class="score-bar-item">
+                    <div class="score-bar-label">${cityNames[city]}</div>
+                    <div class="score-bar-value">${score}%</div>
+                </div>
+            `).join('');
+        }
+
+        function generateReport() {
+            const cityNames = {
+                tokyo: '东京', singapore: '新加坡', london: '伦敦', newyork: '纽约', sydney: '悉尼', vancouver: '温哥华', berlin: '柏林', paris: '巴黎', seoul: '首尔', bangkok: '曼谷', dubai: '迪拜', lisbon: '里斯本'
+            };
+            const result = cityNames[state.resultType];
+            const sorted = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
+            
+            const ageMap = { young: '20-30岁', mid: '31-45岁', senior: '46-60岁', retired: '60岁以上' };
+            const engMap = { basic: '基础', intermediate: '中级', advanced: '高级', native: '母语级' };
+            const budgetMap = { low: '预算有限', medium: '中等预算', high: '预算充足' };
+
+            const html = `
+                <div class="report-section">
+                    <h3 class="report-section-title">📋 测评基础信息</h3>
+                    <p>• 年龄范围：${ageMap[state.profileData.age] || '20-30岁'}</p>
+                    <p>• 英语水平：${engMap[state.profileData.english] || '中级'}</p>
+                    <p>• 预算范围：${budgetMap[state.profileData.budget] || '中等预算'}</p>
+                    <p>• 测试时间：${new Date().toLocaleString()}</p>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">📊 测评结果总览</h3>
+                    <div class="report-highlight">
+                        <p style="font-size:18px; font-weight:700; margin-bottom:10px;">🎯 核心推荐：${result}</p>
+                        <p style="margin:0;">根据你的测评结果，${result}是你最匹配的海外宜居城市。但这并不意味着其他城市完全不适合你，下面的详细分析会给你更多参考。</p>
+                    </div>
+                    <p style="margin-top:20px;"><strong>城市适配度排行：</strong></p>
+                    <ul class="report-list">
+                        ${sorted.slice(0, 8).map(([city, score], i) => `<li>${i+1}. ${cityNames[city]}：${score}% ${score>= 70 ? '（高度推荐）' : score>= 50 ? '（可以考虑）' : ''}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">📈 深度分析：为什么是${result}？</h3>
+                    <p>${getCityAnalysis(state.resultType, state.profileData)}</p>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">💡 各城市利弊分析</h3>
+                    <p style="font-weight:600; margin-bottom:10px;">🌸 ${result}的优势与挑战：</p>
+                    ${getCityProsCons(state.resultType)}
+                    <p style="font-weight:600; margin:20px 0 10px;">🏙️ 其他热门城市概览：</p>
+                    <p>• <strong>新加坡：</strong>安全系数最高，华人占比高，但房价极高</p>
+                    <p>• <strong>伦敦：</strong>教育资源顶级，文化多元，但生活成本高</p>
+                    <p>• <strong>悉尼：</strong>阳光海岸，宜居度高，但远离主流发达国家</p>
+                    <p>• <strong>曼谷：</strong>生活成本最低，但发展机会有限</p>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">🎯 针对性建议</h3>
+                    ${getSpecificSuggestions(state.resultType, state.profileData, state.scores)}
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">📅 行动规划建议</h3>
+                    <p>无论你最终选择哪个城市，都建议：</p>
+                    <ul class="report-list">
+                        <li><strong>前期调研：</strong>深入了解目标城市的房价、租金、生活成本</li>
+                        <li><strong>签证准备：</strong>了解目标国家的签证政策和移民要求</li>
+                        <li><strong>语言准备：</strong>提前学习目标国家的语言或提升英语水平</li>
+                        <li><strong>实地考察：</strong>条件允许先去旅游或短期居住体验</li>
+                        <li><strong>人脉建立：</strong>加入华人社群，寻找同路人</li>
+                    </ul>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">💪 心理建设</h3>
+                    <p>海外定居是一项重大决定，需要考虑方方面面：</p>
+                    <ul class="report-list">
+                        <li>相信自己，坚定自己的选择</li>
+                        <li>做好充分准备，全力以赴</li>
+                        <li>保持开放心态，接受可能的调整</li>
+                        <li>记住：选择比努力更重要，但努力可以让选择变得正确</li>
+                    </ul>
+                    <p style="margin-top:20px; text-align:center; color:var(--text-sub);">愿你找到属于自己的理想之城，开启全新的海外生活！</p>
+                </div>
+            `;
+
+            document.getElementById('reportContent').innerHTML = html;
+        }
+
+        function getCityAnalysis(city, profile) {
+            const analyses = {
+                tokyo: '从你的测评结果来看，你更适合日本的首都东京。东京是亚洲最具活力的国际大都会，融合了传统与现代的魅力。这座城市安全系数高，交通便利，美食丰富，生活便利度极高。同时东京拥有世界级的教育资源和完善的医疗体系，是一个既能享受都市繁华又能保持生活品质的理想之地。',
+                singapore: '从你的测评结果来看，你更适合新加坡这个花园城市。新加坡是全球最安全的国家之一，种族多元，包容性强，华人占比高，融入成本低。城市整洁，美食丰富，教育资源优质，是一个兼具东西方优点的理想定居地。虽然房价较高，但其高生活品质足以弥补。',
+                london: '从你的测评结果来看，你更适合英国的伦敦。伦敦作为世界文化之都，历史底蕴深厚，教育资源丰富，艺术氛围浓厚。这座城市汇聚了全球顶尖的大学和文化机构，是追求高品质知识生活的人的理想选择。虽然生活成本较高，但其国际化和多元文化环境无可替代。',
+                newyork: '从你的测评结果来看，你更适合美国的纽约。纽约是世界的金融中心，机会多多，是追梦者的天堂。这座城市永不眠夜，文化多元，汇聚了全球最顶尖的人才和资源。在这里你可以接触到最前沿的行业发展，是追求事业成功的人的理想之地。',
+                sydney: '从你的测评结果来看，你更适合澳大利亚的悉尼。悉尼拥有得天独厚的自然环境，阳光海岸，宜居度高。这里既保留了西方发达国家的生活品质，又没有伦敦纽约的拥挤和高压。悉尼的华人社区成熟，教育资源优质，是追求生活与工作平衡的人的理想选择。',
+                vancouver: '从你的测评结果来看，你更适合加拿大的温哥华。温哥华是北美最宜居的城市之一，自然风光优美，气候相对温和。华人社区成熟，沟通无障碍。加拿大相对宽松的移民政策也让定居更加容易。是一个兼顾生活品质和移民可能性的理想选择。',
+                paris: '从你的测评结果来看，你更适合法国的巴黎。巴黎是浪漫之都，艺术氛围浓厚，生活品质高。这里有世界级的博物馆、美食和时尚资源。法国相对宽松的签证政策和欧盟身份也为生活提供了更多可能性。是一个追求生活品质和文化体验的理想之地。',
+                berlin: '从你的测评结果来看，你更适合德国的柏林。柏林是欧洲创新之都，包容开放，生活成本相对较低。德国强大的经济和优质的教育资源也为生活和职业发展提供了保障。是一个追求性价比和职业发展的理想选择。',
+                seoul: '从你的测评结果来看，你更适合韩国的首尔。首尔是韩流文化中心，科技发达，生活便利。这座城市融合了传统文化和现代潮流，是追求时尚和科技生活的年轻人的理想之地。距离中国近，回家也方便。',
+                bangkok: '从你的测评结果来看，你更适合泰国的曼谷。曼谷是东南亚的物价洼地，生活成本低，美食丰富，气候温暖。这里生活节奏慢，压力小，是追求低成本生活的退休人士的理想选择。虽然发展机会有限，但生活品质可以很高。',
+                dubai: '从你的测评结果来看，你更适合阿联酋的迪拜。迪拜是中东的购物天堂，奢华现代，税率极低。这座城市是全球富豪的聚集地，提供了独特的生活体验。阿联酋相对宽松的商业政策也为事业发展提供了机会。是一个追求奢华生活的理想之地。',
+                lisbon: '从你的测评结果来看，你更适合葡萄牙的里斯本。里斯本是南欧的温暖小城，生活节奏慢，非常适合养老。葡萄牙的移民门槛相对较低，欧盟身份也为生活提供了更多可能性。气候温暖宜人，是追求退休生活的人的理想选择。'
+            };
+            return analyses[city] || '';
+        }
+
+        function getCityProsCons(city) {
+            const prosCons = {
+                tokyo: `<p>• <strong>优势：</strong>安全便利、美食丰富、交通发达、教育优质、医疗先进</p><p>• <strong>挑战：</strong>语言门槛高、房价较高、工作压力大</p>`,
+                singapore: `<p>• <strong>优势：</strong>安全系数最高、华人占比高、城市整洁、美食天堂、教育优质</p><p>• <strong>挑战：</strong>房价极高、面积小、缺乏自然风光</p>`,
+                london: `<p>• <strong>优势：</strong>教育资源顶级、文化多元、历史底蕴深厚、艺术氛围浓</p><p>• <strong>挑战：</strong>生活成本极高、天气阴郁、房价高</p>`,
+                newyork: `<p>• <strong>优势：</strong>机会多多、国际都市、文化多元、行业发展前沿</p><p>• <strong>挑战：</strong>生活成本高、生活压力大、治安一般</p>`,
+                sydney: `<p>• <strong>优势：</strong>阳光海岸、宜居度高、自然环境好、生活节奏适中</p><p>• <strong>挑战：</strong>远离主流发达国家、相对封闭</p>`,
+                vancouver: `<p>• <strong>优势：</strong>自然风光优美、华人社区成熟、移民政策宽松、气候温和</p><p>• <strong>挑战：</strong>房价高、就业机会相对有限</p>`,
+                paris: `<p>• <strong>优势：</strong>浪漫之都、艺术氛围浓、生活品质高、欧盟身份</p><p>• <strong>挑战：</strong>语言门槛高、工作难找、效率较低</p>`,
+                berlin: `<p>• <strong>优势：</strong>创新之都、包容开放、生活成本低、移民政策宽松</p><p>• <strong>挑战：</strong>语言门槛、德语难学、冬天寒冷</p>`,
+                seoul: `<p>• <strong>优势：</strong>科技发达、生活便利、韩流文化、距离中国近</p><p>• <strong>挑战：</strong>工作压力大、语言难学、等级观念强</p>`,
+                bangkok: `<p>• <strong>优势：</strong>生活成本最低、美食丰富、气候温暖、生活节奏慢</p><p>• <strong>挑战：</strong>发展机会有限、医疗一般、基础设施老旧</p>`,
+                dubai: `<p>• <strong>优势：</strong>奢华都市、免税天堂、现代建筑、机会多多</p><p>• <strong>挑战：</strong>气候炎热、文化差异大、缺乏文化底蕴</p>`,
+                lisbon: `<p>• <strong>优势：</strong>养老圣地、温暖舒适、移民门槛低、欧盟身份</p><p>• <strong>挑战：</strong>经济一般、发展机会有限、英语普及率低</p>`
+            };
+            return prosCons[city] || '';
+        }
+
+        function getSpecificSuggestions(city, profile, scores) {
+            let suggestion = '';
+            
+            if (city === 'tokyo' || city === 'seoul') {
+                suggestion = `<p>1. <strong>日语/韩语准备：</strong>建议提前学习基础日语/韩语，日常交流会方便很多。</p>
+                <p>2. <strong>工作签证：</strong>可以先通过留学或技能签证途径进入。</p>
+                <p>3. <strong>租房注意：</strong>日本租房需要礼金和押金，建议提前了解。</p>`;
+            } else if (city === 'singapore') {
+                suggestion = `<p>1. <strong>住房成本：</strong>新加坡房价极高，建议先了解组屋政策。</p>
+                <p>2. <strong>工作准证：</strong>需要EP或SP准证才能工作，了解申请条件。</p>
+                <p>3. <strong>子女教育：</strong>教育资源优质但竞争激烈。</p>`;
+            } else if (city === 'london' || city === 'newyork') {
+                suggestion = `<p>1. <strong>签证问题：</strong>需要提前解决签证问题，工作签或学生签。</p>
+                <p>2. <strong>生活成本：</strong>伦敦和纽约生活成本极高，建议准备充足资金。</p>
+                <p>3. <strong>租房市场：</strong>租房市场竞争激烈，建议提前做准备。</p>`;
+            } else if (city === 'sydney' || city === 'vancouver') {
+                suggestion = `<p>1. <strong>移民政策：</strong>澳洲和加拿大都有技术移民政策，可以了解打分要求。</p>
+                <p>2. <strong>语言要求：</strong>需要雅思成绩，建议提前准备。</p>
+                <p>3. <strong>住房选择：</strong>独立屋价格高，公寓是更经济的选择。</p>`;
+            } else if (city === 'bangkok' || city === 'dubai' || city === 'lisbon') {
+                suggestion = `<p>1. <strong>签证了解：</strong>了解目标国家的长期签证或退休签证政策。</p>
+                <p>2. <strong>医疗保险：</strong>建议购买国际医疗保险。</p>
+                <p>3. <strong>当地社群：</strong>联系当地华人社群，获取生活经验。</p>`;
+                suggestion = `<p>1. <strong>前期调研：</strong>深入了解目标城市的生活成本和就业机会。</p>
+                <p>2. <strong>签证准备：</strong>了解目标国家的签证政策。</p>
+                <p>3. <strong>实地考察：</strong>建议先去旅游体验一段时间。</p>`;
+            }
+            
+            return suggestion;
+        }
+
+        initEventListeners();
+    </script>
+    <script>
+        try { initEventListeners(); } catch(e) {}
+    </script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "hwcs";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

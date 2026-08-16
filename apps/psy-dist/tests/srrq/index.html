@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>寻找你的诗人原型 | 文学灵魂深度解析</title>
+    <style>
+        :root {
+            /* 诗人原型主题配色 - 文艺诗意风 */
+            --primary: #4a5568; 
+            --primary-dark: #2d3748;
+            --accent: #8b7355; 
+            --accent-hover: #705a40;
+            --safe: #6b8e82;
+            --warning: #c8b69c;
+            --bg-gradient-start: #f8f5ee;
+            --bg-gradient-end: #eae6dd;
+            --text-main: #2d3748;
+            --text-sub: #718096;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Songti SC", serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.1);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-accent { 0% { box-shadow: 0 0 0 0 rgba(139, 115, 85, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(139, 115, 85, 0); } 100% { box-shadow: 0 0 0 0 rgba(139, 115, 85, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 85, 104, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#e6e2d8 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 38px;
+            line-height: 1.3;
+            margin-bottom: 16px;
+            color: var(--primary);
+            font-weight: 900;
+            letter-spacing: 2px;
+            font-family: "Songti SC", serif;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: var(--text-sub); margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e6e2d8;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: var(--primary); font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: var(--text-sub); line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: var(--primary); }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #e6e2d8; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: var(--text-main); font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: var(--text-sub); font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #f0eee9; color: var(--text-sub); padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: var(--primary); font-family: "Songti SC", serif; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: var(--text-main); cursor: pointer; border: 2px solid #e6e2d8; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #f8f7f5; }
+        .option-btn.selected { background: #f8f5f0; border-color: var(--accent); color: var(--accent); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #f5f2ed; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .poet-avatar {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #f0eee9;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; background: var(--accent); color: #fff; font-size: 40px; font-weight: 900;
+            font-family: "Songti SC", serif;
+        }
+        .poet-tag { font-size: 12px; color: #fff; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; font-weight: normal; }
+        
+        .level-badge {
+            background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: var(--text-sub); max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 80px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: var(--primary); display: block; }
+        .dim-sub { font-size: 10px; color: var(--text-sub); }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 40px; text-align: right; font-size: 13px; font-weight: 700; color: var(--text-sub); }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-accent 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: var(--text-sub); width: 100%; padding: 10px;
+            border: 1px solid #bdc3c7; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: var(--primary); color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: 1px; font-family: "Songti SC", serif; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: var(--primary); margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #e6e2d8; font-family: "Songti SC", serif; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: var(--primary); margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #f8f7f5; border: 1px solid #e6e2d8; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; background: var(--accent); }
+        .r-list li { margin-bottom: 10px; color: #555; line-height: 1.7; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-诗人气质" class="fade-in">
+        <div class="cover-tag">2026 文学深度版</div>
+        <h1 class="cover-title">寻找你的<br><span>诗人原型</span></h1>
+        <p class="cover-subtitle">20位文学灵魂的精神镜像全景<br>32题深度扫描，解锁你的文字人格</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">📖</div>
+                <div class="feature-title">多维人格扫描</div>
+                <div class="feature-desc">10维文学特质，精准定位你的灵魂底色。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">✍️</div>
+                <div class="feature-title">诗人原型匹配</div>
+                <div class="feature-desc">20位中外诗人，找到与你同频的文学灵魂。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">千字深度解析</div>
+                <div class="feature-desc">拆解你的精神内核，解读专属文学人格。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🌿</div>
+                <div class="feature-title">创作成长指南</div>
+                <div class="feature-desc">基于你的原型，给出专属阅读与创作建议。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开启灵魂镜像测试 (约需 3 分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:var(--primary); margin-bottom:10px; font-family: 'Songti SC', serif;">建立你的文学档案 ✍️</h2>
+        <p style="color:var(--text-sub); font-size:14px; margin-bottom:30px;">系统将根据你的偏好调整匹配权重。</p>
+
+        <div class="form-group">
+            <label class="form-label">你更偏爱哪种诗歌类型？</label>
+            <select id="input-type" class="select-box">
+                <option value="romantic">浪漫抒情 - 纵情天地，情感炽烈</option>
+                <option value="realistic">现实关照 - 悲悯苍生，沉郁厚重</option>
+                <option value="philosophy">哲思内省 - 孤独探索，存在之思</option>
+                <option value="avant-garde">先锋反叛 - 颠覆规则，撕裂感官</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你更看重文字的哪种特质？</label>
+            <select id="input-style" class="select-box">
+                <option value="power">磅礴力量 - 大开大合，生命力拉满</option>
+                <option value="delicate">细腻通透 - 婉约灵动，共情力极强</option>
+                <option value="sharp">锋利冷峻 - 极简克制，一针见血</option>
+                <option value="warm">温和治愈 - 日常诗意，万物有灵</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：精神底色</span>
+            <span id="progress-text">1 / 32</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">📖 精神底色</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-accent 1s infinite; border-radius:50%;">✍️</div>
+        <h3 style="margin-top:20px; font-weight:800; color:var(--primary);">正在匹配诗人原型...</h3>
+        <p style="color:var(--text-sub); font-size:14px; line-height:1.8;">正在扫描文学人格...<br>解析精神镜像...<br>生成专属深度报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="poet-avatar" id="res-avatar">
+                <span id="res-poet-name">李</span>
+                <span class="poet-tag" id="res-poet-tag">谪仙人</span>
+            </div>
+            <div class="level-badge" id="res-level">你的核心诗人原型</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 灵魂特质匹配度</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">✨ 同频灵魂TOP3</div>
+            <div id="top-poets-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《诗人原型深度解析报告》完整版</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新测试，探索另一个灵魂</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">POET ARCHETYPE REPORT</div>
+            <div class="r-h1">诗人原型深度解析报告</div>
+            <div style="font-size:14px;">文学人格专属指南 · 2026版</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置 (完全保留原有计数逻辑)
+const pageId = window.location.pathname;
+
+// 20位诗人原型库
+const poets = [
+    { id: 'libai', name: '李白', tag: '谪仙人', trait: '浪漫狂放，自由不羁，蔑视世俗，纵情天地', color: '#d4a017', dims: ['freedom', 'romantic'] },
+    { id: 'lanbo', name: '兰波', tag: '通灵者', trait: '反叛先锋，感官通灵，少年意气，颠覆规则', color: '#2a75bb', dims: ['rebellion', 'avant-garde'] },
+    { id: 'pulasi', name: '普拉斯', tag: '风暴', trait: '极致敏感，自我剖白，撕裂感，生命张力', color: '#4a6fe3', dims: ['sensitive', 'rebellion'] },
+    { id: 'yuxuanji', name: '鱼玄机', tag: '欲海清徒', trait: '情欲觉醒，桀骜不驯，女性意识，爱恨炽烈', color: '#995588', dims: ['awakening', 'romantic'] },
+    { id: 'ailuote', name: '艾略特', tag: '诊断师', trait: '冷峻哲思，现代荒原，精英视角，精神解剖', color: '#3a4a58', dims: ['philosophy', 'sharp'] },
+    { id: 'xinbosika', name: '辛波斯卡', tag: '惊奇者', trait: '日常诗意，理性幽默，万物有灵，温和清醒', color: '#6b8e82', dims: ['daily', 'warm'] },
+    { id: 'gelike', name: '格丽克', tag: '剥蚀者', trait: '极简锋利，神话重构，向内探索，冷冽克制', color: '#738396', dims: ['introspection', 'sharp'] },
+    { id: 'peisuo', name: '佩索阿', tag: '漫游者', trait: '多重自我，精神漫游，孤独哲思，虚无与存在', color: '#5a6b7d', dims: ['philosophy', 'introspection'] },
+    { id: 'lierke', name: '里尔克', tag: '观测者', trait: '孤独内省，物我相融，存在之思，温柔坚定', color: '#7a8b9c', dims: ['introspection', 'philosophy'] },
+    { id: 'safu', name: '萨福', tag: '原乡人', trait: '女性抒情，爱与美，自然本真，温柔炽热', color: '#c17a74', dims: ['romantic', 'warm'] },
+    { id: 'ciwei', name: '茨维塔耶娃', tag: '自燃者', trait: '极致炽热，灵魂孤勇，宿命悲怆，爱与流亡', color: '#b85450', dims: ['romantic', 'rebellion'] },
+    { id: 'liqingzhao', name: '李清照', tag: '细腻愁绪', trait: '婉约细腻，家国之思，傲骨柔情，灵秀通透', color: '#a07c90', dims: ['delicate', 'romantic'] },
+    { id: 'dijinsen', name: '狄金森', tag: '内心君主', trait: '离群索居，向内深耕，极致纯粹，精神独立', color: '#6c7b8b', dims: ['introspection', 'pure'] },
+    { id: 'bajiao', name: '芭蕉', tag: '草霜行路', trait: '侘寂之美，自然禅意，旅途感，极简留白', color: '#889e81', dims: ['nature', 'daily'] },
+    { id: 'bukao', name: '布考茨基', tag: '野性酒徒', trait: '底层叙事，粗粝真实，反叛世俗，生命力', color: '#945a3c', dims: ['rebellion', 'power'] },
+    { id: 'huiteman', name: '惠特曼', tag: '粗犷歌者', trait: '自由民主，生命赞歌，开阔磅礴，众生平等', color: '#709a5b', dims: ['freedom', 'power'] },
+    { id: 'dufu', name: '杜甫', tag: '大地底片', trait: '悲悯苍生，家国情怀，沉郁顿挫，现实关照', color: '#8b6e4e', dims: ['realism', 'compassion'] },
+    { id: 'ahema', name: '阿赫玛托娃', tag: '尊严', trait: '苦难坚守，女性风骨，历史见证，沉静力量', color: '#7a5c61', dims: ['dignity', 'compassion'] },
+    { id: 'celan', name: '策兰', tag: '守夜人', trait: '创伤书写，语言深渊，黑暗坚守，记忆与救赎', color: '#4a5057', dims: ['introspection', 'dignity'] },
+    { id: 'nieluda', name: '聂鲁达', tag: '蔚蓝意志', trait: '炽热深情，政治理想，大地与爱，磅礴抒情', color: '#367588', dims: ['romantic', 'power'] }
+];
+
+// 10维文学特质
+const traitDims = [
+    { key: 'freedom', name: '自由狂放', desc: '不羁于世俗，纵情天地' },
+    { key: 'romantic', name: '浪漫抒情', desc: '情感炽烈，爱与美至上' },
+    { key: 'rebellion', name: '反叛先锋', desc: '颠覆规则，打破边界' },
+    { key: 'introspection', name: '内省哲思', desc: '向内探索，存在之思' },
+    { key: 'realism', name: '现实关照', desc: '悲悯苍生，扎根大地' },
+    { key: 'sharp', name: '锋利冷峻', desc: '一针见血，极致克制' },
+    { key: 'warm', name: '温和治愈', desc: '日常诗意，万物有灵' },
+    { key: 'power', name: '磅礴力量', desc: '大开大合，生命力拉满' },
+    { key: 'delicate', name: '细腻通透', desc: '婉约灵动，共情力强' },
+    { key: 'dignity', name: '风骨尊严', desc: '苦难坚守，精神独立' }
+];
+
+// 32道完整测试题库 (保持不变)
+const questions = [
+    { t: '精神底色', q: "如果可以选择一种人生，你更向往？", o: [{t:"仗剑天涯，纵情山水，不为世俗规则束缚", s: {libai:10, huiteman:8, lanbo:7}},{t:"离群索居，向内深耕，与自己的灵魂对话", s: {dijinsen:10, lierke:8, gelike:7}},{t:"扎根人间，记录苍生，为沉默的人发声", s: {dufu:10, bukao:8, ahema:7}},{t:"颠覆规则，反叛世俗，活成独一无二的火焰", s: {lanbo:10, pulasi:8, yuxuanji:7}}] },
+    { t: '情感内核', q: "面对爱情，你更倾向于？", o: [{t:"爱得炽烈坦荡，敢爱敢恨，毫无保留", s: {nieluda:10, yuxuanji:9, safu:8}},{t:"爱得克制深沉，藏于细节，温柔坚定", s: {lierke:10, dijinsen:8, liqingzhao:7}},{t:"爱得清醒通透，保持自我，不卑不亢", s: {xinbosika:10, gelike:8, ahema:7}},{t:"爱得极致疯魔，燃尽自己，奔赴宿命", s: {pulasi:10, ciwei:9, lanbo:7}}] },
+    { t: '精神底色', q: "面对世俗的规则与偏见，你会？", o: [{t:"嗤之以鼻，我行我素，活成自己的规则", s: {libai:10, bukao:9, lanbo:8}},{t:"冷眼旁观，清醒解构，用文字刺破虚妄", s: {ailuote:10, gelike:8, peisuo:7}},{t:"温柔坚守，不迎合不妥协，守住内心秩序", s: {dijinsen:10, ahema:9, celan:8}},{t:"直面反抗，用锋芒打破不公与枷锁", s: {yuxuanji:10, pulasi:9, ciwei:8}}] },
+    { t: '创作倾向', q: "你更愿意把文字写给？", o: [{t:"天地万物，山川湖海，与自然对话", s: {libai:10, bajiao:9, huiteman:8}},{t:"自己的内心，写给灵魂深处的自己", s: {dijinsen:10, peisuo:9, lierke:8}},{t:"人间百态，写给每一个平凡的普通人", s: {dufu:10, xinbosika:9, bukao:8}},{t:"爱与被爱，写给那个让你心动的人", s: {safu:10, nieluda:9, liqingzhao:8}}] },
+    { t: '情感内核', q: "面对孤独，你会？", o: [{t:"享受孤独，在独处中与灵魂深度对话", s: {dijinsen:10, lierke:9, celan:8}},{t:"与孤独共舞，把孤独酿成文字与诗意", s: {peisuo:10, gelike:9, pulasi:8}},{t:"在孤独中看见众生，生出悲悯与温柔", s: {dufu:10, ahema:9, xinbosika:8}},{t:"挣脱孤独，用自由与热烈对抗虚无", s: {libai:10, huiteman:9, lanbo:8}}] },
+    { t: '创作倾向', q: "你更偏爱哪种文字风格？", o: [{t:"磅礴开阔，大气磅礴，有席卷一切的力量", s: {huiteman:10, libai:9, nieluda:8}},{t:"细腻婉约，灵动通透，共情力直达心底", s: {liqingzhao:10, safu:9, ciwei:8}},{t:"极简锋利，冷冽克制，一针见血戳破本质", s: {gelike:10, ailuote:9, celan:8}},{t:"温和幽默，日常诗意，在平凡里看见奇迹", s: {xinbosika:10, bajiao:9, ahema:8}}] },
+    { t: '精神底色', q: "面对苦难与挫折，你会？", o: [{t:"以傲骨对抗，绝不低头，守住尊严与风骨", s: {ahema:10, celan:9, yuxuanji:8}},{t:"以豁达消解，人生得意须尽欢，莫使金樽空对月", s: {libai:10, bukao:9, huiteman:8}},{t:"以悲悯接纳，把苦难酿成文字，照见人间", s: {dufu:10, ciwei:9, pulasi:8}},{t:"以哲思解构，在痛苦中向内探索，获得新生", s: {lierke:10, gelike:9, peisuo:8}}] },
+    { t: '情感内核', q: "你对「女性意识」的态度更贴近？", o: [{t:"桀骜不驯，打破男权枷锁，我的身体与灵魂我做主", s: {yuxuanji:10, pulasi:9, safu:8}},{t:"沉静坚定，在苦难中坚守女性的风骨与尊严", s: {ahema:10, gelike:9, ciwei:8}},{t:"细腻通透，用女性的视角看见世界的温柔与坚硬", s: {liqingzhao:10, xinbosika:9, dijinsen:8}},{t:"极致炽热，用女性的生命力燃尽世俗的偏见", s: {ciwei:10, safu:9, pulasi:8}}] },
+    { t: '创作倾向', q: "你更希望自己的文字拥有哪种力量？", o: [{t:"治愈的力量，给平凡的人带去温柔与慰藉", s: {xinbosika:10, safu:9, bajiao:8}},{t:"刺破的力量，撕开虚妄，直抵世界的本质", s: {ailuote:10, gelike:9, bukao:8}},{t:"觉醒的力量，打破枷锁，唤醒沉睡的灵魂", s: {lanbo:10, yuxuanji:9, pulasi:8}},{t:"传承的力量，记录时代，成为历史的见证", s: {dufu:10, ahema:9, celan:8}}] },
+    { t: '精神底色', q: "你对「自由」的理解更贴近？", o: [{t:"身体与灵魂都在路上，不为任何人停留", s: {libai:10, lanbo:9, bajiao:8}},{t:"精神的绝对自由，哪怕身处牢笼，灵魂依旧旷野", s: {dijinsen:10, peisuo:9, celan:8}},{t:"打破所有规则与偏见，活成自己想要的样子", s: {bukao:10, yuxuanji:9, pulasi:8}},{t:"众生平等的自由，为每一个生命的尊严呐喊", s: {huiteman:10, dufu:9, nieluda:8}}] },
+    { t: '情感内核', q: "面对离别与失去，你会？", o: [{t:"把思念酿成诗，在文字里获得永恒", s: {liqingzhao:10, nieluda:9, lierke:8}},{t:"在离别中看见存在的本质，获得向内的力量", s: {lierke:10, gelike:8, celan:7}},{t:"豁达释然，人生如逆旅，我亦是行人", s: {libai:10, bajiao:9, xinbosika:8}},{t:"把痛苦燃成火焰，在极致的撕裂中重生", s: {pulasi:10, ciwei:9, lanbo:7}}] },
+    { t: '创作倾向', q: "你更愿意在文字里探讨什么主题？", o: [{t:"爱与孤独，存在与虚无，生命的本质", s: {lierke:10, peisuo:9, gelike:8}},{t:"人间烟火，日常万物，平凡里的诗意", s: {xinbosika:10, bajiao:9, bukao:8}},{t:"家国时代，苍生苦难，历史的重量", s: {dufu:10, ahema:9, celan:8}},{t:"自由与反叛，感官与觉醒，生命的张力", s: {lanbo:10, libai:9, pulasi:8}}] },
+    { t: '精神底色', q: "你对「死亡」的态度更贴近？", o: [{t:"向死而生，在有限的生命里燃尽所有热烈", s: {lanbo:10, pulasi:9, ciwei:8}},{t:"淡然接纳，死亡是自然的一部分，是另一种归途", s: {bajiao:10, xinbosika:9, gelike:8}},{t:"在死亡里看见生命的重量，守住记忆与尊严", s: {celan:10, ahema:9, dufu:8}},{t:"人生忽如寄，寿无金石固，不如及时行乐", s: {libai:10, bukao:9, huiteman:8}}] },
+    { t: '情感内核', q: "你对「故乡」的理解更贴近？", o: [{t:"此心安处是吾乡，灵魂的归处就是故乡", s: {safu:10, libai:9, bajiao:8}},{t:"回不去的过往，是藏在心底的愁绪与温柔", s: {liqingzhao:10, dufu:9, nieluda:8}},{t:"在流亡中坚守，故乡是刻在骨血里的尊严", s: {ahema:10, ciwei:9, celan:8}},{t:"天地万物皆是故乡，我自飘零我自狂", s: {huiteman:10, lanbo:9, peisuo:8}}] },
+    { t: '创作倾向', q: "你对「语言」的态度更贴近？", o: [{t:"语言是通灵的媒介，是感官与灵魂的桥梁", s: {lanbo:10, pulasi:9, libai:8}},{t:"语言是深渊，是救赎，是记忆的容器", s: {celan:10, gelike:9, ailuote:8}},{t:"语言是日常的奇迹，是平凡生活里的光", s: {xinbosika:10, bajiao:9, safu:8}},{t:"语言是武器，是号角，是刺破黑暗的锋芒", s: {dufu:10, ahema:9, bukao:8}}] },
+    { t: '精神底色', q: "你更认同哪句话？", o: [{t:"天生我材必有用，千金散尽还复来", s: {libai:10, huiteman:9, bukao:8}},{t:"安得广厦千万间，大庇天下寒士俱欢颜", s: {dufu:10, ahema:9, nieluda:8}},{t:"谁此时孤独，就永远孤独", s: {lierke:10, peisuo:9, dijinsen:8}},{t:"我必须是你近旁的一株木棉，作为树的形象和你站在一起", s: {yuxuanji:10, safu:9, gelike:8}}] },
+    { t: '情感内核', q: "面对他人的苦难，你会？", o: [{t:"心生悲悯，把他人的苦难写进自己的文字里", s: {dufu:10, ahema:9, bukao:8}},{t:"温柔共情，用文字给苦难带去一丝慰藉", s: {xinbosika:10, safu:9, liqingzhao:8}},{t:"冷静剖析，看见苦难背后的时代与制度", s: {ailuote:10, gelike:9, celan:8}},{t:"愤怒呐喊，用文字为不公与苦难发声", s: {nieluda:10, huiteman:9, pulasi:8}}] },
+    { t: '创作倾向', q: "你更偏爱哪种创作节奏？", o: [{t:"灵感爆发时一气呵成，如江河奔涌不可阻挡", s: {libai:10, lanbo:9, pulasi:8}},{t:"反复打磨，极简克制，删到不能再删", s: {gelike:10, ailuote:9, celan:8}},{t:"日常记录，在平凡的日子里慢慢积累", s: {xinbosika:10, dijinsen:9, bajiao:8}},{t:"沉郁顿挫，把人生的重量都揉进文字里", s: {dufu:10, ahema:9, liqingzhao:8}}] },
+    { t: '精神底色', q: "你对「自然」的态度更贴近？", o: [{t:"纵情山水，在自然里获得自由与洒脱", s: {libai:10, huiteman:9, bajiao:8}},{t:"物我相融，在自然里看见生命的本质", s: {lierke:10, bajiao:9, gelike:8}},{t:"在自然里看见人间，一草一木皆是诗意", s: {xinbosika:10, liqingzhao:9, safu:8}},{t:"自然是灵魂的原乡，是爱与美的源头", s: {safu:10, nieluda:9, dijinsen:8}}] },
+    { t: '情感内核', q: "面对自己的内心黑暗，你会？", o: [{t:"直面剖白，把黑暗撕开，在文字里赤裸呈现", s: {pulasi:10, bukao:9, gelike:8}},{t:"在黑暗里坚守，守住内心的光与尊严", s: {celan:10, ahema:9, ciwei:8}},{t:"用哲思解构，在黑暗里探索存在的意义", s: {peisuo:10, lierke:9, ailuote:8}},{t:"用热烈与自由对抗黑暗，活成一道光", s: {libai:10, lanbo:9, huiteman:8}}] },
+    { t: '精神底色', q: "你对「人生意义」的理解更贴近？", o: [{t:"人生得意须尽欢，活在当下，纵情燃烧", s: {libai:10, bukao:9, lanbo:8}},{t:"为天地立心，为生民立命，为往圣继绝学", s: {dufu:10, ahema:9, nieluda:8}},{t:"认识你自己，向内探索，与自己的灵魂对话", s: {dijinsen:10, lierke:9, gelike:8}},{t:"在平凡的日常里，发现万物的诗意与奇迹", s: {xinbosika:10, bajiao:9, safu:8}}] },
+    { t: '创作倾向', q: "你更希望读者从你的文字里获得什么？", o: [{t:"自由与勇气，打破枷锁，活成自己", s: {libai:10, lanbo:9, yuxuanji:8}},{t:"温柔与慰藉，在平凡的日子里获得力量", s: {xinbosika:10, safu:9, liqingzhao:8}},{t:"清醒与思考，看见世界的本质与真相", s: {ailuote:10, gelike:9, peisuo:8}},{t:"共情与悲悯，看见他人的苦难与尊严", s: {dufu:10, ahema:9, bukao:8}}] },
+    { t: '情感内核', q: "面对他人的误解与非议，你会？", o: [{t:"仰天大笑出门去，我辈岂是蓬蒿人，不屑辩解", s: {libai:10, lanbo:9, bukao:8}},{t:"冷静克制，用文字回应，时间会证明一切", s: {ahema:10, gelike:9, celan:8}},{t:"温柔释然，懂你的人自然会懂，无需多言", s: {xinbosika:10, dijinsen:9, safu:8}},{t:"锋芒毕露，用文字回击，打破所有偏见", s: {yuxuanji:10, pulasi:9, ciwei:8}}] },
+    { t: '精神底色', q: "你对「理想」的态度更贴近？", o: [{t:"虽千万人吾往矣，哪怕粉身碎骨也绝不回头", s: {dufu:10, ahema:9, celan:8}},{t:"人生在世，当及时行乐，理想不如当下的快乐", s: {libai:10, bukao:9, lanbo:8}},{t:"理想是内心的秩序，哪怕无人理解，也独自坚守", s: {dijinsen:10, lierke:9, gelike:8}},{t:"理想是爱与大地，是为众生的幸福而奋斗", s: {nieluda:10, huiteman:9, xinbosika:8}}] },
+    { t: '创作倾向', q: "你更认同哪种创作理念？", o: [{t:"文章合为时而著，歌诗合为事而作", s: {dufu:10, ahema:9, bukao:8}},{t:"诗是强烈情感的自然流露，源于宁静中回忆起来的情感", s: {lierke:10, liqingzhao:9, safu:8}},{t:"诗不是情感，而是经验，是日常里的奇迹", s: {xinbosika:10, gelike:9, bajiao:8}},{t:"诗是通灵的，是感官的错位，是灵魂的呐喊", s: {lanbo:10, pulasi:9, libai:8}}] },
+    { t: '情感内核', q: "你对「时间」的态度更贴近？", o: [{t:"人生苦短，及时行乐，莫负好时光", s: {libai:10, bukao:9, lanbo:8}},{t:"逝者如斯，在时间里守住记忆与尊严", s: {celan:10, ahema:9, dufu:8}},{t:"在时间里向内探索，成为更好的自己", s: {lierke:10, dijinsen:9, gelike:8}},{t:"一茶一饭，一朝一夕，时间藏在日常的诗意里", s: {xinbosika:10, bajiao:9, safu:8}}] },
+    { t: '精神底色', q: "你更愿意成为哪种人？", o: [{t:"自由不羁的谪仙人，不为世俗束缚", s: {libai:10, huiteman:9, lanbo:8}},{t:"清醒冷峻的观察者，看透世界的本质", s: {ailuote:10, peisuo:9, gelike:8}},{t:"悲悯人间的记录者，为苍生发声", s: {dufu:10, ahema:9, bukao:8}},{t:"向内深耕的独行者，与自己的灵魂对话", s: {dijinsen:10, lierke:9, celan:8}}] },
+    { t: '情感内核', q: "面对爱情里的背叛与伤害，你会？", o: [{t:"决绝转身，绝不回头，我的尊严不容践踏", s: {yuxuanji:10, ahema:9, gelike:8}},{t:"把伤害酿成文字，在诗里获得重生", s: {pulasi:10, ciwei:9, liqingzhao:8}},{t:"清醒释然，人总要为自己的选择负责", s: {xinbosika:10, ailuote:9, peisuo:8}},{t:"爱恨炽烈，你欠我的，我必加倍讨回", s: {libai:10, bukao:9, lanbo:8}}] },
+    { t: '创作倾向', q: "你对「诗歌」的理解更贴近？", o: [{t:"诗歌是灵魂的呐喊，是自由的宣言", s: {libai:10, lanbo:9, huiteman:8}},{t:"诗歌是向内的镜子，照见自己的灵魂", s: {dijinsen:10, lierke:9, gelike:8}},{t:"诗歌是时代的记录，是人间的底片", s: {dufu:10, ahema:9, celan:8}},{t:"诗歌是日常的奇迹，是平凡里的光", s: {xinbosika:10, bajiao:9, safu:8}}] },
+    { t: '精神底色', q: "你对「自我」的理解更贴近？", o: [{t:"我就是我，独一无二，不容定义", s: {libai:10, yuxuanji:9, bukao:8}},{t:"我是无数个自我的集合，在精神里漫游", s: {peisuo:10, lanbo:9, pulasi:8}},{t:"我的自我，藏在我对世界的温柔与悲悯里", s: {dufu:10, xinbosika:9, ahema:8}},{t:"我的自我，是我内心的绝对秩序，与他人无关", s: {dijinsen:10, gelike:9, lierke:8}}] },
+    { t: '情感内核', q: "你对「幸福」的理解更贴近？", o: [{t:"灵魂的绝对自由，无拘无束，纵情天地", s: {libai:10, huiteman:9, lanbo:8}},{t:"与爱的人相守，一屋两人，三餐四季", s: {safu:10, liqingzhao:9, nieluda:8}},{t:"内心的平静与自洽，与自己和解", s: {dijinsen:10, lierke:9, xinbosika:8}},{t:"用自己的力量，给更多人带去温暖与光明", s: {dufu:10, ahema:9, nieluda:8}}] },
+    { t: '精神底色', q: "如果可以成为一位诗人，你希望自己被后人记住的是？", o: [{t:"自由不羁的灵魂，与天地同宽的格局", s: {libai:10, huiteman:9, nieluda:8}},{t:"悲悯苍生的情怀，与时代同频的重量", s: {dufu:10, ahema:9, celan:8}},{t:"极致通透的哲思，对生命本质的探索", s: {lierke:10, peisuo:9, ailuote:8}},{t:"打破枷锁的勇气，女性觉醒的先锋", s: {yuxuanji:10, pulasi:9, safu:8}}] }
+];
+
+// 诗人完整解析库
+const poetFullData = {
+    libai: { spirit: "你骨子里刻着李白式的浪漫与狂放，天生带着对世俗规则的蔑视，坚信「天生我材必有用」的人生信条。你不屑于被世俗的框架束缚，灵魂永远向往着天地与自由，哪怕身处低谷，也永远保有「仰天大笑出门去」的豁达与骄傲。", emotion: "你的情感炽烈而坦荡，爱憎分明，敢爱敢恨。爱时可以倾尽所有，热烈奔赴；被伤害时也能决绝转身，绝不拖泥带水。你永远不会为了迎合他人而磨平自己的棱角，你的温柔与深情，只留给值得的人。", style: "你的文字有着天生的磅礴气场，大开大合，如江河奔涌，自带一股席卷一切的生命力。你不喜欢拘泥于刻板的规则，灵感来时一气呵成，文字里藏着你的洒脱与不羁，哪怕是写日常小事，也能写出天地辽阔的格局。", core: "永远自由，永远热烈，永远不向世俗低头。", book: "《李太白全集》", advice: ["顺着你的灵感创作，不要被刻板的格律与规则束缚，你的天赋就藏在那份不受拘束的洒脱里。","多去自然里走走，山川湖海会给你源源不断的创作灵感，天地辽阔会让你的文字更有格局。","不必刻意迎合大众的审美，你的狂放与浪漫，本身就是最独一无二的风格。"], quote: "天生我材必有用，千金散尽还复来。" },
+    lanbo: { spirit: "你有着兰波式的反叛与先锋性，天生带着对平庸世俗的厌恶，拒绝被规训，拒绝被定义。你坚信「生活在别处」，灵魂永远在寻找新的感官体验，永远在颠覆既定的规则，哪怕遍体鳞伤，也要活成独一无二的火焰。", emotion: "你的情感极致而炽热，带着少年人的纯粹与疯魔。你对世界有着强烈的好奇心，对爱有着极致的期待，愿意为了心中的理想与热爱，燃尽自己所有的能量。你讨厌虚伪与平庸，永远在寻找灵魂同频的人。", style: "你的文字有着强烈的感官冲击力，通灵而先锋，带着打破一切的张力。你不喜欢循规蹈矩的表达，擅长用错位的感官与极致的意象，撕开世界的表象，直抵灵魂的本质。你的文字里藏着少年人的意气，永远新鲜，永远反叛。", core: "永远反叛，永远新鲜，永远在奔赴别处的路上。", book: "《兰波诗集》", advice: ["保持你对世界的惊奇与反叛，不要被世俗的规训磨平你的棱角，你的先锋性就是你最珍贵的天赋。","多去体验不同的生活，不同的风景，你的文字灵感来自于感官的碰撞与新鲜的体验。","不必害怕文字的「出格」，你天生就不是为了循规蹈矩而存在的，你的使命就是打破规则。"], quote: "我永恒的灵魂，注视着你的心，纵然黑夜孤寂，白昼如焚。" },
+    pulasi: { spirit: "你有着普拉斯式的极致敏感与生命张力，对世界的感知有着超乎常人的细腻与尖锐。你擅长向内探索，敢于直面自己内心的黑暗与痛苦，哪怕身处风暴之中，也能把痛苦酿成文字，在撕裂中获得重生。", emotion: "你的情感极致而浓烈，带着强烈的自毁与重生的张力。你对爱有着极致的渴求，也对伤害有着极致的敏感。你敢于直面自己的欲望与痛苦，不掩饰，不回避，你的灵魂里藏着一股向死而生的强大力量。", style: "你的文字有着极强的情绪穿透力，锋利而赤裸，带着风暴般的张力。你擅长自我剖白，敢于把自己的内心撕开给世界看，文字里没有虚伪的修饰，只有最真实的灵魂呐喊，哪怕痛苦，也有着震撼人心的力量。", core: "在风暴中重生，在撕裂中绽放。", book: "《爱丽尔》", advice: ["你的敏感不是弱点，而是你最珍贵的天赋，不要害怕直面自己的痛苦，那些经历都会成为你文字的养分。","在向内探索的同时，也记得给自己留一丝温柔，你的灵魂已经足够强大，不必用伤害来证明自己的存在。","保持你文字里的赤裸与真诚，那份不掩饰的真实，就是最能打动人心的力量。"], quote: "我闭上眼，世界就在我身后坍塌。" },
+    yuxuanji: { spirit: "你有着鱼玄机式的桀骜与觉醒，天生带着对男权规则的反抗，对女性自我的坚守。你不屑于被世俗的女性规训束缚，敢于直面自己的欲望与野心，坚信女性的身体与灵魂，都该由自己做主。", emotion: "你的情感炽烈而坦荡，爱憎分明，敢爱敢恨。你敢于直面自己的情欲与爱意，不掩饰，不扭捏，爱时可以倾尽所有，被背叛时也能决绝转身，绝不卑微讨好。你的骨子里藏着一股不服输的傲骨，绝不向世俗的偏见低头。", style: "你的文字有着女性觉醒的锋芒，灵动而桀骜，带着打破枷锁的力量。你擅长用细腻的笔触写尽女性的爱与愁，文字里藏着你的柔情，更藏着你的傲骨，哪怕写情爱，也有着不输男性的格局与锋芒。", core: "我的身体与灵魂，都由我自己做主。", book: "《鱼玄机诗集》", advice: ["保持你骨子里的桀骜与觉醒，不要被世俗对女性的规训束缚，你的价值从来不需要通过他人的认可来证明。","你的文字里藏着女性独有的细腻与锋芒，大胆去写你的爱与恨，你的欲望与野心，那都是最珍贵的表达。","爱时可以坦荡热烈，但永远不要为了任何人，放弃自己的傲骨与尊严。"], quote: "易求无价宝，难得有心郎。" },
+    ailuote: { spirit: "你有着艾略特式的冷峻与哲思，天生带着对现代社会的清醒洞察，擅长用精英的视角，解剖时代的精神荒原。你不喜欢肤浅的情绪宣泄，更愿意在文字里探讨文明的困境与存在的本质，思想深邃，格局宏大。", emotion: "你的情感克制而深沉，不喜欢外露的情绪表达，更习惯用理性的视角看待世界。你对人性有着清醒的认知，不轻易相信乌托邦，对世界有着深刻的悲悯，但从不轻易流露，只藏在冷峻的文字背后。", style: "你的文字有着极强的逻辑与结构感，冷峻而克制，带着精英式的精准与锋利。你擅长用复杂的意象与典故，构建宏大的精神世界，文字里没有多余的情绪修饰，只有一针见血的洞察，有着穿越时代的力量。", core: "清醒解剖时代，冷峻洞察人性。", book: "《荒原》", advice: ["保持你对时代的清醒洞察，不要被肤浅的情绪裹挟，你的深度与格局，就藏在那份冷峻的哲思里。","不必刻意迎合大众的阅读习惯，你的文字是写给同频的灵魂的，精准与深刻，就是你最大的优势。","在理性洞察的同时，也可以偶尔释放自己的情绪，柔软与深刻，从来都不矛盾。"], quote: "四月是最残忍的月份，哺育着丁香，在死去的土地里。" },
+    xinbosika: { spirit: "你有着辛波斯卡式的温和与清醒，擅长在平凡的日常里，发现万物的诗意与奇迹。你不喜欢宏大的叙事，更愿意关注日常里的小确幸，用理性的幽默与温柔的共情，看待世界的复杂与荒诞，永远对世界保持着一份孩童般的惊奇。", emotion: "你的情感温和而通透，有着极强的共情力，却不会被情绪裹挟。你对世界有着温柔的善意，对他人的苦难有着深切的共情，却始终保持着一份清醒的距离，不偏激，不极端，永远温柔，永远清醒。", style: "你的文字有着治愈人心的力量，日常而不琐碎，幽默而不刻薄，带着对万物的温柔与好奇。你擅长从最平凡的事物里，挖掘出深刻的哲思，文字简单干净，却有着直抵人心的力量，哪怕写最普通的日常，也能写出动人的诗意。", core: "在日常里发现奇迹，在平凡里看见诗意。", book: "《万物静默如谜》", advice: ["保持你对日常万物的惊奇与温柔，不必刻意追求宏大的主题，平凡的日常里，藏着最动人的诗意。","你的文字里的幽默与共情，是最珍贵的天赋，大胆去写你眼里的日常，那些细碎的美好，会打动无数同频的人。","永远保持对世界的好奇，你眼里的世界，就是最珍贵的创作素材。"], quote: "我偏爱写诗的荒谬，胜过不写诗的荒谬。" },
+    gelike: { spirit: "你有着格丽克式的冷冽与深刻，天生带着对人性与神话的清醒解构，擅长在向内的探索里，剥蚀掉所有虚伪的修饰，直抵生命最本质的痛苦与真相。你不喜欢喧嚣的情绪宣泄，更愿意在极致的克制里，写出最有力量的文字，灵魂里藏着一股不妥协的锋利。", emotion: "你的情感克制而深沉，带着极强的自省意识。你不擅长外露的情绪表达，更习惯把所有的痛苦、渴望、孤独都藏在心底，在向内的探索里与自己和解。你对爱有着清醒的认知，不沉溺于虚假的浪漫，更看重灵魂深处的平等与懂得。", style: "你的文字有着极简的锋利，冷冽而克制，没有多余的修饰，却有着一刀见血的穿透力。你擅长用神话重构个人经验，用最简洁的语言，写尽生命里的孤独、失去与重生，文字里没有喧嚣的情绪，却有着震耳欲聋的力量。", core: "在克制里藏锋芒，在剥蚀中见真相。", book: "《野鸢尾》", advice: ["保持你文字里的极简与锋利，不必刻意堆砌华丽的辞藻，最克制的表达，往往有着最强大的力量。","你的天赋在于对人性与自我的深刻解构，大胆去直面那些痛苦的、不愿提及的经历，它们会成为你文字里最深刻的底色。","不必强迫自己变得温和热烈，你的冷冽与清醒，本身就是独一无二的光芒。"], quote: "我们都有一个深渊，但我们可以，不坠入其中。" },
+    peisuo: { spirit: "你有着佩索阿式的精神漫游与多重自我，天生带着对存在本质的无尽探索，拒绝被单一的身份定义，灵魂里藏着无数个平行的自己。你擅长在孤独里与自己对话，在精神的世界里无限漫游，对世俗的功利与喧嚣保持着清醒的疏离。", emotion: "你的情感细腻而复杂，有着极强的精神内耗，却也有着极致的清醒。你习惯在自己的精神世界里构建一切，对现实里的人际交往保持着距离，不轻易向人敞开心扉，却在自己的内心世界里，上演着无数场盛大的情感波澜。", style: "你的文字有着梦呓般的哲思，温柔而破碎，带着精神漫游的散漫与深刻。你擅长用碎片化的表达，写尽存在的虚无、孤独的本质与自我的多重性，文字里没有强烈的戏剧冲突，却有着让人沉浸其中的精神魔力，让同频的灵魂一眼沦陷。", core: "我的灵魂有无数个分身，在精神的世界里无限漫游。", book: "《惶然录》", advice: ["不必强迫自己融入世俗的喧嚣，你的精神世界，本身就是最珍贵的宝藏，孤独从来都不是缺陷。","保持你对存在本质的探索欲，你的文字天赋就藏在那些看似无意义的思考与漫游里，大胆去写你脑子里的每一个念头。","不必为自己的多重自我感到困扰，正是这些不同的灵魂切面，构成了独一无二的你。"], quote: "我的心略大于整个宇宙。" },
+    lierke: { spirit: "你有着里尔克式的温柔与坚定，天生带着对存在本质的深刻探索，擅长在孤独里与万物相融，在时间的流逝里，寻找生命的永恒意义。你不喜欢肤浅的情绪宣泄，更愿意在向内的深耕里，获得对抗虚无的力量，灵魂里藏着一股温柔而强大的韧性。", emotion: "你的情感深沉而绵长，带着极强的共情力与包容心。你不相信快餐式的爱与浪漫，更看重灵魂深处的懂得与陪伴，相信真正的爱，是两个孤独的灵魂互相守护、互相照亮。你对孤独有着清醒的认知，相信孤独是成长的必经之路，能在孤独里沉淀出最强大的自我。", style: "你的文字有着温柔而坚定的力量，细腻而不矫情，深刻而不晦涩，带着物我相融的通透。你擅长用具象的意象，写尽生命的孤独、爱的本质与存在的意义，文字里没有强烈的情绪起伏，却有着穿越时间的治愈力量，能安抚每一个孤独的灵魂。", core: "在孤独里沉淀，在万物中看见自己。", book: "《杜伊诺哀歌》", advice: ["保持你对万物的共情与温柔，不必强迫自己变得锋利尖锐，温柔的力量，从来都比对抗更强大。","你的文字天赋藏在对生命与存在的深刻思考里，多给自己一些独处的时间，在孤独里沉淀的一切，都会成为你文字里的养分。","永远相信你笔下的温柔与坚定，它们会穿越时间，给无数孤独的灵魂带去慰藉。"], quote: "谁此时孤独，就永远孤独。" },
+    safu: { spirit: "你有着萨福式的本真与炽热，天生带着对爱与美的极致追求，相信女性的情感与欲望，本身就是最动人的诗意。你拒绝世俗对女性的规训，敢于直面自己的内心，坦荡地写爱，写美，写女性的身体与灵魂，灵魂里藏着最本真、最纯粹的生命力。", emotion: "你的情感炽热而纯粹，温柔而坦荡，敢爱敢恨，不掩饰，不扭捏。你对爱有着最本真的向往，相信爱就是生命里最美好的事情，愿意为爱倾尽所有的温柔与热情。你对同性与异性的美有着同等的欣赏，灵魂里没有世俗的偏见，只有对爱与美的无限向往。", style: "你的文字有着最本真的诗意，简洁而炽热，温柔而坦荡，带着古希腊的阳光与海风的气息。你不喜欢复杂的修饰与晦涩的典故，只用最直白、最真诚的语言，写尽爱的甜蜜与苦涩，写尽女性的温柔与力量，哪怕跨越千年，依旧有着直抵人心的魔力。", core: "爱与美，是生命永恒的信仰。", book: "《萨福抒情诗集》", advice: ["保持你对爱与美的本真向往，不必为自己的坦荡与炽热感到羞耻，你的真诚，本身就是最动人的诗意。","大胆去写你眼里的爱与美，写女性的身体与灵魂，你的文字会给更多女性带去觉醒的力量，让她们看见自己的美好。","永远保持灵魂里的纯粹与热烈，不必被世俗的偏见束缚，你生来就是为了歌颂爱与美。"], quote: "月亮升起，群星隐没，圆满的银光洒满咸涩的海洋与盛开的田野。" },
+    ciwei: { spirit: "你有着茨维塔耶娃式的孤勇与炽热，天生带着对爱与自由的极致追求，哪怕一生都在流亡与苦难里，也永远保持着灵魂的骄傲与炽热。你不向命运低头，不向世俗妥协，哪怕燃尽自己，也要守住灵魂里的爱与诗意，骨子里藏着一股向死而生的强大生命力。", emotion: "你的情感极致而孤勇，炽热而决绝，爱时可以倾尽所有，飞蛾扑火也在所不惜。你对灵魂同频的爱有着极致的渴求，对世俗的平庸与虚伪有着强烈的厌恶，哪怕一生都在孤独里，也绝不将就，绝不妥协，永远保持着灵魂的骄傲与纯粹。", style: "你的文字有着火山喷发般的力量，炽热而悲怆，带着极强的生命张力。你擅长用极致的意象，写尽爱的炽热、流亡的悲怆、灵魂的孤勇，文字里没有丝毫的软弱与妥协，哪怕写痛苦与苦难，也有着震耳欲聋的力量，能点燃每一个孤独的灵魂。", core: "哪怕身处流亡，灵魂也要永远炽热。", book: "《茨维塔耶娃诗集》", advice: ["保持你灵魂里的孤勇与炽热，不必为了迎合世俗而磨平自己的棱角，你的骄傲与纯粹，是最珍贵的宝藏。","你的文字天赋藏在你极致的情感与生命力里，那些苦难与流亡的经历，都化作了你文字里的力量，大胆去写你的爱与痛，它们会震撼无数人。","在奔赴热爱的同时，也记得给自己留一丝温柔，你的灵魂已经足够强大，值得被世界温柔以待。"], quote: "我的灵魂，天生就和每一个人同频。" },
+    liqingzhao: { spirit: "你有着李清照式的灵秀与傲骨，天生带着细腻的感知力与不屈的风骨，既能写尽小儿女的婉约柔情，也能写出生当作人杰的家国豪情。你不被世俗对女性的规训束缚，灵魂里既有女性的细腻通透，也有不输男性的格局与傲骨，柔中带刚，清醒独立。", emotion: "你的情感细腻而绵长，柔中带刚，爱时温柔缱绻，离别时愁绪婉转，面对家国变故时，也能生出不屈的傲骨。你对感情有着极致的忠贞与向往，对家国有着深切的情怀，不沉溺于小情小爱，灵魂里藏着广阔的格局与清醒的认知。", style: "你的文字有着极致的婉约灵动，细腻而不矫情，清丽而不浮华，既有儿女情长的温柔，也有家国天下的风骨。你擅长用最日常的意象，写尽最动人的愁绪与深情，语言清丽自然，却有着极强的共情力，哪怕跨越千年，依旧能让人感同身受。", core: "柔中带刚，既有玲珑心，也有鸿鹄志。", book: "《漱玉词》", advice: ["保持你骨子里的柔中带刚，不必被世俗对女性的刻板印象束缚，你的细腻与傲骨，共同构成了独一无二的你。","你的文字天赋藏在你对情绪与场景的极致感知里，大胆去写你的欢喜与愁绪，你的温柔与豪情，它们都有着动人的力量。","永远保持你灵魂里的清醒与独立，你的价值，从来都不需要通过他人的认可来证明。"], quote: "生当作人杰，死亦为鬼雄。" },
+    dijinsen: { spirit: "你有着狄金森式的纯粹与独立，天生带着向内深耕的能力，哪怕离群索居，也能在自己的内心世界里，构建出一个完整而丰盈的宇宙。你不迎合世俗的喧嚣，不追求外界的认可，只忠于自己的内心与诗意，灵魂里藏着绝对的独立与极致的纯粹。", emotion: "你的情感内敛而深沉，纯粹而坚定，不擅长外露的表达，却有着极致的共情力。你对爱、死亡、自然、永恒有着深刻的思考，不喜欢世俗的社交与喧嚣，更愿意在独处里与自己的灵魂对话，与自然相融，灵魂里藏着不被外界打扰的平静与坚定。", style: "你的文字有着极致的纯粹与凝练，短而有力，带着极强的哲思与想象力。你不喜欢复杂的格律与修饰，擅长用最简洁的语言，写尽对生命、死亡、爱与自然的深刻思考，文字里藏着巨大的能量，哪怕只有短短几行，也能让人反复回味，直击灵魂。", core: "我的内心，就是我的整个宇宙。", book: "《狄金森诗选》", advice: ["不必强迫自己融入世俗的喧嚣，独处从来都不是孤独，而是你与自己的灵魂对话的最好方式，你的内心世界，本身就是无尽的宝藏。","保持你文字里的纯粹与凝练，不必刻意追求篇幅的长短，真正有力量的文字，从来都不在于长度，而在于灵魂的浓度。","永远忠于自己的内心，不必在意外界的评价，你的诗意，只需要为自己而写。"], quote: "我本可以忍受黑暗，如果我不曾见过太阳。" },
+    bajiao: { spirit: "你有着松尾芭蕉式的侘寂与禅意，天生带着对自然与日常的极致感知力，相信平凡的日常里，藏着最动人的诗意。你不追求宏大的叙事，不喜欢喧嚣的表达，更愿意在旅途里，在一草一木里，在日常的点滴里，寻找生命的本真与禅意，灵魂里藏着平和与通透。", emotion: "你的情感平和而细腻，温柔而内敛，有着极强的共情力，能从一草一木、一朝一夕里，感受到生命的美好与无常。你不喜欢激烈的情绪起伏，更追求内心的平静与自洽，对生命的无常有着清醒的接纳，灵魂里藏着东方禅意的通透与豁达。", style: "你的文字有着极致的留白与侘寂之美，极简而空灵，带着自然的禅意与旅途的烟火气。你擅长用最简短的语言，捕捉瞬间的诗意，在日常的事物里，挖掘出生命的本质，文字里没有多余的修饰，却有着言有尽而意无穷的境界，让人在平淡里看见深刻。", core: "日常即诗意，万物皆有灵。", book: "《奥州小路》", advice: ["保持你对日常万物的细腻感知，不必刻意追求宏大的主题，一茶一饭，一朝一夕，一草一木，都可以是你创作的源泉。","你的文字天赋藏在留白与极简里，不必堆砌华丽的辞藻，真正的诗意，往往藏在那些看似平淡的瞬间里。","多去自然里走走，多去感受旅途的烟火气，天地万物，都会给你源源不断的创作灵感。"], quote: "古池塘，青蛙跳入水中央，一声响。" },
+    bukao: { spirit: "你有着布考茨基式的粗粝与真实，天生带着对世俗精英的蔑视，对底层生活的深刻洞察，拒绝虚伪的精致与虚假的浪漫，只写最真实的人间，最赤裸的人性。你不向世俗的成功学低头，哪怕身处泥泞，也永远保持着对诗意的追求，灵魂里藏着最野的生命力。", emotion: "你的情感真实而赤裸，粗粝而温柔，不掩饰自己的欲望、痛苦、颓废与不甘。你对底层的普通人有着深切的共情，对虚伪的上流社会有着强烈的嘲讽，不喜欢虚假的客套与伪装，只和真诚的人交心，灵魂里藏着最柔软的善意，却用最粗粝的外壳包裹。", style: "你的文字有着粗粝的真实感，直白而锋利，带着酒气与烟火气，没有丝毫的虚伪与修饰。你擅长用最直白的语言，写尽底层生活的辛酸，写尽人性的欲望与不堪，写尽平凡人里的诗意，文字里没有华丽的辞藻，却有着极强的生命力，能狠狠砸进人的心里。", core: "哪怕身处泥泞，也要写尽人间真实。", book: "《苦水音乐》", advice: ["保持你对真实的坚守，不必刻意追求精致与高雅，最赤裸的真实，本身就是最有力量的诗意。","你的文字天赋藏在你对底层生活的洞察里，大胆去写你眼里的人间，写那些不被主流关注的平凡人，你的文字会给他们带去共鸣与慰藉。","永远保持你骨子里的生命力，哪怕身处低谷，也不要放弃笔下的诗意，你生来就是为了记录最真实的人间。"], quote: "我们都在阴沟里，但仍有人仰望星空。" },
+    huiteman: { spirit: "你有着惠特曼式的开阔与平等，天生带着对自由与生命的极致歌颂，相信众生平等，万物有灵，拒绝阶级与偏见，用最开阔的胸怀，拥抱整个世界。你不喜欢刻板的规则与束缚，灵魂里藏着对生命、对自然、对自由的无限热爱，有着席卷一切的磅礴生命力。", emotion: "你的情感开阔而热烈，包容而坦荡，有着极强的共情力，能接纳每一个不同的灵魂，能看见每一个平凡生命里的光辉。你对自由有着极致的追求，对祖国与人民有着深切的热爱，相信每一个人，无论身份高低，都有自己的价值与诗意，灵魂里藏着最广阔的温柔。", style: "你的文字有着磅礴的生命力，开阔而自由，像奔腾的江河，有着席卷一切的力量。你不喜欢刻板的格律与束缚，擅长用自由的句式，歌颂生命、自然、自由与劳动，写尽众生平等的理想，文字里没有丝毫的矫揉造作，只有最热烈、最坦荡的生命赞歌。", core: "众生平等，生命本身就是最动人的诗。", book: "《草叶集》", advice: ["保持你灵魂里的开阔与平等，不必被刻板的规则与格律束缚，自由的表达，本身就是最动人的诗意。","你的文字天赋藏在你对生命与自由的歌颂里，大胆去写你眼里的众生，写每一个平凡生命里的光辉，你的文字会给无数人带去力量。","永远保持你对世界的热爱与包容，你的开阔格局，会让你的文字拥有穿越时间的力量。"], quote: "我辽阔博大，我包罗万象。" },
+    dufu: { spirit: "你有着杜甫式的悲悯与厚重，天生带着对家国苍生的深切关怀，哪怕自己身处困境，也依旧心忧天下，心怀苍生。你不沉溺于个人的悲欢，更愿意把自己的命运，和时代、和人民紧紧绑在一起，灵魂里藏着最深厚的家国情怀，最动人的悲悯之心，千百年后依旧让人动容。", emotion: "你的情感深沉而厚重，悲天悯人，柔中带刚。你对家人有着温柔的牵挂，对国家有着深切的热爱，对底层百姓有着极致的共情，哪怕自己身处茅屋，也依旧想着大庇天下寒士俱欢颜。你的情感里，从来都不只有个人的悲欢，更有整个时代的重量，整个苍生的疾苦。", style: "你的文字有着沉郁顿挫的力量，厚重而深刻，带着时代的重量与苍生的温度。你擅长用最精准的语言，写尽时代的动荡，百姓的疾苦，个人的悲欢，文字里没有华丽的辞藻，却有着千钧之力，被称为诗史，一字一句，都是时代的底片，生命的重量。", core: "安得广厦千万间，大庇天下寒士俱欢颜。", book: "《杜工部集》", advice: ["保持你骨子里的悲悯与厚重，你的文字里的家国情怀与苍生温度，是最珍贵的力量，能穿越千年，依旧打动人心。","不必刻意追求华丽的表达，最真挚的情感，最深刻的洞察，本身就是最有力量的文字，你的笔，就是时代的记录者。","在心怀天下的同时，也记得关照自己的内心，你的悲欢，同样值得被书写，被看见。"], quote: "国破山河在，城春草木深。" },
+    ahema: { spirit: "你有着阿赫玛托娃式的风骨与坚守，天生带着对苦难的不屈，对尊严的坚守，哪怕身处时代的洪流里，哪怕面对无尽的黑暗与迫害，也绝不低头，绝不背叛自己的灵魂与记忆。你用自己的笔，记录下时代的苦难，民族的记忆，灵魂里藏着女性最强大的风骨与尊严。", emotion: "你的情感沉静而坚定，温柔而有力量，对祖国有着深切的热爱，对苦难中的人民有着深切的共情，对爱人与家人有着温柔的牵挂。你不轻易流露自己的脆弱，在无尽的黑暗里，依旧保持着灵魂的骄傲与尊严，用温柔的力量，对抗整个时代的疯狂。", style: "你的文字有着沉静而强大的力量，克制而坚定，带着历史的重量与女性的风骨。你擅长用简洁而精准的语言，写尽时代的苦难，爱情的悲欢，女性的坚守，文字里没有激烈的控诉，却有着比呐喊更强大的力量，成为一个时代的精神象征。", core: "哪怕身处黑暗，也要守住灵魂的尊严与记忆。", book: "《安魂曲》", advice: ["保持你骨子里的风骨与坚守，你的温柔从来都不是软弱，而是最强大的力量，能对抗所有的黑暗与苦难。","你的文字天赋藏在你对时代与记忆的坚守里，大胆去记录你眼里的真相，你的笔，会成为历史的见证，给无数人带去力量。","永远相信女性的力量，你的坚守与风骨，会给更多女性带去勇气，让她们看见自己的尊严与价值。"], quote: "我知道，我在大地之上，不是孤身一人。" },
+    celan: { spirit: "你有着策兰式的坚守与救赎，天生带着对创伤与记忆的深刻执念，哪怕经历了最黑暗的苦难，也依旧用文字守住记忆，寻找救赎。你不回避人性的黑暗，不粉饰生命的创伤，用自己的笔，在语言的深渊里，寻找光，寻找记忆，寻找生命的尊严，灵魂里藏着最沉重的坚守，最动人的救赎。", emotion: "你的情感深沉而破碎，沉默而坚定，经历过极致的黑暗与创伤，却依旧不愿意放弃对生命的坚守。你不轻易向人敞开心扉，把所有的痛苦、记忆、执念都藏在文字里，对逝去的人有着无尽的怀念，对生命的尊严有着极致的坚守，哪怕身处深渊，也要守住记忆的火种。", style: "你的文字有着深渊般的深刻，破碎而凝练，带着创伤的重量与救赎的力量。你擅长用极致晦涩、极致凝练的语言，写尽创伤、记忆、死亡与救赎，文字里没有直白的控诉，却每一个字都带着千钧之力，在语言的废墟里，开出了最坚韧的花。", core: "在语言的深渊里，守住记忆，寻找救赎。", book: "《罂粟与记忆》", advice: ["不必强迫自己与创伤和解，你的文字，你的记忆，本身就是最强大的反抗与救赎，不必为自己的破碎感到羞耻。","保持你对语言的极致探索，你的文字天赋就藏在那些破碎的、凝练的表达里，它们会穿越时间，给同样身处黑暗的人带去光。","在坚守记忆的同时，也记得给自己留一丝温柔，你已经足够勇敢，值得被世界温柔以待。"], quote: "秋天从我手里吃它的叶子：我们是朋友。" },
+    nieluda: { spirit: "你有着聂鲁达式的炽热与辽阔，天生带着对爱与大地的极致歌颂，对政治理想的坚定追求，相信诗歌的力量，能改变世界，能唤醒人民。你的灵魂里，既有对爱情的极致炽热，也有对大地、对祖国、对人民的辽阔深情，有着像大海一样磅礴的生命力。", emotion: "你的情感炽热而辽阔，既有小儿女的缱绻深情，也有对天下苍生的悲悯情怀。你对爱有着极致的表达能力，爱时可以倾尽所有的温柔与热烈，对祖国与人民有着深切的热爱，愿意为了理想与正义，付出自己的一切，灵魂里藏着最动人的浪漫，最坚定的信仰。", style: "你的文字有着磅礴的抒情力量，炽热而辽阔，既有爱情里的细腻缱绻，也有政治抒情里的大开大合。你擅长用极致的意象，写尽爱情的甜蜜与苦涩，写尽大地的辽阔与深情，写尽人民的苦难与希望，文字里有着极强的感染力，像大海一样，能席卷每一个读者的心。", core: "爱与大地，是我永恒的信仰。", book: "《二十首情诗与绝望的歌》", advice: ["保持你灵魂里的炽热与辽阔，你的浪漫与理想，从来都不是矛盾的，它们共同构成了最有力量的你。","你的文字天赋藏在你对爱与大地的极致感知里，大胆去写你的爱，你的理想，你眼里的大地与人民，你的文字会给无数人带去感动与力量。","永远保持你对理想与正义的坚守，你的笔，不仅可以歌颂爱情，也可以成为唤醒人民的号角。"], quote: "爱情太短，遗忘太长。" }
+};
+
+// 全局变量
+let currQList = [];
+let currIdx = 0;
+let userType = '';
+let userStyle = '';
+let poetScores = {};
+let dimScores = {};
+
+// 辅助函数
+function safeGetPoetData(poetId) {
+    return poetFullData[poetId] || poetFullData['libai'];
+}
+function getDimName(dimKey) {
+    const dim = traitDims.find(d => d.key === dimKey);
+    return dim ? dim.name : dimKey;
+}
+function getTypeName(type) {
+    const map = { romantic: '浪漫抒情', realistic: '现实关照', philosophy: '哲思内省', 'avant-garde': '先锋反叛' };
+    return map[type] || type;
+}
+function getStyleName(style) {
+    const map = { power: '磅礴力量', delicate: '细腻通透', sharp: '锋利冷峻', warm: '温和治愈' };
+    return map[style] || style;
+}
+
+function initScores() {
+    poetScores = {};
+    poets.forEach(poet => { poetScores[poet.id] = 0; });
+    dimScores = {};
+    traitDims.forEach(dim => { dimScores[dim.key] = 0; });
+}
+
+// 页面切换
+function goToDemo() { document.getElementById('page-intro').style.display = 'none'; document.getElementById('page-demographics').style.display = 'block'; }
+function initTest() {
+    userType = document.getElementById('input-type').value;
+    userStyle = document.getElementById('input-style').value;
+    currQList = [...questions];
+    currIdx = 0;
+    initScores();
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+function renderQuestion() {
+    const q = currQList[currIdx];
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${(currIdx / currQList.length) * 100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${q.t}`;
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up'); void wrapper.offsetWidth; wrapper.classList.add('slide-up');
+    document.getElementById('q-category').innerText = `📖 ${q.t}`;
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box'); box.innerHTML = '';
+    q.o.forEach(opt => {
+        const btn = document.createElement('div'); btn.className = 'option-btn'; btn.innerText = opt.t;
+        btn.onclick = () => { Array.from(box.children).forEach(c => c.classList.remove('selected')); btn.classList.add('selected'); setTimeout(() => handleAnswer(opt.s), 200); };
+        box.appendChild(btn);
+    });
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+function handleAnswer(scoreMap) {
+    Object.keys(scoreMap).forEach(poetId => {
+        poetScores[poetId] += scoreMap[poetId];
+        const poet = poets.find(p => p.id === poetId);
+        if (poet && poet.dims) {
+            poet.dims.forEach(dimKey => { dimScores[dimKey] = (dimScores[dimKey] || 0) + scoreMap[poetId] / 2; });
+        }
+    });
+    if (currIdx < currQList.length - 1) { currIdx++; renderQuestion(); }
+    else finishTest();
+}
+function prevQuestion() { if (currIdx> 0) { currIdx--; renderQuestion(); } }
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0; initScores();
+}
+
+function getSortedPoets() {
+    return Object.keys(poetScores).map(id => {
+        const poet = poets.find(p => p.id === id);
+        return { ...poet, score: poetScores[id] || 0 };
+    }).sort((a, b) => b.score - a.score);
+}
+
+function calculateResult() {
+    const sortedPoets = getSortedPoets();
+    if (!sortedPoets.length) return;
+    const corePoet = sortedPoets[0];
+    document.getElementById('res-avatar').style.background = corePoet.color || '#8b7355';
+    document.getElementById('res-poet-name').innerText = corePoet.name.charAt(0);
+    document.getElementById('res-poet-tag').innerText = corePoet.tag || '';
+    document.getElementById('res-level').innerText = `你的核心诗人原型 · ${corePoet.name}`;
+    document.getElementById('res-desc').innerText = corePoet.trait || '';
+    renderBars();
+    renderTopPoets(sortedPoets.slice(0, 3));
+    drawRadar();
+}
+
+function renderBars() {
+    const box = document.getElementById('bars-container');
+    const sortedDims = Object.keys(dimScores)
+        .map(key => { const dim = traitDims.find(d => d.key === key); return { ...dim, score: dimScores[key] || 0 }; })
+        .filter(d => d.key)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5);
+    if (!sortedDims.length) return;
+    const maxScore = Math.max(...sortedDims.map(d => d.score), 1);
+    let html = '';
+    sortedDims.forEach(dim => {
+        let pct = Math.min((dim.score / maxScore) * 100, 100);
+        let color = pct> 60 ? 'var(--accent)' : (pct> 30 ? 'var(--warning)' : 'var(--safe)');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${dim.name}</span><span class="dim-sub">${dim.desc}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val">${Math.round(pct)}%</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function renderTopPoets(top3) {
+    const box = document.getElementById('top-poets-container');
+    let html = '';
+    top3.forEach((poet, index) => {
+        html += `<div style="display:flex; align-items:center; margin-bottom:16px; padding:12px; background:#f8f7f5; border-radius:8px;"><div style="width:40px;height:40px;border-radius:50%;background:${poet.color || '#aaa'};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;margin-right:12px;">${index+1}</div><div style="flex:1;"><div style="font-weight:700;color:var(--primary);">${poet.name} · ${poet.tag}</div><div style="font-size:12px;color:var(--text-sub);">${poet.trait}</div></div><div style="font-weight:900;color:${poet.color};">${Math.round(poet.score)}分</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function drawRadar() {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.width = 240 * dpr; c.height = 240 * dpr; ctx.scale(dpr, dpr);
+    const cx = 120, cy = 120, r = 90;
+    const sortedDims = Object.keys(dimScores)
+        .map(key => traitDims.find(d => d.key === key))
+        .filter(Boolean)
+        .sort((a, b) => (dimScores[b.key] || 0) - (dimScores[a.key] || 0))
+        .slice(0, 5);
+    if (!sortedDims.length) return;
+    const keys = sortedDims.map(d => d.key);
+    const labels = sortedDims.map(d => d.name);
+    const N = keys.length;
+    ctx.clearRect(0, 0, 240, 240);
+    ctx.strokeStyle = '#dfe6e9'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<N; j++) {
+            let a = (Math.PI*2/N)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = dimScores[k] || 0;
+        let ratio = Math.min(val / 100, 1.1);
+        let a = (Math.PI*2/N)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(139, 115, 85, 0.1)");
+    grd.addColorStop(1, "rgba(139, 115, 85, 0.6)");
+    ctx.fillStyle = grd; ctx.fill();
+    ctx.strokeStyle = 'var(--accent)'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = 'var(--primary)'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/N)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+// 报告生成
+function showReport() {
+    try {
+        const sortedPoets = getSortedPoets();
+        if (!sortedPoets.length) return;
+        const corePoet = sortedPoets[0];
+        const secondPoet = sortedPoets[1] || poets[1];
+        const thirdPoet = sortedPoets[2] || poets[2];
+        const coreData = safeGetPoetData(corePoet.id);
+        const secondData = safeGetPoetData(secondPoet.id);
+        const thirdData = safeGetPoetData(thirdPoet.id);
+        const topDims = Object.keys(dimScores).map(key => {
+            const dim = traitDims.find(d => d.key === key);
+            return { ...dim, score: dimScores[key] || 0 };
+        }).filter(d => d.key).sort((a, b) => b.score - a.score).slice(0, 3);
+        const dimListHtml = topDims.map(dim => `<li><strong>${dim.name}：</strong>${dim.desc}，灵魂匹配度${Math.round((dim.score/100)*100)}%</li>`).join('');
+        const adviceListHtml = coreData.advice.map(item => `<li>${item}</li>`).join('');
+        const coreDimsDesc = corePoet.dims ? corePoet.dims.map(d => getDimName(d)).join('、') : '独特诗意';
+        const secondDimsDesc = secondPoet.dims ? secondPoet.dims.map(d => getDimName(d)).join('与') : '独特气质';
+        const thirdDimsDesc = thirdPoet.dims ? thirdPoet.dims.map(d => getDimName(d)).join('与') : '隐藏特质';
+        const html = `
+        <div class="report-section">
+            <div class="r-h1">你的核心诗人原型：${corePoet.name} · ${corePoet.tag}</div>
+            <p class="r-p" style="background:#f8f7f5; padding:12px; border-radius:8px; font-size:14px; border:1px solid #e6e2d8;">
+                <strong>✍️ 文学档案：</strong>偏好类型 · ${getTypeName(userType)} <br>
+                <strong>📖 文字特质：</strong>${getStyleName(userStyle)}
+            </p>
+            <div class="r-box" style="border-left:5px solid ${corePoet.color}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+                <div style="font-size:22px; font-weight:900; color:${corePoet.color}; margin-bottom:8px; font-family: 'Songti SC', serif;">${corePoet.name} · ${corePoet.tag}</div>
+                <div style="margin-bottom:10px; font-size:16px; color:var(--text-main);">${corePoet.trait}</div>
+                <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><span class="r-tag">灵魂镜像</span>你的灵魂与${corePoet.name}有着极高的同频度，你骨子里的${coreDimsDesc}，正是这位诗人穿越时空留给你的精神印记。</p>
+            </div>
+            <div style="margin-top:30px;">
+                <div class="r-h2">一、灵魂内核深度解析</div>
+                <p class="r-p">经过32道题的深度扫描，我们捕捉到了你与${corePoet.name}高度契合的精神特质，这不是表面的模仿，而是灵魂深处的同频共振：</p>
+                <div class="r-box">
+                    <p class="r-p"><strong>1. 精神底色：</strong>${coreData.spirit}</p>
+                    <p class="r-p"><strong>2. 情感内核：</strong>${coreData.emotion}</p>
+                    <p class="r-p"><strong>3. 文字特质：</strong>${coreData.style}</p>
+                </div>
+                <p class="r-p">你在测试中展现出的每一个选择，恰恰是${corePoet.name}一生的精神注脚——${coreData.core}。这份刻在骨子里的特质，会成为你创作与人生里最核心的力量。</p>
+            </div>
+            <div class="report-section">
+                <div class="r-h2">二、你的灵魂三重镜像</div>
+                <p class="r-p">除了核心原型${corePoet.name}，你的灵魂里还藏着另外两位诗人的精神印记，三者共同构成了你独一无二、层次丰富的文学人格：</p>
+                <div class="r-box"><div class="r-h3" style="color:${secondPoet.color};">次位原型：${secondPoet.name} · ${secondPoet.tag}</div><p class="r-p">${secondPoet.trait}。${secondPoet.name}给你的灵魂带来了${secondDimsDesc}的特质，让你的文学人格更加丰满。</p></div>
+                <div class="r-box"><div class="r-h3" style="color:${thirdPoet.color};">隐藏原型：${thirdPoet.name} · ${thirdPoet.tag}</div><p class="r-p">${thirdPoet.trait}。这是你灵魂深处的隐藏特质。</p></div>
+            </div>
+            <div class="report-section">
+                <div class="r-h2">三、你的核心文学天赋维度</div>
+                <ul class="r-list">${dimListHtml}</ul>
+            </div>
+            <div class="report-section">
+                <div class="r-h2">四、专属阅读与创作成长指南</div>
+                <div class="r-box"><div class="r-h3">📖 专属阅读书单</div><ul class="r-list"><li><strong>核心必读：</strong>${coreData.book}</li><li><strong>次位补充：</strong>${secondData.book}、${thirdData.book}</li></ul></div>
+                <div class="r-box"><div class="r-h3">✍️ 创作成长指南</div><ul class="r-list">${adviceListHtml}</ul></div>
+            </div>
+            <div class="report-section">
+                <div class="r-h2">五、灵魂寄语</div>
+                <div class="r-box" style="text-align:center; font-family: 'Songti SC', serif; font-size:18px; line-height:2;">${coreData.quote}</div>
+            </div>
+        </div>`;
+        document.getElementById('report-content').innerHTML = html;
+        document.getElementById('report-modal').style.display = 'block';
+    } catch(e) { alert('生成报告出错，请重试'); }
+}
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function updateLimitUI() {
+    document.getElementById('limit-hint').innerText = `本设备剩余可用次数：${remaining}次`;
+}
+msg.style.opacity = 0;
+    document.getElementById('load-layer').style.display = 'flex';
+    setTimeout(() => {
+        sessionStorage.setItem('unlocked_' + pageId, 'true');
+    }, 2000);
+}
+
+// 事件绑定
+window.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('unlocked_' + pageId)) {
+        updateLimitUI();
+    }
+    .addEventListener('click', unlockPage);
+    document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+    document.getElementById('init-test-btn').addEventListener('click', initTest);
+    document.getElementById('prev-btn').addEventListener('click', prevQuestion);
+    document.getElementById('show-report-btn').addEventListener('click', showReport);
+    document.getElementById('close-report-btn').addEventListener('click', closeReport);
+    document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "srrq";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

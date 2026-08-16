@@ -1,0 +1,146 @@
+[
+    {
+        "title": "你们分手多久了？",
+        "options": [
+            {"text": "刚分手不久", "score": 0},
+            {"text": "1-3个月", "score": 1},
+            {"text": "3个月到半年", "score": 3},
+            {"text": "半年以上", "score": 5}
+        ]
+    },
+    {
+        "title": "当初为什么分手？",
+        "options": [
+            {"text": "客观原因（如距离等）", "score": 0},
+            {"text": "小矛盾冲动分手", "score": 1},
+            {"text": "原则性问题", "score": 3},
+            {"text": "出轨/欺骗等", "score": 5}
+        ]
+    },
+    {
+        "title": "分手后TA有联系你吗？",
+        "options": [
+            {"text": "经常主动联系", "score": 0},
+            {"text": "偶尔会联系", "score": 1},
+            {"text": "很少联系", "score": 3},
+            {"text": "完全没联系", "score": 5}
+        ]
+    },
+    {
+        "title": "你现在单身吗？",
+        "options": [
+            {"text": "一直单身", "score": 0},
+            {"text": "分手后单身", "score": 1},
+            {"text": "有新欢但放不下", "score": 3},
+            {"text": "有新欢很幸福", "score": 5}
+        ]
+    },
+    {
+        "title": "你想起复合的动机是？",
+        "options": [
+            {"text": "还爱着TA", "score": 0},
+            {"text": "习惯了离不开", "score": 1},
+            {"text": "害怕找不到更好的", "score": 3},
+            {"text": "寂寞想找人陪", "score": 5}
+        ]
+    },
+    {
+        "title": "导致分手的问题解决了吗？",
+        "options": [
+            {"text": "完全解决了", "score": 0},
+            {"text": "部分解决了", "score": 1},
+            {"text": "没有解决", "score": 3},
+            {"text": "更严重了", "score": 5}
+        ]
+    },
+    {
+        "title": "你的朋友们支持复合吗？",
+        "options": [
+            {"text": "都支持", "score": 0},
+            {"text": "部分支持", "score": 1},
+            {"text": "反对居多", "score": 3},
+            {"text": "全部反对", "score": 5}
+        ]
+    },
+    {
+        "title": "你复合后有信心吗？",
+        "options": [
+            {"text": "很有信心经营好", "score": 0},
+            {"text": "有点信心", "score": 1},
+            {"text": "没什么信心", "score": 3},
+            {"text": "完全没有信心", "score": 5}
+        ]
+    },
+    {
+        "title": "TA有新欢了吗？",
+        "options": [
+            {"text": "没有，一直单身", "score": 0},
+            {"text": "可能有但不确定", "score": 1},
+            {"text": "有了但还在联系", "score": 3},
+            {"text": "已经有了", "score": 5}
+        ]
+    },
+    {
+        "title": "分手后你成长了多少？",
+        "options": [
+            {"text": "成长很多", "score": 0},
+            {"text": "成长了一些", "score": 1},
+            {"text": "没什么成长", "score": 3},
+            {"text": "还在原地", "score": 5}
+        ]
+    },
+    {
+        "title": "你是想复合还是不甘心？",
+        "options": [
+            {"text": "真的很想复合", "score": 0},
+            {"text": "都有一点", "score": 1},
+            {"text": "更多是不甘心", "score": 3},
+            {"text": "纯粹不甘心", "score": 5}
+        ]
+    },
+    {
+        "title": "TA对复合的态度是？",
+        "options": [
+            {"text": "很积极求复合", "score": 0},
+            {"text": "有点犹豫", "score": 1},
+            {"text": "态度模糊", "score": 3},
+            {"text": "明确拒绝", "score": 5}
+        ]
+    },
+    {
+        "title": "你们有共同未来规划吗？",
+        "options": [
+            {"text": "有明确的规划", "score": 0},
+            {"text": "有一些", "score": 1},
+            {"text": "很少", "score": 3},
+            {"text": "完全没有", "score": 5}
+        ]
+    },
+    {
+        "title": "复合可能重蹈覆辙吗？",
+        "options": [
+            {"text": "完全不会", "score": 0},
+            {"text": "应该不会", "score": 1},
+            {"text": "可能会", "score": 3},
+            {"text": "大概率会", "score": 5}
+        ]
+    },
+    {
+        "title": "你愿意为复合付出多少？",
+        "options": [
+            {"text": "愿意付出很多", "score": 0},
+            {"text": "愿意付出一些", "score": 1},
+            {"text": "不想付出太多", "score": 3},
+            {"text": "不想付出", "score": 5}
+        ]
+    },
+    {
+        "title": "你现在的情感状态是？",
+        "options": [
+            {"text": "走出来了", "score": 0},
+            {"text": "基本走出来了", "score": 1},
+            {"text": "还很难受", "score": 3},
+            {"text": "完全走不出来", "score": 5}
+        ]
+    }
+]

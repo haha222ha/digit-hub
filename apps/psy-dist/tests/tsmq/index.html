@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>同事职场默契测试 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:var(--primary);text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:var(--primary-dark, var(--primary))}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root { --primary: #0984E3; --primary-dark: #0652DD; --accent: #00CEC9; --bg-gradient-start: #E8F4FD; --bg-gradient-end: #D6EAF8; --text-main: #2D3436; }
+        * { box-sizing: border-box; user-select: none; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; margin: 0 auto; box-shadow: 0 0 60px rgba(0,0,0,0.15); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(9, 132, 227, 0.3); }
+        #page-intro { padding: 60px 24px 40px; text-align: center; min-height: 100vh; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #d6eaf8; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #e8f4fd; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; cursor: pointer; border: 2px solid #d6eaf8; transition: all 0.2s; font-weight: 500; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #e8f4fd; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #e8f4fd; padding-bottom: 120px; overflow-y: auto; min-height: 100vh; }
+        .result-header { background: #fff; padding: 40px 24px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #d6eaf8; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; }
+        .score-num { font-size: 48px; font-weight: 900; color: var(--primary); }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; }
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; }
+        .card-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 80px; }
+        .dim-name { font-size: 14px; font-weight: 700; }
+        .dim-bar-bg { flex: 1; height: 10px; background: #f0f2f5; border-radius: 5px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 5px; }
+        .dim-val { width: 40px; text-align: right; font-size: 13px; font-weight: 700; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .export-btn { background: #00CEC9; color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+    <div id="page-intro" data-screenshot="psych-test-同事职场默契测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">同事职场<br><span>默契</span>测试</h1>
+        <p class="cover-subtitle">测试你和同事的工作默契程度<br>找到提升协作效率的方法</p>
+        <div class="intro-features">
+            <div class="feature-box"><div class="feature-icon">🤝</div><div class="feature-title">团队协作理论</div><div class="feature-desc">基于团队协作理论分析。</div></div>
+            <div class="feature-box"><div class="feature-icon">📊</div><div class="feature-title">六维分析</div><div class="feature-desc">沟通、配合、信任、目标、风格、互补。</div></div>
+            <div class="feature-box"><div class="feature-icon">✨</div><div class="feature-title">精准匹配</div><div class="feature-desc">找到你们的默契和差异。</div></div>
+            <div class="feature-box"><div class="feature-icon">💡</div><div class="feature-title">提升建议</div><div class="feature-desc">提供具体协作改善方案。</div></div>
+        </div>
+        <button class="btn" id="start-btn">开始测试 (约需 2 分钟)</button>
+    </div>
+    <div id="page-test">
+        <div class="progress-header"><span id="dim-tag">维度：沟通配合</span><span id="progress-text">1 / 18</span></div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🤝 沟通配合</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle"><span class="score-num" id="res-score">0</span><span class="score-label">默契指数</span></div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+        <div class="card">
+            <div class="card-title">📊 默契六维雷达</div>
+            <div id="bars-container"></div>
+        </div>
+        <div class="bottom-dock">
+            <button class="export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    {d:'communication',t:'沟通配合',q:"你们交流信息通常？",o:[{t:"及时准确，信息共享",s:10},{t:"基本及时，偶尔遗漏",s:7},{t:"有时延迟，常有误解",s:3},{t:"经常不通畅",s:0}]},
+    {d:'communication',t:'沟通配合',q:"对方发的消息你会秒回吗？",o:[{t:"几乎都秒回",s:10},{t:"看到都会回",s:7},{t:"偶尔会忘记回",s:3},{t:"经常不回",s:0}]},
+    {d:'communication',t:'沟通配合',q:"工作交接时你们配合？",o:[{t:"非常顺畅，清楚明白",s:10},{t:"比较顺畅",s:7},{t:"有时会有遗漏",s:3},{t:"经常出问题",s:0}]},
+    {d:'coordination',t:'工作配合',q:"任务分配时你们？",o:[{t:"分工明确，各司其职",s:10},{t:"基本明确",s:7},{t:"有时会重叠或遗漏",s:3},{t:"经常混乱",s:0}]},
+    {d:'coordination',t:'工作配合',q:"遇到问题你会？",o:[{t:"主动沟通解决",s:10},{t:"会一起讨论",s:7},{t:"有时会拖延",s:3},{t:"各自为政",s:0}]},
+    {d:'coordination',t:'工作配合',q:"对方工作需要帮助时？",o:[{t:"主动伸出援手",s:10},{t:"会帮忙",s:7},{t:"看情况",s:3},{t:"各做各的",s:0}]},
+    {d:'trust',t:'信任程度',q:"你信任对方的工作能力吗？",o:[t:"完全信任",s:10},{t:"比较信任",s:7},{t:"一般",s:3},{t:"不太信任",s:0}]},
+    {d:'trust',t:'信任程度',q:"你会把重要任务交给对方吗？",o:[{t:"完全放心",s:10},{t:"比较放心",s:7},{t:"会有顾虑",s:3},{t:"不放心",s:0}]},
+    {d:'trust',t:'信任程度',q:"对方不在你会担心工作吗？",o:[{t:"完全不担心",s:10},{t:"偶尔会",s:7},{t:"经常担心",s:3},{t:"很担心",s:0}]},
+    {d:'goal',t:'目标一致',q:"你们的工作目标？",o:[{t:"完全一致",s:10},{t:"基本一致",s:7},{t:"有时不一致",s:3},{t:"经常冲突",s:0}]},
+    {d:'goal',t:'目标一致',q:"对项目进度的看法？",o:[{t:"完全同步",s:10},{t:"基本同步",s:7},{t:"有时分歧",s:3},{t:"经常不同步",s:0}]},
+    {d:'goal',t:'目标一致',q:"对待工作的态度？",o:[{t:"都很积极负责",s:10},{t:"都比较认真",s:7},{t:"有时会懈怠",s:3},{t:"差异很大",s:0}]},
+    {d:'style',t:'工作风格',q:"你们的风格？",o:[{t:"互补型，配合完美",s:10},{t:"比较相似",s:7},{t:"有些差异",s:3},{t:"完全不同",s:0}]},
+    {d:'style',t:'工作风格',q:"你欣赏对方的工作方式吗？",o:[{t:"非常欣赏",s:10},{t:"比较欣赏",s:7},{t:"一般",s:3},{t:"不太欣赏",s:0}]},
+    {d:'style',t:'工作风格',q:"能适应对方的节奏吗？",o:[{t:"完全能适应",s:10},{t:"基本能",s:7},{t:"偶尔有摩擦",s:3},{t:"很难适应",s:0}]},
+    {d:'complement',t:'互补优势',q:"你们的优势？",o:[{t:"互补型，强弱项不同",s:10},{t:"比较互补",s:7},{t:"相似",s:3},{t:"重叠",s:0}]},
+    {d:'complement',t:'互补优势',q:"你能补对方的短板吗？",o:[{t:"经常互补",s:10},{t:"偶尔能",s:7},{t:"很少",s:3},{t:"完全不能",s:0}]},
+    {d:'complement',t:'互补优势',q:"合作时1+1>2吗？",o:[{t:"完全大于2",s:10},{t:"大于2",s:7},{t:"约等于2",s:3},{t:"小于2",s:0}]}
+];
+const levels = [
+    {max:40,l:"默契较低",c:"#FF7675",d:"你们的职场默契有待提升，协作效率可能受影响。",advice:"多沟通，了解彼此的工作风格，建立更好的配合机制。"},
+    {max:80,l:"默契一般",c:"#FDCB6E",d:"你们有一定默契，但还有提升空间。",advice:"加强日常沟通，明确分工，减少误解。"},
+    {max:120,l:"默契较好",c:"#00CEC9",d:"你们配合比较默契，协作效率不错。",advice:"继续保持，多交流心得，进一步提升。"},
+    {max:180,l:"高度默契",c:"#0984E3",d:"你们是非常默契的同事！配合堪称完美。",advice:"你们是最佳拍档，可以尝试更多深度合作。"}
+];
+let scores={communication:0,coordination:0,trust:0,goal:0,style:0,complement:0},currQList=[],currIdx=0;
+function startTest(){currQList=[...questions];currIdx=0;scores={communication:0,coordination:0,trust:0,goal:0,style:0,complement:0};document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=`${currIdx+1}/${currQList.length}`;document.getElementById('progress-fill').style.width=`${(currIdx/currQList.length)*100}%`;document.getElementById('dim-tag').innerText=`维度：${q.t}`;document.getElementById('q-category').innerText=q.t;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(q.d,opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(dim,val){scores[dim]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';setTimeout(()=>{document.getElementById('page-result').style.display='block';calculateResult();},1500);}
+function calculateResult(){let total=Object.values(scores).reduce((a,b)=>a+b,0);let finalScore=Math.round(total);let lvl=levels.find(l=>finalScore<=l.max)||levels[levels.length-1];let start=0;const timer=setInterval(()=>{start++;document.getElementById('res-score').innerText=start;if(start>=finalScore)clearInterval(timer);},15);document.getElementById('res-level').innerText=lvl.l;document.getElementById('res-level').style.background=lvl.c;document.getElementById('res-desc').innerText=lvl.d;const box=document.getElementById('bars-container');const dims=[{k:'communication',n:'沟通'},{k:'coordination',n:'配合'},{k:'trust',n:'信任'},{k:'goal',n:'目标'},{k:'style',n:'风格'},{k:'complement',n:'互补'}];let html='';dims.forEach(d=>{let pct=Math.min((scores[d.k]/10)*100,100);html+=`<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%;background:#0984E3;"></div></div><div class="dim-val">${Math.round(pct)}%</div></div>`;});box.innerHTML=html;}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(9,132,227);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('同事职场默契测试报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});doc.setTextColor(0,0,0);doc.setFontSize(16);doc.text(`默契等级：${document.getElementById('res-level').innerText}`,15,55);doc.save('职场默契报告.pdf');}
+document.getElementById('start-btn').document.getElementById('start-btn').addEventListener('click',function(){var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}startTest();document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';});document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "tsmq";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

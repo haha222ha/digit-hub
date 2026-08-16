@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 KPOP大势男团匹配测试 | 性格深度分析</title>
+    <style>
+        :root {
+            /* 2026 KPOP 潮流风格 */
+            --primary: #7E57C2; /* 潮流紫 */
+            --primary-dark: #6A4BAB;
+            --accent: #4FC3F7; /* 清新蓝 */
+            --accent-hover: #29B6F6;
+            --pink: #FF80AB; /* 少女粉 */
+            --safe: #27ae60;
+            --warning: #f39c12;
+            --bg-gradient-start: #F5F1FF;
+            --bg-gradient-end: #E3F2FD;
+            --text-main: #2D3436;
+            --text-sub: #636e72;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.15);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-purple { 0% { box-shadow: 0 0 0 0 rgba(126, 87, 194, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(126, 87, 194, 0); } 100% { box-shadow: 0 0 0 0 rgba(126, 87, 194, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(126, 87, 194, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#E3F2FD 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 40px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #2c3e50;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--pink); }
+        .cover-subtitle { font-size: 16px; color: #7f8c8d; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ecf0f1;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2c3e50; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2c3e50; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #ecf0f1; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #2c3e50; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #ecf0f1; color: #7f8c8d; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2c3e50; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #34495e; cursor: pointer; border: 2px solid #ecf0f1; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #F5F1FF; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #ecf0f1; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ecf0f1;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--primary); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #7f8c8d; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2c3e50; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2c3e50; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #7f8c8d; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--primary); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-purple 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #7f8c8d; width: 100%; padding: 10px;
+            border: 1px solid #bdc3c7; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: var(--primary); color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2c3e50; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ecf0f1; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #34495e; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #f8f9fa; border: 1px solid #ecf0f1; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #555; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-Kpop男团" class="fade-in">
+        <div class="cover-tag">2026 KPOP EDITION</div>
+        <h1 class="cover-title">你最像哪个<br><span>大势男团</span></h1>
+        <p class="cover-subtitle">基于性格特质和审美偏好的深度分析<br>找到与你最契合的2026 KPOP大势男团</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">✨</div>
+                <div class="feature-title">五维匹配</div>
+                <div class="feature-desc">风格、舞台、性格、审美、潮流，全方位精准匹配。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🎤</div>
+                <div class="feature-title">大势男团</div>
+                <div class="feature-desc">覆盖2026顶流男团，专属你的本命匹配。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💫</div>
+                <div class="feature-title">性格解析</div>
+                <div class="feature-desc">深度剖析你的内在特质，对应男团灵魂气质。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">千字报告</div>
+                <div class="feature-desc">2026专属深度报告，解锁你的追星专属指南。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始匹配测试 (约需 3 分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2c3e50; margin-bottom:10px;">建立专属档案 🎵</h2>
+        <p style="color:#7f8c8d; font-size:14px; margin-bottom:30px;">系统将根据你的信息精准匹配本命男团。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的性别是？</label>
+            <select id="input-gender" class="select-box">
+                <option value="female">女生</option>
+                <option value="male">男生</option>
+                <option value="other">保密</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你追KPOP的时长是？</label>
+            <select id="input-fan" class="select-box">
+                <option value="new">萌新 (1年以内)</option>
+                <option value="middle">老粉 (1-3年)</option>
+                <option value="old">骨灰粉 (3年以上)</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属匹配题</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：风格魅力</span>
+            <span id="progress-text">1 / 30</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">✨ 风格魅力</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-purple 1s infinite; border-radius:50%;">🎤</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2c3e50;">正在匹配你的本命男团...</h3>
+        <p style="color:#7f8c8d; font-size:14px; line-height:1.8;">正在分析性格特质...<br>匹配舞台风格...<br>生成2026专属报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">匹配指数</span>
+            </div>
+            <div class="level-badge" id="res-level">匹配中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维匹配雷达图</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《2026男团匹配深度报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新测试 匹配新男团</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 KPOP MATCH REPORT</div>
+            <div class="r-h1">大势男团深度匹配报告</div>
+            <div style="font-size:14px;">专属你的本命分析 · 2026终极版</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const pageId = window.location.pathname;
+
+// 2026 KPOP男团匹配题库
+const questions = [
+    // 维度：风格魅力 (style)
+    { d: 'style', t: '风格魅力', q: "你最喜欢的穿搭风格是？", o: [
+        {t:"简约休闲风", s:2},
+        {t:"街头潮流风", s:5},
+        {t:"精致贵气风", s:8},
+        {t:"梦幻元气风", s:10}
+    ]},
+    { d: 'style', t: '风格魅力', q: "你偏爱哪种音乐风格？", o: [
+        {t:"抒情温柔", s:2},
+        {t:"流行舞曲", s:5},
+        {t:"硬核说唱", s:8},
+        {t:"梦幻合成器", s:10}
+    ]},
+    { d: 'style', t: '风格魅力', q: "你喜欢的视觉概念是？", o: [
+        {t:"清新自然", s:2},
+        {t:"暗黑酷炫", s:5},
+        {t:"未来科技", s:8},
+        {t:"童话梦幻", s:10}
+    ]},
+
+    // 维度：舞台气场 (stage)
+    { d: 'stage', t: '舞台气场', q: "你喜欢的舞台表现是？", o: [
+        {t:"温柔治愈", s:2},
+        {t:"整齐刀群舞", s:5},
+        {t:"炸裂爆发力", s:8},
+        {t:"灵动氛围感", s:10}
+    ]},
+    { d: 'stage', t: '舞台气场', q: "你更看重舞台的？", o: [
+        {t:"唱功稳定性", s:2},
+        {t:"舞蹈整齐度", s:5},
+        {t:"舞台感染力", s:8},
+        {t:"创意设计感", s:10}
+    ]},
+    { d: 'stage', t: '舞台气场', q: "你偏爱哪种舞台氛围？", o: [
+        {t:"温馨治愈", s:2},
+        {t:"热血沸腾", s:5},
+        {t:"酷炫炸场", s:8},
+        {t:"浪漫梦幻", s:10}
+    ]},
+
+    // 维度：性格适配 (personality)
+    { d: 'personality', t: '性格适配', q: "你的社交性格是？", o: [
+        {t:"安静内敛", s:2},
+        {t:"活泼开朗", s:5},
+        {t:"霸气自信", s:8},
+        {t:"温柔贴心", s:10}
+    ]},
+    { d: 'personality', t: '性格适配', q: "面对困难你会？", o: [
+        {t:"冷静思考", s:2},
+        {t:"勇敢挑战", s:5},
+        {t:"团队协作", s:8},
+        {t:"乐观面对", s:10}
+    ]},
+    { d: 'personality', t: '性格适配', q: "你在团队中是？", o: [
+        {t:"沉稳决策者", s:2},
+        {t:"气氛活跃者", s:5},
+        {t:"实力担当者", s:8},
+        {t:"暖心照顾者", s:10}
+    ]},
+
+    // 维度：审美偏好 (aesthetic)
+    { d: 'aesthetic', t: '审美偏好', q: "你喜欢的发色风格是？", o: [
+        {t:"自然黑发", s:2},
+        {t:"潮流彩色", s:5},
+        {t:"渐变个性", s:8},
+        {t:"浅色系梦幻", s:10}
+    ]},
+    { d: 'aesthetic', t: '审美偏好', q: "你偏爱哪种MV画风？", o: [
+        {t:"写实日常", s:2},
+        {t:"电影质感", s:5},
+        {t:"奇幻脑洞", s:8},
+        {t:"唯美浪漫", s:10}
+    ]},
+    { d: 'aesthetic', t: '审美偏好', q: "你喜欢的颜值类型是？", o: [
+        {t:"清爽少年", s:2},
+        {t:"痞帅酷炫", s:5},
+        {t:"精致贵气", s:8},
+        {t:"温柔治愈", s:10}
+    ]},
+
+    // 维度：潮流态度 (trend)
+    { d: 'trend', t: '潮流态度', q: "你对潮流的态度是？", o: [
+        {t:"跟随大众", s:2},
+        {t:"适度追赶", s:5},
+        {t:"引领潮流", s:8},
+        {t:"独特自我", s:10}
+    ]},
+    { d: 'trend', t: '潮流态度', q: "你喜欢的偶像特质是？", o: [
+        {t:"踏实努力", s:2},
+        {t:"全能实力", s:5},
+        {t:"个性鲜明", s:8},
+        {t:"温柔宠粉", s:10}
+    ]},
+    { d: 'trend', t: '潮流态度', q: "你追星的核心是？", o: [
+        {t:"欣赏实力", s:2},
+        {t:"喜欢颜值", s:5},
+        {t:"共鸣性格", s:8},
+        {t:"治愈情绪", s:10}
+    ]},
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+// 粉丝等级特供题
+const fanSpecific = {
+    new: [
+        { d: 'style', t: '萌新风格', q: "【萌新特供】你第一次被KPOP吸引是因为？", o: [
+            {t:"歌曲好听", s:2},
+            {t:"颜值惊艳", s:5},
+            {t:"舞台酷炫", s:8},
+            {t:"氛围治愈", s:10}
+        ]},
+    ],
+    middle: [
+        { d: 'stage', t: '老粉舞台', q: "【老粉特供】你最看重男团的？", o: [
+            {t:"作品质量", s:2},
+            {t:"舞台实力", s:5},
+            {t:"团魂氛围", s:8},
+            {t:"成员互动", s:10}
+        ]},
+    ],
+    old: [
+        { d: 'personality', t: '骨灰粉性格', q: "【骨灰粉特供】你认为男团最重要的是？", o: [
+            {t:"不忘初心", s:2},
+            {t:"实力进步", s:5},
+            {t:"陪伴成长", s:8},
+            {t:"双向奔赴", s:10}
+        ]},
+    ]
+};
+
+// 2026大势男团匹配结果
+const groups = [
+    { max: 35, name: "TXT", color: "#4FC3F7", desc: "元气梦幻少年团，温柔治愈，充满童话感", intro: "你像TXT一样，拥有干净纯粹的灵魂，温柔又充满少年感，是治愈系的小天使" },
+    { max: 50, name: "ENHYPEN", color: "#7E57C2", desc: "暗黑概念王者，颜值与实力并存，氛围感拉满", intro: "你像ENHYPEN一样，自带神秘气场，颜值出众，拥有独特的高级感" },
+    { max: 65, name: "SEVENTEEN", color: "#27ae60", desc: "自给自足全能团，团魂炸裂，温柔又有实力", intro: "你像SEVENTEEN一样，沉稳靠谱，团队意识极强，是温柔又强大的存在" },
+    { max: 80, name: "Stray Kids", color: "#e67e22", desc: "硬核实力炸场团，个性鲜明，舞台爆发力拉满", intro: "你像Stray Kids一样，勇敢自信，拥有超强的实力和独一无二的个性" },
+    { max: 95, name: "RIIZE", color: "#FF80AB", desc: "新生代大势团，清爽少年感，潮流感拉满", intro: "你像RIIZE一样，充满青春活力，走在潮流前沿，是新生代的代表" },
+    { max: 999, name: "ZB1", color: "#f39c12", desc: "国际顶流男团，颜值天花板，全能ACE集合", intro: "你像ZB1一样，自带巨星气场，颜值实力双在线，是天生的焦点" },
+];
+
+// 全局变量
+let currQList = [];
+let currIdx = 0;
+let userGender = '';
+let userFan = '';
+let scores = { style:0, stage:0, personality:0, aesthetic:0, trend:0 };
+
+// 页面切换
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userGender = document.getElementById('input-gender').value;
+    userFan = document.getElementById('input-fan').value;
+    
+    currQList = [...questions, ...fanSpecific[userFan]];
+    currIdx = 0;
+    scores = { style:0, stage:0, personality:0, aesthetic:0, trend:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { style:0, stage:0, personality:0, aesthetic:0, trend:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+
+    let group = groups.find(g => finalScore <= g.max) || groups[groups.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = group.name;
+    badge.style.background = group.color;
+    
+    document.getElementById('res-desc').innerText = group.intro;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'style', n:'风格'}, {k:'stage', n:'舞台'}, 
+        {k:'personality', n:'性格'}, {k:'aesthetic', n:'审美'}, {k:'trend', n:'潮流'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 30) * 100, 100);
+        let color = pct> 60 ? '#7E57C2' : (pct> 30 ? '#4FC3F7' : '#27ae60');
+        let txt = pct> 70 ? '超高' : (pct> 40 ? '适配' : '普通');
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {style:'风格魅力', stage:'舞台气场', personality:'性格适配', aesthetic:'审美偏好', trend:'潮流态度'};
+    return map[k];
+}
+
+// 千字报告生成
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const group = groups.find(g => total <= g.max) || groups[groups.length-1];
+    
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、2026 KPOP男团匹配诊断书</div>
+        <p class="r-p" style="background:#f8f9fa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>🎵 个人档案：</strong>${userGender==='female'?'女生':userGender==='male'?'男生':'保密'} <br>
+            <strong>🌟 粉丝等级：</strong>${userFan==='new'?'KPOP萌新':userFan==='middle'?'资深老粉':'骨灰级粉丝'}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${group.color}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:22px; font-weight:900; color:${group.color}; margin-bottom:8px;">你的本命男团：${group.name}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#999; margin-right:8px;">综合匹配指数</span>
+                <span style="font-size:36px; font-weight:900; color:#2c3e50; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#999;">/ 100</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>匹配评语：</strong>${group.intro}</p>
+        </div>
+
+        <p class="r-p">
+            2026年KPOP市场群雄逐鹿，经过系统对30项性格、审美、风格指标的深度扫描，最终为你精准匹配到了<b>${group.name}</b>。
+            这不是简单的喜好匹配，而是灵魂与气质的高度契合，你的内在特质与男团的核心风格完美共振，是天生的双向奔赴。
+        </p>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维匹配深度解构</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px; font-style:italic;">*基于2026 KPOP潮流趋势的专业分析</p>
+        ${generateDimAnalysis('style', scores.style)}
+        ${generateDimAnalysis('stage', scores.stage)}
+        ${generateDimAnalysis('personality', scores.personality)}
+        ${generateDimAnalysis('aesthetic', scores.aesthetic)}
+        ${generateDimAnalysis('trend', scores.trend)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、${group.name} 专属追星指南</div>
+        <div class="r-box" style="border-color:#bdc3c7;">
+            <div class="r-h3">🌟 气质共鸣点</div>
+            <p class="r-p">
+                你与${group.name}的契合度源于灵魂深处的共鸣。无论是待人接物的温柔，还是面对梦想的执着，亦或是独特的审美品味，
+                都与男团的核心气质高度一致。你欣赏他们的同时，也在他们身上看到了最真实的自己。
+            </p>
+        </div>
+        
+        <div class="r-box" style="background:#F5F1FF; border-color:#7E57C2;">
+            <div class="r-h3" style="color:#7E57C2;">
+                🎤 2026追星建议
+            </div>
+            <ul class="r-list">
+                <li><strong>专注作品：</strong> ${group.name}在2026年将推出全新概念专辑，聚焦音乐作品，感受最纯粹的舞台魅力。</li>
+                <li><strong>双向成长：</strong> 以偶像为榜样，提升自己的实力与气质，成为和他们一样优秀的人。</li>
+                <li><strong>理性追星：</strong> 保持热爱，保持清醒，在追星的过程中收获快乐与成长。</li>
+                <li><strong>拥抱同好：</strong> 加入粉丝社群，结识志同道合的朋友，一起分享追星的美好时光。</li>
+            </ul>
+        </div>
+
+        <div class="r-box">
+            <div class="r-h3">💫 性格成长建议</div>
+            <p class="r-p">
+                匹配${group.name}的你，拥有独一无二的闪光点。2026年，愿你保持自己的特质，勇敢做自己，
+                像你喜欢的男团一样，在属于自己的舞台上闪闪发光。无论遇到什么困难，都要记得你和本命一样，
+                拥有无限的潜力和光芒，你的热爱永远值得被善待。
+            </p>
+        </div>
+    </div>
+    
+    <div class="report-section">
+        <div class="r-h2">四、2026 KPOP潮流趋势预言</div>
+        <p class="r-p">
+            2026年的KPOP将进入「多元融合」时代，梦幻概念、硬核舞台、自给自足创作、新生代活力将成为主流。
+            你的审美与性格完美踩中了今年的潮流风口，无论是喜欢的风格还是追捧的偶像，都站在了行业的顶端。
+            继续保持你的独特品味，你就是KPOP潮流的引领者。
+        </p>
+        <p class="r-p">
+            最后，愿你在追星的路上永远被温柔以待，永远保持热爱，永远热泪盈眶。你的本命${group.name}会一直陪伴你，
+            成为你生命中最温暖的光，而你也会成为自己人生中最耀眼的明星。
+        </p>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        本报告由2026 KPOP匹配算法自动生成<br>
+        祝愿每一份热爱，都能迎来双向奔赴
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 20 ? 'high' : (val> 10 ? 'med' : 'low');
+    
+    const config = {
+        high: { color: '#7E57C2', bg: '#F5F1FF', tag: '🌟 超高匹配', titleColor: '#7E57C2' },
+        med: { color: '#4FC3F7', bg: '#E3F2FD', tag: '✅ 高度适配', titleColor: '#4FC3F7' },
+        low: { color: '#27ae60', bg: '#E8F8F5', tag: '☁️ 基础匹配', titleColor: '#27ae60' }
+    };
+    
+    const c = config[riskLevel];
+    
+    const texts = {
+        style: {
+            high: "<strong>风格魅力完美契合！</strong> 你的穿搭、音乐、视觉审美与男团高度统一，是天生的同频者，每一个风格点都精准踩中。",
+            med: "<strong>风格高度适配。</strong> 你的审美与男团有大量共鸣点，整体风格协调，是非常契合的粉丝体质。",
+            low: "<strong>风格基础匹配。</strong> 你对男团的风格有基础好感，可慢慢深入了解他们的概念美学。"
+        },
+        stage: {
+            high: "<strong>舞台气场完全共振！</strong> 你偏爱舞台风格与男团的核心魅力100%匹配，能深度感受舞台带来的震撼与快乐。",
+            med: "<strong>舞台表现高度适配。</strong> 你欣赏男团的舞台实力，对刀群舞、表现力等核心亮点高度认可。",
+            low: "<strong>舞台基础匹配。</strong> 你对男团的舞台有好感，可更多关注他们的舞台细节。"
+        },
+        personality: {
+            high: "<strong>性格灵魂深度契合！</strong> 你的社交性格、处事方式与男团成员的内核完全一致，是灵魂层面的双向奔赴。",
+            med: "<strong>性格高度适配。</strong> 你的性格特质与男团氛围高度融合，能轻松共情成员的一举一动。",
+            low: "<strong>性格基础匹配。</strong> 你认可男团的性格魅力，可深入感受他们的团魂与温度。"
+        },
+        aesthetic: {
+            high: "<strong>审美品味完美同步！</strong> 你的颜值偏好、视觉审美与男团的概念美学完全匹配，是顶级的颜值同好。",
+            med: "<strong>审美高度适配。</strong> 你的审美与男团的视觉体系高度契合，能get到所有颜值与画面亮点。",
+            low: "<strong>审美基础匹配。</strong> 你喜欢男团的视觉风格，可探索更多MV与造型细节。"
+        },
+        trend: {
+            high: "<strong>潮流态度引领风口！</strong> 你的追星理念、潮流态度与2026 KPOP趋势完全契合，是天生的潮流粉丝。",
+            med: "<strong>潮流高度适配。</strong> 你的潮流认知与男团的定位高度统一，紧跟KPOP最新趋势。",
+            low: "<strong>潮流基础匹配。</strong> 你跟随KPOP潮流，可逐步形成自己独特的追星态度。"
+        }
+    };
+    
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimName(key)} 
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)})</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// 雷达图绘制
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['style','stage','personality','aesthetic','trend'];
+    const labels = ['风格','舞台','性格','审美','潮流'];
+    
+    ctx.strokeStyle = '#dfe6e9';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 30, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(126, 87, 194, 0.1)");
+    grd.addColorStop(1, "rgba(126, 87, 194, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#7E57C2'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2c3e50'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+function updateLimitUI() {
+    document.getElementById('limit-hint').innerText = `本设备剩余可用次数：${remaining}次`;
+}
+
+msg.style.opacity = 0;
+    
+    document.getElementById('load-layer').style.display = 'flex';
+    setTimeout(() => {
+        sessionStorage.setItem('unlocked_' + pageId, 'true');
+        setTimeout(() => { 
+        }, 500);
+    }, 2000);
+}
+
+// 绑定事件
+window.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('unlocked_' + pageId)) {
+        updateLimitUI();
+    }
+
+    .addEventListener('click', function() {
+        
+    });
+    .addEventListener('click', function() {
+        
+    });
+    .addEventListener('click', function() {
+        
+    });
+    .addEventListener('click', function() {
+        
+    });
+
+    document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+    document.getElementById('init-test-btn').addEventListener('click', initTest);
+    document.getElementById('prev-btn').addEventListener('click', prevQuestion);
+    document.getElementById('show-report-btn').addEventListener('click', showReport);
+    document.getElementById('close-report-btn').addEventListener('click', closeReport);
+    document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "kpopntm";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>恋爱人格测试 | 基于大五人格理论</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #FF6B81;
+            --primary-dark: #E85A70;
+            --accent: #FFB7B2;
+            --accent-hover: #FF9E99;
+            --safe: #00B42A;
+            --warning: #FF7D00;
+            --bg-gradient-start: #FFF5F6;
+            --bg-gradient-end: #FFEFF0;
+            --text-main: #1D2129;
+            --text-sub: #6B7280;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.15);
+        }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-pink { 0% { box-shadow: 0 0 0 0 rgba(255, 107, 129, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 107, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 107, 129, 0); } }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 129, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#ffe6ea 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 40px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #1D2129;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 16px; color: #6B7280; margin-bottom: 40px; line-height: 1.6; }
+
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ffdee5;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #1D2129; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #1D2129; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #ffdee5; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #1D2129; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+
+        .question-card { flex: 1; }
+        .question-tag {
+            display: inline-block; background: #ffdee5; color: var(--primary); padding: 4px 10px;
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #1D2129; }
+
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #34495e; cursor: pointer; border: 2px solid #ffdee5; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #fff0f3; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+
+        #page-result {
+            display: none; background: #ffeef0; padding-bottom: 100px;
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ffdee5;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--primary); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .level-badge {
+            background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #7f8c8d; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #1D2129; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #1D2129; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #7f8c8d; }
+
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--primary); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-pink 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #7f8c8d; width: 100%; padding: 10px;
+            border: 1px solid #bdc3c7; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: var(--primary); color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #1D2129; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ffdee5; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #34495e; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fff5f6; border: 1px solid #ffdee5; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #555; }
+
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+
+        #page-loading { display: none; height: 100vh; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: #fff; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-恋爱人格测试" class="fade-in">
+        <div class="cover-tag">大五人格恋爱版</div>
+        <h1 class="cover-title">恋爱<span>人格</span><br>类型测试</h1>
+        <p class="cover-subtitle">基于大五人格理论<br>深度解析你的恋爱性格密码</p>
+
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">💕</div>
+                <div class="feature-title">五维人格分析</div>
+                <div class="feature-desc">外向/亲和/尽责/开放/情绪，全方位扫描你的恋爱特质。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🌈</div>
+                <div class="feature-title">精准人格匹配</div>
+                <div class="feature-desc">科学测算你的恋爱人格类型与匹配方式。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">深度心理报告</div>
+                <div class="feature-desc">专业解析你的恋爱优势与成长空间。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">千字专属报告</div>
+                <div class="feature-desc">深度解析你的恋爱人格密码与相处指南。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始测试 (约需 2 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#1D2129; margin-bottom:10px;">个人恋爱档案 💕</h2>
+        <p style="color:#6B7280; font-size:14px; margin-bottom:30px;">系统将根据你的偏好精准分析恋爱人格。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的恋爱经历？</label>
+            <select id="input-status" class="select-box">
+                <option value="single">母胎solo (从未恋爱)</option>
+                <option value="few">少数几次 (1-2段)</option>
+                <option value="many">多段恋爱 (3段以上)</option>
+                <option value="long">长期稳定 (有固定伴侣)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你向往的恋爱类型？</label>
+            <select id="input-title" class="select-box">
+                <option value="passion">热烈浪漫 (轰轰烈烈)</option>
+                <option value="steady">细水长流 (平淡甜蜜)</option>
+                <option value="free">独立自由 (相互成就)</option>
+                <option value="soul">灵魂伴侣 (精神共鸣)</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：外向性</span>
+            <span id="progress-text">1 / 20</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">💕 外向性</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <div id="page-loading" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-pink 1s infinite; border-radius:50%;">💕</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#1D2129;">正在分析你的恋爱人格...</h3>
+        <p style="color:#6B7280; font-size:14px; line-height:1.8;">正在扫描五维人格特质...<br>计算恋爱类型...<br>生成专属报告...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">人格指数</span>
+            </div>
+            <div class="level-badge" id="res-level">分析中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维恋爱人格雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《恋爱人格深度分析报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新测试 探索新人格</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">LOVE PERSONALITY REPORT</div>
+            <div class="r-h1">恋爱人格深度分析报告</div>
+            <div style="font-size:14px;">基于大五人格的专属恋爱指南</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+
+</div>
+
+<script>
+const questions = [
+    { d: 'extro', t: '外向性', q: "在社交场合中，你通常的表现是？", o: [
+        {t:"主动搭话，社交达人", s:10},
+        {t:"偶尔主动，自然交流", s:7},
+        {t:"被动等待，但会回应", s:3},
+        {t:"安静观察，很少主动", s:0}
+    ]},
+    { d: 'extro', t: '外向性', q: "周末你更倾向于？", o: [
+        {t:"参加聚会，认识新朋友", s:10},
+        {t:"和好友一起出游", s:7},
+        {t:"偶尔出门，大部分时间独处", s:3},
+        {t:"宅家，享受独处时光", s:0}
+    ]},
+    { d: 'extro', t: '外向性', q: "面对陌生人的搭讪，你的反应是？", o: [
+        {t:"热情回应，相谈甚欢", s:10},
+        {t:"礼貌回应，不排斥", s:7},
+        {t:"简短回应，快速结束", s:3},
+        {t:"礼貌拒绝，保持距离", s:0}
+    ]},
+    { d: 'extro', t: '外向性', q: "你的恋爱风格更倾向于？", o: [
+        {t:"公开甜蜜，高调示爱", s:10},
+        {t:"适度展示，甜蜜共享", s:7},
+        {t:"低调处理，私下甜蜜", s:3},
+        {t:"含蓄内敛，私下相处", s:0}
+    ]},
+    { d: 'agree', t: '亲和性', q: "当与恋人发生矛盾时，你通常会？", o: [
+        {t:"主动沟通，寻求和解", s:10},
+        {t:"冷静后沟通", s:7},
+        {t:"等待对方先开口", s:3},
+        {t:"冷战回避", s:0}
+    ]},
+    { d: 'agree', t: '亲和性', q: "在关系中你是否愿意为对方妥协？", o: [
+        {t:"经常妥协，求同存异", s:10},
+        {t:"适当妥协，保持自我", s:7},
+        {t:"原则问题上不让步", s:3},
+        {t:"坚持自我，很少妥协", s:0}
+    ]},
+    { d: 'agree', t: '亲和性', q: "你对恋人前任的态度是？", o: [
+        {t:"坦然接受，不计较过去", s:10},
+        {t:"接受但会好奇", s:7},
+        {t:"在意但不说", s:3},
+        {t:"非常在意，无法接受", s:0}
+    ]},
+    { d: 'agree', t: '亲和性', q: "在恋爱中你有多信任对方？", o: [
+        {t:"完全信任，毫无保留", s:10},
+        {t:"基本信任，有所保留", s:7},
+        {t:"部分信任，保持警惕", s:3},
+        {t:"很难信任，随时警惕", s:0}
+    ]},
+    { d: 'consci', t: '尽责性', q: "你是否会记得恋人的重要纪念日？", o: [
+        {t:"记得并主动准备惊喜", s:10},
+        {t:"记得并会庆祝", s:7},
+        {t:"偶尔忘记，会补救", s:3},
+        {t:"经常忘记，无所谓", s:0}
+    ]},
+    { d: 'consci', t: '尽责性', q: "面对恋爱中的承诺，你的态度是？", o: [
+        {t:" 言出必行，高度负责", s:10},
+        {t:"尽量做到，负责", s:7},
+        {t:"看情况，不太在意", s:3},
+        {t:"随意承诺，不太当回事", s:0}
+    ]},
+    { d: 'consci', t: '尽责性', q: "你会规划与恋人的未来吗？", o: [
+        {t:"有详细未来规划", s:10},
+        {t:"有大致规划", s:7},
+        {t:"走一步看一步", s:3},
+        {t:"不考虑太远，活在当下", s:0}
+    ]},
+    { d: 'consci', t: '尽责性', q: "你对待感情的态度是？", o: [
+        {t:"认真对待，专一深情", s:10},
+        {t:"认真但有底线", s:7},
+        {t:"随缘，开心就好", s:3},
+        {t:"游戏人间，享受当下", s:0}
+    ]},
+    { d: 'open', t: '开放性', q: "你愿意尝试恋爱中的新形式吗？", o: [
+        {t:"非常愿意，勇于尝试", s:10},
+        {t:"愿意，适度尝试", s:7},
+        {t:"不太愿意，保守为主", s:3},
+        {t:"拒绝，保持传统", s:0}
+    ]},
+    { d: 'open', t: '开放性', q: "你对跨国/异地恋的看法是？", o: [
+        {t:"完全接受，勇于挑战", s:10},
+        {t:"可以接受，努力克服", s:7},
+        {t:"不太愿意，困难太多", s:3},
+        {t:"完全不接受", s:0}
+    ]},
+    { d: 'open', t: '开放性', q: "你对恋爱多元化形式的态度？", o: [
+        {t:"完全开放，接受各种形式", s:10},
+        {t:"尊重，接受不同的选择", s:7},
+        {t:"中立，不太关心", s:3},
+        {t:"传统，坚持主流", s:0}
+    ]},
+    { d: 'open', t: '开放性', q: "你对婚恋观的看法？", o: [
+        {t:"跟随内心，不被传统束缚", s:10},
+        {t:"尊重传统但灵活变通", s:7},
+        {t:"基本遵循传统", s:3},
+        {t:"完全遵循传统观念", s:0}
+    ]},
+    { d: 'neuro', t: '情绪性', q: "恋爱中你容易吃醋吗？", o: [
+        {t:"经常吃醋，情绪波动大", s:10},
+        {t:"偶尔吃醋，能克制", s:7},
+        {t:"很少吃醋，信任为主", s:3},
+        {t:"完全不吃醋，理性", s:0}
+    ]},
+    { d: 'neuro', t: '情绪性', q: "面对恋人失联时你会？", o: [
+        {t:"焦虑不安，胡思乱想", s:10},
+        {t:"担心但能克制", s:7},
+        {t:"短暂担心后会理���", s:3},
+        {t:"冷静等待，不受影响", s:0}
+    ]},
+    { d: 'neuro', t: '情绪性', q: "恋爱中你会缺乏安全感吗？", o: [
+        {t:"经常缺乏安全感", s:10},
+        {t:"偶尔会，缺乏自信", s:7},
+        {t:"基本还好，信任对方", s:3},
+        {t:"完全信任，充满安全感", s:0}
+    ]},
+    { d: 'neuro', t: '情绪性', q: "你对待失恋的态度是？", o: [
+        {t:"情绪低落，需要很长时间恢复", s:10},
+        {t:"难过但能尽快调整", s:7},
+        {t:"快速调整，重新出发", s:3},
+        {t:"坦然接受，及时止损", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},];
+
+const roleSpecific = {
+    single: [
+        { d: 'extro', t: '恋爱经历', q: "【恋爱小白】你对追求者的态度是？", o: [
+            {t:"积极回应，愿意尝试", s:10}, {t:"谨慎观察", s:7}, {t:"还在犹豫", s:3}, {t:"直接拒绝", s:0}
+        ]},
+        { d: 'neuro', t: '恋爱经历', q: "【恋爱小白】你对暗恋的人会？", o: [
+            {t:"勇敢表白", s:10}, {t:"默默关注", s:7}, {t:"等待机会", s:3}, {t:"只放心里", s:0}
+        ]}
+    ],
+    few: [
+        { d: 'agree', t: '有限经验', q: "【有限经验】你更在意恋人的？", o: [
+            {t:"颜值与感觉", s:10}, {t:"性格合适", s:7}, {t:"条件相当", s:3}, {t:"缘分到了", s:0}
+        ]},
+        { d: 'consci', t: '有限经验', q: "【有限经验】你会主动推进关系吗？", o: [
+            {t:"非常主动", s:10}, {t:"适度主动", s:7}, {t:"被动等待", s:3}, {t:"顺其自然", s:0}
+        ]}
+    ],
+    many: [
+        { d: 'open', t: '丰富经验', q: "【情场老手】你对恋爱看法是？", o: [
+            {t:"享受过程，不断尝试", s:10}, {t:"寻找真爱", s:7}, {t:"遇到合适的就定", s:3}, {t:"宁缺毋滥", s:0}
+        ]},
+        { d: 'neuro', t: '丰富经验', q: "【情场老手】你会怀念前任吗？", o: [
+            {t:"偶尔想起，感恩遇见", s:10}, {t:"偶尔想起，有所遗憾", s:7}, {t:"很少想起", s:3}, {t:"完全放下，开启新篇", s:0}
+        ]}
+    ],
+    long: [
+        { d: 'agree', t: '稳定关系', q: "【稳定关系】你们会有仪式感吗？", o: [
+            {t:"经常有，珍惜相处", s:10}, {t:"偶尔有，保持新鲜", s:7}, {t:"很少刻意", s:3}, {t:"相处自然，不强求", s:0}
+        ]},
+        { d: 'consci', t: '稳定关系', q: "【稳定关系】你会给彼此空间吗？", o: [
+            {t:"给足空间，信任彼此", s:10}, {t:"适度给空间", s:7}, {t:"希望粘在一起", s:3}, {t:"没有空间概念", s:0}
+        ]}
+    ]
+};
+
+const levels = [
+    { max: 25, l: "纯爱战士型", c: "#FF6B81", d: "对爱情充满理想和热情，愿意为爱付出一切。", advice: "适合找一个同样热情的伴侣，但要学会保护自己。" },
+    { max: 40, l: "浪漫诗人型", c: "#FF9A8B", d: "追求精神共鸣和浪漫氛围，恋爱中注重情感交流。", advice: "适合找一个有文艺气质的灵魂伴侣，注重精神层面沟通。" },
+    { max: 55, l: "温暖伴侣型", c: "#FFB7B2", d: "擅长照顾人，在关系中给予温暖和关怀。", advice: "适合找一个需要被照顾的伴侣，你的温暖会让关系更稳固。" },
+    { max: 70, l: "理性规划型", c: "#FFD93D", d: "恋爱中保持理性，注重长远规划和责任担当。", advice: "适合找一个同样成熟的伴侣，共同规划未来生活。" },
+    { max: 85, l: "独立自主型", c: "#6BCB77", d: "在恋爱中保持独立，崇尚自由，相互成就。", advice: "适合找一个同样独立的伴侣，给彼此空间共同成长。" },
+    { max: 200, l: "佛系随缘型", c: "#4D96FF", d: "顺其自然，不强求，恋爱中保持平和心态。", advice: "适合找任何一个类型的伴侣，关键是要遇到对的人。" }
+];
+
+let currQList = [];
+let currIdx = 0;
+let userRole = '';
+let userTitle = '';
+let scores = { extro:0, agree:0, consci:0, open:0, neuro:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userRole = document.getElementById('input-status').value;
+    userTitle = document.getElementById('input-title').value;
+
+    currQList = [...questions, ...roleSpecific[userRole]];
+    currIdx = 0;
+    scores = { extro:0, agree:0, consci:0, open:0, neuro:0 };
+
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { extro:0, agree:0, consci:0, open:0, neuro:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+
+    let lvl = levels.find(l => totalRaw <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, totalRaw, 1500);
+
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'extro', n:'外向'}, {k:'agree', n:'亲和'},
+        {k:'consci', n:'尽责'}, {k:'open', n:'开放'}, {k:'neuro', n:'情绪'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 40) * 100, 100);
+        let color = pct> 60 ? '#FF6B81' : (pct> 30 ? '#FFB7B2' : '#6BCB77');
+        let txt = pct> 70 ? '突出' : (pct> 40 ? '中等' : '普通');
+
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {extro:'外向性', agree:'亲和性', consci:'尽责性', open:'开放性', neuro:'情绪性'};
+    return map[k];
+}
+
+function generateReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、恋爱人格诊断书</div>
+        <p class="r-p" style="background:#fff5f6; padding:12px; border-radius:8px; font-size:14px; border:1px solid #ffdee5;">
+            <strong>💕 个人档案：</strong>${getRoleName(userRole)} <br>
+            <strong>✨ 恋爱偏好：</strong>${getTitleName(userTitle)}
+        </p>
+
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">你的恋爱人格类型：${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#999; margin-right:8px;">人格指数</span>
+                <span style="font-size:36px; font-weight:900; color:#1D2129; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#999;">/ 200</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>人格分析：</strong>${lvl.d}</p>
+        </div>
+
+        <p class="r-p">
+        大五人格理论是现代心理学中最具影响力的人格模型之一，它从五个核心维度——外向性、亲和性、尽责性、开放性和情绪性——来描述人类的人格特质。
+        在恋爱中，这五个维度相互交织，共同塑造了你在亲密关系中的独特表现模式。经过系统对你的20道题目深度分析，
+        精准识别出你的恋爱人格类型为<span style="background:${lvl.c}; color:#fff; padding:2px 6px; border-radius:4px; font-weight:bold;">${lvl.l}</span>。
+        你的核心特质为<span style="color:${lvl.c}; font-weight:bold;">${getDimFullCN(maxDimKey)}</span>，这决定了你恋爱中的核心行为模式。
+        </p>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维恋爱人格深度解构</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px; font-style:italic;">*基于大五人格理论的科学分析</p>
+        ${generateDimAnalysis('extro', scores.extro)}
+        ${generateDimAnalysis('agree', scores.agree)}
+        ${generateDimAnalysis('consci', scores.consci)}
+        ${generateDimAnalysis('open', scores.open)}
+        ${generateDimAnalysis('neuro', scores.neuro)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、专属恋爱相处指南</div>
+        <div class="r-box" style="border-color:#ffdee5;">
+            <div class="r-h3">💕 恋爱风格解读</div>
+            <p class="r-p">
+            你的恋爱人格类型决定了你在亲密关系中的行为模式。${lvl.l}的你，在恋爱中倾向于${getLoveStyle(lvl.l)}。
+            理解自己的恋爱人格类型，是提升恋爱质量的第一步。
+            </p>
+        </div>
+
+        <div class="r-box" style="background:#fff5f6; border-color:#FF6B81;">
+            <div class="r-h3" style="color:#FF6B81;">
+                ✨ 专属恋爱建议
+            </div>
+            <ul class="r-list">
+                <li><strong>恋爱优势：</strong> ${getLoveAdvantage(lvl.l)}</li>
+                <li><strong>需要注意：</strong> ${getLoveCaution(lvl.l)}</li>
+                <li><strong>理想伴侣：</strong> ${getIdealPartner(lvl.l)}</li>
+                <li><strong>相处模式：</strong> ${getLovePattern(lvl.l)}</li>
+            </ul>
+        </div>
+
+        <div class="r-box">
+            <div class="r-h3">💡 恋爱成长建议</div>
+            <p class="r-p">
+            每一种恋爱人格都有自己的优势和成长空间。了解自己的类型后，更重要的是认识到自己在恋爱中需要成长的方向。
+            建议你从以下几个方面进行自我提升，逐步完善自己的恋爱能力，从而收获更加幸福稳定的亲密关系。
+            </p>
+            <p class="r-p">
+            爱情是需要两个人共同经营的事业，愿你能够认清自己的恋爱人格，发挥优势，补足短板，
+            在恋爱中不断成长，最终收获属于自己的幸福。
+            </p>
+        </div>
+    </div>
+
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        恋爱人格深度分析报告 · 自动生成<br>
+        愿你认清自我，收获幸福
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function showReport() {
+    generateReport();
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function getRoleName(r) {
+    const m = { single: '母胎solo', few: '情窦初开', many: '情场老手', long: '稳定关系' };
+    return m[r] || r;
+}
+
+function getTitleName(t) {
+    const m = { passion: '热烈浪漫型', steady: '细水长流型', free: '独立自由型', soul: '灵魂伴侣型' };
+    return m[t] || t;
+}
+
+function getDimFullCN(k) {
+    const map = { extro: '外向性', agree: '亲和性', consci: '尽责性', open: '开放性', neuro: '情绪性' };
+    return map[k];
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 25 ? 'high' : (val> 15 ? 'med' : 'low');
+
+    const config = {
+        high: { color: '#FF6B81', bg: '#fff5f6', tag: '🌟 突出', titleColor: '#FF6B81' },
+        med: { color: '#FFB7B2', bg: '#fff9f9', tag: '✨ 中等', titleColor: '#FFB7B2' },
+        low: { color: '#6BCB77', bg: '#f0fff4', tag: '🌿 普通', titleColor: '#6BCB77' }
+    };
+
+    const c = config[riskLevel];
+
+    const texts = {
+        extro: {
+            high: "<strong>外向性拉满！</strong>你在恋爱中主动热情，喜欢表达，是社交达人。但要注意给对方一定的空间，不要过于强势。",
+            med: "<strong>外向性适中。</strong>你懂得平衡主动与被动，在恋爱中能够自然表达情感，是健康的恋爱状态。",
+            low: "<strong>外向性较弱。</strong>你更内向被动，在恋爱中需要更多时间热身。建议尝试走出舒适区，主动表达。"
+        },
+        agree: {
+            high: "<strong>亲和性拉满！</strong>你贴心温柔，擅长照顾他人感受，在恋爱中是很好的伴侣选择。",
+            med: "<strong>亲和性适中。</strong>你懂得照顾对方感受，但也知道维护自己的边界，是健康的平衡状态。",
+            low: "<strong>亲和性较弱。</strong>你更自我，在恋爱中要坚持自己的原则。学会换位思考会让关系更和谐。"
+        },
+        consci: {
+            high: "<strong>尽责性拉满！</strong>你对待感情认真负责，值得信赖。但要注意不要给自己和对方太大压力。",
+            med: "<strong>尽责性适中。</strong>你认真对待感情，但也懂得灵活变通，是成熟稳定的恋爱状态。",
+            low: "<strong>尽责性较弱。</strong>你随性洒脱，不被束缚。但也要学会对感情负责，避免伤害对方。"
+        },
+        open: {
+            high: "<strong>开放性拉满！</strong>你勇于尝试新事物，恋爱中充满创意和惊喜。但要注意对方的接受度。",
+            med: "<strong>开放性适中。</strong>你愿意尝试新事物，但也会考虑传统和稳定，是平衡的恋爱状态。",
+            low: "<strong>开放性较弱。</strong>你更传统保守，恋爱中喜欢稳定。但可以尝试一些新体验，增加情趣。"
+        },
+        neuro: {
+            high: "<strong>情绪性较高。</strong>你情感丰富，恋爱中容易情绪波动。需要学会情绪管理，保持内心平静。",
+            med: "<strong>情绪性适中。</strong>你情感细腻，但不外露，是健康的情绪状态。",
+            low: "<strong>情绪性很低。</strong>你理性冷静，不容易被情绪影响。但也要注意表达情感，让对方感受到爱意。"
+        }
+    };
+
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimFullCN(key)}
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)})</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+function getLoveStyle(type) {
+    const map = {
+        '纯爱战士型': '热情主动，追求轰轰烈烈的爱情',
+        '浪漫诗人型': '注重氛围，追求精神层面的共鸣',
+        '温暖伴侣型': '关怀备至，给予对方温暖和照顾',
+        '理性规划型': '深思熟虑，注重长远发展和责任',
+        '独立自主型': '保持自我，崇尚自由相互成就',
+        '佛系随缘型': '顺其自然，享受当下的相处时光'
+    };
+    return map[type] || '独特的恋爱风格';
+}
+
+function getLoveAdvantage(type) {
+    const map = {
+        '纯爱战士型': '热情真诚，敢于表达爱意',
+        '浪漫诗人型': '情感细腻，懂得制造浪漫',
+        '温暖伴侣型': '体贴入微，照顾周全',
+        '理性规划型': '成熟稳重，有责任感',
+        '独立自主型': '尊重彼此，给对方空间',
+        '佛系随缘型': '心态平和，不强求'
+    };
+    return map[type] || '独特的优势';
+}
+
+function getLoveCaution(type) {
+    const map = {
+        '纯爱战士型': '避免过度付出，失去自我',
+        '浪漫诗人型': '不要过于追求完美',
+        '温暖伴侣型': '学会照顾自己',
+        '理性规划型': '适当放松，享受当下',
+        '独立自主型': '不要过于疏离',
+        '佛系随缘型': '主动把握机会'
+    };
+    return map[type] || '注意适度';
+}
+
+function getIdealPartner(type) {
+    const map = {
+        '纯爱战士型': '同样热情的伴侣',
+        '浪漫诗人型': '有文艺气质的灵魂伴侣',
+        '温暖伴侣型': '懂得感恩的伴侣',
+        '理性规划型': '成熟稳重的伴侣',
+        '独立自主型': '同样独立的伴侣',
+        '佛系随缘型': '任何类型的伴侣'
+    };
+    return map[type] || '合适的伴侣';
+}
+
+function getLovePattern(type) {
+    const map = {
+        '纯爱战士型': '主动出击，制造惊喜',
+        '浪漫诗人型': '精神交流，共创回忆',
+        '温暖伴侣型': '日常关心，细节陪伴',
+        '理性规划型': '共同规划，稳步前进',
+        '独立自主型': '保持距离，共同成长',
+        '佛系随缘型': '顺其自然，享受当下'
+    };
+    return map[type] || '舒适的相处模式';
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+
+    const cx=120, cy=120, r=90;
+    const keys = ['extro','agree','consci','open','neuro'];
+    const labels = ['外向','亲和','尽责','开放','情绪'];
+
+    ctx.strokeStyle = '#ffdee5';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k];
+        let ratio = Math.min(val / 40, 1.1);
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(255, 107, 129, 0.1)");
+    grd.addColorStop(1, "rgba(255, 107, 129, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+
+    ctx.strokeStyle = '#FF6B81'; ctx.lineWidth = 2; ctx.stroke();
+
+    ctx.fillStyle = '#1D2129'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+    document.getElementById('init-test-btn').addEventListener('click', initTest);
+    document.getElementById('prev-btn').addEventListener('click', prevQuestion);
+    document.getElementById('show-report-btn').addEventListener('click', showReport);
+    document.getElementById('close-report-btn').addEventListener('click', closeReport);
+    document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "largv";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

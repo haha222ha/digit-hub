@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>婚前焦虑检测 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #8B5CF6;
+            --primary-dark: #7C3AED;
+            --accent: #F59E0B;
+            --safe: #10B981;
+            --warning: #EF4444;
+            --bg-gradient-start: #FAF5FF;
+            --bg-gradient-end: #EDE9FE;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-purple { 0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); } }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#ede9fe 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ede9fe; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #ede9fe; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #ede9fe; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #ede9fe; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #ede9fe; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        #page-result { display: none; background: #ede9fe; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ede9fe; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-purple 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ede9fe; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #ede9fe; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-婚前焦虑检测" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">婚前焦虑<br><span>程度</span>检测</h1>
+        <p class="cover-subtitle">科学评估你的婚前焦虑水平<br>找到焦虑的根源并提供解决方案</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🔍</div>
+                <div class="feature-title">五维深度分析</div>
+                <div class="feature-desc">婚前焦虑、婚姻恐惧、经济担忧、家庭压力、关系不确定，全面扫描。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">压力心理学理论</div>
+                <div class="feature-desc">基于压力心理学和婚前咨询理论，科学评估焦虑水平。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">⚠️</div>
+                <div class="feature-title">精准定位原因</div>
+                <div class="feature-desc">找到你婚前焦虑的核心原因。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💡</div>
+                <div class="feature-title">专业解决方案</div>
+                <div class="feature-desc">提供针对性的婚前焦虑缓解方案。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始检测 (约需 3 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">婚前档案建立 💕</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的情况精准评估婚前焦虑程度。</p>
+
+        <div class="form-group">
+            <label class="form-label">你们计划什么时候结婚？</label>
+            <select id="input-time" class="select-box">
+                <option value="1m">1个月内</option>
+                <option value="3m">3个月内</option>
+                <option value="6m">半年内</option>
+                <option value="1y">一年内</option>
+                <option value="later">还没确定</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你对婚姻的期待程度？</label>
+            <select id="input-expect" class="select-box">
+                <option value="veryhigh">非常期待</option>
+                <option value="high">比较期待</option>
+                <option value="normal">一般</option>
+                <option value="low">不太期待</option>
+                <option value="fear">有些恐惧</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">双方父母对婚姻的态度？</label>
+            <select id="input-parents" class="select-box">
+                <option value="support">双方都支持</option>
+                <option value="mostly">大部分支持</option>
+                <option value="mixed">有些分歧</option>
+                <option value="oppose">有反对意见</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：婚姻恐惧</span>
+            <span id="progress-text">1 / 20</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🔍 婚姻恐惧</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+
+    <div id="page-loading">
+        <div style="font-size:50px; animation: pulse-purple 1s infinite;">💍</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的婚前焦虑...</h3>
+        <p style="color:#636E72; font-size:14px;">正在扫描五维数据...<br>计算婚前焦虑指数...<br>生成专属报告...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">婚前焦虑指数</span>
+            </div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 婚前焦虑五维雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《婚前焦虑深度分析报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新检测</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div>
+            <div class="r-h1">婚前焦虑深度分析报告</div>
+            <div style="font-size:14px;">专业心理测评 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+
+</div>
+
+<script>
+const questions = [
+    { d: 'fear', t: '婚姻恐惧', q: "你对婚后失去自由感到担忧吗？", o: [
+        {t:"非常担忧", s:10},
+        {t:"比较担忧", s:7},
+        {t:"有一点", s:5},
+        {t:"不担忧", s:0}
+    ]},
+    { d: 'fear', t: '婚姻恐惧', q: "你担心婚后的生活方式会发生巨大改变吗？", o: [
+        {t:"非常担心", s:10},
+        {t:"比较担心", s:7},
+        {t:"偶尔担心", s:5},
+        {t:"不担心", s:0}
+    ]},
+    { d: 'fear', t: '婚姻恐惧', q: "你害怕婚后会失去自己的社交圈吗？", o: [
+        {t:"非常害怕", s:10},
+        {t:"比较害怕", s:7},
+        {t:"有一点", s:5},
+        {t:"不害怕", s:0}
+    ]},
+    { d: 'fear', t: '婚姻恐惧', q: "你对"结婚"这个决定感到犹豫吗？", o: [
+        {t:"非常犹豫", s:10},
+        {t:"比较犹豫", s:7},
+        {t:"偶尔犹豫", s:5},
+        {t:"不犹豫", s:0}
+    ]},
+    { d: 'fear', t: '婚姻恐惧', q: "你想象婚礼场景时，会感到紧张吗？", o: [
+        {t:"非常紧张", s:10},
+        {t:"比较紧张", s:7},
+        {t:"有一点", s:5},
+        {t:"不紧张", s:0}
+    ]},
+    
+    { d: 'economic', t: '经济担忧', q: "你对婚后经济压力感到担忧吗？", o: [
+        {t:"非常担忧", s:10},
+        {t:"比较担忧", s:7},
+        {t:"有一点", s:5},
+        {t:"不担忧", s:0}
+    ]},
+    { d: 'economic', t: '经济担忧', q: "你对买房买车的压力感到焦虑吗？", o: [
+        {t:"非常焦虑", s:10},
+        {t:"比较焦虑", s:7},
+        {t:"有一点", s:5},
+        {t:"不焦虑", s:0}
+    ]},
+    { d: 'economic', t: '经济担忧', q: "你担心婚后生活质量会下降吗？", o: [
+        {t:"非常担心", s:10},
+        {t:"比较担心", s:7},
+        {t:"有一点", s:5},
+        {t:"不担心", s:0}
+    ]},
+    { d: 'economic', t: '经济担忧', q: "你对婚后理财和消费观念的分歧感到担忧吗？", o: [
+        {t:"非常担忧", s:10},
+        {t:"比较担忧", s:7},
+        {t:"有一点", s:5},
+        {t:"不担忧", s:0}
+    ]},
+    
+    { d: 'family', t: '家庭压力', q: "你担心婚后与对方家人相处会有问题吗？", o: [
+        {t:"非常担心", s:10},
+        {t:"比较担心", s:7},
+        {t:"有一点", s:5},
+        {t:"不担心", s:0}
+    ]},
+    { d: 'family', t: '家庭压力', q: "你对婚后要处理复杂的家庭关系感到压力吗？", o: [
+        {t:"压力很大", s:10},
+        {t:"压力较大", s:7},
+        {t:"有一点", s:5},
+        {t:"没有压力", s:0}
+    ]},
+    { d: 'family', t: '家庭压力', q: "你担心双方家庭对你们婚姻的期望会给你们带来压力吗？", o: [
+        {t:"非常担心", s:10},
+        {t:"比较担心", s:7},
+        {t:"有一点", s:5},
+        {t:"不担心", s:0}
+    ]},
+    { d: 'family', t: '家庭压力', q: "你对生育问题（是否要孩子、何时要）感到焦虑吗？", o: [
+        {t:"非常焦虑", s:10},
+        {t:"比较焦虑", s:7},
+        {t:"有一点", s:5},
+        {t:"不焦虑", s:0}
+    ]},
+    
+    { d: 'relation', t: '关系不确定', q: "你对婚后感情会变淡感到担忧吗？", o: [
+        {t:"非常担忧", s:10},
+        {t:"比较担忧", s:7},
+        {t:"有一点", s:5},
+        {t:"不担忧", s:0}
+    ]},
+    { d: 'relation', t: '关系不确定', q: "你担心婚后对方会发生变化吗？", o: [
+        {t:"非常担心", s:10},
+        {t:"比较担心", s:7},
+        {t:"有一点", s:5},
+        {t:"不担心", s:0}
+    ]},
+    { d: 'relation', t: '关系不确定', q: "你对婚后吵架会影响感情感到担忧吗？", o: [
+        {t:"非常担忧", s:10},
+        {t:"比较担忧", s:7},
+        {t:"有一点", s:5},
+        {t:"不担忧", s:0}
+    ]},
+    { d: 'relation', t: '关系不确定', q: "你对"七年之痒"或婚姻危机感到恐惧吗？", o: [
+        {t:"非常恐惧", s:10},
+        {t:"比较恐惧", s:7},
+        {t:"有一点", s:5},
+        {t:"不恐惧", s:0}
+    ]},
+    
+    { d: 'self', t: '自我认同', q: "你担心婚后会失去自我吗？", o: [
+        {t:"非常担心", s:10},
+        {t:"比较担心", s:7},
+        {t:"有一点", s:5},
+        {t:"不担心", s:0}
+    ]},
+    { d: 'self', t: '自我认同', q: "你担心婚后无法平衡事业和家庭吗？", o: [
+        {t:"非常担心", s:10},
+        {t:"比较担心", s:7},
+        {t:"有一点", s:5},
+        {t:"不担心", s:0}
+    ]},
+    { d: 'self', t: '自我认同', q: "你对婚后能否保持个人成长感到不确定吗？", o: [
+        {t:"非常不确定", s:10},
+        {t:"比较不确定", s:7},
+        {t:"有一点", s:5},
+        {t:"确定可以", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const levels = [
+    { max: 40, l: "无焦虑", c: "#10B981", d: "你对婚姻充满信心，没有明显的婚前焦虑。", advice: "继续保持这种积极的心态，你们的婚姻生活值得期待。" },
+    { max: 70, l: "轻度焦虑", c: "#F59E0B", d: "你对婚姻有一些担忧，但整体心态比较平稳。", advice: "建议与伴侣多沟通，共同面对即将到来的变化。" },
+    { max: 100, l: "中度焦虑", c: "#F97316", d: "你的婚前焦虑比较明显，可能需要更多关注。", advice: "建议与伴侣深入沟通，必要时可以寻求婚前咨询帮助。" },
+    { max: 140, l: "高度焦虑", c: "#EF4444", d: "你的婚前焦虑程度较高，需要引起重视。", advice: "建议认真审视自己的担忧，与伴侣坦诚沟通，必要时寻求专业心理咨询。" },
+    { max: 200, l: "极度焦虑", c: "#DC2626", d: "你的婚前焦虑非常严重，可能影响婚姻决策。", advice: "强烈建议寻求专业婚前心理咨询帮助，深入了解焦虑的根源。" }
+];
+
+let currQList = [];
+let currIdx = 0;
+let userInfo = {};
+let scores = { fear:0, economic:0, family:0, relation:0, self:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userInfo.time = document.getElementById('input-time').value;
+    userInfo.expect = document.getElementById('input-expect').value;
+    userInfo.parents = document.getElementById('input-parents').value;
+    
+    currQList = [...questions];
+    currIdx = 0;
+    scores = { fear:0, economic:0, family:0, relation:0, self:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { fear:0, economic:0, family:0, relation:0, self:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+    
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'fear', n:'恐惧'}, {k:'economic', n:'经济'}, 
+        {k:'family', n:'家庭'}, {k:'relation', n:'关系'}, {k:'self', n:'自我'}
+    ];
+    let html = '';
+    dims.forEach(d => {
+        let maxVal = d.k === 'family' ? 40 : 30;
+        let pct = Math.min((s[d.k] / maxVal) * 100, 100);
+        let color = pct> 60 ? '#8B5CF6' : (pct> 30 ? '#F59E0B' : '#10B981');
+        let txt = pct> 70 ? '高焦虑' : (pct> 40 ? '中等' : '较低');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {fear:'婚姻恐惧', economic:'经济担忧', family:'家庭压力', relation:'关系不确定', self:'自我认同'};
+    return map[k];
+}
+
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、婚前焦虑诊断</div>
+        <p class="r-p" style="background:#fafafa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>📋 个人档案：</strong>婚期：${getTimeName(userInfo.time)} | 期待：${getExpectName(userInfo.expect)} | 家庭态度：${getParentsName(userInfo.parents)}
+        </p>
+        <div class="r-box" style="border-left:5px solid ${lvl.c};">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">婚前焦虑等级：${lvl.l}</div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>焦虑评估：</strong>${lvl.d}</p>
+            <p style="margin:10px 0 0; font-size:15px; line-height:1.6; color:#555;"><strong>核心建议：</strong>${lvl.advice}</p>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">二、五维焦虑深度分析</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px;">*基于压力心理学的科学分析</p>
+        ${generateDimAnalysis('fear', scores.fear, '反映你对婚姻本身的恐惧程度，包括对失去自由、生活改变等方面的担忧。')}
+        ${generateDimAnalysis('economic', scores.economic, '反映你对婚后经济状况的担忧，包括收入、房产、理财等方面的焦虑。')}
+        ${generateDimAnalysis('family', scores.family, '反映你处理复杂家庭关系的压力，包括婆媳关系、生育问题等。')}
+        ${generateDimAnalysis('relation', scores.relation, '反映你对婚姻关系稳定性的担忧，包括感情变化、对方变化等方面的焦虑。')}
+        ${generateDimAnalysis('self', scores.self, '反映你对婚后个人发展和自我认同的担忧，包括事业平衡、个人成长等。')}
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">三、婚前焦虑的心理学解析</div>
+        <div class="r-box" style="background:#f5f5ff; border-color:#8B5CF6;">
+            <div class="r-h3" style="color:#8B5CF6;">💡 什么是婚前焦虑？</div>
+            <p class="r-p">
+                <strong>婚前焦虑</strong>是一种在结婚前出现的紧张、担忧和不安的情绪状态。根据压力心理学理论，这是由于即将到来的重大生活变化引发的正常心理反应。
+            </p>
+            <p class="r-p">
+                <strong>适度的婚前焦虑是正常的</strong>，适度的焦虑可以帮助你更认真地对待婚姻，提前发现问题并解决。但如果焦虑过度，则需要引起重视。
+            </p>
+        </div>
+        
+        <div class="r-box" style="background:#fff5f5; border-color:#EF4444;">
+            <div class="r-h3" style="color:#EF4444;">⚠️ 需要关注的信号</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li>持续失眠或睡眠质量下降</li>
+                <li>反复出现负面想法，无法控制</li>
+                <li>对结婚这件事产生强烈的回避心理</li>
+                <li>身体出现不适（头痛、胃痛等）</li>
+                <li>严重影响日常工作和生活</li>
+            </ul>
+            <p class="r-p" style="margin-top:10px;">
+                如果你出现以上情况，建议及时寻求专业心理咨询帮助。
+            </p>
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">四、专业缓解建议</div>
+        <div class="r-box">
+            <div class="r-h3">🎯 针对性行动计划</div>
+            <p class="r-p">根据你的测评结果，以下建议可能对你有帮助：</p>
+            ${getRecommendations(lvl.l).map((p, i) => `<p style="margin:8px 0; padding-left:20px; position:relative;"><span style="position:absolute; left:0; color:#8B5CF6; font-weight:bold;">${i+1}.</span> ${p}</p>`).join('')}
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">五、心理学小知识</div>
+        <div class="r-box" style="background:#f9f9f9;">
+            <div class="r-h3">📚 压力与焦虑</div>
+            <p class="r-p">
+                <strong>压力心理学</strong>告诉我们，压力是一种身体和心理对威胁或挑战的反应。适度的压力可以提升表现，但过度的压力则会对身心健康造成伤害。
+            </p>
+            <p class="r-p">
+                <strong>认知行为理论</strong>认为，我们的情绪和行为很大程度上受到我们想法的影响。改变不合理的想法，可以有效减轻焦虑。
+            </p>
+            <p class="r-p" style="margin-top:10px;">
+                建议你尝试记录自己的负面想法，并尝试用更理性、平衡的角度去看待婚姻中的问题。
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026婚前焦虑检测 · 专业心理测评<br>
+        愿你消除焦虑，拥抱幸福婚姻
+    </div>
+    `;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function getTimeName(t) {
+    const m = {'1m':'1个月内','3m':'3个月内','6m':'半年内','1y':'一年内','later':'还没确定'};
+    return m[t] || t;
+}
+function getExpectName(e) {
+    const m = {'veryhigh':'非常期待','high':'比较期待','normal':'一般','low':'不太期待','fear':'有些恐惧'};
+    return m[e] || e;
+}
+function getParentsName(p) {
+    const m = {'support':'双方都支持','mostly':'大部分支持','mixed':'有些分歧','oppose':'有反对意见'};
+    return m[p] || p;
+}
+
+function generateDimAnalysis(key, val, explanation) {
+    let level = val> 25 ? 'high' : (val> 15 ? 'med' : 'low');
+    const config = {
+        high: { color: '#EF4444', bg: '#fef2f2', tag: '⚠️ 高焦虑', titleColor: '#EF4444' },
+        med: { color: '#F59E0B', bg: '#fffbeb', tag: '⚡ 中等', titleColor: '#F59E0B' },
+        low: { color: '#10B981', bg: '#ecfdf5', tag: '✅ 正常', titleColor: '#10B981' }
+    };
+    const c = config[level];
+    const texts = {
+        fear: { high: "<strong>婚姻恐惧较重！</strong>你对婚姻本身有较多担忧，可能对失去自由或生活改变感到恐惧。", med: "<strong>婚姻恐惧一般。</strong>你对婚姻有一些顾虑，这是正常的。", low: "<strong>婚姻恐惧较低。</strong>你对即将到来的婚姻持开放态度。" },
+        economic: { high: "<strong>经济担忧较重！</strong>你对婚后经济状况有较多顾虑，可能对买房、生活压力等感到焦虑。", med: "<strong>经济担忧一般。</strong>你对经济问题有一些关注，这是正常的。", low: "<strong>经济担忧较低。</strong>你对婚后的经济状况比较有信心。" },
+        family: { high: "<strong>家庭压力较重！</strong>你对处理复杂家庭关系感到压力，包括婆媳关系、生育问题等。", med: "<strong>家庭压力一般。</strong>你对家庭关系有一些关注，可以提前做好准备。", low: "<strong>家庭压力较低。</strong>你对处理家庭关系比较有信心。" },
+        relation: { high: "<strong>关系不确定感较强！</strong>你对婚姻关系的稳定性有较多担忧，可能对感情变化感到不安。", med: "<strong>关系不确定感一般。</strong>你对关系稳定性有一些关注，这是正常的。", low: "<strong>关系不确定感较低。</strong>你对你们的感情比较有信心。" },
+        self: { high: "<strong>自我认同担忧较重！</strong>你对婚后保持自我和个人发展感到不确定，可能担心失去自我。", med: "<strong>自我认同担忧一般。</strong>你对个人发展有一些关注，可以提前规划。", low: "<strong>自我认同稳定。</strong>你对婚后保持自我和成长比较有信心。" }
+    };
+    return `<div style="margin-bottom:20px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor}; margin-top:0;">${getDimName(key)} <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${val})</span><span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span></div><p style="font-size:13px; color:#888; margin-bottom:8px;">${explanation}</p><p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][level]}</p></div>`;
+}
+
+function getRecommendations(level) {
+    const recs = {
+        '无焦虑': ['继续保持积极乐观的心态', '与伴侣分享你的喜悦和期待', '一起规划美好的婚后生活'],
+        '轻度焦虑': ['与伴侣坦诚分享你的担忧', '一起讨论并制定家庭规划', '保持规律作息，学会放松'],
+        '中度焦虑': ['建议与伴侣进行深入沟通', '可以尝试婚前咨询服务', '学会用写日记的方式记录情绪'],
+        '高度焦虑': ['强烈建议寻求专业心理咨询', '与伴侣认真讨论你的顾虑', '给自己更多时间思考婚姻决定'],
+        '极度焦虑': ['立即寻求专业婚前心理咨询', '认真考虑是否准备好进入婚姻', '必要时可以考虑延迟婚期']
+    };
+    return recs[level] || recs['轻度焦虑'];
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    const cx=120, cy=120, r=90;
+    const keys = ['fear','economic','family','relation','self'];
+    const labels = ['恐惧','经济','家庭','关系','自我'];
+    
+    ctx.strokeStyle = '#ede9fe'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            ctx.lineTo(cx + Math.cos(a)*(r/4)*i, cy + Math.sin(a)*(r/4)*i);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let maxVal = k === 'family' ? 40 : 30;
+        let ratio = Math.min(s[k] / maxVal, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(139, 92, 246, 0.1)");
+    grd.addColorStop(1, "rgba(139, 92, 246, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.strokeStyle = '#8B5CF6'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "hqjl";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

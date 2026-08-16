@@ -1,0 +1,156 @@
+/* psy-skin-accent */
+html, body { background: linear-gradient(135deg, #fafaf9 0%, #e7e5e4 100%) !important; }
+.btn, button.btn, .result-level, .progress-fill {
+  background: linear-gradient(135deg, #a16207 0%, #854d0e 100%) !important;
+  color: #fff !important;
+}
+.question-num, .result-score, h2 { color: #a16207 !important; }
+.option-btn:hover { border-color: #a16207 !important; background: rgba(161,98,7,0.08) !important; }
+.spinner { border-top-color: #a16207 !important; }
+/* /psy-skin-accent */
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>骨相美vs皮相美测试</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+    </nav>
+
+    <div id="auth" class="page">
+        <div class="container">
+            <div class="card">
+                <div class="icon">🎭</div>
+                <h2>骨相美vs皮相美测试</h2>
+                <p class="subtitle">测测你是骨相美还是皮相美</p>
+                <button onclick="login()">开始测试</button>
+                </div>
+        </div>
+    </div>
+    
+    <div id="test" class="page hidden">
+        <div class="progress-bar">
+            <div class="progress-fill" id="fill"></div>
+        </div>
+        <div class="container">
+            <div class="card">
+                <div class="question-num" id="pro">第 1 题</div>
+                <h3 id="q"></h3>
+                <div id="opts"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="res" class="page hidden">
+        <div class="container">
+            <div class="card result-card">
+                <div class="icon">📊</div>
+                <h2>类型分析报告</h2>
+                <div class="score-circle">
+                    <span id="sc">0</span>
+                    <small>分</small>
+                </div>
+                <div class="level-badge" id="lv"></div>
+                <div class="result-text" id="txt"></div>
+                <div class="result-actions">
+                    <button onclick="share()">分享结果</button>
+                    <button class="secondary" onclick="location.reload()">重新测试</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TEST_NAME = "骨相美vs皮相美测试";
+        let qs=[],cur=0,score=0;
+        const lv=[
+            {max:30,lv:"皮相美为主",txt:"你是典型的皮相美！你的魅力来自于细腻的皮肤、五官的精致和整体的甜美感。你属于第一眼美女，越看越好看那种类型。"},
+            {max:50,lv:"偏皮相美",txt:"你更偏向皮相美类型。你的优势在于柔和的长相和甜美的气质。但你也具备一定的骨相支撑，是很耐看的类型。"},
+            {max:70,lv:"偏骨相美",txt:"你更偏向骨相美类型！你的高级感来自于立体的骨骼和清晰的轮廓。你属于耐看型，越老越有味道。"},
+            {max:100,lv:"骨相美为主",txt:"你是典型的骨相美！你的高级感来自优秀的骨骼架构和立体的五官。你是真正的氛围感美人，越成熟越有魅力。"
+            }
+        ];
+        
+        // psy: no auto-load; wait for start
+        
+        async function load(){
+            let r=await fetch("data.json");
+            qs=await r.json();
+            show("test");
+            render();
+        }
+        
+        function login(){
+            Promise.resolve(window.__psyEnsureStart && window.__psyEnsureStart()).then(function(ok){
+                if (ok === false) return;
+                load();
+            }).catch(function(e){ alert((e&&e.message)||'无法开始测试'); });
+        }
+        
+        function render(){
+            let q=qs[cur];
+            document.getElementById("q").textContent=q.title;
+            document.getElementById("pro").textContent=`第 ${cur+1} 题，共 ${qs.length} 题`;
+            document.getElementById("fill").style.width=`${((cur+1)/qs.length)*100}%`;
+            let h="";
+            q.options.forEach((o,i)=>h+=`<button class="option-btn" onclick="sel(${o.score})">${o.text}</button>`);
+            document.getElementById("opts").innerHTML=h;
+        }
+        
+        function sel(s){
+            score+=s;
+            if(cur<qs.length-1){
+                cur++;
+                render();
+            }else{
+                submitResult();
+            }
+        }
+        
+        function submitResult(){
+            show("res");
+            document.getElementById("sc").textContent=score;
+            let t=lv.find(x=>score<=x.max)||lv[3];
+            document.getElementById("lv").textContent=t.lv;
+            document.getElementById("txt").textContent=t.txt;
+            
+            if (window.__psyComplete) window.__psyComplete({ score: score });
+        }
+        
+        function share(){
+            let t=lv.find(x=>score<=x.max)||lv[3];
+            let text=`我在【${TEST_NAME}】测出了「${t.lv}」，得分${score}分！`;
+            if(navigator.share){
+                navigator.share({title:TEST_NAME,text:text});
+            }else{
+                navigator.clipboard.writeText(text);
+                alert("结果已复制到剪贴板！");
+            }
+        }
+        
+        function show(id){
+            document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
+            document.getElementById(id).classList.remove("hidden");
+        }
+        
+        document.addEventListener("keypress",(e)=>{
+            if(e.key>="1" && e.key<="4" && !document.getElementById("test").classList.contains("hidden")){
+                let btns=document.querySelectorAll(".option-btn");
+                let idx=parseInt(e.key)-1;
+                if(btns[idx]) btns[idx].click();
+            }
+        });
+    </script>
+
+
+
+
+<script>window.__PSY_TEST_CODE__ = "gxpx";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

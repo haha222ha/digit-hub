@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>职场人设类型测试 | 2026专业心理测评</title>
+    <style>
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600}
+        :root { --primary: #2D3436; --accent: #fd79a8; --safe: #00B894; --warning: #FDCB6E; --bg-gradient-start: #DFE6E9; --bg-gradient-end: #B2BEC3; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-dark { 0% { box-shadow: 0 0 0 0 rgba(253, 121, 168, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(253, 121, 168, 0); } 100% { box-shadow: 0 0 0 0 rgba(253, 121, 168, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(45, 52, 54, 0.3); transition: transform 0.1s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 60px 24px 40px; text-align: center; min-height: 100vh; }
+        .cover-tag { display: inline-block; background: var(--accent); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; }
+        .cover-title { font-size: 34px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #dfe6e9; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; }
+        #page-demo { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #dfe6e9; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; cursor: pointer; border: 2px solid #dfe6e9; transition: all 0.2s; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #dfe6e9; border-color: var(--accent); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #dfe6e9; padding-bottom: 120px; overflow-y: auto; min-height: 100vh; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ffeaa7; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; }
+        .score-num { font-size: 48px; font-weight: 900; color: var(--accent); }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; }
+        .level-badge { background: var(--accent); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; }
+        .card-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 80px; }
+        .dim-name { font-size: 14px; font-weight: 700; }
+        .dim-bar-bg { flex: 1; height: 10px; background: #f0f2f5; border-radius: 5px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 5px; }
+        .dim-val { width: 40px; text-align: right; font-size: 13px; font-weight: 700; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--accent); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-dark 2s infinite; cursor: pointer; }
+        .export-btn { background: var(--primary); margin-top: 10px; }
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--accent); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 40px; }
+        .r-h1 { font-size: 26px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 20px; font-weight: 800; margin: 25px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #dfe6e9; }
+        .r-p { font-size: 15px; line-height: 1.8; color: #555; margin-bottom: 12px; }
+        .r-box { background: #fafafa; border: 1px solid #dfe6e9; padding: 18px; border-radius: 10px; margin: 12px 0; }
+        .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .type-item { padding: 15px; border-radius: 10px; text-align: center; font-weight: 700; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav"><a href="https://psy.xhs365.cn/" class="nav-home">🏠 首页</a></nav>
+    <div class="container">
+        <div id="page-intro" data-screenshot="psych-test-职场人设类型测试" class="fade-in">
+            <div class="cover-tag">PERSONA TYPE</div>
+            <h1 class="cover-title">职场人设<span>类型</span>测试</h1>
+            <p class="cover-subtitle">发现你在职场中的独特人设类型<br>了解你的职场优势与角色定位</p>
+            <div class="intro-features">
+                <div class="feature-box"><div class="feature-icon">🎭</div><div class="feature-title">人设类型</div><div class="feature-desc">发现你的职场人设类型</div></div>
+                <div class="feature-box"><div class="feature-icon">💪</div><div class="feature-title">角色优势</div><div class="feature-desc">分析你的人设优势所在</div></div>
+                <div class="feature-box"><div class="feature-icon">⚡</div><div class="feature-title">行为模式</div><div class="feature-desc">了解你的职场行为特点</div></div>
+                <div class="feature-box"><div class="feature-icon">🌟</div><div class="feature-title">发展建议</div><div class="feature-desc">提供人设优化策略</div></div>
+            </div>
+            <button class="btn" id="start-btn">开始测试 (约需 3 分钟)</button>
+        </div>
+        <div id="page-demo">
+            <h2 style="font-size:26px;font-weight:800;margin-bottom:10px;">📋 背景信息</h2>
+            <p style="color:#636E72;font-size:14px;margin-bottom:30px;">系统将根据你的情况分析职场人设</p>
+            <div class="form-group">
+                <label class="form-label">你在职场中是什么角色？</label>
+                <select id="input-years" class="select-box">
+                    <option value="leader">团队领导</option>
+                    <option value="core">核心骨干</option>
+                    <option value="support">支持配合型</option>
+                    <option value="new">新人/初级员工</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">你工作几年了？</label>
+                <select id="input-level" class="select-box">
+                    <option value="<1">不到1年</option>
+                    <option value="1-3">1-3年</option>
+                    <option value="3-5">3-5年</option>
+                    <option value="5+">5年以上</option>
+                </select>
+            </div>
+            <button class="btn" id="next-btn">开始答题</button>
+        </div>
+        <div id="page-test">
+            <div class="progress-header"><span id="dim-tag">维度：领导力</span><span id="progress-text">1 / 15</span></div>
+            <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+            <div id="question-wrapper" class="slide-up question-card">
+                <div class="question-tag" id="q-category">💼 领导力</div>
+                <div class="question-text" id="question-text">题目加载中...</div>
+                <div id="options-box"></div>
+            </div>
+        </div>
+        <div id="page-result">
+            <div class="result-header">
+                <div class="score-circle"><span class="score-num" id="res-score">0</span><span class="score-label">综合得分</span></div>
+                <div class="level-badge" id="res-level">分析中...</div>
+                <div class="level-desc" id="res-desc">...</div>
+            </div>
+            <div class="card">
+                <div class="card-title">📊 四维人设雷达</div>
+                <div id="bars-container"></div>
+            </div>
+            <div class="bottom-dock">
+                <button class="unlock-btn" id="show-report-btn">📄 解锁人设类型报告</button>
+                <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+            </div>
+        </div>
+        <div id="report-modal">
+            <button class="report-close" id="close-report-btn">×</button>
+            <div class="report-header"><div style="font-size:12px; opacity:0.8;">2026 PSYCHOLOGY REPORT</div><div class="r-h1">职场人设类型深度分析报告</div><div style="font-size:14px;">专业心理测评 · 2026全新版</div></div>
+            <div class="report-body" id="report-content"></div>
+        </div>
+    </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    {d:'leadership',t:'💼 领导力',q:"在团队中你通常扮演什么角色？",o:[{t:"主导决策，引领方向",s:4},{t:"配合执行，推动进展",s:2},{t:"协调关系，促进合作",s:3},{t:"默默做事，不突出",s:1}]},
+    {d:'leadership',t:'💼 领导力',q:"面对团队冲突你会怎么做？",o:[{t:"主动出面调解",s:4},{t:"协助但不主导",s:2},{t:"观察各方立场后建议",s:3},{t:"尽量不介入",s:1}]},
+    {d:'leadership',t:'💼 领导力',q:"你愿意为团队目标承担责任吗？",o:[{t:"非常愿意，主动承担",s:4},{t:"愿意，但有顾虑",s:2},{t:"在职责范围内承担",s:3},{t:"尽量不单独承担",s:1}]},
+    {d:'communication',t:'🗣️ 沟通力',q:"在会议中你通常是什么角色？",o:[{t:"积极发言，引导讨论",s:4},{t:"有想法时发言",s:2},{t:"倾听后总结",s:3},{t:"很少发言",s:1}]},
+    {d:'communication',t:'🗣️ 沟通力',q:"你擅长向上级汇报工作吗？",o:[{t:"非常擅长，逻辑清晰",s:4},{t:"比较擅长",s:2},{t:"一般，需要准备",s:3},{t:"不太擅长，有些紧张",s:1}]},
+    {d:'communication',t:'🗣️ 沟通力',q:"你能有效说服他人接受你的观点吗？",o:[{t:"非常擅长，有感染力",s:4},{t:"比较擅长",s:2},{t:"有时可以",s:3},{t:"很难说服别人",s:1}]},
+    {d:'execution',t:'⚡ 执行力',q:"接到任务后你会怎么做？",o:[{t:"立即行动，快速完成",s:4},{t:"先规划再执行",s:3},{t:"仔细思考后再行动",s:2},{t:"需要催促才行动",s:1}]},
+    {d:'execution',t:'⚡ 执行力',q:"面对困难任务你的态度是？",o:[{t:"迎难而上，想办法解决",s:4},{t:"尽力而为",s:3},{t:"先想退路",s:2},{t:"回避或拖延",s:1}]},
+    {d:'execution',t:'⚡ 执行力',q:"你能按时高质量完成任务吗？",o:[{t:"几乎每次都能",s:4},{t:"大部分时候能",s:3},{t:"经常需要延期",s:2},{t:"经常无法按时完成",s:1}]},
+    {d:'creativity',t:'💡 创新力',q:"你经常提出新想法吗？",o:[{t:"经常，有很多创意",s:4},{t:"偶尔会提",s:3},{t:"很少",s:2},{t:"几乎不会",s:1}]},
+    {d:'creativity',t:'💡 创新力',q:"面对常规工作你会？",o:[{t:"想办法优化改进",s:4},{t:"按部就班完成",s:3},{t:"偶尔想改进",s:2},{t:"完全按流程走",s:1}]},
+    {d:'creativity',t:'💡 创新力',q:"你愿意尝试新的工作方法吗？",o:[{t:"非常愿意，积极探索",s:4},{t:"愿意尝试",s:3},{t:"观望后再决定",s:2},{t:"倾向于保守",s:1}]},
+    {d:'stability',t:'🛡️ 稳定性',q:"你会因为一点挫折就想换工作吗？",o:[{t:"不会，能坚持克服",s:4},{t:"很少",s:3},{t:"有时会动摇",s:2},{t:"经常想放弃",s:1}]},
+    {d:'stability',t:'🛡️ 稳定性',q:"你对公司的忠诚度如何？",o:[{t:"非常忠诚，与公司共进退",s:4},{t:"比较忠诚",s:3},{t:"有合适机会会考虑",s:2},{t:"随时准备跳槽",s:1}]},
+    {d:'stability',t:'🛡️ 稳定性',q:"你能承受多大的工作压力？",o:[{t:"非常大，压力下表现更好",s:4},{t:"比较大，能应对",s:3},{t:"一般，需要调节",s:2},{t:"压力一大就崩溃",s:1}]}
+];
+const types = [
+    {name:'领袖型人设',color:'#e17055',icon:'👑',desc:'你天生具有领导气质，善于带领团队达成目标。',strengths:['具有影响力','决策果断','敢于担当','善于激励'],career:['管理层','创业者','项目负责人'],advice:'继续发挥领导力，同时注意培养团队成员成长'},
+    {name:'专家型人设',color:'#00B894',icon:'🧠',desc:'你是专业领域的深耕者，追求卓越和技术精进。',strengths:['专业能力强','解决问题厉害','值得信赖','持续学习'],career:['技术专家','资深顾问','研究员'],advice:'深化专业能力，适时拓展影响力'},
+    {name:'协调型人设',color:'#0984e3',icon:'🤝',desc:'你是团队的润滑剂，善于协调各方关系和资源。',strengths:['人际敏感度高','善于沟通','资源整合强','情商高'],career:['项目经理','HR','行政管理者'],advice:'发挥协调优势，建立更广的人脉网络'},
+    {name:'创新型人设',color:'#6c5ce7',icon:'💡',desc:'你充满创意，喜欢打破常规，追求新颖。',strengths:['思维活跃','敢于尝试','善于发现问题','有洞察力'],career:['产品经理','设计师','创业者'],advice:'将创意落地，同时注重可行性'},
+    {name:'执行型人设',color:'#fdcb6e',icon:'⚡',desc:'你高效务实，是团队的可靠执行者。',strengths:['执行力强','责任心重','效率高','稳定可靠'],career:['运营专家','项目经理','执行层管理'],advice:'提升战略思维，向管理层发展'},
+    {name:'支持型人设',color:'#fd79a8',icon:'🌸',desc:'你是温暖的支持者，善于帮助他人成长。',strengths:['乐于助人','细心周到','团队融合度高','情绪稳定'],career:['行政','客服','培训师','HR'],advice:'发挥支持优势，同时建立个人品牌'}
+];
+let currQList=[],currIdx=0,scores={leadership:0,communication:0,execution:0,creativity:0,stability:0};
+function goToDemo(){document.getElementById('page-intro').style.display='none';document.getElementById('page-demo').style.display='block';}
+function initTest(){currQList=[...questions];currIdx=0;scores={leadership:0,communication:0,execution:0,creativity:0,stability:0};document.getElementById('page-demo').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=`${currIdx+1}/${currQList.length}`;document.getElementById('progress-fill').style.width=`${(currIdx/currQList.length)*100}%`;document.getElementById('dim-tag').innerText=`维度：${q.t}`;document.getElementById('q-category').innerText=q.t;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(q.d,opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(dim,val){scores[dim]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';setTimeout(()=>{document.getElementById('page-result').style.display='block';calculateResult();},2000);}
+function calculateResult(){let total=Object.values(scores).reduce((a,b)=>a+b,0);let maxTotal=60;let typeIdx=0;let maxScore=0;const dims=[{k:'leadership',n:'领导力'},{k:'communication',n:'沟通力'},{k:'execution',n:'执行力'},{k:'creativity',n:'创新力'},{k:'stability',n:'稳定性'}];dims.forEach((d,i)=>{if(scores[d.k]>maxScore){maxScore=scores[d.k];typeIdx=i;}});let lvl=types[typeIdx];let finalScore=Math.round(total/maxTotal*100);let start=0;const timer=setInterval(()=>{start++;document.getElementById('res-score').innerText=start;if(start>=finalScore)clearInterval(timer);},15);document.getElementById('res-level').innerText=lvl.icon+' '+lvl.name;document.getElementById('res-level').style.background=lvl.color;document.getElementById('res-desc').innerText=lvl.desc;renderBars(scores);}
+function renderBars(s){const box=document.getElementById('bars-container');const dims=[{k:'leadership',n:'领导力'},{k:'communication',n:'沟通力'},{k:'execution',n:'执行力'},{k:'creativity',n:'创新力'},{k:'stability',n:'稳定性'}];let html='';dims.forEach(d=>{let maxScore=d.k==='leadership'?12:d.k==='communication'?12:d.k==='execution'?12:d.k==='creativity'?12:12;let pct=Math.min((s[d.k]/maxScore)*100,100);let color='#00B894';if(pct>=75)color='#00B894';else if(pct>=50)color='#fdcb6e';else color='#fd79a8';html+=`<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%;background:${color};"></div></div><div class="dim-val" style="color:${color}">${Math.round(pct)}%</div></div>`;});box.innerHTML=html;}
+function showReport(){const dims=[{k:'leadership',n:'领导力'},{k:'communication',n:'沟通力'},{k:'execution',n:'执行力'},{k:'creativity',n:'创新力'},{k:'stability',n:'稳定性'}];let maxScore=0,typeIdx=0;dims.forEach((d,i)=>{if(scores[d.k]>maxScore){maxScore=scores[d.k];typeIdx=i;}});let lvl=types[typeIdx];let html=`<div class="report_section"><div class="r-h1">一、职场人设类型</div><div class="r-box" style="border-left:5px solid ${lvl.color};"><div style="font-size:24px;font-weight:900;color:${lvl.color};margin-bottom:8px;">${lvl.icon} ${lvl.name}</div><p style="margin:0;font-size:14px;line-height:1.6;color:#555;">${lvl.desc}</p></div></div><div class="report_section"><div class="r-h2">二、人设优势</div><div class="r-box"><ul style="margin:0;padding-left:20px;line-height:2;">${lvl.strengths.map(s=>`<li>${s}</li>`).join('')}</ul></div></div><div class="report_section"><div class="r-h2">三、适合职业方向</div><div class="r-box"><ul style="margin:0;padding-left:20px;line-height:2;">${lvl.career.map(c=>`<li>${c}</li>`).join('')}</ul></div></div><div class="report_section"><div class="r-h2">四、发展建议</div><div class="r-box"><p>${lvl.advice}</p></div></div><div class="report_section"><div class="r-h2">五、五维能力分析</div>${dims.map((d,i)=>{let maxScore=12;let level=scores[d.k]/maxScore>=0.75?'很强':(scores[d.k]/maxScore>=0.5?'较强':'一般');let color=scores[d.k]/maxScore>=0.75?'#00B894':(scores[d.k]/maxScore>=0.5?'#fdcb6e':'#fd79a8');return`<div style="margin-bottom:15px;padding:12px;background:#fafafa;border-radius:8px;"><div style="font-weight:700;margin-bottom:5px;">${d.n}</div><div style="height:6px;background:#eee;border-radius:3px;"><div style="height:100%;width:${(scores[d.k]/maxScore)*100}%;background:${color};border-radius:3px;"></div></div><div style="font-size:12px;color:#999;">能力水平：<span style="color:${color}">${level}</span></div></div>`}).join('')}</div><div style="text-align:center;color:#ccc;font-size:12px;margin-top:40px;">2026职场人设类型测试·专业心理测评</div>`;document.getElementById('report-content').innerHTML=html;document.getElementById('report-modal').style.display='block';}
+function closeReport(){document.getElementById('report-modal').style.display='none';}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(253,121,168);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('职场人设类型深度分析报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});let y=55;const dims=[{k:'leadership',n:'领导力'},{k:'communication',n:'沟通力'},{k:'execution',n:'执行力'},{k:'creativity',n:'创新力'},{k:'stability',n:'稳定性'}];let maxScore=0,typeIdx=0;dims.forEach((d,i)=>{if(scores[d.k]>maxScore){maxScore=scores[d.k];typeIdx=i;}});let lvl=types[typeIdx];doc.setTextColor(0,0,0);doc.setFontSize(16);doc.text(`人设类型：${lvl.name}`,15,y);y+=10;doc.setFontSize(12);doc.text(lvl.desc.substring(0,150)+'...',15,y);doc.save('职场人设类型报告.pdf');}
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });document.getElementById('next-btn').addEventListener('click',initTest);document.getElementById('show-report-btn').addEventListener('click',showReport);document.getElementById('close-report-btn').addEventListener('click',closeReport);document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "zcrs";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

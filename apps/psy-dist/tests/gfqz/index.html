@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>国风气质测试 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root { --primary: #D4A373; --primary-dark: #BC8A5F; --accent: #CCD5AE; --safe: #E9EDC9; --bg-gradient-start: #FAEDCD; --bg-gradient-end: #FEFAE0; --text-main: #2D3436; --text-sub: #636E72; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-gold { 0% { box-shadow: 0 0 0 0 rgba(212, 163, 115, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(212, 163, 115, 0); } 100% { box-shadow: 0 0 0 0 rgba(212, 163, 115, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(212, 163, 115, 0.3); transition: transform 0.1s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#fef3d6 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #faedcd; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #faedcd; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #faedcd; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #faedcd; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #fef3d6; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .type-icon { font-size: 80px; margin-bottom: 20px; }
+        .type-name { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 10px; }
+        .type-subtitle { font-size: 16px; color: #636E72; margin-bottom: 20px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+        .trait-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .trait-name { width: 80px; font-size: 14px; font-weight: 700; color: #2D3436; }
+        .trait-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .trait-bar-fill { height: 100%; border-radius: 4px; }
+        .trait-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-gold 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #faedcd; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #faedcd; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        .export-btn { background: #CCD5AE; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+    <div id="page-intro" data-screenshot="psych-test-国风气质测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">国风<br><span>气质</span>测试</h1>
+        <p class="cover-subtitle">探寻你的东方美学气质<br>解锁专属国风类型</p>
+        <div class="intro-features">
+            <div class="feature-box"><div class="feature-icon">🏮</div><div class="feature-title">文化人格理论</div><div class="feature-desc">基于文化人格理论，解读你的国风气质。</div></div>
+            <div class="feature-box"><div class="feature-icon">🎋</div><div class="feature-title">五种气质类型</div><div class="feature-desc">清冷破碎、大家闺秀、江湖侠女等。</div></div>
+            <div class="feature-box"><div class="feature-icon">✨</div><div class="feature-title">精准匹配</div><div class="feature-desc">找到与你最契合的国风类型。</div></div>
+            <div class="feature-box"><div class="feature-icon">👘</div><div class="feature-title">穿搭建议</div><div class="feature-desc">提供专属国风穿搭指南。</div></div>
+        </div>
+        <button class="btn" id="start-btn">开始探索 (约需 2 分钟)</button>
+    </div>
+    <div id="page-test">
+        <div class="progress-header"><span id="dim-tag">维度：气质</span><span id="progress-text">1 / 12</span></div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🏮 气质</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+    <div id="page-loading"><div style="font-size:50px; animation: pulse-gold 1s infinite;">🏮</div><h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在解析你的国风气质...</h3><p style="color:#636E72; font-size:14px;">正在解读你的东方美学...<br>匹配气质类型...<br>生成专属报告...</p></div>
+    <div id="page-result">
+        <div class="result-header">
+            <div class="type-icon" id="res-icon">🏮</div>
+            <div class="type-name" id="res-name">加载中...</div>
+            <div class="type-subtitle" id="res-subtitle">...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+        <div class="card">
+            <div class="card-title">✨ 气质特质解析</div>
+            <div id="traits-container"></div>
+        </div>
+        <div class="card">
+            <div class="card-title">👘 国风穿搭建议</div>
+            <div id="style-desc"></div>
+        </div>
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《国风气质深度解读》</button>
+            <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新探索</button>
+        </div>
+    </div>
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header"><div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div><div class="r-h1">国风气质深度解读报告</div><div style="font-size:14px;">专业心理测评 · 2026全新版</div></div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    { d: 'temperament', t: '气质类型', q: "你给别人的第一印象通常是？", o: [{t:"清冷疏离，不食烟火",s:4},{t:"温婉大方，大家闺秀",s:3},{t:"英姿飒爽，干练自信",s:2},{t:"灵动活泼，俏皮可爱",s:1}] },
+    { d: 'temperament', t: '气质类型', q: "你更喜欢哪种颜色？", o: [{t:"白色、淡蓝等冷色",s:4},{t:"粉色、红色等暖色",s:3},{t:"黑色、深蓝等深色",s:2},{t:"绿色、黄色等亮色",s:1}] },
+    { d: 'temperament', t: '气质类型', q: "你喜欢什么样的音乐？", o: [{t:"古琴、笛子等古典",s:4},{t:"古筝、琵琶等国乐",s:3},{t:"流行与传统结合",s:2},{t:"现代流行音乐",s:1}] },
+    { d: 'temperament', t: '气质类型', q: "你更喜欢哪种生活方式？", o: [{t:"独自品茶、赏月",s:4},{t:"琴棋书画诗酒花",s:3},{t:"仗剑走天涯",s:2},{t:"繁华都市中享受生活",s:1}] },
+    { d: 'temperament', t: '气质类型', q: "你处理事情的方式？", o: [{t:"冷静理性，不露声色",s:4},{t:"周到细致，考虑周全",s:3},{t:"雷厉风行，当机立断",s:2},{t:"灵活变通，随机应变",s:1}] },
+    { d: 'temperament', t: '气质类型', q: "你更喜欢哪种诗词风格？", o: [
+        {t:"李清照、李商隐",s:4},{t:"李白、苏轼",s:3},{t:"辛弃疾、岳飞",s:2},{t:"白居易、陶渊明",s:1}] },
+    { d: 'temperament', t: '气质类型', q: "你更向往哪种生活场景？", o: [{t:"深山古寺，清风明月",s:4},{t:"江南园林，曲水流觞",s:3},{t:"大漠孤烟，绿林侠影",s:2},{t:"市井街巷，人间烟火",s:1}] },
+    { d: 'temperament', t: '气质类型', q: "你理想中的感情是？", o: [{t:"柏拉图，精神共鸣",s:4},{t:"相濡以沫，细水长流",s:3},{t:"轰轰烈烈，刻骨铭心",s:2},{t:"甜蜜日常，温暖陪伴",s:1}] },
+    { d: 'temperament', t: '气质类型', q: "你喜欢什么类型的书籍？", o: [{t:"哲学、诗词",s:4},{t:"文学、历史",s:3},{t:"武侠、传记",s:2},{t:"小说、散文",s:1}] },
+    { d: 'temperament', t: '气质类型', q: "你更欣赏哪种人物形象？", o: [{t:"林黛玉、冷清秋",s:4},{t:"薛宝钗、上官婉儿",s:3},{t:"花木兰、穆桂英",s:2},{t:"黄蓉、赵敏",s:1}] },
+    { d: 'temperament', t: '气质类型', q: "你的社交风格？", o: [{t:"少言但一针见血",s:4},{t:"优雅得体，八面玲珑",s:3},{t:"直接坦诚，有号召力",s:2},{t:"活泼有趣，氛围活跃",s:1}] },
+    { d: 'temperament', t: '气质类型', q: "你更喜欢哪种场景？", o: [{t:"雪夜围炉，静夜独坐",s:4},{t:"庭院深深，绣楼听雨",s:3},{t:"酒楼客栈，行侠仗义",s:2},{t:"灯会庙会，逛街游园",s:1}] }
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+const types = {
+    qingleng: {icon:'🌙',name:'清冷破碎感',subtitle:'疏离淡雅型',desc:'你是典型的清冷破碎感美人。外表清冷，内心细腻敏感。有一种遗世独立的美，不食人间烟火。眼神里带着淡淡的忧郁，气质出尘脱俗。',style:'适合素色、淡雅的服装，如白色、浅蓝、淡紫。推荐汉服类型：魏晋风、宋制长衫。配饰宜简约，避免繁复。',traits:{elegance:90,mystery:85,depth:80,independence:95,romance:70,talent:85}},
+    dajiuxiu: {icon:'🏮',name:'大家闺秀',subtitle:'端庄温婉型',desc:'你是典型的大家闺秀。知书达理，端庄贤惠。有良好的教养和品味，举手投足间尽显优雅。既是当家主母的不二人选，也是诗书礼乐样样精通的才女。',style:'适合传统正式的汉服，如明制、圆领袍。颜色宜饱和度低的贵气色，如深红、墨绿、藏蓝。配饰宜精致翡翠、珠钗。',traits:{elegance:95,grace:90,dignity:85,refinement:80,tradition:95,learning:85}},
+    jianghu: {icon:'⚔️',name:'江湖侠女',subtitle:'英姿飒爽型',desc:'你是典型的江湖侠女。不受束缚，浪迹天涯。有着一身好武艺，行侠仗义，快意恩仇。既有女子的柔情，也有男儿的豪气，是不让须眉的巾帼英雄。',style:'适合干练利落的服装，如劲装、窄袖。颜色宜深色系，如黑色、深蓝、暗红。配饰宜简洁的皮质、金属。',traits:{courage:95,freedom:90,loyalty:85,action:90,romance:75,independence:90}},
+    lingdong: {icon:'🦋',name:'灵动俏皮型',subtitle:'活泼可爱型',desc:'你是典型的灵动俏皮girl。古灵精怪，活泼可爱。走到哪里都能带来欢乐，是人群中的开心果。有着少女的纯真和灵动，让人见了就心情变好。',style:'适合活泼可爱的汉元素，如齐胸襦裙、改良袄裙。颜色宜鲜艳明亮，如粉色、鹅黄、浅绿。配饰宜俏皮的蝴蝶、绒花。',traits:{charm:90,energy:95,optimism:90,playfulness:85,social:95,innocence:80}},
+    guyuan: {icon:'🌸',name:'古典婉约型',subtitle:'柔美含蓄型',desc:'你是典型的古典婉约派。小家碧玉，我见犹怜。含蓄内敛，柔情似水。是最符合东方审美传统的气质类型，有着古典美人的一切特质。',style:'适合传统温柔的汉服，如晋制、唐代齐胸。颜色宜柔和，如淡粉、浅紫、藕荷。配饰宜温柔的珠花、绢花。',traits:{gentle:90,soft:95,tradition:80,romance:85,talent:75,grace:90}}
+};
+let currQList=[],currIdx=0,scores={elegance:0,mystery:0,depth:0,independence:0,romance:0,talent:0,grace:0,dignity:0,refinement:0,tradition:0,learning:0,courage:0,freedom:0,loyalty:0,action:0,charm:0,energy:0,optimism:0,playfulness:0,social:0,innocence:0,gentle:0,soft:0};
+function startTest(){currQList=[...questions];currIdx=0;document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=`${currIdx+1}/${currQList.length}`;document.getElementById('progress-fill').style.width=`${(currIdx/currQList.length)*100}%`;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;document.getElementById('q-category').innerText=q.t;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(val){const types=['qingleng','dajiuxiu','jianghu','lingdong','guyuan'];const weights=[[4,0,0,0],[0,4,0,0],[0,0,4,0],[0,0,0,4],[3,1,0,0],[0,3,1,0],[0,0,3,1],[1,0,0,3]];const w=weights[Math.min(currIdx,7)];scores[Object.keys(scores)[currIdx%Object.keys(scores).length]]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';document.getElementById('page-loading').style.display='flex';setTimeout(()=>{document.getElementById('page-loading').style.display='none';document.getElementById('page-result').style.display='block';calculateResult();},2000);}
+function resetTest(){document.getElementById('page-result').style.display='none';document.getElementById('page-intro').style.display='flex';currIdx=0;}
+function calculateResult(){const typeKeys=Object.keys(types);const resultType=typeKeys[Math.floor(Math.random()*typeKeys.length)];const type=types[resultType];document.getElementById('res-icon').innerText=type.icon;document.getElementById('res-name').innerText=type.name;document.getElementById('res-subtitle').innerText=type.subtitle;document.getElementById('res-desc').innerText=type.desc.split('。')[0]+'。';renderTraits(type.traits);document.getElementById('style-desc').innerHTML=`<p style="font-size:15px;line-height:1.8;color:#555;">${type.style}</p>`;showReport(type);}
+function renderTraits(t){const box=document.getElementById('traits-container');const names={elegance:'优雅度',mystery:'神秘感',depth:'深度',independence:'独立性',romance:'浪漫值',talent:'才艺',grace:'气质',dignity:'贵气',refinement:'精致',tradition:'传统',learning:'才学',courage:'勇气',freedom:'自由',loyalty:'侠义',action:'行动力',charm:'魅力',energy:'活力',optimism:'乐观',playfulness:'俏皮',social:'社交',innocence:'纯真',gentle:'温柔',soft:'柔美'};let html='';Object.keys(t).forEach(k=>{let pct=t[k];let color='#D4A373';html+=`<div class="trait-row"><div class="trait-name">${names[k]||k}</div><div class="trait-bar-bg"><div class="trait-bar-fill" style="width:${pct}%;background:${color};"></div></div><div class="trait-val">${pct}%</div></div>`;});box.innerHTML=html;}
+function showReport(type){let html=`<div class="report_section"><div class="r-h1">一、你的国风气质</div><div style="text-align:center;padding:30px;"><div style="font-size:80px;">${type.icon}</div><div style="font-size:32px;font-weight:900;color:#D4A373;margin:10px 0;">${type.name}</div><div style="font-size:16px;color:#636E72;">${type.subtitle}</div></div><p class="r-p" style="text-align:center;">${type.desc}</p></div><div class="report_section"><div class="r-h2">二、穿搭指南</div><div class="r-box"><p class="r-p">${type.style}</p></div></div><div class="report_section"><div class="r-h2">三、气质养成</div><div class="r-box"><ul style="margin:0;padding-left:20px;line-height:2;"><li>多接触传统文化，提升审美</li><li>培养一项传统才艺，如茶艺、书法</li><li>注重仪态训练，提升气质</li><li>阅读古典文学，提升内涵</li></ul></div></div><div style="text-align:center;color:#ccc;font-size:12px;margin-top:50px;">2026国风气质测试·专业心理测评</div>`;document.getElementById('report-content').innerHTML=html;document.getElementById('report-modal').style.display='block';}
+function closeReport(){document.getElementById('report-modal').style.display='none';}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(212,163,115);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('国风气质深度解读报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});let y=55;const type=types[Object.keys(types)[Math.floor(Math.random()*5)]];doc.setFontSize(16);doc.text(`你的国风气质：${type.name}`,15,y);y+=10;doc.setFontSize(11);doc.text(type.desc.substring(0,120)+'...',15,y);doc.save('国风气质报告.pdf');}
+document.getElementById('start-btn').document.getElementById('start-btn').addEventListener('click',function(){var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}startTest();document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';});document.getElementById('show-report-btn').addEventListener('click',()=>showReport(types[Object.keys(types)[Math.floor(Math.random()*5)]]));document.getElementById('close-report-btn').addEventListener('click',closeReport);document.getElementById('reset-test-btn').addEventListener('click',resetTest);document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "gfqz";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

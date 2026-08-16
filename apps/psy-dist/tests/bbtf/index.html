@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>宝贝天赋发现测试 Pro | 儿童发展心理学评估</title>
+    <style>
+        :root {
+            /* 宝贝天赋 Pro 风格 */
+            --primary: #4A90E2; /* 智慧蓝 */
+            --primary-dark: #357ABD;
+            --accent: #FFB300; /* 活力黄 */
+            --accent-hover: #FFA000;
+            --safe: #4CAF50;
+            --warning: #FF9800;
+            --bg-gradient-start: #E3F2FD;
+            --bg-gradient-end: #BBDEFB;
+            --text-main: #263238;
+            --text-sub: #78909C;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.15);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-yellow { 0% { box-shadow: 0 0 0 0 rgba(255, 179, 0, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 179, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 179, 0, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#BBDEFB 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 40px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #4A90E2;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: #78909C; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #E3F2FD;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #4A90E2; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #78909C; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #4A90E2; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #E3F2FD; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #263238; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #78909C; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #E3F2FD; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #E3F2FD; color: #4A90E2; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #263238; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #37474F; cursor: pointer; border: 2px solid #E3F2FD; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #FFF8E1; border-color: var(--accent); color: #F57C00; font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #E3F2FD; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #E3F2FD;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--accent); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #78909C; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: #4A90E2; color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #78909C; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #4A90E2; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #263238; display: block; }
+        .dim-sub { font-size: 10px; color: #78909C; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #E3F2FD; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #78909C; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-yellow 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #78909C; width: 100%; padding: 10px;
+            border: 1px solid #BDBDBD; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: #4A90E2; color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #4A90E2; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #E3F2FD; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #37474F; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #F5F5F5; border: 1px solid #E0E0E0; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #555; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-宝宝天赋测试" class="fade-in">
+        <div class="cover-tag">2026 儿童天赋版</div>
+        <h1 class="cover-title">宝贝<span>天赋发现</span><br>深度测试 Pro</h1>
+        <p class="cover-subtitle">基于儿童发展心理学的 32 题深度扫描<br>精准发现孩子的独特天赋优势</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">八大天赋维度</div>
+                <div class="feature-desc">语言、逻辑、空间、运动、音乐等全方位扫描。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📚</div>
+                <div class="feature-title">专业心理学依据</div>
+                <div class="feature-desc">结合加德纳多元智能理论，科学解读天赋。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🎨</div>
+                <div class="feature-title">个性化培养建议</div>
+                <div class="feature-desc">根据天赋特点，定制专属培养方案。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">万字深度报告</div>
+                <div class="feature-desc">2026年版，详细解析孩子的天赋密码。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始天赋发现 (约需 3 分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#4A90E2; margin-bottom:10px;">建立宝贝天赋档案 🎁</h2>
+        <p style="color:#78909C; font-size:14px; margin-bottom:30px;">系统将根据孩子的年龄调整评分权重，确保结果更精准。</p>
+
+        <div class="form-group">
+            <label class="form-label">孩子的年龄是？</label>
+            <select id="input-age" class="select-box">
+                <option value="3-4">3-4岁 (启蒙期)</option>
+                <option value="5-6">5-6岁 (学前准备期)</option>
+                <option value="7-8">7-8岁 (小学低年级)</option>
+                <option value="9-12">9-12岁 (小学高年级)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">孩子的性别是？</label>
+            <select id="input-gender" class="select-box">
+                <option value="boy">男孩</option>
+                <option value="girl">女孩</option>
+                <option value="secret">保密</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">家长最关注的天赋领域是？</label>
+            <select id="input-focus" class="select-box">
+                <option value="language">语言表达</option>
+                <option value="logic">逻辑思维</option>
+                <option value="creativity">创造力</option>
+                <option value="sports">运动能力</option>
+                <option value="music">音乐艺术</option>
+                <option value="social">社交能力</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成天赋测试题</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：语言智能</span>
+            <span id="progress-text">1 / 32</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🧠 语言智能</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-yellow 1s infinite; border-radius:50%;">🧠</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#4A90E2;">正在演算天赋系数...</h3>
+        <p style="color:#78909C; font-size:14px; line-height:1.8;">正在分析多元智能...<br>匹配天赋模型...<br>生成专属培养报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">天赋指数</span>
+            </div>
+            <div class="level-badge" id="res-level">Level ?</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 八大天赋雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《宝贝天赋培养指南》完整报告</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 换个关注领域 再测一次</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">TALENT DISCOVERY GUIDE</div>
+            <div class="r-h1">宝贝天赋培养指南</div>
+            <div style="font-size:14px;">定制化儿童发展策略报告 · 2026版</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const MAX_USES = 6; // 同一设备限制次数
+const pageId = window.location.pathname;
+const usageKey = 'usage_count_' + pageId;
+
+// 测试题库配置 - 基于加德纳多元智能理论
+const questions = [
+    // --- 维度：语言智能 (Language) ---
+    { d: 'language', t: '语言智能', q: "孩子平时喜欢听故事或讲故事吗？", o: [
+        {t:"不太喜欢，比较安静", s:0},
+        {t:"偶尔喜欢听，不太主动讲", s:3},
+        {t:"很喜欢听，也会主动讲简单的故事", s:7},
+        {t:"非常喜欢，能生动地编故事", s:10}
+    ]},
+    { d: 'language', t: '词汇表达', q: "孩子的词汇量和表达能力如何？", o: [
+        {t:"比较少，表达不太清楚", s:0},
+        {t:"一般，能表达基本需求", s:3},
+        {t:"比较丰富，能描述细节", s:7},
+        {t:"非常丰富，用词准确生动", s:10}
+    ]},
+    { d: 'language', t: '阅读兴趣', q: "孩子对绘本或书籍感兴趣吗？", o: [
+        {t:"不太感兴趣，坐不住", s:0},
+        {t:"一般，需要大人陪着读", s:3},
+        {t:"比较感兴趣，会自己翻书看", s:7},
+        {t:"非常感兴趣，经常主动阅读", s:10}
+    ]},
+    { d: 'language', t: '语言记忆', q: "孩子对儿歌、古诗或故事的记忆如何？", o: [
+        {t:"比较差，很难记住", s:0},
+        {t:"一般，重复多次能记住", s:3},
+        {t:"比较好，听几遍就能记住", s:7},
+        {t:"非常好，过耳不忘", s:10}
+    ]},
+
+    // --- 维度：逻辑-数学智能 (Logic) ---
+    { d: 'logic', t: '逻辑-数学智能', q: "孩子对数字、拼图或分类游戏感兴趣吗？", o: [
+        {t:"不太感兴趣，觉得有点难", s:0},
+        {t:"一般，需要引导才会玩", s:3},
+        {t:"比较喜欢，能完成简单的拼图/分类", s:7},
+        {t:"非常喜欢，主动探索数字和规律", s:10}
+    ]},
+    { d: 'logic', t: '数感能力', q: "孩子对数量、大小、多少的概念如何？", o: [
+        {t:"比较模糊，不太能区分", s:0},
+        {t:"一般，能区分明显的差异", s:3},
+        {t:"比较清晰，能做简单的比较", s:7},
+        {t:"非常清晰，对数字很敏感", s:10}
+    ]},
+    { d: 'logic', t: '推理能力', q: "孩子喜欢问“为什么”或探索事物的原因吗？", o: [
+        {t:"不太喜欢，很少问", s:0},
+        {t:"一般，偶尔会问", s:3},
+        {t:"比较喜欢，经常问问题", s:7},
+        {t:"非常喜欢，会主动寻找答案", s:10}
+    ]},
+    { d: 'logic', t: '解决问题', q: "孩子遇到问题（如玩具坏了）时的表现如何？", o: [
+        {t:"直接放弃，找大人帮忙", s:0},
+        {t:"尝试一下，不行就放弃", s:3},
+        {t:"会想办法尝试不同的方法", s:7},
+        {t:"很有耐心，直到解决为止", s:10}
+    ]},
+
+    // --- 维度：空间智能 (Spatial) ---
+    { d: 'spatial', t: '空间智能', q: "孩子喜欢画画、搭积木或认路吗？", o: [
+        {t:"不太喜欢，方向感一般", s:0},
+        {t:"偶尔玩，能搭简单的造型", s:3},
+        {t:"比较喜欢，能画出/搭出有创意的造型", s:7},
+        {t:"非常喜欢，空间想象力强，认路很快", s:10}
+    ]},
+    { d: 'spatial', t: '视觉记忆', q: "孩子对见过的事物或场景的记忆如何？", o: [
+        {t:"比较差，很快就忘记", s:0},
+        {t:"一般，有点印象", s:3},
+        {t:"比较好，能记得细节", s:7},
+        {t:"非常好，过目不忘", s:10}
+    ]},
+    { d: 'spatial', t: '色彩感知', q: "孩子对颜色、形状或图案敏感吗？", o: [
+        {t:"不太敏感，没特别反应", s:0},
+        {t:"一般，能认识常见颜色", s:3},
+        {t:"比较敏感，喜欢搭配颜色", s:7},
+        {t:"非常敏感，对色彩很有天赋", s:10}
+    ]},
+    { d: 'spatial', t: '动手建构', q: "孩子喜欢搭积木、拼乐高或做手工吗？", o: [
+        {t:"不太喜欢，动手能力一般", s:0},
+        {t:"偶尔玩，能完成简单的作品", s:3},
+        {t:"比较喜欢，能搭出复杂的造型", s:7},
+        {t:"非常喜欢，动手能力很强", s:10}
+    ]},
+
+    // --- 维度：身体-动觉智能 (Bodily) ---
+    { d: 'bodily', t: '身体-动觉智能', q: "孩子喜欢运动、跳舞或动手做手工吗？", o: [
+        {t:"不太喜欢，比较文静", s:0},
+        {t:"偶尔活动，动作协调性一般", s:3},
+        {t:"比较喜欢，动作比较灵活", s:7},
+        {t:"非常喜欢，运动/动手能力很强", s:10}
+    ]},
+    { d: 'bodily', t: '动作协调', q: "孩子的动作协调性（如跑跳、平衡）如何？", o: [
+        {t:"比较差，容易摔倒", s:0},
+        {t:"一般，能完成基本动作", s:3},
+        {t:"比较好，动作比较灵活", s:7},
+        {t:"非常好，协调性很强", s:10}
+    ]},
+    { d: 'bodily', t: '肢体模仿', q: "孩子喜欢模仿别人的动作或跳舞吗？", o: [
+        {t:"不太喜欢，比较害羞", s:0},
+        {t:"偶尔模仿，不太像", s:3},
+        {t:"比较喜欢，模仿得很像", s:7},
+        {t:"非常喜欢，很有表演天赋", s:10}
+    ]},
+    { d: 'bodily', t: '动手能力', q: "孩子的动手能力（如用筷子、系鞋带）如何？", o: [
+        {t:"比较差，需要大人帮忙", s:0},
+        {t:"一般，能做但不太熟练", s:3},
+        {t:"比较好，能独立完成", s:7},
+        {t:"非常好，动手能力很强", s:10}
+    ]},
+
+    // --- 维度：音乐智能 (Musical) ---
+    { d: 'musical', t: '音乐智能', q: "孩子对声音、音乐或节奏敏感吗？", o: [
+        {t:"不太敏感，对音乐没特别反应", s:0},
+        {t:"一般，喜欢听简单的儿歌", s:3},
+        {t:"比较敏感，能跟着节奏打拍子", s:7},
+        {t:"非常敏感，喜欢唱歌/演奏乐器，节奏感强", s:10}
+    ]},
+    { d: 'musical', t: '音准感知', q: "孩子唱歌或模仿声音时的音准如何？", o: [
+        {t:"不太准，经常跑调", s:0},
+        {t:"一般，简单的歌能唱准", s:3},
+        {t:"比较好，音准不错", s:7},
+        {t:"非常好，很有音乐天赋", s:10}
+    ]},
+    { d: 'musical', t: '节奏感知', q: "孩子对节奏的感知和表现如何？", o: [
+        {t:"不太好，很难跟上节奏", s:0},
+        {t:"一般，能跟着简单的节奏拍手", s:3},
+        {t:"比较好，能打出复杂的节奏", s:7},
+        {t:"非常好，节奏感很强", s:10}
+    ]},
+    { d: 'musical', t: '音乐兴趣', q: "孩子喜欢听音乐、唱歌或玩乐器吗？", o: [
+        {t:"不太喜欢，没什么兴趣", s:0},
+        {t:"一般，偶尔听听", s:3},
+        {t:"比较喜欢，经常主动听/唱", s:7},
+        {t:"非常喜欢，对音乐很着迷", s:10}
+    ]},
+
+    // --- 维度：人际智能 (Interpersonal) ---
+    { d: 'interpersonal', t: '人际智能', q: "孩子在和小朋友相处时表现如何？", o: [
+        {t:"比较害羞，不太主动和人玩", s:0},
+        {t:"能和熟悉的小朋友一起玩", s:3},
+        {t:"比较主动，能和大家友好相处", s:7},
+        {t:"非常受欢迎，善于组织和关心他人", s:10}
+    ]},
+    { d: 'interpersonal', t: '共情能力', q: "孩子能理解和关心别人的情绪吗？", o: [
+        {t:"不太能，不太关注别人", s:0},
+        {t:"一般，能看出别人不开心", s:3},
+        {t:"比较能，会安慰别人", s:7},
+        {t:"非常能，很会体贴人", s:10}
+    ]},
+    { d: 'interpersonal', t: '合作能力', q: "孩子在集体游戏或活动中的表现如何？", o: [
+        {t:"不太会，喜欢自己玩", s:0},
+        {t:"一般，能配合但不太主动", s:3},
+        {t:"比较会，能和大家合作", s:7},
+        {t:"非常会，是团队的核心", s:10}
+    ]},
+    { d: 'interpersonal', t: '表达沟通', q: "孩子和别人沟通时的表达能力如何？", o: [
+        {t:"不太好，不太会表达", s:0},
+        {t:"一般，能表达基本意思", s:3},
+        {t:"比较好，能清楚表达想法", s:7},
+        {t:"非常好，很会沟通", s:10}
+    ]},
+
+    // --- 维度：内省智能 (Intrapersonal) ---
+    { d: 'intrapersonal', t: '内省智能', q: "孩子能意识到自己的情绪和优缺点吗？", o: [
+        {t:"不太能，情绪容易受外界影响", s:0},
+        {t:"一般，能简单表达自己的感受", s:3},
+        {t:"比较能，知道自己喜欢什么不喜欢什么", s:7},
+        {t:"非常能，会反思自己的行为，有主见", s:10}
+    ]},
+    { d: 'intrapersonal', t: '独立性', q: "孩子的独立性（如自己吃饭、穿衣服）如何？", o: [
+        {t:"比较差，依赖大人", s:0},
+        {t:"一般，需要提醒", s:3},
+        {t:"比较好，能自己做", s:7},
+        {t:"非常好，很独立", s:10}
+    ]},
+    { d: 'intrapersonal', t: '专注力', q: "孩子做自己喜欢的事情时的专注力如何？", o: [
+        {t:"比较差，很容易分心", s:0},
+        {t:"一般，能专注一会儿", s:3},
+        {t:"比较好，能专注较长时间", s:7},
+        {t:"非常好，专注力很强", s:10}
+    ]},
+    { d: 'intrapersonal', t: '情绪管理', q: "孩子遇到挫折或不开心时的表现如何？", o: [
+        {t:"比较差，容易哭闹或发脾气", s:0},
+        {t:"一般，需要大人安抚", s:3},
+        {t:"比较好，能自己慢慢平复", s:7},
+        {t:"非常好，情绪管理能力很强", s:10}
+    ]},
+
+    // --- 维度：自然观察智能 (Naturalist) ---
+    { d: 'naturalist', t: '自然观察智能', q: "孩子对动植物、自然现象或小实验感兴趣吗？", o: [
+        {t:"不太感兴趣，不太关注", s:0},
+        {t:"一般，偶尔会问一些问题", s:3},
+        {t:"比较感兴趣，喜欢观察和探索", s:7},
+        {t:"非常感兴趣，会主动收集/做小实验", s:10}
+    ]},
+    { d: 'naturalist', t: '观察力', q: "孩子对周围事物的细节观察如何？", o: [
+        {t:"比较粗心，很少注意细节", s:0},
+        {t:"一般，能注意到明显的变化", s:3},
+        {t:"比较细心，能发现细节", s:7},
+        {t:"非常细心，观察力很强", s:10}
+    ]},
+    { d: 'naturalist', t: '探索欲', q: "孩子对未知事物的好奇心和探索欲如何？", o: [
+        {t:"比较弱，不太敢尝试", s:0},
+        {t:"一般，在大人鼓励下会尝试", s:3},
+        {t:"比较强，会主动探索", s:7},
+        {t:"非常强，好奇心很旺盛", s:10}
+    ]},
+    { d: 'naturalist', t: '分类归纳', q: "孩子喜欢把东西分类或整理吗？", o: [
+        {t:"不太喜欢，东西乱放", s:0},
+        {t:"一般，大人提醒会整理", s:3},
+        {t:"比较喜欢，会自己分类整理", s:7},
+        {t:"非常喜欢，很有条理", s:10}
+    ]}
+];
+
+// 年龄特供题
+const ageSpecific = {
+    '3-4': [
+        { d: 'language', t: '启蒙语言', q: "【3-4岁特供】孩子会说完整的句子吗？", o: [
+            {t:"不太会，只会说单词", s:0},
+            {t:"会说简单的短句", s:3},
+            {t:"会说完整的句子", s:7},
+            {t:"会说很长的句子，表达很清楚", s:10}
+        ]},
+        { d: 'bodily', t: '启蒙动作', q: "【3-4岁特供】孩子能独立完成吃饭、穿脱简单衣服吗？", o: [
+            {t:"不太能，需要大人帮忙", s:0},
+            {t:"能做一部分", s:3},
+            {t:"基本能独立完成", s:7},
+            {t:"完全能独立完成", s:10}
+        ]}
+    ],
+    '5-6': [
+        { d: 'logic', t: '学前逻辑', q: "【5-6岁特供】孩子能认识10以上的数字并做简单计算吗？", o: [
+            {t:"不太能，对数字没概念", s:0},
+            {t:"能认识10以内的数字", s:3},
+            {t:"能认识10以上的数字，做简单加减", s:7},
+            {t:"对数字很敏感，计算能力很强", s:10}
+        ]},
+        { d: 'interpersonal', t: '学前社交', q: "【5-6岁特供】孩子能主动和陌生小朋友打招呼并一起玩吗？", o: [
+            {t:"不太敢，躲在大人后面", s:0},
+            {t:"需要大人鼓励", s:3},
+            {t:"能主动打招呼", s:7},
+            {t:"很快就能和小朋友打成一片", s:10}
+        ]}
+    ],
+    '7-8': [
+        { d: 'language', t: '低年级读写', q: "【7-8岁特供】孩子的阅读和写作能力如何？", o: [
+            {t:"比较弱，需要大人辅导", s:0},
+            {t:"一般，能独立完成作业", s:3},
+            {t:"比较好，喜欢阅读和写日记", s:7},
+            {t:"非常好，写作经常被表扬", s:10}
+        ]},
+        { d: 'intrapersonal', t: '低年级习惯', q: "【7-8岁特供】孩子能主动完成作业并整理书包吗？", o: [
+            {t:"不太能，需要大人催促", s:0},
+            {t:"一般，需要提醒", s:3},
+            {t:"比较好，能主动完成", s:7},
+            {t:"非常好，学习习惯很好", s:10}
+        ]}
+    ],
+    '9-12': [
+        { d: 'logic', t: '高年级数学', q: "【9-12岁特供】孩子对数学应用题或奥数题感兴趣吗？", o: [
+            {t:"不太感兴趣，觉得很难", s:0},
+            {t:"一般，能完成作业", s:3},
+            {t:"比较感兴趣，喜欢挑战难题", s:7},
+            {t:"非常感兴趣，数学成绩很好", s:10}
+        ]},
+        { d: 'naturalist', t: '高年级科学', q: "【9-12岁特供】孩子对科学课或科普书籍感兴趣吗？", o: [
+            {t:"不太感兴趣", s:0},
+            {t:"一般，能完成作业", s:3},
+            {t:"比较感兴趣，喜欢看科普书", s:7},
+            {t:"非常感兴趣，经常做小实验", s:10}
+        ]}
+    ]
+};
+
+// 天赋评级文案
+const levels = [
+    { max: 20, l: "Lv.1 天赋探索期", c: "#4CAF50", d: "孩子的天赋正在萌芽，需要更多探索和引导。", advice: "多带孩子尝试不同的活动，激发兴趣。" },
+    { max: 35, l: "Lv.2 天赋潜力股", c: "#8BC34A", d: "孩子在某些领域展现出潜力，值得进一步培养。", advice: "关注孩子的兴趣点，给予适当的支持。" },
+    { max: 50, l: "Lv.3 天赋小达人", c: "#FFEB3B", d: "孩子有明显的天赋优势，继续加油哦！", advice: "提供更专业的学习资源，深化优势。" },
+    { max: 60, l: "Lv.4 天赋佼佼者", c: "#FFC107", d: "孩子的天赋在同龄人中比较突出，很有潜力。", advice: "制定系统的培养计划，持续发展。" },
+    { max: 70, l: "Lv.5 天赋小天才", c: "#FF9800", d: "孩子在某一或多个领域展现出过人的天赋！", advice: "寻求专业指导，让天赋得到充分发挥。" },
+    { max: 80, l: "Lv.6 天赋之星", c: "#F57C00", d: "孩子的天赋非常亮眼，未来可期！", advice: "平衡全面发展，同时重点培养优势领域。" },
+    { max: 90, l: "Lv.7 天赋精英", c: "#E64A19", d: "孩子的天赋在专业测试中表现优异！", advice: "为孩子创造展示和实践的机会。" },
+    { max: 100, l: "Lv.8 天赋大师", c: "#D32F2F", d: "孩子是不可多得的天赋型人才！", advice: "尊重孩子的兴趣，同时给予专业支持。" },
+    { max: 110, l: "Lv.9 天赋传奇", c: "#7B1FA2", d: "孩子的天赋让人惊叹，好好培养！", advice: "为孩子规划长期的发展路径。" },
+    { max: 999, l: "Lv.10 天赋天花板", c: "#4A90E2", d: "孩子的天赋全面且突出，未来无限可能！", advice: "保护孩子的好奇心和创造力，自由成长。" }
+];
+
+// 全局变量
+let currQList = [];
+let currIdx = 0;
+let userAge = '';
+let userGender = '';
+let userFocus = '';
+let scores = { language:0, logic:0, spatial:0, bodily:0, musical:0, interpersonal:0, intrapersonal:0, naturalist:0 };
+
+// 页面切换函数
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userAge = document.getElementById('input-age').value;
+    userGender = document.getElementById('input-gender').value;
+    userFocus = document.getElementById('input-focus').value;
+    
+    currQList = [...questions, ...ageSpecific[userAge]];
+    currIdx = 0;
+    scores = { language:0, logic:0, spatial:0, bodily:0, musical:0, interpersonal:0, intrapersonal:0, naturalist:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    let weight = 1.0;
+    if (userAge === '3-4') {
+        if (dim === 'language' || dim === 'bodily') weight = 1.2;
+    } else if (userAge === '5-6') {
+        if (dim === 'logic' || dim === 'interpersonal') weight = 1.2;
+    } else if (userAge === '7-8') {
+        if (dim === 'language' || dim === 'intrapersonal') weight = 1.2;
+    } else if (userAge === '9-12') {
+        if (dim === 'logic' || dim === 'naturalist') weight = 1.2;
+    }
+
+    scores[dim] += val * weight;
+
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { language:0, logic:0, spatial:0, bodily:0, musical:0, interpersonal:0, intrapersonal:0, naturalist:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw / 2.8); 
+    if(finalScore> 120) finalScore = 120;
+
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'language', n:'语言'}, {k:'logic', n:'逻辑'}, 
+        {k:'spatial', n:'空间'}, {k:'bodily', n:'运动'},
+        {k:'musical', n:'音乐'}, {k:'interpersonal', n:'人际'},
+        {k:'intrapersonal', n:'内省'}, {k:'naturalist', n:'自然'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 65) * 100, 100);
+        let color = pct> 60 ? '#FFB300' : (pct> 30 ? '#4CAF50' : '#4A90E2');
+        let txt = pct> 70 ? '优势' : (pct> 40 ? '良好' : '发展中');
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {language:'语言', logic:'逻辑', spatial:'空间', bodily:'运动', musical:'音乐', interpersonal:'人际', intrapersonal:'内省', naturalist:'自然'};
+    return map[k];
+}
+
+// 报告生成函数
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let envStatus = '';
+    let envClass = '';
+    if (total> 80) {
+        envStatus = '🌟 天赋卓越：全面发展的小天才 (优势突出)';
+        envClass = 'color:#FFB300; font-weight:900;';
+    } else if (total> 60) {
+        envStatus = '✨ 天赋优秀：有明显优势领域 (值得培养)';
+        envClass = 'color:#4CAF50; font-weight:800;';
+    } else if (total> 40) {
+        envStatus = '🌱 天赋良好：均衡发展 (潜力巨大)';
+        envClass = 'color:#4A90E2; font-weight:700;';
+        envStatus = '🌰 天赋探索期：需要更多尝试 (未来可期)';
+        envClass = 'color:#78909C; font-weight:700;';
+    }
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、宝贝天赋诊断书</div>
+        <p class="r-p" style="background:#F5F5F5; padding:12px; border-radius:8px; font-size:14px; border:1px solid #E0E0E0;">
+            <strong>🎁 样本档案：</strong>${userAge}岁 (${userAge==='3-4'?'启蒙期':userAge==='5-6'?'学前准备期':userAge==='7-8'?'小学低年级':'小学高年级'}) <br>
+            <strong>👦👧 孩子性别：</strong>${userGender==='boy'?'男孩':userGender==='girl'?'女孩':'保密'} <br>
+            <strong>🎯 家长关注：</strong>${getFocusName(userFocus)}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#999; margin-right:8px;">综合天赋指数</span>
+                <span style="font-size:36px; font-weight:900; color:#263238; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#999;">/ 120</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>培养建议：</strong>${lvl.advice}</p>
+        </div>
+
+        <div style="margin-top:20px; padding:15px; background:#fff; border-radius:8px; border:1px solid #E0E0E0;">
+            <p style="margin:0 0 10px 0; font-size:14px; color:#999;">天赋发展定性：</p>
+            <div style="${envClass} font-size:17px; margin-bottom:12px;">${envStatus}</div>
+            <p class="r-p" style="font-size:15px; margin:0;">
+                经过 32 项多元智能指标的深度扫描，系统检测到孩子的核心天赋优势位于 <span style="background:#FFB300; color:#fff; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:13px;">${getDimFullCN(maxDimKey)}</span> 维度。
+                ${total> 60 ? '孩子在这一领域展现出过人的天赋，建议重点培养，让天赋得到充分发挥。' : '孩子的天赋正在全面发展，建议多尝试不同的活动，激发更多可能性。'}
+            </p>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、八大天赋维度深度解构</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px; font-style:italic;">*基于霍华德·加德纳多元智能理论 (2026年修订版)</p>
+        ${generateDimAnalysis('language', scores.language)}
+        ${generateDimAnalysis('logic', scores.logic)}
+        ${generateDimAnalysis('spatial', scores.spatial)}
+        ${generateDimAnalysis('bodily', scores.bodily)}
+        ${generateDimAnalysis('musical', scores.musical)}
+        ${generateDimAnalysis('interpersonal', scores.interpersonal)}
+        ${generateDimAnalysis('intrapersonal', scores.intrapersonal)}
+        ${generateDimAnalysis('naturalist', scores.naturalist)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、个性化天赋培养方案</div>
+        <div class="r-box" style="border-color:#BDBDBD;">
+            <div class="r-h3">🏠 家庭互动篇：在生活中激发天赋</div>
+            <ul class="r-list">
+                <li><strong>语言智能：</strong> 每天睡前给孩子读故事，鼓励孩子复述或改编故事；多和孩子聊天，问开放式问题，让孩子表达自己的想法。</li>
+                <li><strong>逻辑-数学智能：</strong> 玩数字游戏、拼图、积木；让孩子帮忙算账、分类整理物品；鼓励孩子问“为什么”，一起探索答案。</li>
+                <li><strong>空间智能：</strong> 让孩子画画、搭积木、拼乐高；玩迷宫、找不同游戏；带孩子认路，观察周围的环境。</li>
+                <li><strong>身体-动觉智能：</strong> 多带孩子进行户外活动，如跑步、跳绳、打球；让孩子帮忙做家务，如包饺子、整理房间；鼓励孩子跳舞、模仿动作。</li>
+            </ul>
+        </div>
+        
+        <div class="r-box" style="background:#FFF8E1; border-color:#FFE082;">
+            <div class="r-h3" style="color:#F57C00;">
+                🎨 兴趣培养篇：${userAge==='3-4'?'启蒙期·快乐探索':userAge==='5-6'?'学前·兴趣发现':userAge==='7-8'?'低年级·能力培养':'高年级·专业发展'}
+            </div>
+            ${getAgeAdvice()}
+        </div>
+
+        <div class="r-box" style="background:#E3F2FD; border-color:#90CAF9;">
+            <div class="r-h3" style="color:#357ABD;">
+                🚀 优势强化篇：重点发展 <span style="color:#FFB300;">${getDimFullCN(maxDimKey)}</span>
+            </div>
+            ${getFocusAdvice(maxDimKey)}
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        本报告由多元智能算法自动生成<br>
+        每个孩子都是独一无二的天才<br>
+        愿所有宝贝都能健康快乐地成长
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function getFocusName(f) {
+    const m = {
+        language: '语言表达', 
+        logic: '逻辑思维', 
+        creativity: '创造力', 
+        sports: '运动能力', 
+        music: '音乐艺术', 
+        social: '社交能力'
+    };
+    return m[f] || f;
+}
+
+function getDimFullCN(k) {
+    const m = {
+        language: '语言智能 (表达与沟通)', 
+        logic: '逻辑-数学智能 (推理与计算)', 
+        spatial: '空间智能 (想象与创作)', 
+        bodily: '身体-动觉智能 (运动与动手)', 
+        musical: '音乐智能 (节奏与旋律)', 
+        interpersonal: '人际智能 (社交与合作)', 
+        intrapersonal: '内省智能 (自我认知与管理)', 
+        naturalist: '自然观察智能 (探索与发现)'
+    };
+    return m[k];
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 45 ? 'high' : (val> 25 ? 'med' : 'low');
+    
+    const config = {
+        high: { color: '#FFB300', bg: '#FFF8E1', tag: '🌟 核心优势', titleColor: '#F57C00' },
+        med: { color: '#4CAF50', bg: '#E8F5E9', tag: '✨ 发展良好', titleColor: '#388E3C' },
+        low: { color: '#4A90E2', bg: '#E3F2FD', tag: '🌱 探索成长', titleColor: '#357ABD' }
+    };
+    
+    const c = config[riskLevel];
+    
+    const texts = {
+        language: {
+            high: "<strong>孩子的语言智能非常突出！</strong> 他/她在词汇表达、阅读写作、语言记忆等方面都表现优异，很有语言天赋。建议多给孩子提供阅读、写作、演讲的机会，未来可能在文学、教育、传媒等领域有所发展。",
+            med: "<strong>孩子的语言智能发展良好。</strong> 他/她能较好地表达自己的想法，对阅读和故事也有兴趣。建议多和孩子聊天，鼓励孩子多读书、多写作，进一步提升语言能力。",
+            low: "<strong>孩子的语言智能正在探索中。</strong> 可能目前对语言表达不太感兴趣，但没关系，每个孩子的发展节奏不同。建议通过有趣的故事、儿歌、游戏等方式，慢慢培养孩子的语言兴趣。"
+        },
+        logic: {
+            high: "<strong>孩子的逻辑-数学智能非常突出！</strong> 他/她对数字、规律、推理很敏感，喜欢探索事物的原因，解决问题的能力很强。建议多给孩子提供数学游戏、科学实验、逻辑推理的机会，未来可能在数学、科学、计算机等领域有所发展。",
+            med: "<strong>孩子的逻辑-数学智能发展良好。</strong> 他/她能理解基本的数学概念，喜欢玩拼图、分类等游戏，有一定的推理能力。建议多和孩子玩数学游戏，一起做小实验，培养逻辑思维能力。",
+            low: "<strong>孩子的逻辑-数学智能正在探索中。</strong> 可能目前对数字和逻辑不太感兴趣，但没关系，这方面的能力可以通过后天培养。建议从孩子感兴趣的事物入手，比如用玩具、食物等教孩子数学，让学习变得有趣。"
+        },
+        spatial: {
+            high: "<strong>孩子的空间智能非常突出！</strong> 他/她的空间想象力很强，喜欢画画、搭积木、认路，对色彩和形状很敏感。建议多给孩子提供绘画、手工、建筑、迷宫等活动，未来可能在艺术、设计、建筑、工程等领域有所发展。",
+            med: "<strong>孩子的空间智能发展良好。</strong> 他/她能较好地感知空间和形状，喜欢玩积木、画画等游戏，有一定的视觉记忆能力。建议多带孩子观察周围的环境，鼓励孩子画画、做手工，提升空间感知能力。",
+            low: "<strong>孩子的空间智能正在探索中。</strong> 可能目前对空间和形状不太敏感，但没关系，这方面的能力可以通过练习提升。建议多和孩子玩积木、拼图、迷宫等游戏，让孩子在玩中培养空间感。"
+        },
+        bodily: {
+            high: "<strong>孩子的身体-动觉智能非常突出！</strong> 他/她的动作协调性很强，喜欢运动、跳舞、动手做手工，动手能力很强。建议多给孩子提供运动、舞蹈、手工、表演等机会，未来可能在体育、舞蹈、戏剧、手工艺术等领域有所发展。",
+            med: "<strong>孩子的身体-动觉智能发展良好。</strong> 他/她能较好地控制自己的身体，喜欢活动，动手能力也不错。建议多带孩子进行户外活动，鼓励孩子跳舞、做手工，提升动作协调性和动手能力。",
+            low: "<strong>孩子的身体-动觉智能正在探索中。</strong> 可能目前不太喜欢运动或动手，但没关系，每个孩子的特长不同。建议从简单的活动入手，比如散步、玩球、折纸等，让孩子慢慢喜欢上活动。"
+        },
+        musical: {
+            high: "<strong>孩子的音乐智能非常突出！</strong> 他/她对声音、节奏、旋律很敏感，喜欢唱歌、听音乐，甚至可能喜欢演奏乐器，很有音乐天赋。建议多给孩子提供音乐欣赏、唱歌、乐器学习的机会，未来可能在音乐、表演、艺术等领域有所发展。",
+            med: "<strong>孩子的音乐智能发展良好。</strong> 他/她喜欢听音乐，能跟着节奏打拍子，对音乐有一定的兴趣。建议多给孩子听不同类型的音乐，鼓励孩子唱歌、跳舞，培养音乐素养。",
+            low: "<strong>孩子的音乐智能正在探索中。</strong> 可能目前对音乐不太敏感，但没关系，音乐兴趣可以慢慢培养。建议多给孩子听儿歌、轻音乐，和孩子一起玩音乐游戏，让孩子在轻松的氛围中感受音乐。"
+        },
+        interpersonal: {
+            high: "<strong>孩子的人际智能非常突出！</strong> 他/她很善于和别人相处，能理解和关心他人的情绪，合作能力和沟通能力都很强，很有领导力。建议多给孩子提供集体活动、团队合作、社交沟通的机会，未来可能在管理、教育、社会工作等领域有所发展。",
+            med: "<strong>孩子的人际智能发展良好。</strong> 他/她能和小朋友友好相处，能理解别人的情绪，有一定的合作能力。建议多带孩子参加集体活动，鼓励孩子和别人交流，提升社交能力。",
+            low: "<strong>孩子的人际智能正在探索中。</strong> 可能目前比较害羞，不太主动和别人交往，但没关系，社交能力可以慢慢培养。建议多带孩子和小朋友一起玩，鼓励孩子表达自己的想法，让孩子在互动中学会社交。"
+        },
+        intrapersonal: {
+            high: "<strong>孩子的内省智能非常突出！</strong> 他/她很了解自己，能意识到自己的情绪和优缺点，独立性强，专注力好，情绪管理能力也很强。建议多给孩子提供独立思考、自主决策的机会，尊重孩子的想法，未来可能在任何需要自我驱动的领域有所发展。",
+            med: "<strong>孩子的内省智能发展良好。</strong> 他/她能基本了解自己的情绪，有一定的独立性和专注力。建议多给孩子一些独立完成任务的机会，鼓励孩子反思自己的行为，培养自我认知能力。",
+            low: "<strong>孩子的内省智能正在探索中。</strong> 可能目前还不太了解自己，情绪管理能力也在发展中，但没关系，这是成长的必经过程。建议多和孩子聊一聊他/她的感受，帮助孩子认识自己的情绪，培养独立性。"
+        },
+        naturalist: {
+            high: "<strong>孩子的自然观察智能非常突出！</strong> 他/她对动植物、自然现象很感兴趣，观察力很强，喜欢探索和发现，好奇心旺盛。建议多带孩子接触大自然，进行观察、采集、小实验等活动，未来可能在生物学、地质学、环境科学等领域有所发展。",
+            med: "<strong>孩子的自然观察智能发展良好。</strong> 他/她对自然事物有一定的兴趣，喜欢观察和探索，有一定的好奇心。建议多带孩子到大自然中去，鼓励孩子观察周围的事物，培养观察力和探索欲。",
+            low: "<strong>孩子的自然观察智能正在探索中。</strong> 可能目前对自然事物不太关注，但没关系，好奇心可以慢慢培养。建议多带孩子到户外走走，一起观察花草树木、小动物，让孩子感受大自然的奇妙。"
+        }
+    };
+    
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimFullCN(key)} 
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)})</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+function getAgeAdvice() {
+    if (userAge === '3-4') {
+        return `
+        <ul class="r-list">
+            <li><strong>启蒙期原则：快乐第一，兴趣为主。</strong> 不要给孩子压力，让孩子在玩中学习。</li>
+            <li><strong>语言：</strong> 读简单的绘本，唱儿歌，鼓励孩子模仿发音和说话。</li>
+            <li><strong>运动：</strong> 玩球、跑步、攀爬，锻炼大肌肉；玩积木、串珠子，锻炼小肌肉。</li>
+            <li><strong>社交：</strong> 多和小朋友一起玩，学习分享和合作。</li>
+        </ul>`;
+    } else if (userAge === '5-6') {
+        return `
+        <ul class="r-list">
+            <li><strong>学前准备期原则：培养习惯，激发兴趣。</strong> 为小学做好准备，但不要过度学习。</li>
+            <li><strong>逻辑：</strong> 认识数字、形状，玩简单的数学游戏，培养数感。</li>
+            <li><strong>空间：</strong> 画画、搭积木、拼拼图，培养空间想象力。</li>
+            <li><strong>内省：</strong> 培养孩子的独立性，让孩子自己的事情自己做。</li>
+        </ul>`;
+    } else if (userAge === '7-8') {
+        return `
+        <ul class="r-list">
+            <li><strong>小学低年级原则：适应学校，培养能力。</strong> 帮助孩子适应小学生活，培养学习习惯。</li>
+            <li><strong>语言：</strong> 培养阅读习惯，写简单的日记，提升读写能力。</li>
+            <li><strong>逻辑：</strong> 做数学应用题，玩逻辑推理游戏，培养思维能力。</li>
+            <li><strong>人际：</strong> 鼓励孩子和同学友好相处，学会合作和沟通。</li>
+        </ul>`;
+        return `
+        <ul class="r-list">
+            <li><strong>小学高年级原则：深化优势，全面发展。</strong> 根据孩子的兴趣和优势，进行更专业的培养。</li>
+            <li><strong>逻辑：</strong> 尝试奥数、编程，培养抽象思维和解决问题的能力。</li>
+            <li><strong>自然：</strong> 做科学小实验，读科普书籍，培养科学素养。</li>
+            <li><strong>内省：</strong> 帮助孩子制定学习计划，培养时间管理能力。</li>
+        </ul>`;
+    }
+}
+
+function getFocusAdvice(key) {
+    const advice = {
+        language: `
+        <ul class="r-list">
+            <li><strong>家庭活动：</strong> 每天固定阅读时间，举办家庭故事会，让孩子轮流讲故事。</li>
+            <li><strong>兴趣班推荐：</strong> 口才班、写作班、绘本阅读班。</li>
+            <li><strong>日常实践：</strong> 让孩子写日记、写信，鼓励孩子参加演讲比赛或作文比赛。</li>
+        </ul>`,
+        logic: `
+        <ul class="r-list">
+            <li><strong>家庭活动：</strong> 玩数独、华容道、逻辑推理游戏，一起做科学小实验。</li>
+            <li><strong>兴趣班推荐：</strong> 奥数班、编程班、科学实验课。</li>
+            <li><strong>日常实践：</strong> 让孩子帮忙算账、理财，鼓励孩子用数学解决生活中的问题。</li>
+        </ul>`,
+        spatial: `
+        <ul class="r-list">
+            <li><strong>家庭活动：</strong> 一起画画、做手工、搭乐高、玩拼图，带孩子去看建筑和展览。</li>
+            <li><strong>兴趣班推荐：</strong> 绘画班、手工班、乐高课、建筑模型课。</li>
+            <li><strong>日常实践：</strong> 让孩子布置房间、设计手抄报，鼓励孩子用图像表达想法。</li>
+        </ul>`,
+        bodily: `
+        <ul class="r-list">
+            <li><strong>家庭活动：</strong> 一起运动、跳舞、做手工、玩角色扮演游戏。</li>
+            <li><strong>兴趣班推荐：</strong> 体育班（足球、篮球、游泳等）、舞蹈班、手工班、戏剧表演班。</li>
+            <li><strong>日常实践：</strong> 让孩子帮忙做家务，鼓励孩子参加体育比赛或表演活动。</li>
+        </ul>`,
+        musical: `
+        <ul class="r-list">
+            <li><strong>家庭活动：</strong> 一起听音乐、唱歌、跳舞，玩打击乐器，去听音乐会。</li>
+            <li><strong>兴趣班推荐：</strong> 音乐启蒙班、乐器班（钢琴、小提琴、吉他等）、舞蹈班。</li>
+            <li><strong>日常实践：</strong> 让孩子学唱新歌，鼓励孩子参加音乐表演或比赛。</li>
+        </ul>`,
+        interpersonal: `
+        <ul class="r-list">
+            <li><strong>家庭活动：</strong> 一起玩角色扮演游戏，讨论社交场景，教孩子如何与人相处。</li>
+            <li><strong>兴趣班推荐：</strong> 口才班、戏剧班、团队运动班。</li>
+            <li><strong>日常实践：</strong> 让孩子多参加集体活动，鼓励孩子组织游戏或活动，培养领导力。</li>
+        </ul>`,
+        intrapersonal: `
+        <ul class="r-list">
+            <li><strong>家庭活动：</strong> 和孩子聊天，讨论他/她的感受和想法，让孩子自己做决定。</li>
+            <li><strong>兴趣班推荐：</strong> 围棋班、象棋班、书法班（培养专注力和耐心）。</li>
+            <li><strong>日常实践：</strong> 让孩子制定学习计划和目标，鼓励孩子反思自己的行为，培养独立性。</li>
+        </ul>`,
+        naturalist: `
+        <ul class="r-list">
+            <li><strong>家庭活动：</strong> 一起去公园、郊外，观察动植物，做科学小实验，养小动物或植物。</li>
+            <li><strong>兴趣班推荐：</strong> 科学实验课、自然观察课、机器人课。</li>
+            <li><strong>日常实践：</strong> 让孩子收集标本、做观察日记，鼓励孩子参加科学竞赛或活动。</li>
+        </ul>`
+    };
+    return advice[key] || advice['language'];
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// 雷达图绘制
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['language','logic','spatial','bodily','musical','interpersonal','intrapersonal','naturalist'];
+    const labels = ['语言','逻辑','空间','运动','音乐','人际','内省','自然'];
+    
+    // 背景网格
+    ctx.strokeStyle = '#E3F2FD';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<8; j++) {
+            let a = (Math.PI*2/8)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    // 数据层
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 65, 1.1); 
+        let a = (Math.PI*2/8)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    // 渐变填充
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(255, 179, 0, 0.1)");
+    grd.addColorStop(1, "rgba(255, 179, 0, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#FFB300'; ctx.lineWidth = 2; ctx.stroke();
+    
+    // 文字
+    ctx.fillStyle = '#263238'; ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/8)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    // 主测试流程按钮绑定
+    document.getElementById('start-btn').addEventListener('click', function() {var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}
+        goToDemo();
+    });
+
+    document.getElementById('init-test-btn').addEventListener('click', function() {
+        initTest();
+    });
+
+    document.getElementById('prev-btn').addEventListener('click', function() {
+        prevQuestion();
+    });
+
+    document.getElementById('show-report-btn').addEventListener('click', function() {
+        showReport();
+    });
+
+    document.getElementById('close-report-btn').addEventListener('click', function() {
+        closeReport();
+    });
+
+    document.getElementById('reset-test-btn').addEventListener('click', function() {
+        resetTest();
+    });
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "bbtf";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

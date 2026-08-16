@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>职场PUA敏感度检测 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #8E44AD;
+            --primary-light: #9B59B6;
+            --accent: #9B59B6;
+            --safe: #27AE60;
+            --warning: #E74C3C;
+            --danger: #C0392B;
+            --bg-gradient-start: #F4ECF7;
+            --bg-gradient-end: #E8DAEF;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-purple { 0% { box-shadow: 0 0 0 0 rgba(142, 68, 173, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(142, 68, 173, 0); } 100% { box-shadow: 0 0 0 0 rgba(142, 68, 173, 0); } }
+        @keyframes pulse-warning { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); } }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-light); }
+
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#ede0f5 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--warning); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 34px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ede0f5; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #ede0f5; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #ede0f5; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #ede0f5; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #f5eff9; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        #page-result { display: none; background: #ede0f5; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ede0f5; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 45px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-purple 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ede0f5; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #ede0f5; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+
+        .warning-banner { background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%); border: 2px solid var(--warning); padding: 16px; border-radius: 12px; margin-bottom: 30px; text-align: left; }
+        .warning-banner .icon { font-size: 28px; margin-bottom: 8px; }
+        .warning-banner .title { font-weight: 800; color: var(--warning); font-size: 16px; margin-bottom: 4px; }
+        .warning-banner .desc { font-size: 13px; color: #666; line-height: 1.5; }
+
+        .sensitivity-indicator { display: flex; justify-content: center; gap: 8px; margin-top: 15px; }
+        .sens-dot { width: 12px; height: 12px; border-radius: 50%; background: #eee; }
+        .sens-dot.active { background: var(--primary); }
+        .sens-dot.warning { background: var(--warning); }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-职场PUA敏感度检测" class="fade-in">
+        <div class="cover-tag">⚠️ 职场防护指南</div>
+        <h1 class="cover-title">职场<span>PUA</span><br>敏感度检测</h1>
+        <p class="cover-subtitle">基于权力心理学科学评估<br>识别职场精神控制，保护自我价值</p>
+
+        <div class="warning-banner">
+            <div class="icon">🔍</div>
+            <div class="title">什么是职场PUA？</div>
+            <div class="desc">职场PUA是指上司或同事通过打击、否定、威胁等手段操控你的情绪，让你产生自我怀疑，从而服从其意志的行为。</div>
+        </div>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🛡️</div>
+                <div class="feature-title">四维精准分析</div>
+                <div class="feature-desc">认知识别、情绪反应、行为应对、边界维护，全面评估你的PUA防御能力。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">权力心理学</div>
+                <div class="feature-desc">基于权力心理学和煤气灯效应理论，科学解析你的敏感度。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">⚠️</div>
+                <div class="feature-title">识别PUA套路</div>
+                <div class="feature-desc">帮助你识别常见的职场PUA手段，提高警惕意识。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💪</div>
+                <div class="feature-title">自我保护策略</div>
+                <div class="feature-desc">提供实用的职场自我保护方法，建立健康的工作心态。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始检测 (约需 3 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">📋 职场背景调查</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的情况精准评估PUA敏感度。</p>
+
+        <div class="form-group">
+            <label class="form-label">你工作多久了？</label>
+            <select id="input-experience" class="select-box">
+                <option value="new">刚入职 (< 1年)</option>
+                <option value="junior">1-3年</option>
+                <option value="mid">3-5年</option>
+                <option value="senior">5-10年</option>
+                <option value="expert">10年以上</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的职位层级是？</label>
+            <select id="input-level" class="select-box">
+                <option value="intern">实习生/试用期</option>
+                <option value="junior">初级员工</option>
+                <option value="mid">中级员工</option>
+                <option value="senior">高级/资深员工</option>
+                <option value="lead">团队负责人/主管</option>
+                <option value="manager">经理及以上</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你目前的职场环境是？</label>
+            <select id="input-env" class="select-box">
+                <option value="startup">创业公司</option>
+                <option value="smb">中小型企业</option>
+                <option value="large">大型企业</option>
+                <option value="foreign">外资/合资企业</option>
+                <option value="gov">国有企业/事业单位</option>
+                <option value="other">其他</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">开始测评</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：认知识别</span>
+            <span id="progress-text">1 / 16</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🔍 认知识别</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+
+    <div id="page-loading">
+        <div style="font-size:50px; animation: pulse-purple 1s infinite;">🛡️</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的PUA敏感度...</h3>
+        <p style="color:#636E72; font-size:14px;">正在扫描四维数据...<br>计算敏感度指数...<br>生成专属报告...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">敏感度指数</span>
+            </div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+            <div class="sensitivity-indicator">
+                <div class="sens-dot" id="dot1"></div>
+                <div class="sens-dot" id="dot2"></div>
+                <div class="sens-dot" id="dot3"></div>
+                <div class="sens-dot" id="dot4"></div>
+                <div class="sens-dot" id="dot5"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 职场PUA敏感度四维雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《职场PUA敏感度深度分析报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新检测</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div>
+            <div class="r-h1">职场PUA敏感度深度分析报告</div>
+            <div style="font-size:14px;">专业心理测评 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+
+</div>
+
+<script>
+const questions = [
+    { d: 'cognition', t: '认知识别', q: "你的领导经常打击或否定你的工作成果吗？", o: [
+        {t:"经常发生，而且很严重", s:10},
+        {t:"经常发生，但程度较轻", s:8},
+        {t:"偶尔发生", s:5},
+        {t:"很少发生", s:2},
+        {t:"从未发生", s:0}
+    ]},
+    { d: 'cognition', t: '认知识别', q: "有人让你觉得离开这个公司就找不到更好的工作吗？", o: [
+        {t:"经常这样说", s:10},
+        {t:"有时这样说", s:8},
+        {t:"偶尔听到", s:5},
+        {t:"很少听到", s:2},
+        {t:"从未听到", s:0}
+    ]},
+    { d: 'cognition', t: '认知识别', q: "领导会当众羞辱你或让你当众出丑吗？", o: [
+        {t:"经常发生", s:10},
+        {t:"时有发生", s:8},
+        {t:"偶尔发生", s:5},
+        {t:"很少发生", s:2},
+        {t:"从未发生", s:0}
+    ]},
+    { d: 'cognition', t: '认知识别', q: "有人经常拿你和别人比较，说你不如某某吗？", o: [
+        {t:"经常这样比较", s:10},
+        {t:"时有这种比较", s:8},
+        {t:"偶尔比较", s:5},
+        {t:"很少比较", s:2},
+        {t:"从不比较", s:0}
+    ]},
+    
+    { d: 'emotion', t: '情绪反应', q: "当被领导否定时，你会感到强烈的自我怀疑吗？", o: [
+        {t:"每次都会，怀疑自己的能力", s:10},
+        {t:"经常怀疑自己", s:8},
+        {t:"有时会怀疑", s:5},
+        {t:"很少怀疑", s:2},
+        {t:"从不怀疑，我能客观看待", s:0}
+    ]},
+    { d: 'emotion', t: '情绪反应', q: "面对领导的打压，你会感到焦虑或恐惧吗？", o: [
+        {t:"每次都很焦虑恐惧", s:10},
+        {t:"经常焦虑恐惧", s:8},
+        {t:"有时会焦虑", s:5},
+        {t:"很少焦虑", s:2},
+        {t:"从不焦虑，能冷静应对", s:0}
+    ]},
+    { d: 'emotion', t: '情绪反应', q: "被PUA后，你会长时间陷入负面情绪走不出来吗？", o: [
+        {t:"每次都会，很长时间走不出来", s:10},
+        {t:"经常这样，需要很久恢复", s:8},
+        {t:"有时会，但很快能调整", s:5},
+        {t:"很少，能较快恢复", s:2},
+        {t:"完全不会，不影响情绪", s:0}
+    ]},
+    { d: 'emotion', t: '情绪反应', q: "你会因为害怕被批评而不敢表达真实想法吗？", o: [
+        {t:"经常这样，完全不敢表达", s:10},
+        {t:"经常这样，有所顾虑", s:8},
+        {t:"有时会，不敢完全表达", s:5},
+        {t:"很少，基本能正常表达", s:2},
+        {t:"从不，我会坚持表达", s:0}
+    ]},
+    
+    { d: 'behavior', t: '行为应对', q: "面对职场PUA，你会主动反抗或表达不满吗？", o: [
+        {t:"从不反抗，选择默默忍受", s:10},
+        {t:"很少反抗，忍着居多", s:8},
+        {t:"有时会反抗，但不坚定", s:5},
+        {t:"经常反抗，维护自己", s:2},
+        {t:"总是反抗，坚决维护权益", s:0}
+    ]},
+    { d: 'behavior', t: '行为应对', q: "你会为了讨好领导而做超出职责范围的事吗？", o: [
+        {t:"经常这样做", s:10},
+        {t:"经常，主动迎合", s:8},
+        {t:"有时会，被迫妥协", s:5},
+        {t:"很少，坚守底线", s:2},
+        {t:"从不，保持原则", s:0}
+    ]},
+    { d: 'behavior', t: '行为应对', q: "面对不公正待遇，你会选择忍气吞声还是寻求帮助？", o: [
+        {t:"完全忍气吞声，不敢声张", s:10},
+        {t:"大多时候选择忍受", s:8},
+        {t:"犹豫，不知如何是好", s:5},
+        {t:"有时会寻求帮助", s:2},
+        {t:"总是积极寻求解决方案", s:0}
+    ]},
+    { d: 'behavior', t: '行为应对', q: "你会因为领导的负面评价而改变自己的行为方式吗？", o: [
+        {t:"完全按照领导说的改变", s:10},
+        {t:"经常改变，失去自我", s:8},
+        {t:"有时会改变自己", s:5},
+        {t:"很少改变，坚持自我", s:2},
+        {t:"从不改变，保持独立判断", s:0}
+    ]},
+    
+    { d: 'boundary', t: '边界维护', q: "领导会在非工作时间频繁找你处理工作吗？", o: [
+        {t:"每天都会，经常深夜联系", s:10},
+        {t:"经常，周末也不放过", s:8},
+        {t:"偶尔，重要的事会联系", s:5},
+        {t:"很少，基本只在工作时间", s:2},
+        {t:"从不，界限分明", s:0}
+    ]},
+    { d: 'boundary', t: '边界维护', q: "你能拒绝领导不合理的要求吗？", o: [
+        {t:"完全不敢拒绝", s:10},
+        {t:"基本不敢拒绝", s:8},
+        {t:"有时不敢拒绝", s:5},
+        {t:"经常能拒绝", s:2},
+        {t:"总是能合理拒绝", s:0}
+    ]},
+    { d: 'boundary', t: '边界维护', q: "你的私人生活和空间会被工作侵犯吗？", o: [
+        {t:"经常被侵犯，毫无边界", s:10},
+        {t:"经常被干预", s:8},
+        {t:"偶尔被干预", s:5},
+        {t:"很少被干预", s:2},
+        {t:"从未被干预", s:0}
+    ]},
+    { d: 'boundary', t: '边界维护', q: "你能区分工作关系和私人关系吗？", o: [
+        {t:"完全混淆，被牵着走", s:10},
+        {t:"经常混淆，分不清界限", s:8},
+        {t:"有时混淆", s:5},
+        {t:"很少混淆", s:2},
+        {t:"完全能区分，界限清晰", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const levels = [
+    { max: 40, l: "极度不敏感", c: "#C0392B", d: "你对职场PUA几乎没有任何警觉，非常容易被操控。你需要立即提高警惕，学习识别PUA的手段。", advice: "强烈建议你立即学习PUA识别技巧，建立自我保护意识。", icon: "🚨" },
+    { max: 80, l: "不敏感", c: "#E74C3C", d: "你对职场PUA的识别能力较弱，容易被常见的PUA手段影响。需要加强自我保护意识。", advice: "建议系统学习PUA心理学，了解常见套路，提高警觉性。", icon: "⚠️" },
+    { max: 120, l: "较敏感", c: "#F39C12", d: "你能识别大部分职场PUA行为，但面对复杂情况时仍可能受到影响。", advice: "继续保持警惕，积累应对经验，建立更强大的心理防线。", icon: "🛡️" },
+    { max: 160, l: "极度敏感", c: "#27AE60", d: "你对职场PUA非常敏感，具有很强的识别和防御能力。能够有效保护自己免受精神操控。", advice: "你已经具备较强的自我保护能力，可以适当帮助身边的人提高警觉。", icon: "✅" }
+];
+
+let currQList = [];
+let currIdx = 0;
+let userInfo = {};
+let scores = { cognition:0, emotion:0, behavior:0, boundary:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userInfo.experience = document.getElementById('input-experience').value;
+    userInfo.level = document.getElementById('input-level').value;
+    userInfo.env = document.getElementById('input-env').value;
+    
+    currQList = [...questions];
+    currIdx = 0;
+    scores = { cognition:0, emotion:0, behavior:0, boundary:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { cognition:0, emotion:0, behavior:0, boundary:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+    
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.icon + ' ' + lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    const dots = document.querySelectorAll('.sens-dot');
+    const levelIndex = levels.indexOf(lvl);
+    dots.forEach((dot, i) => {
+        dot.classList.remove('active', 'warning');
+        if (i <= levelIndex) {
+            dot.classList.add(levelIndex>= 2 ? 'active' : 'warning');
+        }
+    });
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'cognition', n:'认知'}, 
+        {k:'emotion', n:'情绪'}, 
+        {k:'behavior', n:'行为'}, 
+        {k:'boundary', n:'边界'}
+    ];
+    let html = '';
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 40) * 100, 100);
+        let color = pct> 60 ? '#E74C3C' : (pct> 30 ? '#F39C12' : '#27AE60');
+        let txt = pct> 70 ? '需警惕' : (pct> 40 ? '待加强' : '良好');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {cognition:'认知识别', emotion:'情绪反应', behavior:'行为应对', boundary:'边界维护'};
+    return map[k];
+}
+
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、PUA敏感度诊断</div>
+        <p class="r-p" style="background:#fafafa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>📋 职场档案：</strong>工作经验：${getExperienceName(userInfo.experience)} | 职位层级：${getLevelName(userInfo.level)} | 企业类型：${getEnvName(userInfo.env)}
+        </p>
+        <div class="r-box" style="border-left:5px solid ${lvl.c};">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">敏感等级：${lvl.l}</div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>敏感度评估：</strong>${lvl.d}</p>
+            <p style="margin:10px 0 0; font-size:15px; line-height:1.6; color:#555;"><strong>核心建议：</strong>${lvl.advice}</p>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">二、四维度深度分析</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px;">*基于权力心理学和煤气灯效应的科学分析</p>
+        ${generateDimAnalysis('cognition', scores.cognition, '反映你对职场PUA行为的识别能力，包括对打击、否定、威胁等操控手段的敏感程度。')}
+        ${generateDimAnalysis('emotion', scores.emotion, '反映你在面对PUA时的情绪反应模式，包括自我怀疑、焦虑恐惧等负面情绪的敏感程度。')}
+        ${generateDimAnalysis('behavior', scores.behavior, '反映你在面对PUA时的应对行为，包括反抗、妥协、寻求帮助等行为倾向。')}
+        ${generateDimAnalysis('boundary', scores.boundary, '反映你维护个人边界的能力，包括拒绝不合理要求、保护私人空间等边界维护行为。')}
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">三、职场PUA的心理学原理</div>
+        <div class="r-box" style="background:#fdf2f2; border-color:#E74C3C;">
+            <div class="r-h3" style="color:#E74C3C;">⚠️ 什么是职场PUA？</div>
+            <p class="r-p">
+                <strong>职场PUA</strong>是指在工作场所中，拥有权力的一方（上司、领导）通过心理操控手段，使另一方（下属）产生自我怀疑、恐惧和依赖，从而服从其意志的行为。
+            </p>
+            <p class="r-p">
+                这种操控往往披着"为你好"、"培养你"的外衣，让受害者难以察觉和反抗。长期处于PUA环境中，会严重损害个人的心理健康和职业发展。
+            </p>
+        </div>
+
+        <div class="r-box" style="background:#f5eff9; border-color:#9B59B6;">
+            <div class="r-h3" style="color:#9B59B6;">🧠 PUA的心理学机制</div>
+            <p class="r-p">
+                <strong>1. 煤气灯效应（Gaslighting）</strong><br>
+                通过持续否定、扭曲事实，让受害者怀疑自己的记忆、感知和判断，最终失去自我认同。
+            </p>
+            <p class="r-p">
+                <strong>2. 认知失调</strong><br>
+                当领导不断否定你的工作时，你会产生认知失调，为了减少这种不适，可能会选择认同领导的评价，从而丧失自信。
+            </p>
+            <p class="r-p">
+                <strong>3. 权力不对称</strong><br>
+                职场中天然存在权力差异，领导掌握着你的晋升、薪酬等资源，这种不对称让你更易被操控。
+            </p>
+            <p class="r-p">
+                <strong>4. 习得性无助</strong><br>
+                长期被打压和否定后，你会形成"无论怎么努力都没用"的认知，失去反抗的动力和信心。
+            </p>
+        </div>
+        
+        <div class="r-box" style="background:#fef9f0; border-color:#F39C12;">
+            <div class="r-h3" style="color:#F39C12;">🔍 常见职场PUA套路</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>打击式管理</strong>：永远说你做得不够好，无论你多努力</li>
+                <li><strong>画大饼</strong>：承诺升职加薪，但从不正面兑现</li>
+                <li><strong>孤立排挤</strong>：在团队中制造对立，让你觉得被孤立</li>
+                <li><strong>制造焦虑</strong>：不断强调市场竞争，让你害怕失去工作</li>
+                <li><strong>否定成就</strong>：将你的成功归因于他人或运气</li>
+                <li><strong>情绪勒索</strong>：利用你的愧疚感或责任感操控你</li>
+                <li><strong>比较打压</strong>：总是拿你和"更优秀"的同事比较</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">四、自我保护策略</div>
+        <div class="r-box" style="background:#eafaf1; border-color:#27AE60;">
+            <div class="r-h3" style="color:#27AE60;">💪 建立心理防线</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>建立客观的自我评价体系</strong>：不要依赖领导的评价来定义自己</li>
+                <li><strong>记录工作成果</strong>：保留邮件、聊天记录等证据，有据可查</li>
+                <li><strong>培养支持系统</strong>：建立职场内外的支持网络，获得客观反馈</li>
+                <li><strong>保持情绪觉察</strong>：当感到持续的负面情绪时，提高警觉</li>
+            </ul>
+        </div>
+
+        <div class="r-box">
+            <div class="r-h3">🎯 针对性应对策略</div>
+            ${getRecommendations(lvl.l).map((p, i) => `<p style="margin:8px 0; padding-left:20px; position:relative;"><span style="position:absolute; left:0; color:#9B59B6; font-weight:bold;">${i+1}.</span> ${p}</p>`).join('')}
+        </div>
+
+        <div class="r-box">
+            <div class="r-h3">🌟 长期职业发展建议</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>持续学习提升</strong>：增强专业能力，提高不可替代性</li>
+                <li><strong>拓展职业网络</strong>：不要局限在当前公司，建立行业人脉</li>
+                <li><strong>关注市场价值</strong>：定期了解行业薪资水平，客观评估自我价值</li>
+                <li><strong>设置退出机制</strong>：如果环境持续恶化，要有Plan B的勇气</li>
+                <li><strong>寻求专业帮助</strong>：必要时寻求心理咨询，处理心理创伤</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">五、给不同敏感度人群的话</div>
+        ${levels.map(l => `
+        <div class="r-box" style="border-left:5px solid ${l.c}; ${l.l === lvl.l ? 'background:#f5eff9;' : ''}">
+            <div style="font-size:16px; font-weight:800; color:${l.c}; margin-bottom:8px;">${l.icon} ${l.l}</div>
+            <p style="margin:0; font-size:14px; color:#666; line-height:1.6;">${getSpecificAdvice(l.l)}</p>
+        </div>
+        `).join('')}
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026职场PUA敏感度检测 · 专业心理测评<br>
+        愿你职场不被PUA，活出真实自我 🛡️
+    </div>
+    `;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function getExperienceName(e) {
+    const m = {'new':'刚入职 (< 1年)','junior':'1-3年','mid':'3-5年','senior':'5-10年','expert':'10年以上'};
+    return m[e] || e;
+}
+function getLevelName(l) {
+    const m = {'intern':'实习生/试用期','junior':'初级员工','mid':'中级员工','senior':'高级/资深员工','lead':'团队负责人/主管','manager':'经理及以上'};
+    return m[l] || l;
+}
+function getEnvName(env) {
+    const m = {'startup':'创业公司','smb':'中小型企业','large':'大型企业','foreign':'外资/合资企业','gov':'国有企业/事业单位','other':'其他'};
+    return m[env] || env;
+}
+
+function generateDimAnalysis(key, val, explanation) {
+    let level = val> 28 ? 'high' : (val> 14 ? 'med' : 'low');
+    const config = {
+        high: { color: '#E74C3C', bg: '#fdf2f2', tag: '⚠️ 需警惕', titleColor: '#E74C3C' },
+        med: { color: '#F39C12', bg: '#fef9f0', tag: '⚡ 待加强', titleColor: '#F39C12' },
+        low: { color: '#27AE60', bg: '#eafaf1', tag: '✅ 良好', titleColor: '#27AE60' }
+    };
+    const c = config[level];
+    const texts = {
+        cognition: { 
+            high: "<strong>认知识别能力较弱！</strong>你可能难以察觉职场PUA行为，容易被操控手段影响。建议系统学习PUA的常见表现形式。", 
+            med: "<strong>认知识别能力中等。</strong>你能察觉部分PUA行为，但对隐蔽手段识别不足。需要加强学习。", 
+            low: "<strong>认知识别能力良好！</strong>你能够较好地识别各种PUA手段，保持警觉。" 
+        },
+        emotion: { 
+            high: "<strong>情绪反应敏感度过高！</strong>你容易被PUA引发强烈的负面情绪，需要学习情绪管理技巧。", 
+            med: "<strong>情绪反应敏感度中等。</strong>面对PUA时会有一定情绪波动，但基本可控。", 
+            low: "<strong>情绪反应稳定！</strong>你能较好地管理面对PUA时的情绪，不易被操控。" 
+        },
+        behavior: { 
+            high: "<strong>行为应对不足！</strong>你倾向于默默忍受，不敢反抗。需要建立勇气，学会维护自己的权益。", 
+            med: "<strong>行为应对能力中等。</strong>你有反抗意识，但不够坚定。需要更多练习。", 
+            low: "<strong>行为应对能力良好！</strong>你能够积极应对PUA行为，维护自己的权益。" 
+        },
+        boundary: { 
+            high: "<strong>边界维护能力弱！</strong>你的个人边界容易被侵犯，需要学会说\"不\"，保护自己的时间和空间。", 
+            med: "<strong>边界维护能力中等。</strong>你有一定边界意识，但执行不够彻底。", 
+            low: "<strong>边界维护能力良好！</strong>你能较好地维护个人边界，不轻易被侵犯。" 
+        }
+    };
+    return `<div style="margin-bottom:20px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor}; margin-top:0;">${getDimName(key)} <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${val}/40)</span><span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span></div><p style="font-size:13px; color:#888; margin-bottom:8px;">${explanation}</p><p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][level]}</p></div>`;
+}
+
+function getRecommendations(level) {
+    const recs = {
+        '极度不敏感': [
+            '立即开始学习职场PUA的识别技巧，提高警惕意识',
+            '建立客观的自我评价体系，不要依赖领导的主观评价',
+            '记录工作成果和领导的正面反馈，作为自我证明的依据',
+            '主动寻求可信赖朋友或专业人士的反馈，了解真实情况',
+            '如果可能，考虑更换工作环境，远离有害的职场文化'
+        ],
+        '不敏感': [
+            '系统学习职场PUA的常见套路和识别方法',
+            '培养记录工作的习惯，保留客观的工作证据',
+            '建立职场内外的支持网络，获取多元反馈',
+            '学习情绪管理技巧，在被否定时保持冷静',
+            '从小事开始练习说\"不\"，逐步建立边界意识'
+        ],
+        '较敏感': [
+            '继续保持警惕，你的敏感度是很好的保护因素',
+            '积累更多应对经验，形成自己的应对策略库',
+            '加强情绪稳定性训练，在压力下保持判断力',
+            '帮助身边的人提高PUA识别意识',
+            '定期回顾自己的职场经历，及时发现潜在问题'
+        ],
+        '极度敏感': [
+            '你已具备较强的PUA防御能力，继续保持',
+            '可以适当帮助身边的同事朋友提高警觉',
+            '注意不要过度敏感，影响正常的职场关系',
+            '把你的识别经验整理分享，帮助更多人',
+            '持续关注心理健康，维护良好的自我状态'
+        ]
+    };
+    return recs[level] || recs['较敏感'];
+}
+
+function getSpecificAdvice(level) {
+    const advice = {
+        '极度不敏感': '你的敏感度很低，需要立即行动。首先要认识到自己可能正在经历职场PUA，然后开始学习识别技巧。建议寻求可信的朋友或专业人士的帮助，客观评估你的职场环境。记住，你值得被尊重和善待。',
+        '不敏感': '你的敏感度有待提高。建议系统学习PUA心理学，了解常见套路。同时，建立客观的自我评价体系，不要让领导的评价完全定义你。开始练习从小事说\"不\"，逐步建立边界。',
+        '较敏感': '你已经有较好的PUA识别能力。继续培养应对技巧，在遇到问题时保持冷静。记得建立支持网络，获得多元反馈。帮助身边的人也是一种很好的巩固学习的方式。',
+        '极度敏感': '你具备优秀的PUA防御能力！你的敏感度是长期积累的结果。继续维护好你的心理健康状态，同时可以适度帮助身边的人。你的存在本身就是对健康职场文化的一种推动。'
+    };
+    return advice[level] || advice['较敏感'];
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    const cx=120, cy=120, r=90;
+    const keys = ['cognition','emotion','behavior','boundary'];
+    const labels = ['认知','情绪','行为','边界'];
+    
+    ctx.strokeStyle = '#ede0f5'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<4; j++) {
+            let a = (Math.PI*2/4)*j - Math.PI/2;
+            ctx.lineTo(cx + Math.cos(a)*(r/4)*i, cy + Math.sin(a)*(r/4)*i);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let ratio = Math.min(s[k] / 40, 1.1); 
+        let a = (Math.PI*2/4)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(142, 68, 173, 0.1)");
+    grd.addColorStop(1, "rgba(142, 68, 173, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.strokeStyle = '#8E44AD'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/4)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('closeReport');
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "zcpua";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

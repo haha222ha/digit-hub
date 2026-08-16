@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>楚汉风云 - 你是哪位英雄？</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --primary-dark: #1a252f;
+            --accent: #c0392b;
+            --accent-hover: #e74c3c;
+            --safe: #27ae60;
+            --warning: #f39c12;
+            --bg-gradient-start: #f3f5f7;
+            --bg-gradient-end: #dfe6e9;
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+            --radius: 16px;
+            --theme-red: #ff2e4c;
+            --theme-red-light: #ff4760;
+            --card-radius: 24px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8f9fa; min-height: 100vh; color: var(--text-main); }
+        .container { max-width: 520px; margin: 0 auto; padding: 20px; position: relative; min-height: 100vh; }
+        .page { display: none; animation: fadeIn 0.5s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(100px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulseRed { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 46, 76, 0.7); } 50% { box-shadow: 0 0 0 15px rgba(255, 46, 76, 0); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .btn { display: block; width: 100%; padding: 18px; border: none; border-radius: 50px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+        .btn-primary { background: var(--primary); color: white; border-radius: var(--radius); }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-theme { background: linear-gradient(90deg, var(--theme-red), var(--theme-red-light)); color: white; box-shadow: 0 8px 20px rgba(255, 46, 76, 0.3); }
+        .btn-theme:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-accent { background: var(--accent); color: white; animation: pulseRed 2s infinite; border-radius: var(--radius); }
+        .btn-accent:active { transform: scale(0.98); background: var(--accent-hover); }
+        .btn-secondary { background: #f1f2f6; color: var(--text-main); border: none; margin-top: 12px; }
+        .btn-secondary:active { transform: scale(0.98); background: #dfe4ea; }
+        .card { background: white; border-radius: var(--radius); padding: 24px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .cover-badge { display: inline-block; background: linear-gradient(135deg, #8e44ad, #6c3483); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .cover-title { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+        .cover-title .highlight { color: #8e44ad; }
+        .cover-subtitle { color: var(--text-sub); font-size: 16px; margin-bottom: 30px; line-height: 1.5; }
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .feature-card { background: white; border-radius: var(--radius); padding: 20px 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .feature-icon { font-size: 32px; margin-bottom: 10px; }
+        .feature-text { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .quiz-dimension { font-size: 14px; font-weight: 600; color: #8e44ad; }
+        .quiz-progress { font-size: 14px; font-weight: 600; color: var(--text-sub); }
+        .progress-bar { width: 100%; height: 8px; background: #eaecef; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #8e44ad, #6c3483); border-radius: 4px; transition: width 0.3s ease; }
+        .question-card { animation: slideUp 0.4s ease; }
+        .question-tag { display: inline-block; background: #f1f2f6; color: var(--primary); padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .question-text { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 30px; }
+        .option-btn { display: block; width: 100%; padding: 18px; border: 2px solid #eaecef; border-radius: var(--radius); background: white; font-size: 16px; font-weight: 500; text-align: left; cursor: pointer; margin-bottom: 12px; transition: all 0.2s ease; }
+        .option-btn:hover { border-color: #8e44ad; }
+        .option-btn.selected { border-color: #8e44ad; background: rgba(142, 68, 173, 0.05); }
+        .option-btn:active { transform: scale(0.98); }
+        .back-btn { background: transparent; border: none; color: var(--text-sub); font-size: 16px; cursor: pointer; padding: 10px 0; margin-top: 20px; }
+        .loading-container { text-align: center; padding: 50px 20px; }
+        .loading-icon { font-size: 80px; animation: breathe 1.5s infinite; margin-bottom: 30px; }
+        .loading-title { font-size: 24px; font-weight: 700; margin-bottom: 15px; }
+        .loading-subtitle { font-size: 16px; color: var(--text-sub); }
+        .result-top-card { background: linear-gradient(135deg, #8e44ad, #6c3483); color: white; border-radius: var(--radius); padding: 30px 20px; text-align: center; margin-bottom: 20px; }
+        .level-tag { display: inline-block; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 8px 24px; border-radius: 20px; font-size: 20px; font-weight: 700; margin-bottom: 15px; }
+        .level-desc { font-size: 16px; line-height: 1.5; opacity: 0.95; }
+        .result-match-section { text-align: center; margin: 30px 0; padding: 30px 20px; background: linear-gradient(135deg, #f8f9fa, #fff); border-radius: var(--radius); border: 2px solid #8e44ad; }
+        .match-title { font-size: 18px; font-weight: 600; color: var(--text-sub); margin-bottom: 10px; }
+        .match-name { font-size: 36px; font-weight: 700; color: #8e44ad; margin-bottom: 15px; }
+        .match-desc { font-size: 16px; color: var(--text-main); line-height: 1.8; }
+        .match-tags { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+        .match-tag { padding: 6px 16px; background: rgba(142, 68, 173, 0.1); color: #8e44ad; border-radius: 20px; font-size: 14px; }
+        .result-actions { position: sticky; bottom: 20px; padding-top: 20px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: none; overflow-y: auto; }
+        .modal.active { display: block; animation: fadeIn 0.3s ease; }
+        .modal-content { background: white; min-height: 100vh; padding: 20px; max-width: 520px; margin: 0 auto; position: relative; padding-top: 80px; }
+        .modal-close { position: fixed; top: 20px; right: calc(50% - 260px); font-size: 32px; background: white; border: none; cursor: pointer; color: var(--text-sub); z-index: 2001; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.15); transition: all 0.2s ease; }
+        @media (max-width: 520px) { .modal-close { right: 20px; } }
+        .modal-close:hover { color: #8e44ad; transform: scale(1.1); }
+        .report-header { background: linear-gradient(135deg, #8e44ad, #6c3483); color: white; padding: 40px 20px 30px; margin: -20px -20px 30px; border-radius: 0 0 var(--radius) var(--radius); text-align: center; }
+        .report-title { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+        .report-subtitle { font-size: 16px; opacity: 0.9; }
+        .report-section { margin-bottom: 35px; }
+        .report-section-title { font-size: 18px; font-weight: 700; color: #8e44ad; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #f1f2f6; }
+        .report-content { font-size: 15px; line-height: 1.9; color: var(--text-main); }
+        .report-content p { margin-bottom: 12px; }
+        .report-highlight { background: linear-gradient(135deg, rgba(142, 68, 173, 0.05), rgba(108, 52, 131, 0.05)); border-left: 4px solid #8e44ad; padding: 15px; margin: 20px 0; border-radius: 0 var(--radius) var(--radius) 0; }
+        .report-list { padding-left: 20px; }
+        .report-list li { margin-bottom: 10px; line-height: 1.7; }
+    </style>
+</head>
+<body>
+
+    <div class="container" data-screenshot="psych-test-出厂设置">
+        <div id="coverPage" class="page active">
+            <div class="cover-badge">历史英雄版</div>
+            <h1 class="cover-title">楚汉风云<br><span class="highlight">你是哪位英雄？</span></h1>
+            <p class="cover-subtitle">穿越千年时空，回到楚汉争霸的时代，发现你的英雄人格</p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚔️</div>
+                    <div class="feature-text">8位英雄</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-text">精准匹配</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📜</div>
+                    <div class="feature-text">历史故事</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-text">千字报告</div>
+                </div>
+            </div>
+            <button id="startBtn" class="btn btn-primary">开始测试 (约需 2 分钟)</button>
+        </div>
+        <div id="profilePage" class="page">
+            <div class="card">
+                <h2 style="font-size:24px; font-weight:700; margin-bottom:15px;">你的基本画像 ⚔️</h2>
+                <p style="color:var(--text-sub); margin-bottom:30px; line-height:1.6;">系统将根据你的偏好调整分析维度。</p>
+                <div class="form-group">
+                    <label class="form-label">你更喜欢哪种成功方式？</label>
+                    <select id="successStyle" class="form-select">
+                        <option value="wisdom">智取</option>
+                        <option value="courage">勇夺</option>
+                        <option value="both">智勇双全</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">你更看重什么？</label>
+                    <select id="value" class="form-select">
+                        <option value="loyalty">忠诚</option>
+                        <option value="power">权力</option>
+                        <option value="fame">名誉</option>
+                        <option value="wealth">财富</option>
+                    </select>
+                </div>
+            </div>
+            <button id="generateQuizBtn" class="btn btn-primary">开始测评</button>
+        </div>
+        <div id="quizPage" class="page">
+            <div class="quiz-header">
+                <div class="quiz-dimension" id="dimensionLabel">性格特质</div>
+                <div class="quiz-progress" id="progressLabel">1 / 15</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+            <div class="card question-card" id="questionCard">
+                <div class="question-tag" id="questionTag">⚔️ 领导力</div>
+                <div class="question-text" id="questionText">题目加载中...</div>
+                <div id="optionsContainer"></div>
+            </div>
+            <button id="backQuestionBtn" class="back-btn" style="display:none;">← 返回上一题</button>
+        </div>
+        <div id="loadingPage" class="page">
+            <div class="loading-container">
+                <div class="loading-icon">⚔️</div>
+                <div class="loading-title">正在计算你的英雄指数...</div>
+                <div class="loading-subtitle">结合楚汉历史人物模型运算中...</div>
+            </div>
+        </div>
+        <div id="resultPage" class="page">
+            <div class="result-top-card">
+                <div class="level-tag" id="levelTag">你更像：项羽</div>
+                <div class="level-desc" id="resultLevelDesc">根据你的测评结果，你的英雄人格是...</div>
+            </div>
+            <div class="result-match-section">
+                <div class="match-title">最佳匹配</div>
+                <div class="match-name" id="matchName">项羽</div>
+                <div class="match-desc" id="matchDesc">你是一个顶天立地的英雄...</div>
+                <div class="match-tags" id="matchTags"></div>
+            </div>
+            <div class="result-actions">
+                <button id="reportBtn" class="btn btn-accent">📄 查看千字深度报告</button>
+                <button id="resetBtn" class="btn btn-secondary">🔄 重新测试</button>
+            </div>
+        </div>
+    </div>
+    <div id="reportModal" class="modal">
+        <button class="modal-close" id="closeModal">&times;</button>
+        <div class="modal-content">
+            <div class="report-header">
+                <div class="report-title">楚汉英雄人格分析报告</div>
+                <div class="report-subtitle">深度分析与千字建议</div>
+            </div>
+            <div id="reportContent" class="report-content"></div>
+        </div>
+    </div>
+    <script>
+        const QUESTIONS = [
+            { dimension: "leadership", tag: "⚔️ 领导力", text: "你更倾向于哪种领导风格？", options: [
+                { text: "以身作则，冲锋在前", score: { xiangyu: 10, liubang: 4, xiahousun: 8, zhangliang: 4, fansheng: 5, xiaoyuan: 4, pengyue: 8, lianpo: 7 } },
+                { text: "运筹帷幄，善于用人", score: { xiangyu: 3, liubang: 10, xiahoudun: 5, zhangliang: 9, fansheng: 6, xiaoyuan: 5, pengyue: 6, lianpo: 6 } },
+                { text: "恩威并施，刚柔并济", score: { xiangyu: 6, liubang: 6, xiahoudun: 10, zhangliang: 6, fansheng: 8, xiaoyuan: 7, pengyue: 7, lianpo: 8 } },
+                { text: "冷静睿智，审时度势", score: { xiangyu: 4, liubang: 7, xiahoudun: 5, zhangliang: 10, fansheng: 9, xiaoyuan: 9, pengyue: 5, lianpo: 6 } }
+            ]},
+            { dimension: "wisdom", tag: "🧠 智慧", text: "面对难题，你会？", options: [
+                { text: "正面突破，以力破巧", score: { xiangyu: 10, liubang: 4, xiahoudun: 7, zhangliang: 3, fansheng: 3, xiaoyuan: 4, pengyue: 8, lianpo: 6 } },
+                { text: "智取为上，借力打力", score: { xiangyu: 3, liubang: 10, xiahoudun: 5, zhangliang: 10, fansheng: 9, xiaoyuan: 7, pengyue: 4, lianpo: 5 } },
+                { text: "虚心请教，集思广益", score: { xiangyu: 5, liubang: 8, xiahoudun: 9, zhangliang: 8, fansheng: 8, xiaoyuan: 6, pengyue: 6, lianpo: 7 } },
+                { text: "随机应变，灵活应对", score: { xiangyu: 5, liubang: 8, xiahoudun: 6, zhangliang: 6, fansheng: 7, xiaoyuan: 10, pengyue: 6, lianpo: 8 } }
+            ]},
+            { dimension: "loyalty", tag: "💝 忠诚观", text: "你对忠诚的看法是？", options: [
+                { text: "忠义两难，我选忠义", score: { xiangyu: 10, liubang: 5, xiahoudun: 9, zhangliang: 6, fansheng: 5, xiaoyuan: 4, pengyue: 8, lianpo: 10 } },
+                { text: "识时务者为俊杰", score: { xiangyu: 2, liubang: 10, xiahoudun: 6, zhangliang: 5, fansheng: 8, xiaoyuan: 9, pengyue: 6, lianpo: 5 } },
+                { text: "忠诚要看对象", score: { xiangyu: 4, liubang: 8, xiahoudun: 7, zhangliang: 9, fansheng: 10, xiaoyuan: 8, pengyue: 5, lianpo: 6 } },
+                { text: "忠诚是立身之本", score: { xiangyu: 8, liubang: 6, xiahoudun: 10, zhangliang: 6, fansheng: 4, xiaoyuan: 5, pengyue: 10, lianpo: 9 } }
+            ]},
+            { dimension: "ambition", tag: "🎯 野心", text: "你的野心程度？", options: [
+                { text: "称霸天下，唯我独尊", score: { xiangyu: 10, liubang: 6, xiahoudun: 6, zhangliang: 5, fansheng: 4, xiaoyuan: 4, pengyue: 8, lianpo: 6 } },
+                { text: "平定天下，还百姓安宁", score: { xiangyu: 6, liubang: 10, xiahoudun: 7, zhangliang: 8, fansheng: 6, xiaoyuan: 6, pengyue: 8, lianpo: 8 } },
+                { text: "封侯拜相，名留青史", score: { xiangyu: 5, liubang: 7, xiahoudun: 8, zhangliang: 10, fansheng: 9, xiaoyuan: 7, pengyue: 6, lianpo: 7 } },
+                { text: "过好当下，不想太多", score: { xiangyu: 3, liubang: 4, xiahoudun: 5, zhangliang: 4, fansheng: 6, xiaoyuan: 8, pengyue: 4, lianpo: 5 } }
+            ]},
+            { dimension: "emotion", tag: "💔 情感", text: "你对待感情的态度？", options: [
+                { text: "用情至深，致死不渝", score: { xiangyu: 10, liubang: 4, xiahoudun: 8, zhangliang: 5, fansheng: 4, xiaoyuan: 4, pengyue: 6, lianpo: 7 } },
+                { text: "感情是奢侈品", score: { xiangyu: 3, liubang: 8, xiahoudun: 5, zhangliang: 6, fansheng: 8, xiaoyuan: 7, pengyue: 6, lianpo: 5 } },
+                { text: "有舍有得，看得开", score: { xiangyu: 5, liubang: 7, xiahoudun: 6, zhangliang: 8, fansheng: 9, xiaoyuan: 9, pengyue: 5, lianpo: 6 } },
+                { text: "专一深情，但更重事业", score: { xiangyu: 6, liubang: 6, xiahoudun: 10, zhangliang: 7, fansheng: 5, xiaoyuan: 6, pengyue: 9, lianpo: 9 } }
+            ]},
+            { dimension: "battle", tag: "⚔️ 战斗", text: "你更擅长什么战斗方式？", options: [
+                { text: "身先士卒，万军之中取上将首级", score: { xiangyu: 10, liubang: 3, xiahoudun: 8, zhangliang: 2, fansheng: 2, xiaoyuan: 3, pengyue: 10, lianpo: 8 } },
+                { text: "指挥若定，运筹帷幄决胜千里", score: { xiangyu: 4, liubang: 9, xiahoudun: 6, zhangliang: 10, fansheng: 7, xiaoyuan: 5, pengyue: 5, lianpo: 6 } },
+                { text: "冲锋陷阵，身先士卒", score: { xiangyu: 8, liubang: 5, xiahoudun: 10, zhangliang: 4, fansheng: 3, xiaoyuan: 4, pengyue: 8, lianpo: 10 } },
+                { text: "防守反击，以逸待劳", score: { xiangyu: 5, liubang: 6, xiahoudun: 6, zhangliang: 6, fansheng: 8, xiaoyuan: 10, pengyue: 6, lianpo: 7 } }
+            ]},
+            { dimension: "person", tag: "👥 为人", text: "你更欣赏哪种人？", options: [
+                { text: "顶天立地的大英雄", score: { xiangyu: 10, liubang: 5, xiahoudun: 8, zhangliang: 5, fansheng: 4, xiaoyuan: 4, pengyue: 8, lianpo: 8 } },
+                { text: "知人善任的明主", score: { xiangyu: 5, liubang: 10, xiahoudun: 7, zhangliang: 9, fansheng: 8, xiaoyuan: 6, pengyue: 6, lianpo: 7 } },
+                { text: "足智多谋的智者", score: { xiangyu: 4, liubang: 8, xiahoudun: 5, zhangliang: 10, fansheng: 9, xiaoyuan: 8, pengyue: 4, lianpo: 5 } },
+                { text: "忠肝义胆的侠士", score: { xiangyu: 8, liubang: 5, xiahoudun: 9, zhangliang: 5, fansheng: 4, xiaoyuan: 4, pengyue: 9, lianpo: 10 } }
+            ]},
+            { dimension: "failure", tag: "💪 失败观", text: "面对失败，你会？", options: [
+                { text: "宁为玉碎，不为瓦全", score: { xiangyu: 10, liubang: 3, xiahoudun: 7, zhangliang: 4, fansheng: 3, xiaoyuan: 3, pengyue: 7, lianpo: 6 } },
+                { text: "留得青山在，不怕没柴烧", score: { xiangyu: 2, liubang: 10, xiahoudun: 6, zhangliang: 6, fansheng: 9, xiaoyuan: 9, pengyue: 4, lianpo: 5 } },
+                { text: "卧薪尝胆，十年不晚", score: { xiangyu: 5, liubang: 8, xiahoudun: 5, zhangliang: 10, fansheng: 8, xiaoyuan: 7, pengyue: 6, lianpo: 7 } },
+                { text: "从哪里跌倒从哪里爬起", score: { xiangyu: 6, liubang: 7, xiahoudun: 9, zhangliang: 6, fansheng: 6, xiaoyuan: 8, pengyue: 8, lianpo: 9 } }
+            ]},
+            { dimension: "strategy", tag: "🎨 策略", text: "你更倾向哪种策略？", options: [
+                { text: "以强凌弱，一击制胜", score: { xiangyu: 10, liubang: 4, xiahoudun: 7, zhangliang: 3, fansheng: 3, xiaoyuan: 3, pengyue: 9, lianpo: 7 } },
+                { text: "以弱胜强，智取为上", score: { xiangyu: 3, liubang: 10, xiahoudun: 5, zhangliang: 10, fansheng: 9, xiaoyuan: 6, pengyue: 4, lianpo: 5 } },
+                { text: "稳扎稳打，步步为营", score: { xiangyu: 5, liubang: 6, xiahoudun: 8, zhangliang: 7, fansheng: 7, xiaoyuan: 10, pengyue: 6, lianpo: 9 } },
+                { text: "因地制宜，灵活应变", score: { xiangyu: 5, liubang: 7, xiahoudun: 6, zhangliang: 8, fansheng: 8, xiaoyuan: 8, pengyue: 6, lianpo: 7 } }
+            ]},
+            { dimension: "team", tag: "🤝 团队", text: "你更重视团队中的什么？", options: [
+                { text: "兄弟义气，有福同享", score: { xiangyu: 10, liubang: 6, xiahoudun: 9, zhangliang: 5, fansheng: 4, xiaoyuan: 4, pengyue: 8, lianpo: 8 } },
+                { text: "人才济济，各显神通", score: { xiangyu: 4, liubang: 10, xiahoudun: 6, zhangliang: 10, fansheng: 9, xiaoyuan: 6, pengyue: 5, lianpo: 6 } },
+                { text: "纪律严明，令行禁止", score: { xiangyu: 7, liubang: 6, xiahoudun: 10, zhangliang: 6, fansheng: 6, xiaoyuan: 7, pengyue: 9, lianpo: 10 } },
+                { text: "各司其职，配合默契", score: { xiangyu: 5, liubang: 7, xiahoudun: 8, zhangliang: 8, fansheng: 8, xiaoyuan: 9, pengyue: 7, lianpo: 8 } }
+            ]},
+            { dimension: "fame", tag: "📜 名声", text: "你对名声的看法？", options: [
+                { text: "生当作人杰，死亦为鬼雄", score: { xiangyu: 10, liubang: 5, xiahoudun: 8, zhangliang: 5, fansheng: 4, xiaoyuan: 4, pengyue: 8, lianpo: 7 } },
+                { text: "成王败寇，历史由胜者书写", score: { xiangyu: 4, liubang: 10, xiahoudun: 5, zhangliang: 6, fansheng: 8, xiaoyuan: 8, pengyue: 6, lianpo: 5 } },
+                { text: "留得生前身后名", score: { xiangyu: 6, liubang: 7, xiahoudun: 7, zhangliang: 10, fansheng: 7, xiaoyuan: 6, pengyue: 6, lianpo: 7 } },
+                { text: "名声是浮云，实用最重要", score: { xiangyu: 3, liubang: 8, xiahoudun: 6, zhangliang: 6, fansheng: 8, xiaoyuan: 9, pengyue: 5, lianpo: 6 } }
+            ]},
+            { dimension: "risk", tag: "⚡ 冒险", text: "你愿意冒多大的风险？", options: [
+                { text: "孤注一掷，破釜沉舟", score: { xiangyu: 10, liubang: 5, xiahoudun: 7, zhangliang: 4, fansheng: 4, xiaoyuan: 4, pengyue: 9, lianpo: 6 } },
+                { text: "小赌怡情，稳健为主", score: { xiangyu: 4, liubang: 7, xiahoudun: 7, zhangliang: 8, fansheng: 8, xiaoyuan: 8, pengyue: 5, lianpo: 7 } },
+                { text: "风险与收益成正比", score: { xiangyu: 6, liubang: 9, xiahoudun: 6, zhangliang: 8, fansheng: 7, xiaoyuan: 6, pengyue: 7, lianpo: 6 } },
+                { text: "尽量避免风险", score: { xiangyu: 3, liubang: 5, xiahoudun: 7, zhangliang: 5, fansheng: 6, xiaoyuan: 9, pengyue: 5, lianpo: 8 } }
+            ]},
+            { dimension: "decision", tag: "🔮 决断", text: "你做决定的速度？", options: [
+                { text: "当机立断，果断出击", score: { xiangyu: 10, liubang: 7, xiahoudun: 9, zhangliang: 5, fansheng: 5, xiaoyuan: 5, pengyue: 10, lianpo: 8 } },
+                { text: "深思熟虑，谋定后动", score: { xiangyu: 4, liubang: 8, xiahoudun: 6, zhangliang: 10, fansheng: 9, xiaoyuan: 7, pengyue: 5, lianpo: 7 } },
+                { text: "看情况，有时快有时慢", score: { xiangyu: 6, liubang: 7, xiahoudun: 7, zhangliang: 6, fansheng: 7, xiaoyuan: 9, pengyue: 6, lianpo: 7 } },
+                { text: "犹豫不决，总在权衡", score: { xiangyu: 3, liubang: 5, xiahoudun: 5, zhangliang: 5, fansheng: 6, xiaoyuan: 6, pengyue: 4, lianpo: 5 } }
+            ]},
+            { dimension: "charisma", tag: "✨ 魅力", text: "你认为自己最大的魅力是？", options: [
+                { text: "英雄气概，令人敬畏", score: { xiangyu: 10, liubang: 5, xiahoudun: 9, zhangliang: 5, fansheng: 4, xiaoyuan: 4, pengyue: 9, lianpo: 8 } },
+                { text: "知人识人，令人信服", score: { xiangyu: 4, liubang: 10, xiahoudun: 6, zhangliang: 9, fansheng: 8, xiaoyuan: 6, pengyue: 5, lianpo: 6 } },
+                { text: "足智多谋，令人佩服", score: { xiangyu: 4, liubang: 8, xiahoudun: 5, zhangliang: 10, fansheng: 9, xiaoyuan: 8, pengyue: 4, lianpo: 5 } },
+                { text: "忠义无双，令人感动", score: { xiangyu: 8, liubang: 5, xiahoudun: 10, zhangliang: 5, fansheng: 4, xiaoyuan: 4, pengyue: 8, lianpo: 10 } }
+            ]},
+            { dimension: "future", tag: "🔮 远见", text: "你的远见如何？", options: [
+                { text: "只看当下，不想太远", score: { xiangyu: 6, liubang: 5, xiahoudun: 6, zhangliang: 4, fansheng: 5, xiaoyuan: 8, pengyue: 5, lianpo: 5 } },
+                { text: "看得较远，预判趋势", score: { xiangyu: 5, liubang: 8, xiahoudun: 7, zhangliang: 9, fansheng: 8, xiaoyuan: 7, pengyue: 6, lianpo: 7 } },
+                { text: "高瞻远瞩，布局深远", score: { xiangyu: 4, liubang: 9, xiahoudun: 6, zhangliang: 10, fansheng: 9, xiaoyuan: 6, pengyue: 5, lianpo: 6 } },
+                { text: "走一步看一步", score: { xiangyu: 7, liubang: 6, xiahoudun: 7, zhangliang: 5, fansheng: 5, xiaoyuan: 8, pengyue: 6, lianpo: 6 } }
+            ]}
+        ];
+
+        const state = {
+            currentQuestionIndex: 0,
+            answers: [],
+            profileData: {},
+            scores: {},
+            totalScore: 0,
+            resultType: ''
+        };
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function initEventListeners() {
+            document.getElementById('startBtn').addEventListener('click', () => showPage('profilePage'));
+            
+            document.getElementById('generateQuizBtn').addEventListener('click', () => {
+                state.profileData.successStyle = document.getElementById('successStyle').value;
+                state.profileData.value = document.getElementById('value').value;
+                state.currentQuestionIndex = 0;
+                state.answers = [];
+                renderQuestion(0);
+                showPage('quizPage');
+            });
+
+            document.getElementById('backQuestionBtn').addEventListener('click', () => {
+                if (state.currentQuestionIndex> 0) renderQuestion(state.currentQuestionIndex - 1);
+            });
+
+            document.getElementById('reportBtn').addEventListener('click', () => {
+                generateReport();
+                document.getElementById('reportModal').classList.add('active');
+            });
+
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                state.currentQuestionIndex = 0;
+                state.answers = [];
+                state.scores = {};
+                showPage('profilePage');
+            });
+
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('reportModal').classList.remove('active');
+            });
+
+            document.getElementById('reportModal').addEventListener('click', (e) => {
+                if (e.target.id === 'reportModal') {
+                    document.getElementById('reportModal').classList.remove('active');
+                }
+            });
+        }
+
+        function renderQuestion(index) {
+            if (index>= QUESTIONS.length) {
+                calculateScores();
+                showPage('loadingPage');
+                setTimeout(() => {
+                    renderResults();
+                    showPage('resultPage');
+                }, 3000);
+                return;
+            }
+
+            state.currentQuestionIndex = index;
+            const q = QUESTIONS[index];
+            document.getElementById('dimensionLabel').textContent = q.tag;
+            document.getElementById('progressLabel').textContent = `${index + 1} / ${QUESTIONS.length}`;
+            document.getElementById('progressFill').style.width = `${((index + 1) / QUESTIONS.length) * 100}%`;
+            document.getElementById('questionTag').textContent = q.tag;
+            document.getElementById('questionText').textContent = q.text;
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn' + (state.answers[index] === i ? ' selected' : '');
+                btn.textContent = opt.text;
+                btn.onclick = () => {
+                    state.answers[index] = i;
+                    container.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    setTimeout(() => renderQuestion(index + 1), 300);
+                };
+                container.appendChild(btn);
+            });
+
+            document.getElementById('backQuestionBtn').style.display = index> 0 ? 'block' : 'none';
+        }
+
+        function calculateScores() {
+            const heroes = ['xiangyu', 'liubang', 'xiahoudun', 'zhangliang', 'fansheng', 'xiaoyuan', 'pengyue', 'lianpo'];
+            state.scores = {};
+            heroes.forEach(h => state.scores[h] = 0);
+
+            QUESTIONS.forEach((q, i) => {
+                if (state.answers[i] !== undefined) {
+                    const scores = q.options[state.answers[i]].score;
+                    Object.keys(scores).forEach(hero => {
+                        state.scores[hero] = (state.scores[hero] || 0) + scores[hero];
+                    });
+                }
+            });
+
+            const maxPossible = 15 * 10;
+            Object.keys(state.scores).forEach(hero => {
+                state.scores[hero] = Math.round((state.scores[hero] / maxPossible) * 100);
+            });
+
+            const sorted = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
+            state.resultType = sorted[0][0];
+        }
+
+        function renderResults() {
+            const heroNames = {
+                xiangyu: '项羽', liubang: '刘邦', xiahoudun: '韩信', zhangliang: '张良',
+                fansheng: '范增', xiaoyuan: '项庄', pengyue: '彭越', lianpo: '廉颇'
+            };
+            const heroDescs = {
+                xiangyu: '你是一个顶天立地的英雄，有气盖山河的英雄气概，重情重义，但有时过于刚愎自用。',
+                liubang: '你是一个知人善任的明主，善于听取意见，能屈能伸，最终成就帝业。',
+                xiahoudun: '你是一个战无不胜的将军，有出色的军事才能，功高震主但懂得审时度势。',
+                zhangliang: '你是一个足智多谋的智者，运筹帷幄决胜千里，是刘邦的重要谋士。',
+                fansheng: '你是一个老谋深算的谋士，有远见卓识，但有时过于精明而误事。',
+                xiaoyuan: '你是一个忠肝义胆的侠士，忠诚勇敢，重情重义，愿为知己者死。',
+                pengyue: '你是一个亦正亦邪的豪杰，能屈能伸，见风使舵但不失原则。',
+                lianpo: '你是一个老当益壮的猛将，年老仍心怀国家，忠诚不渝，令人敬佩。'
+            };
+            const heroTags = {
+                xiangyu: ['英雄', '霸气', '忠义'], liubang: ['明智', '用人', '隐忍'],
+                xiahoudun: ['军事', '天才', '功高'], zhangliang: ['智慧', '谋略', '从容'],
+                fansheng: ['谋略', '远见', '精明'], xiaoyuan: ['忠义', '勇敢', '侠义'],
+                pengyue: ['豪杰', '灵活', '务实'], lianpo: ['忠诚', '勇猛', '担当']
+            };
+
+            const result = state.resultType;
+            document.getElementById('levelTag').textContent = '你更像：' + heroNames[result];
+            document.getElementById('resultLevelDesc').textContent = '根据你的测评结果，你的楚汉英雄人格是';
+            document.getElementById('matchName').textContent = heroNames[result];
+            document.getElementById('matchDesc').textContent = heroDescs[result];
+            
+            const tagsContainer = document.getElementById('matchTags');
+            tagsContainer.innerHTML = (heroTags[result] || []).map(tag => `<span class="match-tag">${tag}</span>`).join('');
+        }
+
+        function generateReport() {
+            const heroNames = {
+                xiangyu: '项羽', liubang: '刘邦', xiahoudun: '韩信', zhangliang: '张良',
+                fansheng: '范增', xiaoyuan: '项庄', pengyue: '彭越', lianpo: '廉颇'
+            };
+            const result = heroNames[state.resultType] || state.resultType;
+            const sorted = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
+            
+            const html = `
+                <div class="report-section">
+                    <h3 class="report-section-title">📋 测评基础信息</h3>
+                    <p>• 测试主题：楚汉风云英雄人格测试</p>
+                    <p>• 测试时间：${new Date().toLocaleString()}</p>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">📊 测评结果总览</h3>
+                    <div class="report-highlight">
+                        <p style="font-size:18px; font-weight:700; margin-bottom:10px;">🎯 核心推荐：${result}</p>
+                        <p style="margin:0;">根据你的测评结果，${result}与你最为相似。你具有他的性格特质和行事风格。</p>
+                    </div>
+                    <p style="margin-top:20px;"><strong>英雄适配度：</strong></p>
+                    <ul class="report-list">
+                        ${sorted.slice(0, 5).map(([hero, score], i) => `<li>${i+1}. ${heroNames[hero]}：${score}%</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">📜 人物分析</h3>
+                    <p>${getHeroAnalysis(state.resultType)}</p>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">⚔️ 人物故事</h3>
+                    <p>${getHeroStory(state.resultType)}</p>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">💡 人生启示</h3>
+                    <p>${getLifeLesson(state.resultType)}</p>
+                </div>
+            `;
+
+            document.getElementById('reportContent').innerHTML = html;
+        }
+
+        function getHeroAnalysis(hero) {
+            const analyses = {
+                xiangyu: '你是一个具有强烈英雄主义色彩的人。项羽是中国历史上最著名的悲剧英雄之一，他力能扛鼎，气盖山河，有"西楚霸王"之称。你欣赏他的英雄气概和顶天立地的品格，但也为他最后的乌江自刎感到惋惜。你是一个有理想、有抱负的人，不甘于平庸，希望能够成就一番事业。',
+                liubang: '你是一个懂得审时度势、知人善任的人。刘邦是中国历史上第一个平民皇帝，他出身低微，但最终能够成就帝业，关键在于他善于听取意见，能够容忍人才。你是一个务实的人，不追求虚名，注重实际效果，能够屈能伸，能屈能伸。',
+                xiahoudun: '你是一个军事天才，有出色的指挥才能。韩信是"兵仙"，战无不胜，攻无不克，为刘邦立下汗马功劳。你是一个有真才实学的人相信自己，有能力，有自信，能够在竞争中脱颖而出。',
+                zhangliang: '你是一个足智多谋的智者，有"谋圣"之称。张良是刘邦最重要的谋士之一，运筹帷幄决胜千里，为刘邦夺得天下立下奇功。你是一个善于思考的人，喜欢研究策略和方法，能够从宏观角度看待问题。',
+                fansheng: '你是一个老谋深算的智者，有远见卓识。范增是项羽的主要谋士，被称为"亚父"，多次为项羽出谋划策，但最终不被信任。你是一个有智慧的人，看问题透彻，但有时过于精明反而误事。',
+                xiaoyuan: '你是一个忠肝义胆的侠士，愿为知己者死。项庄是项羽的堂弟，以忠义著称，"项庄舞剑，意在沛公"就是他的故事。你是一个重情重义的人，对朋友忠诚，愿意为朋友两肋插刀。',
+                pengyue: '你是一个亦正亦邪的豪杰，能屈能伸。彭越是汉初三大名将之一，出身草莽，最终成为开国功臣。你是一个灵活的人，懂得随机应变，能够在复杂的的环境中生存发展。',
+                lianpo: '你是一个忠勇无双的老将，年老仍心系国家。廉颇是赵国名将，"负荆请罪"的故事流传千古。你是一个忠诚的人，有责任感，愿意为国家和社会奉献自己的力量。'
+            };
+            return analyses[hero] || '';
+        }
+
+        function getHeroStory(hero) {
+            const stories = {
+                xiangyu: '项羽从小就有推翻秦朝的志向。巨鹿之战中，他率领楚军破釜沉舟，以少胜多，大败秦军，成为各路诸侯的领袖。然而，在楚汉相争中，他刚愎自用，不听范增建议，最终在垓下被围，乌江自刎。"生当作人杰，死亦为鬼雄"是他一生的写照。',
+                liubang: '刘邦出身平民，早年只是一个亭长。响应陈胜吴广起义后，他一步步发展壮大。在与项羽的斗争中，他善于用人知人善任，最终在垓下之战中击败项羽，建立大汉朝。他证明了"王侯将相宁有种乎"。',
+                xiahoudun: '韩信早年贫困，曾受胯下之辱。后来投奔刘邦，被萧何举荐为大将。他"明修栈道，暗度陈仓"，击败章邯，又在井陉之战中以少胜多大败赵军，最后十面埋伏击败项羽，被誉为"兵仙"。',
+                zhangliang: '张良是韩国贵族后裔，早年刺杀秦始皇未遂。后来遇到刘邦，成为最重要的谋士。他献计让刘邦入关中，又在鸿门宴上保护刘邦脱险，在楚汉相争中多次献出奇策，是刘邦夺得天下的关键人物。',
+                fansheng: '范增是项羽的谋士，被项羽尊称为"亚父"。他多次为项羽出谋划策，建议在鸿门宴上杀掉刘邦，但项羽不听。最终范增负气离去，病死途中，留下"竖子不足与谋"的千古遗憾。',
+                xiaoyuan: '项庄是项羽的堂弟，以武艺高强著称。在鸿门宴上，项庄舞剑，意在刺杀刘邦，但被项伯阻挡未能成功。他代表了项羽集团中忠诚勇猛的一面。',
+                pengyue: '彭越出身草莽，早年聚众为盗。后来投奔刘邦，成为汉初三大名将之一。他善用游击战术，骚扰项羽后方，为刘邦夺得天下立下大功。被封为梁王。',
+                lianpo: '廉颇是赵国名将，以勇猛著称。蔺相如"负荆请罪"的故事展示了他的知错能改。年老后仍心系国家，"廉颇老矣，尚能饭否"成为千古名句，体现了他永不放弃的精神。'
+            };
+            return stories[hero] || '';
+        }
+
+        function getLifeLesson(hero) {
+            const lessons = {
+                xiangyu: '你是一个有理想、有抱负的人，但要注意不要过于刚愎自用。要学会听取别人的意见，集思广益。成功不仅需要勇气，还需要智慧和包容心。记住：独木难支，孤掌难鸣。',
+                liubang: '你的成功在于懂得用人，善于听取意见。要继续发挥这个优点，同时也要有自己的判断力。记住：知人善任是领导者的核心能力，但也要有自己的主见。',
+                xiahoudun: '你是一个有能力、有自信的人，这是你的优势。但要注意处理好人际关系，不要过于锋芒毕露。记住：真正的强者，不仅能打天下，也能守天下。',
+                zhangliang: '你是一个善于思考、有智慧的人，这是你的财富。但要注意把想法付诸实践，不要只停留在思考层面。记住：智慧需要实践来检验。',
+                fansheng: '你有远见卓识，这是你的优点。但要注意与人沟通的方式，不要过于直接。记住：聪明反被聪明误，有时候装傻才是真聪明。',
+                xiaoyuan: '你是一个重情重义的人，这是你的美德。但要注意保护自己，不要被人利用。记住：忠诚是美德，但要有原则。',
+                pengyue: '你是一个灵活、务实的人，这是你的生存之道。但要注意保持底线，不要为了生存而失去原则。记住：灵活但要有原则，务实但要有底线。',
+                lianpo: '你是一个忠诚、有责任感的人，这是你的品格。但要注意与时俱进，不要固步自封。记住：忠诚是可贵的，但也要学会变通。'
+            };
+            return lessons[hero] || '';
+        }
+
+        initEventListeners();
+    </script>
+    <script>
+        try { initEventListeners(); } catch(e) {}
+    </script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "ccsz";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>转行适配度风险测试 | 2026专业心理测评</title>
+    <style>
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600}
+        :root { --primary: #2D3436; --accent: #74b9ff; --safe: #00B894; --warning: #FDCB6E; --risk: #e17055; --bg-gradient-start: #DFE6E9; --bg-gradient-end: #B2BEC3; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-dark { 0% { box-shadow: 0 0 0 0 rgba(116, 185, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(116, 185, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(116, 185, 255, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(45, 52, 54, 0.3); transition: transform 0.1s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 60px 24px 40px; text-align: center; min-height: 100vh; }
+        .cover-tag { display: inline-block; background: var(--accent); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; }
+        .cover-title { font-size: 34px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #dfe6e9; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; }
+        #page-demo { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #dfe6e9; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; cursor: pointer; border: 2px solid #dfe6e9; transition: all 0.2s; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #dfe6e9; border-color: var(--accent); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #dfe6e9; padding-bottom: 120px; overflow-y: auto; min-height: 100vh; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #dfe6e9; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; }
+        .score-num { font-size: 48px; font-weight: 900; color: var(--accent); }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; }
+        .level-badge { background: var(--accent); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; }
+        .card-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 80px; }
+        .dim-name { font-size: 14px; font-weight: 700; }
+        .dim-bar-bg { flex: 1; height: 10px; background: #f0f2f5; border-radius: 5px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 5px; }
+        .dim-val { width: 40px; text-align: right; font-size: 13px; font-weight: 700; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--accent); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-dark 2s infinite; cursor: pointer; }
+        .export-btn { background: var(--primary); margin-top: 10px; }
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--accent); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 40px; }
+        .r-h1 { font-size: 26px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 20px; font-weight: 800; margin: 25px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #dfe6e9; }
+        .r-p { font-size: 15px; line-height: 1.8; color: #555; margin-bottom: 12px; }
+        .r-box { background: #fafafa; border: 1px solid #dfe6e9; padding: 18px; border-radius: 10px; margin: 12px 0; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav"><a href="https://psy.xhs365.cn/" class="nav-home">🏠 首页</a></nav>
+    <div class="container">
+        <div id="page-intro" data-screenshot="psych-test-转行适配度检测" class="fade-in">
+            <div class="cover-tag">CAREER CHANGE</div>
+            <h1 class="cover-title">转行适配度<span>风险</span>测试</h1>
+            <p class="cover-subtitle">评估你转行的成功概率与风险<br>做出更理性的职业选择</p>
+            <div class="intro-features">
+                <div class="feature-box"><div class="feature-icon">🎯</div><div class="feature-title">适配度评估</div><div class="feature-desc">评估你与目标行业的匹配度</div></div>
+                <div class="feature-box"><div class="feature-icon">⚠️</div><div class="feature-title">风险识别</div><div class="feature-desc">识别转行可能面临的风险</div></div>
+                <div class="feature-box"><div class="feature-icon">💪</div><div class="feature-title">能力迁移</div><div class="feature-desc">评估可迁移技能的价值</div></div>
+                <div class="feature-box"><div class="feature-icon">📋</div><div class="feature-title">决策建议</div><div class="feature-desc">提供针对性的转行策略</div></div>
+            </div>
+            <button class="btn" id="start-btn">开始测试 (约需 4 分钟)</button>
+        </div>
+        <div id="page-demo">
+            <h2 style="font-size:26px;font-weight:800;margin-bottom:10px;">📋 背景信息</h2>
+            <p style="color:#636E72;font-size:14px;margin-bottom:30px;">系统将根据你的情况评估转行适配度</p>
+            <div class="form-group">
+                <label class="form-label">你考虑好转行方向了吗？</label>
+                <select id="input-years" class="select-box">
+                    <option value="clear">已有明确方向</option>
+                    <option value="some">有几个备选方向</option>
+                    <option value="vague">只有模糊想法</option>
+                    <option value="none">还没想好</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">你为转行做了多少准备？</label>
+                <select id="input-level" class="select-box">
+                    <option value="full">准备充分</option>
+                    <option value="some">有一些准备</option>
+                    <option value="little">刚开始了解</option>
+                    <option value="none">还没开始准备</option>
+                </select>
+            </div>
+            <button class="btn" id="next-btn">开始答题</button>
+        </div>
+        <div id="page-test">
+            <div class="progress-header"><span id="dim-tag">维度：目标清晰度</span><span id="progress-text">1 / 18</span></div>
+            <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+            <div id="question-wrapper" class="slide-up question-card">
+                <div class="question-tag" id="q-category">🎯 目标清晰度</div>
+                <div class="question-text" id="question-text">题目加载中...</div>
+                <div id="options-box"></div>
+            </div>
+        </div>
+        <div id="page-result">
+            <div class="result-header">
+                <div class="score-circle"><span class="score-num" id="res-score">0</span><span class="score-label">适配度指数</span></div>
+                <div class="level-badge" id="res-level">评估中...</div>
+                <div class="level-desc" id="res-desc">...</div>
+            </div>
+            <div class="card">
+                <div class="card-title">📊 五维适配度雷达</div>
+                <div id="bars-container"></div>
+            </div>
+            <div class="bottom-dock">
+                <button class="unlock-btn" id="show-report-btn">📄 解锁转行适配度报告</button>
+                <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+            </div>
+        </div>
+        <div id="report-modal">
+            <button class="report-close" id="close-report-btn">×</button>
+            <div class="report-header"><div style="font-size:12px; opacity:0.8;">2026 PSYCHOLOGY REPORT</div><div class="r-h1">转行适配度风险测试报告</div><div style="font-size:14px;">专业心理测评 · 2026全新版</div></div>
+            <div class="report-body" id="report-content"></div>
+        </div>
+    </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    {d:'clarity',t:'🎯 目标清晰度',q:"你清楚自己想转入哪个行业/岗位吗？",o:[{t:"非常清楚，目标明确",s:0},{t:"比较清楚，有几个选项",s:2},{t:"模糊，不确定是否适合",s:5},{t:"完全不知道该往哪转",s:8}]},
+    {d:'clarity',t:'🎯 目标清晰度',q:"你了解目标行业的工作内容吗？",o:[{t:"非常了解，有实践经验",s:0},{t:"比较了解，通过调研",s:2},{t:"了解一些，但不深入",s:5},{t:"完全不了解",s:8}]},
+    {d:'clarity',t:'🎯 目标清晰度',q:"你知道自己为什么想转行吗？",o:[{t:"目标明确，理性规划",s:0},{t:"有一定想法",s:2},{t:"只是逃避现状",s:5},{t:"随大流或一时冲动",s:8}]},
+    {d:'clarity',t:'🎯 目标清晰度',q:"你为目标行业做过哪些准备？",o:[{t:"深入学习和实践过",s:0},{t:"参加过培训或兼职",s:2},{t:"只是看过一些资料",s:5},{t:"完全没有准备",s:8}]},
+    {d:'risk',t:'⚠️ 风险承受力',q:"你能接受转行后薪资下降吗？",o:[{t:"完全能接受",s:0},{t:"能接受短期下降",s:2},{t:"不太能接受",s:5},{t:"完全无法接受",s:8}]},
+    {d:'risk',t:'⚠️ 风险承受力',q:"如果转行失败，你的后备方案是？",o:[{t:"有清晰的备选方案",s:0},{t:"有一些人脉和资源",s:2},{t:"走一步看一步",s:5},{t:"没有想过失败",s:8}]},
+    {d:'risk',t:'⚠️ 风险承受力',q:"转行需要你学习大量新知识，你准备好了吗？",o:[{t:"非常期待学习新东西",s:0},{t:"愿意学习但有顾虑",s:2},{t:"担心学习能力跟不上",s:5},{t:"害怕学习新东西",s:8}]},
+    {d:'risk',t:'⚠️ 风险承受力',q:"你的经济储备能支撑多久的过渡期？",o:[{t:"足够支撑1-2年",s:0},{t:"可以支撑半年",s:2},{t:"最多3个月",s:5},{t:"几乎没有储备",s:8}]},
+    {d:'skill',t:'💪 技能迁移力',q:"你有多少可迁移到新行业的技能？",o:[{t:"很多，核心技能通用",s:0},{t:"有一些可迁移技能",s:2},{t:"很少，几乎要从头学",s:5},{t:"几乎没有",s:8}]},
+    {d:'skill',t:'💪 技能迁移力',q:"你的学习能力怎么样？",o:[{t:"很强，快速掌握新知识",s:0},{t:"比较好，适应较快",s:2},{t:"一般，需要时间",s:5},{t:"较弱，学习困难",s:8}]},
+    {d:'skill',t:'💪 技能迁移力',q:"你在新行业有相关人脉吗？",o:[{t:"有很多行业人脉",s:0},{t:"认识一些业内人士",s:2},{t:"只有泛泛之交",s:5},{t:"完全不认识",s:8}]},
+    {d:'skill',t:'💪 技能迁移力',q:"你有哪些可以用在简历上的成绩？",o:[{t:"有亮眼的跨行业成绩",s:0},{t:"有一些相关成就",s:2},{t:"成绩较少或与目标无关",s:5},{t:"几乎没有",s:8}]},
+    {d:'mindset',t:'🧠 心态准备度',q:"你害怕从零开始吗？",o:[{t:"完全不怕，当作新挑战",s:0},{t:"有点担心但能克服",s:2},{t:"比较害怕",s:5},{t:"极度恐惧，不敢尝试",s:8}]},
+    {d:'mindset',t:'🧠 心态准备度',q:"你能接受比原来低的职位吗？",o:[{t:"完全能，为了长远发展",s:0},{t:"勉强能接受",s:2},{t:"心理上难以接受",s:5},{t:"完全无法接受",s:8}]},
+    {d:'mindset',t:'🧠 心态准备度',q:"你对转行后的未知感到兴奋还是恐惧？",o:[{t:"非常兴奋，期待新开始",s:0},{t:"有点期待也有点担心",s:2},{t:"担心大于期待",s:5},{t:"只有恐惧和焦虑",s:8}]},
+    {d:'mindset',t:'🧠 心态准备度',q:"你能坚持多久看不到回报？",o:[{t:"可以坚持1-2年",s:0},{t:"半年左右",s:2},{t:"几个月",s:5},{t:"很快就会放弃",s:8}]},
+    {d:'timing',t:'⏰ 时机成熟度',q:"你现在的处境适合转行吗？",o:[{t:"时机很好，适合行动",s:0},{t:"还行，可以考虑",s:2},{t:"时机不太好",s:5},{t:"非常不适合",s:8}]},
+    {d:'timing',t:'⏰ 时机成熟度',q:"市场环境对你想转入的行业有利吗？",o:[{t:"非常有利，朝阳行业",s:0},{t:"还行，机会与挑战并存",s:2},{t:"不太好，竞争激烈",s:5},{t:"很差，不是好时机",s:8}]}
+];
+const levels = [
+    {max:35,l:"适配度高",c:"#00B894",d:"你的转行适配度很高！具备良好的条件和准备，转行成功概率大。",advice:"把握时机，果断行动。可以考虑从小步快跑的方式逐步过渡。",points:["果断行动","从小步开始","善用人脉","持续学习"]},
+    {max:70,l:"适配度中上",c:"#00CEC9",d:"你的转行适配度不错，但还有一些方面需要加强。",advice:"继续完善准备，补齐短板。建议先尝试兼职或项目积累经验。",points:["补齐短板","积累经验","拓展人脉","做好规划"]},
+    {max:100,l:"适配度一般",c:"#FDCB6E",d:"你的转行适配度一般，需要更充分的准备才能降低风险。",advice:"建议先不要急于转行，继续积累经验和资源，等条件更成熟。",points:["延迟决策","积累经验","深度调研","培养技能"]},
+    {max:144,l:"适配度低",c:"#e17055",d:"目前转行风险较高，条件还不够成熟。需要更多准备。",advice:"不建议现在转行。建议先在现有领域深耕，同时开始储备目标行业的能力和资源。",points:["暂缓转行","深耕现有","储备能力","寻找过渡"]}
+];
+let currQList=[],currIdx=0,scores={clarity:0,risk:0,skill:0,mindset:0,timing:0};
+function goToDemo(){document.getElementById('page-intro').style.display='none';document.getElementById('page-demo').style.display='block';}
+function initTest(){currQList=[...questions];currIdx=0;scores={clarity:0,risk:0,skill:0,mindset:0,timing:0};document.getElementById('page-demo').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=`${currIdx+1}/${currQList.length}`;document.getElementById('progress-fill').style.width=`${(currIdx/currQList.length)*100}%`;document.getElementById('dim-tag').innerText=`维度：${q.t}`;document.getElementById('q-category').innerText=q.t;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(q.d,opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(dim,val){scores[dim]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';setTimeout(()=>{document.getElementById('page-result').style.display='block';calculateResult();},2000);}
+function calculateResult(){let total=Object.values(scores).reduce((a,b)=>a+b,0);let finalScore=Math.round(total);let lvl=levels.find(l=>finalScore<=l.max)||levels[levels.length-1];let start=0;const timer=setInterval(()=>{start++;document.getElementById('res-score').innerText=start;if(start>=finalScore)clearInterval(timer);},15);document.getElementById('res-level').innerText=lvl.l;document.getElementById('res-level').style.background=lvl.c;document.getElementById('res-desc').innerText=lvl.d;renderBars(scores);}
+function renderBars(s){const box=document.getElementById('bars-container');const dims=[{k:'clarity',n:'目标'},{k:'risk',n:'风险'},{k:'skill',n:'技能'},{k:'mindset',n:'心态'},{k:'timing',n:'时机'}];let html='';dims.forEach(d=>{let maxScore=d.k==='clarity'?32:d.k==='risk'?32:d.k==='skill'?32:d.k==='mindset'?32:16;let pct=Math.min((s[d.k]/maxScore)*100,100);let color=s[d.k]/maxScore<=0.25?'#00B894':(s[d.k]/maxScore<=0.5?'#FDCB6E':'#e17055');html+=`<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%;background:${color};"></div></div><div class="dim-val" style="color:${color}">${Math.round(pct)}%</div></div>`;});box.innerHTML=html;}
+function showReport(){const total=parseInt(document.getElementById('res-score').innerText);const lvl=levels.find(l=>total<=l.max)||levels[levels.length-1];let html=`<div class="report_section"><div class="r-h1">一、转行适配度评估</div><div class="r-box" style="border-left:5px solid ${lvl.c};"><div style="font-size:20px;font-weight:900;color:${lvl.c};margin-bottom:8px;">适配度等级：${lvl.l}</div><p style="margin:0;font-size:14px;line-height:1.6;color:#555;">${lvl.d}</p><p style="margin:10px 0 0;font-size:14px;"><strong>核心建议：</strong>${lvl.advice}</p></div></div><div class="report_section"><div class="r-h2">二、五维度适配分析</div>${Object.entries(scores).map(([k,v])=>{let maxScore=k==='clarity'?32:k==='risk'?32:k==='skill'?32:k==='mindset'?32:16;let level=v/maxScore<=0.25?'优秀':(v/maxScore<=0.5?'一般':'需提升');let color=v/maxScore<=0.25?'#00B894':(v/maxScore<=0.5?'#FDCB6E':'#e17055');return`<div style="margin-bottom:15px;padding:12px;background:#fafafa;border-radius:8px;"><div style="font-weight:700;margin-bottom:5px;">${['目标清晰度','风险承受力','技能迁移力','心态准备度','时机成熟度'][['clarity','risk','skill','mindset','timing'].indexOf(k)]}</div><div style="height:6px;background:#eee;border-radius:3px;"><div style="height:100%;width:${(v/maxScore)*100}%;background:${color};border-radius:3px;"></div></div><div style="font-size:12px;color:#999;">准备程度：<span style="color:${color}">${level}</span></div></div>`}).join('')}</div><div class="report_section"><div class="r-h2">三、行动建议</div><div class="r-box"><ul style="margin:0;padding-left:20px;line-height:2;">${lvl.points.map(p=>`<li>${p}</li>`).join('')}</ul></div></div><div style="text-align:center;color:#ccc;font-size:12px;margin-top:40px;">2026转行适配度风险测试·专业心理测评</div>`;document.getElementById('report-content').innerHTML=html;document.getElementById('report-modal').style.display='block';}
+function closeReport(){document.getElementById('report-modal').style.display='none';}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(116,185,255);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('转行适配度风险测试报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});let y=55;const lvl=levels.find(l=>parseInt(document.getElementById('res-score').innerText)<=l.max)||levels[levels.length-1];doc.setTextColor(0,0,0);doc.setFontSize(16);doc.text(`适配度等级：${lvl.l}`,15,y);y+=10;doc.setFontSize(12);doc.text(lvl.d.substring(0,150)+'...',15,y);doc.save('转行适配度报告.pdf');}
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });document.getElementById('next-btn').addEventListener('click',initTest);document.getElementById('show-report-btn').addEventListener('click',showReport);document.getElementById('close-report-btn').addEventListener('click',closeReport);document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "zhsp";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

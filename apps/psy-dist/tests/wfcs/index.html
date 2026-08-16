@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>写作风格深度分析 | 文字人格鉴定 Pro 2026</title>
+    <style>
+        :root {
+            /* 文字人格 专业文艺风格 */
+            --primary: #3A4F66; 
+            --primary-dark: #2A3848;
+            --accent: #8A9BA8; 
+            --accent-hover: #7A8B99;
+            --safe: #5A7266;
+            --warning: #B8A88F;
+            --bg-gradient-start: #F8F9FA;
+            --bg-gradient-end: #E9ECEF;
+            --text-main: #2C3E50;
+            --text-sub: #6C757D;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.1);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(138, 155, 168, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(138, 155, 168, 0); } 100% { box-shadow: 0 0 0 0 rgba(138, 155, 168, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(58, 79, 102, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#D4C2B8 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 40px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #3A4F66;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: #6C757D; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ECF0F1;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #3A4F66; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #6C757D; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #3A4F66; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #ECF0F1; border-radius: 10px;
+            font-size: 16px; background: #FDFDFD; outline: none; appearance: none;
+            color: #3A4F66; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #6C757D; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #F0F2F5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #ECF0F1; color: #6C757D; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #3A4F66; }
+        
+        .option-btn {
+            background: #FDFDFD; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #34495E; cursor: pointer; border: 2px solid #ECF0F1; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #F8F9FA; }
+        .option-btn.selected { background: #F5F7F9; border-color: var(--accent); color: var(--primary); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #E9ECEF; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ECF0F1;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--primary); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #6C757D; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: #3A4F66; color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #6C757D; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #3A4F66; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #3A4F66; display: block; }
+        .dim-sub { font-size: 10px; color: #6C757D; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #F0F2F5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #6C757D; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-blue 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #6C757D; width: 100%; padding: 10px;
+            border: 1px solid #BDC3C7; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: #3A4F66; color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #3A4F66; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ECF0F1; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #34495E; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #F8F9FA; border: 1px solid #ECF0F1; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #555; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-文风测试" class="fade-in">
+        <div class="cover-tag">2026 Word Edition</div>
+        <h1 class="cover-title">写作<span>风格</span><br>深度分析 Pro</h1>
+        <p class="cover-subtitle">基于表达习惯与写作偏好的深度扫描<br>精准解锁你的专属文字人格</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">✍️</div>
+                <div class="feature-title">五维文字雷达</div>
+                <div class="feature-desc">共情、逻辑、个性、节奏、质感，全方位解析文字基因。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">文风解构</div>
+                <div class="feature-desc">深度拆解你的表达习惯，发现文字背后的真实性格。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">人格匹配</div>
+                <div class="feature-desc">文字风格对应人格特质，精准匹配你的灵魂底色。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">千字报告</div>
+                <div class="feature-desc">2026专业版深度分析，解锁专属文字成长指南。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始深度分析 (约需 3 分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#3A4F66; margin-bottom:10px;">建立文字档案 ✍️</h2>
+        <p style="color:#6C757D; font-size:14px; margin-bottom:30px;">系统将根据你的创作场景调整分析权重。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的常用写作场景是？</label>
+            <select id="input-status" class="select-box">
+                <option value="daily">日常随笔/朋友圈</option>
+                <option value="work">职场文案/工作汇报</option>
+                <option value="create">文学创作/自媒体</option>
+                <option value="chat">聊天沟通/日常表达</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你偏好的文字风格是？</label>
+            <select id="input-title" class="select-box">
+                <option value="concise">简洁干练，直击重点</option>
+                <option value="emotional">温柔共情，细腻感性</option>
+                <option value="sharp">犀利锋芒，观点鲜明</option>
+                <option value="elegant">文艺优雅，精致考究</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成文字分析题库</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：共情文风</span>
+            <span id="progress-text">1 / 34</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">❤️ 共情文风</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-blue 1s infinite; border-radius:50%;">✍️</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#3A4F66;">正在解析文字基因...</h3>
+        <p style="color:#6C757D; font-size:14px; line-height:1.8;">正在分析表达习惯...<br>匹配文字人格...<br>生成专属千字报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">文字特质分</span>
+            </div>
+            <div class="level-badge" id="res-level">Level ?</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维文字人格雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《2026文字人格深度报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 切换场景/风格 再测一次</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">WRITING PERSONALITY REPORT</div>
+            <div class="r-h1">2026文字人格深度报告</div>
+            <div style="font-size:14px;">基于写作偏好的专属分析 · 专业版</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const MAX_USES = 6; // 同一设备限制次数
+const pageId = window.location.pathname;
+const usageKey = 'usage_count_' + pageId;
+
+// 写作风格分析题库
+const questions = [
+    // --- 维度：共情文风 (emotion) ---
+    { d: 'emotion', t: '共情文风', q: "你写文字时，会优先考虑读者的感受吗？", o: [
+        {t:"完全不会，只表达自己", s:0},
+        {t:"偶尔考虑，点到为止", s:3},
+        {t:"经常顾及，温柔表达", s:7},
+        {t:"全程共情，细腻走心", s:10}
+    ]},
+    { d: 'emotion', t: '情绪表达', q: "你会用大量文字描述内心情绪吗？", o: [
+        {t:"从不，只说事实", s:0},
+        {t:"偶尔简单描述", s:3},
+        {t:"经常细腻表达情绪", s:7},
+        {t:"情绪饱满，感染力极强", s:10}
+    ]},
+    { d: 'emotion', t: '温暖表达', q: "你习惯用温暖治愈的语气写作吗？", o: [
+        {t:"从不，冰冷直接", s:0},
+        {t:"偶尔温和", s:3},
+        {t:"经常温暖治愈", s:7},
+        {t:"全程温柔，极具温度", s:10}
+    ]},
+    { d: 'emotion', t: '共鸣营造', q: "你会刻意营造文字共鸣感吗？", o: [
+        {t:"完全不刻意", s:0},
+        {t:"偶尔尝试", s:3},
+        {t:"经常营造共鸣", s:7},
+        {t:"擅长引发深度共鸣", s:10}
+    ]},
+    { d: 'emotion', t: '细腻描写', q: "你会细致描写场景/心理细节吗？", o: [
+        {t:"从不，极简表达", s:0},
+        {t:"偶尔简单描写", s:3},
+        {t:"经常细腻刻画", s:7},
+        {t:"极致细腻，画面感拉满", s:10}
+    ]},
+
+    // --- 维度：逻辑表达 (logic) ---
+    { d: 'logic', t: '逻辑表达', q: "你的文字会有清晰的结构框架吗？", o: [
+        {t:"毫无结构，随性而写", s:0},
+        {t:"简单分点，略有逻辑", s:3},
+        {t:"结构清晰，层次分明", s:7},
+        {t:"逻辑严谨，环环相扣", s:10}
+    ]},
+    { d: 'logic', t: '重点突出', q: "你会优先突出核心观点吗？", o: [
+        {t:"从不，想到哪写到哪", s:0},
+        {t:"偶尔突出重点", s:3},
+        {t:"核心明确，一目了然", s:7},
+        {t:"重点突出，直击本质", s:10}
+    ]},
+    { d: 'logic', t: '条理清晰', q: "你的表达会条理清晰、不拖沓吗？", o: [
+        {t:"杂乱无章，反复啰嗦", s:0},
+        {t:"略有条理，偶尔拖沓", s:3},
+        {t:"条理清晰，简洁明了", s:7},
+        {t:"极致干练，毫无冗余", s:10}
+    ]},
+    { d: 'logic', t: '理性表达', q: "你会用理性客观的语气写作吗？", o: [
+        {t:"完全感性，毫无理性", s:0},
+        {t:"感性为主，偶尔理性", s:3},
+        {t:"理性客观，情绪克制", s:7},
+        {t:"极致理性，冷静客观", s:10}
+    ]},
+    { d: 'logic', t: '论证表达', q: "你会用事实/论据支撑观点吗？", o: [
+        {t:"从不，只凭感觉", s:0},
+        {t:"偶尔简单佐证", s:3},
+        {t:"经常用事实支撑", s:7},
+        {t:"论据充分，逻辑闭环", s:10}
+    ]},
+
+    // --- 维度：个性张力 (personality) ---
+    { d: 'personality', t: '个性张力', q: "你的文字有独特的个人风格吗？", o: [
+        {t:"毫无特色，千篇一律", s:0},
+        {t:"略有特点，不够鲜明", s:3},
+        {t:"风格独特，辨识度高", s:7},
+        {t:"极具个性，过目不忘", s:10}
+    ]},
+    { d: 'personality', t: '态度鲜明', q: "你的文字会有明确的个人态度吗？", o: [
+        {t:"模棱两可，毫无态度", s:0},
+        {t:"偶尔表达态度", s:3},
+        {t:"态度鲜明，立场坚定", s:7},
+        {t:"锋芒毕露，个性十足", s:10}
+    ]},
+    { d: 'personality', t: '原创表达', q: "你会用原创的语言表达想法吗？", o: [
+        {t:"全是套话，毫无原创", s:0},
+        {t:"偶尔原创，多用模板", s:3},
+        {t:"经常原创，拒绝模板", s:7},
+        {t:"全程原创，语言独特", s:10}
+    ]},
+    { d: 'personality', t: '风格标签', q: "别人能一眼认出你的文字风格吗？", o: [
+        {t:"完全不能", s:0},
+        {t:"偶尔能认出", s:3},
+        {t:"经常能认出", s:7},
+        {t:"一眼识别，专属标签", s:10}
+    ]},
+
+    // --- 维度：叙事节奏 (narrative) ---
+    { d: 'narrative', t: '叙事节奏', q: "你偏好慢节奏、细腻的文字吗？", o: [
+        {t:"极度反感，喜欢快节奏", s:0},
+        {t:"偶尔接受，偏爱快速", s:3},
+        {t:"喜欢慢节奏，细腻沉浸", s:7},
+        {t:"极致偏爱，沉浸式表达", s:10}
+    ]},
+    { d: 'narrative', t: '简洁节奏', q: "你偏好快节奏、极简的文字吗？", o: [
+        {t:"极度反感，喜欢细腻", s:0},
+        {t:"偶尔接受，偏爱细腻", s:3},
+        {t:"喜欢极简，快节奏表达", s:7},
+        {t:"极致偏爱，一字千金", s:10}
+    ]},
+    { d: 'narrative', t: '篇幅控制', q: "你能精准控制文字篇幅吗？", o: [
+        {t:"完全失控，忽长忽短", s:0},
+        {t:"偶尔控制，基本随性", s:3},
+        {t:"精准控制，长短适宜", s:7},
+        {t:"极致把控，恰到好处", s:10}
+    ]},
+    { d: 'narrative', t: '流畅度', q: "你的文字读起来流畅自然吗？", o: [
+        {t:"晦涩生硬，读起来费劲", s:0},
+        {t:"略有卡顿，基本流畅", s:3},
+        {t:"流畅自然，一气呵成", s:7},
+        {t:"行云流水，极具美感", s:10}
+    ]},
+
+    // --- 维度：语言质感 (texture) ---
+    { d: 'texture', t: '语言质感', q: "你会精心打磨用词措辞吗？", o: [
+        {t:"从不，随口而写", s:0},
+        {t:"偶尔简单修改", s:3},
+        {t:"精心打磨，用词考究", s:7},
+        {t:"极致雕琢，语言精致", s:10}
+    ]},
+    { d: 'texture', t: '词汇丰富', q: "你的词汇量丰富、表达多样吗？", o: [
+        {t:"词汇匮乏，反复用词", s:0},
+        {t:"词汇一般，略有重复", s:3},
+        {t:"词汇丰富，表达多样", s:7},
+        {t:"辞藻优美，极具质感", s:10}
+    ]},
+    { d: 'texture', t: '文字美感', q: "你会追求文字的美感与韵律吗？", o: [
+        {t:"从不，只重内容", s:0},
+        {t:"偶尔追求美感", s:3},
+        {t:"注重文字美感与韵律", s:7},
+        {t:"极致追求，文字如诗", s:10}
+    ]},
+    { d: 'texture', t: '精炼表达', q: "你会删除冗余文字、精简表达吗？", o: [
+        {t:"从不，啰嗦冗长", s:0},
+        {t:"偶尔精简，略有冗余", s:3},
+        {t:"经常精简，拒绝啰嗦", s:7},
+        {t:"极致精炼，字字珠玑", s:10}
+    ]},
+];
+
+// 场景特供题
+const roleSpecific = {
+    daily: [
+        { d: 'emotion', t: '日常共情', q: "【日常特供】发朋友圈时，你会？", o: [
+            {t:"只发图片，不配文", s:0},
+            {t:"简单配文，点到为止", s:3},
+            {t:"走心配文，温柔表达", s:7},
+            {t:"细腻长文，情绪饱满", s:10}
+        ]},
+        { d: 'personality', t: '日常个性', q: "【日常特供】你的朋友圈文案风格是？", o: [
+            {t:"跟风复制，毫无个性", s:0},
+            {t:"简单修改，略有特点", s:3},
+            {t:"原创表达，个性鲜明", s:7},
+            {t:"专属风格，独一无二", s:10}
+        ]},
+    ],
+    work: [
+        { d: 'logic', t: '职场逻辑', q: "【职场特供】写工作汇报时，你会？", o: [
+            {t:"杂乱无章，毫无逻辑", s:0},
+            {t:"简单分点，略有条理", s:3},
+            {t:"结构清晰，重点突出", s:7},
+            {t:"逻辑严谨，专业干练", s:10}
+        ]},
+        { d: 'texture', t: '职场质感', q: "【职场特供】你会打磨职场文案措辞吗？", o: [
+            {t:"从不，随意书写", s:0},
+            {t:"偶尔修改，简单措辞", s:3},
+            {t:"精心打磨，专业表达", s:7},
+            {t:"极致考究，精准专业", s:10}
+        ]},
+    ],
+    create: [
+        { d: 'emotion', t: '创作共情', q: "【创作特供】写作时，你会沉浸式共情吗？", o: [
+            {t:"完全不会，理性创作", s:0},
+            {t:"偶尔共情，理性为主", s:3},
+            {t:"深度共情，走心创作", s:7},
+            {t:"极致沉浸，灵魂共鸣", s:10}
+        ]},
+        { d: 'texture', t: '创作质感', q: "【创作特供】你会追求文字的艺术美感吗？", o: [
+            {t:"从不，只重故事", s:0},
+            {t:"偶尔追求，点到为止", s:3},
+            {t:"精心雕琢，美感十足", s:7},
+            {t:"艺术级创作，文字如诗", s:10}
+        ]},
+    ],
+    chat: [
+        { d: 'emotion', t: '聊天共情', q: "【聊天特供】和人聊天时，你会温柔表达吗？", o: [
+            {t:"冰冷直接，毫无温度", s:0},
+            {t:"偶尔温和，基本直接", s:3},
+            {t:"温柔共情，舒服自然", s:7},
+            {t:"极致温柔，治愈人心", s:10}
+        ]},
+        { d: 'narrative', t: '聊天节奏', q: "【聊天特供】你的聊天表达节奏是？", o: [
+            {t:"冗长啰嗦，抓不住重点", s:0},
+            {t:"略有拖沓，基本清晰", s:3},
+            {t:"简洁明了，节奏舒适", s:7},
+            {t:"精准高效，恰到好处", s:10}
+        ]},
+    ]
+};
+
+// 文字人格评级文案
+const levels = [
+    { max: 20, l: "Lv.1 极简理性派", c: "#5A7266", d: "文字极致干练，逻辑至上，毫无冗余，理性冷静的表达者。", advice: "保持简洁，你的文字极具力量感。" },
+    { max: 35, l: "Lv.2 清晰务实者", c: "#6B8E8E", d: "表达清晰务实，逻辑与共情平衡，实用主义的文字风格。", advice: "平衡感极佳，适合各类场景表达。" },
+    { max: 50, l: "Lv.3 温润共情者", c: "#8A9BA8", d: "温柔细腻，共情力强，文字有温度，治愈系表达风格。", advice: "你的文字自带治愈力，非常珍贵。" },
+    { max: 60, l: "Lv.4 文艺精致家", c: "#A8B8C8", d: "用词考究，质感拉满，追求文字美感，文艺青年专属风格。", advice: "打磨语言，你的文字极具艺术价值。" },
+    { max: 70, l: "Lv.5 个性锋芒家", c: "#B8A88F", d: "风格鲜明，态度犀利，极具辨识度，独一无二的文字人格。", advice: "坚守个性，你的文字自带光芒。" },
+    { max: 80, l: "Lv.6 灵魂写作者", c: "#3A4F66", d: "共情与逻辑兼备，质感与个性并存，天赋型文字创作者。", advice: "天赋异禀，你天生擅长用文字表达灵魂。" },
+    { max: 999, l: "Lv.7 文字宗师", c: "#2A3848", d: "五维全能，文字登峰造极，用文字传递力量与温度的大师。", advice: "你的文字，足以影响他人的灵魂。" }
+];
+
+// 全局变量
+let currQList = [];
+let currIdx = 0;
+let userRole = '';
+let userTitle = '';
+let scores = { emotion:0, logic:0, personality:0, narrative:0, texture:0 };
+
+// 页面切换函数
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userRole = document.getElementById('input-status').value;
+    userTitle = document.getElementById('input-title').value;
+    
+    currQList = [...questions, ...roleSpecific[userRole]];
+    currIdx = 0;
+    scores = { emotion:0, logic:0, personality:0, narrative:0, texture:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    let weight = 1.0;
+    if (userRole === 'create') {
+        if (dim === 'texture') weight = 1.2;
+        if (dim === 'emotion') weight = 1.2;
+    } else if (userRole === 'work') {
+        if (dim === 'logic') weight = 1.1;
+    }
+
+    scores[dim] += val * weight;
+
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { emotion:0, logic:0, personality:0, narrative:0, texture:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw / 2.5); 
+    if(finalScore> 100) finalScore = 100;
+
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'emotion', n:'共情'}, {k:'logic', n:'逻辑'}, 
+        {k:'personality', n:'个性'}, {k:'narrative', n:'节奏'}, {k:'texture', n:'质感'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 60) * 100, 100);
+        let color = pct> 60 ? '#3A4F66' : (pct> 30 ? '#8A9BA8' : '#A8B8C8');
+        let txt = pct> 70 ? '顶尖' : (pct> 40 ? '优秀' : '良好');
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {emotion:'共情文风', logic:'逻辑表达', personality:'个性张力', narrative:'叙事节奏', texture:'语言质感'};
+    return map[k];
+}
+
+// 千字报告生成函数
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let envStatus = '';
+    let envClass = '';
+    if (total> 70) {
+        envStatus = '🌟 天赋级：文字宗师 (五维全能表达者)';
+        envClass = 'color:#2A3848; font-weight:900;';
+    } else if (total> 50) {
+        envStatus = '✨ 优秀级：灵魂写作者 (极具文字天赋)';
+        envClass = 'color:#3A4F66; font-weight:800;';
+    } else if (total> 30) {
+        envStatus = '📝 良好级：风格表达者 (特色鲜明)';
+        envClass = 'color:#8A9BA8; font-weight:700;';
+        envStatus = '✍️ 基础级：务实表达者 (清晰直白)';
+        envClass = 'color:#A8B8C8; font-weight:700;';
+    }
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、2026文字人格深度诊断书</div>
+        <p class="r-p" style="background:#F8F9FA; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>✍️ 创作场景：</strong>${userRole==='daily'?'日常随笔/朋友圈':userRole==='work'?'职场文案/工作汇报':userRole==='create'?'文学创作/自媒体':'聊天沟通/日常表达'} <br>
+            <strong>🖋️ 偏好风格：</strong>${getTitleName(userTitle)}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#999; margin-right:8px;">综合文字特质分</span>
+                <span style="font-size:36px; font-weight:900; color:#2C3E50; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#999;">/ 100</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>成长建议：</strong>${lvl.advice}</p>
+        </div>
+
+        <div style="margin-top:20px; padding:15px; background:#fff; border-radius:8px; border:1px solid #eee;">
+            <p style="margin:0 0 10px 0; font-size:14px; color:#999;">文字人格定性：</p>
+            <div style="${envClass} font-size:17px; margin-bottom:12px;">${envStatus}</div>
+            <p class="r-p" style="font-size:15px; margin:0;">
+                经过 34 项文字指标的深度扫描，系统检测到你的核心文字优势位于 <span style="background:#3A4F66; color:#fff; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:13px;">${getDimFullCN(maxDimKey)}</span> 维度。
+                ${total> 60 ? '你拥有天生的文字天赋，共情、逻辑、个性、节奏、质感全面发展，是天生的表达者。' : '你的文字风格独具特色，针对性打磨后，将成为极具辨识度的个人标签。'}
+            </p>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维文字基因深度解构</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px; font-style:italic;">*基于语言学与人格心理学的2026专业分析</p>
+        ${generateDimAnalysis('emotion', scores.emotion)}
+        ${generateDimAnalysis('logic', scores.logic)}
+        ${generateDimAnalysis('personality', scores.personality)}
+        ${generateDimAnalysis('narrative', scores.narrative)}
+        ${generateDimAnalysis('texture', scores.texture)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、专属文字风格成长指南</div>
+        <div class="r-box" style="border-color:#bdc3c7;">
+            <div class="r-h3">📌 基础篇：放大核心优势</div>
+            <ul class="r-list">
+                <li><strong>优势固化：</strong> 聚焦你的核心文字优势（${getDimFullCN(maxDimKey)}），持续深耕，让它成为你的独家文字标签。</li>
+                <li><strong>风格定型：</strong> 固定你的表达习惯与风格调性，拒绝随意跟风，形成独一无二的文字人格。</li>
+                <li><strong>场景适配：</strong> 根据你的常用场景，优化表达方式，让文字在对应场景中发挥最大价值。</li>
+            </ul>
+        </div>
+        
+        <div class="r-box" style="background:#F5F7F9; border-color:#8A9BA8;">
+            <div class="r-h3" style="color:#3A4F66;">
+                🚀 进阶篇：${userRole==='daily'?'日常随笔·治愈表达':userRole==='work'?'职场文案·专业表达':userRole==='create'?'文学创作·灵魂表达':'聊天沟通·舒适表达'}
+            </div>
+            ${userRole==='daily' ? getDailyAdvice() : userRole==='work' ? getWorkAdvice() : userRole==='create' ? getCreateAdvice() : getChatAdvice()}
+        </div>
+
+        <div class="r-box" style="background:#F8F9FA; border-color:#3A4F66;">
+            <div class="r-h3" style="color:#2A3848;">
+                🌿 高阶篇：文字人格升华
+            </div>
+            <p class="r-p">文字是灵魂的镜子，你的写作风格，就是你最真实的人格写照。2026年的文字表达，不再是简单的信息传递，而是人格的外化、灵魂的共鸣。</p>
+            <p class="r-p">无论你是理性干练、温润共情、个性锋芒还是文艺精致，坚守自己的文字风格，打磨自己的表达习惯，你的文字终将成为独一无二的财富，治愈自己，也温暖他人。</p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        本报告由2026文字人格算法自动生成<br>
+        愿你的文字，有温度，有力量，有灵魂
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function getTitleName(t) {
+    const m = {
+        concise: '简洁干练型', 
+        emotional: '温柔共情型', 
+        sharp: '犀利锋芒型', 
+        elegant: '文艺优雅型'
+    };
+    return m[t] || t;
+}
+
+function getDimFullCN(k) {
+    const m = {
+        emotion: '共情文风 (文字温度)', 
+        logic: '逻辑表达 (结构清晰)', 
+        personality: '个性张力 (独特风格)', 
+        narrative: '叙事节奏 (流畅度)', 
+        texture: '语言质感 (用词精致)'
+    };
+    return m[k];
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 40 ? 'high' : (val> 20 ? 'med' : 'low');
+    
+    const config = {
+        high: { color: '#3A4F66', bg: '#F5F7F9', tag: '🌟 顶尖水平', titleColor: '#2A3848' },
+        med: { color: '#8A9BA8', bg: '#F8F9FA', tag: '✨ 优秀水平', titleColor: '#3A4F66' },
+        low: { color: '#A8B8C8', bg: '#F9FAFC', tag: '📝 良好水平', titleColor: '#8A9BA8' }
+    };
+    
+    const c = config[riskLevel];
+    
+    const texts = {
+        emotion: {
+            high: "<strong>你是顶级共情型写作者。</strong> 文字极具温度与感染力，能轻松引发读者共鸣，治愈人心，是天生的情感表达者。",
+            med: "<strong>共情能力优秀。</strong> 文字温柔细腻，能顾及他人感受，表达自然舒服，具备良好的情感传递能力。",
+            low: "<strong>理性表达为主。</strong> 文字侧重事实传递，情绪克制，清晰直白，适合理性沟通类场景。"
+        },
+        logic: {
+            high: "<strong>你是逻辑天花板级表达者。</strong> 文字结构严谨、层次分明、重点突出，逻辑闭环，极具说服力与专业性。",
+            med: "<strong>逻辑表达清晰。</strong> 文字有条理、有框架，表达简洁明了，能高效传递核心信息。",
+            low: "<strong>随性表达为主。</strong> 文字不拘泥于结构，随心而写，更注重情感与个性，而非逻辑框架。"
+        },
+        personality: {
+            high: "<strong>你是个性锋芒型写作者。</strong> 文字风格独一无二、辨识度拉满，态度鲜明、锋芒毕露，过目不忘。",
+            med: "<strong>个性风格鲜明。</strong> 文字有自己的特点，不随波逐流，具备基础的个人辨识度。",
+            low: "<strong>务实表达为主。</strong> 文字侧重实用传递，风格简约，不刻意追求个性，清晰直白即可。"
+        },
+        narrative: {
+            high: "<strong>你是节奏掌控大师。</strong> 文字流畅自然、行云流水，篇幅精准把控，阅读体验极佳，极具美感。",
+            med: "<strong>节奏把控良好。</strong> 文字流畅自然，篇幅适宜，读起来舒服顺畅，无卡顿感。",
+            low: "<strong>随心掌控节奏。</strong> 文字节奏随性而为，更注重内容表达，而非形式节奏。"
+        },
+        texture: {
+            high: "<strong>你是语言质感艺术家。</strong> 用词考究、辞藻优美、极致精炼，文字如诗，具备艺术级的语言质感。",
+            med: "<strong>语言质感优秀。</strong> 用词精准、表达多样，文字干净整洁，具备良好的阅读质感。",
+            low: "<strong>直白表达为主。</strong> 文字侧重通俗易懂，不刻意打磨措辞，简洁实用至上。"
+        }
+    };
+    
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimFullCN(key)} 
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)})</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+function getDailyAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>治愈表达：</strong> 放大共情优势，用温柔细腻的文字记录生活，打造专属治愈系朋友圈风格。</li>
+        <li><strong>个性标签：</strong> 固定自己的文案风格，拒绝跟风复制，让你的文字成为个人名片。</li>
+        <li><strong>简洁走心：</strong> 无需冗长篇幅，用简短精致的文字，传递最真实的情绪与感受。</li>
+    </ul>`;
+}
+
+function getWorkAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>逻辑优先：</strong> 强化逻辑表达，用清晰的结构、突出的重点，提升职场文案的专业性。</li>
+        <li><strong>精准措辞：</strong> 打磨语言质感，用精准干练的文字，提高工作沟通效率。</li>
+        <li><strong>务实表达：</strong> 摒弃冗余修饰，聚焦核心信息，打造专业高效的职场文字风格。</li>
+    </ul>`;
+}
+
+function getCreateAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>灵魂创作：</strong> 深度沉浸共情，用文字传递灵魂与情感，打造有温度的原创作品。</li>
+        <li><strong>质感打磨：</strong> 精心雕琢语言质感与美感，让文字兼具故事性与艺术性。</li>
+        <li><strong>个性坚守：</strong> 坚守自己的创作风格，不迎合流量，做独一无二的灵魂写作者。</li>
+    </ul>`;
+}
+
+function getChatAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>舒适共情：</strong> 用温柔共情的表达，让聊天更舒服自然，拉近彼此距离。</li>
+        <li><strong>节奏把控：</strong> 保持简洁流畅的表达节奏，不啰嗦、不拖沓，高效沟通。</li>
+        <li><strong>真诚表达：</strong> 用真实的文字传递心意，无需刻意修饰，真诚最能打动人心。</li>
+    </ul>`;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// 雷达图绘制
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['emotion','logic','personality','narrative','texture'];
+    const labels = ['共情','逻辑','个性','节奏','质感'];
+    
+    // 背景网格
+    ctx.strokeStyle = '#E9ECEF';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    // 数据层
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 60, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    // 渐变填充
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(58, 79, 102, 0.1)");
+    grd.addColorStop(1, "rgba(58, 79, 102, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#3A4F66'; ctx.lineWidth = 2; ctx.stroke();
+    
+    // 文字
+    ctx.fillStyle = '#3A4F66'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    // 主测试流程按钮绑定
+    document.getElementById('start-btn').addEventListener('click', function() {var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}
+        goToDemo();
+    });
+
+    document.getElementById('init-test-btn').addEventListener('click', function() {
+        initTest();
+    });
+
+    document.getElementById('prev-btn').addEventListener('click', function() {
+        prevQuestion();
+    });
+
+    document.getElementById('show-report-btn').addEventListener('click', function() {
+        showReport();
+    });
+
+    document.getElementById('close-report-btn').addEventListener('click', function() {
+        closeReport();
+    });
+
+    document.getElementById('reset-test-btn').addEventListener('click', function() {
+        resetTest();
+    });
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "wfcs";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

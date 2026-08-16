@@ -1,0 +1,31 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); min-height: 100vh; padding: 20px; }
+.page { display: flex; align-items: center; justify-content: center; min-height: 95vh; }
+.hidden { display: none !important; }
+.container { width: 100%; max-width: 450px; }
+.card { background: #fff; padding: 35px; border-radius: 20px; box-shadow: 0 10px 40px rgba(239, 68, 68, 0.15); text-align: center; }
+.icon { font-size: 50px; margin-bottom: 15px; }
+h2 { color: #dc2626; margin-bottom: 10px; font-size: 24px; }
+.subtitle { color: #999; margin-bottom: 25px; font-size: 14px; }
+input { width: 100%; padding: 15px; border: 2px solid #fee2e2; border-radius: 12px; font-size: 16px; transition: border-color 0.3s; margin-bottom: 15px; }
+input:focus { outline: none; border-color: #ef4444; }
+button { width: 100%; padding: 15px; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(239, 68, 68, 0.4); }
+button.secondary { background: #fff; color: #ef4444; border: 2px solid #ef4444; }
+button.secondary:hover { background: #fee2e2; }
+.red { color: #dc2626; margin-top: 10px; font-size: 14px; }
+.progress-bar { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: rgba(239, 68, 68, 0.2); z-index: 100; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #ef4444, #dc2626); width: 0%; transition: width 0.3s ease; }
+.question-num { color: #ef4444; font-size: 14px; margin-bottom: 15px; }
+#q { color: #333; font-size: 18px; line-height: 1.6; margin-bottom: 25px; }
+.option-btn { background: #fff; color: #333; border: 2px solid #fee2e2; margin-bottom: 10px; text-align: left; padding-left: 20px; }
+.option-btn:hover { border-color: #ef4444; background: #fef2f2; }
+.result-card { padding: 40px; }
+.score-circle { width: 120px; height: 120px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 20px auto; color: #fff; }
+.score-circle span { font-size: 36px; font-weight: bold; }
+.score-circle small { font-size: 14px; opacity: 0.8; }
+.level-badge { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; padding: 12px 30px; border-radius: 25px; font-size: 18px; font-weight: bold; display: inline-block; margin: 15px 0; }
+.result-text { color: #666; line-height: 1.8; text-align: left; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 12px; }
+.result-actions { display: flex; gap: 10px; margin-top: 20px; }
+.result-actions button { flex: 1; }
+@media (max-width: 480px) { .card { padding: 25px; } h2 { font-size: 20px; } #q { font-size: 16px; } }

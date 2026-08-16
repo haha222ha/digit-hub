@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>工作生活平衡测试 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:var(--primary);text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:var(--primary-dark, var(--primary))}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root { --primary: #00CEC9; --primary-dark: #00B5AD; --accent: #FF7675; --safe: #00B894; --bg-gradient-start: #E8F8F7; --bg-gradient-end: #D1F2EB; --text-main: #2D3436; --text-sub: #636E72; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-teal { 0% { box-shadow: 0 0 0 0 rgba(0, 206, 201, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 206, 201, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 206, 201, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 206, 201, 0.3); transition: transform 0.1s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 60px 24px 40px; text-align: center; min-height: 100vh; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #d1f2eb; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; }
+        #page-demo { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #d1f2eb; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #e8f8f7; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; cursor: pointer; border: 2px solid #d1f2eb; transition: all 0.2s; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #e8f8f7; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #e8f8f7; padding-bottom: 120px; overflow-y: auto; min-height: 100vh; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #d1f2eb; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; }
+        .score-num { font-size: 48px; font-weight: 900; color: var(--primary); }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; }
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; }
+        .card-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 90px; }
+        .dim-name { font-size: 14px; font-weight: 700; }
+        .dim-bar-bg { flex: 1; height: 10px; background: #f0f2f5; border-radius: 5px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 5px; }
+        .dim-val { width: 40px; text-align: right; font-size: 13px; font-weight: 700; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-teal 2s infinite; cursor: pointer; }
+        .export-btn { background: #FF7675; margin-top: 10px; }
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 40px; }
+        .r-h1 { font-size: 26px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 20px; font-weight: 800; margin: 25px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #d1f2eb; }
+        .r-p { font-size: 15px; line-height: 1.8; color: #555; margin-bottom: 12px; }
+        .r-box { background: #fafafa; border: 1px solid #d1f2eb; padding: 18px; border-radius: 10px; margin: 12px 0; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+    <div id="page-intro" data-screenshot="psych-test-工作生活平衡测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">工作生活<br><span>平衡</span>测试</h1>
+        <p class="cover-subtitle">科学评估你的工作生活平衡状态<br>找到适合自己的节奏</p>
+        <div class="intro-features">
+            <div class="feature-box"><div class="feature-icon">⚖️</div><div class="feature-title">五维深度分析</div><div class="feature-desc">时间、精力、情感、心态、社交，全面评估。</div></div>
+            <div class="feature-box"><div class="feature-icon">📊</div><div class="feature-title">工作家庭平衡理论</div><div class="feature-desc">基于工作家庭平衡理论，科学评估你的平衡状态。</div></div>
+            <div class="feature-box"><div class="feature-icon">✨</div><divdiv class="feature-title">精准定位问题</div><div class="feature-desc">找到你失衡的具体原因。</div></div>
+            <div class="feature-box"><div class="feature-icon">💡</div><divdiv class="feature-title">定制化建议</div><div class="feature-desc">提供具体的平衡方案。</div></div>
+        </div>
+        <button class="btn" id="start-btn">开始测评 (约需 3 分钟)</button>
+    </div>
+    <div id="page-demo">
+        <h2 style="font-size:26px;font-weight:800;margin-bottom:10px;">📋 个人档案</h2>
+        <p style="color:#636E72;font-size:14px;margin-bottom:30px;">系统将根据你的情况精准评估平衡状态。</p>
+        <div class="form-group">
+            <label class="form-label">你的工作时长？</label>
+            <select id="input-hours" class="select-box">
+                <option value="normal">朝九晚五</option>
+                <option value=" overtime">偶尔加班</option>
+                <option value="busy">经常加班</option>
+                <option value="extreme">996/007</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">你的家庭状态？</label>
+            <select id="input-family" class="select-box">
+                <option value="single">单身一人</option>
+                <option value="couple">二人世界</option>
+                <option value="family">有孩子家庭</option>
+                <option value="elder">照顾老人</option>
+            </select>
+        </div>
+        <button class="btn" id="next-btn">开始答题</button>
+    </div>
+    <div id="page-test">
+        <div class="progress-header"><span id="dim-tag">维度：时间分配</span><span id="progress-text">1 / 20</span></div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">⚖️ 时间分配</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle"><span class="score-num" id="res-score">0</span><span class="score-label">平衡指数</span></div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+        <div class="card">
+            <div class="card-title">📊 五维平衡雷达</div>
+            <div id="bars-container"></div>
+        </div>
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《工作生活平衡深度报告》</button>
+            <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+        </div>
+    </div>
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header"><div style="font-size:12px; opacity:0.8;">2026 PSYCHOLOGY REPORT</div><div class="r-h1">工作生活平衡深度分析报告</div><div style="font-size:14px;">专业心理测评 · 2026全新版</div></div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    {d:'time',t:'时间分配',q:"你每天有多少时间属于自己的？",o:[{t:"2小时以上，很充裕",s:10},{t:"1-2小时，刚好够",s:7},{t:"不到1小时，很紧张",s:3},{t:"完全没有私人时间",s:0}]},
+    {d:'time',t:'时间分配',q:"周末你会加班吗？",o:[{t:"从不，周末完全属于自己",s:10},{t:"偶尔，偶尔处理工作",s:7},{t:"经常，周末也要工作",s:3},{t:"每周末都加班",s:0}]},
+    {d:'time',t:'时间分配',q:"你能按时下班吗？",o:[{t:"几乎每天都能",s:10},{t:"大部分时候能",s:7},{t:"偶尔能",s:3},{t:"几乎不能",s:0}]},
+    {d:'time',t:'时间分配',q:"你会利用碎片时间休息吗？",o:[{t:"会，很注意休息",s:10},{t:"偶尔会",s:7},{t:"很少",s:3},{t:"完全不会",s:0}]},
+    {d:'energy',t:'精力状态',q:"下班后你还有精力做其他事吗？",o:[{t:"精力充沛，还能做很多",s:10},{t:"还行，能做一些",s:7},{t:"很疲惫，只想躺着",s:3},{t:"完全没精力做任何事",s:0}]},
+    {d:'energy',t:'精力状态',q:"你经常感到疲劳吗？",o:[{t:"几乎不，很精神",s:10},{t:"偶尔会",s:7},{t:"经常感到疲劳",s:3},{t:"每天都感到很累",s:0}]},
+    {d:'energy',t:'精力状态',q:"你的睡眠质量如何？",o:[{t:"很好，一觉到天亮",s:10},{t:"还可以",s:7},{t:"不太好，经常失眠",s:3},{t:"很差，严重失眠",s:0}]},
+    {d:'energy',t:'精力状态',q:"你会运动锻炼吗？",o:[{t:"每周规律运动",s:10},{t:"偶尔运动",s:7},{t:"很少运动",s:3},{t:"从不运动",s:0}]},
+    {d:'emotion',t:'情感需求',q:"你有时间陪伴家人吗？",o:[{t:"有很多时间陪伴",s:10},{t:"有时间，但不够",s:7},{t:"很少时间陪伴",s:3},{t:"完全没有时间",s:0}]},
+    {d:'emotion',t:'情感需求',q:"你与朋友还有联系吗？",o:[{t:"经常和朋友聚会",s:10},{t:"偶尔联系",s:7},{t:"很少联系",s:3},{t:"几乎没有朋友联系",s:0}]},
+    {d:'emotion',t:'情感需求',q:"你感到孤独吗？",o:[{t:"完全不孤独",s:10},{t:"偶尔会",s:7},{t:"经常感到孤独",s:3},{t:"一直很孤独",s:0}]},
+    {d:'emotion',t:'情感需求',q:"你的社交生活丰富吗？",o:[{t:"非常丰富",s:10},{t:"比较丰富",s:7},{t:"比较单调",s:3},{t:"完全没有社交",s:0}]},
+    {d:'mindset',t:'心态状态',q:"你对目前的工作生活满意吗？",o:[{t:"非常满意",s:10},{t:"比较满意",s:7},{t:"不太满意",s:3},{t:"很不满意",s:0}]},
+    {d:'mindset',t:'心态状态',q:"你会因为工作忽略生活而焦虑吗？",o:[{t:"完全不焦虑",s:10},{t:"偶尔会",s:7},{t:"经常焦虑",s:3},{t:"一直很焦虑",s:0}]},
+    {d:'mindset',t:'心态状态',q:"你能接受目前的工作强度吗？",o:[{t:"完全能接受",s:10},{t:"基本能接受",s:7},{t:"不太能接受",s:3},{t:"完全不能接受",s:0}]},
+    {d:'mindset',t:'心态状态',q:"你对未来有期待吗？",o:[{t:"很有希望",s:10},{t:"比较乐观",s:7},{t:"比较迷茫",s:3},{t:"很悲观",s:0}]},
+    {d:'social',t:'社交健康',q:"你在职场有人支持吗？",o:[{t:"有很多支持",s:10},{t:"有一些",s:7},{t:"很少",s:3},{t:"完全没有",s:0}]},
+    {d:'social',t:'社交健康',q:"你有人生导师或榜样吗？",o:[{t:"有，且经常交流",s:10},{t:"有，偶尔交流",s:7},{t:"没有",s:3},{t:"不需要",s:0}]},
+    {d:'social',t:'社交健康',q:"你能从工作中获得成就感吗？",o:[{t:"经常有",s:10},{t:"偶尔有",s:7},{t:"很少有",s:3},{t:"完全没有",s:0}]},
+    {d:'social',t:'社交健康',q:"你的工作对社交有帮助吗？",o:[{t:"帮助很大",s:10},{t:"有一些帮助",s:7},{t:"帮助很少",s:3},{t:"没有帮助",s:0}]}
+];
+const levels = [
+    {max:40,l:"严重失衡",c:"#FF7675",d:"你的工作生活严重失衡！需要立即调整。",advice:"这是危险信号，建议立即减少工作量，增加休息时间。",points:["立即减少加班","每天留出休息时间","寻求工作调整","关注身心健康"]},
+    {max:80,l:"中度失衡",c:"#FDCB6E",d:"你的工作生活有一定失衡，需要关注。",advice:"尽快调整，避免情况恶化。",points:["减少不必要的加班","增加运动锻炼","多陪伴家人朋友","调整工作心态"]},
+    {max:120,l:"基本平衡",c:"#00CEC9",d:"你的工作生活基本平衡，保持得不错。",advice:"继续保持目前的状态，注意不要过度工作。",points:["保持现有节奏","注意劳逸结合","定期评估平衡","预防潜在风险"]},
+    {max:200,l:"高度平衡",c:"#00B894",d:"你是工作生活平衡高手！状态非常好。",advice:"你已经找到了适合自己的节奏，继续保持并分享经验。",points:["继续保持","帮助他人平衡","进一步优化","享受美好生活"]}
+];
+let currQList=[],currIdx=0,scores={time:0,energy:0,emotion:0,mindset:0,social:0};
+function goToDemo(){document.getElementById('page-intro').style.display='none';document.getElementById('page-demo').style.display='block';}
+function initTest(){currQList=[...questions];currIdx=0;scores={time:0,energy:0,emotion:0,mindset:0,social:0};document.getElementById('page-demo').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=`${currIdx+1}/${currQList.length}`;document.getElementById('progress-fill').style.width=`${(currIdx/currQList.length)*100}%`;document.getElementById('dim-tag').innerText=`维度：${q.t}`;document.getElementById('q-category').innerText=q.t;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(q.d,opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(dim,val){scores[dim]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';setTimeout(()=>{document.getElementById('page-result').style.display='block';calculateResult();},2000);}
+function calculateResult(){let total=Object.values(scores).reduce((a,b)=>a+b,0);let finalScore=Math.round(total);let lvl=levels.find(l=>finalScore<=l.max)||levels[levels.length-1];let start=0;const timer=setInterval(()=>{start++;document.getElementById('res-score').innerText=start;if(start>=finalScore)clearInterval(timer);},15);document.getElementById('res-level').innerText=lvl.l;document.getElementById('res-level').style.background=lvl.c;document.getElementById('res-desc').innerText=lvl.d;renderBars(scores);}
+function renderBars(s){const box=document.getElementById('bars-container');const dims=[{k:'time',n:'时间'},{k:'energy',n:'精力'},{k:'emotion',n:'情感'},{k:'mindset',n:'心态'},{k:'social',n:'社交'}];let html='';dims.forEach(d=>{let pct=Math.min((s[d.k]/10)*100,100);let color=s[d.k]<=24?'#00B894':(s[d.k]<=48?'#00CEC9':'#FDCB6E');if(s[d.k]>56)color='#FF7675';html+=`<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%;background:${color};"></div></div><div class="dim-val" style="color:${color}">${Math.round(pct)}%</div></div>`;});box.innerHTML=html;}
+function showReport(){const total=parseInt(document.getElementById('res-score').innerText);const lvl=levels.find(l=>total<=l.max)||levels[levels.length-1];let html=`<div class="report_section"><div class="r-h1">一、工作生活平衡诊断</div><div class="r-box" style="border-left:5px solid ${lvl.c};"><div style="font-size:20px;font-weight:900;color:${lvl.c};margin-bottom:8px;">平衡等级：${lvl.l}</div><p style="margin:0;font-size:14px;line-height:1.6;color:#555;">${lvl.d}</p><p style="margin:10px 0 0;font-size:14px;"><strong>核心建议：</strong>${lvl.advice}</p></div></div><div class="report_section"><div class="r-h2">二、五维度深度分析</div>${Object.entries(scores).map(([k,v])=>{let level=v<=24?'优秀':(v<=48?'良好':'待改善');let color=v<=24?'#00B894':(v<=48?'#00CEC9':'#FF7675');return`<div style="margin-bottom:15px;padding:12px;background:#fafafa;border-radius:8px;"><div style="font-weight:700;margin-bottom:5px;">${['时间分配','精力状态','情感需求','心态状态','社交健康'][['time','energy','emotion','mindset','social'].indexOf(k)]}</div><div style="height:6px;background:#eee;border-radius:3px;"><div style="height:100%;width:${(v/10)*100}%;background:${color};border-radius:3px;"></div></div><div style="font-size:12px;color:#999;">状态：<span style="color:${color}">${level}</span> (得分：${v}/10)</div></div>`}).join('')}</div><div class="report_section"><div class="r-h2">三、平衡提升方案</div><div class="r-box"><ul style="margin:0;padding-left:20px;line-height:2;">${lvl.points.map(p=>`<li>${p}</li>`).join('')}</ul></div></div><div style="text-align:center;color:#ccc;font-size:12px;margin-top:40px;">2026工作生活平衡测试·专业心理测评</div>`;document.getElementById('report-content').innerHTML=html;document.getElementById('report-modal').style.display='block';}
+function closeReport(){document.getElementById('report-modal').style.display='none';}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(0,206,201);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('工作生活平衡深度分析报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});let y=55;const lvl=levels.find(l=>parseInt(document.getElementById('res-score').innerText)<=l.max)||levels[levels.length-1];doc.setTextColor(0,0,0);doc.setFontSize(16);doc.text(`平衡等级：${lvl.l}`,15,y);y+=10;doc.setFontSize(12);doc.text(lvl.d.substring(0,150)+'...',15,y);doc.save('工作生活平衡报告.pdf');}
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });document.getElementById('next-btn').addEventListener('click',initTest);document.getElementById('show-report-btn').addEventListener('click',showReport);document.getElementById('close-report-btn').addEventListener('click',closeReport);document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "gzph";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>吸渣体质测试 | 专业心理测评</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); min-height: 100vh; }
+        
+        .container { max-width: 520px; margin: 0 auto; padding: 15px; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        .card { background: #fff; border-radius: 20px; padding: 40px 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: center; margin: 10px 0; }
+        .card h1 { font-size: 28px; color: #333; margin-bottom: 10px; }
+        .card p { color: #666; font-size: 14px; margin-bottom: 30px; }
+        
+        .btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #be123c 0%, #9f1239 100%); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn:hover { opacity: 0.9; }
+        .btn:active { transform: scale(0.98); }
+        
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        .progress { height: 6px; background: #e5e7eb; border-radius: 3px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(135deg, #be123c 0%, #9f1239 100%); border-radius: 3px; transition: width 0.3s; }
+        
+        .question-card { background: #fff; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .question-num { color: #be123c; font-size: 14px; margin-bottom: 10px; }
+        .question-text { font-size: 20px; font-weight: bold; color: #333; margin-bottom: 25px; line-height: 1.5; }
+        
+        .option-btn { width: 100%; padding: 18px; background: #f8f9fa; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 16px; color: #333; margin-bottom: 12px; cursor: pointer; text-align: left; transition: all 0.2s; }
+        .option-btn:hover { border-color: #be123c; background: #f0f2ff; }
+        .option-btn:active { transform: scale(0.98); }
+        
+        .result-card { text-align: center; }
+        .result-icon { font-size: 60px; margin-bottom: 20px; }
+        .result-score { font-size: 48px; font-weight: bold; color: #be123c; }
+        .result-label { color: #999; font-size: 14px; margin-bottom: 20px; }
+        .result-level { display: inline-block; padding: 10px 25px; background: linear-gradient(135deg, #be123c 0%, #9f1239 100%); color: #fff; border-radius: 25px; font-size: 18px; font-weight: bold; margin-bottom: 20px; }
+        .result-desc { color: #666; font-size: 15px; line-height: 1.8; text-align: left; padding: 20px; background: #f8f9fa; border-radius: 12px; white-space: pre-line; }
+        
+        .loading { text-align: center; padding: 60px; }
+        .spinner { width: 50px; height: 50px; border: 4px solid #e5e7eb; border-top-color: #be123c; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .hidden { display: none !important; }
+    /* psy-skin-accent */
+html, body { background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%) !important; }
+.btn, button.btn, .result-level, .progress-fill {
+  background: linear-gradient(135deg, #be123c 0%, #9f1239 100%) !important;
+  color: #fff !important;
+}
+.question-num, .result-score, h2 { color: #be123c !important; }
+.option-btn:hover { border-color: #be123c !important; background: rgba(190,18,60,0.08) !important; }
+.spinner { border-top-color: #be123c !important; }
+/* /psy-skin-accent */
+</style>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <div id="page-intro" class="card page active">
+            <h1>吸渣体质测试</h1>
+            <p>专业心理测评 · 精准分析</p>
+            <button id="start-btn" class="btn">开始测试</button>
+        </div>
+        
+        <div id="page-test" class="test-page" style="display:none">
+            <div class="question-card">
+                <div class="progress"><div id="progress-fill" class="progress-fill" style="width: 0%"></div></div>
+                <div class="question-num" id="question-num">第 1 题</div>
+                <div class="question-text" id="question-text">加载中...</div>
+                <div id="options-box"></div>
+            </div>
+        </div>
+        
+        <div id="page-loading" class="loading">
+            <div class="spinner"></div>
+            <p>正在分析...</p>
+        </div>
+        
+        <div id="page-result" class="card result-card page">
+            <div class="result-icon" id="result-icon">📊</div>
+            <div class="result-score" id="result-score">0</div>
+            <div class="result-label">综合得分</div>
+            <div class="result-level" id="result-level">结果等级</div>
+            <div class="result-desc" id="result-desc">分析描述...</div>
+            <button class="btn" onclick="location.reload()" style="margin-top: 20px;">重新测试</button>
+        </div>
+    </div>
+
+    <script>
+        var TEST_NAME = "吸渣体质测试";
+        var questions = [];
+        var currentIndex = 0;
+        var totalScore = 0;
+        
+        var pageIntro = document.getElementById('page-intro');
+        var pageTest = document.getElementById('page-test');
+        var pageLoading = document.getElementById('page-loading');
+        var pageResult = document.getElementById('page-result');
+        var startBtn = document.getElementById('start-btn');
+        var questionNum = document.getElementById('question-num');
+        var questionText = document.getElementById('question-text');
+        var optionsBox = document.getElementById('options-box');
+        var progressFill = document.getElementById('progress-fill');
+        var resultIcon = document.getElementById('result-icon');
+        var resultScore = document.getElementById('result-score');
+        var resultLevel = document.getElementById('result-level');
+        var resultDesc = document.getElementById('result-desc');
+        
+        if (sessionStorage.getItem('sys_authed') === 'true') {
+            loadData();
+        }
+        
+        startBtn.addEventListener('click', function() {
+            
+            loadData();
+        });
+        
+        async function loadData() {
+            pageIntro.style.display = 'none';
+            pageLoading.style.display = 'block';
+            try {
+                var res = await fetch('data.json');
+                questions = await res.json();
+                pageLoading.style.display = 'none';
+                showQuestion();
+            } catch (e) {
+                pageLoading.style.display = 'none';
+                pageIntro.style.display = 'block';
+                alert('加载失败，请刷新重试');
+            }
+        }
+        
+        function showQuestion() {
+            var q = questions[currentIndex];
+            pageTest.style.display = 'block';
+            questionNum.textContent = '第 ' + (currentIndex + 1) + ' 题，共 ' + questions.length + ' 题';
+            questionText.textContent = q.title;
+            progressFill.style.width = ((currentIndex + 1) / questions.length * 100) + '%';
+            optionsBox.innerHTML = '';
+            for (var i = 0; i < q.options.length; i++) {
+                var opt = q.options[i];
+                var btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt.text;
+                btn.addEventListener('click', (function(score) { return function() { selectOption(score); }; })(opt.score));
+                optionsBox.appendChild(btn);
+            }
+        }
+        
+        function selectOption(score) {
+            totalScore += score;
+            if (currentIndex < questions.length - 1) {
+                currentIndex++;
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+        
+        function showResult() {
+            pageTest.style.display = 'none';
+            var maxScore = questions.length * 5;
+            var percentage = (totalScore / maxScore) * 100;
+            var level, icon, desc;
+            if (percentage>= 70) {
+                icon = '🔴';
+                level = '高风险';
+                desc = '你的测试结果显示处于较高风险区间，建议深入分析并采取相应措施。\n\n【深度分析】\n1. 性格特质：你在这方面表现出一定的倾向性。\n2. 行为模式：你的行为模式显示出明确的特征。\n3. 发展建议：建议保持优势，改善不足。\n4. 提升方向：可以通过学习和实践增强能力。';
+            } else if (percentage>= 40) {
+                icon = '🟡';
+                level = '中等风险';
+                desc = '你的测试结果显示处于中等水平，需要注意风险因素。\n\n【深度分析】\n1. 性格特质：你的性格特质处于平衡状态。\n2. 行为模式：行为模式较为稳定。\n3. 发展建议：建议保持现状，适度提升。\n4. 提升方向：可以通过练习进一步优化。';
+            } else {
+                icon = '🟢';
+                level = '低风险';
+                desc = '你的测试结果显示处于安全区间，各项指标良好。\n\n【深度分析】\n1. 性格特质：你的性格特质健康稳定。\n2. 行为模式：行为模式良好。\n3. 发展建议：继续保持良好状态。\n4. 提升方向：可以尝试新挑战。';
+            }
+            resultIcon.textContent = icon;
+            resultScore.textContent = totalScore + '分';
+            resultLevel.textContent = level;
+            resultDesc.textContent = desc;
+            pageResult.style.display = 'block';
+        }
+    </script>
+
+    
+
+<script>window.__PSY_TEST_CODE__ = "xzzt";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

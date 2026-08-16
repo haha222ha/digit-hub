@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>城市氛围感测试 | 2026中国城市气质匹配</title>
+    <style>
+        :root {
+            /* 2026城市氛围感风格 */
+            --primary: #165DFF; 
+            --primary-dark: #0E42B3;
+            --accent: #36CFC9; 
+            --accent-hover: #26B5B0;
+            --safe: #00B42A;
+            --warning: #FF7D00;
+            --bg-gradient-start: #F5F7FA;
+            --bg-gradient-end: #E4E7ED;
+            --text-main: #1D2129;
+            --text-sub: #6B7280;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.15);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(22, 93, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(22, 93, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(22, 93, 255, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(22, 93, 255, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#e6f7ff 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 40px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #1D2129;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: #6B7280; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ecf0f1;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #1D2129; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #1D2129; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #ecf0f1; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #1D2129; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #ecf0f1; color: #7f8c8d; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #1D2129; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #34495e; cursor: pointer; border: 2px solid #ecf0f1; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #f0f7ff; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #ecf0f1; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ecf0f1;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--primary); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: #165DFF; color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #7f8c8d; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #1D2129; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #1D2129; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #7f8c8d; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--primary); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-blue 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #7f8c8d; width: 100%; padding: 10px;
+            border: 1px solid #bdc3c7; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: #165DFF; color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #1D2129; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ecf0f1; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #34495e; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #f8f9fa; border: 1px solid #ecf0f1; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #555; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-城市氛围感" class="fade-in">
+        <div class="cover-tag">2026 CITY EDITION</div>
+        <h1 class="cover-title">城市<span>氛围感</span><br>气质匹配测试</h1>
+        <p class="cover-subtitle">哪座中国城市最契合你的独特气质<br>测测你与城市的灵魂共鸣度</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🏙️</div>
+                <div class="feature-title">五维气质雷达</div>
+                <div class="feature-desc">文艺、烟火、潮流、松弛、精致，全方位扫描你的城市气质。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🌆</div>
+                <div class="feature-title">城市深度解析</div>
+                <div class="feature-desc">精准匹配专属城市，解读你与城市的灵魂契合点。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">✨</div>
+                <div class="feature-title">2026都市适配</div>
+                <div class="feature-desc">结合新时代生活方式，定制你的理想城市指南。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">千字专属报告</div>
+                <div class="feature-desc">2026全新版，深度解析你的城市气质密码。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始测试 (约需 2 分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#1D2129; margin-bottom:10px;">个人气质档案 🏙️</h2>
+        <p style="color:#6B7280; font-size:14px; margin-bottom:30px;">系统将根据你的偏好精准匹配中国城市。</p>
+
+        <div class="form-group">
+            <label class="form-label">你偏好的生活节奏？</label>
+            <select id="input-status" class="select-box">
+                <option value="fast">快节奏 (奋斗、追梦、高效)</option>
+                <option value="middle">中节奏 (平衡、舒适、自在)</option>
+                <option value="slow">慢节奏 (松弛、慵懒、惬意)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的核心性格倾向？</label>
+            <select id="input-title" class="select-box">
+                <option value="art">文艺浪漫 (爱艺术、爱生活)</option>
+                <option value="casual">随性烟火 (爱美食、爱热闹)</option>
+                <option value="fashion">潮流先锋 (爱新鲜、爱时尚)</option>
+                <option value="quiet">安静内敛 (爱独处、爱自然)</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：文艺气质</span>
+            <span id="progress-text">1 / 30</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🎨 文艺气质</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-blue 1s infinite; border-radius:50%;">🏙️</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#1D2129;">正在匹配你的专属城市...</h3>
+        <p style="color:#6B7280; font-size:14px; line-height:1.8;">正在分析气质维度...<br>计算城市契合度...<br>生成2026专属报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">契合指数</span>
+            </div>
+            <div class="level-badge" id="res-level">匹配中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维城市气质雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《2026城市气质契合报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新测试 匹配新城市</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 CITY REPORT</div>
+            <div class="r-h1">中国城市气质契合报告</div>
+            <div style="font-size:14px;">定制化城市指南 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 千字以上报告 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const pageId = window.location.pathname;
+
+// 城市气质测试题库 5大维度
+const questions = [
+    // 文艺感
+    { d: 'artistic', t: '文艺感', q: "周末你更愿意去哪里？", o: [
+        {t:"美术馆/书店/咖啡馆", s:10},
+        {t:"公园/江边散步", s:7},
+        {t:"商场逛街", s:3},
+        {t:"宅家睡觉", s:0}
+    ]},
+    { d: 'artistic', t: '文艺感', q: "你对古建筑/历史街区的态度？", o: [
+        {t:"非常喜欢，愿意深度游览", s:10},
+        {t:"喜欢拍照打卡", s:7},
+        {t:"一般，偶尔看看", s:3},
+        {t:"不感兴趣", s:0}
+    ]},
+    { d: 'artistic', t: '文艺感', q: "你喜欢的音乐风格是？", o: [
+        {t:"民谣/爵士/轻音乐", s:10},
+        {t:"流行抒情", s:7},
+        {t:"电子/摇滚", s:3},
+        {t:"不听音乐", s:0}
+    ]},
+    // 烟火气
+    { d: 'firework', t: '烟火气', q: "你更喜欢哪种美食场景？", o: [
+        {t:"街边小吃/夜市大排档", s:10},
+        {t:"社区家常菜馆", s:7},
+        {t:"精致餐厅", s:3},
+        {t:"速食/外卖", s:0}
+    ]},
+    { d: 'firework', t: '烟火气', q: "你喜欢热闹的市井氛围吗？", o: [
+        {t:"超喜欢，充满生活气息", s:10},
+        {t:"喜欢，偶尔感受", s:7},
+        {t:"一般，不排斥", s:3},
+        {t:"不喜欢，太吵闹", s:0}
+    ]},
+    { d: 'firework', t: '烟火气', q: "你会为了美食特意穿街走巷吗？", o: [
+        {t:"一定会，美食至上", s:10},
+        {t:"会，顺路就去", s:7},
+        {t:"不会，就近解决", s:3},
+        {t:"完全不会", s:0}
+    ]},
+    // 潮流度
+    { d: 'fashion', t: '潮流度', q: "你关注新鲜事物/网红打卡地吗？", o: [
+        {t:"重度关注，紧跟潮流", s:10},
+        {t:"偶尔关注，觉得有趣", s:7},
+        {t:"很少关注", s:3},
+        {t:"完全不关注", s:0}
+    ]},
+    { d: 'fashion', t: '潮流度', q: "你喜欢现代化的都市商圈吗？", o: [
+        {t:"非常喜欢，时尚感拉满", s:10},
+        {t:"喜欢，购物方便", s:7},
+        {t:"一般，够用就行", s:3},
+        {t:"不喜欢，太商业化", s:0}
+    ]},
+    { d: 'fashion', t: '潮流度', q: "你愿意尝试新的生活方式吗？", o: [
+        {t:"非常愿意，勇于尝鲜", s:10},
+        {t:"愿意，看情况", s:7},
+        {t:"不太愿意，习惯稳定", s:3},
+        {t:"不愿意，固守传统", s:0}
+    ]},
+    // 松弛感
+    { d: 'relax', t: '松弛感', q: "你对生活压力的态度？", o: [
+        {t:"佛系躺平，享受当下", s:10},
+        {t:"劳逸结合，适度放松", s:7},
+        {t:"努力奋斗，偶尔放松", s:3},
+        {t:"时刻紧绷，不敢懈怠", s:0}
+    ]},
+    { d: 'relax', t: '松弛感', q: "你喜欢喝茶/品酒/慢生活吗？", o: [
+        {t:"超喜欢，这是生活常态", s:10},
+        {t:"喜欢，偶尔体验", s:7},
+        {t:"一般，没感觉", s:3},
+        {t:"不喜欢，太无聊", s:0}
+    ]},
+    { d: 'relax', t: '松弛感', q: "你能接受慢节奏的生活吗？", o: [
+        {t:"完全接受，向往慢生活", s:10},
+        {t:"接受，很舒适", s:7},
+        {t:"勉强接受", s:3},
+        {t:"不能接受，会焦虑", s:0}
+    ]},
+    // 精致度
+    { d: 'delicate', t: '精致度', q: "你注重生活细节/仪式感吗？", o: [
+        {t:"非常注重，精致生活", s:10},
+        {t:"注重，偶尔营造仪式感", s:7},
+        {t:"一般，随性就好", s:3},
+        {t:"不注重，怎么舒服怎么来", s:0}
+    ]},
+    { d: 'delicate', t: '精致度', q: "你喜欢干净整洁的高品质环境吗？", o: [
+        {t:"非常喜欢，追求品质", s:10},
+        {t:"喜欢，干净就好", s:7},
+        {t:"一般，不挑剔", s:3},
+        {t:"不介意，随意就行", s:0}
+    ]},
+    { d: 'delicate', t: '精致度', q: "你愿意为生活品质付费吗？", o: [
+        {t:"非常愿意，性价比优先", s:10},
+        {t:"愿意，适当消费", s:7},
+        {t:"不愿意，节俭为主", s:3},
+        {t:"绝对不愿意，能省则省", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+// 节奏专属题目
+const roleSpecific = {
+    fast: [
+        { d: 'fashion', t: '快节奏', q: "【快节奏特供】你能接受高强度工作吗？", o: [
+            {t:"完全能，热爱奋斗", s:10}, {t:"能，适应力强", s:7}, {t:"勉强能", s:3}, {t:"不能", s:0}
+        ]},
+        { d: 'delicate', t: '快节奏', q: "【快节奏特供】你喜欢高效便捷的都市生活吗？", o: [
+            {t:"非常喜欢", s:10}, {t:"喜欢", s:7}, {t:"一般", s:3}, {t:"不喜欢", s:0}
+        ]}
+    ],
+    middle: [
+        { d: 'relax', t: '中节奏', q: "【中节奏特供】你追求工作与生活的平衡吗？", o: [
+            {t:"极致追求", s:10}, {t:"追求", s:7}, {t:"一般", s:3}, {t:"不追求", s:0}
+        ]},
+        { d: 'firework', t: '中节奏', q: "【中节奏特供】你喜欢温馨的社区生活吗？", o: [
+            {t:"非常喜欢", s:10}, {t:"喜欢", s:7}, {t:"一般", s:3}, {t:"不喜欢", s:0}
+        ]}
+    ],
+    slow: [
+        { d: 'relax', t: '慢节奏', q: "【慢节奏特供】你愿意花一下午发呆/喝茶吗？", o: [
+            {t:"非常愿意", s:10}, {t:"愿意", s:7}, {t:"偶尔", s:3}, {t:"不愿意", s:0}
+        ]},
+        { d: 'artistic', t: '慢节奏', q: "【慢节奏特供】你喜欢悠闲的自然风光吗？", o: [
+            {t:"非常喜欢", s:10}, {t:"喜欢", s:7}, {t:"一般", s:3}, {t:"不喜欢", s:0}
+        ]}
+    ]
+};
+
+// 城市匹配结果
+const levels = [
+    { max: 30, l: "青岛", c: "#00B42A", d: "山海相拥的浪漫之城，文艺与松弛并存。", advice: "适合享受慢生活，拥抱自然与文艺。" },
+    { max: 45, l: "厦门", c: "#36CFC9", d: "海滨文艺之都，清新温柔，惬意自在。", advice: "适合热爱浪漫、追求小资生活的你。" },
+    { max: 60, l: "杭州", c: "#165DFF", d: "人间天堂，精致与文艺兼具的江南名城。", advice: "适合追求品质、热爱生活的你。" },
+    { max: 75, l: "成都", c: "#FF7D00", d: "天府之国，烟火气拉满的松弛之都。", advice: "适合佛系躺平、热爱美食的你。" },
+    { max: 90, l: "广州", c: "#E67E22", d: "岭南商都，充满人间烟火的美食之城。", advice: "适合热爱生活、随性洒脱的你。" },
+    { max: 105, l: "重庆", c: "#FF4757", d: "8D魔幻山城，热辣鲜活的烟火之都。", advice: "适合性格开朗、热爱热闹的你。" },
+    { max: 120, l: "西安", c: "#7B61FF", d: "十三朝古都，历史与文艺交融的古城。", advice: "适合热爱历史、文艺内敛的你。" },
+    { max: 135, l: "深圳", c: "#0E42B3", d: "创新之都，潮流先锋的奋斗之城。", advice: "适合勇于追梦、紧跟潮流的你。" },
+    { max: 150, l: "上海", c: "#1D2129", d: "魔都，精致潮流与国际化的顶级都市。", advice: "适合追求精致、热爱潮流的你。" },
+    { max: 999, l: "北京", c: "#6B7280", d: "帝都，历史底蕴与现代繁华共生的城市。", advice: "适合胸怀格局、文艺大气的你。" }
+];
+
+// 全局变量
+let currQList = [];
+let currIdx = 0;
+let userRole = '';
+let userTitle = '';
+let scores = { artistic:0, firework:0, fashion:0, relax:0, delicate:0 };
+
+// 页面切换
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userRole = document.getElementById('input-status').value;
+    userTitle = document.getElementById('input-title').value;
+    
+    currQList = [...questions, ...roleSpecific[userRole]];
+    currIdx = 0;
+    scores = { artistic:0, firework:0, fashion:0, relax:0, delicate:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    let weight = 1.0;
+    scores[dim] += val * weight;
+
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { artistic:0, firework:0, fashion:0, relax:0, delicate:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+    if(finalScore> 160) finalScore = 160;
+
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'artistic', n:'文艺'}, {k:'firework', n:'烟火'}, 
+        {k:'fashion', n:'潮流'}, {k:'relax', n:'松弛'}, {k:'delicate', n:'精致'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 30) * 100, 100);
+        let color = pct> 60 ? '#165DFF' : (pct> 30 ? '#36CFC9' : '#00B42A');
+        let txt = pct> 70 ? '突出' : (pct> 40 ? '中等' : '普通');
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {artistic:'文艺感', firework:'烟火气', fashion:'潮流度', relax:'松弛感', delicate:'精致度'};
+    return map[k];
+}
+
+// 千字报告生成
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、2026城市气质诊断书</div>
+        <p class="r-p" style="background:#f8f9fa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>🏙️ 个人档案：</strong>${userRole==='fast'?'快节奏奋斗型':userRole==='middle'?'中节奏平衡型':'慢节奏松弛型'} <br>
+            <strong>✨ 核心性格：</strong>${getTitleName(userTitle)}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">你的专属城市：${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#999; margin-right:8px;">城市契合指数</span>
+                <span style="font-size:36px; font-weight:900; color:#1D2129; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#999;">/ 160</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>城市适配建议：</strong>${lvl.advice}</p>
+        </div>
+
+        <p class="r-p">
+        2026年，中国城市进入全新的发展阶段，每一座城市都拥有独一无二的气质内核。经过系统对30项生活偏好、性格特质的深度扫描，
+        精准匹配出与你灵魂高度共鸣的城市——<strong>${lvl.l}</strong>。你的核心气质亮点为<span style="background:${lvl.c}; color:#fff; padding:2px 6px; border-radius:4px; font-weight:bold;">${getDimFullCN(maxDimKey)}</span>，
+        这正是你与${lvl.l}产生深度契合的核心原因。
+        </p>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维城市气质深度解构</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px; font-style:italic;">*基于2026都市生活美学的专业分析</p>
+        ${generateDimAnalysis('artistic', scores.artistic)}
+        ${generateDimAnalysis('firework', scores.firework)}
+        ${generateDimAnalysis('fashion', scores.fashion)}
+        ${generateDimAnalysis('relax', scores.relax)}
+        ${generateDimAnalysis('delicate', scores.delicate)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、2026 ${lvl.l} 生活适配指南</div>
+        <div class="r-box" style="border-color:#bdc3c7;">
+            <div class="r-h3">🏙️ 城市核心气质解读</div>
+            <p class="r-p">
+            ${lvl.l}是一座兼具${getCityFeature(lvl.l)}的城市，它的城市节奏、生活方式、文化氛围与你的性格完美契合。
+            在这里，你无需刻意迎合，就能找到最舒适的生活状态，释放最真实的自己。
+            </p>
+        </div>
+        
+        <div class="r-box" style="background:#f0f7ff; border-color:#165DFF;">
+            <div class="r-h3" style="color:#165DFF;">
+                ✨ 专属生活建议
+            </div>
+            <ul class="r-list">
+                <li><strong>生活节奏：</strong> ${getCityLife(lvl.l)}</li>
+                <li><strong>美食体验：</strong> ${getCityFood(lvl.l)}</li>
+                <li><strong>休闲方式：</strong> ${getCityHobby(lvl.l)}</li>
+                <li><strong>成长适配：</strong> ${getCityGrowth(lvl.l)}</li>
+            </ul>
+        </div>
+
+        <div class="r-box">
+            <div class="r-h3">💡 2026城市居住建议</div>
+            <p class="r-p">
+            2026年的${lvl.l}，在城市更新与生活品质上实现了全新升级。如果你向往这座城市，无论是短期旅行、长期旅居还是定居，
+            都能感受到它独有的魅力。你的气质与城市高度契合，在这里你会收获归属感、幸福感与成长感。
+            </p>
+            <p class="r-p">
+            每一座城市都有自己的灵魂，而你与${lvl.l}的相遇，是性格与城市的双向奔赴。愿你在这座城市里，
+            找到属于自己的生活节奏，拥抱最舒适、最真实的人生状态。
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026中国城市气质匹配报告 · 自动生成<br>
+        愿你与心仪的城市，双向奔赴，灵魂共鸣
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function getTitleName(t) {
+    const m = {
+        art: '文艺浪漫型', casual: '随性烟火型', fashion: '潮流先锋型', quiet: '安静内敛型'
+    };
+    return m[t] || t;
+}
+
+function getDimFullCN(k) {
+    const m = {
+        artistic: '文艺感', firework: '烟火气', fashion: '潮流度', relax: '松弛感', delicate: '精致度'
+    };
+    return m[k];
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 20 ? 'high' : (val> 10 ? 'med' : 'low');
+    
+    const config = {
+        high: { color: '#165DFF', bg: '#f0f7ff', tag: '🌟 突出', titleColor: '#165DFF' },
+        med: { color: '#36CFC9', bg: '#f5fcff', tag: '✨ 中等', titleColor: '#36CFC9' },
+        low: { color: '#00B42A', bg: '#f0fff4', tag: '🌿 普通', titleColor: '#00B42A' }
+    };
+    
+    const c = config[riskLevel];
+    
+    const texts = {
+        artistic: {
+            high: "<strong>文艺感拉满！</strong>你热爱艺术、历史与生活美学，对美好事物有极致追求，与文艺古城、江南水乡高度契合。",
+            med: "<strong>文艺气质适中。</strong>你喜欢美好的事物，偶尔感受文艺氛围，是平衡生活与浪漫的最佳状态。",
+            low: "<strong>文艺感较弱。</strong>你更注重实际生活，对艺术氛围无感，偏爱简单直接的生活方式。"
+        },
+        firework: {
+            high: "<strong>烟火气爆棚！</strong>你热爱美食、市井与热闹，崇尚人间烟火，与美食之都、山城老城完美适配。",
+            med: "<strong>烟火气适中。</strong>你喜欢生活气息，偶尔感受市井热闹，是温馨舒适的生活状态。",
+            low: "<strong>烟火气较弱。</strong>你偏爱安静，不喜欢吵闹的市井环境，追求独处与清净。"
+        },
+        fashion: {
+            high: "<strong>潮流度满分！</strong>你紧跟时代潮流，热爱新鲜事物，与国际化都市、创新之城高度契合。",
+            med: "<strong>潮流度适中。</strong>你偶尔关注新鲜事物，喜欢舒适的现代生活，不刻意追赶潮流。",
+            low: "<strong>潮流度较弱。</strong>你固守传统生活方式，对新鲜事物不感兴趣，追求稳定与安逸。"
+        },
+        relax: {
+            high: "<strong>松弛感天花板！</strong>你佛系随性，享受当下，与慢生活城市、休闲之都完美适配。",
+            med: "<strong>松弛感适中。</strong>你懂得劳逸结合，平衡压力与生活，是健康的生活状态。",
+            low: "<strong>松弛感较弱。</strong>你时刻紧绷，追求奋斗与效率，适合快节奏的奋斗之城。"
+        },
+        delicate: {
+            high: "<strong>精致度拉满！</strong>你注重生活品质与仪式感，追求高品质环境，与精致都市、江南名城高度契合。",
+            med: "<strong>精致度适中。</strong>你注重生活细节，偶尔营造仪式感，追求舒适与品质并存。",
+            low: "<strong>精致度较弱。</strong>你随性洒脱，怎么舒服怎么来，不刻意追求生活品质。"
+        }
+    };
+    
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimFullCN(key)} 
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)})</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+// 城市专属文案
+function getCityFeature(city){
+    const map = {
+        '北京':'历史底蕴与现代繁华', '上海':'精致潮流与国际化', '深圳':'创新奋斗与年轻活力',
+        '广州':'岭南烟火与务实包容', '成都':'松弛慵懒与美食烟火', '重庆':'热辣鲜活与魔幻山水',
+        '西安':'千年历史与文艺古韵', '杭州':'江南精致与文艺浪漫', '厦门':'海滨清新与小资浪漫',
+        '青岛':'山海文艺与松弛惬意'
+    };
+    return map[city] || '独特的气质与魅力';
+}
+function getCityLife(city){
+    const map = {
+        '北京':'大气从容，兼顾奋斗与文化底蕴', '上海':'精致高效，享受国际化都市生活', '深圳':'年轻奋斗，拥抱创新与机遇',
+        '广州':'务实随性，沉浸式感受人间烟火', '成都':'佛系躺平，享受慢生活与美食', '重庆':'热辣洒脱，感受山城的鲜活',
+        '西安':'漫步古城，沉浸历史与文艺', '杭州':'江南惬意，精致与浪漫并存', '厦门':'海滨悠闲，小资清新',
+        '青岛':'山海相拥，松弛自在'
+    };
+    return map[city] || '舒适自在的生活节奏';
+}
+function getCityFood(city){
+    const map = {
+        '北京':'烤鸭、京味小吃', '上海':'本帮菜、精致点心', '深圳':'全球美食、创新料理',
+        '广州':'早茶、粤菜、街边小吃', '成都':'火锅、川菜、特色小吃', '重庆':'麻辣火锅、山城美食',
+        '西安':'肉夹馍、面食、陕菜', '杭州':'杭帮菜、江南点心', '厦门':'海鲜、闽南小吃',
+        '青岛':'海鲜、啤酒、鲁菜'
+    };
+    return map[city] || '当地特色美食';
+}
+function getCityHobby(city){
+    const map = {
+        '北京':'逛胡同、逛博物馆、爬长城', '上海':'逛商圈、看展、打卡网红地', '深圳':'徒步、创业、体验新科技',
+        '广州':'喝早茶、逛夜市、公园散步', '成都':'喝茶、打麻将、逛古镇', '重庆':'打卡夜景、逛山城步道',
+        '西安':'逛古城、看兵马俑、听相声', '杭州':'游西湖、逛茶园、古镇漫步', '厦门':'逛海边、鼓浪屿打卡',
+        '青岛':'逛海边、爬崂山、喝啤酒'
+    };
+    return map[city] || '休闲散步、感受城市风光';
+}
+function getCityGrowth(city){
+    const map = {
+        '北京':'格局提升，文化与事业双丰收', '上海':'视野开拓，国际化成长', '深圳':'快速成长，抓住时代机遇',
+        '广州':'心态包容，务实成长', '成都':'精神富足，享受生活', '重庆':'性格开朗，热爱生活',
+        '西安':'沉淀内涵，提升文化素养', '杭州':'精致成长，生活品质升级', '厦门':'治愈心灵，放松身心',
+        '青岛':'松弛成长，拥抱自然'
+    };
+    return map[city] || '舒适成长，提升幸福感';
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// 雷达图
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['artistic','firework','fashion','relax','delicate'];
+    const labels = ['文艺','烟火','潮流','松弛','精致'];
+    
+    ctx.strokeStyle = '#dfe6e9';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 30, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(22, 93, 255, 0.1)");
+    grd.addColorStop(1, "rgba(22, 93, 255, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#165DFF'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#1D2129'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+// 锁屏功能
+function updateLimitUI() {
+    document.getElementById('limit-hint').innerText = `本设备剩余可用次数：${remaining}次`;
+}
+
+msg.style.opacity = 0;
+    
+    document.getElementById('load-layer').style.display = 'flex';
+    setTimeout(() => {
+        sessionStorage.setItem('unlocked_' + pageId, 'true');
+        setTimeout(() => { 
+        }, 500);
+    }, 2000);
+}
+
+// 绑定事件
+window.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('unlocked_' + pageId)) {
+        updateLimitUI();
+    }
+
+    .addEventListener('click', unlockPage);
+
+    document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+    document.getElementById('init-test-btn').addEventListener('click', initTest);
+    document.getElementById('prev-btn').addEventListener('click', prevQuestion);
+    document.getElementById('show-report-btn').addEventListener('click', showReport);
+    document.getElementById('close-report-btn').addEventListener('click', closeReport);
+    document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "csfw";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

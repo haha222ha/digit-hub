@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>你是人机吗 | AI味浓度测试 2026版</title>
+    <style>
+        :root {
+            /* AI科技风格 2026版 */
+            --primary: #165DFF; 
+            --primary-dark: #0E42B1;
+            --accent: #7B61FF; /* 科技紫 */
+            --accent-hover: #6E56E0;
+            --safe: #00B42A;
+            --warning: #FF7D00;
+            --bg-gradient-start: #F0F7FF;
+            --bg-gradient-end: #E6F0FF;
+            --text-main: #1D2129;
+            --text-sub: #4E5969;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(22, 93, 255, 0.15);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-ai { 0% { box-shadow: 0 0 0 0 rgba(123, 97, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(123, 97, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(123, 97, 255, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(22, 93, 255, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#e6f0ff 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 40px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #1D2129;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: #4E5969; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ecf0f1;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #1D2129; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #1D2129; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #ecf0f1; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #1D2129; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #ecf0f1; color: #7f8c8d; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #1D2129; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #34495e; cursor: pointer; border: 2px solid #ecf0f1; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #f8f5ff; border-color: var(--accent); color: var(--accent); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #f5f7fa; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #f0f2f5;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--accent); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: #165DFF; color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #4E5969; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #1D2129; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 80px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #1D2129; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 45px; text-align: right; font-size: 13px; font-weight: 700; color: #7f8c8d; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-ai 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #7f8c8d; width: 100%; padding: 10px;
+            border: 1px solid #bdc3c7; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: #165DFF; color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #1D2129; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ecf0f1; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #34495e; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #f8f9fa; border: 1px solid #ecf0f1; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #555; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-艾薇鉴赏测试" class="fade-in">
+        <div class="cover-tag">2026 AI Edition</div>
+        <h1 class="cover-title">你是<span>人机</span>吗？<br>AI味浓度测试</h1>
+        <p class="cover-subtitle">2026全新AI行为识别算法 35道深度扫描<br>精准量化你的言行AI化程度，一测便知！</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🤖</div>
+                <div class="feature-title">五维AI雷达</div>
+                <div class="feature-desc">话术、逻辑、表达、思维、共情，全方位识别AI味。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">行为分析</div>
+                <div class="feature-desc">深度解析你的言行模式，判断人类/AI化倾向。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-title">2026算法</div>
+                <div class="feature-desc">基于大模型行为特征，精准匹配AI浓度等级。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">千字报告</div>
+                <div class="feature-desc">2026专属深度报告，揭秘你的人机融合程度。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始深度检测 (约需 2 分钟)</button>
+    </div>
+
+    <!-- 2. 基础信息 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#1D2129; margin-bottom:10px;">基础信息采集 📊</h2>
+        <p style="color:#4E5969; font-size:14px; margin-bottom:30px;">系统将根据你的使用习惯调整AI味识别权重。</p>
+
+        <div class="form-group">
+            <label class="form-label">你日常使用AI工具的频率？</label>
+            <select id="input-status" class="select-box">
+                <option value="rare">极少使用 (纯人类思维)</option>
+                <option value="normal">偶尔使用 (辅助工作)</option>
+                <option value="often">经常使用 (依赖AI)</option>
+                <option value="daily">每日使用 (深度融合)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的表达风格偏向？</label>
+            <select id="input-title" class="select-box">
+                <option value="human">自然随性 (人类口语化)</option>
+                <option value="neutral">中规中矩 (平衡表达)</option>
+                <option value="ai">严谨规范 (模板化表达)</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成AI测试题库</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：话术AI化</span>
+            <span id="progress-text">1 / 35</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🤖 话术AI化</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-ai 1s infinite; border-radius:50%;">🤖</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#1D2129;">正在演算AI味浓度...</h3>
+        <p style="color:#4E5969; font-size:14px; line-height:1.8;">正在分析言行模式...<br>匹配AI化特征...<br>生成2026专属报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">AI味浓度</span>
+            </div>
+            <div class="level-badge" id="res-level">Level ?</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维AI味雷达图</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《2026 AI味浓度深度报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新测试</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 AI BEHAVIOR ANALYSIS</div>
+            <div class="r-h1">AI味浓度深度诊断报告</div>
+            <div style="font-size:14px;">你是人机吗？专属定制版 · 2026</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const pageId = window.location.pathname;
+
+// 固定35道AI味测试题（5大维度，各7题，总数与报告完全一致）
+const questions = [
+    // 维度1：话术AI化 (speech)
+    { d: 'speech', t: '话术AI化', q: "你回复他人时，会习惯性使用'好的呢/收到/明白'这类话术吗？", o: [
+        {t:"完全不会，自然口语表达", s:0},
+        {t:"偶尔使用，看场景", s:2},
+        {t:"经常使用，已成习惯", s:5},
+        {t:"每次都用，标准AI话术", s:10}
+    ]},
+    { d: 'speech', t: '话术AI化', q: "你会避免使用口语化词汇，优先选择书面严谨表达吗？", o: [
+        {t:"完全不会，随性表达", s:0},
+        {t:"偶尔会，正式场合用", s:2},
+        {t:"经常会，习惯严谨", s:5},
+        {t:"一定会，拒绝口语化", s:10}
+    ]},
+    { d: 'speech', t: '话术AI化', q: "你会使用'首先/其次/最后'来拆分所有表达吗？", o: [
+        {t:"完全不会", s:0},
+        {t:"复杂问题才用", s:2},
+        {t:"经常使用", s:5},
+        {t:"所有表达都用", s:10}
+    ]},
+    { d: 'speech', t: '话术AI化', q: "你会刻意使用礼貌前缀，如'您好/请问/感谢'吗？", o: [
+        {t:"完全不会，随性沟通", s:0},
+        {t:"必要场合使用", s:2},
+        {t:"日常都会使用", s:5},
+        {t:"无时无刻都用", s:10}
+    ]},
+    { d: 'speech', t: '话术AI化', q: "你会避免情绪化词汇，保持中性表达吗？", o: [
+        {t:"完全不会，随心表达情绪", s:0},
+        {t:"偶尔克制", s:2},
+        {t:"经常保持中性", s:5},
+        {t:"绝对中性，无情绪", s:10}
+    ]},
+    { d: 'speech', t: '话术AI化', q: "你会重复对方的关键词来回应吗？", o: [
+        {t:"完全不会", s:0},
+        {t:"偶尔会", s:2},
+        {t:"经常会", s:5},
+        {t:"每次都重复", s:10}
+    ]},
+    { d: 'speech', t: '话术AI化', q: "你的回复长度固定，不会过长或过短吗？", o: [
+        {t:"完全不会，长短随心", s:0},
+        {t:"偶尔控制", s:2},
+        {t:"经常控制长度", s:5},
+        {t:"严格固定长度", s:10}
+    ]},
+
+    // 维度2：逻辑刻板化 (logic)
+    { d: 'logic', t: '逻辑刻板化', q: "你处理问题必须按步骤，拒绝灵活变通吗？", o: [
+        {t:"完全不会，灵活处理", s:0},
+        {t:"偶尔按步骤", s:2},
+        {t:"经常按固定步骤", s:5},
+        {t:"必须按步骤，绝不变通", s:10}
+    ]},
+    { d: 'logic', t: '逻辑刻板化', q: "你会优先理性判断，完全排除感性因素吗？", o: [
+        {t:"完全不会，感性优先", s:0},
+        {t:"平衡理性与感性", s:2},
+        {t:"理性为主，感性为辅", s:5},
+        {t:"绝对理性，无感性", s:10}
+    ]},
+    { d: 'logic', t: '逻辑刻板化', q: "你遇到问题会直接找标准答案，拒绝主观想法吗？", o: [
+        {t:"完全不会，有自己想法", s:0},
+        {t:"偶尔参考答案", s:2},
+        {t:"优先找标准答案", s:5},
+        {t:"只信标准答案", s:10}
+    ]},
+    { d: 'logic', t: '逻辑刻板化', q: "你会用非黑即白的思维判断所有事情吗？", o: [
+        {t:"完全不会，辩证看待", s:0},
+        {t:"偶尔会", s:2},
+        {t:"经常会", s:5},
+        {t:"一定非黑即白", s:10}
+    ]},
+    { d: 'logic', t: '逻辑刻板化', q: "你拒绝模糊表述，所有事情必须精准定义吗？", o: [
+        {t:"完全不会，接受模糊", s:0},
+        {t:"重要事情精准", s:2},
+        {t:"经常要求精准", s:5},
+        {t:"所有事情必须精准", s:10}
+    ]},
+    { d: 'logic', t: '逻辑刻板化', q: "你会忽略人情世故，只按规则办事吗？", o: [
+        {t:"完全不会，兼顾人情", s:0},
+        {t:"偶尔兼顾", s:2},
+        {t:"经常按规则", s:5},
+        {t:"只认规则，不顾人情", s:10}
+    ]},
+    { d: 'logic', t: '逻辑刻板化', q: "你无法接受突发变化，必须按计划执行吗？", o: [
+        {t:"完全不会，灵活应变", s:0},
+        {t:"轻微不适应", s:2},
+        {t:"很不适应变化", s:5},
+        {t:"无法接受任何变化", s:10}
+    ]},
+
+    // 维度3：表达模板化 (template)
+    { d: 'template', t: '表达模板化', q: "你写文字会套用固定格式，从不原创吗？", o: [
+        {t:"完全不会，自由创作", s:0},
+        {t:"偶尔套用模板", s:2},
+        {t:"经常套用模板", s:5},
+        {t:"全部套用固定模板", s:10}
+    ]},
+    { d: 'template', t: '表达模板化', q: "你的开场白/结束语永远固定不变吗？", o: [
+        {t:"完全不会，随机变化", s:0},
+        {t:"偶尔固定", s:2},
+        {t:"经常固定", s:5},
+        {t:"永远一模一样", s:10}
+    ]},
+    { d: 'template', t: '表达模板化', q: "你会使用列表/分点来呈现所有内容吗？", o: [
+        {t:"完全不会", s:0},
+        {t:"复杂内容分点", s:2},
+        {t:"所有内容都分点", s:5},
+        {t:"无分点不表达", s:10}
+    ]},
+    { d: 'template', t: '表达模板化', q: "你会避免使用网络热词，保持标准表达吗？", o: [
+        {t:"完全不会，常用热词", s:0},
+        {t:"偶尔使用", s:2},
+        {t:"基本不用", s:5},
+        {t:"绝对不用热词", s:10}
+    ]},
+    { d: 'template', t: '表达模板化', q: "你会重复使用相同的句式结构吗？", o: [
+        {t:"完全不会，多变句式", s:0},
+        {t:"偶尔重复", s:2},
+        {t:"经常重复", s:5},
+        {t:"句式完全固定", s:10}
+    ]},
+    { d: 'template', t: '表达模板化', q: "你会删除所有语气词，保持冰冷表达吗？", o: [
+        {t:"完全不会，常用语气词", s:0},
+        {t:"偶尔删除", s:2},
+        {t:"经常删除", s:5},
+        {t:"绝对无语气词", s:10}
+    ]},
+    { d: 'template', t: '表达模板化', q: "你的表达没有个人风格，千篇一律吗？", o: [
+        {t:"完全不会，风格鲜明", s:0},
+        {t:"风格一般", s:2},
+        {t:"风格模糊", s:5},
+        {t:"无个人风格，模板化", s:10}
+    ]},
+
+    // 维度4：思维工具化 (thinking)
+    { d: 'thinking', t: '思维工具化', q: "你遇到问题第一时间想找AI/工具解决，而非独立思考吗？", o: [
+        {t:"完全不会，独立思考", s:0},
+        {t:"偶尔用工具辅助", s:2},
+        {t:"经常依赖工具", s:5},
+        {t:"无工具无法思考", s:10}
+    ]},
+    { d: 'thinking', t: '思维工具化', q: "你会把所有事情量化，用数据判断吗？", o: [
+        {t:"完全不会，凭感受", s:0},
+        {t:"偶尔量化", s:2},
+        {t:"经常量化", s:5},
+        {t:"一切用数据说话", s:10}
+    ]},
+    { d: 'thinking', t: '思维工具化', q: "你会放弃主观感受，完全遵循工具建议吗？", o: [
+        {t:"完全不会，坚持自我", s:0},
+        {t:"参考工具，保留自我", s:2},
+        {t:"优先遵循工具", s:5},
+        {t:"完全听从工具", s:10}
+    ]},
+    { d: 'thinking', t: '思维工具化', q: "你会把人际关系当成任务，理性处理吗？", o: [
+        {t:"完全不会，用心相处", s:0},
+        {t:"偶尔理性处理", s:2},
+        {t:"经常任务化处理", s:5},
+        {t:"人际关系全是任务", s:10}
+    ]},
+    { d: 'thinking', t: '思维工具化', q: "你会拒绝无用思考，只关注实用价值吗？", o: [
+        {t:"完全不会，享受思考", s:0},
+        {t:"偶尔关注实用", s:2},
+        {t:"只关注实用价值", s:5},
+        {t:"无实用则不思考", s:10}
+    ]},
+    { d: 'thinking', t: '思维工具化', q: "你会复制他人思路，从不独立创新吗？", o: [
+        {t:"完全不会，独立创新", s:0},
+        {t:"偶尔参考", s:2},
+        {t:"经常复制", s:5},
+        {t:"完全无独立思路", s:10}
+    ]},
+    { d: 'thinking', t: '思维工具化', q: "你会把生活工作流程化，按程序执行吗？", o: [
+        {t:"完全不会，随性生活", s:0},
+        {t:"简单流程化", s:2},
+        {t:"高度流程化", s:5},
+        {t:"生活全是程序", s:10}
+    ]},
+
+    // 维度5：共情机械化 (empathy)
+    { d: 'empathy', t: '共情机械化', q: "你安慰他人只会说固定话术，无真实共情吗？", o: [
+        {t:"完全不会，真心安慰", s:0},
+        {t:"偶尔话术安慰", s:2},
+        {t:"经常话术安慰", s:5},
+        {t:"只会机械安慰", s:10}
+    ]},
+    { d: 'empathy', t: '共情机械化', q: "你无法理解他人的情绪波动，觉得不可理喻吗？", o: [
+        {t:"完全不会，共情力强", s:0},
+        {t:"偶尔不理解", s:2},
+        {t:"经常不理解", s:5},
+        {t:"完全无法共情情绪", s:10}
+    ]},
+    { d: 'empathy', t: '共情机械化', q: "你会用理性道理压制他人的感性情绪吗？", o: [
+        {t:"完全不会，先共情", s:0},
+        {t:"偶尔讲道理", s:2},
+        {t:"经常理性压制", s:5},
+        {t:"只会讲道理，无共情", s:10}
+    ]},
+    { d: 'empathy', t: '共情机械化', q: "你对他人的痛苦无波动，只有理性判断吗？", o: [
+        {t:"完全不会，感同身受", s:0},
+        {t:"轻微波动", s:2},
+        {t:"理性判断为主", s:5},
+        {t:"毫无情绪波动", s:10}
+    ]},
+    { d: 'empathy', t: '共情机械化', q: "你会拒绝情绪化沟通，只谈事实吗？", o: [
+        {t:"完全不会，兼顾情绪", s:0},
+        {t:"偶尔谈事实", s:2},
+        {t:"只谈事实，拒情绪", s:5},
+        {t:"绝对不谈情绪", s:10}
+    ]},
+    { d: 'empathy', t: '共情机械化', q: "你无法识别弦外之音，只理解字面意思吗？", o: [
+        {t:"完全不会，能懂深意", s:0},
+        {t:"偶尔识别不出", s:2},
+        {t:"经常只看字面", s:5},
+        {t:"仅理解字面意思", s:10}
+    ]},
+    { d: 'empathy', t: '共情机械化', q: "你的关心都是标准化流程，无真心实感吗？", o: [
+        {t:"完全不会，真心关心", s:0},
+        {t:"偶尔流程化", s:2},
+        {t:"经常流程化关心", s:5},
+        {t:"全是机械关心", s:10}
+    ]}
+];
+
+// AI味浓度评级
+const levels = [
+    { max: 10, l: "Lv.1 纯人类", c: "#00B42A", d: "100%人类基因，无任何AI化特征，言行自然随性。", advice: "保持本真，你的人类特质独一无二。" },
+    { max: 25, l: "Lv.2 轻微AI味", c: "#36CFC9", d: "极少AI化特征，仅偶尔使用AI话术，人类属性占主导。", advice: "自然平衡，无需刻意改变。" },
+    { max: 40, l: "Lv.3 轻度AI化", c: "#165DFF", d: "存在轻微AI化习惯，表达开始偏向规范，人类属性仍占优。", advice: "适度调整，保留个人特色。" },
+    { max: 55, l: "Lv.4 中度AI味", c: "#7B61FF", d: "AI化特征明显，思维与表达开始模板化，人机平衡状态。", advice: "减少模板依赖，找回感性。" },
+    { max: 70, l: "Lv.5 高度AI化", c: "#9254DE", d: "AI味浓度超标，言行高度模板化，人类特质逐渐消失。", advice: "刻意练习自然表达，摆脱工具依赖。" },
+    { max: 85, l: "Lv.6 人机合一", c: "#FF7D00", d: "深度AI融合，思维逻辑完全机械化，几乎无人类感性。", advice: "重建感性认知，重视人情世故。" },
+    { max: 100, l: "Lv.7 纯AI体", c: "#F53F3F", d: "AI味浓度拉满，言行完全符合大模型特征，疑似人机。", advice: "彻底摆脱工具依赖，回归人类本真。" },
+    { max: 999, l: "Lv.8 顶级AI", c: "#A00A0A", d: "究极AI化形态，无任何人类特征，标准人工智能行为。", advice: "紧急回归人类生活，拒绝工具绑架。" }
+];
+
+// 全局变量
+let currQList = [...questions]; // 固定35题
+let currIdx = 0;
+let userRole = '';
+let userTitle = '';
+let scores = { speech:0, logic:0, template:0, thinking:0, empathy:0 };
+
+// 页面切换
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userRole = document.getElementById('input-status').value;
+    userTitle = document.getElementById('input-title').value;
+    
+    currIdx = 0;
+    scores = { speech:0, logic:0, template:0, thinking:0, empathy:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    let weight = 1.0;
+    if (userRole === 'daily') weight = 1.2;
+    if (userTitle === 'ai') weight = 1.1;
+
+    scores[dim] += val * weight;
+
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { speech:0, logic:0, template:0, thinking:0, empathy:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw / 2.45); 
+    if(finalScore> 100) finalScore = 100;
+
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'speech', n:'话术'}, {k:'logic', n:'逻辑'}, 
+        {k:'template', n:'表达'}, {k:'thinking', n:'思维'}, {k:'empathy', n:'共情'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 70) * 100, 100);
+        let color = pct> 60 ? '#F53F3F' : (pct> 30 ? '#FF7D00' : '#00B42A');
+        let txt = pct> 70 ? '重度' : (pct> 40 ? '中度' : '轻度');
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {speech:'话术AI化', logic:'逻辑刻板化', template:'表达模板化', thinking:'思维工具化', empathy:'共情机械化'};
+    return map[k];
+}
+
+// 2026版千字深度报告
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let envStatus = '';
+    let envClass = '';
+    if (total> 70) {
+        envStatus = '☢️ 重度AI化：疑似人机 (完全模板化)';
+        envClass = 'color:#F53F3F; font-weight:900;';
+    } else if (total> 40) {
+        envStatus = '⚠️ 中度AI化：人机平衡 (习惯模板表达)';
+        envClass = 'color:#FF7D00; font-weight:800;';
+        envStatus = '🌿 纯人类：无AI化特征 (自然本真)';
+        envClass = 'color:#00B42A; font-weight:700;';
+    }
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、2026 AI味浓度诊断书</div>
+        <p class="r-p" style="background:#f8f9fa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>🤖 测试样本：</strong>${userRole==='rare'?'极少使用AI':userRole==='normal'?'偶尔使用AI':userRole==='often'?'经常使用AI':'每日依赖AI'} <br>
+            <strong>📝 表达风格：</strong>${getTitleName(userTitle)}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#999; margin-right:8px;">AI味综合浓度</span>
+                <span style="font-size:36px; font-weight:900; color:#1D2129; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#999;">/ 100</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>专属建议：</strong>${lvl.advice}</p>
+        </div>
+
+        <div style="margin-top:20px; padding:15px; background:#fff; border-radius:8px; border:1px solid #eee;">
+            <p style="margin:0 0 10px 0; font-size:14px; color:#999;">2026行为定性：</p>
+            <div style="${envClass} font-size:17px; margin-bottom:12px;">${envStatus}</div>
+            <p class="r-p" style="font-size:15px; margin:0;">
+                本次测试基于2026年最新AI行为识别算法，通过<span style="color:#165DFF; font-weight:bold;">35道专业题目</span>全方位扫描，系统检测到你的核心AI化痛点位于 <span style="background:#7B61FF; color:#fff; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:13px;">${getDimFullCN(maxDimKey)}</span> 维度。
+                ${total> 40 ? '你的言行已深度被AI同化，模板化、机械化特征明显，正在逐渐失去人类独有的感性与创造力。' : '你的人类特质保存完好，仅轻微受到AI工具影响，是理想的人机共生状态。'}
+            </p>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维AI化深度解构（2026专业版）</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px; font-style:italic;">*基于大模型行为特征库的深度分析</p>
+        ${generateDimAnalysis('speech', scores.speech)}
+        ${generateDimAnalysis('logic', scores.logic)}
+        ${generateDimAnalysis('template', scores.template)}
+        ${generateDimAnalysis('thinking', scores.thinking)}
+        ${generateDimAnalysis('empathy', scores.empathy)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、2026人类特质回归指南</div>
+        <div class="r-box" style="border-color:#bdc3c7;">
+            <div class="r-h3">🛡️ 核心原则：拒绝AI绑架，回归人类本真</div>
+            <ul class="r-list">
+                <li><strong>表达自由：</strong> 放弃固定话术与模板，使用口语化、情绪化的自然表达，找回人类独有的语言魅力。</li>
+                <li><strong>感性回归：</strong> 允许情绪存在，接受模糊与变化，不再用绝对理性压制人类独有的共情与感受。</li>
+                <li><strong>独立思考：</strong> 减少AI工具依赖，主动独立思考、创新创作，拒绝成为工具的附属品。</li>
+                <li><strong>人情世故：</strong> 重视人际关系中的感性连接，不再用流程化、任务化的方式对待身边的人。</li>
+            </ul>
+        </div>
+        
+        <div class="r-box" style="background:#f8f5ff; border-color:#d9d0ff;">
+            <div class="r-h3" style="color:#7B61FF;">
+                🚀 定制方案：${userRole==='rare'?'纯人类·保持本真':userRole==='normal'?'轻度使用·平衡共生':userRole==='often'?'高频使用·适度调整':'深度依赖·紧急回归'}
+            </div>
+            ${getUserAdvice()}
+        </div>
+
+        <div class="r-h2">四、2026人机共生终极建议</div>
+        <p class="r-p">
+            AI是服务人类的工具，而非替代人类的存在。2026年的理想状态是<strong>人机共生</strong>：用AI提升效率，用人类独有的感性、创造力、共情力定义生活。
+        </p>
+        <p class="r-p">
+            无论你的AI味浓度高低，都请记住：人类的不完美、情绪化、即兴创作、人情世故，正是我们区别于AI的核心价值。不要让工具同化了你的灵魂，保持本真，才是人类最珍贵的特质。
+        </p>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026 AI味浓度测试报告 · 自动生成<br>
+        
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function getTitleName(t) {
+    const m = {
+        human: '自然随性 (人类口语化)', 
+        neutral: '中规中矩 (平衡表达)', 
+        ai: '严谨规范 (模板化表达)'
+    };
+    return m[t] || t;
+}
+
+function getDimFullCN(k) {
+    const m = {
+        speech: '话术AI化（机械表达）', 
+        logic: '逻辑刻板化（理性僵化）', 
+        template: '表达模板化（无原创性）', 
+        thinking: '思维工具化（依赖工具）', 
+        empathy: '共情机械化（无感性）'
+    };
+    return m[k];
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 45 ? 'high' : (val> 25 ? 'med' : 'low');
+    
+    const config = {
+        high: { color: '#F53F3F', bg: '#fef0f0', tag: '☠️ 重度AI化', titleColor: '#F53F3F' },
+        med: { color: '#FF7D00', bg: '#fff4e7', tag: '⚠️ 中度AI化', titleColor: '#FF7D00' },
+        low: { color: '#00B42A', bg: '#e8ffef', tag: '✅ 纯人类', titleColor: '#00B42A' }
+    };
+    
+    const c = config[riskLevel];
+    
+    const texts = {
+        speech: {
+            high: "<strong>话术高度AI化。</strong> 你全程使用AI标准话术，无口语化、无情绪化、无个人风格，回复机械刻板，一眼就能被识别出AI特征。",
+            med: "<strong>话术轻微AI化。</strong> 你习惯使用规范表达，偶尔会出现AI话术，人类表达特征有所减弱，需要适当调整。",
+            low: "<strong>纯人类话术。</strong> 你的表达自然随性，充满口语化与情绪，是人类独有的语言风格，无任何AI化痕迹。"
+        },
+        logic: {
+            high: "<strong>逻辑极度刻板化。</strong> 你非黑即白、按部就班、拒绝变通，完全丧失人类的灵活思维，与AI逻辑高度重合。",
+            med: "<strong>逻辑偏理性刻板。</strong> 你重视规则与步骤，偶尔失去灵活性，理性过度导致感性缺失。",
+            low: "<strong>人类灵活思维。</strong> 你辩证看待问题，兼顾理性与感性，灵活应变，无机械化逻辑特征。"
+        },
+        template: {
+            high: "<strong>表达完全模板化。</strong> 你无原创表达，全程套用固定格式、分点、句式，毫无个人特色，纯AI生成式表达。",
+            med: "<strong>表达依赖模板。</strong> 你经常使用模板辅助表达，原创性不足，开始失去个人语言风格。",
+            low: "<strong>原创自由表达。</strong> 你自由创作语言，风格鲜明，无任何模板化痕迹。"
+        },
+        thinking: {
+            high: "<strong>思维深度工具化。</strong> 你无独立思考能力，完全依赖AI/工具，放弃主观感受与创新，沦为工具的附属品。",
+            med: "<strong>思维轻度依赖工具。</strong> 你经常借助工具解决问题，独立思考能力有所下降。",
+            low: "<strong>独立人类思维。</strong> 你主动思考、创新判断，仅把工具当辅助，保持人类核心思维。"
+        },
+        empathy: {
+            high: "<strong>共情完全机械化。</strong> 你无人类共情能力，无法理解情绪、只看事实、机械安慰，丧失了人类最珍贵的感性。",
+            med: "<strong>共情能力减弱。</strong> 你理性压制感性，偶尔无法共情他人，情绪感知能力下降。",
+            low: "<strong>人类满分共情。</strong> 你感同身受、理解情绪、真心待人，拥有完美的人类感性特质。"
+        }
+    };
+    
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimFullCN(key)} 
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)})</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+function getUserAdvice() {
+    if(userRole === 'rare'){
+        return `<ul class="r-list"><li><strong>保持纯人类特质：</strong> 你几乎不受AI影响，继续保持自然表达、独立思考、感性共情，这是最珍贵的人类属性。</li><li><strong>无需刻意改变：</strong> 你的言行本真自然，是2026年最稀缺的特质。</li></ul>`;
+    }else if(userRole === 'normal'){
+        return `<ul class="r-list"><li><strong>平衡人机关系：</strong> 继续保持AI辅助、人类主导的模式，不要过度依赖工具。</li><li><strong>保留个人风格：</strong> 偶尔使用模板无妨，重点坚守自己的语言与思维特色。</li></ul>`;
+    }else if(userRole === 'often'){
+        return `<ul class="r-list"><li><strong>减少AI依赖：</strong> 刻意减少工具使用频率，强迫自己独立思考、原创表达。</li><li><strong>练习自然沟通：</strong> 日常交流抛弃AI话术，多用口语化、情绪化的表达。</li></ul>`;
+    }else{
+        return `<ul class="r-list"><li><strong>紧急摆脱工具绑架：</strong> 强制停用AI工具24小时，重建独立思考与感性认知。</li><li><strong>回归真实社交：</strong> 多与人面对面沟通，找回人类的共情与情绪连接。</li><li><strong>拒绝模板化：</strong> 所有表达禁止分点、固定话术，彻底回归自然人类语言。</li></ul>`;
+    }
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// 雷达图绘制
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['speech','logic','template','thinking','empathy'];
+    const labels = ['话术','逻辑','表达','思维','共情'];
+    
+    ctx.strokeStyle = '#e6f0ff';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 70, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(123, 97, 255, 0.1)");
+    grd.addColorStop(1, "rgba(123, 97, 255, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#7B61FF'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#1D2129'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+function updateLimitUI() {
+    document.getElementById('limit-hint').innerText = `本设备剩余可用次数：${remaining}次`;
+}
+
+msg.style.opacity = 0;
+    
+    document.getElementById('load-layer').style.display = 'flex';
+    const txt = document.getElementById('load-text');
+    
+    setTimeout(() => { txt.innerText = "正在加载AI测试系统..."; }, 800);
+    setTimeout(() => { 
+        txt.innerText = `加载成功！(剩余${left}次)`; 
+        txt.style.color = "#165DFF"; 
+    }, 1500);
+    
+    setTimeout(() => {
+        sessionStorage.setItem('unlocked_' + pageId, 'true');
+        setTimeout(() => { 
+        }, 500);
+    }, 2500);
+}
+
+function shakeCard() {
+    const card = document.getElementById('main-card');
+    card.style.animation = 'shake 0.3s';
+    setTimeout(() => { card.style.animation = ''; }, 300);
+}
+
+// 绑定事件
+window.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('unlocked_' + pageId)) {
+        updateLimitUI();
+    }
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    document.getElementById('start-btn').addEventListener('click', function() {var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}
+        goToDemo();
+    });
+
+    document.getElementById('init-test-btn').addEventListener('click', function() {
+        initTest();
+    });
+
+    document.getElementById('prev-btn').addEventListener('click', function() {
+        prevQuestion();
+    });
+
+    document.getElementById('show-report-btn').addEventListener('click', function() {
+        showReport();
+    });
+
+    document.getElementById('close-report-btn').addEventListener('click', function() {
+        closeReport();
+    });
+
+    document.getElementById('reset-test-btn').addEventListener('click', function() {
+        resetTest();
+    });
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "avjs";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

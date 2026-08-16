@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026山海经神兽测试 | 你的上古神兽属性</title>
+    <style>
+        :root {
+            /* 山海经上古国风配色 */
+            --primary: #1a1a2e; 
+            --primary-dark: #0f0f1e;
+            --accent: #c92a2a; /* 朱砂红 */
+            --accent-hover: #a61e20;
+            --safe: #2d6a4f; /* 苍绿 */
+            --warning: #d4a373; /* 鎏金 */
+            --bg-gradient-start: #f8f9fa;
+            --bg-gradient-end: #e9ecef;
+            --text-main: #212529;
+            --text-sub: #495057;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.15);
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(201, 42, 42, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(201, 42, 42, 0); } 100% { box-shadow: 0 0 0 0 rgba(201, 42, 42, 0); } }
+
+        /* 按钮组件 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(26, 26, 46, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* 封面 */
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#f1e6d2 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 40px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #1a1a2e;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--accent); }
+        .cover-subtitle { font-size: 16px; color: #7f8c8d; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ecf0f1;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #1a1a2e; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        /* 档案页 */
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #1a1a2e; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #ecf0f1; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #1a1a2e; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        /* 测试页 */
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #ecf0f1; color: #7f8c8d; padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #1a1a2e; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #34495e; cursor: pointer; border: 2px solid #ecf0f1; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #fef5f7; border-color: var(--accent); color: var(--accent); font-weight: 700; }
+        
+        /* 结果页 */
+        #page-result {
+            display: none; background: #ecf0f1; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ecf0f1;
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--accent); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: #1a1a2e; color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #7f8c8d; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #1a1a2e; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        /* 维度条 */
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #1a1a2e; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #7f8c8d; }
+
+        /* 底部操作 */
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: var(--accent); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-red 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #7f8c8d; width: 100%; padding: 10px;
+            border: 1px solid #bdc3c7; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 报告模态窗 */
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: #1a1a2e; color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #1a1a2e; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ecf0f1; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #34495e; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #f8f9fa; border: 1px solid #ecf0f1; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #555; }
+        
+        /* 辅助 */
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+    <!-- 1. 封面 -->
+    <div id="page-intro" data-screenshot="psych-test-山海经神兽" class="fade-in">
+        <div class="cover-tag">2026 山海经典藏版</div>
+        <h1 class="cover-title">上古<span>神兽</span><br>属性深度测试</h1>
+        <p class="cover-subtitle">基于山海经上古命格的30题深度扫描<br>精准解锁你的专属上古神兽</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🐉</div>
+                <div class="feature-title">神兽溯源</div>
+                <div class="feature-desc">匹配山海经正统神兽，解锁你的上古身份。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">五维命格</div>
+                <div class="feature-desc">祥瑞、霸气、灵慧、桀骜、仁善，全方位解析命格。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">✨</div>
+                <div class="feature-title">上古寓意</div>
+                <div class="feature-desc">解读神兽天赋，揭秘2026年专属运势。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📜</div>
+                <div class="feature-title">千字报告</div>
+                <div class="feature-desc">2026典藏版，深度解析你的神兽命格密码。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开启上古试炼 (约需3分钟)</button>
+    </div>
+
+    <!-- 2. 档案建立 -->
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#1a1a2e; margin-bottom:10px;">缔结上古命格 📜</h2>
+        <p style="color:#7f8c8d; font-size:14px; margin-bottom:30px;">系统将根据你的特质匹配专属山海经神兽。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的性别是？</label>
+            <select id="input-status" class="select-box">
+                <option value="male">乾阳·男子</option>
+                <option value="female">坤阴·女子</option>
+                <option value="neutral">混元·中性</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的性格特质是？</label>
+            <select id="input-title" class="select-box">
+                <option value="cold">清冷疏离·独善其身</option>
+                <option value="gentle">温润仁善·共情万物</option>
+                <option value="direct">桀骜霸气·敢作敢当</option>
+                <option value="passive">沉稳内敛·大智若愚</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成神兽试炼题</button>
+    </div>
+
+    <!-- 3. 测试页 -->
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：祥瑞命格</span>
+            <span id="progress-text">1 / 34</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">✨ 祥瑞命格</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <!-- 4. Loading -->
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-red 1s infinite; border-radius:50%;">🐉</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#1a1a2e;">正在演算上古命格...</h3>
+        <p style="color:#7f8c8d; font-size:14px; line-height:1.8;">正在匹配神兽血脉...<br>解析五维命格...<br>生成2026典藏报告...</p>
+    </div>
+
+    <!-- 5. 结果页 -->
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">神兽命格</span>
+            </div>
+            <div class="level-badge" id="res-level">神兽？</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维神兽命格雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+                <!-- JS 注入 -->
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📜 解锁《2026神兽命格》完整报告</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重置命格 重新试炼</button>
+        </div>
+    </div>
+
+    <!-- 完整报告模态窗 -->
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">SHAN HAI JING 2026</div>
+            <div class="r-h1">上古神兽命格典藏报告</div>
+            <div style="font-size:14px;">2026马年专属·山海经正统解析</div>
+        </div>
+        <div class="report-body" id="report-content">
+            <!-- JS 注入 千字以上报告 -->
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+// 全局配置
+const pageId = window.location.pathname;
+
+// 山海经神兽测试题库 5大维度：祥瑞、霸气、灵慧、桀骜、仁善
+const questions = [
+    // 祥瑞维度
+    { d: 'luck', t: '祥瑞命格', q: "遇到陌生人陷入困境，你会？", o: [
+        {t:"视而不见，独善其身", s:0},
+        {t:"观望片刻，选择离开", s:3},
+        {t:"主动伸手，力所能及相助", s:7},
+        {t:"倾尽全力，不求回报", s:10}
+    ]},
+    { d: 'luck', t: '祥瑞命格', q: "你更相信世间的本质是？", o: [
+        {t:"弱肉强食，残酷无情", s:0},
+        {t:"利弊权衡，利益至上", s:3},
+        {t:"善恶有报，天道轮回", s:7},
+        {t:"万物有灵，皆为美好", s:10}
+    ]},
+    { d: 'luck', t: '祥瑞命格', q: "获得意外之财，你会？", o: [
+        {t:"全部私藏，绝不分享", s:0},
+        {t:"留作己用，适当分享", s:3},
+        {t:"分享亲友，传递好运", s:7},
+        {t:"布施助人，积累福泽", s:10}
+    ]},
+    { d: 'luck', t: '祥瑞命格', q: "你对缘分的看法是？", o: [
+        {t:"不信缘分，事在人为", s:0},
+        {t:"半信半疑，顺其自然", s:3},
+        {t:"深信不疑，珍惜缘分", s:7},
+        {t:"缘分天定，感恩相遇", s:10}
+    ]},
+    { d: 'luck', t: '祥瑞命格', q: "看到受伤的小动物，你会？", o: [
+        {t:"漠不关心，径直离开", s:0},
+        {t:"心生怜悯，不敢靠近", s:3},
+        {t:"主动救助，妥善安置", s:7},
+        {t:"悉心照料，不离不弃", s:10}
+    ]},
+
+    // 霸气维度
+    { d: 'power', t: '霸气命格', q: "面对他人的挑衅，你会？", o: [
+        {t:"忍气吞声，息事宁人", s:0},
+        {t:"委婉回应，保持体面", s:3},
+        {t:"正面回击，绝不示弱", s:7},
+        {t:"气场全开，震慑全场", s:10}
+    ]},
+    { d: 'power', t: '霸气命格', q: "在团队中，你更倾向于？", o: [
+        {t:"默默无闻，跟随他人", s:0},
+        {t:"配合协作，做好本分", s:3},
+        {t:"主动牵头，主导方向", s:7},
+        {t:"天生领袖，掌控全局", s:10}
+    ]},
+    { d: 'power', t: '霸气命格', q: "陷入绝境时，你的心态是？", o: [
+        {t:"绝望放弃，听天由命", s:0},
+        {t:"焦虑不安，寻求帮助", s:3},
+        {t:"冷静破局，迎难而上", s:7},
+        {t:"逆天改命，无所畏惧", s:10}
+    ]},
+    { d: 'power', t: '霸气命格', q: "你对规则的态度是？", o: [
+        {t:"严格遵守，不敢逾越", s:0},
+        {t:"遵守规则，灵活变通", s:3},
+        {t:"打破规则，制定标准", s:7},
+        {t:"无视规则，自成天道", s:10}
+    ]},
+    { d: 'power', t: '霸气命格', q: "面对失败，你会？", o: [
+        {t:"一蹶不振，自我否定", s:0},
+        {t:"接受失败，慢慢调整", s:3},
+        {t:"总结经验，卷土重来", s:7},
+        {t:"越挫越勇，必成大器", s:10}
+    ]},
+
+    // 灵慧维度
+    { d: 'wisdom', t: '灵慧命格', q: "面对复杂的问题，你会？", o: [
+        {t:"手足无措，无法思考", s:0},
+        {t:"慢慢梳理，寻求帮助", s:3},
+        {t:"快速分析，找到关键", s:7},
+        {t:"一眼看透，直击本质", s:10}
+    ]},
+    { d: 'wisdom', t: '灵慧命格', q: "你学习新事物的速度是？", o: [
+        {t:"极其缓慢，难以掌握", s:0},
+        {t:"循序渐进，稳步提升", s:3},
+        {t:"一点就通，快速掌握", s:7},
+        {t:"无师自通，天赋异禀", s:10}
+    ]},
+    { d: 'wisdom', t: '灵慧命格', q: "你对人心的洞察能力？", o: [
+        {t:"毫无察觉，天真单纯", s:0},
+        {t:"后知后觉，事后明白", s:3},
+        {t:"敏锐察觉，心知肚明", s:7},
+        {t:"通透世事，看破不说破", s:10}
+    ]},
+    { d: 'wisdom', t: '灵慧命格', q: "你更喜欢的生活方式是？", o: [
+        {t:"随波逐流，平淡度日", s:0},
+        {t:"安稳踏实，简单快乐", s:3},
+        {t:"思考人生，追求真理", s:7},
+        {t:"参悟大道，通透万物", s:10}
+    ]},
+    { d: 'wisdom', t: '灵慧命格', q: "遇到谎言，你会？", o: [
+        {t:"深信不疑，全然当真", s:0},
+        {t:"半信半疑，无法判断", s:3},
+        {t:"立刻识破，保持沉默", s:7},
+        {t:"早有预判，从容应对", s:10}
+    ]},
+
+    // 桀骜维度
+    { d: 'wild', t: '桀骜命格', q: "他人对你的指指点点，你会？", o: [
+        {t:"全盘接受，改变自己", s:0},
+        {t:"虚心听取，有则改之", s:3},
+        {t:"毫不在意，坚持自我", s:7},
+        {t:"嗤之以鼻，随性而为", s:10}
+    ]},
+    { d: 'wild', t: '桀骜命格', q: "你向往的生活是？", o: [
+        {t:"循规蹈矩，安稳一生", s:0},
+        {t:"平淡温馨，小富即安", s:3},
+        {t:"无拘无束，自由洒脱", s:7},
+        {t:"逍遥世间，不被束缚", s:10}
+    ]},
+    { d: 'wild', t: '桀骜命格', q: "当你的想法与大众相悖，你会？", o: [
+        {t:"放弃自我，迎合大众", s:0},
+        {t:"保留意见，不与人争", s:3},
+        {t:"坚持己见，据理力争", s:7},
+        {t:"特立独行，绝不妥协", s:10}
+    ]},
+    { d: 'wild', t: '桀骜命格', q: "你对世俗眼光的看法？", o: [
+        {t:"极度在意，害怕评判", s:0},
+        {t:"偶尔在意，顾及面子", s:3},
+        {t:"不屑一顾，走自己的路", s:7},
+        {t:"无视世俗，我即天道", s:10}
+    ]},
+    { d: 'wild', t: '桀骜命格', q: "你是否愿意为了利益妥协？", o: [
+        {t:"愿意，利益至上", s:0},
+        {t:"适当妥协，权衡利弊", s:3},
+        {t:"绝不妥协，坚守本心", s:7},
+        {t:"宁为玉碎，不为瓦全", s:10}
+    ]},
+
+    // 仁善维度
+    { d: 'kind', t: '仁善命格', q: "你会因为他人的痛苦而难过吗？", o: [
+        {t:"毫无感觉，麻木不仁", s:0},
+        {t:"略有感触，转瞬即逝", s:3},
+        {t:"感同身受，心生悲悯", s:7},
+        {t:"痛彻心扉，共情万物", s:10}
+    ]},
+    { d: 'kind', t: '仁善命格', q: "你对待身边人的态度是？", o: [
+        {t:"冷漠疏离，自私自利", s:0},
+        {t:"礼貌客气，保持距离", s:3},
+        {t:"温柔体贴，真诚相待", s:7},
+        {t:"包容万物，大爱无疆", s:10}
+    ]},
+    { d: 'kind', t: '仁善命格', q: "他人犯错伤害了你，你会？", o: [
+        {t:"睚眦必报，加倍奉还", s:0},
+        {t:"心存芥蒂，保持距离", s:3},
+        {t:"选择原谅，宽容待人", s:7},
+        {t:"全然释怀，慈悲为怀", s:10}
+    ]},
+    { d: 'kind', t: '仁善命格', q: "你认为善良的意义是？", o: [
+        {t:"毫无意义，软弱可欺", s:0},
+        {t:"自保之道，明哲保身", s:3},
+        {t:"立身之本，为人之基", s:7},
+        {t:"世间大道，万物本源", s:10}
+    ]},
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [];
+
+// 性别特供题
+const roleSpecific = {
+    male: [
+        { d: 'power', t: '乾阳霸气', q: "【乾阳特供】面对家国大义，你会？", o: [
+            {t:"独善其身，不管不顾", s:0},
+            {t:"量力而行，适当参与", s:3},
+            {t:"挺身而出，担当重任", s:7},
+            {t:"舍生取义，守护苍生", s:10}
+        ]},
+    ],
+    female: [
+        { d: 'luck', t: '坤阴祥瑞', q: "【坤阴特供】你认为女子的力量源于？", o: [
+            {t:"依附他人，柔弱顺从", s:0},
+            {t:"独立自主，自给自足", s:3},
+            {t:"温柔坚韧，包容万物", s:7},
+            {t:"内圣外王，自成乾坤", s:10}
+        ]},
+    ],
+    neutral: [
+        { d: 'wisdom', t: '混元灵慧', q: "【混元特供】你对阴阳平衡的理解是？", o: [
+            {t:"毫无概念，不懂其意", s:0},
+            {t:"简单理解，顺其自然", s:3},
+            {t:"深谙其道，灵活运用", s:7},
+            {t:"参悟阴阳，天人合一", s:10}
+        ]},
+    ]
+};
+
+// 山海经神兽等级 10级对应正统神兽
+const levels = [
+    { max: 20, l: "Lv.1 白泽", c: "#2d6a4f", d: "上古瑞兽，通万物情，晓天下事，智慧无双。", advice: "坚守灵慧，你的通透将庇佑一生。" },
+    { max: 35, l: "Lv.2 麒麟", c: "#74c69d", d: "仁兽之首，含仁怀义，祥瑞加身，福泽绵长。", advice: "保持仁善，你的温柔自带光芒。" },
+    { max: 50, l: "Lv.3 玄武", c: "#4a90e2", d: "北方神兽，龟蛇合体，沉稳内敛，长生不朽。", advice: "坚守本心，你的稳重终成大器。" },
+    { max: 60, l: "Lv.4 朱雀", c: "#e63946", d: "南方火神，涅槃重生，热情洒脱，祥瑞之兆。", advice: "释放热情，你的生命力无可阻挡。" },
+    { max: 70, l: "Lv.5 白虎", c: "#adb5bd", d: "西方战神，杀伐果断，霸气凛然，镇邪驱魔。", advice: "释放霸气，你的气场震慑四方。" },
+    { max: 80, l: "Lv.6 青龙", c: "#06d6a0", d: "东方圣兽，九五之尊，天赋异禀，天命所归。", advice: "龙行天下，你的命格注定不凡。" },
+    { max: 90, l: "Lv.7 饕餮", c: "#ff9f1c", d: "上古凶兽，贪欲无双，桀骜不驯，极致自我。", advice: "收敛锋芒，你的天赋需善加引导。" },
+    { max: 100, l: "Lv.8 穷奇", c: "#ff5400", d: "西方恶兽，狂傲不羁，颠覆规则，随性而为。", advice: "坚守底线，自由不可逾越良知。" },
+    { max: 110, l: "Lv.9 梼杌", c: "#6a040f", d: "上古顽兽，顽固不屈，意志坚定，永不言败。", advice: "灵活变通，执着亦可成就大道。" },
+    { max: 999, l: "Lv.10 混沌", c: "#1a1a2e", d: "创世神兽，无眼无耳，无形无状，天人合一。", advice: "混元一体，你是世间最独特的存在。" }
+];
+
+// 全局变量
+let currQList = [];
+let currIdx = 0;
+let userRole = '';
+let userTitle = '';
+let scores = { luck:0, power:0, wisdom:0, wild:0, kind:0 };
+
+// 页面切换
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userRole = document.getElementById('input-status').value;
+    userTitle = document.getElementById('input-title').value;
+    
+    currQList = [...questions, ...roleSpecific[userRole]];
+    currIdx = 0;
+    scores = { luck:0, power:0, wisdom:0, wild:0, kind:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    let weight = 1.0;
+    scores[dim] += val * weight;
+
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { luck:0, power:0, wisdom:0, wild:0, kind:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw / 2.5); 
+    if(finalScore> 120) finalScore = 120;
+
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'luck', n:'祥瑞'}, {k:'power', n:'霸气'}, 
+        {k:'wisdom', n:'灵慧'}, {k:'wild', n:'桀骜'}, {k:'kind', n:'仁善'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 60) * 100, 100);
+        let color = pct> 60 ? '#c92a2a' : (pct> 30 ? '#d4a373' : '#2d6a4f');
+        let txt = pct> 70 ? '满级' : (pct> 40 ? '出众' : '普通');
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {luck:'祥瑞', power:'霸气', wisdom:'灵慧', wild:'桀骜', kind:'仁善'};
+    return map[k];
+}
+
+// 2026神兽千字报告生成
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let envStatus = '';
+    let envClass = '';
+    if (total> 80) {
+        envStatus = '🐉 上古神兽血脉：创世级命格 (天赋异禀)';
+        envClass = 'color:#c92a2a; font-weight:900;';
+    } else if (total> 60) {
+        envStatus = '✨ 圣兽血脉：王者级命格 (天命所归)';
+        envClass = 'color:#06d6a0; font-weight:800;';
+    } else if (total> 40) {
+        envStatus = '📜 瑞兽血脉：贤能级命格 (福泽加身)';
+        envClass = 'color:#d4a373; font-weight:700;';
+        envStatus = '🌿 灵兽血脉：温润级命格 (平安顺遂)';
+        envClass = 'color:#2d6a4f; font-weight:700;';
+    }
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、2026上古神兽命格诊断书</div>
+        <p class="r-p" style="background:#f8f9fa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>📜 命格档案：</strong>${userRole==='male'?'乾阳·男子':userRole==='female'?'坤阴·女子':'混元·中性'} <br>
+            <strong>🐉 性格特质：</strong>${getTitleName(userTitle)}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#999; margin-right:8px;">神兽命格指数</span>
+                <span style="font-size:36px; font-weight:900; color:#1a1a2e; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#999;">/ 120</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>上古箴言：</strong>${lvl.advice}</p>
+        </div>
+
+        <div style="margin-top:20px; padding:15px; background:#fff; border-radius:8px; border:1px solid #eee;">
+            <p style="margin:0 0 10px 0; font-size:14px; color:#999;">神兽血脉定性：</p>
+            <div style="${envClass} font-size:17px; margin-bottom:12px;">${envStatus}</div>
+            <p class="r-p" style="font-size:15px; margin:0;">
+                经过山海经34项上古命格的深度扫描，系统成功解锁你的专属神兽：<span style="background:${lvl.c}; color:#fff; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:13px;">${lvl.l.split(' ')[1]}</span>，核心命格天赋位于 <span style="background:#c92a2a; color:#fff; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:13px;">${getDimFullCN(maxDimKey)}</span> 维度。2026马年，你的神兽血脉将全面觉醒，自带上古福泽与天赋，注定拥有不凡的人生轨迹。
+            </p>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维神兽命格深度解构</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px; font-style:italic;">*基于《山海经》正统古籍解析命格</p>
+        ${generateDimAnalysis('luck', scores.luck)}
+        ${generateDimAnalysis('power', scores.power)}
+        ${generateDimAnalysis('wisdom', scores.wisdom)}
+        ${generateDimAnalysis('wild', scores.wild)}
+        ${generateDimAnalysis('kind', scores.kind)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、2026神兽命格运势与生存之道</div>
+        <div class="r-box" style="border-color:#bdc3c7;">
+            <div class="r-h3">✨ 运势篇：2026马年神兽觉醒</div>
+            <ul class="r-list">
+                <li><strong>福泽运势：</strong> 你的神兽血脉将在2026年全面觉醒，祥瑞命格者得贵人相助，霸气命格者事业腾飞，灵慧命格者智慧全开，桀骜命格者自由顺遂，仁善命格者福报满满。</li>
+                <li><strong>人际运势：</strong> 神兽气场将吸引同频之人，远离小人与消耗你的关系，身边皆是良师益友，人脉圈层全面升级。</li>
+                <li><strong>心境运势：</strong> 与自身神兽特质深度共鸣，内心通透平和，不再内耗，活出最本真的自我状态。</li>
+            </ul>
+        </div>
+        
+        <div class="r-box" style="background:#fef5f7; border-color:#ffd6e0;">
+            <div class="r-h3" style="color:#c92a2a;">
+                🐉 修行篇：${userRole==='male'?'乾阳·龙行天下':userRole==='female'?'坤阴·凤舞九天':'混元·天人合一'}
+            </div>
+            ${userRole==='male' ? getMaleAdvice() : userRole==='female' ? getFemaleAdvice() : getNeutralAdvice()}
+        </div>
+
+        <div class="r-box" style="margin-top:20px;">
+            <div class="r-h3">📜 上古结语</div>
+            <p class="r-p">
+                山海经神兽血脉，是刻在你灵魂深处的天赋与印记。2026年，愿你顺应自身命格，释放神兽力量，不被世俗束缚，不被困境打倒。瑞兽庇佑，圣兽护航，凶兽破局，无论你是哪一种神兽，都是世间独一无二的存在。<br><br>
+                愿你以神兽之姿，行世间之路，得偿所愿，平安喜乐，万事胜意，此生尽兴，赤诚善良。这便是上古命格赋予你的终极馈赠，也是山海经留给每一个人的温柔与力量。
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        本报告由山海经上古命格算法自动生成 · 2026典藏版<br>
+        愿上古神兽庇佑，岁岁常欢愉，万事皆胜意
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function getTitleName(t) {
+    const m = {
+        cold: '清冷疏离·独善其身', 
+        gentle: '温润仁善·共情万物', 
+        direct: '桀骜霸气·敢作敢当', 
+        passive: '沉稳内敛·大智若愚'
+    };
+    return m[t] || t;
+}
+
+function getDimFullCN(k) {
+    const m = {
+        luck: '祥瑞命格·福泽庇佑', 
+        power: '霸气命格·气场全开', 
+        wisdom: '灵慧命格·通透万物', 
+        wild: '桀骜命格·自由洒脱', 
+        kind: '仁善命格·慈悲为怀'
+    };
+    return m[k];
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 40 ? 'high' : (val> 20 ? 'med' : 'low');
+    
+    const config = {
+        high: { color: '#c92a2a', bg: '#fdecea', tag: '🐉 满级天赋', titleColor: '#c92a2a' },
+        med: { color: '#d4a373', bg: '#fef5e7', tag: '✨ 天赋出众', titleColor: '#d4a373' },
+        low: { color: '#2d6a4f', bg: '#e8f8f5', tag: '🌿 天赋温和', titleColor: '#2d6a4f' }
+    };
+    
+    const c = config[riskLevel];
+    
+    const texts = {
+        luck: {
+            high: "<strong>祥瑞命格满级觉醒。</strong> 你自带上古瑞兽血脉，福泽深厚，贵人环绕，万事顺遂，是上天眷顾的天选之人，所求皆所愿，所行化坦途。",
+            med: "<strong>祥瑞命格天赋出众。</strong> 你拥有不错的福泽运势，生活平稳安康，偶尔有小惊喜，善良的举动都会化作福报回馈自身。",
+            low: "<strong>祥瑞命格温和内敛。</strong> 你的福泽藏于内心，无需强求，平安顺遂便是最大的幸运，平淡生活自有诗意。"
+        },
+        power: {
+            high: "<strong>霸气命格满级觉醒。</strong> 你拥有战神般的气场，天生领袖，杀伐果断，无惧挑战，能掌控自己的人生，震慑四方，成就大业。",
+            med: "<strong>霸气命格天赋出众。</strong> 你气场十足，有主见有担当，在人群中脱颖而出，面对困难能从容应对，成为身边人的依靠。",
+            low: "<strong>霸气命格温和内敛。</strong> 你不怒自威，内敛的力量更加强大，温和的态度下藏着坚定的内心，以柔克刚。"
+        },
+        wisdom: {
+            high: "<strong>灵慧命格满级觉醒。</strong> 你通万物情，晓天下事，天赋异禀，智慧无双，看透世事本质，活得通透清醒，是世间少有的灵慧之人。",
+            med: "<strong>灵慧命格天赋出众。</strong> 你聪明机敏，学习能力强，洞察人心，善于思考，总能做出最正确的选择，少走弯路。",
+            low: "<strong>灵慧命格温和内敛。</strong> 你大智若愚，不争不抢，内心澄澈，简单的生活方式让你远离纷扰，自得其乐。"
+        },
+        wild: {
+            high: "<strong>桀骜命格满级觉醒。</strong> 你特立独行，不被世俗束缚，追求极致自由，坚持自我，永不妥协，活出最真实、最洒脱的人生。",
+            med: "<strong>桀骜命格天赋出众。</strong> 你有自己的原则和底线，不迎合他人，不随波逐流，在规则与自由中找到平衡。",
+            low: "<strong>桀骜命格温和内敛。</strong> 你随性淡然，与世无争，享受安稳的自由，不刻意张扬，内心平和自在。"
+        },
+        kind: {
+            high: "<strong>仁善命格满级觉醒。</strong> 你慈悲为怀，共情万物，包容一切，拥有上古仁兽的品质，你的善良是世间最珍贵的力量，温暖众生。",
+            med: "<strong>仁善命格天赋出众。</strong> 你温柔体贴，真诚待人，懂得宽容与理解，身边的人都因你的善良而感到温暖。",
+            low: "<strong>仁善命格温和内敛。</strong> 你心存善意，明辨是非，独善其身，不伤害他人，也守护好自己的内心。"
+        }
+    };
+    
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimFullCN(key)} 
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)})</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+function getMaleAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>龙行天下：</strong> 释放乾阳霸气，勇于担当，你的气场将成为事业与生活的最强后盾。</li>
+        <li><strong>坚守本心：</strong> 不被世俗利益裹挟，坚守良知与底线，霸气不可无德，锋芒不可伤人。</li>
+        <li><strong>顺势而为：</strong> 2026年乘势而上，大胆追梦，你的神兽血脉将助你突破所有困境。</li>
+    </ul>`;
+}
+
+function getFemaleAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>凤舞九天：</strong> 释放坤阴温柔与力量，温柔且坚定，你的坚韧是世间最强大的力量。</li>
+        <li><strong>自爱自强：</strong> 不依附不将就，独立自主，你的祥瑞血脉会吸引所有美好与温柔。</li>
+        <li><strong>绽放光芒：</strong> 2026年大胆做自己，无需隐藏光芒，你的存在本身就是一道风景。</li>
+    </ul>`;
+}
+
+function getNeutralAdvice() {
+    return `
+    <ul class="r-list">
+        <li><strong>天人合一：</strong> 参悟阴阳平衡，兼容万物，你的混元命格是世间最独特的存在。</li>
+        <li><strong>随心而行：</strong> 不被性别与世俗定义，听从内心，自由洒脱，活出真我。</li>
+        <li><strong>混元觉醒：</strong> 2026年灵慧全开，通透世事，在平衡中找到属于自己的人生大道。</li>
+    </ul>`;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationStep(step);
+        }
+    };
+    window.requestAnimationStep(step);
+}
+
+// 雷达图绘制
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['luck','power','wisdom','wild','kind'];
+    const labels = ['祥瑞','霸气','灵慧','桀骜','仁善'];
+    
+    ctx.strokeStyle = '#dfe6e9';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 60, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(201, 42, 42, 0.1)");
+    grd.addColorStop(1, "rgba(201, 42, 42, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#c92a2a'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#1a1a2e'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+function updateLimitUI() {
+    document.getElementById('limit-hint').innerText = `本设备剩余可用次数：${remaining}次`;
+}
+
+msg.style.opacity = 0;
+    
+    document.getElementById('load-layer').style.display = 'flex';
+    const txt = document.getElementById('load-text');
+    
+    setTimeout(() => { txt.innerText = "正在唤醒神兽血脉..."; }, 800);
+    setTimeout(() => { 
+        txt.innerText = `血脉觉醒成功！(剩余${left}次)`; 
+        txt.style.color = "#c92a2a"; 
+    }, 1500);
+    
+    setTimeout(() => {
+        sessionStorage.setItem('unlocked_' + pageId, 'true');
+        setTimeout(() => { 
+        }, 500);
+    }, 2500);
+}
+
+function shakeCard() {
+    const card = document.getElementById('main-card');
+    card.style.animation = 'shake 0.3s';
+    setTimeout(() => { card.style.animation = ''; }, 300);
+}
+
+// 绑定事件
+window.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('unlocked_' + pageId)) {
+        updateLimitUI();
+    }
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    .addEventListener('click', function() {
+        
+    });
+
+    document.getElementById('start-btn').addEventListener('click', function() {var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}
+        goToDemo();
+    });
+
+    document.getElementById('init-test-btn').addEventListener('click', function() {
+        initTest();
+    });
+
+    document.getElementById('prev-btn').addEventListener('click', function() {
+        prevQuestion();
+    });
+
+    document.getElementById('show-report-btn').addEventListener('click', function() {
+        showReport();
+    });
+
+    document.getElementById('close-report-btn').addEventListener('click', function() {
+        closeReport();
+    });
+
+    document.getElementById('reset-test-btn').addEventListener('click', function() {
+        resetTest();
+    });
+});
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "shjss";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

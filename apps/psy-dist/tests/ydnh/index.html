@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>月度精神内耗复测 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root { --primary: #A55EEA; --primary-dark: #8854D0; --bg-gradient-start: #F5F0FF; --bg-gradient-end: #EDE7F6; --text-main: #2D3436; --text-sub: #636E72; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-purple { 0% { box-shadow: 0 0 0 0 rgba(165, 94, 234, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(165, 94, 234, 0); } 100% { box-shadow: 0 0 0 0 rgba(165, 94, 234, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(165, 94, 234, 0.3); transition: transform 0.1s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 60px 24px 40px; text-align: center; min-height: 100vh; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 30px; }
+        .month-indicator { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 30px; display: inline-block; }
+        .month-text { font-size: 14px; color: #636E72; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ede7f6; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #f5f0ff; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; cursor: pointer; border: 2px solid #ede7f6; transition: all 0.2s; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #f5f0ff; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #f5f0ff; padding-bottom: 120px; overflow-y: auto; min-height: 100vh; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ede7f6; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; }
+        .score-num { font-size: 48px; font-weight: 900; color: var(--primary); }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; }
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+        .compare-box { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 20px; text-align: center; }
+        .compare-title { font-size: 16px; font-weight: 700; margin-bottom: 15px; color: var(--primary); }
+        .compare-score { display: flex; justify-content: space-around; align-items: center; }
+        .compare-item { text-align: center; }
+        .compare-label { font-size: 12px; color: #95a5a6; }
+        .compare-num { font-size: 24px; font-weight: 700; }
+        .compare-arrow { font-size: 20px; color: #95a5a6; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; }
+        .card-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-purple 2s infinite; cursor: pointer; }
+        .export-btn { background: #2ED573; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+    <div id="page-intro" data-screenshot="psych-test-月度精神内耗复测" class="fade-in">
+        <div class="cover-tag">月度复测版</div>
+        <h1 class="cover-title">月度精神<br><span>内耗</span>复测</h1>
+        <p class="cover-subtitle">检测这个月你的精神内耗有没有好转</p>
+        <div class="month-indicator">
+            <span class="month-text">📅 上次测试：2026年3月</span>
+        </div>
+        <div class="intro-features">
+            <div class="feature-box"><div class="feature-icon">📊</div><div class="feature-title">职业健康心理学</div><div class="feature-desc">基于职业健康心理学理论。</div></div>
+            <div class="feature-box"><div class="feature-icon">📈</div><divdiv class="feature-title">对比上月数据</div><div class="feature-desc">可以看到内耗变化趋势。</div></div>
+            <div class="feature-box"><div class="feature-icon">🎯</div><divdiv class="feature-title">针对性建议</div><div class="feature-desc">根据本月情况调整方案。</div></div>
+            <div class="feature-box"><div class="feature-icon">📅</div><divdiv class="feature-title">月度体检</div><div class="feature-desc">把测试变成职场定期体检。</div></div>
+        </div>
+        <button class="btn" id="start-btn">开始本月复测 (约需 2 分钟)</button>
+    </div>
+    <div id="page-test">
+        <div class="progress-header"><span id="dim-tag">维度：认知内耗</span><span id="progress-text">1 / 15</span></div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🧠 认知内耗</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle"><span class="score-num" id="res-score">0</span><span class="score-label">内耗指数</span></div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+        <div class="compare-box">
+            <div class="compare-title">📊 与上月对比</div>
+            <div class="compare-score">
+                <div class="compare-item"><div class="compare-label">上月</div><div class="compare-num" style="color:#95a5a6">75</div></div>
+                <div class="compare-arrow">→</div>
+                <div class="compare-item"><div class="compare-label">本月</div><div class="compare-num" id="compare-now" style="color:#A55EEA">-</div></div>
+                <div class="compare-arrow" id="trend-arrow">-</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">📈 内耗变化趋势</div>
+            <div id="trend-desc" style="font-size:14px;color:#555;line-height:1.8;"></div>
+        </div>
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 查看详细报告</button>
+            <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    {d:'cognitive',t:'认知内耗',q:"这个月你经常胡思乱想吗？",o:[{t:"几乎不会，思绪平静",s:10},{t:"偶尔会想一些",s:7},{t:"经常想很多",s:3},{t:"每天都思绪纷乱",s:0}]},
+    {d:'cognitive',t:'认知内耗',q:"你会反复纠结过去的事情吗？",o:[{t:"完全不会，活在当下",s:10},{t:"偶尔会",s:7},{t:"经常纠结过去",s:3},{t:"每天都后悔过去",s:0}]},
+    {d:'cognitive',t:'认知内耗',q:"你会在脑子里预演未来吗？",o:[{t:"不会，想那么多干嘛",s:10},{t:"偶尔会想一下",s:7},{t:"经常预演各种可能",s:3},{t:"每天都在担心未来",s:0}]},
+    {d:'emotion',t:'情绪内耗',q:"这个月你容易焦虑吗？",o:[{t:"完全不焦虑",s:10},{t:"偶尔会",s:7},{t:"经常焦虑",s:3},{t:"每天都焦虑",s:0}]},
+    {d:'emotion',t:'情绪内耗',q:"你会因为小事纠结很久吗？",o:[{t:"不会，很快做决定",s:10},{t:"偶尔会",s:7},{t:"经常纠结",s:3},{t:"每天都在纠结",s:0}]},
+    {d:'emotion',t:'情绪内耗',q:"你会在意别人的评价吗？",o:[{t:"完全不在意",s:10},{t:"偶尔会在意",s:7},{t:"经常在意",s:3},{t:"非常在意，每天都在想",s:0}]},
+    {d:'social',t:'社交内耗',q:"你在社交场合会感到累吗？",o:[{t:"完全不累，很享受",s:10},{t:"偶尔会累",s:7},{t:"经常感到社交疲惫",s:3},{t:"非常排斥社交",s:0}]},
+    {d:'social',t:'社交内耗',q:"你会因为回复消息感到压力吗？",o:[{t:"完全不会，有消息就回",s:10},{t:"偶尔会",s:7},{t:"经常有压力",s:3},{t:"看到消息就焦虑",s:0}]},
+    {d:'social',t:'社交内耗',q:"你害怕独处吗？",o:[{t:"完全不怕，很享受",s:10},{t:"偶尔会",s:7},{t:"经常害怕独处",s:3},{t:"非常害怕一个人",s:0}]},
+    {d:'work',t:'工作内耗',q:"你会担心工作做不好吗？",o:[{t:"完全不担心，尽力就好",s:10},{t:"偶尔会担心",s:7},{t:"经常担心",s:3},{t:"每天都很担心",s:0}]},
+    {d:'work',t:'工作内耗',q:"你会把工作情绪带回家吗？",o:[{t:"完全不会，分得很清",s:10},{t:"偶尔会",s:7},{t:"经常会把情绪带回家",s:3},{t:"每天都被工作情绪影响",s:0}]},
+    {d:'work',t:'工作内耗',q:"你会担心被裁员或淘汰吗？",o:[{t:"完全不担心",s:10},{t:"偶尔会想",s:7},{t:"经常担心",s:3},{t:"每天都在担心",s:0}]},
+    {d:'self',t:'自我内耗',q:"你会经常自我怀疑吗？",o:[{t:"完全不会，很自信",s:10},{t:"偶尔会",s:7},{t:"经常自我怀疑",s:3},{t:"每天都觉得自己不行",s:0}]},
+    {d:'self',t:'自我内耗',q:"你会和别人比较然后自卑吗？",o:[{t:"完全不会，各有各的好",s:10},{t:"偶尔会",s:7},{t:"经常比较",s:3},{t:"每天都在比较中度过",s:0}]},
+    {d:'self',t:'自我内耗',q:"你对自己满意吗？",o:[{t:"非常满意，接纳自己",s:10},{t:"比较满意",s:7},{t:"不太满意",s:3},{t:"完全不满意自己",s:0}]}
+];
+const levels = [
+    {max:30,l:"内耗很低",c:"#2ED573",d:"这个月你的精神内耗很低！状态非常好。",advice:"继续保持，你找到了很好的内心平衡方式。",change:"下降"},
+    {max:60,l:"内耗较低",c:"#00CEC9",d:"这个月内耗有所下降，比上个月好。",advice:"继续坚持目前的生活方式，内耗正在逐渐减轻。",change:"下降"},
+    {max:90,l:"内耗中等",c:"#FDCB6E",d:"这个月内耗和上月差不多，维持在中等水平。",advice:"需要更加关注自己的内心世界，尝试一些放松方法。",change:"持平"},
+    {max:150,l:"内耗较高",c:"#FF7675",d:"这个月内耗有所上升，比上个月严重了。",advice:"需要立即调整状态，减少内耗来源。",change:"上升"}
+];
+let currQList=[],currIdx=0,scores={cognitive:0,emotion:0,social:0,work:0,self:0};
+const lastMonthScore=75;
+function startTest(){currQList=[...questions];currIdx=0;scores={cognitive:0,emotion:0,social:0,work:0,self:0};document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=`${currIdx+1}/${currQList.length}`;document.getElementById('progress-fill').style.width=`${(currIdx/currQList.length)*100}%`;document.getElementById('dim-tag').innerText=`维度：${q.t}`;document.getElementById('q-category').innerText=q.t;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(q.d,opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(dim,val){scores[dim]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';setTimeout(()=>{document.getElementById('page-result').style.display='block';calculateResult();},2000);}
+function calculateResult(){let total=Object.values(scores).reduce((a,b)=>a+b,0);let finalScore=Math.round(total);let lvl=levels.find(l=>finalScore<=l.max)||levels[levels.length-1];let start=0;const timer=setInterval(()=>{start++;document.getElementById('res-score').innerText=start;if(start>=finalScore)clearInterval(timer);},20);document.getElementById('res-level').innerText=lvl.l;document.getElementById('res-level').style.background=lvl.c;document.getElementById('res-desc').innerText=lvl.d;document.getElementById('compare-now').innerText=finalScore;const trend=finalScore<lastMonthScore?'↓':(finalScore>lastMonthScore?'↑':'→');document.getElementById('trend-arrow').innerText=trend;document.getElementById('trend-arrow').style.color=trend==='↓'?'#2ED573':(trend==='↑'?'#FF7675':'#95a5a6');const trendText=finalScore<lastMonthScore?'相比上月下降了'+(lastMonthScore-finalScore)+'分，内耗明显减少！':(finalScore>lastMonthScore?'相比上月上升了'+(finalScore-lastMonthScore)+'分，内耗有所增加，需要注意。':'和上月持平，内耗维持在中等水平。');document.getElementById('trend-desc').innerText=trendText;}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(165,94,234);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('月度精神内耗复测报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});let y=55;const score=parseInt(document.getElementById('res-score').innerText);const lvl=levels.find(l=>score<=l.max)||levels[levels.length-1];doc.setTextColor(0,0,0);doc.setFontSize(16);doc.text(`内耗等级：${lvl.l}`,15,y);y+=10;doc.setFontSize(12);doc.text(lvl.d.substring(0,150)+'...',15,y);doc.save('月度精神内耗复测.pdf');}
+document.getElementById('start-btn').document.getElementById('start-btn').addEventListener('click',function(){var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}startTest();document.getElementById('page-intro').style.display='none';document.getElementById('page-test').style.display='flex';});document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "ydnh";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

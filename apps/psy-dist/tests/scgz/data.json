@@ -1,0 +1,155 @@
+[
+    {
+        "title": "面对压力时你会？",
+        "options": [
+            {"text": "完全能放松", "score": 0},
+            {"text": "会比较焦虑", "score": 2},
+            {"text": "会很紧张", "score": 4},
+            {"text": "完全无法放松", "score": 5}
+        ]
+    },
+    {
+        "title": "你对生活的态度是？",
+        "options": [
+            {"text": "很轻松随意", "score": 0},
+            {"text": "比较随和", "score": 1},
+            {"text": "有点紧绷", "score": 3},
+            {"text": "非常焦虑紧张", "score": 5}
+        ]
+    },
+    {
+        "title": "你经常比较自己和别人吗？",
+        "options": [
+            {"text": "从不比较", "score": 0},
+            {"text": "偶尔会", "score": 1},
+            {"text": "经常比较", "score": 3},
+            {"text": "经常陷入焦虑", "score": 5}
+        ]
+    },
+    {
+        "title": "你对未来的态度是？",
+        "options": [
+            {"text": "顺其自然", "score": 0},
+            {"text": "有点担心", "score": 2},
+            {"text": "经常焦虑", "score": 4},
+            {"text": "极度担忧", "score": 5}
+        ]
+    },
+    {
+        "title": "别人说你最大的特点是？",
+        "options": [
+            {"text": "很放松", "score": 0},
+            {"text": "比较淡定", "score": 1},
+            {"text": "容易紧张", "score": 3},
+            {"text": "很焦虑", "score": 5}
+        ]
+    },
+    {
+        "title": "你晚上睡眠质量如何？",
+        "options": [
+            {"text": "很好，一觉到天亮", "score": 0},
+            {"text": "还行", "score": 1},
+            {"text": "偶尔失眠", "score": 3},
+            {"text": "经常失眠", "score": 5}
+        ]
+    },
+    {
+        "title": "你吃饭时的心情是？",
+        "options": [
+            {"text": "很享受", "score": 0},
+            {"text": "比较放松", "score": 1},
+            {"text": "经常看手机", "score": 3},
+            {"text": "经常焦虑", "score": 5}
+        ]
+    },
+    {
+        "title": "你容易受外界影响吗？",
+        "options": [
+            {"text": "完全不受影响", "score": 0},
+            {"text": "偶尔会", "score": 1},
+            {"text": "经常会", "score": 3},
+            {"text": "总是受影响", "score": 5}
+        ]
+    },
+    {
+        "title": "你对待失败的态度是？",
+        "options": [
+            {"text": "没关系，继续努力", "score": 0},
+            {"text": "会有点失落", "score": 1},
+            {"text": "会很沮丧", "score": 3},
+            {"text": "无法接受", "score": 5}
+        ]
+    },
+    {
+        "title": "你周末通常怎么过？",
+        "options": [
+            {"text": "很放松怎么开心怎么来", "score": 0},
+            {"text": "比较随意", "score": 1},
+            {"text": "会想工作的事", "score": 3},
+            {"text": "经常加班", "score": 5}
+        ]
+    },
+    {
+        "title": "你会被社交媒体影响心情吗？",
+        "options": [
+            {"text": "完全不会", "score": 0},
+            {"text": "偶尔会", "score": 1},
+            {"text": "经常会", "score": 3},
+            {"text": "严重影响心情", "score": 5}
+        ]
+    },
+    {
+        "title": "你对自己要求高吗？",
+        "options": [
+            {"text": "还好，适度", "score": 0},
+            {"text": "比较高", "score": 2},
+            {"text": "非常严格", "score": 4},
+            {"text": "极度追求完美", "score": 5}
+        ]
+    },
+    {
+        "title": "你容易内耗吗？",
+        "options": [
+            {"text": "很少", "score": 0},
+            {"text": "偶尔", "score": 1},
+            {"text": "经常", "score": 3},
+            {"text": "总是内耗", "score": 5}
+        ]
+    },
+    {
+        "title": "你参加聚会时的状态是？",
+        "options": [
+            {"text": "很放松享受", "score": 0},
+            {"text": "比较自然", "score": 1},
+            {"text": "会有点拘谨", "score": 3},
+            {"text": "很不舒服", "score": 5}
+        ]
+    },
+    {
+        "title": "你会因為小事焦虑吗？",
+        "options": [
+            {"text": "不会", "score": 0},
+            {"text": "偶尔", "score": 1},
+            {"text": "经常", "score": 3},
+            {"text": "经常崩溃", "score": 5}
+        ]
+    },
+    {
+        "title": "你觉得自己松弛吗？",
+        "options": [
+            {"text": "非常松弛", "score": 0},
+            {"text": "比较松弛", "score": 1},
+            {"text": "有点紧绷", "score": 3},
+            {"text": "非常紧绷", "score": 5}
+        ]
+    },
+    {
+        "title": "你面对选择时会很纠结吗？",
+        "options": [
+            {"text": "很快就能做决定", "score": 0},
+            {"text": "会考虑一下", "score": 1},
+            {"text": "经常纠结", "score": 3},
+            {"text": "非常纠结", "score": 5}
+        ]
+    }
+]

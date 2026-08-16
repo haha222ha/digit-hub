@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>前任执念程度检测 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #9B59B6;
+            --primary-dark: #8E44AD;
+            --accent: #F39C12;
+            --safe: #27AE60;
+            --warning: #E74C3C;
+            --bg-gradient-start: #F5EFF9;
+            --bg-gradient-end: #EDE0F5;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-purple { 0% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(155, 89, 182, 0); } 100% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0); } }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#ede0f5 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ede0f5; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #ede0f5; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #ede0f5; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #ede0f5; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #f5eff9; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        #page-result { display: none; background: #ede0f5; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ede0f5; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-purple 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ede0f5; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #ede0f5; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-前任执念程度测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">前任执念<br><span>程度</span>检测</h1>
+        <p class="cover-subtitle">科学评估你对前任的执念程度<br>基于依恋理论和创伤心理学</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🔍</div>
+                <div class="feature-title">四维深度分析</div>
+                <div class="feature-desc">情感依赖、认知执念、行为残留、情感分离，全面扫描执念程度。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">依恋理论</div>
+                <div class="feature-desc">基于依恋理论和创伤心理学，科学评估你的执念程度。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">⚠️</div>
+                <div class="feature-title">精准定位原因</div>
+                <div class="feature-desc">帮助你认识到执念的深层原因。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💡</div>
+                <div class="feature-title">走出执念指南</div>
+                <div class="feature-desc">提供科学的走出前任执念的方法。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始检测 (约需 3 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">前任档案建立 💔</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的情况精准评估执念程度。</p>
+
+        <div class="form-group">
+            <label class="form-label">你分手多久了？</label>
+            <select id="input-time" class="select-box">
+                <option value="new">不到一个月</option>
+                <option value="short">1-6个月</option>
+                <option value="medium">6个月-1年</option>
+                <option value="long">1-3年</option>
+                <option value="verylong">3年以上</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">这段感情持续了多久？</label>
+            <select id="input-duration" class="select-box">
+                <option value="short">不到三个月</option>
+                <option value="medium">3个月-1年</option>
+                <option value="long">1-3年</option>
+                <option value="verylong">3年以上</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">分手是谁提出的？</label>
+            <select id="input-who" class="select-box">
+                <option value="me">我提出</option>
+                <option value="them">对方提出</option>
+                <option value="mutual">双方同意</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：情感依赖</span>
+            <span id="progress-text">1 / 16</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🔍 情感依赖</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+
+    <div id="page-loading">
+        <div style="font-size:50px; animation: pulse-purple 1s infinite;">💔</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的执念程度...</h3>
+        <p style="color:#636E72; font-size:14px;">正在扫描四维数据...<br>计算执念指数...<br>生成专属报告...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">执念指数</span>
+            </div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 前任执念四维雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《前任执念深度分析报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新检测</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div>
+            <div class="r-h1">前任执念深度分析报告</div>
+            <div style="font-size:14px;">专业心理测评 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+
+</div>
+
+<script>
+const questions = [
+    { d: 'emotion', t: '情感依赖', q: "你还会想起前任吗？", o: [
+        {t:"经常想起，无法控制", s:10},
+        {t:"经常想起，但能接受", s:8},
+        {t:"偶尔想起", s:5},
+        {t:"很少想起", s:2},
+        {t:"基本不想起", s:0}
+    ]},
+    { d: 'emotion', t: '情感依赖', q: "如果前任回头找你，你会？", o: [
+        {t:"毫不犹豫接受", s:10},
+        {t:"会考虑，可能接受", s:8},
+        {t:"犹豫，不知道", s:5},
+        {t:"谨慎考虑后拒绝", s:2},
+        {t:"直接拒绝", s:0}
+    ]},
+    { d: 'emotion', t: '情感依赖', q: "你怀念前任的哪些方面？", o: [
+        {t:"所有方面，ta就是最好的", s:10},
+        {t:"大部分方面", s:8},
+        {t:"某些方面", s:5},
+        {t:"很少方面", s:2},
+        {t:"没什么可怀念的", s:0}
+    ]},
+    { d: 'emotion', t: '情感依赖', q: "你对这段感情的感受是？", o: [
+        {t:"很遗憾，无法释怀", s:10},
+        {t:"有些遗憾", s:8},
+        {t:"一般，可以接受", s:5},
+        {t:"已经释怀", s:2},
+        {t:"完全放下", s:0}
+    ]},
+    
+    { d: 'cognition', t: '认知执念', q: "你是否认为再也遇不到更好的人了？", o: [
+        {t:"完全这样认为", s:10},
+        {t:"经常这样想", s:8},
+        {t:"偶尔这样想", s:5},
+        {t:"很少这样想", s:2},
+        {t:"完全不会", s:0}
+    ]},
+    { d: 'cognition', t: '认知执念', q: "你是否觉得前任是"唯一"？", o: [
+        {t:"完全这样认为", s:10},
+        {t:"经常这样觉得", s:8},
+        {t:"偶尔这样觉得", s:5},
+        {t:"很少", s:2},
+        {t:"完全没有", s:0}
+    ]},
+    { d: 'cognition', t: '认知执念', q: "你会美化前任的形象吗？", o: [
+        {t:"完全美化，ta很完美", s:10},
+        {t:"经常美化", s:8},
+        {t:"偶尔美化", s:5},
+        {t:"很少", s:2},
+        {t:"不会，很客观", s:0}
+    ]},
+    { d: 'cognition', t: '认知执念', q: "你是否经常回想"如果当初"？", o: [
+        {t:"经常这样想", s:10},
+        {t:"经常", s:8},
+        {t:"偶尔", s:5},
+        {t:"很少", s:2},
+        {t:"从不", s:0}
+    ]},
+    
+    { d: 'behavior', t: '行为残留', q: "你是否还会关注前任的社交媒体？", o: [
+        {t:"经常偷偷关注", s:10},
+        {t:"经常关注", s:8},
+        {t:"偶尔看看", s:5},
+        {t:"很少看", s:2},
+        {t:"从不看", s:0}
+    ]},
+    { d: 'behavior', t: '行为残留', q: "你会保留前任的联系方式吗？", o: [
+        {t:"留着，随时可以联系", s:10},
+        {t:"留着，但不会联系", s:8},
+        {t:"犹豫中", s:5},
+        {t:"删了，但有备份", s:2},
+        {t:"彻底删除", s:0}
+    ]},
+    { d: 'behavior', t: '行为残留', q: "你保留着前任的东西吗？", o: [
+        {t:"全部保留", s:10},
+        {t:"保留大部分", s:8},
+        {t:"保留一些", s:5},
+        {t:"很少保留", s:2},
+        {t:"全部处理", s:0}
+    ]},
+    { d: 'behavior', t: '行为残留', q: "你会和他人提起前任吗？", o: [
+        {t:"经常提起", s:10},
+        {t:"经常提起", s:8},
+        {t:"偶尔提起", s:5},
+        {t:"很少提起", s:2},
+        {t:"从不提起", s:0}
+    ]},
+    
+    { d: 'separation', t: '情感分离', q: "你能接受前任有新对象吗？", o: [
+        {t:"完全不能接受", s:10},
+        {t:"不能接受", s:8},
+        {t:"有点难受，但能接受", s:5},
+        {t:"可以接受", s:2},
+        {t:"完全无所谓", s:0}
+    ]},
+    { d: 'separation', t: '情感分离', q: "你准备好开始新恋情了吗？", o: [
+        {t:"完全没有准备好", s:10},
+        {t:"还没准备好", s:8},
+        {t:"有点犹豫", s:5},
+        {t:"准备好了", s:2},
+        {t:"完全准备好", s:0}
+    ]},
+    { d: 'separation', t: '情感分离', q: "你能客观评价前任的缺点吗？", o: [
+        {t:"完全不能，ta没有缺点", s:10},
+        {t:"不能，ta没有明显缺点", s:8},
+        {t:"有一些，但不愿想", s:5},
+        {t:"可以客观评价", s:2},
+        {t:"完全能客观评价", s:0}
+    ]},
+    { d: 'separation', t: '情感分离', q: "你对未来有新的期待吗？", o: [
+        {t:"完全没有，只想着前任", s:10},
+        {t:"很少，focus在前任", s:8},
+        {t:"有一些", s:5},
+        {t:"有，期待新生活", s:2},
+        {t:"完全期待新生活", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const levels = [
+    { max: 30, l: "已完全释怀", c: "#27AE60", d: "你对前任已经完全释怀，能够理性看待这段感情。", advice: "你已经走出前任的阴影，可以开始新的生活了。" },
+    { max: 60, l: "轻度执念", c: "#F39C12", d: "你对前任有轻微的执念，但已经能够正常生活。", advice: "继续保持，慢慢放下过去。" },
+    { max: 90, l: "中度执念", c: "#E67E22", d: "你对前任有明显的执念，可能影响到正常生活。", advice: "建议主动寻求改变，减少对前任的关注。" },
+    { max: 120, l: "重度执念", c: "#E74C3C", d: "你对前任的执念很深，已经严重影响到生活。", advice: "强烈建议寻求专业心理咨询帮助。" },
+    { max: 160, l: "极度执念", c: "#C0392B", d: "你对前任有极强的执念，可能已经形成心理问题。", advice: "强烈建议立即寻求专业心理咨询。" }
+];
+
+let currQList = [];
+let currIdx = 0;
+let userInfo = {};
+let scores = { emotion:0, cognition:0, behavior:0, separation:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userInfo.time = document.getElementById('input-time').value;
+    userInfo.duration = document.getElementById('input-duration').value;
+    userInfo.who = document.getElementById('input-who').value;
+    
+    currQList = [...questions];
+    currIdx = 0;
+    scores = { emotion:0, cognition:0, behavior:0, separation:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { emotion:0, cognition:0, behavior:0, separation:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+    
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'emotion', n:'情感'}, {k:'cognition', n:'认知'}, 
+        {k:'behavior', n:'行为'}, {k:'separation', n:'分离'}
+    ];
+    let html = '';
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 40) * 100, 100);
+        let color = pct> 60 ? '#9B59B6' : (pct> 30 ? '#F39C12' : '#27AE60');
+        let txt = pct> 70 ? '高执念' : (pct> 40 ? '中等' : '已释怀');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {emotion:'情感依赖', cognition:'认知执念', behavior:'行为残留', separation:'情感分离'};
+    return map[k];
+}
+
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、前任执念诊断</div>
+        <p class="r-p" style="background:#fafafa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>📋 感情档案：</strong>分手时长：${getTimeName(userInfo.time)} | 感情时长：${getDurationName(userInfo.duration)} | 分手方：${getWhoName(userInfo.who)}
+        </p>
+        <div class="r-box" style="border-left:5px solid ${lvl.c};">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">执念等级：${lvl.l}</div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>执念评估：</strong>${lvl.d}</p>
+            <p style="margin:10px 0 0; font-size:15px; line-height:1.6; color:#555;"><strong>核心建议：</strong>${lvl.advice}</p>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">二、四维执念深度分析</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px;">*基于依恋理论和创伤心理学的科学分析</p>
+        ${generateDimAnalysis('emotion', scores.emotion, '反映你对前任的情感依赖程度，包括思念、怀念等情绪。')}
+        ${generateDimAnalysis('cognition', scores.cognition, '反映你在认知层面对前任的执念程度，包括美化、理想化等思维模式。')}
+        ${generateDimAnalysis('behavior', scores.behavior, '反映你在行为层面对前任的残留程度，包括关注、保留物品等行为。')}
+        ${generateDimAnalysis('separation', scores.separation, '反映你与前任情感分离的程度，包括接受新恋情、客观评价等。')}
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">三、执念形成的心理学解析</div>
+        <div class="r-box" style="background:#f5eff9; border-color:#9B59B6;">
+            <div class="r-h3" style="color:#9B59B6;">💡 为什么你会对前任有执念？</div>
+            <p class="r-p">
+                <strong>依恋理论</strong>认为，我们在亲密关系中会形成特定的依恋模式。当一段重要的感情结束后，未完成的"依恋任务"会让我们难以释怀。
+            </p>
+            <p class="r-p">
+                <strong>蔡格尼克效应</strong>表明，人们对未完成的事情比已完成的事情记得更清楚。这就是为什么分手后，我们会反复回想那些"如果当初"。
+            </p>
+        </div>
+        
+        <div class="r-box" style="background:#fef9f0; border-color:#F39C12;">
+            <div class="r-h3" style="color:#F39C12;">🔍 执念的常见原因</div>
+            <ul style="margin:0; padding-left:20px; line-height:2; color:#555;">
+                <li><strong>未完成的情感</strong>：分手太突然，没有好好告别</li>
+                <li><strong>自我认同</strong>：把前任和自我价值联系在一起</li>
+                <li><strong>习惯依赖</strong>：长期相处形成的情感依赖</li>
+                <li><strong>理想化</strong>：只记住美好，忘记问题</li>
+                <li><strong>自尊受损</strong>：被分手导致的自我怀疑</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">四、走出执念的方法</div>
+        <div class="r-box">
+            <div class="r-h3">🎯 针对性行动计划</div>
+            ${getRecommendations(lvl.l).map((p, i) => `<p style="margin:8px 0; padding-left:20px; position:relative;"><span style="position:absolute; left:0; color:#9B59B6; font-weight:bold;">${i+1}.</span> ${p}</p>`).join('')}
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026前任执念检测 · 专业心理测评<br>
+        愿你放下过去，拥抱未来
+    </div>
+    `;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function getTimeName(t) {
+    const m = {'new':'不到一个月','short':'1-6个月','medium':'6个月-1年','long':'1-3年','verylong':'3年以上'};
+    return m[t] || t;
+}
+function getDurationName(d) {
+    const m = {'short':'不到三个月','medium':'3个月-1年','long':'1-3年','verylong':'3年以上'};
+    return m[d] || d;
+}
+function getWhoName(w) {
+    const m = {'me':'我提出','them':'对方提出','mutual':'双方同意'};
+    return m[w] || w;
+}
+
+function generateDimAnalysis(key, val, explanation) {
+    let level = val> 28 ? 'high' : (val> 14 ? 'med' : 'low');
+    const config = {
+        high: { color: '#E74C3C', bg: '#fdf2f2', tag: '⚠️ 高执念', titleColor: '#E74C3C' },
+        med: { color: '#F39C12', bg: '#fef9f0', tag: '⚡ 中等', titleColor: '#F39C12' },
+        low: { color: '#27AE60', bg: '#eafaf1', tag: '✅ 已释怀', titleColor: '#27AE60' }
+    };
+    const c = config[level];
+    const texts = {
+        emotion: { high: "<strong>情感依赖严重！</strong>你对前任有很强的情感依赖，很难放下这段感情。", med: "<strong>情感依赖中等。</strong>你对前任有一些情感依赖，但可以慢慢释怀。", low: "<strong>情感依赖较低。</strong>你已经能够理性看待这段感情。" },
+        cognition: { high: "<strong>认知执念严重！</strong>你对前任有很强的理想化和美化倾向。", med: "<strong>认知执念中等。</strong>你对前任有一些理想化倾向。", low: "<strong>认知执念较低。</strong>你能客观评价前任。" },
+        behavior: { high: "<strong>行为残留严重！</strong>你还有很多与前任相关的行为习惯。", med: "<strong>行为残留中等。</strong>你有一些与前任相关的行为残留。", low: "<strong>行为残留较少。</strong>你已经清除了大部分与前任相关的内容。" },
+        separation: { high: "<strong>情感分离困难！</strong>你很难接受前任有新对象或开始新恋情。", med: "<strong>情感分离一般。</strong>你能部分接受前任开始新生活。", low: "<strong>情感分离良好。</strong>你已经准备好开始新生活了。" }
+    };
+    return `<div style="margin-bottom:20px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor}; margin-top:0;">${getDimName(key)} <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${val}/40)</span><span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span></div><p style="font-size:13px; color:#888; margin-bottom:8px;">${explanation}</p><p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][level]}</p></div>`;
+}
+
+function getRecommendations(level) {
+    const recs = {
+        '已完全释怀': ['继续保持这种状态', '可以开始新的恋情', '从过去中学习成长'],
+        '轻度执念': ['减少对前任社交媒体的关注', '删除或收起前任的东西', '多和朋友在一起'],
+        '中度执念': ['强烈建议减少对前任的关注', '可以尝试新的爱好转移注意力', '考虑寻求朋友或心理咨询帮助'],
+        '重度执念': ['建议寻求专业心理咨询帮助', '给自己设定"不想前任"的小目标', '删除前任的所有联系方式'],
+        '极度执念': ['强烈建议立即寻求专业心理咨询', '给自己时间和空间', '不要急于开始新恋情']
+    };
+    return recs[level] || recs['轻度执念'];
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    const cx=120, cy=120, r=90;
+    const keys = ['emotion','cognition','behavior','separation'];
+    const labels = ['情感','认知','行为','分离'];
+    
+    ctx.strokeStyle = '#ede0f5'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<4; j++) {
+            let a = (Math.PI*2/4)*j - Math.PI/2;
+            ctx.lineTo(cx + Math.cos(a)*(r/4)*i, cy + Math.sin(a)*(r/4)*i);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let ratio = Math.min(s[k] / 40, 1.1); 
+        let a = (Math.PI*2/4)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(155, 89, 182, 0.1)");
+    grd.addColorStop(1, "rgba(155, 89, 182, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.strokeStyle = '#9B59B6'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/4)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "qrzh";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>情侣婚恋适配度测试 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root { --primary: #E84393; --primary-dark: #D63384; --accent: #00CEC9; --safe: #00B894; --warning: #FF7675; --bg-gradient-start: #FDECEE; --bg-gradient-end: #F5D6E0; --text-main: #2D3436; --text-sub: #636E72; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-pink { 0% { box-shadow: 0 0 0 0 rgba(232, 67, 147, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(232, 67, 147, 0); } 100% { box-shadow: 0 0 0 0 rgba(232, 67, 147, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(232, 67, 147, 0.3); transition: transform 0.1s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#fce4ec 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 34px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #fce4ec; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+        #page-demo { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #fce4ec; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #fce4ec; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #fce4ec; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #fce4ec; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #fce4ec; padding-bottom: 120px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 160px; height: 160px; border-radius: 50%; border: 10px solid #fce4ec; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .score-num { font-size: 48px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .level-badge { background: var(--primary); color: #fff; padding: 10px 24px; border-radius: 25px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; line-height: 1.6; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 80px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-bar-bg { flex: 1; height: 10px; background: #f0f2f5; border-radius: 5px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 5px; }
+        .dim-val { width: 40px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-pink 2s infinite; cursor: pointer; }
+        .export-btn { background: #00CEC9; margin-top: 10px; }
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 40px; }
+        .r-h1 { font-size: 26px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 20px; font-weight: 800; color: #2D3436; margin: 25px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #fce4ec; }
+        .r-h3 { font-size: 17px; font-weight: 700; color: #2D3436; margin: 15px 0 10px; }
+        .r-p { font-size: 15px; line-height: 1.8; color: #555; margin-bottom: 12px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #fce4ec; padding: 18px; border-radius: 10px; margin: 12px 0; }
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+    <div id="page-intro" data-screenshot="psych-test-情侣婚恋适配度测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">情侣婚恋<br><span>适配度</span>测试</h1>
+        <p class="cover-subtitle">科学评估你们的关系匹配度<br>找到彼此的契合与互补</p>
+        <div class="intro-features">
+            <div class="feature-box"><div class="feature-icon">💑</div><div class="feature-title">六维深度分析</div><div class="feature-desc">价值观、生活方式、沟通、亲密、成长、规划。</div></div>
+            <div class="feature-box"><div class="feature-icon">📊</div><div class="feature-title">匹配理论</div><div class="feature-desc">基于婚恋匹配理论，科学评估适配度。</div></div>
+            <div class="feature-box"><div class="feature-icon">🔍</div><div class="feature-title">精准定位</div><div class="feature-desc">找到你们的优势与潜在问题。</div></div>
+            <div class="feature-box"><div class="feature-icon">💡</div><div class="feature-title">成长指南</div><div class="feature-desc">提供针对性的关系提升方案。</div></div>
+        </div>
+        <button class="btn" id="start-btn">开始测评 (约需 3 分钟)</button>
+    </div>
+    <div id="page-demo">
+        <h2 style="font-size:26px;font-weight:800;color:#2D3436;margin-bottom:10px;">💑 情侣档案</h2>
+        <p style="color:#636E72;font-size:14px;margin-bottom:30px;">请双方分别填写自己的信息</p>
+        <div class="form-group">
+            <label class="form-label">你们在一起多久？</label>
+            <select id="input-time" class="select-box">
+                <option value="0-3">0-3个月</option>
+                <option value="3-12">3-12个月</option>
+                <option value="1-3">1-3年</option>
+                <option value="3+">3年以上</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">你们目前的状态？</label>
+            <select id="input-status" class="select-box">
+                <option value="dating">恋爱中</option>
+                <option value="engaged">订婚</option>
+                <option value="married">已婚</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">你的性别？</label>
+            <select id="input-gender" class="select-box">
+                <option value="female">女</option>
+                <option value="male">男</option>
+            </select>
+        </div>
+        <button class="btn" id="next-btn">开始答题</button>
+    </div>
+    <div id="page-test">
+        <div class="progress-header"><span id="dim-tag">维度：价值观</span><span id="progress-text">1 / 18</span></div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">💑 价值观</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+    <div id="page-loading"><div style="font-size:50px; animation: pulse-pink 1s infinite;">💑</div><h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你们的适配度...</h3><p style="color:#636E72; font-size:14px;">正在计算六维匹配度...<br>生成专属报告...</p></div>
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle"><span class="score-num" id="res-score">0</span><span class="score-label">适配度得分</span></div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+        <div class="card">
+            <div class="card-title">📊 六维适配雷达</div>
+            <div id="bars-container"></div>
+        </div>
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《婚恋适配深度报告》</button>
+            <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+            <button class="unlock-btn" id="retry-btn" style="background:#fff;color:#666;border:1px solid #ddd;">🔄 重新测试</button>
+        </div>
+    </div>
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header"><div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div><div class="r-h1">情侣婚恋适配度深度分析报告</div><div style="font-size:14px;">专业心理测评 · 2026全新版</div></div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    {d:'values',t:'价值观',q:"你如何看待金钱在感情中的地位？",o:[{t:"物质基础很重要",s:3},{t:"够用就好，够花就行",s:2},{t:"感情比金钱重要",s:1},{t:"完全不重要",s:0}]},
+    {d:'values',t:'价值观',q:"你认同婚姻应该门当户对吗？",o:[{t:"非常认同",s:3},{t:"比较认同",s:2},{t:"不太认同",s:1},{t:"完全不认同",s:0}]},
+    {d:'values',t:'价值观',q:"你对婚前财产的看法？",o:[{t:"应该明确分开",s:3},{t:"可以共同管理",s:2},{t:"应该融为一体",s:1},{t:"完全不在意",s:0}]},
+    {d:'lifestyle',t:'生活方式',q:"你的作息时间是？",o:[{t:"早睡早起",s:3},{t:"正常作息",s:2},{t:"经常熬夜",s:1},{t:"作息不规律",s:0}]},
+    {d:'lifestyle',t:'生活方式',q:"你周末通常怎么度过？",o:[{t:"学习提升",s:3},{t:"休息放松",s:2},{t:"社交娱乐",s:1},{t:"不一定",s:0}]},
+    {d:'lifestyle',t:'生活方式',q:"你对家居环境的要求？",o:[{t:"整洁有序",s:3},{{t:"舒适即可",s:2},{t:"可以随意",s:1},{t:"无所谓",s:0}]},
+    {d:'communication',t:'沟通模式',q:"发生矛盾时你通常？",o:[{t:"直接沟通",s:3},{t:"冷静后沟通",s:2},{t:"等待对方主动",s:1},{t:"逃避问题",s:0}]},
+    {d:'communication',t:'沟通模式',q:"你习惯表达爱意的方式？",o:[{t:"语言表达",s:3},{t:"行动表达",s:2},{t:"陪伴表达",s:1},{t:"不太表达",s:0}]},
+    {d:'communication',t:'沟通模式',q:"你愿意分享情绪吗？",o:[{t:"经常分享",s:3},{t:"偶尔分享",s:2},{t:"很少分享",s:1},{t:"基本不分享",s:0}]},
+    {d:'intimacy',t:'亲密关系',q:"你理想中的亲密频率？",o:[{t:"每天都有",s:3},{t:"每周几次",s:2},{t:"看情况",s:1},{t:"不太重要",s:0}]},
+    {d:'intimacy',t:'亲密关系',q:"你对浪漫的看法？",o:[{t:"非常重要",s:3},{t:"偶尔需要",s:2},{t:"不太需要",s:1},{t:"无所谓",s:0}]},
+    {d:'intimacy',t:'亲密关系',q:"你会在公共场合表达亲密吗？",o:[{t:"经常",s:3},{t:"偶尔",s:2},{t:"很少",s:1},{t:"不会",s:0}]},
+    {d:'growth',t:'成长空间',q:"你支持伴侣追求事业吗？",o:[{t:"完全支持",s:3},{t:"比较支持",s:2},{t:"不太支持",s:1},{t:"完全不支持",s:0}]},
+    {d:'growth',t:'成长空间',q:"你能接受异地恋吗？",o:[{t:"完全能",s:3},{t:"可以尝试",s:2},{t:"不太能",s:1},{t:"完全不能",s:0}]},
+    {d:'growth',t:'成长空间',q:"你对伴侣有掌控欲吗？",o:[{t:"完全没有",s:3},{t:"偶尔会有",s:2},{t:"经常会有",s:1},{t:"很强",s:0}]},
+    {d:'plan',t:'未来规划',q:"你计划什么时候结婚？",o:[{t:"1年内",s:3},{t:"2-3年内",s:2},{t:"5年内",s:1},{t:"不确定",s:0}]},
+    {d:'plan',t:'未来规划',q:"你希望要孩子吗？",o:[{t:"必须要有",s:3},{t:"可以考虑",s:2},{t:"不太想要",s:1},{t:"完全不要",s:0}]},
+    {d:'plan',t:'未来规划',q:"你对未来的职业规划？",o:[{t:"有明确规划",s:3},{t:"有些想法",s:2},{t:"走一步看一步",s:1},{t:"没规划",s:0}]}
+];
+const levels = [
+    {max:18,l:"需深入了解",c:"#FF7675",d:"你们的适配度较低，需要更多沟通和了解。建议多花时间磨合价值观和生活方式。",advice:"不要急于确定关系，多观察多沟通。"},
+    {max:30,l:"适配一般",c:"#FDCB6E",d:"你们的适配度中等，有一些方面契合，也存在需要磨合的地方。",advice:"珍惜契合点，针对问题多沟通。"},
+    {max:42,l:"适配较好",c:"#00B894",d:"你们的适配度较好，大部分方面比较契合，是比较合适的一对。",advice:"继续保持，多沟通多理解。"},
+    {max:54,l:"高度适配",c:"#E84393",d:"你们是高度适配的情侣!价值观、生活方式都很一致，相处起来很舒服。",advice:"珍惜彼此，可以考虑长期发展。"}
+];
+let currQList=[],currIdx=0,scores={values:0,lifestyle:0,communication:0,intimacy:0,growth:0,plan:0};
+function goToDemo(){document.getElementById('page-intro').style.display='none';document.getElementById('page-demo').style.display='block';}
+function initTest(){currQList=[...questions];currIdx=0;scores={values:0,lifestyle:0,communication:0,intimacy:0,growth:0,plan:0};document.getElementById('page-demo').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=`${currIdx+1}/${currQList.length}`;document.getElementById('progress-fill').style.width=`${(currIdx/currQList.length)*100}%`;document.getElementById('dim-tag').innerText=`维度：${q.t}`;document.getElementById('q-category').innerText=q.t;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(q.d,opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(dim,val){scores[dim]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';document.getElementById('page-loading').style.display='flex';setTimeout(()=>{document.getElementById('page-loading').style.display='none';document.getElementById('page-result').style.display='block';calculateResult();},2500);}
+function calculateResult(){let total=Object.values(scores).reduce((a,b)=>a+b,0);let finalScore=total;let lvl=levels.find(l=>finalScore<=l.max)||levels[levels.length-1];const numEl=document.getElementById('res-score');let start=0;const timer=setInterval(()=>{start++;numEl.innerText=start;if(start>=finalScore)clearInterval(timer);},20);document.getElementById('res-level').innerText=lvl.l;document.getElementById('res-level').style.background=lvl.c;document.getElementById('res-desc').innerText=lvl.d;renderBars(scores);}
+function renderBars(s){const box=document.getElementById('bars-container');const dims=[{k:'values',n:'价值观'},{k:'lifestyle',n:'生活方式'},{k:'communication',n:'沟通模式'},{k:'intimacy',n:'亲密关系'},{k:'growth',n:'成长空间'},{k:'plan',n:'未来规划'}];let html='';dims.forEach(d=>{let pct=Math.min((s[d.k]/3)*100,100);let color='#E84393';html+=`<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%;background:${color};"></div></div><div class="dim-val">${Math.round(pct)}%</div></div>`;});box.innerHTML=html;}
+function showReport(){const total=parseInt(document.getElementById('res-score').innerText);const lvl=levels.find(l=>total<=l.max)||levels[levels.length-1];let html=`<div class="report_section"><div class="r-h1">一、婚恋适配诊断</div><div class="r-box" style="border-left:5px solid ${lvl.c};"><div style="font-size:20px;font-weight:900;color:${lvl.c};margin-bottom:8px;">适配等级：${lvl.l}</div><p style="margin:0;font-size:14px;line-height:1.6;color:#555;">${lvl.d}</p><p style="margin:10px 0 0;font-size:14px;line-height:1.6;color:#555;"><strong>建议：</strong>${lvl.advice}</p></div></div><div class="report_section"><div class="r-h2">二、六维度深度分析</div>${Object.entries(scores).map(([k,v])=>`<div style="margin-bottom:15px;padding:12px;background:#fafafa;border-radius:8px;"><div style="font-weight:700;margin-bottom:5px;">${['价值观','生活方式','沟通模式','亲密关系','成长空间','未来规划'][['values','lifestyle','communication','intimacy','growth','plan'].indexOf(k)]}</div><div style="height:6px;background:#eee;border-radius:3px;"><div style="height:100%;width:${(v/3)*100}%;background:#E84393;border-radius:3px;"></div></div><div style="font-size:12px;color:#999;margin-top:5px;">得分：${v}/3</div></div>`).join('')}</div><div class="report_section"><div class="r-h2">三、关系提升建议</div><div class="r-box"><ul style="margin:0;padding-left:20px;line-height:2;"><li>建立固定的沟通时间，深度交流</li><li>共同制定未来规划，达成共识</li><li>尊重彼此的生活方式，寻找平衡点</li><li>共同成长，支持彼此的目标</li></ul></div></div><div style="text-align:center;color:#ccc;font-size:12px;margin-top:40px;">2026情侣婚恋适配度测试·专业心理测评</div>`;document.getElementById('report-content').innerHTML=html;document.getElementById('report-modal').style.display='block';}
+function closeReport(){document.getElementById('report-modal').style.display='none';}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(232,67,147);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('情侣婚恋适配度深度分析报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});let y=55;const total=parseInt(document.getElementById('res-score').innerText);const lvl=levels.find(l=>total<=l.max)||levels[levels.length-1];doc.setTextColor(0,0,0);doc.setFontSize(16);doc.text(`适配等级：${lvl.l}`,15,y);y+=10;doc.setFontSize(12);doc.text(lvl.d.substring(0,150)+'...',15,y);doc.save('婚恋适配度报告.pdf');}
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });document.getElementById('next-btn').addEventListener('click',initTest);document.getElementById('show-report-btn').addEventListener('click',showReport);document.getElementById('close-report-btn').addEventListener('click',closeReport);document.getElementById('retry-btn').addEventListener('click',()=>location.reload());document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "qlhl";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

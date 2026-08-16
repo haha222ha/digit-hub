@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>领导力潜质测试 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root { --primary: #6C5CE7; --primary-dark: #5849BE; --accent: #00CEC9; --safe: #2ED573; --warning: #FF7675; --bg-gradient-start: #F0F0FF; --bg-gradient-end: #E0E5FF; --text-main: #2D3436; --text-sub: #636E72; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-purple { 0% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(108, 92, 231, 0); } 100% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3); transition: transform 0.1s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#f0f0ff 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #e8e5ff; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+        #page-demo { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #e8e5ff; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #f0f0ff; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #e8e5ff; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); }
+        .option-btn.selected { background: #f0f0ff; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #f0f0ff; padding-bottom: 120px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #e8e5ff; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .score-num { font-size: 48px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; line-height: 1.6; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 80px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-bar-bg { flex: 1; height: 10px; background: #f0f2f5; border-radius: 5px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 5px; }
+        .dim-val { width: 40px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-purple 2s infinite; cursor: pointer; }
+        .export-btn { background: #00CEC9; margin-top: 10px; }
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 40px; }
+        .r-h1 { font-size: 26px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 20px; font-weight: 800; color: #2D3436; margin: 25px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #e8e5ff; }
+        .r-h3 { font-size: 17px; font-weight: 700; color: #2D3436; margin: 15px 0 10px; }
+        .r-p { font-size: 15px; line-height: 1.8; color: #555; margin-bottom: 12px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #e8e5ff; padding: 18px; border-radius: 10px; margin: 12px 0; }
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+    <div id="page-intro" data-screenshot="psych-test-领导力潜质测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">领导力<br><span>潜质</span>测试</h1>
+        <p class="cover-subtitle">深度评估你的领导潜质<br>发现你的领袖基因</p>
+        <div class="intro-features">
+            <div class="feature-box"><div class="feature-icon">🎯</div><div class="feature-title">六维深度分析</div><div class="feature-desc">战略思维、决策力、影响力、团队管理、自我驱动、情绪智商。</div></div>
+            <div class="feature-box"><div class="feature-icon">📊</div><div class="feature-title">领导力理论</div><div class="feature-desc">基于领导力理论，科学评估你的领导潜质。</div></div>
+            <div class="feature-box"><div class="feature-icon">✨</div><div class="feature-title">精准定位</div><divdiv class="feature-desc">找到你的领导风格和优势。</div></div>
+            <div class="feature-box"><div class="feature-icon">🚀</div><divdiv class="feature-title">成长路径</div><div class="feature-desc">提供领导力提升的具体方案。</div></div>
+        </div>
+        <button class="btn" id="start-btn">开始测评 (约需 3 分钟)</button>
+    </div>
+    <div id="page-demo">
+        <h2 style="font-size:26px;font-weight:800;color:#2D3436;margin-bottom:10px;">📋 个人档案</h2>
+        <p style="color:#636E72;font-size:14px;margin-bottom:30px;">系统将根据你的情况精准评估领导力潜质。</p>
+        <div class="form-group">
+            <label class="form-label">你的工作年限？</label>
+            <select id="input-exp" class="select-box">
+                <option value="0-1">0-1年</option>
+                <option value="1-3">1-3年</option>
+                <option value="3-5">3-5年</option>
+                <option value="5+">5年以上</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">你是否管理过团队？</label>
+            <select id="input-team" class="select-box">
+                <option value="no">没有</option>
+                <option value="small">管理1-5人</option>
+                <option value="medium">管理6-15人</option>
+                <option value="large">管理15人以上</option>
+            </select>
+        </div>
+        <button class="btn" id="next-btn">开始答题</button>
+    </div>
+    <div id="page-test">
+        <div class="progress-header"><span id="dim-tag">维度：战略思维</span><span id="progress-text">1 / 24</span></div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🎯 战略思维</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+    <div id="page-loading"><div style="font-size:50px; animation: pulse-purple 1s infinite;">🎯</div><h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的领导力潜质...</h3><p style="color:#636E72; font-size:14px;">正在扫描六维数据...<br>计算领导力指数...<br>生成专属报告...</p></div>
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle"><span class="score-num" id="res-score">0</span><span class="score-label">领导力指数</span></div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+        <div class="card">
+            <div class="card-title">📊 领导力六维雷达</div>
+            <div id="bars-container"></div>
+        </div>
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《领导力潜质深度报告》</button>
+            <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+            <button class="unlock-btn" id="retry-btn" style="background:#fff;color:#666;border:1px solid #ddd;">🔄 重新测试</button>
+        </div>
+    </div>
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header"><div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div><div class="r-h1">领导力潜质深度分析报告</div><div style="font-size:14px;">专业心理测评 · 2026全新版</div></div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    {d:'strategy',t:'战略思维',q:"你经常思考公司的长远发展吗？",o:[{t:"经常思考，有清晰的愿景",s:10},{t:"偶尔会想",s:7},{t:"很少想，走一步看一步",s:3},{t:"完全不想",s:0}]},
+    {d:'strategy',t:'战略思维',q:"你能看到别人看不到的机会吗？",o:[{t:"经常发现新机会",s:10},{t:"偶尔能发现",s:7},{t:"很少发现",s:3},{t:"完全不能",s:0}]},
+    {d:'strategy',t:'战略思维',q:"你做决定时会考虑整体影响吗？",o:[{t:"会系统考虑",s:10},{t:"会考虑一些",s:7},{t:"很少考虑",s:3},{t:"只顾眼前",s:0}]},
+    {d:'decision',t:'决策力',q:"面对复杂问题，你会？",o:[{t:"快速分析后果断决定",s:10},{t:"分析后慢慢决定",s:7},{t:"犹豫不决",s:3},{t:"逃避不做决定",s:0}]},
+    {d:'decision',t:'决策力',q:"你能承担决策的风险吗？",o:[{t:"完全能承担",s:10},{t:"能承担一定风险",s:7},{t:"尽量避免风险",s:3},{t:"完全不敢冒险",s:0}]},
+    {d:'decision',t:'决策力',q:"决策失误后，你会？",o:[{t:"迅速调整，继续前进",s:10},{t:"反思后调整",s:7},{t:"后悔自责",s:3},{t:"一蹶不振",s:0}]},
+    {d:'influence',t:'影响力',q:"你善于说服他人吗？",o:[{t:"非常善于，经常能说服",s:10},{t:"比较善于",s:7},{t:"不太善于",s:3},{t:"完全不能",s:0}]},
+    {d:'influence',t:'影响力',q:"别人愿意听你的建议吗？",o:[{t:"非常愿意",s:10},{t:"比较愿意",s:7},{t:"偶尔愿意",s:3},{t:"不太愿意",s:0}]},
+    {d:'influence',t:'影响力',q:"你能激励团队成员吗？",o:[{t:"非常擅长激励",s:10},{t:"比较擅长",s:7},{t:"不太擅长",s:3},{t:"完全不会",s:0}]},
+    {d:'team',t:'团队管理',q:"你擅长分配任务吗？",o:[{t:"非常擅长，人尽其用",s:10},{t:"比较擅长",s:7},{t:"不太擅长",s:3},{t:"完全不会",s:0}]},
+    {d:'team',t:'团队管理',q:"团队成员出错时，你会？",o:[{t:"帮助分析原因，指导改进",s:10},{t:"批评后让其改进",s:7},{t:"直接自己完成",s:3},{t:"严厉责备",s:0}]},
+    {d:'team',t:'团队管理',q:"你能处理团队冲突吗？",o:[{t:"非常擅长，化干戈为玉帛",s:10},{t:"比较擅长",s:7},{t:"不太擅长回避",s:3},{t:"完全不知道怎么处理",s:0}]},
+    {d:'drive',t:'自我驱动',q:"你有明确的目标和追求吗？",o:[{t:"有非常清晰的目标",s:10},{t:"有比较明确的目标",s:7},{t:"目标不太清晰",s:3},{t:"没有目标",s:0}]},
+    {d:'drive',t:'自我驱动',q:"面对困难，你会？",o:[{t:"迎难而上，越挫越勇",s:10},{t:"坚持克服",s:7},{t:"想放弃",s:3},{t:"直接放弃",s:0}]},
+    {d:'drive',t:'自我驱动',q:"你有持续学习的习惯吗？",o:[{t:"每天学习，不断提升",s:10},{t:"经常学习",s:7},{t:"偶尔学习",s:3},{t:"基本不学习",s:0}]},
+    {d:'eq',t:'情绪智商',q:"你能控制自己的情绪吗？",o:[{t:"完全能控制",s:10},{t:"基本能控制",s:7},{t:"偶尔失控",s:3},{t:"经常情绪化",s:0}]},
+    {d:'eq',t:'情绪智商',q:"你能感知他人的情绪吗？",o:[{t:"非常敏感，完全能感知",s:10},{t:"比较敏感",s:7},{t:"不太敏感",s:3},{t:"完全感知不到",s:0}]},
+    {d:'eq',t:'情绪智商',q:"压力下你能保持冷静吗？",o:[{t:"完全能保持冷静",s:10},{t:"基本能",s:7},{t:"偶尔会慌乱",s:3},{t:"经常慌乱",s:0}]},
+    {d:'vision',t:'愿景感召',q:"你能描绘吸引人的未来吗？",o:[{t:"非常能，描绘愿景是我的强项",s:10},{t:"比较能",s:7},{t:"不太能",s:3},{t:"完全不能",s:0}]},
+    {d:'vision',t:'愿景感召',q:"别人会被你的愿景吸引吗？",o:[{t:"经常被吸引",s:10},{t:"偶尔被吸引",s:7},{t:"很少被吸引",s:3},{t:"完全不会",s:0}]},
+    {d:'vision',t:'愿景感召',q:"你能让团队充满希望吗？",o:[{t:"完全能，总是充满正能量",s:10},{t:"比较能",s:7},{t:"不太能",s:3},{t:"完全不能",s:0}]},
+    {d:'integrity',t:'诚信正直',q:"你会坚守原则吗？",o:[{t:"无论何时都坚守",s:10},{t:"大部分时候坚守",s:7},{t:"偶尔会妥协",s:3},{t:"经常没有原则",s:0}]},
+    {d:'integrity',t:'诚信正直',q:"你值得信任吗？",o:[{t:"完全值得信任",s:10},{t:"比较值得信任",s:7},{t:"一般",s:3},{t:"不太值得信任",s:0}]},
+    {d:'integrity',t:'诚信正直',q:"你会言行一致吗？",o:[{t:"完全言行一致",s:10},{t:"基本一致",s:7},{t:"偶尔不一致",s:3},{t:"经常不一致",s:0}]}
+];
+const levels = [
+    {max:60,l:"领导力待提升",c:"#FF7675",d:"你的领导力潜质还有较大提升空间。建议从基础的管理技能开始学习。",advice:"多观察优秀领导者的行为，学习管理知识，从小事开始锻炼领导能力。",points:["学习管理基础知识","培养自我驱动的习惯","锻炼决策能力","提升沟通技巧"]},
+    {max:120,l:"有领导潜质",c:"#FDCB6E",d:"你具备一定的领导潜质，有发展成为领导者的基础。",advice:"继续发挥优势，有针对性地提升弱项，假以时日可以成为合格的领导者。",points:["发挥现有优势","学习领导技能","争取管理机会","培养战略思维"]},
+    {max:180,l:"领导力较强",c:"#6C5CE7",d:"你具备较强的领导力潜质，是管理岗位的合适人选。",advice:"你已经具备了成为领导者的核心素质，可以尝试承担更多管理责任。",points:["主动承担管理职责","培养团队领导力","提升战略视野","建立个人品牌"]},
+    {max:240,l:"领导力优秀",c:"#00CEC9",d:"你的领导力潜质非常优秀！你是天生的领导者，有很大的发展潜力。",advice:"你具备成为卓越领导者的所有素质，是组织重点培养的人才。",points:["承担更大的责任","发展高层领导力","培养下一代领导者","发挥影响力"]}
+];
+let currQList=[],currIdx=0,scores={strategy:0,decision:0,influence:0,team:0,drive:0,eq:0,vision:0,integrity:0};
+function goToDemo(){document.getElementById('page-intro').style.display='none';document.getElementById('page-demo').style.display='block';}
+function initTest(){currQList=[...questions];currIdx=0;scores={strategy:0,decision:0,influence:0,team:0,drive:0,eq:0,vision:0,integrity:0};document.getElementById('page-demo').style.display='none';document.getElementById('page-test').style.display='flex';renderQuestion();}
+function renderQuestion(){const q=currQList[currIdx];document.getElementById('progress-text').innerText=`${currIdx+1}/${currQList.length}`;document.getElementById('progress-fill').style.width=`${(currIdx/currQList.length)*100}%`;document.getElementById('dim-tag').innerText=`维度：${q.t}`;document.getElementById('q-category').innerText=q.t;const wrapper=document.getElementById('question-wrapper');wrapper.classList.remove('slide-up');void wrapper.offsetWidth;wrapper.classList.add('slide-up');document.getElementById('question-text').innerText=q.q;const box=document.getElementById('options-box');box.innerHTML='';q.o.forEach(opt=>{const btn=document.createElement('div');btn.className='option-btn';btn.innerText=opt.t;btn.onclick=()=>{Array.from(box.children).forEach(c=>c.classList.remove('selected'));btn.classList.add('selected');setTimeout(()=>handleAnswer(q.d,opt.s),200);};box.appendChild(btn);});}
+function handleAnswer(dim,val){scores[dim]+=val;if(currIdx<currQList.length-1){currIdx++;renderQuestion();}else{finishTest();}}
+function finishTest(){document.getElementById('page-test').style.display='none';document.getElementById('page-loading').style.display='flex';setTimeout(()=>{document.getElementById('page-loading').style.display='none';document.getElementById('page-result').style.display='block';calculateResult();},2500);}
+function calculateResult(){let total=Object.values(scores).reduce((a,b)=>a+b,0);let finalScore=Math.round(total);let lvl=levels.find(l=>finalScore<=l.max)||levels[levels.length-1];const numEl=document.getElementById('res-score');let start=0;const timer=setInterval(()=>{start++;numEl.innerText=start;if(start>=finalScore)clearInterval(timer);},15);document.getElementById('res-level').innerText=lvl.l;document.getElementById('res-level').style.background=lvl.c;document.getElementById('res-desc').innerText=lvl.d;renderBars(scores);}
+function renderBars(s){const box=document.getElementById('bars-container');const dims=[{k:'strategy',n:'战略思维'},{k:'decision',n:'决策力'},{k:'influence',n:'影响力'},{k:'team',n:'团队管理'},{k:'drive',n:'自我驱动'},{k:'eq',n:'情绪智商'},{k:'vision',n:'愿景感召'},{k:'integrity',n:'诚信正直'}];let html='';dims.forEach(d=>{let pct=Math.min((s[d.k]/10)*100,100);let color='#6C5CE7';html+=`<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%;background:${color};"></div></div><div class="dim-val">${Math.round(pct)}%</div></div>`;});box.innerHTML=html;}
+function showReport(){const total=parseInt(document.getElementById('res-score').innerText);const lvl=levels.find(l=>total<=l.max)||levels[levels.length-1];let html=`<div class="report_section"><div class="r-h1">一、领导力潜质诊断</div><div class="r-box" style="border-left:5px solid ${lvl.c};"><div style="font-size:20px;font-weight:900;color:${lvl.c};margin-bottom:8px;">领导力等级：${lvl.l}</div><p style="margin:0;font-size:14px;line-height:1.6;color:#555;">${lvl.d}</p><p style="margin:10px 0 0;font-size:14px;line-height:1.6;color:#555;"><strong>核心建议：</strong>${lvl.advice}</p></div></div><div class="report_section"><div class="r-h2">二、八维度深度分析</div>${Object.entries(scores).map(([k,v])=>`<div style="margin-bottom:15px;padding:12px;background:#fafafa;border-radius:8px;"><div style="font-weight:700;margin-bottom:5px;">${['战略思维','决策力','影响力','团队管理','自我驱动','情绪智商','愿景感召','诚信正直'].indexOf(k)+1}. ${['战略思维','决策力','影响力','团队管理','自我驱动','情绪智商','愿景感召','诚信正直'][['strategy','decision','influence','team','drive','eq','vision','integrity'].indexOf(k)]}</div><div style="height:6px;background:#eee;border-radius:3px;"><div style="height:100%;width:${(v/10)*100}%;background:#6C5CE7;border-radius:3px;"></div></div><div style="font-size:12px;color:#999;margin-top:5px;">得分：${v}/10</div></div>`).join('')}</div><div class="report_section"><div class="r-h2">三、领导力提升方案</div><div class="r-box"><ul style="margin:0;padding-left:20px;line-height:2;">${lvl.points.map(p=>`<li>${p}</li>`).join('')}</ul></div></div><div style="text-align:center;color:#ccc;font-size:12px;margin-top:40px;">2026领导力潜质测试·专业心理测评</div>`;document.getElementById('report-content').innerHTML=html;document.getElementById('report-modal').style.display='block';}
+function closeReport(){document.getElementById('report-modal').style.display='none';}
+async function exportPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFillColor(108,92,231);doc.rect(0,0,210,40,'F');doc.setTextColor(255,255,255);doc.setFontSize(22);doc.text('领导力潜质深度分析报告',105,25,{align:'center'});doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text('专业心理测评·2026全新版',105,35,{align:'center'});let y=55;const total=parseInt(document.getElementById('res-score').innerText);const lvl=levels.find(l=>total<=l.max)||levels[levels.length-1];doc.setTextColor(0,0,0);doc.setFontSize(16);doc.text(`领导力等级：${lvl.l}`,15,y);y+=10;doc.setFontSize(12);doc.text(lvl.d.substring(0,150)+'...',15,y);doc.save('领导力潜质报告.pdf');}
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });document.getElementById('next-btn').addEventListener('click',initTest);document.getElementById('show-report-btn').addEventListener('click',showReport);document.getElementById('close-report-btn').addEventListener('click',closeReport);document.getElementById('retry-btn').addEventListener('click',()=>location.reload());document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "ldlqz";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>副业适配度测试 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:var(--primary);text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:var(--primary-dark, var(--primary))}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #6C5CE7;
+            --primary-dark: #5849BE;
+            --accent: #00CEC9;
+            --safe: #2ED573;
+            --warning: #FF7675;
+            --bg-gradient-start: #F5F3FF;
+            --bg-gradient-end: #EDE9FE;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-purple { 0% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(108, 92, 231, 0); } 100% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0); } }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 15px; }
+
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#f3f0ff 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 36px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ede9fe; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #ede9fe; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #f3f0ff; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #ede9fe; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #f3f0ff; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        #page-result { display: none; background: #f3f0ff; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ede9fe; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-purple 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ede9fe; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #ede9fe; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+        
+        .export-btn { background: #00CEC9; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-副业适配度测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">副业<br><span>适配度</span>测试</h1>
+        <p class="cover-subtitle">找到最适合你的副业方向<br>开启多重收入之路</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">💰</div>
+                <div class="feature-title">六维深度分析</div>
+                <div class="feature-desc">技能、兴趣、时间、资金、人脉、风险，全面评估。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-title">能力匹配理论</div>
+                <div class="feature-desc">基于能力匹配理论，科学定位适合你的副业。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">精准推荐</div>
+                <div class="feature-desc">根据你的特点推荐最适合的副业类型。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🚀</div>
+                <div class="feature-title">落地指南</div>
+                <div class="feature-desc">提供具体的副业启动方案和路径。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始检测 (约需 3 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">个人档案建立 💼</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的情况精准匹配副业类型。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的主业朝九晚五吗？</label>
+            <select id="input-time" class="select-box">
+                <option value="flexible">时间灵活</option>
+                <option value="normal">朝九晚五</option>
+                <option value="busy">经常加班</option>
+                <option value="irregular">时间不规律</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你每月可投入副业的资金？</label>
+            <select id="input-money" class="select-box">
+                <option value="0">0元 (资金紧张)</option>
+                <option value="1-1000">1000元以内</option>
+                <option value="1000-5000">1000-5000元</option>
+                <option value="5000+">5000元以上</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你的自媒体经验？</label>
+            <select id="input-social" class="select-box">
+                <option value="none">完全小白</option>
+                <option value="basic">略有了解</option>
+                <option value="moderate">有一定粉丝</option>
+                <option value="expert">资深达人</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：技能优势</span>
+            <span id="progress-text">1 / 24</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">💰 技能优势</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
+
+    <div id="page-loading">
+        <div style="font-size:50px; animation: pulse-purple 1s infinite;">💰</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的副业适配度...</h3>
+        <p style="color:#636E72; font-size:14px;">正在扫描六维数据...<br>计算副业匹配度...<br>生成专属报告...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">副业适配度</span>
+            </div>
+            <div class="level-badge" id="res-level">检测中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 副业适配六维雷达</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container"></div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《副业适配度深度分析报告》</button>
+            <button class="unlock-btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新检测</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div>
+            <div class="r-h1">副业适配度深度分析报告</div>
+            <div style="font-size:14px;">专业心理测评 · 2026全新版</div>
+        </div>
+        <div class="report-body" id="report-content"></div>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const questions = [
+    // 技能优势 (0-3)
+    { d: 'skill', t: '技能优势', q: "你有什么专业技能或证书？", o: [
+        {t:"有专业技能证书，多年经验", s:10},
+        {t:"有一些技能，但经验不多", s:7},
+        {t:"技能较少，还在学习中", s:3},
+        {t:"没有突出技能", s:0}
+    ]},
+    { d: 'skill', t: '技能优势', q: "你的办公软件操作水平？", o: [
+        {t:"精通多种软件", s:10},
+        {t:"熟练主要软件", s:7},
+        {t:"基本会用", s:3},
+        {t:"不太会", s:0}
+    ]},
+    { d: 'skill', t: '技能优势', q: "你能做设计或视频剪辑吗？", o: [
+        {t:"非常专业，能接单", s:10},
+        {t:"会一些基础操作", s:7},
+        {t:"正在学习中", s:3},
+        {t:"完全不会", s:0}
+    ]},
+    { d: 'skill', t: '技能优势', q: "你的写作能力如何？", o: [
+        {t:"能写专业文章，文笔好", s:10},
+        {t:"能写一般文章", s:7},
+        {t:"写作有些困难", s:3},
+        {t:"不太会写", s:0}
+    ]},
+    
+    // 兴趣爱好 (4-7)
+    { d: 'interest', t: '兴趣爱好', q: "你平时喜欢研究什么？", o: [
+        {t:"有深度钻研的领域", s:10},
+        {t:"有一些爱好", s:7},
+        {t:"爱好比较广泛但浅", s:3},
+        {t:"没什么特别爱好", s:0}
+    ]},
+    { d: 'interest', t: '兴趣爱好', q: "你愿意为爱好付费学习吗？", o: [
+        {t:"非常愿意投入", s:10},
+        {t:"愿意适当投入", s:7},
+        {t:"偶尔愿意", s:3},
+        {t:"不太愿意", s:0}
+    ]},
+    { d: 'interest', t: '兴趣爱好', q: "你的好奇心强吗？", o: [
+        {t:"很强，总想学新东西", s:10},
+        {t:"比较强", s:7},
+        {t:"一般", s:3},
+        {t:"不太强", s:0}
+    ]},
+    { d: 'interest', t: '兴趣爱好', q: "你有持续学习的习惯吗？", o: [
+        {t:"每天都在学习", s:10},
+        {t:"经常学习", s:7},
+        {t:"偶尔学习", s:3},
+        {t:"基本不学习", s:0}
+    ]},
+    
+    // 时间精力 (8-11)
+    { d: 'time', t: '时间精力', q: "你每天有多少自由时间？", o: [
+        {t:"2小时以上", s:10},
+        {t:"1-2小时", s:7},
+        {t:"不到1小时", s:3},
+        {t:"几乎没有", s:0}
+    ]},
+    { d: 'time', t: '时间精力', q: "你的精力状态通常是？", o: [
+        {t:"精力充沛，能兼顾", s:10},
+        {t:"还行，能应付", s:7},
+        {t:"经常感到疲惫", s:3},
+        {t:"很疲惫，需要休息", s:0}
+    ]},
+    { d: 'time', t: '时间精力', q: "你能接受周末工作吗？", o: [
+        {t:"完全没问题", s:10},
+        {t:"可以接受", s:7},
+        {t:"不太愿意", s:3},
+        {t:"完全不接受", s:0}
+    ]},
+    { d: 'time', t: '时间精力', q: "你能长期坚持做一件事吗？", o: [
+        {t:"非常能坚持", s:10},
+        {t:"比较能坚持", s:7},
+        {t:"偶尔会放弃", s:3},
+        {t:"经常半途而废", s:0}
+    ]},
+    
+    // 资金投入 (12-15)
+    { d: 'capital', t: '资金投入', q: "你能承受的投资风险？", o: [
+        {t:"愿意高风险高回报", s:10},
+        {t:"愿意承担中等风险", s:7},
+        {t:"倾向保守投资", s:3},
+        {t:"不接受任何风险", s:0}
+    ]},
+    { d: 'capital', t: '资金投入', q: "如果副业需要前期投入，你会？", o: [
+        {t:"愿意投入，资金充裕", s:10},
+        {t:"愿意少量投入", s:7},
+        {t:"尽量不投入", s:3},
+        {t:"完全不接受投入", s:0}
+    ]},
+    { d: 'capital', t: '资金投入', q: "你对收入的心理预期？", o: [
+        {t:"希望月入过万", s:10},
+        {t:"每月几千就好", s:7},
+        {t:"有收入就行", s:3},
+        {t:"不以赚钱为目的", s:0}
+    ]},
+    { d: 'capital', t: '资金投入', q: "如果投入产出周期长，你能等吗？", o: [
+        {t:"完全能等，半年以上", s:10},
+        {t:"能等1-3个月", s:7},
+        {t:"希望快速见效", s:3},
+        {t:"立刻要看到钱", s:0}
+    ]},
+    
+    // 人脉资源 (16-19)
+    { d: 'network', t: '人脉资源', q: "你的微信好友有多少？", o: [
+        {t:"3000以上", s:10},
+        {t:"1000-3000", s:7},
+        {t:"500-1000", s:3},
+        {t:"500以下", s:0}
+    ]},
+    { d: 'network', t: '人脉资源', q: "你善于社交和拓展人脉吗？", o: [
+        {t:"非常善于", s:10},
+        {t:"比较善于", s:7},
+        {t:"不太善于", s:3},
+        {t:"完全不善于", s:0}
+    ]},
+    { d: 'network', t: '人脉资源', q: "你身边有做副业成功的朋友吗？", o: [
+        {t:"有很多", s:10},
+        {t:"有几个", s:7},
+        {t:"很少", s:3},
+        {t:"没有", s:0}
+    ]},
+    { d: 'network', t: '人脉资源', q: "你愿意麻烦朋友帮忙吗？", o: [
+        {t:"完全没问题", s:10},
+        {t:"偶尔会", s:7},
+        {t:"尽量不", s:3},
+        {t:"完全不会", s:0}
+    ]},
+    
+    // 风险承受 (20-23)
+    { d: 'risk', t: '风险承受', q: "如果副业失败，你会？", o: [
+        {t:"当作经验，继续尝试", s:10},
+        {t:"会沮丧但会调整", s:7},
+        {t:"会很受打击", s:3},
+        {t:"完全不敢尝试", s:0}
+    ]},
+    { d: 'risk', t: '风险承受', q: "你能接受副业影响主业吗？", o: [
+        {t:"完全能平衡", s:10},
+        {t:"尽量不影响", s:7},
+        {t:"担心会影响", s:3},
+        {t:"绝对不能影响", s:0}
+    ]},
+    { d: 'risk', t: '风险承受', q: "你对失败的看法？", o: [
+        {t:"失败是成功之母", s:10},
+        {t:"能接受失败", s:7},
+        {t:"不太能接受", s:3},
+        {t:"完全不能接受", s:0}
+    ]},
+    { d: 'risk', t: '风险承受', q: "你的心理抗压能力？", o: [
+        {t:"非常强", s:10},
+        {t:"比较强", s:7},
+        {t:"一般", s:3},
+        {t:"较弱", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const levels = [
+    { max: 40, l: "暂不适合副业", c: "#FF7675", d: "你目前的状态更适合专注主业，建议先提升自身能力。", advice: "先做好主业，积累技能和资源后再考虑副业。", points: [
+        "专注提升主业技能",
+        "建立稳定收入基础",
+        "学习相关知识储备",
+        "等待更合适时机"
+    ]},
+    { max: 80, l: "可尝试轻副业", c: "#FDCB6E", d: "你可以尝试一些低投入、低风险的轻副业。", advice: "从低成本、易上手的副业开始尝试。", points: [
+        "选择低成本副业",
+        "利用碎片时间",
+        "不影响主业前提下尝试",
+        "逐步积累经验"
+    ]},
+    { max: 120, l: "适合做副业", c: "#6C5CE7", d: "你具备做副业的基本条件，可以尝试发展副业。", advice: "选择适合自己的副业方向，从小做起。", points: [
+        "选择1-2个副业方向尝试",
+        "制定副业计划",
+        "利用业余时间启动",
+        "持续学习和优化"
+    ]},
+    { max: 160, l: "副业潜力股", c: "#00CEC9", d: "你有很强的副业潜力，是天生做副业的料。", advice: "认真规划副业发展，可能比主业更有前景。", points: [
+        "认真规划副业方向",
+        "投入时间和精力发展",
+        "建立个人品牌",
+        "考虑副业转主业"
+    ]},
+    { max: 200, l: "副业创业达人", c: "#2ED573", d: "你是副业创业达人，具备成功的所有条件。", advice: "可以开始认真规划副业创业，很可能成功。", points: [
+        "全职投入副业创业",
+        "整合资源规模化",
+        "建立团队",
+        "打造长期事业"
+    ]},
+    { max: 240, l: "副业天花板", c: "#A55EEA", d: "你是副业天花板级别的人物，潜力无限。", advice: "你的条件非常适合创业做大事。", points: [
+        "考虑创业",
+        "整合资源大干一场",
+        "成为行业标杆",
+        "带动更多人成功"
+    ]}
+];
+
+let currQList = [];
+let currIdx = 0;
+let userInfo = {};
+let scores = { skill:0, interest:0, time:0, capital:0, network:0, risk:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userInfo.time = document.getElementById('input-time').value;
+    userInfo.money = document.getElementById('input-money').value;
+    userInfo.social = document.getElementById('input-social').value;
+    
+    currQList = [...questions];
+    currIdx = 0;
+    scores = { skill:0, interest:0, time:0, capital:0, network:0, risk:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { skill:0, interest:0, time:0, capital:0, network:0, risk:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+    
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'skill', n:'技能'}, {k:'interest', n:'兴趣'}, 
+        {k:'time', n:'时间'}, {k:'capital', n:'资金'},
+        {k:'network', n:'人脉'}, {k:'risk', n:'风险'}
+    ];
+    let html = '';
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 10) * 100, 100);
+        let color = pct> 60 ? '#6C5CE7' : (pct> 30 ? '#FDCB6E' : '#2ED573');
+        let txt = pct> 70 ? '强' : (pct> 40 ? '中' : '弱');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {skill:'技能优势', interest:'兴趣爱好', time:'时间精力', capital:'资金投入', network:'人脉资源', risk:'风险承受'};
+    return map[k];
+}
+
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    let html = `
+    <div class="report_section">
+        <div class="r-h1">一、副业适配度诊断</div>
+        <p class="r-p" style="background:#fafafa; padding:12px; border-radius:8px; font-size:14px; border:1px solid #eee;">
+            <strong>📋 个人档案：</strong>时间：${userInfo.time} | 资金：${userInfo.money} | 自媒体：${userInfo.social}
+        </p>
+        <div class="r-box" style="border-left:5px solid ${lvl.c};">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">副业适配等级：${lvl.l}</div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>整体评估：</strong>${lvl.d}</p>
+            <p style="margin:10px 0 0; font-size:15px; line-height:1.6; color:#555;"><strong>核心建议：</strong>${lvl.advice}</p>
+        </div>
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">二、六维适配深度分析</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px;">*基于能力匹配理论的深度分析</p>
+        ${generateDimAnalysis('skill', scores.skill)}
+        ${generateDimAnalysis('interest', scores.interest)}
+        ${generateDimAnalysis('time', scores.time)}
+        ${generateDimAnalysis('capital', scores.capital)}
+        ${generateDimAnalysis('network', scores.network)}
+        ${generateDimAnalysis('risk', scores.risk)}
+    </div>
+
+    <div class="report_section">
+        <div class="r-h2">三、适合你的副业推荐</div>
+        <div class="r-box" style="background:#f5f3ff; border-color:#6C5CE7;">
+            <div class="r-h3" style="color:#6C5CE7;">🎯 根据你的特点推荐</div>
+            <ul style="margin:0; padding-left:20px; line-height:2;">
+                <li><strong>技能型副业</strong>：设计、编程、翻译、咨询</li>
+                <li><strong>内容型副业</strong>：自媒体、写作、短视频、知识付费</li>
+                <li><strong>资源型副业</strong>：电商、代购、社群分销</li>
+                <li><strong>服务型副业</strong>：家教、陪练、兼职摄影</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="report_section">
+        <div class="r-h2">四、副业启动路线图</div>
+        <div class="r-box">
+            <div class="r-h3">🚀 从0到1的副业之路</div>
+            <p class="r-p">
+                <strong>第1步（1-2周）</strong>：确定1个副业方向<br>
+                <strong>第2步（3-4周）</strong>：学习相关技能<br>
+                <strong>第3步（5-8周）</strong>：开始尝试并获取首批客户<br>
+                <strong>第4步（3-6个月）</strong>：优化并扩大规模
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        2026副业适配度测试 · 专业心理测评<br>
+        愿你找到适合自己的副业之路
+    </div>
+    `;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function generateDimAnalysis(key, val) {
+    let level = val> 7 ? 'high' : (val> 4 ? 'med' : 'low');
+    const config = {
+        high: { color: '#2ED573', bg: '#f0fff4', tag: '🌟 强', titleColor: '#2ED573' },
+        med: { color: '#FDCB6E', bg: '#fff9e6', tag: '⚡ 中', titleColor: '#FDCB6E' },
+        low: { color: '#FF7675', bg: '#ffe4e6', tag: '⚠️ 弱', titleColor: '#FF7675' }
+    };
+    const c = config[level];
+    const texts = {
+        skill: { high: "<strong>技能优势强！</strong>你有扎实的专业技能，是副业的核心竞争力。", med: "<strong>技能优势中等。</strong>有一些基础，需要继续提升。", low: "<strong>技能优势弱。</strong>建议先提升技能再考虑副业。" },
+        interest: { high: "<strong>兴趣驱动力强！</strong>你有强烈的兴趣和好奇心，是持续做副业的动力。", med: "<strong>兴趣驱动力中等。</strong>有一定兴趣，需要找到更强的点。", low: "<strong>兴趣驱动力弱。</strong>需要找到真正热爱的方向。" },
+        time: { high: "<strong>时间精力充足！</strong>你有足够的时间投入副业。", med: "<strong>时间精力中等。</strong>时间有限，需要高效利用。", low: "<strong>时间精力不足。</strong>建议先做好主业。" },
+        capital: { high: "<strong>资金投入意愿强！</strong>你愿意投入资金发展副业。", med: "<strong>资金投入中等。</strong>愿意适当投入，需要控制成本。", low: "<strong>资金投入意愿弱。</strong>建议选择低成本副业。" },
+        network: { high: "<strong>人脉资源丰富！</strong>你有广泛的人脉，有助于副业发展。", med: "<strong>人脉资源中等。</strong>有一定人脉，需要主动拓展。", low: "<strong>人脉资源较弱。</strong>需要从0开始积累。" },
+        risk: { high: "<strong>风险承受力强！</strong>你能接受失败，心态好。", med: "<strong>风险承受力中等。</strong>能接受适度风险。", low: "<strong>风险承受力弱。</strong>建议更保守地尝试。" }
+    };
+    return `<div style="margin-bottom:20px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor}; margin-top:0;">${getDimName(key)} <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${val}/10)</span><span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span></div><p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][level]}</p></div>`;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    const cx=120, cy=120, r=85;
+    const keys = ['skill','interest','time','capital','network','risk'];
+    const labels = ['技能','兴趣','时间','资金','人脉','风险'];
+    
+    ctx.strokeStyle = '#ede9fe'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<6; j++) {
+            let a = (Math.PI*2/6)*j - Math.PI/2;
+            ctx.lineTo(cx + Math.cos(a)*(r/4)*i, cy + Math.sin(a)*(r/4)*i);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let ratio = Math.min(s[k] / 10, 1.1); 
+        let a = (Math.PI*2/6)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(108, 92, 231, 0.1)");
+    grd.addColorStop(1, "rgba(108, 92, 231, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.strokeStyle = '#6C5CE7'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/6)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4);
+    });
+}
+
+async function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.setFont('simhei', 'normal');
+    
+    doc.setFillColor(108, 92, 231);
+    doc.rect(0, 0, 210, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.text('副业适配度深度分析报告', 105, 25, { align: 'center' });
+    
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(10);
+    doc.text('专业心理测评 · 2026全新版', 105, 35, { align: 'center' });
+    
+    let y = 55;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(16);
+    doc.text('一、副业适配诊断', 15, y);
+    y += 10;
+    
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    
+    doc.setFontSize(12);
+    doc.text(`综合得分：${total}分`, 15, y);
+    y += 8;
+    doc.text(`副业适配等级：${lvl.l}`, 15, y);
+    y += 8;
+    doc.text(`整体评估：${lvl.d}`, 15, y);
+    y += 15;
+    
+    doc.setFontSize(16);
+    doc.text('二、六维能力分析', 15, y);
+    y += 10;
+    
+    doc.setFontSize(11);
+    const dims = [
+        {k:'skill', n:'技能优势', s:scores.skill},
+        {k:'interest', n:'兴趣爱好', s:scores.interest},
+        {k:'time', n:'时间精力', s:scores.time},
+        {k:'capital', n:'资金投入', s:scores.capital},
+        {k:'network', n:'人脉资源', s:scores.network},
+        {k:'risk', n:'风险承受', s:scores.risk}
+    ];
+    
+    dims.forEach(d => {
+        doc.text(`${d.n}：${d.s}/10分`, 15, y);
+        y += 7;
+    });
+    
+    y += 10;
+    doc.setFontSize(16);
+    doc.text('三、核心建议', 15, y);
+    y += 10;
+    
+    doc.setFontSize(11);
+    doc.text(lvl.advice, 15, y);
+    y += 20;
+    
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    doc.text('2026副业适配度测试 · 专业心理测评', 105, 280, { align: 'center' });
+    
+    doc.save('副业适配度报告.pdf');
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+document.getElementById('export-pdf-btn').addEventListener('click', exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "fysp";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

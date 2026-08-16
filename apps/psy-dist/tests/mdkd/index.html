@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>母单脱单核心卡点检测 | 2026专业心理测评</title>
+    <style>
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#FF6B6B;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        :root {--primary: #FF6B6B;--primary-dark: #EE5A5A;--accent: #FF7D00;--safe: #2ED573;--warning: #FF4757;--bg-gradient-start: #FFF0F0;--bg-gradient-end: #FFE5E5;--text-main: #2D3436;--text-sub: #636E72;--radius: 12px;}
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3); transition: transform 0.1s, background 0.2s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        #page-intro { padding: 50px 24px; text-align: center; display: flex; flex-direction: column;  min-height: 100vh; background-image: radial-gradient(#ffe5e5 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; align-self: center; letter-spacing: 2px; text-transform: uppercase; }
+        .cover-title { font-size: 38px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .feature-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ffe5e5; text-align: left; }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #95a5a6; line-height: 1.4; }
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box { width: 100%; padding: 18px; border: 2px solid #ffe5e5; border-radius: 10px; font-size: 16px; background: #fdfdfd; outline: none; appearance: none; color: #2D3436; font-weight: 500; }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        #page-test { padding: 30px 24px; display: none; flex-direction: column; min-height: 100vh; background: #fff; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #95a5a6; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #f0f2f5; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        .question-card { flex: 1; }
+        .question-tag { display: inline-block; background: #ffe5e5; color: var(--primary); padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700; }
+        .question-text { font-size: 21px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        .option-btn { background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px; font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #ffe5e5; transition: all 0.2s; position: relative; font-weight: 500; display: flex; align-items: center; }
+        .option-btn:active { transform: scale(0.99); background: #f8f9fa; }
+        .option-btn.selected { background: #ffe5e5; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        #page-result { display: none; background: #ffe5e5; padding-bottom: 100px; overflow-y: auto; min-height: 100vh; width: 100%; }
+        .result-header { background: #fff; padding: 40px 24px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 8px solid #ffe5e5; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .score-num { font-size: 52px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 12px; color: #95a5a6; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .level-badge { background: var(--primary); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 70px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #95a5a6; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #636E72; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .unlock-btn { background: var(--primary); color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; animation: pulse-red 2s infinite; cursor: pointer; }
+        .reset-btn { background: #fff; color: #636E72; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        #report-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 2000; overflow-y: auto; }
+        .report-header { background: var(--primary); color: #fff; padding: 70px 24px 40px; }
+        .report-close { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; z-index: 2001; display: flex; align-items: center; justify-content: center; }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ffe5e5; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fafafa; border: 1px solid #ffe5e5; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        #page-loading { display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff; }
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <a href="https://psy.xhs365.cn/" class="nav-home">首页</a>
+    </nav>
+    <div class="container">
+        <div id="page-intro" data-screenshot="psych-test-母单脱单核心卡点测试" class="fade-in">
+            <div class="cover-tag">2026 EDITION</div>
+            <h1 class="cover-title">母单脱单<br><span>核心卡点</span>检测</h1>
+            <p class="cover-subtitle">科学分析你脱单的核心障碍<br>找到让你一直单身的根本原因</p>
+            <div class="intro-features">
+                <div class="feature-box"><div class="feature-icon">🔍</div><div class="feature-title">五大维度分析</div><div class="feature-desc">认知、社交、标准、意愿、价值，全方位扫描脱单障碍。</div></div>
+                <div class="feature-box"><div class="feature-icon">🧠</div><div class="feature-title">心理卡点识别</div><div class="feature-desc">基于心理学的深度分析，精准定位卡点。</div></div>
+                <div class="feature-box"><div class="feature-icon">⚠️</div><div class="feature-title">定位核心问题</div><div class="feature-desc">找到你单身至今的根本原因。</div></div>
+                <div class="feature-box"><div class="feature-icon">🛠️</div><div class="feature-title">脱单实操方案</div><div class="feature-desc">提供可执行的具体行动方案。</div></div>
+            </div>
+            <button class="btn" id="start-btn">开始检测 (约需 3 分钟)</button>
+        </div>
+        <div id="page-demographics">
+            <h2 style="font-size:26px;font-weight:800;color:#2D3436;margin-bottom:10px;">个人档案建立 💕</h2>
+            <p style="color:#636E72;font-size:14px;margin-bottom:30px;">系统将根据你的情况精准分析脱单卡点。</p>
+            <div class="form-group"><label class="form-label">你的年龄？</label><select id="input-age" class="select-box"><option value="20以下">20岁以下</option><option value="20-25">20-25岁</option><option value="26-30">26-30岁</option><option value="31-35">31-35岁</option><option value="35以上">35岁以上</option></select></div>
+            <div class="form-group"><label class="form-label">你单身多长时间？</label><select id="input-single" class="select-box"><option value="1年内">1年以内</option><option value="1-3年">1-3年</option><option value="3-5年">3-5年</option><option value="5年以上">5年以上</option></select></div>
+            <div class="form-group"><label class="form-label">你谈过几次恋爱？</label><select id="input-experience" class="select-box"><option value="0">0次 (母单)</option><option value="1">1次</option><option value="2-3">2-3次</option><option value="4+">4次及以上</option></select></div>
+            <button class="btn" id="init-test-btn">生成专属测试题</button>
+        </div>
+        <div id="page-test">
+            <div class="progress-header"><span id="dim-tag">维度：认知偏差</span><span id="progress-text">1 / 20</span></div>
+            <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+            <div id="question-wrapper" class="slide-up question-card">
+                <div class="question-tag" id="q-category">🔍 认知偏差</div>
+                <div class="question-text" id="question-text">题目加载中...</div>
+                <div id="options-box"></div>
+            </div>
+        </div>
+        <div id="page-loading">
+            <div style="font-size:50px; animation: pulse-red 1s infinite;">🔍</div>
+            <h3 style="margin-top:20px;font-weight:800;color:#2D3436;">正在分析你的脱单卡点...</h3>
+            <p style="color:#636E72;font-size:14px;">正在扫描五维数据...<br>计算脱单难度指数...<br>生��专属报告...</p>
+        </div>
+        <div id="page-result">
+            <div class="result-header">
+                <div class="score-circle"><span class="score-num" id="res-score">0</span><span class="score-label">脱单难度指数</span></div>
+                <div class="level-badge" id="res-level">检测中...</div>
+                <div class="level-desc" id="res-desc">...</div>
+            </div>
+            <div class="card">
+                <div class="card-title">📊 脱单卡点五维雷达</div>
+                <div style="height:240px;display:flex;justify-content:center;margin-bottom:20px;"><canvas id="radarChart" width="240" height="240"></canvas></div>
+                <div id="bars-container"></div>
+            </div>
+            <div class="bottom-dock">
+                <button class="unlock-btn" id="show-report-btn">📄 解锁《母单脱单核心卡点分析报告》</button>
+                <button class="reset-btn" id="reset-test-btn">🔄 重新检测</button>
+            </div>
+        </div>
+        <div id="report-modal">
+            <button class="report-close" id="close-report-btn">×</button>
+            <div class="report-header">
+                <div style="font-size:12px;opacity:0.8;letter-spacing:1px;">2026 PSYCHOLOGY REPORT</div>
+                <div class="r-h1">母单脱单核心卡点分析报告</div>
+                <div style="font-size:14px;">专业心理测评 · 2026全新版</div>
+            </div>
+            <div class="report-body" id="report-content"></div>
+        </div>
+    </div>
+<script>
+const questions = [
+    { d: 'cognition', t: '认知偏差', q: "你觉得自己找不到对象的原因是？", o: [{t:"缘分还没到", s:3}, {t:"社交圈太小", s:7}, {t:"自己不够好", s:10}, {t:"没有合适的人", s:5}] },
+    { d: 'cognition', t: '认知偏差', q: "你相信爱情需要"缘分"吗？", o: [{t:"完全相信", s:10}, {t:"比较相信", s:7}, {t:"不太相信", s:3}, {t:"完全不信", s:0}] },
+    { d: 'cognition', t: '认知偏差', q: "你认为"对的人"会自然出现吗？", o: [{t:"会，缘分到了自然成", s:10}, {t:"可能会", s:7}, {t:"不太会", s:3}, {t:"需要自己争取", s:0}] },
+    { d: 'cognition', t: '认知偏差', q: "你经常觉得"好男人都被人挑走了"吗？", o: [{t:"经常这样想", s:10}, {t:"偶尔会", s:7}, {t:"很少", s:3}, {t:"从不这样想", s:0}] },
+    { d: 'cognition', t: '认知偏差', q: "你觉得脱单最重要的是什么？", o: [{t:"缘分", s:10}, {t:"外表", s:7}, {t:"经济条件", s:5}, {t:"主动出击", s:0}] },
+    { d: 'anxiety', t: '社交焦虑', q: "你害怕主动和异性搭话吗？", o: [{t:"非常害怕", s:10}, {t:"有点害怕", s:7}, {t:"不太害怕", s:3}, {t:"完全不怕", s:0}] },
+    { d: 'anxiety', t: '社交焦虑', q: "在社交场合你会感到不自在吗？", o: [{t:"非常不自在", s:10}, {t:"有点不自在", s:7}, {t:"不太会", s:3}, {t:"完全不会", s:0}] },
+    { d: 'anxiety', t: '社交焦虑', q: "你害怕被拒绝吗？", o: [{t:"非常害怕", s:10}, {t:"有点害怕", s:7}, {t:"不太害怕", s:3}, {t:"完全不怕", s:0}] },
+    { d: 'anxiety', t: '社交焦虑', q: "你会在社交软件上主动打招呼吗？", o: [{t:"从来不会", s:10}, {t:"偶尔会", s:7}, {t:"经常会", s:3}, {t:"总是会", s:0}] },
+    { d: 'anxiety', t: '社交焦虑', q: "参加相亲活动你会紧张吗？", o: [{t:"非常紧张", s:10}, {t:"有点紧张", s:7}, {t:"不太紧张", s:3}, {t:"完全不紧张", s:0}] },
+    { d: 'standard', t: '择偶标准', q: "你的择偶标准高吗？", o: [{t:"非常高", s:10}, {t:"比较高", s:7}, {t:"一般", s:3}, {t:"不高", s:0}] },
+    { d: 'standard', t: '择偶标准', q: "你能接受"差不多"的人吗？", o: [{t:"完全不能", s:10}, {t:"不太能", s:7}, {t:"可能会", s:3}, {t:"完全可以", s:0}] },
+    { d: 'standard', t: '择偶标准', q: "你有明确的择偶标准吗？", o: [{t:"非常明确", s:10}, {t:"比较明确", s:7}, {t:"不太明确", s:3}, {t:"没有标准", s:0}] },
+    { d: 'standard', t: '择偶标准', q: "你经常觉得找不到"对的人"吗？", o: [{t:"经常", s:10}, {t:"偶尔", s:7}, {t:"很少", s:3}, {t:"从不", s:0}] },
+    { d: 'standard', t: '择偶标准', q: "你会在意对方的收入和学历吗？", o: [{t:"非常在意", s:10}, {t:"比较在意", s:7}, {t:"不太在意", s:3}, {t:"完全不在意", s:0}] },
+    { d: 'initiative', t: '主动意愿', q: "你会在社交软件上主动认识新男生吗？", o: [{t:"从来不会", s:10}, {t:"偶尔会", s:7}, {t:"经常会", s:3}, {t:"总是会", s:0}] },
+    { d: 'initiative', t: '主动意愿', q: "遇到喜欢的人你会主动吗？", o: [{t:"完全不会", s:10}, {t:"很少会", s:7}, {t:"有时候会", s:3}, {t:"经常会", s:0}] },
+    { d: 'initiative', t: '主动意愿', q: "你会接受相亲吗？", o: [{t:"完全不接受", s:10}, {t:"不太接受", s:7}, {t:"可以考虑", s:3}, {t:"完全接受", s:0}] },
+    { d: 'initiative', t: '主动意愿', q: "你会主动参加社交活动吗？", o: [{t:"从来不会", s:10}, {t:"偶尔会", s:7}, {t:"经常会", s:3}, {t:"总是会", s:0}] },
+    { d: 'value', t: '自我价值', q: "你觉得自己值得被爱吗？", o: [{t:"完全不值得", s:10}, {t:"不太值得", s:7}, {t:"有点值得", s:3}, {t:"非常值得", s:0}] }
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const levels = [
+    { max: 30, l: "脱单困难户", c: "#FF4757", d: "你的脱单难度非常高，需要重点突破心理障碍。", advice: "建议从提升自信和主动意愿开始，先改变认知。" },
+    { max: 50, l: "脱单困难", c: "#FF7D00", d: "你有一定的脱单困难，需要注意几个关键卡点。", advice: "建议先从降低标准或提升主动性开始。" },
+    { max: 80, l: "中等难度", c: "#FF6B6B", d: "你的脱单难度中等，有一些卡点需要注意。", advice: "建议适当调整策略，主动出击。" },
+    { max: 120, l: "较易脱单", c: "#2ED573", d: "你的脱单难度较低，有一定的优势和机会。", advice: "继续保持积极心态，主动寻找机会。" },
+    { max: 160, l: "极易脱单", c: "#00B42A", d: "你的脱单难度很低，你具备很好的脱单条件。", advice: "你已经具备了很好的脱单素质，继续保持。" }
+];
+
+let currQList = [], currIdx = 0, userInfo = {}, scores = { cognition:0, anxiety:0, standard:0, initiative:0, value:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userInfo.age = document.getElementById('input-age').value;
+    userInfo.single = document.getElementById('input-single').value;
+    userInfo.experience = document.getElementById('input-experience').value;
+    currQList = [...questions];
+    currIdx = 0;
+    scores = { cognition:0, anxiety:0, standard:0, initiative:0, value:0 };
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${getDimName(q.d)}`;
+    document.getElementById('q-category').innerText = q.t;
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up'); void wrapper.offsetWidth; wrapper.classList.add('slide-up');
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+    if (currIdx < currQList.length - 1) { currIdx++; renderQuestion(); } else { finishTest(); }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { cognition:0, anxiety:0, standard:0, initiative:0, value:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = Math.round(totalRaw); 
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    const badge = document.getElementById('res-level');
+    badge.innerText = lvl.l;
+    badge.style.background = lvl.c;
+    document.getElementById('res-desc').innerText = lvl.d;
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [{k:'cognition', n:'认知'}, {k:'anxiety', n:'焦虑'}, {k:'standard', n:'标准'}, {k:'initiative', n:'意愿'}, {k:'value', n:'价值'}];
+    let html = '';
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 10) * 100, 100);
+        let color = pct> 60 ? '#FF4757' : (pct> 30 ? '#FF7D00' : '#2ED573');
+        let txt = pct> 70 ? '高风险' : (pct> 40 ? '中等' : '较低');
+        html += `<div class="dim-row"><div class="dim-info"><span class="dim-name">${d.n}</span><span class="dim-sub">${getDimName(d.k)}</span></div><div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%;background:${color};"></div></div><div class="dim-val" style="color:${color}">${txt}</div></div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {cognition:'认知偏差', anxiety:'社交焦虑', standard:'择偶标准', initiative:'主动意愿', value:'自我价值'};
+    return map[k];
+}
+
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、脱单卡点诊断</div>
+        <p class="r-p" style="background:#fafafa;padding:12px;border-radius:8px;font-size:14px;border:1px solid #eee;">
+            <strong>📋 个人档案：</strong>年龄：${userInfo.age} | 单身时长：${userInfo.single} | 恋爱经验：${userInfo.experience}
+        </p>
+        <div class="r-box" style="border-left:5px solid ${lvl.c};">
+            <div style="font-size:22px;font-weight:900;color:${lvl.c};margin-bottom:8px;">脱单难度等级：${lvl.l}</div>
+            <p style="margin:0;font-size:15px;line-height:1.6;color:#555;"><strong>难度评估：</strong>${lvl.d}</p>
+            <p style="margin:10px 0 0;font-size:15px;line-height:1.6;color:#555;"><strong>核心建议：</strong>${lvl.advice}</p>
+        </div>
+    </div>
+    <div class="report_section">
+        <div class="r-h2">二、五维脱单卡点深度分析</div>
+        ${generateDimAnalysis('cognition', scores.cognition)}
+        ${generateDimAnalysis('anxiety', scores.anxiety)}
+        ${generateDimAnalysis('standard', scores.standard)}
+        ${generateDimAnalysis('initiative', scores.initiative)}
+        ${generateDimAnalysis('value', scores.value)}
+    </div>
+    <div class="report_section">
+        <div class="r-h2">三、脱单实操方案</div>
+        <div class="r-box">
+            <div class="r-h3">📋 具体行动计划</div>
+            <ul style="margin:0;padding-left:20px;line-height:2;">
+                <li>打破"缘分论"，主动出击</li>
+                <li>降低过高择偶标准</li>
+                <li>每周认识一个新朋友</li>
+                <li>尝试使用社交软件</li>
+                <li>参加至少一个社交活动</li>
+            </ul>
+        </div>
+    </div>
+    <div style="text-align:center;color:#ccc;font-size:12px;margin-top:50px;line-height:1.8;">2026母单脱单核心卡点检测 · 专业心理测评<br>愿你早日找到对的人</div>`;
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+
+function generateDimAnalysis(key, val) {
+    let level = val> 7 ? 'high' : (val> 4 ? 'med' : 'low');
+    const config = { high: { color: '#FF4757', bg: '#ffe4e6', tag: '⚠️ 高风险', titleColor: '#FF4757' }, med: { color: '#FF7D00', bg: '#fff8e6', tag: '⚡ 中等', titleColor: '#FF7D00' }, low: { color: '#2ED573', bg: '#f0fff4', tag: '✅ 良好', titleColor: '#2ED573' } };
+    const c = config[level];
+    const texts = {
+        cognition: { high: "<strong>认知偏差严重！</strong>你有严重的错误认知，需要调整思维模式。", med: "<strong>认知一般。</strong>你有一些认知需要调整。", low: "<strong>认知健康。</strong>你的认知很正确。" },
+        anxiety: { high: "<strong>社交焦虑严重！</strong>你过度焦虑，需要克服心理障碍。", med: "<strong>焦虑一般。</strong>你有轻度焦虑。", low: "<strong>无焦虑。</strong>你社交能力很好。" },
+        standard: { high: "<strong>标准过高！</strong>你的择偶标准不切实际。", med: "<strong>标准一般。</strong>你有适当的择偶标准。", low: "<strong>标准合理。</strong>你的标准很合理。" },
+        initiative: { high: "<strong>过于被动！</strong>你完全不够主动。", med: "<strong>主动性一般。</strong>你可以更主动一些。", low: "<strong>主动性强。</strong>你很懂得主动争取。" },
+        value: { high: "<strong>自我价值低！</strong>你需要提升自信。", med: "<strong>价值感一般。</strong>你有基本的自我价值感。", low: "<strong>价值感强。</strong>你很有自信。" }
+    };
+    return `<div style="margin-bottom:20px;padding:16px;background:${c.bg};border-radius:8px;border-left:4px solid ${c.color};"><div class="r-h3" style="color:${c.titleColor};margin-top:0;">${getDimName(key)} <span style="font-size:12px;opacity:0.8;margin-left:8px;">(得分: ${val}/10)</span><span style="float:right;font-size:12px;background:${c.color};color:#fff;padding:2px 8px;border-radius:10px;">${c.tag}</span></div><p class="r-p" style="margin-bottom:0;color:#444;">${texts[key][level]}</p></div>`;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    const cx=120, cy=120, r=90;
+    const keys = ['cognition','anxiety','standard','initiative','value'];
+    const labels = ['认知','焦虑','标准','意愿','价值'];
+    ctx.strokeStyle = '#ffe5e5'; ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) { ctx.beginPath(); for(let j=0; j<5; j++) { let a = (Math.PI*2/5)*j - Math.PI/2; ctx.lineTo(cx + Math.cos(a)*(r/4)*i, cy + Math.sin(a)*(r/4)*i); } ctx.closePath(); ctx.stroke(); }
+    ctx.beginPath();
+    keys.forEach((k, i) => { let ratio = Math.min(s[k] / 10, 1.1); let a = (Math.PI*2/5)*i - Math.PI/2; ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio); });
+    ctx.closePath();
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(255, 107, 107, 0.1)");
+    grd.addColorStop(1, "rgba(255, 107, 107, 0.6)");
+    ctx.fillStyle = grd; ctx.fill();
+    ctx.strokeStyle = '#FF6B6B'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => { let a = (Math.PI*2/5)*i - Math.PI/2; ctx.fillText(l, cx + Math.cos(a)*(r+20), cy + Math.sin(a)*(r+20) + 4); });
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "mdkd";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

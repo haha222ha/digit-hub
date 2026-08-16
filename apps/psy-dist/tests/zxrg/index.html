@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>追星人格测试 - 深度分析</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --primary-dark: #1a252f;
+            --accent: #c0392b;
+            --accent-hover: #e74c3c;
+            --safe: #27ae60;
+            --warning: #f39c12;
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+            --radius: 16px;
+            --theme-red: #ff2e4c;
+            --theme-red-light: #ff4760;
+            --card-radius: 24px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8f9fa; min-height: 100vh; color: var(--text-main); }
+        .container { max-width: 520px; margin: 0 auto; padding: 20px; position: relative; min-height: 100vh; }
+        .page { display: none; animation: fadeIn 0.5s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(100px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulseRed { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 46, 76, 0.7); } 50% { box-shadow: 0 0 0 15px rgba(255, 46, 76, 0); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .btn { display: block; width: 100%; padding: 18px; border: none; border-radius: 50px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+        .btn-primary { background: var(--primary); color: white; border-radius: var(--radius); }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-theme { background: linear-gradient(90deg, var(--theme-red), var(--theme-red-light)); color: white; box-shadow: 0 8px 20px rgba(255, 46, 76, 0.3); }
+        .btn-theme:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-accent { background: var(--accent); color: white; animation: pulseRed 2s infinite; border-radius: var(--radius); }
+        .btn-accent:active { transform: scale(0.98); background: var(--accent-hover); }
+        .btn-secondary { background: #f1f2f6; color: var(--text-main); border: none; margin-top: 12px; }
+        .btn-secondary:active { transform: scale(0.98); background: #dfe4ea; }
+        .card { background: white; border-radius: var(--radius); padding: 24px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .cover-badge { display: inline-block; background: linear-gradient(135deg, #e91e63, #c2185b); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .cover-title { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+        .cover-title .highlight { color: #e91e63; }
+        .cover-subtitle { color: var(--text-sub); font-size: 16px; margin-bottom: 30px; line-height: 1.5; }
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .feature-card { background: white; border-radius: var(--radius); padding: 20px 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .feature-icon { font-size: 32px; margin-bottom: 10px; }
+        .feature-text { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .quiz-dimension { font-size: 14px; font-weight: 600; color: #e91e63; }
+        .quiz-progress { font-size: 14px; font-weight: 600; color: var(--text-sub); }
+        .progress-bar { width: 100%; height: 8px; background: #eaecef; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #e91e63, #c2185b); border-radius: 4px; transition: width 0.3s ease; }
+        .question-card { animation: slideUp 0.4s ease; }
+        .question-tag { display: inline-block; background: #f1f2f6; color: var(--primary); padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .question-text { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 30px; }
+        .option-btn { display: block; width: 100%; padding: 18px; border: 2px solid #eaecef; border-radius: var(--radius); background: white; font-size: 16px; font-weight: 500; text-align: left; cursor: pointer; margin-bottom: 12px; transition: all 0.2s ease; }
+        .option-btn:hover { border-color: #e91e63; }
+        .option-btn.selected { border-color: #e91e63; background: rgba(233, 30, 99, 0.05); }
+        .option-btn:active { transform: scale(0.98); }
+        .back-btn { background: transparent; border: none; color: var(--text-sub); font-size: 16px; cursor: pointer; padding: 10px 0; margin-top: 20px; }
+        .loading-container { text-align: center; padding: 50px 20px; }
+        .loading-icon { font-size: 80px; animation: breathe 1.5s infinite; margin-bottom: 30px; }
+        .loading-title { font-size: 24px; font-weight: 700; margin-bottom: 15px; }
+        .loading-subtitle { font-size: 16px; color: var(--text-sub); }
+        .result-top-card { background: linear-gradient(135deg, #e91e63, #c2185b); color: white; border-radius: var(--radius); padding: 30px 20px; text-align: center; margin-bottom: 20px; }
+        .level-tag { display: inline-block; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 8px 24px; border-radius: 20px; font-size: 20px; font-weight: 700; margin-bottom: 15px; }
+        .level-desc { font-size: 16px; line-height: 1.5; opacity: 0.95; }
+        .result-match-section { text-align: center; margin: 30px 0; padding: 30px 20px; background: linear-gradient(135deg, #f8f9fa, #fff); border-radius: var(--radius); border: 2px solid #e91e63; }
+        .match-title { font-size: 18px; font-weight: 600; color: var(--text-sub); margin-bottom: 10px; }
+        .match-name { font-size: 36px; font-weight: 700; color: #e91e63; margin-bottom: 15px; }
+        .match-desc { font-size: 16px; color: var(--text-main); line-height: 1.8; }
+        .match-tags { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+        .match-tag { padding: 6px 16px; background: rgba(233, 30, 99, 0.1); color: #e91e63; border-radius: 20px; font-size: 14px; }
+        .result-actions { position: sticky; bottom: 20px; padding-top: 20px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: none; overflow-y: auto; }
+        .modal.active { display: block; animation: fadeIn 0.3s ease; }
+        .modal-content { background: white; min-height: 100vh; padding: 20px; max-width: 520px; margin: 0 auto; position: relative; padding-top: 80px; }
+        .modal-close { position: fixed; top: 20px; right: calc(50% - 260px); font-size: 32px; background: white; border: none; cursor: pointer; color: var(--text-sub); z-index: 2001; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.15); transition: all 0.2s ease; }
+        @media (max-width: 520px) { .modal-close { right: 20px; } }
+        .modal-close:hover { color: #e91e63; transform: scale(1.1); }
+        .report-header { background: linear-gradient(135deg, #e91e63, #c2185b); color: white; padding: 40px 20px 30px; margin: -20px -20px 30px; border-radius: 0 0 var(--radius) var(--radius); text-align: center; }
+        .report-title { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+        .report-subtitle { font-size: 16px; opacity: 0.9; }
+        .report-section { margin-bottom: 35px; }
+        .report-section-title { font-size: 18px; font-weight: 700; color: #e91e63; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #f1f2f6; }
+        .report-content { font-size: 15px; line-height: 1.9; color: var(--text-main); }
+        .report-content p { margin-bottom: 12px; }
+        .report-highlight { background: linear-gradient(135deg, rgba(233, 30, 99, 0.05), rgba(194, 24, 91, 0.05)); border-left: 4px solid #e91e63; padding: 15px; margin: 20px 0; border-radius: 0 var(--radius) var(--radius) 0; }
+        .report-list { padding-left: 20px; }
+        .report-list li { margin-bottom: 10px; line-height: 1.7; }
+    </style>
+</head>
+<body>
+
+    <div class="container" data-screenshot="psych-test-追星人格测试">
+        <div id="coverPage" class="page active">
+            <div class="cover-badge">饭圈人格版</div>
+            <h1 class="cover-title">你的<br><span class="highlight">追星人格</span></h1>
+            <p class="cover-subtitle">基于追星行为和心理的深度分析，发现你的饭圈人格类型</p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⭐</div>
+                    <div class="feature-text">人格分析</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-text">精准匹配</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💕</div>
+                    <div class="feature-text">深度解析</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-text">千字报告</div>
+                </div>
+            </div>
+            <button id="startBtn" class="btn btn-primary">开始测试 (约需 2 分钟)</button>
+        </div>
+        <div id="profilePage" class="page">
+            <div class="card">
+                <h2 style="font-size:24px; font-weight:700; margin-bottom:15px;">你的追星画像 🌟</h2>
+                <p style="color:var(--text-sub); margin-bottom:30px; line-height:1.6;">请如实填写，以便更准确分析。</p>
+                <div class="form-group">
+                    <label class="form-label">你追星几年了？</label>
+                    <select id="years" class="form-select">
+                        <option value="new">0-1年</option>
+                        <option value="mid">1-3年</option>
+                        <option value="old">3-5年</option>
+                        <option value="veteran">5年+</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">你追过几个明星？</label>
+                    <select id="count" class="form-select">
+                        <option value="one">1个</option>
+                        <option value="few">2-3个</option>
+                        <option value="many">4-6个</option>
+                        <option value="lot">7个+</option>
+                    </select>
+                </div>
+            </div>
+            <button id="generateQuizBtn" class="btn btn-primary">开始测评</button>
+        </div>
+        <div id="quizPage" class="page">
+            <div class="quiz-header">
+                <div class="quiz-dimension" id="dimensionLabel">追星行为</div>
+                <div class="quiz-progress" id="progressLabel">1 / 15</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+            <div class="card question-card" id="questionCard">
+                <div class="question-tag" id="questionTag">⭐ 日常行为</div>
+                <div class="question-text" id="questionText">题目加载中...</div>
+                <div id="optionsContainer"></div>
+            </div>
+            <button id="backQuestionBtn" class="back-btn" style="display:none;">← 返回上一题</button>
+        </div>
+        <div id="loadingPage" class="page">
+            <div class="loading-container">
+                <div class="loading-icon">⭐</div>
+                <div class="loading-title">正在分析你的饭圈人格...</div>
+                <div class="loading-subtitle">结合追星心理模型运算中...</div>
+            </div>
+        </div>
+        <div id="resultPage" class="page">
+            <div class="result-top-card">
+                <div class="level-tag" id="levelTag">你的追星人格：事业粉</div>
+                <div class="level-desc" id="resultLevelDesc">根据你的测评结果...</div>
+            </div>
+            <div class="result-match-section">
+                <div class="match-title">最佳匹配</div>
+                <div class="match-name" id="matchName">事业粉</div>
+                <div class="match-desc" id="matchDesc">你关注明星的作品和事业...</div>
+                <div class="match-tags" id="matchTags"></div>
+            </div>
+            <div class="result-actions">
+                <button id="reportBtn" class="btn btn-accent">📄 查看千字深度报告</button>
+                <button id="resetBtn" class="btn btn-secondary">🔄 重新测试</button>
+            </div>
+        </div>
+    </div>
+    <div id="reportModal" class="modal">
+        <button class="modal-close" id="closeModal">&times;</button>
+        <div class="modal-content">
+            <div class="report-header">
+                <div class="report-title">追星人格分析报告</div>
+                <div class="report-subtitle">深度分析与千字建议</div>
+            </div>
+            <div id="reportContent" class="report-content"></div>
+        </div>
+    </div>
+    <script>
+        const QUESTIONS = [
+            { dimension: "focus", tag: "⭐ 关注点", text: "你更关注明星的什么？", options: [
+                { text: "作品和业务能力", score: { career: 10, visual: 3, char: 4, fun: 3, data: 5, emotion: 3 } },
+                { text: "颜值和身材", score: { career: 3, visual: 10, char: 4, fun: 4, data: 3, emotion: 4 } },
+                { text: "性格和人品", score: { career: 4, visual: 3, char: 10, fun: 5, data: 3, emotion: 6 } },
+                { text: "综艺和搞笑", score: { career: 3, visual: 4, char: 5, fun: 10, data: 3, emotion: 4 } }
+            ]},
+            { dimension: "support", tag: "💰 支持方式", text: "你会为明星花钱吗？", options: [
+                { text: "会的，重金支持", score: { career: 5, visual: 6, char: 4, fun: 4, data: 8, emotion: 5 } },
+                { text: "偶尔买代言", score: { career: 6, visual: 6, char: 5, fun: 5, data: 6, emotion: 5 } },
+                { text: "白嫖党路过", score: { career: 5, visual: 5, char: 6, fun: 6, data: 4, emotion: 5 } },
+                { text: "只看作品不花钱", score: { career: 6, visual: 4, char: 5, fun: 4, data: 3, emotion: 4 } }
+            ]},
+            { dimension: "defend", tag: "⚔️ 撕逼态度", text: "遇到黑子你会？", options: [
+                { text: "下场对骂，必须赢", score: { career: 4, visual: 4, char: 5, fun: 4, data: 7, emotion: 10 } },
+                { text: "写澄清贴据理力争", score: { career: 6, visual: 4, char: 6, fun: 3, data: 5, emotion: 7 } },
+                { text: "视而不见不计较", score: { career: 6, visual: 5, char: 6, fun: 6, data: 4, emotion: 4 } },
+                { text: "专注自家不参与", score: { career: 7, visual: 5, char: 6, fun: 5, data: 5, emotion: 5 } }
+            ]},
+            { dimension: "time", tag: "⏰ 投入时间", text: "你每天花在追星上的时间？", options: [
+                { text: "大部分空闲时间", score: { career: 5, visual: 5, char: 5, fun: 6, data: 8, emotion: 5 } },
+                { text: "偶尔看看动态", score: { career: 6, visual: 6, char: 6, fun: 6, data: 4, emotion: 5 } },
+                { text: "只在有新作品时关注", score: { career: 8, visual: 5, char: 5, fun: 4, data: 3, emotion: 4 } },
+                { text: "佛系追星，随缘关注", score: { career: 5, visual: 5, char: 6, fun: 6, data: 4, emotion: 5 } }
+            ]},
+            { dimension: "community", tag: "🤝 社交偏好", text: "你在饭圈的状态是？", options: [
+                { text: "超话大粉，带节奏", score: { career: 6, visual: 4, char: 4, fun: 4, data: 10, emotion: 6 } },
+                { text: "小透明，只点赞", score: { career: 6, visual: 6, char: 6, fun: 6, data: 4, emotion: 5 } },
+                { text: "solo追，不混圈", score: { career: 7, visual: 5, char: 6, fun: 5, data: 4, emotion: 5 } },
+                { text: "只和好友聊", score: { career: 5, visual: 5, char: 7, fun: 6, data: 4, emotion: 6 } }
+            ]},
+            { dimension: "reaction", tag: "😢 情绪反应", text: "看到偶像受委屈你会？", options: [
+                { text: "特别心疼，想保护", score: { career: 4, visual: 4, char: 6, fun: 3, data: 3, emotion: 10 } },
+                { text: "理性分析事件", score: { career: 7, visual: 4, char: 5, fun: 3, data: 6, emotion: 5 } },
+                { text: "跟着一起难过", score: { career: 5, visual: 5, char: 7, fun: 4, data: 4, emotion: 8 } },
+                { text: "客观看待不玻璃心", score: { career: 7, visual: 5, char: 6, fun: 5, data: 5, emotion: 4 } }
+            ]},
+            { dimension: "knowledge", tag: "📚 知识储备", text: "你对偶像的了解？", options: [
+                { text: "无所不知，如数家珍", score: { career: 7, visual: 6, char: 6, fun: 5, data: 10, emotion: 5 } },
+                { text: "知道大概情况", score: { career: 6, visual: 6, char: 6, fun: 6, data: 5, emotion: 5 } },
+                { text: "只了解作品", score: { career: 8, visual: 5, char: 4, fun: 4, data: 3, emotion: 4 } },
+                { text: "了解但不深入", score: { career: 6, visual: 6, char: 6, fun: 6, data: 5, emotion: 5 } }
+            ]},
+            { dimension: "loyalty", tag: "💚 忠诚度", text: "你会爬墙吗？", options: [
+                { text: "永不爬墙，专注一个", score: { career: 8, visual: 5, char: 7, fun: 4, data: 4, emotion: 7 } },
+                { text: "可能会，但会很慢", score: { career: 6, visual: 6, char: 6, fun: 6, data: 5, emotion: 6 } },
+                { text: "墙头很多很正常", score: { career: 4, visual: 7, char: 5, fun: 7, data: 5, emotion: 5 } },
+                { text: "看心情随时换", score: { career: 4, visual: 6, char: 4, fun: 8, data: 4, emotion: 5 } }
+            ]},
+            { dimension: "expectation", tag: "🎯 期望值", text: "你对偶像的期望是？", options: [
+                { text: "专注事业，多出作品", score: { career: 10, visual: 4, char: 4, fun: 4, data: 4, emotion: 4 } },
+                { text: "快乐就好，开心最重要", score: { career: 4, visual: 5, char: 5, fun: 10, data: 3, emotion: 6 } },
+                { text: "希望他一直火下去", score: { career: 7, visual: 5, char: 5, fun: 5, data: 5, emotion: 6 } },
+                { text: "顺其自然不强求", score: { career: 6, visual: 5, char: 6, fun: 6, data: 4, emotion: 5 } }
+            ]},
+            { dimension: "share", tag: "📱 分享欲", text: "你会分享偶像的内容吗？", options: [
+                { text: "疯狂刷屏安利的程度", score: { career: 6, visual: 6, char: 5, fun: 6, data: 9, emotion: 6 } },
+                { text: "偶尔分享觉得好的", score: { career: 7, visual: 6, char: 6, fun: 6, data: 5, emotion: 5 } },
+                { text: "只给自己看", score: { career: 5, visual: 5, char: 6, fun: 5, data: 4, emotion: 5 } },
+                { text: "看情况，不想太疯狂", score: { career: 6, visual: 5, char: 6, fun: 6, data: 5, emotion: 5 } }
+            ]},
+            { dimension: "criticism", tag: "🔍 批评态度", text: "偶像有负面你会？", options: [
+                { text: "无脑护，闭眼夸", score: { career: 3, visual: 6, char: 5, fun: 5, data: 4, emotion: 10 } },
+                { text: "躺平任嘲不影响我", score: { career: 7, visual: 5, char: 6, fun: 6, data: 5, emotion: 5 } },
+                { text: "理性吃瓜有自己的判断", score: { career: 8, visual: 5, char: 6, fun: 5, data: 6, emotion: 5 } },
+                { text: "会脱粉甚至回踩", score: { career: 5, visual: 4, char: 4, fun: 4, data: 4, emotion: 3 } }
+            ]},
+            { dimension: "fantasy", tag: "💭 幻想程度", text: "你会幻想和偶像的关系吗？", options: [
+                { text: "经常幻想自己是女友", score: { career: 3, visual: 7, char: 4, fun: 5, data: 3, emotion: 10 } },
+                { text: "偶尔想想但不痴迷", score: { career: 5, visual: 7, char: 5, fun: 5, data: 4, emotion: 7 } },
+                { text: "只当事业粉不幻想", score: { career: 8, visual: 5, char: 5, fun: 4, data: 5, emotion: 4 } },
+                { text: "完全不会，多肉麻", score: { career: 6, visual: 5, char: 6, fun: 6, data: 5, emotion: 4 } }
+            ]},
+            { dimension: "competition", tag: "🏆 竞争心态", text: "看到别家粉丝你会？", options: [
+                { text: "必须battle，争口气", score: { career: 6, visual: 5, char: 4, fun: 5, data: 9, emotion: 8 } },
+                { text: "专注自家不比较", score: { career: 8, visual: 5, char: 6, fun: 5, data: 5, emotion: 5 } },
+                { text: "和平相处最重要", score: { career: 5, visual: 5, char: 7, fun: 7, data: 4, emotion: 6 } },
+                { text: "无所谓的态度", score: { career: 5, visual: 5, char: 5, fun: 6, data: 4, emotion: 5 } }
+            ]},
+            { dimension: "influence", tag: "🌊 入坑方式", text: "你因为什么入坑的？", options: [
+                { text: "作品太好了入坑", score: { career: 10, visual: 4, char: 4, fun: 4, data: 4, emotion: 4 } },
+                { text: "颜值太绝无法自拔", score: { career: 3, visual: 10, char: 4, fun: 4, data: 3, emotion: 5 } },
+                { text: "性格太圈粉了", score: { career: 4, visual: 4, char: 10, fun: 6, data: 3, emotion: 6 } },
+                { text: "综艺太好笑了", score: { career: 3, visual: 4, char: 5, fun: 10, data: 3, emotion: 4 } }
+            ]},
+            { dimension: "future", tag: "🔮 长远规划", text: "你会追偶像到什么时候？", options: [
+                { text: "一直追到退圈", score: { career: 8, visual: 5, char: 7, fun: 5, data: 5, emotion: 7 } },
+                { text: "直到他不再营业", score: { career: 7, visual: 5, char: 6, fun: 5, data: 5, emotion: 6 } },
+                { text: "看缘分不强求", score: { career: 6, visual: 6, char: 6, fun: 7, data: 5, emotion: 6 } },
+                { text: "随时可能脱粉", score: { career: 5, visual: 5, char: 5, fun: 6, data: 4, emotion: 5 } }
+            ]}
+        ];
+
+        const state = {
+            currentQuestionIndex: 0,
+            answers: [],
+            profileData: {},
+            scores: {},
+            totalScore: 0,
+            resultType: ''
+        };
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function initEventListeners() {
+            document.getElementById('startBtn').addEventListener('click', () => showPage('profilePage'));
+            
+            document.getElementById('generateQuizBtn').addEventListener('click', () => {
+                state.profileData.years = document.getElementById('years').value;
+                state.profileData.count = document.getElementById('count').value;
+                state.currentQuestionIndex = 0;
+                state.answers = [];
+                renderQuestion(0);
+                showPage('quizPage');
+            });
+
+            document.getElementById('backQuestionBtn').addEventListener('click', () => {
+                if (state.currentQuestionIndex> 0) renderQuestion(state.currentQuestionIndex - 1);
+            });
+
+            document.getElementById('reportBtn').addEventListener('click', () => {
+                generateReport();
+                document.getElementById('reportModal').classList.add('active');
+            });
+
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                state.currentQuestionIndex = 0;
+                state.answers = [];
+                state.scores = {};
+                showPage('profilePage');
+            });
+
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('reportModal').classList.remove('active');
+            });
+
+            document.getElementById('reportModal').addEventListener('click', (e) => {
+                if (e.target.id === 'reportModal') {
+                    document.getElementById('reportModal').classList.remove('active');
+                }
+            });
+        }
+
+        function renderQuestion(index) {
+            if (index>= QUESTIONS.length) {
+                calculateScores();
+                showPage('loadingPage');
+                setTimeout(() => {
+                    renderResults();
+                    showPage('resultPage');
+                }, 3000);
+                return;
+            }
+
+            state.currentQuestionIndex = index;
+            const q = QUESTIONS[index];
+            document.getElementById('dimensionLabel').textContent = q.tag;
+            document.getElementById('progressLabel').textContent = `${index + 1} / ${QUESTIONS.length}`;
+            document.getElementById('progressFill').style.width = `${((index + 1) / QUESTIONS.length) * 100}%`;
+            document.getElementById('questionTag').textContent = q.tag;
+            document.getElementById('questionText').textContent = q.text;
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn' + (state.answers[index] === i ? ' selected' : '');
+                btn.textContent = opt.text;
+                btn.onclick = () => {
+                    state.answers[index] = i;
+                    container.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    setTimeout(() => renderQuestion(index + 1), 300);
+                };
+                container.appendChild(btn);
+            });
+
+            document.getElementById('backQuestionBtn').style.display = index> 0 ? 'block' : 'none';
+        }
+
+        function calculateScores() {
+            const types = ['career', 'visual', 'char', 'fun', 'data', 'emotion'];
+            state.scores = {};
+            types.forEach(t => state.scores[t] = 0);
+
+            QUESTIONS.forEach((q, i) => {
+                if (state.answers[i] !== undefined) {
+                    const scores = q.options[state.answers[i]].score;
+                    Object.keys(scores).forEach(type => {
+                        state.scores[type] = (state.scores[type] || 0) + scores[type];
+                    });
+                }
+            });
+
+            const maxPossible = 15 * 10;
+            Object.keys(state.scores).forEach(type => {
+                state.scores[type] = Math.round((state.scores[type] / maxPossible) * 100);
+            });
+
+            const sorted = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
+            state.resultType = sorted[0][0];
+        }
+
+        function renderResults() {
+            const typeNames = {
+                career: '事业粉', visual: '颜粉', char: '性格粉', 
+                fun: '快乐粉', data: '数据粉', emotion: '情感粉'
+            };
+            const typeDescs = {
+                career: '你是典型的作品为王的事业粉。你关注偶像的业务能力和作品质量，认为作品是明星最重要的资本。',
+                visual: '你是颜值为上的颜粉。你被偶像的外貌深深吸引，认为颜值即正义。',
+                char: '你是被性格圈粉的性格粉。你更关注偶像的人格魅力和性格特质，被他们的内在吸引。',
+                fun: '你是追求快乐的综艺粉。你追星主要是为了快乐，偶像能让你开心最重要。',
+                data: '你是热衷做数据的数据粉。你热衷于打榜、控评、做数据，是饭圈的中坚力量。',
+                emotion: '你是真情实感的情感粉。你对偶像投入了很深的感情，把他们当作精神寄托。'
+            };
+            const typeTags = {
+                career: ['作品', '事业', '实力'], visual: ['颜值', '身材', '神颜'],
+                char: ['性格', '人格', '魅力'], fun: ['快乐', '综艺', '有趣'],
+                data: ['打榜', '控评', '数据'], emotion: ['感情', '投入', '真心']
+            };
+
+            const result = state.resultType;
+            document.getElementById('levelTag').textContent = '你的追星人格：' + typeNames[result];
+            document.getElementById('resultLevelDesc').textContent = '根据你的测评结果';
+            document.getElementById('matchName').textContent = typeNames[result];
+            document.getElementById('matchDesc').textContent = typeDescs[result];
+            
+            const tagsContainer = document.getElementById('matchTags');
+            tagsContainer.innerHTML = (typeTags[result] || []).map(tag => `<span class="match-tag">${tag}</span>`).join('');
+        }
+
+        function generateReport() {
+            const typeNames = {
+                career: '事业粉', visual: '颜粉', char: '性格粉', 
+                fun: '快乐粉', data: '数据粉', emotion: '情感粉'
+            };
+            const result = typeNames[state.resultType] || state.resultType;
+            const sorted = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
+            
+            const html = `
+                <div class="report-section">
+                    <h3 class="report-section-title">📋 测评基础信息</h3>
+                    <p>• 测试时间：${new Date().toLocaleString()}</p>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">📊 测评结果总览</h3>
+                    <div class="report-highlight">
+                        <p style="font-size:18px; font-weight:700; margin-bottom:10px;">🎯 核心推荐：${result}</p>
+                        <p style="margin:0;">${getPersonalityIntro(state.resultType)}</p>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">💡 你的人格分析</h3>
+                    <p>${getDeepAnalysis(state.resultType)}</p>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="report-section-title">🎯 追星建议</h3>
+                    <p>${getSuggestions(state.resultType)}</p>
+                </div>
+            `;
+
+            document.getElementById('reportContent').innerHTML = html;
+        }
+
+        function getPersonalityIntro(type) {
+            const intros = {
+                career: '你是典型的作品为王的事业粉，关注偶像的业务能力和作品质量。',
+                visual: '你是颜值为上的颜粉，被偶像的外貌深深吸引。',
+                char: '你是被性格圈粉的性格粉，更关注偶像的人格魅力。',
+                fun: '你是追求快乐的综艺粉，偶像能让你开心最重要。',
+                data: '你是热衷做数据的数据粉，是饭圈的中坚力量。',
+                emotion: '你是真情实感的情感粉，对偶像投入了很深的感情。'
+            };
+            return intros[type] || '';
+        }
+
+        function getDeepAnalysis(type) {
+            const analyses = {
+                career: '作为事业粉，你的追星理念非常务实和理性。你认为一个明星最重要的价值在于他的作品和业务能力。你不会因为一些负面新闻就轻易脱粉，只要偶像还能拿出好的作品，你就会一直支持。你是一个成熟、理性的粉丝，追星对你来说更像是一种精神激励，你从偶像的努力和成功中获得正能量。',
+                visual: '作为颜粉，你是一个彻底的视觉动物。你对美的追求是纯粹的，你被偶像的外貌深深吸引，这让你感到愉悦和享受。颜值即正义是你的信条，只要好看一切都好说。你是一个懂得欣赏美的人，追星对你来说是一种审美享受。',
+                char: '作为性格粉，你追星更看重的是偶像的人格魅力。你被偶像的性格、为人处世的方式所吸引。你喜欢的是那个"人"而不是那个"星"。你是一个注重内在的人，你觉得和偶像在某种程度上有心灵相通的地方。',
+                fun: '作为快乐粉，你的追星态度非常轻松和佛系。追星对你来说就是消遣和娱乐，只要能让你开心就够了。你不会给自己太多压力，也不会为偶像去撕逼或者做数据。快乐最重要是你的座右铭。',
+                data: '作为数据粉，你是一个非常投入和认真的粉丝。你热衷于打榜、控评、反黑、做数据，你是饭圈的中坚力量。你对偶像的爱体现在行动上，你愿意花时间和精力为偶像创造更好的发展环境。你是一个有组织、有纪律的粉丝。',
+                emotion: '作为情感粉，你是一个投入非常深的粉丝。你对偶像有着真挚的感情，把他们当作精神寄托。你会为偶像的开心而开心，为偶像的难过而难过。你是一个长情且专一的人，一旦入坑就很难爬出来。'
+            };
+            return analyses[type] || '';
+        }
+
+        function getSuggestions(type) {
+            const suggestions = {
+                career: '<p>1. 继续关注作品，用作品说话</p><p>2. 适当做做产出，让更多人看到好作品</p><p>3. 保持理性，不要被饭圈恶臭影响心情</p><p>4. 追星是为了激励自己，让生活更美好</p>',
+                visual: '<p>1. 可以继续欣赏美颜，注意不要过度沉迷</p><p>2. 可以尝试了解作品，发现更多优点</p><p>3. 追星审美也要有底线</p><p>4. 不要因为颜而忽略品格</p>',
+                char: '<p>1. 珍惜这份被性格圈粉的缘分</p><p>2. 可以多了解偶像的作品和人品</p><p>3. 不要过度脑补，保留适当距离</p><p>4. 保持独立思考，理性追星</p>',
+                fun: '<p>1. 继续快乐追星，保持好心情</p><p>2. 不用给自己和偶像太大压力</p><p>3. 开心最重要，不要被饭圈影响</p><p>4. 做一个佛系的快乐粉</p>',
+                data: '<p>1. 做数据辛苦了，注意休息</p><p>2. 也要关注作品本身</p><p>3. 保持理性，不要过度沉迷</p><p>4. 团结更多粉丝一起努力</p>',
+                emotion: '<p>1. 投入感情是好事，但要保护自己</p><p>2. 不要过度氪金，量力而行</p><p>3. 保持理性距离，偶像只是偶像</p><p>4. 追星是为了让生活更美好</p>'
+            };
+            return suggestions[type] || '';
+        }
+
+        initEventListeners();
+    </script>
+    <script>
+        try { initEventListeners(); } catch(e) {}
+    </script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "zxrg";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
+</html>

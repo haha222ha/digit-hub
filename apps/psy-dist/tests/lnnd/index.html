@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>恋爱脑程度检测 | 深度心理学测试</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:#764ba2}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root {
+            --primary: #FF6B81; 
+            --primary-dark: #E84A6A;
+            --accent: #FF9EB5; 
+            --accent-hover: #FF8A9E;
+            --safe: #2ED573;
+            --warning: #FFA502;
+            --bg-gradient-start: #FFF0F3;
+            --bg-gradient-end: #FFE4E9;
+            --text-main: #2D3436;
+            --text-sub: #636E72;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(255, 107, 129, 0.15);
+        }
+
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse-pink { 0% { box-shadow: 0 0 0 0 rgba(255, 107, 129, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 107, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 107, 129, 0); } }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 129, 0.3);
+            transition: transform 0.1s, background 0.2s;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        #page-intro {
+            padding: 50px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            
+            min-height: 100vh;
+            background-image: radial-gradient(#ffeef0 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .cover-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            align-self: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cover-title {
+            font-size: 38px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #2D3436;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 16px; color: #636E72; margin-bottom: 40px; line-height: 1.6; }
+        
+        .intro-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ffe4e9;
+            text-align: left;
+        }
+        .feature-icon { font-size: 24px; margin-bottom: 8px; }
+        .feature-title { font-weight: 800; color: #2D3436; font-size: 14px; margin-bottom: 4px; }
+        .feature-desc { font-size: 12px; color: #999; line-height: 1.4; }
+
+        #page-demographics { padding: 40px 24px; display: none; background: #fff; min-height: 100vh; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: block; color: #2D3436; }
+        .select-box {
+            width: 100%; padding: 18px; border: 2px solid #ffe4e9; border-radius: 10px;
+            font-size: 16px; background: #fdfdfd; outline: none; appearance: none;
+            color: #2D3436; font-weight: 500;
+        }
+        .select-box:focus { border-color: var(--primary); background: #fff; }
+        
+        #page-test {
+            padding: 30px 24px;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #fff;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #999; font-weight: 700; text-transform: uppercase; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #ffeef0; border-radius: 3px; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: width 0.3s ease; }
+        
+        .question-card { flex: 1; }
+        .question-tag { 
+            display: inline-block; background: #ffeef0; color: var(--primary); padding: 4px 10px; 
+            border-radius: 4px; font-size: 12px; margin-bottom: 15px; font-weight: 700;
+        }
+        .question-text { font-size: 22px; font-weight: 800; line-height: 1.4; margin-bottom: 30px; color: #2D3436; }
+        
+        .option-btn {
+            background: #fdfdfd; padding: 22px 20px; border-radius: 12px; margin-bottom: 16px;
+            font-size: 16px; color: #2D3436; cursor: pointer; border: 2px solid #ffe4e9; transition: all 0.2s;
+            position: relative; font-weight: 500; display: flex; align-items: center;
+        }
+        .option-btn:active { transform: scale(0.99); background: #fff5f7; }
+        .option-btn.selected { background: #fff0f3; border-color: var(--primary); color: var(--primary); font-weight: 700; }
+        
+        #page-result {
+            display: none; background: #ffeef0; padding-bottom: 100px; 
+            overflow-y: auto; min-height: 100vh; width: 100%;
+        }
+        .result-header {
+            background: #fff; padding: 40px 24px 30px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            text-align: center; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(255, 107, 129, 0.1);
+        }
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%; border: 8px solid var(--primary);
+            margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+            background: linear-gradient(135deg, #fff0f3, #ffe4e9);
+        }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--primary); line-height: 1; font-family: 'DIN Alternate', sans-serif;}
+        .score-label { font-size: 12px; color: #999; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .level-badge {
+            background: linear-gradient(90deg, var(--primary), var(--accent-hover)); color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 10px;
+        }
+        .level-desc { font-size: 14px; color: #636E72; max-width: 90%; margin: 0 auto; }
+
+        .card { background: #fff; margin: 0 20px 20px; border-radius: 16px; padding: 24px; box-shadow: 0 4px 10px rgba(255, 107, 129, 0.08); }
+        .card-title { font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid var(--primary); }
+
+        .dim-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .dim-info { width: 80px; }
+        .dim-name { font-size: 14px; font-weight: 700; color: #2D3436; display: block; }
+        .dim-sub { font-size: 10px; color: #999; }
+        .dim-bar-bg { flex: 1; height: 8px; background: #ffeef0; border-radius: 4px; overflow: hidden; margin: 0 12px; }
+        .dim-bar-fill { height: 100%; border-radius: 4px; }
+        .dim-val { width: 35px; text-align: right; font-size: 13px; font-weight: 700; color: #999; }
+
+        .bottom-dock {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 16px 24px; border-top: 1px solid #ffe4e9;
+            max-width: 520px; margin: 0 auto; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+        }
+        .unlock-btn {
+            background: linear-gradient(90deg, var(--primary), var(--accent)); color: white; width: 100%; padding: 14px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            animation: pulse-pink 2s infinite; cursor: pointer;
+        }
+        .reset-btn {
+            background: #fff; color: #999; width: 100%; padding: 10px;
+            border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        #report-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 2000; overflow-y: auto;
+        }
+        .report-header {
+            background: linear-gradient(135deg, var(--primary), var(--accent-hover)); color: #fff; padding: 70px 24px 40px;
+        }
+        .report-close {
+            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(255,255,255,0.2); color: #fff; border-radius: 50%;
+            border: none; font-size: 24px; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-body { max-width: 600px; margin: 0 auto; padding: 40px 24px 100px; }
+        .report-section { margin-bottom: 50px; }
+        .r-h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+        .r-h2 { font-size: 22px; font-weight: 800; color: #2D3436; margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #ffe4e9; }
+        .r-h3 { font-size: 18px; font-weight: 700; color: #2D3436; margin: 20px 0 10px; display: flex; align-items: center; }
+        .r-p { font-size: 16px; line-height: 1.8; color: #555; margin-bottom: 15px; text-align: justify; }
+        .r-box { background: #fff5f7; border: 1px solid #ffe4e9; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .r-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; margin-right: 8px; vertical-align: middle; }
+        .r-list li { margin-bottom: 10px; color: #555; }
+        
+        canvas { width: 100%; height: auto; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+
+    <div id="page-intro" data-screenshot="psych-test-恋爱脑程度检测" class="fade-in">
+        <div class="cover-tag">基于自我决定理论</div>
+        <h1 class="cover-title">恋爱脑<span>程度</span><br>深度检测</h1>
+        <p class="cover-subtitle">基于心理学专业量表<br>深度解析你的情感模式</p>
+        
+        <div class="intro-features">
+            <div class="feature-box">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">五维深度检测</div>
+                <div class="feature-desc">恋爱脑、自我迷失、情感依赖等多维度全面分析。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">💕</div>
+                <div class="feature-title">20道专业题目</div>
+                <div class="feature-desc">基于心理学量表设计，精准测量你的恋爱脑程度。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">六等级结果</div>
+                <div class="feature-desc">从清醒王者到顶级恋爱脑，科学划分你的状态。</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">千字深度报告</div>
+                <div class="feature-desc">专业解析+实用建议，助你建立健康恋爱观。</div>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn">开始测试 (约需 3 分钟)</button>
+    </div>
+
+    <div id="page-demographics">
+        <h2 style="font-size: 26px; font-weight:800; color:#2D3436; margin-bottom:10px;">个人情感档案 💕</h2>
+        <p style="color:#636E72; font-size:14px; margin-bottom:30px;">系统将根据你的情感模式生成专属测试。</p>
+
+        <div class="form-group">
+            <label class="form-label">你的恋爱经历？</label>
+            <select id="input-experience" class="select-box">
+                <option value="none">母胎solo (从未恋爱)</option>
+                <option value="short">短暂恋爱 (少于3个月)</option>
+                <option value="medium">常规恋爱 (3个月-1年)</option>
+                <option value="long">长期恋爱 (1年以上)</option>
+                <option value="multiple">多段恋爱经验</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">你当前的情感状态？</label>
+            <select id="input-status" class="select-box">
+                <option value="single">单身</option>
+                <option value="dating">暧昧中</option>
+                <option value="relationship">恋爱中</option>
+                <option value="long-distance">异地恋</option>
+                <option value="married">已婚</option>
+            </select>
+        </div>
+
+        <button class="btn" id="init-test-btn">生成专属测试题</button>
+    </div>
+
+    <div id="page-test">
+        <div class="progress-header">
+            <span id="dim-tag">维度：恋爱脑</span>
+            <span id="progress-text">1 / 20</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div id="question-wrapper" class="slide-up question-card">
+            <div class="question-tag" id="q-category">🧠 恋爱脑</div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div id="options-box"></div>
+        </div>
+        
+        <button class="btn-outline" id="prev-btn" style="display:none;">&lt; 返回上一题</button>
+    </div>
+
+    <div id="page-loading" class="hidden" style="height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center; background:#fff;">
+        <div style="font-size:50px; animation: pulse-pink 1s infinite; border-radius:50%;">💕</div>
+        <h3 style="margin-top:20px; font-weight:800; color:#2D3436;">正在分析你的情感模式...</h3>
+        <p style="color:#636E72; font-size:14px; line-height:1.8;">正在计算恋爱脑指数...<br>深度解析情感维度...<br>生成专业报告...</p>
+    </div>
+
+    <div id="page-result">
+        <div class="result-header">
+            <div class="score-circle">
+                <span class="score-num" id="res-score">0</span>
+                <span class="score-label">恋爱脑指数</span>
+            </div>
+            <div class="level-badge" id="res-level">分析中...</div>
+            <div class="level-desc" id="res-desc">...</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 五维情感雷达图</div>
+            <div style="height:240px; display:flex; justify-content:center; margin-bottom:20px;">
+                <canvas id="radarChart" width="240" height="240"></canvas>
+            </div>
+            <div id="bars-container">
+            </div>
+        </div>
+
+        <div class="bottom-dock">
+            <button class="unlock-btn" id="show-report-btn">📄 解锁《深度情感分析报告》</button>
+            <button class="reset-btn" id="reset-test-btn">🔄 重新测试</button>
+        </div>
+    </div>
+
+    <div id="report-modal">
+        <button class="report-close" id="close-report-btn">×</button>
+        <div class="report-header">
+            <div style="font-size:12px; opacity:0.8; letter-spacing:1px;">PSCHOLOGY DEPTH REPORT</div>
+            <div class="r-h1">恋爱脑程度深度分析报告</div>
+            <div style="font-size:14px;">基于自我决定理论 · 专业心理学分析</div>
+        </div>
+        <div class="report-body" id="report-content">
+        </div>
+    </div>
+
+</div>
+
+<script>
+const questions = [
+    // 恋爱脑维度 (lovebrain) - 4题
+    { d: 'lovebrain', t: '恋爱脑', q: "当TA突然不回消息时，你的第一反应是？", o: [
+        {t:"疯狂发消息，打电话也要找到TA", s:10},
+        {t:"反复查看手机，等待TA的回复", s:7},
+        {t:"先做自己的事，稍后再联系", s:3},
+        {t:"完全不在意，各自忙碌很正常", s:0}
+    ]},
+    { d: 'lovebrain', t: '恋爱脑', q: "你会在社交媒体上频繁查看TA的动态吗？", o: [
+        {t:"每小时看好几次，时刻关注", s:10},
+        {t:"每天看好几次，会点赞评论", s:7},
+        {t:"偶尔看看，不频繁", s:3},
+        {t:"几乎不看，各自有空间", s:0}
+    ]},
+    { d: 'lovebrain', t: '恋爱脑', q: "恋爱时你会每天和TA聊天多久？", o: [
+        {t:"几乎全程在线，秒回", s:10},
+        {t:"大部分时间聊天，几小时", s:7},
+        {t:"偶尔聊天，保持联系", s:3},
+        {t:"各忙各的，有事再说", s:0}
+    ]},
+    { d: 'lovebrain', t: '恋爱脑', q: "你会在恋爱中失去自我判断力吗？", o: [
+        {t:"完全围着TA转，失去自我", s:10},
+        {t:"经常以TA为中心", s:7},
+        {t:"偶尔会，更多独立", s:3},
+        {t:"始终保持独立自我", s:0}
+    ]},
+
+    // 自我迷失维度 (selfloss) - 4题
+    { d: 'selfloss', t: '自我迷失', q: "为了取悦TA，你会放弃自己的爱好吗？", o: [
+        {t:"完全放弃，什么都愿意", s:10},
+        {t:"放弃很多，改变习惯", s:7},
+        {t:"偶尔调整，不太刻意", s:3},
+        {t:"坚持自己，不会改变", s:0}
+    ]},
+    { d: 'selfloss', t: '自我迷失', q: "TA的意见会让你改变重大决定吗？", o: [
+        {t:"完全服从，TA说什么是什么", s:10},
+        {t:"经常被影响，跟着走", s:7},
+        {t:"偶尔参考，独立判断", s:3},
+        {t:"坚持自己，不受干扰", s:0}
+    ]},
+    { d: 'selfloss', t: '自我迷失', q: "你会为了TA和朋友家人疏远吗？", o: [
+        {t:"完全疏远，只围着TA", s:10},
+        {t:"减少联系，很少见面", s:7},
+        {t:"保持联系，偶尔见面", s:3},
+        {t:"正常社交，不受影响", s:0}
+    ]},
+    { d: 'selfloss', t: '自我迷失', q: "恋爱后你的个人发展计划？", o: [
+        {t:"完全围绕TA，重心转移", s:10},
+        {t:"以TA为主，个人为辅", s:7},
+        {t:"平衡发展，互相支持", s:3},
+        {t:"坚持自我，追求成长", s:0}
+    ]},
+
+    // 情感依赖维度 (emotion) - 4题
+    { d: 'emotion', t: '情感依赖', q: "没有TA你会感到焦虑不安吗？", o: [
+        {t:"非常焦虑，无法独处", s:10},
+        {t:"经常不安，很依赖", s:7},
+        {t:"偶尔不安，能自我调节", s:3},
+        {t:"完全不会，独立自信", s:0}
+    ]},
+    { d: 'emotion', t: '情感依赖', q: "你的情绪完全受TA影响吗？", o: [
+        {t:"完全依赖��TA决定心情", s:10},
+        {t:"大部分受影响", s:7},
+        {t:"偶尔受影响", s:3},
+        {t:"情绪独立，自主调节", s:0}
+    ]},
+    { d: 'emotion', t: '情感依赖', q: "遇到问题时你首先找谁？", o: [
+        {t:"只找TA，必须TA帮忙", s:10},
+        {t:"首先找TA，其次别人", s:7},
+        {t:"看情况，谁都找", s:3},
+        {t:"先自己解决，独立处理", s:0}
+    ]},
+    { d: 'emotion', t: '情感依赖', q: "你会在情感上过度依赖TA吗？", o: [
+        {t:"完全依赖，无法独立", s:10},
+        {t:"很依赖，黏着对方", s:7},
+        {t:"适度依赖，互相支持", s:3},
+        {t:"情感独立，自尊自爱", s:0}
+    ]},
+
+    // 失去理性维度 (rational) - 4题
+    { d: 'rational', t: '失去理性', q: "恋爱时你能客观评价TA的缺点吗？", o: [
+        {t:"完全看不到，TA完美无缺", s:10},
+        {t:"看到但不愿承认", s:7},
+        {t:"能客观看待，理性分析", s:3},
+        {t:"完全客观，清晰判断", s:0}
+    ]},
+    { d: 'rational', t: '失去理性', q: "当朋友批评TA时你会？", o: [
+        {t:"愤怒绝交，不让人说", s:10},
+        {t:"很不高兴，为TA辩护", s:7},
+        {t:"听取意见，理性思考", s:3},
+        {t:"虚心接受，客观分析", s:0}
+    ]},
+    { d: 'rational', t: '失去理性', q: "你会在恋爱中失去判断力吗？", o: [
+        {t:"完全盲目，失去判断", s:10},
+        {t:"经常盲目，不太理性", s:7},
+        {t:"偶尔迷茫，能走出来", s:3},
+        {t:"始终理性，清晰思考", s:0}
+    ]},
+    { d: 'rational', t: '失去理性', q: "面对TA的错误你会？", o: [
+        {t:"无原则原谅，盲目维护", s:10},
+        {t:"选择原谅，不太计较", s:7},
+        {t:"指出问题，理性沟通", s:3},
+        {t:"坚持原则，客观处理", s:0}
+    ]},
+
+    // 行为表现维度 (behavior) - 4题
+    { d: 'behavior', t: '行为表现', q: "你会在恋爱中过度付出而不求回报吗？", o: [
+        {t:"完全付出，不求回报", s:10},
+        {t:"经常付出，不太计较", s:7},
+        {t:"平衡付出，互相尊重", s:3},
+        {t:"理性付出，对等交往", s:0}
+    ]},
+    { d: 'behavior', t: '行为表现', q: "TA生气时你会无底线道歉吗？", o: [
+        {t:"完全道歉，不管对错", s:10},
+        {t:"经常道歉，委曲求全", s:7},
+        {t:"偶尔道歉，对等沟通", s:3},
+        {t:"理性沟通，坚持原则", s:0}
+    ]},
+    { d: 'behavior', t: '行为表现', q: "你在恋爱中会失去个人空间吗？", o: [
+        {t:"完全没有个人空间", s:10},
+        {t:"很少个人空间", s:7},
+        {t:"保持适当个人空间", s:3},
+        {t:"尊重个人空间，独立生活", s:0}
+    ]},
+    { d: 'behavior', t: '行为表现', q: "你会无条件容忍TA的所有行为吗？", o: [
+        {t:"完全容忍，没有底线", s:10},
+        {t:"经常容忍，底线很低", s:7},
+        {t:"有底线，偶尔容忍", s:3},
+        {t:"有原则，理性对待", s:0}
+    ]}
+,
+
+    { d: 'common', t: '通用维度', q: "你通常如何处理压力和困难？", o: [
+        {t:"积极面对，寻找解决方案", s:10},
+        {t:"偶尔焦虑，但能调整", s:7},
+        {t:"经常感到压力很大", s:4},
+        {t:"难以承受，容易崩溃", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己目前的现状满意吗？", o: [
+        {t:"非常满意，充满信心", s:10},
+        {t:"比较满意，有信心", s:7},
+        {t:"一般，还在努力中", s:4},
+        {t:"不满意，需要改变", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更看重生活中的哪个方面？", o: [
+        {t:"事业发展和个人成长", s:10},
+        {t:"家庭和人际关系", s:8},
+        {t:"身心健康和快乐", s:6},
+        {t:"经济稳定和安全", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "当面对选择时，你通常会？", o: [
+        {t:"理性分析利弊后决定", s:10},
+        {t:"跟随直觉和内心感受", s:7},
+        {t:"听取他人意见后决定", s:5},
+        {t:"犹豫不决，难以决定", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "你认为自己最大的优势是什么？", o: [
+        {t:"学习能力和适应能力", s:10},
+        {t:"沟通和社交能力", s:8},
+        {t:"执行力和自律性", s:6},
+        {t:"创造力和想象力", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "你更倾向于哪种工作方式？", o: [
+        {t:"独立完成，有掌控感", s:10},
+        {t:"团队协作，共同完成", s:8},
+        {t:"有指导的独立工作", s:6},
+        {t:"需要经常与他人沟通", s:4}
+    ]},
+    { d: 'common', t: '通用维度', q: "在社交场合，你通常表现如何？", o: [
+        {t:"自信从容，游刃有余", s:10},
+        {t:"能够正常交流", s:7},
+        {t:"有些紧张和拘谨", s:4},
+        {t:"回避社交场合", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你如何描述你的人际关系？", o: [
+        {t:"有很多知心朋友", s:10},
+        {t:"有几个好朋友", s:7},
+        {t:"朋友不多但关系不错", s:5},
+        {t:"比较孤独，缺乏朋友", s:2}
+    ]},
+    { d: 'common', t: '通用维度', q: "当遇到挫折时，你会怎么做？", o: [
+        {t:"总结经验，继续前进", s:10},
+        {t:"需要时间调整心态", s:7},
+        {t:"容易陷入负面情绪", s:4},
+        {t:"需要很长时间恢复", s:1}
+    ]},
+    { d: 'common', t: '通用维度', q: "你对自己的未来规划清晰吗？", o: [
+        {t:"非常清晰，有明确目标", s:10},
+        {t:"比较清晰，有大方向", s:7},
+        {t:"有些迷茫，还在探索", s:4},
+        {t:"完全没有方向", s:1}
+    ]}
+];
+
+const levels = [
+    { max: 30, l: "清醒王者", c: "#2ED573", emoji: "👑", d: "你拥有非常理性的恋爱观，能够在亲密关系中保持清晰的自我认知和独立判断，是真正的人生赢家。", advice: "继续保持理性思维，你的爱情观非常健康。" },
+    { max: 50, l: "理性达人", c: "#7BED9F", emoji: "🧠", d: "你能够在恋爱中保持较好的理性，虽然会投入感情但不会失去自我，���成���的情感模式。", advice: "保持现状，你的平衡做得很好。" },
+    { max: 70, l: "轻度恋爱脑", c: "#FFA502", emoji: "💕", d: "你有一定程度的恋爱脑倾向，但在可控范围内。需要更多关注自我成长。", advice: "建议多关注自我发展，保持情感独立。" },
+    { max: 90, l: "中度恋爱脑", c: "#FF6B81", emoji: "💗", d: "你的恋爱脑比较明显，常常以对方为中心，容易失去自我。需要警惕情感迷失。", advice: "建议建立更健康的个人边界，注重自我价值。" },
+    { max: 110, l: "重度恋爱脑", c: "#FF4757", emoji: "💖", d: "你的恋爱脑非常严重，几乎完全围绕对方转，失去自我。需要立即重视并调整。", advice: "强烈建议寻求帮助，建立健康恋爱观。" },
+    { max: 200, l: "顶级恋爱脑", c: "#C0392B", emoji: "💔", d: "你处于无药可救的状态，完全失去自我，情感完全依赖对方。这种状态需要专业干预。", advice: "请立即寻求专业心理咨询，建立健康的自我。" }
+];
+
+let currQList = [];
+let currIdx = 0;
+let userExperience = '';
+let userStatus = '';
+let scores = { lovebrain:0, selfloss:0, emotion:0, rational:0, behavior:0 };
+
+function goToDemo() {
+    document.getElementById('page-intro').style.display = 'none';
+    document.getElementById('page-demographics').style.display = 'block';
+}
+
+function initTest() {
+    userExperience = document.getElementById('input-experience').value;
+    userStatus = document.getElementById('input-status').value;
+    
+    currQList = [...questions];
+    currIdx = 0;
+    scores = { lovebrain:0, selfloss:0, emotion:0, rational:0, behavior:0 };
+    
+    document.getElementById('page-demographics').style.display = 'none';
+    document.getElementById('page-test').style.display = 'flex';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = currQList[currIdx];
+    
+    document.getElementById('progress-text').innerText = `${currIdx + 1} / ${currQList.length}`;
+    document.getElementById('progress-fill').style.width = `${((currIdx)/currQList.length)*100}%`;
+    document.getElementById('dim-tag').innerText = `维度：${q.t}`;
+    document.getElementById('q-category').innerText = q.t;
+    
+    const wrapper = document.getElementById('question-wrapper');
+    wrapper.classList.remove('slide-up');
+    void wrapper.offsetWidth;
+    wrapper.classList.add('slide-up');
+    
+    document.getElementById('question-text').innerText = q.q;
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    
+    q.o.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.t;
+        btn.onclick = () => {
+            Array.from(box.children).forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => handleAnswer(q.d, opt.s), 200);
+        };
+        box.appendChild(btn);
+    });
+
+    document.getElementById('prev-btn').style.display = currIdx> 0 ? 'block' : 'none';
+}
+
+function handleAnswer(dim, val) {
+    scores[dim] += val;
+
+    if (currIdx < currQList.length - 1) {
+        currIdx++;
+        renderQuestion();
+        finishTest();
+    }
+}
+
+function prevQuestion() {
+    if (currIdx> 0) {
+        currIdx--;
+        renderQuestion();
+    }
+}
+
+function finishTest() {
+    document.getElementById('page-test').style.display = 'none';
+    document.getElementById('page-loading').style.display = 'flex';
+    document.getElementById('page-loading').classList.remove('hidden');
+    
+    setTimeout(() => {
+        document.getElementById('page-loading').style.display = 'none';
+        document.getElementById('page-result').style.display = 'block';
+        calculateResult();
+    }, 2500);
+}
+
+function resetTest() {
+    document.getElementById('page-result').style.display = 'none';
+    document.getElementById('page-intro').style.display = 'flex';
+    currIdx = 0;
+    scores = { lovebrain:0, selfloss:0, emotion:0, rational:0, behavior:0 };
+}
+
+function calculateResult() {
+    let totalRaw = Object.values(scores).reduce((a,b)=>a+b, 0);
+    let finalScore = totalRaw;
+    if(finalScore> 200) finalScore = 200;
+
+    let lvl = levels.find(l => finalScore <= l.max) || levels[levels.length-1];
+
+    const numEl = document.getElementById('res-score');
+    animateValue(numEl, 0, finalScore, 1500);
+    
+    const badge = document.getElementById('res-level');
+    badge.innerText = `${lvl.emoji} ${lvl.l}`;
+    badge.style.background = lvl.c;
+    
+    document.getElementById('res-desc').innerText = lvl.d;
+
+    renderBars(scores);
+    drawRadar(scores);
+}
+
+function renderBars(s) {
+    const box = document.getElementById('bars-container');
+    const dims = [
+        {k:'lovebrain', n:'恋爱脑'}, {k:'selfloss', n:'自我迷失'}, 
+        {k:'emotion', n:'情感依赖'}, {k:'rational', n:'失去理性'}, {k:'behavior', n:'行为表现'}
+    ];
+    let html = '';
+
+    dims.forEach(d => {
+        let pct = Math.min((s[d.k] / 40) * 100, 100);
+        let color = pct> 60 ? '#FF6B81' : (pct> 30 ? '#FF9EB5' : '#FFB8C5');
+        let txt = pct> 70 ? '严重' : (pct> 40 ? '中等' : '正常');
+        
+        html += `
+        <div class="dim-row">
+            <div class="dim-info">
+                <span class="dim-name">${d.n}</span>
+                <span class="dim-sub">${getDimName(d.k)}</span>
+            </div>
+            <div class="dim-bar-bg"><div class="dim-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+            <div class="dim-val" style="color:${color}">${txt}</div>
+        </div>`;
+    });
+    box.innerHTML = html;
+}
+
+function getDimName(k) {
+    const map = {lovebrain:'恋爱脑', selfloss:'自我迷失', emotion:'情感依赖', rational:'失去理性', behavior:'行为表现'};
+    return map[k];
+}
+
+function showReport() {
+    const total = parseInt(document.getElementById('res-score').innerText);
+    const lvl = levels.find(l => total <= l.max) || levels[levels.length-1];
+    let maxDimKey = Object.keys(scores).reduce((a, b) => scores[a]> scores[b] ? a : b);
+
+    let html = `
+    <div class="report-section">
+        <div class="r-h1">一、情感模式诊断书</div>
+        <p class="r-p" style="background:#fff5f7; padding:12px; border-radius:8px; font-size:14px; border:1px solid #ffe4e9;">
+            <strong>💕 个人档案：</strong>${getExpName(userExperience)} <br>
+            <strong>❤️ 情感状态：</strong>${getStatusName(userStatus)}
+        </p>
+        
+        <div class="r-box" style="border-left:5px solid ${lvl.c}; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size:22px; font-weight:900; color:${lvl.c}; margin-bottom:8px;">${lvl.emoji} 你的恋爱脑等级：${lvl.l}</div>
+            <div style="display:flex; align-items:baseline; margin-bottom:10px;">
+                <span style="font-size:14px; color:#999; margin-right:8px;">恋爱脑指数</span>
+                <span style="font-size:36px; font-weight:900; color:#2D3436; font-family:'DIN Alternate', sans-serif;">${total}</span>
+                <span style="font-size:14px; color:#999;">/ 200</span>
+            </div>
+            <p style="margin:0; font-size:15px; line-height:1.6; color:#555;"><strong>专家建议：</strong>${lvl.advice}</p>
+        </div>
+
+        <p class="r-p">
+        基于自我决定理论(Self-Determination Theory)的深度分析显示，你的恋爱脑程度处于<span style="background:${lvl.c}; color:#fff; padding:2px 6px; border-radius:4px; font-weight:bold;">${lvl.l}</span>水平。
+        你在<span style="color:${lvl.c}; font-weight:bold;">${getDimNameCN(maxDimKey)}</span>维度得分最高，表明这是你最需要关注的情感领域。
+        </p>
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">二、五维度深度解构分析</div>
+        <p style="font-size:12px; color:#999; margin-bottom:20px; font-style:italic;">*基于心理学专业量表的系统分析</p>
+        ${generateDimAnalysis('lovebrain', scores.lovebrain)}
+        ${generateDimAnalysis('selfloss', scores.selfloss)}
+        ${generateDimAnalysis('emotion', scores.emotion)}
+        ${generateDimAnalysis('rational', scores.rational)}
+        ${generateDimAnalysis('behavior', scores.behavior)}
+    </div>
+
+    <div class="report-section">
+        <div class="r-h2">三、基于自我决定理论的专业建议</div>
+        <div class="r-box">
+            <div class="r-h3" style="color:var(--primary);">🧠 自我决定理论解读</div>
+            <p class="r-p">
+            自我决定理论(SDT)由心理学家Deci和Ryan提出，强调人类的三种基本心理需求：<strong>自主性</strong>、<strong>胜任感</strong>和<strong>归属感</strong>。
+            健康的恋爱关系应该满足这三种需求，而不是以牺牲自我为代价。
+            </p>
+            <p class="r-p">
+            你的测试结果显示，在亲密关系中你${getSDTAdvice(total)}。这可能影响你的心理健康和个人发展。
+            </p>
+        </div>
+        
+        <div class="r-box" style="background:#fff5f7; border-color:var(--primary);">
+            <div class="r-h3">
+                💡 针对性改善建议
+            </div>
+            <ul class="r-list">
+                <li><strong>建立边界意识：</strong> ${getBoundaryAdvice(total)}</li>
+                <li><strong>保持独立空间：</strong> ${getSpaceAdvice(total)}</li>
+                <li><strong>发展兴趣爱好：</strong> ${getHobbyAdvice(total)}</li>
+                <li><strong>建立社交支持：</strong> ${getSocialAdvice(total)}</li>
+            </ul>
+        </div>
+
+        <div class="r-box">
+            <div class="r-h3">🌟 健康恋爱观培养</div>
+            <p class="r-p">
+            健康的恋爱关系应该是两个独立个体的相互成长，而不是一方对另一方的依赖或控制。
+            建议你：<br><br>
+            1. <strong>保持个人生活：</strong>不要因为恋爱而放弃原有的社交圈子和兴趣爱好。<br>
+            2. <strong>理性沟通：</strong>遇到问题时要冷静沟通，而不是情绪化处理。<br>
+            3. <strong>相互尊重：</strong>尊重彼此的个人边界和成长空间。<br>
+            4. <strong>自我成长：</strong>在恋爱中不断学习和成长，成为更好的自己。<br><br>
+            记住：只有先学会爱自己，才能真正爱别人。
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align:center; color:#ccc; font-size:12px; margin-top:50px; line-height:1.8;">
+        恋爱脑程度深度检测报告 · 基于自我决定理论<br>
+        愿你拥有健康独立的爱情
+    </div>
+    `;
+
+    document.getElementById('report-content').innerHTML = html;
+    document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReport() {
+    document.getElementById('report-modal').style.display = 'none';
+}
+
+function getExpName(t) {
+    const m = {
+        none: '母胎solo', short: '短暂恋爱', medium: '常规恋爱', long: '长期恋爱', multiple: '多段恋爱'
+    };
+    return m[t] || t;
+}
+
+function getStatusName(t) {
+    const m = {
+        single: '单身', dating: '暧昧中', relationship: '恋��中', longDistance: '异地恋', married: '已婚'
+    };
+    return m[t] || t;
+}
+
+function getDimNameCN(k) {
+    const m = {
+        lovebrain: '恋爱脑', selfloss: '自我迷失', emotion: '情感依赖', rational: '失去理性', behavior: '行为表现'
+    };
+    return m[k];
+}
+
+function getSDTAdvice(score) {
+    if (score <= 30) return "很好地保持了心理独立性，满足基本心理需求";
+    else if (score <= 50) return "基本保持理性，但有轻微依赖倾向";
+    else if (score <= 70) return "存在一定的依赖倾向，需要关注自我需求";
+    else if (score <= 90) return "过度依赖对方，可能忽视自我需求";
+    else return "严重依赖对方，丧失自我，需要立即调整";
+}
+
+function getBoundaryAdvice(score) {
+    if (score <= 50) return "你做得很好，继续保持清晰的个人边界";
+    else if (score <= 90) return "建议明确告诉对方自己的底线，学会说\"不\"";
+    else return "必须学会设立边界，这是健康关系的基础";
+}
+
+function getSpaceAdvice(score) {
+    if (score <= 50) return "你懂得保持个人空间，继续坚持";
+    else if (score <= 90) return "每天给自己一些独处时间，做喜欢的事";
+    else return "立刻给自己安排独立时间，重建个人生活";
+}
+
+function getHobbyAdvice(score) {
+    if (score <= 50) return "保持你的兴趣爱好，它们很重要";
+    else if (score <= 90) return "重拾以前的爱好，重建个人生活";
+    else return "尝试新事物，找到自我价值";
+}
+
+function getSocialAdvice(score) {
+    if (score <= 50) return "你的社交圈保持得很好";
+    else if (score <= 90) return "多和朋友家人联系，保持社交";
+    else return "立即联系老朋友，重建社交支持";
+}
+
+function generateDimAnalysis(key, val) {
+    let riskLevel = val> 28 ? 'high' : (val> 14 ? 'med' : 'low');
+    
+    const config = {
+        high: { color: '#FF6B81', bg: '#fff0f3', tag: '⚠️ 严重', titleColor: '#FF4757' },
+        med: { color: '#FF9EB5', bg: '#fff5f7', tag: '⚡ 警示', titleColor: '#FF6B81' },
+        low: { color: '#FFB8C5', bg: '#fffafb', tag: '✅ 正常', titleColor: '#2ED573' }
+    };
+    
+    const c = config[riskLevel];
+    
+    const texts = {
+        lovebrain: {
+            high: "<strong>恋爱脑严重！</strong>你几乎将所有精力投入到恋爱中，时刻关注对方，失去了正常的理性判断。这种状态需要立即调整。",
+            med: "<strong>有一定恋爱脑倾向。</strong>你会比较关注恋爱对象，但尚有理性思维。建议保持适度的关注度。",
+            low: "<strong>恋爱脑程度正常。</strong>你能够在恋爱中保持理性，这是健康的情感状态。"
+        },
+        selfloss: {
+            high: "<strong>自我迷失严重！</strong>你在恋爱中完全失去自我，以对方为中心。这种依附关系对双方都不健康。",
+            med: "<strong>有一定自我迷失倾向。</strong>你会比较以对方为主，但尚有自我意识。建议多关注自己的需求。",
+            low: "<strong>自我保持良好。</strong>你能够在恋爱中保持自我，这是健康的关系模式。"
+        },
+        emotion: {
+            high: "<strong>情感依赖严重！</strong>你过度依赖对方，情感完全寄托在对方身上。这种依赖会带来焦虑和问题。",
+            med: "<strong>有一定情感依赖。</strong>你会比较依赖对方，但能自我调节。建议发展情感独立性。",
+            low: "<strong>情感独立良好。</strong>你能够独立处理情感，这是成熟的情感模式。"
+        },
+        rational: {
+            high: "<strong>极度不理性！</strong>你在恋���中���全失去判断力，无法客观评价对方。这种盲目会伤害自己。",
+            med: "<strong>理性程度下降。</strong>你会受到情感影响，但尚能保持基本判断。建议多听取他人意见。",
+            low: "<strong>理性保持良��。</strong>你能够客观评价恋爱关系，这是健康的认知模式。"
+        },
+        behavior: {
+            high: "<strong>行为问题严重！</strong>你在恋爱中过度付出，失去原则和底线。这种模式会让自己受伤。",
+            med: "<strong>行为有失衡倾向。</strong>你会在某些方面过度付出，但有底线意识。建议建立原则。",
+            low: "<strong>行为模式健康。</strong>你能够对等付出，这是健康的恋爱行为。"
+        }
+    };
+    
+    return `
+    <div style="margin-bottom:24px; padding:16px; background:${c.bg}; border-radius:8px; border-left:4px solid ${c.color};">
+        <div class="r-h3" style="color:${c.titleColor}; margin-top:0;">
+            ${getDimNameCN(key)} 
+            <span style="font-size:12px; opacity:0.8; margin-left:8px;">(得分: ${Math.round(val)}/40)</span>
+            <span style="float:right; font-size:12px; background:${c.color}; color:#fff; padding:2px 8px; border-radius:10px;">${c.tag}</span>
+        </div>
+        <p class="r-p" style="margin-bottom:0; color:#444;">${texts[key][riskLevel]}</p>
+    </div>
+    `;
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+function drawRadar(s) {
+    const c = document.getElementById('radarChart');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.style.width = '240px'; c.style.height = '240px';
+    c.width = 240 * dpr; c.height = 240 * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const cx=120, cy=120, r=90;
+    const keys = ['lovebrain','selfloss','emotion','rational','behavior'];
+    const labels = ['恋爱脑','自我迷失','情感依赖','失去理性','行为表现'];
+    
+    ctx.strokeStyle = '#ffe4e9';
+    ctx.lineWidth = 1;
+    for(let i=1; i<=4; i++) {
+        ctx.beginPath();
+        for(let j=0; j<5; j++) {
+            let a = (Math.PI*2/5)*j - Math.PI/2;
+            let rad = (r/4)*i;
+            ctx.lineTo(cx + Math.cos(a)*rad, cy + Math.sin(a)*rad);
+        }
+        ctx.closePath(); ctx.stroke();
+    }
+    
+    ctx.beginPath();
+    keys.forEach((k, i) => {
+        let val = s[k]; 
+        let ratio = Math.min(val / 40, 1.1); 
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.lineTo(cx + Math.cos(a)*r*ratio, cy + Math.sin(a)*r*ratio);
+    });
+    ctx.closePath();
+    
+    let grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grd.addColorStop(0, "rgba(255, 107, 129, 0.1)");
+    grd.addColorStop(1, "rgba(255, 107, 129, 0.6)");
+    ctx.fillStyle = grd;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#FF6B81'; ctx.lineWidth = 2; ctx.stroke();
+    
+    ctx.fillStyle = '#2D3436'; ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center';
+    labels.forEach((l, i) => {
+        let a = (Math.PI*2/5)*i - Math.PI/2;
+        ctx.fillText(l, cx + Math.cos(a)*(r+22), cy + Math.sin(a)*(r+22) + 4);
+    });
+}
+
+document.getElementById('start-btn').addEventListener('click', function() {
+        
+ goToDemo(); });
+document.getElementById('init-test-btn').addEventListener('click', initTest);
+document.getElementById('prev-btn').addEventListener('click', prevQuestion);
+document.getElementById('show-report-btn').addEventListener('click', showReport);
+document.getElementById('reset-test-btn').addEventListener('click', resetTest);
+document.getElementById('close-report-btn').addEventListener('click', closeReport);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "lnnd";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

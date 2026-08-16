@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>奶茶人格测试 | 2026专业心理测评</title>
+    <style>
+
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05)}
+        .nav-home{color:var(--primary);text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+        .nav-home:hover{color:var(--primary-dark, var(--primary))}
+        .nav-title{color:#333;font-size:14px;font-weight:700}
+
+        :root { --primary: #F8B500; --primary-dark: #E6A800; --bg-gradient-start: #FFF8E1; --bg-gradient-end: #FFECB3; --text-main: #2D3436; --text-sub: #636E72; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); color: var(--text-main); line-height: 1.6; }
+        .container { width: 100%; max-width: 520px; min-height: 100vh; background: #fff; position: relative; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px 28px; border-radius: 8px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(248, 181, 0, 0.3); transition: transform 0.1s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.98); }
+        #page-intro { padding: 60px 24px 40px; text-align: center; min-height: 100vh; }
+        .cover-tag { display: inline-block; background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 800; margin-bottom: 20px; letter-spacing: 2px; }
+        .cover-title { font-size: 38px; line-height: 1.2; margin-bottom: 16px; color: #2D3436; font-weight: 900; }
+        .cover-title span { color: var(--primary); }
+        .cover-subtitle { font-size: 15px; color: #636E72; margin-bottom: 40px; }
+        .milk-tea-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 40px; }
+        .milk-tea-item { width: 80px; height: 80px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 40px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; }
+        .milk-tea-item:hover { transform: scale(1.1); }
+        #page-result { display: none; padding: 30px 24px; background: #fff8e1; min-height: 100vh; }
+        .result-card { text-align: center; padding: 30px; background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .milk-icon { font-size: 80px; margin-bottom: 20px; }
+        .milk-name { font-size: 28px; font-weight: 900; color: var(--primary); margin-bottom: 10px; }
+        .milk-desc { font-size: 15px; color: #636E72; line-height: 1.8; margin-bottom: 30px; }
+        .traits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .trait-item { background: #fff8e1; padding: 15px; border-radius: 10px; text-align: center; }
+        .trait-label { font-size: 12px; color: #999; }
+        .trait-value { font-size: 16px; font-weight: 700; color: var(--primary); }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 16px 24px; border-top: 1px solid #eee; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .export-btn { background: #FF6B6B; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+            <a href="https://psy.xhs365.cn/" class="nav-home"><i class="fas fa-home"></i> 首页</a>
+        </nav>
+
+<div class="container">
+    <div id="page-intro" data-screenshot="psych-test-奶茶人格测试" class="fade-in">
+        <div class="cover-tag">2026 EDITION</div>
+        <h1 class="cover-title">奶茶<br><span>人格</span>测试</h1>
+        <p class="cover-subtitle">你是哪种奶茶人格？<br>看看你与哪种奶茶最匹配</p>
+        <div class="milk-tea-list">
+            <div class="milk-tea-item">🧋</div>
+            <div class="milk-tea-item">🧋</div>
+            <div class="milk-tea-item">🧋</div>
+            <div class="milk-tea-item">🧋</div>
+            <div class="milk-tea-item">🧋</div>
+            <div class="milk-tea-item">🧋</div>
+        </div>
+        <button class="btn" id="start-btn">开始测试 (约需 1 分钟)</button>
+    </div>
+    <div id="page-result">
+        <div class="result-card">
+            <div class="milk-icon" id="res-icon">🧋</div>
+            <div class="milk-name" id="res-name">加载中...</div>
+            <div class="milk-desc" id="res-desc">...</div>
+            <div class="traits-grid" id="traits-grid"></div>
+        </div>
+        <div style="margin-top:20px;text-align:center;color:#999;font-size:13px;">测试结果仅供参考娱乐</div>
+        <div class="bottom-dock">
+            <button class="btn export-btn" id="export-pdf-btn">📥 导出PDF报告</button>
+            <button class="btn" id="retry-btn" style="background:#fff;color:#666;border:1px solid #ddd;">🔄 重新测试</button>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const milkTeas = [
+    {icon:'🧋',name:'经典珍珠奶茶',desc:'你是经典款！性格稳重踏实，不追求花哨是你的代名词。你注重品质和口碑，是那种会回购同款的人。朋友眼中你是最靠谱的存在，有你在就安心。',traits:['稳重','靠谱','念旧','务实']},
+    {icon:'🧋',name:'杨枝甘露',desc:'你是甜而不腻的代表！性格开朗又温暖，是人群中的小太阳。你善于发现生活中的美好，也会把快乐传递给身边的人。和你在一起永远不会无聊！',traits:['开朗','温暖','有趣','乐观']},
+    {icon:'🧋',name:'芝士奶盖',desc:'你是层次丰富的存在！外表可能有点高冷，但内心柔软。接触后会发现你有有趣的灵魂。你对事物有自己的要求，不会随波逐流。',traits:['内敛','细腻','独特','追求']},
+    {icon:'🧋',name:'柠檬茶',desc:'你是清爽解腻的类型！性格直率坦诚，不喜欢绕弯子。你是那种有什么说什么的人，虽然有时话有点直，但和你相处特别轻松。',traits:['直率','坦诚','简单','高效']},
+    {icon:'🧋',name:'芋泥波波',desc:'你是软糯甜蜜的代表！性格温柔可爱，是甜甜的girl。你善于倾听，是朋友的情感垃圾桶。你总是默默关心身边的人，超级暖心！',traits:['温柔','暖心','倾听','细腻']},
+    {icon:'🧋',name:'生椰拿铁',desc:'你是高级感代表！性格低调但有品位。你追求品质生活，不将就但也不张扬。你是那种默默努力，然后惊艳所有人的类型。',traits:['高级','低调','品质','自律']}
+];
+document.getElementById('start-btn').addEventListener('click',function(){var modal=document.getElementById('sys-auth-modal');if(modal){modal.style.display='flex';var inp=document.getElementById('sys-auth-code');if(inp)inp.focus();}
+    const result=milkTeas[Math.floor(Math.random()*milkTeas.length)];
+    document.getElementById('page-intro').style.display='none';
+    document.getElementById('page-result').style.display='block';
+    document.getElementById('res-icon').innerText=result.icon;
+    document.getElementById('res-name').innerText=result.name;
+    document.getElementById('res-desc').innerText=result.desc;
+    const grid=document.getElementById('traits-grid');
+    grid.innerHTML=result.traits.map(t=>`<div class="trait-item"><div class="trait-label">特质</div><div class="trait-value">${t}</div></div>`).join('');
+});
+document.getElementById('retry-btn').addEventListener('click',function(){
+    document.getElementById('page-result').style.display='none';
+    document.getElementById('page-intro').style.display='flex';
+});
+async function exportPDF(){
+    const{jsPDF}=window.jspdf;
+    const doc=new jsPDF();
+    doc.setFillColor(248,181,0);
+    doc.rect(0,0,210,40,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(22);
+    doc.text('奶茶人格测试报告',105,25,{align:'center'});
+    doc.setTextColor(100,100,100);
+    doc.setFontSize(10);
+    doc.text('专业心理测评·2026全新版',105,35,{align:'center'});
+    let y=55;
+    const result=milkTeas[Math.floor(Math.random()*milkTeas.length)];
+    doc.setTextColor(0,0,0);
+    doc.setFontSize(16);
+    doc.text(`你是：${result.name}`,15,y);
+    y+=10;
+    doc.setFontSize(11);
+    const lines=doc.splitTextToSize(result.desc,180);
+    doc.text(lines,15,y);
+    doc.save('奶茶人格报告.pdf');
+}
+document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+</script>
+
+
+
+<script>window.__PSY_TEST_CODE__ = "ncrg";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>
