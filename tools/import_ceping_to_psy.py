@@ -572,11 +572,17 @@ def inject_bridge(html: str, code: str) -> str:
 
 
 def fix_home_nav(html: str) -> str:
-    # Keep skin; point home to psy landing instead of broken Flask /
+    """Homepage is psy.xhs365.cn itself — keep same-origin `/`, not an external URL.
+
+    Legacy Flask apps used href="/" for their own index; on psy-dist that correctly
+    lands on the 心象测 main site. Absolute https://psy.xhs365.cn/ is equivalent but
+    unnecessary; normalize both to `/`.
+    """
     html = re.sub(
-        r"""href=(['"])/\1""",
-        r"""href=\1https://psy.xhs365.cn/\1""",
+        r"""href=(['"])https?://psy\.xhs365\.cn/?\1""",
+        r"""href=\1/\1""",
         html,
+        flags=re.I,
     )
     # Unique skins often leave purple nav accents; align to --primary when present
     if "--primary:" in html or "--primary :" in html:
