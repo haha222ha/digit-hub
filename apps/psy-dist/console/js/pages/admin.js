@@ -626,13 +626,14 @@ function buildFillMissingPanel(tests, quota) {
   }
 
   function collectCounts() {
+    const def = Math.min(200, Math.max(1, Number(defaultCount.value) || 10));
     const byCode = {};
     for (const [code, inp] of countInputs.entries()) {
       const n = Math.min(200, Math.max(0, Number(inp.value) || 0));
       byCode[code] = n;
     }
     const next = {
-      defaultCount: Math.min(200, Math.max(1, Number(defaultCount.value) || 10)),
+      defaultCount: def,
       byCode,
       onlyMissing: !!onlyMissing.checked,
     };
@@ -644,6 +645,10 @@ function buildFillMissingPanel(tests, quota) {
     const n = Math.min(200, Math.max(1, Number(defaultCount.value) || 10));
     for (const inp of countInputs.values()) inp.value = String(n);
   }
+
+  // 改「默认条数」时同步整表，避免只改上面输入框、表格仍是旧的 10
+  defaultCount.addEventListener("change", applyDefaultToAll);
+  defaultCount.addEventListener("input", applyDefaultToAll);
 
   const previewBtn = el("button", {
     className: "btn btn-ghost",
@@ -659,13 +664,25 @@ function buildFillMissingPanel(tests, quota) {
   async function runFill(dryRun) {
     errHost.replaceChildren();
     previewHost.replaceChildren();
+    // 若表格各行数量相同（常见：全是旧默认 10），以「默认每测题条数」为准再提交
+    const rowVals = [...countInputs.values()].map((inp) =>
+      Math.min(200, Math.max(0, Number(inp.value) || 0))
+    );
+    const allSame = rowVals.length > 0 && rowVals.every((v) => v === rowVals[0]);
+    if (allSame) applyDefaultToAll();
+
     const prefsNow = collectCounts();
+    // 只把与默认不同的测题作为覆盖，其余走 defaultCount
+    const countsOverride = {};
+    for (const [code, n] of Object.entries(prefsNow.byCode || {})) {
+      if (Number(n) !== Number(prefsNow.defaultCount)) countsOverride[code] = n;
+    }
     previewBtn.disabled = true;
     fillBtn.disabled = true;
     try {
       const data = await api.fillMissingLinks({
         defaultCount: prefsNow.defaultCount,
-        counts: prefsNow.byCode,
+        counts: countsOverride,
         onlyMissing: prefsNow.onlyMissing,
         dryRun,
       });
@@ -676,7 +693,7 @@ function buildFillMissingPanel(tests, quota) {
           flash(
             data.quota_ok ? "ok" : "error",
             data.quota_ok
-              ? `将为 ${testsN} 个测题生成 ${need} 条链接（剩余额度 ${data.remaining_quota}）`
+              ? `将为 ${testsN} 个测题各按设定生成，合计 ${need} 条（默认 ${prefsNow.defaultCount}/题；剩余额度 ${data.remaining_quota}）`
               : `额度不足：需要 ${need}，剩余 ${data.remaining_quota}`
           )
         );
