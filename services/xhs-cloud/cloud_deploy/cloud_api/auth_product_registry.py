@@ -154,6 +154,14 @@ AUTH_PRODUCT_REGISTRY: dict[str, dict[str, Any]] = {
                 "summary": "500 次链接生成额度",
                 "quota_amount": 500,
             },
+            "quota_100000": {
+                "label": "额度 100000 次",
+                "plan_code": "psy_quota_100000",
+                "duration_days": 365,
+                "max_activations": 1,
+                "summary": "100000 次链接生成额度（大额兑换）",
+                "quota_amount": 100000,
+            },
         },
     },
 }

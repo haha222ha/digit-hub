@@ -177,6 +177,115 @@ def generate_links(user_id: int, test_code: str, count: int) -> dict:
     return {"links": links, "generatedCount": len(links)}
 
 
+def plan_fill_missing_links(
+    user_id: int,
+    *,
+    default_count: int = 10,
+    counts: dict[str, int] | None = None,
+    only_missing: bool = True,
+) -> dict:
+    """计算一键补齐计划：哪些测题要生成多少条。"""
+    default_count = max(1, min(int(default_count or 10), 200))
+    overrides = {
+        str(k).strip(): max(0, min(int(v or 0), 200))
+        for k, v in (counts or {}).items()
+        if str(k).strip()
+    }
+    existing = dist_db.link_counts_by_test(user_id)
+    tests = list_tests(include_disabled=False)
+    items: list[dict] = []
+    need_total = 0
+    for t in tests:
+        code = str(t.get("test_code") or t.get("code") or "").strip()
+        if not code:
+            continue
+        have = int(existing.get(code) or 0)
+        target = overrides.get(code, default_count)
+        if only_missing:
+            to_gen = target if have == 0 else 0
+        else:
+            to_gen = max(0, target - have)
+        if to_gen <= 0:
+            continue
+        items.append(
+            {
+                "test_code": code,
+                "test_name": t.get("test_name") or t.get("name") or code,
+                "have": have,
+                "target": target,
+                "to_generate": to_gen,
+            }
+        )
+        need_total += to_gen
+    dist = dist_db.ensure_distributor(user_id)
+    remaining = int(dist.get("remaining_quota") or 0)
+    return {
+        "only_missing": only_missing,
+        "default_count": default_count,
+        "items": items,
+        "tests_to_fill": len(items),
+        "links_to_generate": need_total,
+        "remaining_quota": remaining,
+        "quota_ok": remaining >= need_total,
+    }
+
+
+def generate_missing_links(
+    user_id: int,
+    *,
+    default_count: int = 10,
+    counts: dict[str, int] | None = None,
+    only_missing: bool = True,
+    dry_run: bool = False,
+) -> dict:
+    """一键为尚未生成（或未达到目标条数）的测题批量生成链接。"""
+    plan = plan_fill_missing_links(
+        user_id,
+        default_count=default_count,
+        counts=counts,
+        only_missing=only_missing,
+    )
+    if dry_run:
+        return {**plan, "dry_run": True, "generated": [], "generated_count": 0}
+    if plan["links_to_generate"] <= 0:
+        return {**plan, "dry_run": False, "generated": [], "generated_count": 0, "message": "没有需要补齐的测题"}
+    if not plan["quota_ok"]:
+        raise ValueError(
+            f"可用额度不足：需要 {plan['links_to_generate']}，当前剩余 {plan['remaining_quota']}"
+        )
+    generated: list[dict] = []
+    total = 0
+    for it in plan["items"]:
+        code = it["test_code"]
+        n = int(it["to_generate"])
+        # generate_links clamps to 50 per call — chunk
+        while n > 0:
+            chunk = min(n, 50)
+            res = generate_links(user_id, code, chunk)
+            links = res.get("links") or []
+            generated.append(
+                {
+                    "test_code": code,
+                    "test_name": it.get("test_name"),
+                    "count": len(links),
+                    "links": links,
+                }
+            )
+            total += len(links)
+            n -= len(links)
+            if len(links) < chunk:
+                break
+    dist = dist_db.ensure_distributor(user_id)
+    return {
+        **plan,
+        "dry_run": False,
+        "generated": generated,
+        "generated_count": total,
+        "remaining_quota": int(dist.get("remaining_quota") or 0),
+        "message": f"已为 {len(generated)} 个测题生成 {total} 条链接",
+    }
+
+
 def validate_token(token: str, test_code: str | None = None) -> dict:
     out = dist_db.validate_link_token(token)
     if not out.get("valid"):

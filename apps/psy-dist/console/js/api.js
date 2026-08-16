@@ -123,6 +123,17 @@ export const api = {
       auth: true,
       body: { testCode, count },
     }),
+  fillMissingLinks: (payload = {}) =>
+    request("/api/links/fill-missing", {
+      method: "POST",
+      auth: true,
+      body: {
+        defaultCount: payload.defaultCount ?? payload.default_count ?? 10,
+        counts: payload.counts || undefined,
+        onlyMissing: payload.onlyMissing !== false && payload.only_missing !== false,
+        dryRun: !!(payload.dryRun || payload.dry_run),
+      },
+    }),
   linksList: (params = {}) => {
     const q = new URLSearchParams();
     if (params.status) q.set("status", params.status);

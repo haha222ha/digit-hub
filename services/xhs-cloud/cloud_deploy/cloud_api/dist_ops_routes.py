@@ -413,7 +413,9 @@ def sa_redeem_gen(body: RedeemGenBody, request: Request):
     plan = (body.plan_code or "").strip()
     if not sku:
         # map common plans
-        if plan.endswith("500"):
+        if plan.endswith("100000") or "100000" in plan:
+            sku = "quota_100000"
+        elif plan.endswith("500"):
             sku = "quota_500"
         else:
             sku = "quota_100"

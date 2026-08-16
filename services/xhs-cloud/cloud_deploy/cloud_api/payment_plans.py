@@ -266,6 +266,20 @@ PSY_DIST_PAYMENT_PLANS: tuple[dict, ...] = (
         "product": "psy_dist",
         "recommended": True,
     },
+    {
+        "plan_code": "psy_quota_100000",
+        "label": "分销额度·100000次",
+        "label_en": "Quota · 100000 credits",
+        "duration_days": 365,
+        "amount": "0.00",
+        "price_yuan": 0,
+        "prices": {"CNY": "0.00"},
+        "quota_amount": 100000,
+        "summary": "100000 次测评链接生成额度（兑换码专用，不展示购买）",
+        "summary_en": "100000 credits · redeem-code only",
+        "product": "psy_dist",
+        "redeem_only": True,
+    },
 )
 
 # 国家/地区 → 默认币种（ISO 3166-1 alpha-2）
@@ -334,7 +348,8 @@ def is_psy_dist_plan(plan_code: str) -> bool:
 
 
 def list_psy_dist_plans() -> list[dict]:
-    return list(PSY_DIST_PAYMENT_PLANS)
+    """收银台展示的分销额度套餐（排除兑换码专用大额档）。"""
+    return [p for p in PSY_DIST_PAYMENT_PLANS if not p.get("redeem_only")]
 
 
 def normalize_currency(currency: str | None, *, country: str | None = None) -> str:

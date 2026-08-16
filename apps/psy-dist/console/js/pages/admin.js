@@ -428,6 +428,7 @@ export async function renderGenerate(root) {
   const resultHost = el("div");
   const btn = el("button", { className: "btn btn-primary", type: "submit", text: "生成链接", style: "width:auto" });
   let ruleText = "首次开测后 3 天内可复测 3 次";
+  let testsCache = [];
   try {
     const cfg = await api.adminConfigGet();
     if (cfg && cfg.rule_text) ruleText = cfg.rule_text;
@@ -437,7 +438,8 @@ export async function renderGenerate(root) {
 
   try {
     const data = await api.testsList();
-    for (const t of (data && data.tests) || []) {
+    testsCache = (data && data.tests) || [];
+    for (const t of testsCache) {
       select.append(
         el("option", {
           value: t.test_code,
@@ -538,6 +540,8 @@ export async function renderGenerate(root) {
     }
   });
 
+  const fillPanel = buildFillMissingPanel(testsCache, quota);
+
   root.append(
     shell("/admin/generate-link", [
       el("h1", { className: "page-title", text: "生成链接" }),
@@ -557,8 +561,238 @@ export async function renderGenerate(root) {
         ]),
       ]),
       form,
+      fillPanel,
     ])
   );
+}
+
+const FILL_COUNTS_KEY = "psy_link_fill_counts_v1";
+
+function loadFillPrefs() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(FILL_COUNTS_KEY) || "{}");
+    return {
+      defaultCount: Math.min(200, Math.max(1, Number(raw.defaultCount) || 10)),
+      byCode: raw.byCode && typeof raw.byCode === "object" ? raw.byCode : {},
+      onlyMissing: raw.onlyMissing !== false,
+    };
+  } catch (_) {
+    return { defaultCount: 10, byCode: {}, onlyMissing: true };
+  }
+}
+
+function saveFillPrefs(prefs) {
+  try {
+    localStorage.setItem(FILL_COUNTS_KEY, JSON.stringify(prefs));
+  } catch (_) {
+    /* ignore */
+  }
+}
+
+function buildFillMissingPanel(tests, quota) {
+  const prefs = loadFillPrefs();
+  const errHost = el("div");
+  const previewHost = el("div");
+  const defaultCount = el("input", {
+    type: "number",
+    min: "1",
+    max: "200",
+    value: String(prefs.defaultCount),
+  });
+  const onlyMissing = el("input", { type: "checkbox" });
+  onlyMissing.checked = prefs.onlyMissing !== false;
+  const countInputs = new Map();
+  const tableBody = el("tbody");
+
+  for (const t of tests) {
+    const code = t.test_code;
+    const inp = el("input", {
+      type: "number",
+      min: "0",
+      max: "200",
+      value: String(
+        prefs.byCode[code] != null ? prefs.byCode[code] : prefs.defaultCount
+      ),
+      style: "width:72px",
+    });
+    countInputs.set(code, inp);
+    tableBody.append(
+      el("tr", {}, [
+        el("td", { text: t.test_name || code }),
+        el("td", { className: "muted", text: code }),
+        el("td", {}, [inp]),
+      ])
+    );
+  }
+
+  function collectCounts() {
+    const byCode = {};
+    for (const [code, inp] of countInputs.entries()) {
+      const n = Math.min(200, Math.max(0, Number(inp.value) || 0));
+      byCode[code] = n;
+    }
+    const next = {
+      defaultCount: Math.min(200, Math.max(1, Number(defaultCount.value) || 10)),
+      byCode,
+      onlyMissing: !!onlyMissing.checked,
+    };
+    saveFillPrefs(next);
+    return next;
+  }
+
+  function applyDefaultToAll() {
+    const n = Math.min(200, Math.max(1, Number(defaultCount.value) || 10));
+    for (const inp of countInputs.values()) inp.value = String(n);
+  }
+
+  const previewBtn = el("button", {
+    className: "btn btn-ghost",
+    type: "button",
+    text: "预览将补齐",
+  });
+  const fillBtn = el("button", {
+    className: "btn btn-primary",
+    type: "button",
+    text: "一键补齐未生成",
+  });
+
+  async function runFill(dryRun) {
+    errHost.replaceChildren();
+    previewHost.replaceChildren();
+    const prefsNow = collectCounts();
+    previewBtn.disabled = true;
+    fillBtn.disabled = true;
+    try {
+      const data = await api.fillMissingLinks({
+        defaultCount: prefsNow.defaultCount,
+        counts: prefsNow.byCode,
+        onlyMissing: prefsNow.onlyMissing,
+        dryRun,
+      });
+      const need = data.links_to_generate || 0;
+      const testsN = data.tests_to_fill || 0;
+      if (dryRun) {
+        previewHost.append(
+          flash(
+            data.quota_ok ? "ok" : "error",
+            data.quota_ok
+              ? `将为 ${testsN} 个测题生成 ${need} 条链接（剩余额度 ${data.remaining_quota}）`
+              : `额度不足：需要 ${need}，剩余 ${data.remaining_quota}`
+          )
+        );
+        const ul = el("ul", { className: "muted", style: "margin:8px 0 0;padding-left:18px;max-height:220px;overflow:auto" });
+        for (const it of (data.items || []).slice(0, 80)) {
+          ul.append(
+            el("li", {
+              text: `${it.test_name}（${it.test_code}）：已有 ${it.have} → 生成 ${it.to_generate}`,
+            })
+          );
+        }
+        if ((data.items || []).length > 80) {
+          ul.append(el("li", { text: `…其余 ${(data.items || []).length - 80} 项` }));
+        }
+        previewHost.append(ul);
+      } else {
+        previewHost.append(
+          flash("ok", data.message || `已生成 ${data.generated_count || 0} 条`)
+        );
+        showToast(data.message || "补齐完成");
+        const allUrls = [];
+        for (const g of data.generated || []) {
+          for (const link of g.links || []) {
+            allUrls.push(linkFullUrl(link, g.test_code));
+          }
+        }
+        if (allUrls.length) {
+          const copyAllBtn = el("button", {
+            className: "btn btn-primary",
+            type: "button",
+            text: `复制全部新链接（${allUrls.length}）`,
+            style: "margin-top:10px",
+          });
+          bindCopyButton(copyAllBtn, () => allUrls.join("\n"), {
+            okText: `已复制 ${allUrls.length} 条`,
+            onOk: () => showToast(`已复制 ${allUrls.length} 条`),
+          });
+          const exportBtn = el("button", {
+            className: "btn btn-ghost",
+            type: "button",
+            text: "导出发卡 TXT",
+            style: "margin-top:10px;margin-left:8px",
+          });
+          exportBtn.addEventListener("click", () => {
+            downloadPlainTxt(fakaTxtFromUrls(allUrls), `psy_fill_${Date.now()}.txt`);
+            showToast(`已导出 ${allUrls.length} 条`);
+          });
+          previewHost.append(el("div", {}, [copyAllBtn, exportBtn]));
+        }
+      }
+    } catch (err) {
+      errHost.append(flash("error", err.message || "操作失败"));
+    } finally {
+      previewBtn.disabled = false;
+      fillBtn.disabled = false;
+    }
+  }
+
+  previewBtn.addEventListener("click", () => runFill(true));
+  fillBtn.addEventListener("click", async () => {
+    const prefsNow = collectCounts();
+    if (
+      !window.confirm(
+        prefsNow.onlyMissing
+          ? "确认为尚未生成过链接的测题一键补齐？将消耗对应额度。"
+          : "确认为未达目标条数的测题补齐到设定数量？将消耗对应额度。"
+      )
+    ) {
+      return;
+    }
+    await runFill(false);
+  });
+
+  return el("div", { className: "panel", style: "margin-top:20px" }, [
+    el("h2", { style: "font-size:18px;margin:0 0 8px", text: "一键补齐未生成测题" }),
+    el("p", {
+      className: "muted",
+      text: `为还没有任何链接的测题批量生成（可按测题单独设定条数）。当前剩余额度：${quota.remaining_quota ?? "—"}。`,
+    }),
+    errHost,
+    el("div", { className: "grid-2", style: "margin-top:12px" }, [
+      el("div", { className: "field" }, [
+        el("label", { text: "默认每测题条数（1–200）" }),
+        defaultCount,
+      ]),
+      el("div", { className: "field", style: "display:flex;align-items:flex-end;gap:8px" }, [
+        el("label", { style: "display:flex;align-items:center;gap:8px;cursor:pointer" }, [
+          onlyMissing,
+          el("span", { text: "仅补「从未生成过」的测题" }),
+        ]),
+      ]),
+    ]),
+    el("div", { className: "row-actions", style: "margin:8px 0 12px;flex-wrap:wrap;gap:8px" }, [
+      el("button", {
+        className: "btn btn-ghost",
+        type: "button",
+        text: "用默认值填满表格",
+        onClick: applyDefaultToAll,
+      }),
+      previewBtn,
+      fillBtn,
+    ]),
+    el("div", { style: "max-height:280px;overflow:auto;border:1px solid #eee;border-radius:8px" }, [
+      el("table", { className: "data-table", style: "width:100%;font-size:13px" }, [
+        el("thead", {}, [
+          el("tr", {}, [
+            el("th", { text: "测题" }),
+            el("th", { text: "code" }),
+            el("th", { text: "条数" }),
+          ]),
+        ]),
+        tableBody,
+      ]),
+    ]),
+    previewHost,
+  ]);
 }
 
 function linkFullUrl(link, fallbackCode = "") {

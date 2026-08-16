@@ -73,6 +73,13 @@ class LinkGenerateBody(BaseModel):
     count: int = Field(default=1, ge=1, le=50)
 
 
+class LinkFillMissingBody(BaseModel):
+    defaultCount: int = Field(default=10, ge=1, le=200)
+    counts: dict[str, int] | None = None
+    onlyMissing: bool = True
+    dryRun: bool = False
+
+
 class TokenBody(BaseModel):
     token: str = Field(min_length=8)
 
@@ -245,6 +252,23 @@ def dist_quota_info_v1(user: dict = Depends(current_user)):
 def dist_links_generate_v1(body: LinkGenerateBody, user: dict = Depends(current_user)):
     try:
         return _ok(svc.generate_links(user["id"], body.testCode, body.count), "生成链接成功")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@router.post("/api/v1/dist/links/fill-missing")
+def dist_links_fill_missing_v1(body: LinkFillMissingBody, user: dict = Depends(current_user)):
+    try:
+        return _ok(
+            svc.generate_missing_links(
+                user["id"],
+                default_count=body.defaultCount,
+                counts=body.counts,
+                only_missing=body.onlyMissing,
+                dry_run=body.dryRun,
+            ),
+            "预览补齐计划" if body.dryRun else "一键补齐完成",
+        )
     except ValueError as e:
         return JSONResponse(_fail(str(e)), status_code=200)
 
@@ -503,6 +527,24 @@ def compat_links_generate(body: LinkGenerateBody, request: Request):
     user = _dist_token(request)
     try:
         return _ok(svc.generate_links(user["id"], body.testCode, body.count), "生成链接成功")
+    except ValueError as e:
+        return JSONResponse(_fail(str(e)), status_code=200)
+
+
+@compat_router.post("/api/links/fill-missing")
+def compat_links_fill_missing(body: LinkFillMissingBody, request: Request):
+    user = _dist_token(request)
+    try:
+        return _ok(
+            svc.generate_missing_links(
+                user["id"],
+                default_count=body.defaultCount,
+                counts=body.counts,
+                only_missing=body.onlyMissing,
+                dry_run=body.dryRun,
+            ),
+            "预览补齐计划" if body.dryRun else "一键补齐完成",
+        )
     except ValueError as e:
         return JSONResponse(_fail(str(e)), status_code=200)
 

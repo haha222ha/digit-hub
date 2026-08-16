@@ -1243,6 +1243,44 @@ def faka_inventory(user_id: int, *, test_code: str | None = None) -> dict:
     }
 
 
+def link_counts_by_test(user_id: int) -> dict[str, int]:
+    """按测题统计该分销商已生成链接总数（含已用/吊销）。"""
+    init_dist_tables()
+    uid = int(user_id)
+    out: dict[str, int] = {}
+    if _USE_PG:
+        conn = _pg_conn()
+        c = _pg_cur(conn)
+        c.execute(
+            """SELECT test_code, COUNT(*) AS n
+               FROM dist_links WHERE user_id=%s
+               GROUP BY test_code""",
+            (uid,),
+        )
+        for row in c.fetchall() or []:
+            d = _row_dict(row) or {}
+            code = str(d.get("test_code") or "").strip()
+            if code:
+                out[code] = int(d.get("n") or 0)
+        conn.close()
+    else:
+        conn = _sqlite_conn()
+        c = conn.cursor()
+        c.execute(
+            """SELECT test_code, COUNT(*) AS n
+               FROM dist_links WHERE user_id=?
+               GROUP BY test_code""",
+            (uid,),
+        )
+        for row in c.fetchall() or []:
+            d = _row_dict(row) or {}
+            code = str(d.get("test_code") or "").strip()
+            if code:
+                out[code] = int(d.get("n") or 0)
+        conn.close()
+    return out
+
+
 def claim_links_for_faka(
     user_id: int,
     *,
