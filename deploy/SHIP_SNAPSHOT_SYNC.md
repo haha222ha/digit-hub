@@ -9,8 +9,21 @@
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
+| GET | `/api/ship/client-version` | **公开**；返回 `latest` / `min_version` / `force` / `download_url` / `notes` |
 | POST | `/api/ship/snapshot/push` | body: `{ snapshot, device_label }` |
 | GET | `/api/ship/snapshot/pull?device_label=default` | 返回 `{ snapshot, updated_at }` |
+
+### 客户端强制更新（环境变量）
+
+| 变量 | 含义 | 示例 |
+|---|---|---|
+| `SHIP_CLIENT_LATEST` | 最新版本号 | `1.1.0` |
+| `SHIP_CLIENT_MIN` | 最低允许版本；低于则强制更新 | `1.0.0` |
+| `SHIP_CLIENT_FORCE` | 低于 min 时是否强制（true/false） | `true` |
+| `SHIP_CLIENT_DOWNLOAD_URL` | 安装包直链 | `https://psy.xhs365.cn/releases/...exe` |
+| `SHIP_CLIENT_NOTES` | 更新说明 | `修复补货；更新后自动同步配置` |
+
+客户端：低于 `min_version` 且 `force=true` → 不可关遮罩 → 下载安装 → 重启后自动 `snapshot/pull`。
 
 表：`dist_ship_snapshots`（按 `user_id` + `device_label`）
 

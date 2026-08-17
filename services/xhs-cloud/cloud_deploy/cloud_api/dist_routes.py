@@ -772,6 +772,30 @@ def compat_faka_release_links(body: FakaReleaseBody, request: Request):
         return JSONResponse(_fail(str(e)), status_code=200)
 
 
+def _ship_client_version_policy() -> dict:
+    """发货助手版本策略（环境变量可改，无需登录）。"""
+    latest = (os.environ.get("SHIP_CLIENT_LATEST") or "1.0.0").strip() or "1.0.0"
+    min_version = (os.environ.get("SHIP_CLIENT_MIN") or latest).strip() or latest
+    force_raw = (os.environ.get("SHIP_CLIENT_FORCE") or "false").strip().lower()
+    force = force_raw in ("1", "true", "yes", "on")
+    download_url = (os.environ.get("SHIP_CLIENT_DOWNLOAD_URL") or "").strip()
+    notes = (os.environ.get("SHIP_CLIENT_NOTES") or "").strip()
+    return {
+        "latest": latest,
+        "min_version": min_version,
+        "force": force,
+        "download_url": download_url,
+        "notes": notes,
+        "platform": "win",
+    }
+
+
+@compat_router.get("/api/ship/client-version")
+def compat_ship_client_version():
+    """公开：客户端强制/可选更新策略（未登录也可查）。"""
+    return _ok(_ship_client_version_policy(), "ok")
+
+
 @compat_router.post("/api/ship/bindings/sync")
 def compat_ship_bindings_sync(body: ShipBindingsSyncBody, request: Request):
     user = _dist_token(request)
