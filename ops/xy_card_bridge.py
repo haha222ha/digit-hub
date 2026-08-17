@@ -32,18 +32,17 @@ OUT_PATH = ROOT / "ops" / "_xy_card_bridge_last.json"
 PSY_TOKEN_FILE = ROOT / "ops" / ".psy_token"
 DEFAULT_PSY_API = "https://psy.xhs365.cn"
 
-# 对齐小红书发货助手 link_card 四轮文案；闲鱼用 ###### 拆成多条 IM（段间约 0.5s）
-# XHS 用空行分隔；闲鱼原生分隔符是 ######，语义一致。
+# 闲鱼站内打不开 psy 链接，只引导复制到手机浏览器；###### 拆成多条 IM（段间约 0.5s）
 XY_LINK_CARD_DESCRIPTION = "\n".join(
     [
         "{DELIVERY_CONTENT}",
         "######",
-        "使用方法一：直接在闲鱼上点击打开并测试",
-        "######",
-        "使用方法二：",
+        "使用方法：",
         "1.复制您的专属链接到手机浏览器",
         "2.长按浏览器地址栏（长条输入框，苹果Safari是在最底部）",
         "3.点击粘贴打开前进，不要使用搜索方式，会进入错误网站~",
+        "######",
+        "该链接可在三天内重复测三次，开始测试后72小时之后将失效，请及时测试并截图保存结果~有问题滴滴客服哈~",
         "######",
         "宝，链接在上面哈，具体往上滑动屏幕可以看到~",
     ]
@@ -492,6 +491,11 @@ def claim_from_cloud(
                 cur_desc = str(existing.get("description") or "")
                 if cur_desc.strip() != description.strip():
                     cid = int(existing["id"])
+                    bind_ids = [xy_item]
+                    for extra in pair.get("xy_item_aliases") or []:
+                        e = str(extra or "").strip()
+                        if e and e not in bind_ids:
+                            bind_ids.append(e)
                     requests.put(
                         f"{cfg['xy_api_base']}/cards/{cid}",
                         headers=xy_headers(xy_token),
@@ -507,7 +511,7 @@ def claim_from_cloud(
                     requests.put(
                         f"{cfg['xy_api_base']}/cards/{cid}/items",
                         headers=xy_headers(xy_token),
-                        json={"item_ids": [xy_item]},
+                        json={"item_ids": bind_ids},
                         timeout=30,
                     )
                     synced = True
