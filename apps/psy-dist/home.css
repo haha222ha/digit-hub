@@ -158,23 +158,14 @@ a {
   width: min(1120px, calc(100% - 3rem));
   margin: 0 auto;
   padding: clamp(2rem, 6vh, 4rem) 0 clamp(3.5rem, 8vh, 5.5rem);
-  min-height: min(78vh, 720px);
+  min-height: min(62vh, 560px);
   display: flex;
   align-items: center;
 }
 
 .hero-inner {
   width: 100%;
-  display: grid;
-  gap: 2.5rem;
-  align-items: center;
-}
-
-@media (min-width: 960px) {
-  .hero-inner {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    gap: 3rem;
-  }
+  max-width: 40rem;
 }
 
 .hero-copy {
@@ -251,77 +242,6 @@ a {
   margin-top: 0.2rem;
   font-size: 0.82rem;
   color: var(--ink-soft);
-}
-
-.hero-showcase {
-  position: relative;
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
-  aspect-ratio: 1 / 1.05;
-}
-
-.hero-shot {
-  position: absolute;
-  width: 68%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 18px 40px rgba(11, 28, 24, 0.16);
-  background: #0b1c18;
-}
-
-.hero-shot--a {
-  left: 16%;
-  top: 8%;
-  z-index: 3;
-  animation: floatA 10s var(--ease) infinite alternate;
-}
-
-.hero-shot--b {
-  left: 0;
-  bottom: 6%;
-  width: 46%;
-  z-index: 2;
-  transform: rotate(-7deg);
-  animation: floatB 12s var(--ease) infinite alternate;
-}
-
-.hero-shot--c {
-  right: 0;
-  bottom: 10%;
-  width: 46%;
-  z-index: 1;
-  transform: rotate(8deg);
-  animation: floatC 11s var(--ease) infinite alternate;
-}
-
-@keyframes floatA {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(10px);
-  }
-}
-
-@keyframes floatB {
-  from {
-    transform: rotate(-7deg) translateY(0);
-  }
-  to {
-    transform: rotate(-5deg) translateY(-8px);
-  }
-}
-
-@keyframes floatC {
-  from {
-    transform: rotate(8deg) translateY(0);
-  }
-  to {
-    transform: rotate(6deg) translateY(8px);
-  }
 }
 
 .section {
@@ -690,22 +610,10 @@ a.test-item:hover h3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal,
-  .hero-shot {
+  .reveal {
     animation: none !important;
     opacity: 1;
-  }
-
-  .hero-shot--a {
     transform: none;
-  }
-
-  .hero-shot--b {
-    transform: rotate(-7deg);
-  }
-
-  .hero-shot--c {
-    transform: rotate(8deg);
   }
 }
 
@@ -717,10 +625,6 @@ a.test-item:hover h3 {
   .hero {
     min-height: 0;
     padding-top: 1.25rem;
-  }
-
-  .hero-showcase {
-    max-width: 320px;
   }
 
   .hero-title {
