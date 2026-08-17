@@ -2,9 +2,23 @@
   const year = document.getElementById("y");
   if (year) year.textContent = String(new Date().getFullYear());
 
+  const SHELF = [
+    { code: "7v7", title: "七宗罪 VS 七美德" },
+    { code: "phd", title: "你适合读博吗" },
+    { code: "wxcs", title: "五行城市匹配" },
+    { code: "apt", title: "天赋潜能评估" },
+    { code: "rvt", title: "恋爱观测试" },
+    { code: "znt", title: "渣女测试" },
+    { code: "ast", title: "动物塑测试" },
+    { code: "hit", title: "霍兰德职业兴趣" },
+    { code: "vbt", title: "容易被人欺负" },
+    { code: "wjt", title: "这b班值不值" },
+  ];
+
+  const wall = document.getElementById("shelf-wall");
   const grid = document.getElementById("test-grid");
   const statsHost = document.getElementById("hero-stats");
-  if (!grid) return;
+  const moreTitle = document.getElementById("catalog-more-title");
 
   const esc = (s) =>
     String(s ?? "")
@@ -20,7 +34,20 @@
     return String(v);
   }
 
-  function renderStats(stats, siteName) {
+  function renderShelf() {
+    if (!wall) return;
+    wall.innerHTML = SHELF.map((item, i) => {
+      const delay = i < 4 ? ` delay-${(i % 3) + 1}` : "";
+      return (
+        `<a class="shelf-tile reveal${delay}" href="/tests/${esc(item.code)}/">` +
+        `<img src="/images/shelf/${esc(item.code)}.jpg?v=20260817" alt="${esc(item.title)}" loading="${i < 4 ? "eager" : "lazy"}" width="800" height="800" />` +
+        `<span class="shelf-tile-caption"><strong>${esc(item.title)}</strong><em>进入测评</em></span>` +
+        `</a>`
+      );
+    }).join("");
+  }
+
+  function renderStats(stats) {
     if (!statsHost || !stats) return;
     const items = [
       { k: "测评项目", v: stats.tests_catalog || stats.tests_homepage || 0 },
@@ -37,12 +64,10 @@
         return node;
       })
     );
-    if (siteName && document.querySelector(".hero-brand")) {
-      document.querySelector(".hero-brand").textContent = siteName;
-    }
   }
 
   async function loadHomepage() {
+    if (!grid) return;
     try {
       const res = await fetch("/api/stats/homepage", {
         headers: { Accept: "application/json" },
@@ -52,16 +77,25 @@
       const body = await res.json();
       const data = (body && body.data) || body || {};
       const tests = data.tests || [];
-      const stats = data.stats || {};
-      renderStats(stats, data.site_name);
+      renderStats(data.stats || {});
 
-      if (!Array.isArray(tests) || tests.length === 0) {
+      const featured = new Set(SHELF.map((s) => s.code));
+      const rest = (Array.isArray(tests) ? tests : []).filter((t) => {
+        const code = String(t.test_code || t.code || "");
+        return code && !featured.has(code);
+      });
+
+      if (!rest.length) {
         grid.dataset.state = "empty";
-        grid.innerHTML = '<p class="test-status">测题目录暂未加载，注册后可在后台查看全部项目。</p>';
+        grid.innerHTML = "";
+        if (moreTitle) moreTitle.hidden = true;
         return;
       }
-      const items = tests.slice(0, 36).map((t) => {
+
+      if (moreTitle) moreTitle.hidden = false;
+      const items = rest.slice(0, 24).map((t) => {
         const name = esc(t.test_name || t.name || t.test_code || "未命名测评");
+        const code = esc(t.test_code || t.code || "");
         const q = t.question_count || t.questions || "";
         const d = t.duration_minutes || t.duration_min || "";
         const metaBits = [];
@@ -69,15 +103,16 @@
         if (d) metaBits.push("约 " + d + " 分钟");
         const hot = t.is_hot ? '<span class="hot">热门</span>' : "";
         const dual = t.is_dual_perspective ? '<span class="tag-dual">双视角</span>' : "";
+        const href = code ? `/tests/${code}/` : "#tests";
         return (
-          '<article class="test-item">' +
+          `<a class="test-item" href="${href}">` +
           "<h3>" +
           hot +
           dual +
           name +
           "</h3>" +
           (metaBits.length ? '<p class="test-meta">' + esc(metaBits.join(" · ")) + "</p>" : "") +
-          "</article>"
+          "</a>"
         );
       });
       grid.dataset.state = "ready";
@@ -85,7 +120,7 @@
     } catch (err) {
       grid.dataset.state = "error";
       grid.innerHTML =
-        '<p class="test-status">测题列表暂时不可用，不影响注册与登录。稍后刷新即可。</p>';
+        '<p class="test-status">更多测题列表暂时不可用；上方精选主图仍可进入测评。</p>';
     }
   }
 
@@ -98,6 +133,7 @@
     document.body.appendChild(bar);
   }
 
+  renderShelf();
   loadHomepage();
   showWorkbenchBar();
 })();
