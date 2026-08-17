@@ -1,0 +1,17 @@
+{
+  "xhs_api_base": "http://127.0.0.1:19527",
+  "xy_api_base": "http://127.0.0.1:8089/api/v1",
+  "xy_username": "admin",
+  "xy_password": "admin123",
+  "xhs_shop_id": "",
+  "pairs": [
+    {
+      "xhs_product_id": "REPLACE_XHS_PRODUCT_ID",
+      "xy_item_id": "REPLACE_XY_ITEM_ID",
+      "xy_card_name": "桥接测试卡池",
+      "mode": "pull_unused_cards",
+      "mark_exported_on_xhs": false,
+      "max_cards": 50
+    }
+  ]
+}
