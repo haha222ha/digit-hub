@@ -25,14 +25,14 @@
     <meta property="og:url" content="https://psy.xhs365.cn/" />
     <meta property="og:site_name" content="心象测" />
     <meta property="og:locale" content="zh_CN" />
-    <meta property="og:image" content="https://psy.xhs365.cn/images/shelf/hero_phd.jpg?v=20260817" />
+    <meta property="og:image" content="https://psy.xhs365.cn/images/shelf/7v7.jpg?v=20260817b" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/home.css?v=20260817-hero" />
+    <link rel="stylesheet" href="/home.css?v=20260817b" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -51,8 +51,10 @@
     </script>
   </head>
   <body>
-    <header class="topbar topbar--over">
-      <a class="brand brand--light" href="/">
+    <div class="atmosphere" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="brand" href="/">
         <img src="/images/logo.svg?v=5" alt="" width="36" height="36" />
         <span>心象测</span>
       </a>
@@ -60,35 +62,50 @@
         <a href="#tests">测题</a>
         <a href="#flow">怎么用</a>
         <a href="#pricing">定价</a>
-        <a class="ghost ghost--light" href="/login">商家登录</a>
+        <a class="ghost" href="/login">商家登录</a>
         <a class="solid" href="/register">商家入驻</a>
       </nav>
     </header>
 
     <main>
-      <section class="hero hero--bleed" aria-label="心象测首页首屏">
-        <div class="hero-plane" aria-hidden="true">
-          <img
-            class="hero-plane-img"
-            src="/images/shelf/hero_phd.jpg?v=20260817"
-            alt=""
-            width="1920"
-            height="1080"
-            fetchpriority="high"
-          />
-          <div class="hero-plane-veil"></div>
-        </div>
-        <div class="hero-copy">
-          <p class="hero-brand reveal">心象测</p>
-          <h1 class="hero-title reveal delay-1">几分钟短测 · 电子版自测 · 测完有结果卡</h1>
-          <p class="hero-lead reveal delay-2">
-            正版授权测评，测完即可保存结果卡。商家也可一键生成可分发链接。
-          </p>
-          <div class="hero-cta reveal delay-3">
-            <a class="btn primary" href="#tests">挑一个开始测</a>
-            <a class="btn secondary secondary--on-dark" href="/register">商家入驻后台</a>
+      <section class="hero" aria-label="心象测首页首屏">
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <p class="hero-brand reveal">心象测</p>
+            <h1 class="hero-title reveal delay-1">几分钟短测 · 电子版自测 · 测完有结果卡</h1>
+            <p class="hero-lead reveal delay-2">
+              正版授权测评，测完即可保存结果卡。商家也可一键生成可分发链接。
+            </p>
+            <div class="hero-cta reveal delay-3">
+              <a class="btn primary" href="#tests">挑一个开始测</a>
+              <a class="btn secondary" href="/register">商家入驻后台</a>
+            </div>
+            <div class="hero-stats reveal delay-3" id="hero-stats" hidden></div>
           </div>
-          <div class="hero-stats reveal delay-3" id="hero-stats" hidden></div>
+          <div class="hero-showcase reveal delay-2" aria-hidden="true">
+            <img
+              class="hero-shot hero-shot--a"
+              src="/images/shelf/7v7.jpg?v=20260817b"
+              alt=""
+              width="800"
+              height="800"
+              fetchpriority="high"
+            />
+            <img
+              class="hero-shot hero-shot--b"
+              src="/images/shelf/phd.jpg?v=20260817b"
+              alt=""
+              width="800"
+              height="800"
+            />
+            <img
+              class="hero-shot hero-shot--c"
+              src="/images/shelf/wxcs.jpg?v=20260817b"
+              alt=""
+              width="800"
+              height="800"
+            />
+          </div>
         </div>
       </section>
 
@@ -192,6 +209,6 @@
       <p class="footer-copy">© <span id="y"></span> 心象测</p>
     </footer>
 
-    <script src="/home.js?v=20260817-hero" defer></script>
+    <script src="/home.js?v=20260817b" defer></script>
   </body>
 </html>
