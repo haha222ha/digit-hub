@@ -485,17 +485,18 @@ def claim_from_cloud(
     stock_now = stock_lines_of(existing)
     if only_low_water or pair.get("respect_low_water", True):
         if stock_now >= low_water:
-            # 库存够时仍同步发卡文案（多段 ######），保证模板升级能落地
+            # 库存够时仍同步发卡文案 + 主ID/别名绑定，避免旧链脱绑
             synced = False
+            bind_synced = False
             if existing and existing.get("id") and not dry_run:
+                cid = int(existing["id"])
+                bind_ids = [xy_item]
+                for extra in pair.get("xy_item_aliases") or []:
+                    e = str(extra or "").strip()
+                    if e and e not in bind_ids:
+                        bind_ids.append(e)
                 cur_desc = str(existing.get("description") or "")
                 if cur_desc.strip() != description.strip():
-                    cid = int(existing["id"])
-                    bind_ids = [xy_item]
-                    for extra in pair.get("xy_item_aliases") or []:
-                        e = str(extra or "").strip()
-                        if e and e not in bind_ids:
-                            bind_ids.append(e)
                     requests.put(
                         f"{cfg['xy_api_base']}/cards/{cid}",
                         headers=xy_headers(xy_token),
@@ -508,13 +509,14 @@ def claim_from_cloud(
                         },
                         timeout=60,
                     ).raise_for_status()
-                    requests.put(
-                        f"{cfg['xy_api_base']}/cards/{cid}/items",
-                        headers=xy_headers(xy_token),
-                        json={"item_ids": bind_ids},
-                        timeout=30,
-                    )
                     synced = True
+                requests.put(
+                    f"{cfg['xy_api_base']}/cards/{cid}/items",
+                    headers=xy_headers(xy_token),
+                    json={"item_ids": bind_ids},
+                    timeout=30,
+                )
+                bind_synced = True
             return {
                 "ok": True,
                 "skipped": True,
@@ -524,8 +526,10 @@ def claim_from_cloud(
                 "stock_lines": stock_now,
                 "low_water": low_water,
                 "description_synced": synced,
+                "bind_synced": bind_synced,
                 "note": f"库存 {stock_now} >= 低水位 {low_water}，跳过补卡"
-                + ("（已同步多段发卡文案）" if synced else ""),
+                + ("（已同步多段发卡文案）" if synced else "")
+                + ("（已同步别名绑定）" if bind_synced else ""),
             }
 
     psy_token, token_source = resolve_psy_token(cfg)
