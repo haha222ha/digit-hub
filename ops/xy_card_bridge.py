@@ -226,6 +226,7 @@ def upsert_xy_data_card(
     lines: list[str],
     dry_run: bool,
     description: str | None = None,
+    pair_aliases: list[str] | None = None,
 ) -> dict[str, Any]:
     cards = list_xy_cards(base, token)
     existing = find_card_for_item(cards, item_id, name)
@@ -240,6 +241,8 @@ def upsert_xy_data_card(
             "line_count": len(merged.splitlines()) if merged else 0,
             "new_lines": len(lines),
             "description_preview": desc[:80],
+            "item_ids": [str(item_id)]
+            + [str(x).strip() for x in (pair_aliases or []) if str(x).strip()],
         }
 
     payload_common = {
@@ -249,6 +252,12 @@ def upsert_xy_data_card(
         "data_content": merged,
         "description": desc,
     }
+    # 主 item + 旧链/别名一并绑定，避免用户拍到旧商品 ID 无卡可发
+    bind_ids = [str(item_id)]
+    for extra in pair_aliases or []:
+        e = str(extra or "").strip()
+        if e and e not in bind_ids:
+            bind_ids.append(e)
 
     if existing and existing.get("id"):
         cid = int(existing["id"])
@@ -262,7 +271,7 @@ def upsert_xy_data_card(
         r2 = requests.put(
             f"{base}/cards/{cid}/items",
             headers=xy_headers(token),
-            json={"item_ids": [item_id]},
+            json={"item_ids": bind_ids},
             timeout=30,
         )
         return {
@@ -271,6 +280,7 @@ def upsert_xy_data_card(
             "card_id": cid,
             "bind_status": r2.status_code,
             "stock_lines": len(merged.splitlines()) if merged else 0,
+            "item_ids": bind_ids,
         }
 
     r = requests.post(
@@ -278,7 +288,7 @@ def upsert_xy_data_card(
         headers=xy_headers(token),
         json={
             **payload_common,
-            "item_ids": [item_id],
+            "item_ids": bind_ids,
         },
         timeout=60,
     )
@@ -289,6 +299,7 @@ def upsert_xy_data_card(
         "mode": "create",
         "response": body,
         "stock_lines": len(merged.splitlines()) if merged else 0,
+        "item_ids": bind_ids,
     }
 
 
@@ -576,6 +587,11 @@ def claim_from_cloud(
             "stock_lines": stock_now,
         }
 
+    aliases = [
+        str(x).strip()
+        for x in (pair.get("xy_item_aliases") or [])
+        if str(x).strip()
+    ]
     result = upsert_xy_data_card(
         cfg["xy_api_base"],
         xy_token,
@@ -584,6 +600,7 @@ def claim_from_cloud(
         lines=urls,
         dry_run=False,
         description=description,
+        pair_aliases=aliases,
     )
     result.update(
         {
@@ -644,6 +661,11 @@ def run_pair(
                 "xhs_binding_id": binding_id,
                 "xhs_product_id": xhs_pid,
             }
+        aliases = [
+            str(x).strip()
+            for x in (pair.get("xy_item_aliases") or [])
+            if str(x).strip()
+        ]
         result = upsert_xy_data_card(
             cfg["xy_api_base"],
             token,
@@ -652,6 +674,7 @@ def run_pair(
             lines=lines,
             dry_run=dry_run,
             description=resolve_delivery_description(cfg, pair),
+            pair_aliases=aliases,
         )
         result.update(
             {
