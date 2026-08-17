@@ -696,6 +696,45 @@ export async function renderSaSelectionReports(root) {
           text: `${meta.source_name || ""} · 最新 ${meta.latest_day || ""} · 去噪Σ ${meta.noise_filtered ?? 0} · ${meta.note || ""} · ${meta.generated_at || ""}`,
         }),
 
+        (() => {
+          const shelf = (data && data.shelf_batch_v1) || [];
+          if (!shelf.length) return null;
+          return el("div", { className: "panel" }, [
+            el("h3", { text: "⓪ 在售货架批次 · 热库覆盖（10 款）" }),
+            el("p", {
+              className: "muted",
+              text: "与千帆 psyche_listing_batch_v1 主图对齐：码 = 题包目录；热库已映射 = 该主题在全库有出日。",
+            }),
+            table(
+              ["码", "选题", "题包", "热库主题", "出日", "跨日命中", "紧急度", "客单", "趋势"],
+              shelf.map((s) =>
+                el(
+                  "tr",
+                  {
+                    style: s.theme ? "cursor:pointer" : "",
+                    onClick: s.theme
+                      ? () => {
+                          setPick(s.theme);
+                        }
+                      : undefined,
+                  },
+                  [
+                    el("td", { text: s.code || "—" }),
+                    el("td", { text: s.label || "—" }),
+                    el("td", { text: s.has_psy_pack ? "有" : "无" }),
+                    el("td", { text: s.theme || (s.hotlib_mapped ? "—" : "未映射") }),
+                    el("td", { text: String(s.days_present ?? 0) }),
+                    el("td", { text: String(s.total_hits ?? 0) }),
+                    el("td", { text: s.urgency_score != null ? String(s.urgency_score) : "—" }),
+                    el("td", { text: _fitLabel(s.premium_fit) }),
+                    el("td", { text: _trendLabel(s.trend) }),
+                  ]
+                )
+              )
+            ),
+          ]);
+        })(),
+
         el("div", { className: "panel" }, [
           el("h3", { text: "① 日期轴（联动观测）" }),
           el("p", {

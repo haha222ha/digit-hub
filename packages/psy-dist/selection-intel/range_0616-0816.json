@@ -42,16 +42,16 @@
     "day_range": "0616-0816",
     "source_dir": "D:/选品报告/热库全量增量",
     "source_name": "热库全量×33日",
-    "generated_at": "2026-08-16T15:56:26.146627+00:00",
+    "generated_at": "2026-08-17T05:36:42.950408+00:00",
     "advice_total": 1142750,
-    "assess_hit_count": 16080,
-    "assess_hit_latest": 740,
-    "noise_filtered": 13660,
-    "curated_assigned": 5103,
+    "assess_hit_count": 37507,
+    "assess_hit_latest": 1649,
+    "noise_filtered": 15702,
+    "curated_assigned": 5116,
     "discovered_theme_count": 30,
     "uncategorized_count": 90,
-    "theme_count": 39,
-    "active_theme_count": 31,
+    "theme_count": 42,
+    "active_theme_count": 32,
     "schema_version": 3,
     "advice_day_count": 12,
     "datajs_day_count": 21,
@@ -64,9 +64,9 @@
       "source_name": "全量0616",
       "source_kind": "data.js",
       "advice_total": 93052,
-      "assess_hit_count": 1218,
-      "noise_filtered": 1141,
-      "active_theme_count": 26,
+      "assess_hit_count": 2288,
+      "noise_filtered": 1267,
+      "active_theme_count": 27,
       "top_themes": [
         {
           "name": "七宗罪/危险人格",
@@ -393,8 +393,8 @@
       "source_name": "全量0617",
       "source_kind": "data.js",
       "advice_total": 19412,
-      "assess_hit_count": 206,
-      "noise_filtered": 185,
+      "assess_hit_count": 365,
+      "noise_filtered": 203,
       "active_theme_count": 22,
       "top_themes": [
         {
@@ -722,9 +722,9 @@
       "source_name": "全量0618",
       "source_kind": "data.js",
       "advice_total": 53110,
-      "assess_hit_count": 741,
-      "noise_filtered": 553,
-      "active_theme_count": 25,
+      "assess_hit_count": 1447,
+      "noise_filtered": 626,
+      "active_theme_count": 26,
       "top_themes": [
         {
           "name": "松弛感",
@@ -732,7 +732,7 @@
           "hit_count": 48
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 271.6,
           "hit_count": 7
         },
@@ -787,7 +787,7 @@
           "delta": 131.0,
           "pool": "BURST",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0618"
         },
         {
@@ -1051,8 +1051,8 @@
       "source_name": "全量0619",
       "source_kind": "data.js",
       "advice_total": 43538,
-      "assess_hit_count": 752,
-      "noise_filtered": 507,
+      "assess_hit_count": 1247,
+      "noise_filtered": 543,
       "active_theme_count": 23,
       "top_themes": [
         {
@@ -1380,8 +1380,8 @@
       "source_name": "全量0620",
       "source_kind": "data.js",
       "advice_total": 45874,
-      "assess_hit_count": 690,
-      "noise_filtered": 406,
+      "assess_hit_count": 1189,
+      "noise_filtered": 438,
       "active_theme_count": 23,
       "top_themes": [
         {
@@ -1709,9 +1709,9 @@
       "source_name": "全量0621",
       "source_kind": "data.js",
       "advice_total": 45984,
-      "assess_hit_count": 836,
-      "noise_filtered": 478,
-      "active_theme_count": 23,
+      "assess_hit_count": 1366,
+      "noise_filtered": 518,
+      "active_theme_count": 24,
       "top_themes": [
         {
           "name": "松弛感",
@@ -2038,8 +2038,8 @@
       "source_name": "全量0622",
       "source_kind": "data.js",
       "advice_total": 26732,
-      "assess_hit_count": 448,
-      "noise_filtered": 323,
+      "assess_hit_count": 777,
+      "noise_filtered": 345,
       "active_theme_count": 20,
       "top_themes": [
         {
@@ -2367,8 +2367,8 @@
       "source_name": "全量0623",
       "source_kind": "data.js",
       "advice_total": 50624,
-      "assess_hit_count": 804,
-      "noise_filtered": 497,
+      "assess_hit_count": 1532,
+      "noise_filtered": 557,
       "active_theme_count": 26,
       "top_themes": [
         {
@@ -2387,7 +2387,7 @@
           "hit_count": 50
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 262.7,
           "hit_count": 9
         },
@@ -2465,7 +2465,7 @@
           "delta": 71.0,
           "pool": "BURST",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0623"
         },
         {
@@ -2696,8 +2696,8 @@
       "source_name": "全量0630",
       "source_kind": "data.js",
       "advice_total": 25934,
-      "assess_hit_count": 439,
-      "noise_filtered": 245,
+      "assess_hit_count": 806,
+      "noise_filtered": 270,
       "active_theme_count": 21,
       "top_themes": [
         {
@@ -3025,7 +3025,7 @@
       "source_name": "全量0724",
       "source_kind": "data.js",
       "advice_total": 12062,
-      "assess_hit_count": 31,
+      "assess_hit_count": 51,
       "noise_filtered": 8,
       "active_theme_count": 2,
       "top_themes": [
@@ -3137,8 +3137,8 @@
       "source_name": "全量0725",
       "source_kind": "data.js",
       "advice_total": 39192,
-      "assess_hit_count": 174,
-      "noise_filtered": 141,
+      "assess_hit_count": 621,
+      "noise_filtered": 171,
       "active_theme_count": 11,
       "top_themes": [
         {
@@ -3147,7 +3147,7 @@
           "hit_count": 8
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 171.8,
           "hit_count": 6
         },
@@ -3202,7 +3202,7 @@
           "delta": 875.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0725"
         },
         {
@@ -3279,7 +3279,7 @@
           "delta": 132.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0725"
         },
         {
@@ -3345,7 +3345,7 @@
           "delta": 39.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0725"
         },
         {
@@ -3466,8 +3466,8 @@
       "source_name": "全量0726",
       "source_kind": "data.js",
       "advice_total": 26728,
-      "assess_hit_count": 228,
-      "noise_filtered": 160,
+      "assess_hit_count": 755,
+      "noise_filtered": 201,
       "active_theme_count": 20,
       "top_themes": [
         {
@@ -3496,7 +3496,7 @@
           "hit_count": 4
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 108.4,
           "hit_count": 4
         },
@@ -3619,7 +3619,7 @@
           "delta": 265.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0726"
         },
         {
@@ -3784,7 +3784,7 @@
           "delta": 47.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0726"
         }
       ]
@@ -3795,8 +3795,8 @@
       "source_name": "全量0727",
       "source_kind": "data.js",
       "advice_total": 52129,
-      "assess_hit_count": 466,
-      "noise_filtered": 258,
+      "assess_hit_count": 1191,
+      "noise_filtered": 313,
       "active_theme_count": 24,
       "top_themes": [
         {
@@ -3825,7 +3825,7 @@
           "hit_count": 5
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 188.0,
           "hit_count": 7
         },
@@ -3959,7 +3959,7 @@
           "delta": 623.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0727"
         },
         {
@@ -4069,7 +4069,7 @@
           "delta": 183.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0727"
         },
         {
@@ -4124,8 +4124,8 @@
       "source_name": "全量0728",
       "source_kind": "data.js",
       "advice_total": 72254,
-      "assess_hit_count": 615,
-      "noise_filtered": 885,
+      "assess_hit_count": 1684,
+      "noise_filtered": 1010,
       "active_theme_count": 23,
       "top_themes": [
         {
@@ -4139,7 +4139,7 @@
           "hit_count": 29
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 301.5,
           "hit_count": 11
         },
@@ -4277,7 +4277,7 @@
           "delta": 838.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0728"
         },
         {
@@ -4420,7 +4420,7 @@
           "delta": 129.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0728"
         },
         {
@@ -4442,7 +4442,7 @@
           "delta": 122.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0728"
         }
       ]
@@ -4453,8 +4453,8 @@
       "source_name": "全量0729",
       "source_kind": "data.js",
       "advice_total": 65676,
-      "assess_hit_count": 724,
-      "noise_filtered": 932,
+      "assess_hit_count": 2031,
+      "noise_filtered": 1061,
       "active_theme_count": 27,
       "top_themes": [
         {
@@ -4473,7 +4473,7 @@
           "hit_count": 34
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 347.5,
           "hit_count": 16
         },
@@ -4606,7 +4606,7 @@
           "delta": 668.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0729"
         },
         {
@@ -4628,7 +4628,7 @@
           "delta": 502.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0729"
         },
         {
@@ -4782,8 +4782,8 @@
       "source_name": "全量0730",
       "source_kind": "data.js",
       "advice_total": 35430,
-      "assess_hit_count": 505,
-      "noise_filtered": 485,
+      "assess_hit_count": 1308,
+      "noise_filtered": 547,
       "active_theme_count": 24,
       "top_themes": [
         {
@@ -4797,7 +4797,7 @@
           "hit_count": 13
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 191.4,
           "hit_count": 10
         },
@@ -4880,7 +4880,7 @@
           "delta": 251.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0730"
         },
         {
@@ -5100,7 +5100,7 @@
           "delta": 48.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0730"
         }
       ]
@@ -5111,8 +5111,8 @@
       "source_name": "全量0731",
       "source_kind": "data.js",
       "advice_total": 34044,
-      "assess_hit_count": 376,
-      "noise_filtered": 502,
+      "assess_hit_count": 1206,
+      "noise_filtered": 586,
       "active_theme_count": 23,
       "top_themes": [
         {
@@ -5131,7 +5131,7 @@
           "hit_count": 4
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 139.0,
           "hit_count": 5
         },
@@ -5220,7 +5220,7 @@
           "delta": 397.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0731"
         },
         {
@@ -5297,7 +5297,7 @@
           "delta": 137.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0731"
         },
         {
@@ -5374,7 +5374,7 @@
           "delta": 61.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0731"
         },
         {
@@ -5440,8 +5440,8 @@
       "source_name": "全量0801",
       "source_kind": "data.js",
       "advice_total": 30517,
-      "assess_hit_count": 326,
-      "noise_filtered": 404,
+      "assess_hit_count": 968,
+      "noise_filtered": 472,
       "active_theme_count": 23,
       "top_themes": [
         {
@@ -5455,7 +5455,7 @@
           "hit_count": 15
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 172.6,
           "hit_count": 9
         },
@@ -5571,7 +5571,7 @@
           "delta": 123.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0801"
         },
         {
@@ -5582,7 +5582,7 @@
           "delta": 122.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0801"
         },
         {
@@ -5659,7 +5659,7 @@
           "delta": 65.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0801"
         },
         {
@@ -5714,7 +5714,7 @@
           "delta": 51.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0801"
         },
         {
@@ -5769,8 +5769,8 @@
       "source_name": "全量0802",
       "source_kind": "data.js",
       "advice_total": 18627,
-      "assess_hit_count": 229,
-      "noise_filtered": 264,
+      "assess_hit_count": 663,
+      "noise_filtered": 313,
       "active_theme_count": 22,
       "top_themes": [
         {
@@ -5794,7 +5794,7 @@
           "hit_count": 5
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 119.9,
           "hit_count": 7
         },
@@ -5977,7 +5977,7 @@
           "delta": 59.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0802"
         },
         {
@@ -5988,7 +5988,7 @@
           "delta": 56.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0802"
         },
         {
@@ -6098,8 +6098,8 @@
       "source_name": "全量0803",
       "source_kind": "data.js",
       "advice_total": 21202,
-      "assess_hit_count": 244,
-      "noise_filtered": 329,
+      "assess_hit_count": 776,
+      "noise_filtered": 382,
       "active_theme_count": 18,
       "top_themes": [
         {
@@ -6123,7 +6123,7 @@
           "hit_count": 7
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 111.9,
           "hit_count": 7
         },
@@ -6427,8 +6427,8 @@
       "source_name": "全量0804",
       "source_kind": "data.js",
       "advice_total": 19352,
-      "assess_hit_count": 223,
-      "noise_filtered": 314,
+      "assess_hit_count": 776,
+      "noise_filtered": 363,
       "active_theme_count": 20,
       "top_themes": [
         {
@@ -6457,7 +6457,7 @@
           "hit_count": 3
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 68.7,
           "hit_count": 5
         },
@@ -6668,7 +6668,7 @@
           "delta": 44.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0804"
         },
         {
@@ -6745,7 +6745,7 @@
           "delta": 22.0,
           "pool": "WATCH",
           "advice_score": null,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0804"
         }
       ]
@@ -6756,8 +6756,8 @@
       "source_name": "全量0805",
       "source_kind": "advice_data.js",
       "advice_total": 26228,
-      "assess_hit_count": 305,
-      "noise_filtered": 388,
+      "assess_hit_count": 936,
+      "noise_filtered": 455,
       "active_theme_count": 21,
       "top_themes": [
         {
@@ -6771,7 +6771,7 @@
           "hit_count": 15
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 217.0,
           "hit_count": 9
         },
@@ -6887,7 +6887,7 @@
           "delta": 1000.0,
           "pool": "WATCH",
           "advice_score": 68.7,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0805"
         },
         {
@@ -6909,7 +6909,7 @@
           "delta": 467.0,
           "pool": "WATCH",
           "advice_score": 45.0,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0805"
         },
         {
@@ -7085,8 +7085,8 @@
       "source_name": "全量0806",
       "source_kind": "advice_data.js",
       "advice_total": 22359,
-      "assess_hit_count": 272,
-      "noise_filtered": 350,
+      "assess_hit_count": 790,
+      "noise_filtered": 403,
       "active_theme_count": 21,
       "top_themes": [
         {
@@ -7110,7 +7110,7 @@
           "hit_count": 3
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 115.7,
           "hit_count": 7
         },
@@ -7271,7 +7271,7 @@
           "delta": 80.0,
           "pool": "WATCH",
           "advice_score": 60.2,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0806"
         },
         {
@@ -7403,7 +7403,7 @@
           "delta": 39.0,
           "pool": "WATCH",
           "advice_score": 53.2,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0806"
         }
       ]
@@ -7414,8 +7414,8 @@
       "source_name": "全量0807",
       "source_kind": "advice_data.js",
       "advice_total": 16085,
-      "assess_hit_count": 234,
-      "noise_filtered": 267,
+      "assess_hit_count": 681,
+      "noise_filtered": 312,
       "active_theme_count": 19,
       "top_themes": [
         {
@@ -7743,8 +7743,8 @@
       "source_name": "全量0808",
       "source_kind": "advice_data.js",
       "advice_total": 21819,
-      "assess_hit_count": 247,
-      "noise_filtered": 332,
+      "assess_hit_count": 800,
+      "noise_filtered": 385,
       "active_theme_count": 21,
       "top_themes": [
         {
@@ -7768,7 +7768,7 @@
           "hit_count": 13
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 122.6,
           "hit_count": 7
         },
@@ -8039,7 +8039,7 @@
           "delta": 45.0,
           "pool": "WATCH",
           "advice_score": 45.4,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0808"
         },
         {
@@ -8072,8 +8072,8 @@
       "source_name": "全量0809",
       "source_kind": "advice_data.js",
       "advice_total": 26695,
-      "assess_hit_count": 307,
-      "noise_filtered": 392,
+      "assess_hit_count": 930,
+      "noise_filtered": 457,
       "active_theme_count": 22,
       "top_themes": [
         {
@@ -8390,7 +8390,7 @@
           "delta": 28.0,
           "pool": "WATCH",
           "advice_score": 53.6,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0809"
         }
       ]
@@ -8401,9 +8401,9 @@
       "source_name": "全量0810",
       "source_kind": "advice_data.js",
       "advice_total": 25886,
-      "assess_hit_count": 342,
-      "noise_filtered": 378,
-      "active_theme_count": 27,
+      "assess_hit_count": 822,
+      "noise_filtered": 420,
+      "active_theme_count": 28,
       "top_themes": [
         {
           "name": "七宗罪/危险人格",
@@ -8426,7 +8426,7 @@
           "hit_count": 6
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 182.4,
           "hit_count": 7
         },
@@ -8675,7 +8675,7 @@
           "delta": 557.0,
           "pool": "WATCH",
           "advice_score": 45.7,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0810"
         },
         {
@@ -8730,9 +8730,9 @@
       "source_name": "全量0811",
       "source_kind": "advice_data.js",
       "advice_total": 26364,
-      "assess_hit_count": 390,
-      "noise_filtered": 409,
-      "active_theme_count": 23,
+      "assess_hit_count": 1052,
+      "noise_filtered": 482,
+      "active_theme_count": 24,
       "top_themes": [
         {
           "name": "七宗罪/危险人格",
@@ -8745,7 +8745,7 @@
           "hit_count": 30
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 265.2,
           "hit_count": 15
         },
@@ -8993,7 +8993,7 @@
           "delta": 200.0,
           "pool": "WATCH",
           "advice_score": 60.8,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0811"
         },
         {
@@ -9059,8 +9059,8 @@
       "source_name": "全量0812",
       "source_kind": "advice_data.js",
       "advice_total": 28385,
-      "assess_hit_count": 577,
-      "noise_filtered": 367,
+      "assess_hit_count": 1528,
+      "noise_filtered": 459,
       "active_theme_count": 27,
       "top_themes": [
         {
@@ -9094,7 +9094,7 @@
           "hit_count": 38
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 209.6,
           "hit_count": 15
         },
@@ -9234,7 +9234,7 @@
           "delta": 84.0,
           "pool": "WATCH",
           "advice_score": 45.9,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0812"
         },
         {
@@ -9388,8 +9388,8 @@
       "source_name": "全量0813",
       "source_kind": "advice_data.js",
       "advice_total": 22512,
-      "assess_hit_count": 688,
-      "noise_filtered": 357,
+      "assess_hit_count": 1550,
+      "noise_filtered": 436,
       "active_theme_count": 30,
       "top_themes": [
         {
@@ -9403,7 +9403,7 @@
           "hit_count": 9
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 355.6,
           "hit_count": 20
         },
@@ -9464,7 +9464,7 @@
           "delta": 67.0,
           "pool": "WATCH",
           "advice_score": 75.3,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0813"
         },
         {
@@ -9640,7 +9640,7 @@
           "delta": 51.0,
           "pool": "WATCH",
           "advice_score": 38.8,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0813"
         },
         {
@@ -9717,8 +9717,8 @@
       "source_name": "全量0814",
       "source_kind": "advice_data.js",
       "advice_total": 29480,
-      "assess_hit_count": 847,
-      "noise_filtered": 439,
+      "assess_hit_count": 1854,
+      "noise_filtered": 543,
       "active_theme_count": 29,
       "top_themes": [
         {
@@ -9732,7 +9732,7 @@
           "hit_count": 82
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 475.0,
           "hit_count": 21
         },
@@ -9837,7 +9837,7 @@
           "delta": 63.0,
           "pool": "WATCH",
           "advice_score": 76.3,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0814"
         },
         {
@@ -9859,7 +9859,7 @@
           "delta": 26.0,
           "pool": "WATCH",
           "advice_score": 73.0,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0814"
         },
         {
@@ -9936,7 +9936,7 @@
           "delta": 165.0,
           "pool": "WATCH",
           "advice_score": 61.4,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0814"
         },
         {
@@ -10046,8 +10046,8 @@
       "source_name": "全量0815",
       "source_kind": "advice_data.js",
       "advice_total": 38032,
-      "assess_hit_count": 856,
-      "noise_filtered": 571,
+      "assess_hit_count": 1868,
+      "noise_filtered": 679,
       "active_theme_count": 31,
       "top_themes": [
         {
@@ -10081,7 +10081,7 @@
           "hit_count": 20
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 273.7,
           "hit_count": 20
         },
@@ -10265,7 +10265,7 @@
           "delta": 70.0,
           "pool": "WATCH",
           "advice_score": 48.3,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0815"
         },
         {
@@ -10331,7 +10331,7 @@
           "delta": 28.0,
           "pool": "WATCH",
           "advice_score": 43.0,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0815"
         },
         {
@@ -10375,8 +10375,8 @@
       "source_name": "全量0816",
       "source_kind": "advice_data.js",
       "advice_total": 27432,
-      "assess_hit_count": 740,
-      "noise_filtered": 393,
+      "assess_hit_count": 1649,
+      "noise_filtered": 477,
       "active_theme_count": 30,
       "top_themes": [
         {
@@ -10390,7 +10390,7 @@
           "hit_count": 34
         },
         {
-          "name": "性格城市匹配",
+          "name": "性格城市/五行城市",
           "urgency_score": 395.2,
           "hit_count": 18
         },
@@ -10506,7 +10506,7 @@
           "delta": 113.0,
           "pool": "WATCH",
           "advice_score": 60.5,
-          "theme": "性格城市匹配",
+          "theme": "性格城市/五行城市",
           "day": "0816"
         },
         {
@@ -10826,6 +10826,24 @@
         "days_present": 19,
         "trend": "rising",
         "spark": "▅▆▄▄▄▄▅▇"
+      },
+      {
+        "name": "恋爱观测试",
+        "psy_code": "rvt",
+        "urgency_score": 19.4,
+        "latest_urgency": 25.0,
+        "hit_count": 0,
+        "total_hits": 1,
+        "sum_delta": 0.0,
+        "total_delta": 1.0,
+        "avg_price": null,
+        "max_delta": 1.0,
+        "has_psy_pack": true,
+        "suggest_price_band": "¥39–79",
+        "premium_fit": "high",
+        "days_present": 1,
+        "trend": "fading",
+        "spark": "▅█▅▅▅▅▅▅"
       }
     ],
     "mid": [
@@ -10866,8 +10884,8 @@
         "spark": "▆▅▄█▅▅▆▄"
       },
       {
-        "name": "性格城市匹配",
-        "psy_code": "cmt",
+        "name": "性格城市/五行城市",
+        "psy_code": "wxcs",
         "urgency_score": 265.4,
         "latest_urgency": 395.2,
         "hit_count": 18,
@@ -10993,7 +11011,7 @@
       },
       {
         "name": "霍兰德职业兴趣",
-        "psy_code": "holland",
+        "psy_code": "hit",
         "urgency_score": 66.2,
         "latest_urgency": 39.6,
         "hit_count": 2,
@@ -11050,12 +11068,12 @@
       {
         "name": "SCL-90完整90题",
         "psy_code": "scl90",
-        "urgency_score": 191.8,
+        "urgency_score": 191.9,
         "latest_urgency": 268.1,
         "hit_count": 41,
-        "total_hits": 448,
+        "total_hits": 449,
         "sum_delta": 714.0,
-        "total_delta": 22322.7,
+        "total_delta": 22322.9,
         "avg_price": 1.76,
         "max_delta": 3568.0,
         "has_psy_pack": true,
@@ -11140,8 +11158,8 @@
         "spark": "▆▅▄█▅▅▆▄"
       },
       {
-        "name": "性格城市匹配",
-        "psy_code": "cmt",
+        "name": "性格城市/五行城市",
+        "psy_code": "wxcs",
         "urgency_score": 265.4,
         "latest_urgency": 395.2,
         "hit_count": 18,
@@ -11232,12 +11250,12 @@
       {
         "name": "SCL-90完整90题",
         "psy_code": "scl90",
-        "urgency_score": 191.8,
+        "urgency_score": 191.9,
         "latest_urgency": 268.1,
         "hit_count": 41,
-        "total_hits": 448,
+        "total_hits": 449,
         "sum_delta": 714.0,
-        "total_delta": 22322.7,
+        "total_delta": 22322.9,
         "avg_price": 1.76,
         "max_delta": 3568.0,
         "has_psy_pack": true,
@@ -11323,8 +11341,8 @@
         "spark": "▆▅▄█▅▅▆▄"
       },
       {
-        "name": "性格城市匹配",
-        "psy_code": "cmt",
+        "name": "性格城市/五行城市",
+        "psy_code": "wxcs",
         "urgency_score": 265.4,
         "latest_urgency": 395.2,
         "hit_count": 18,
@@ -11415,12 +11433,12 @@
       {
         "name": "SCL-90完整90题",
         "psy_code": "scl90",
-        "urgency_score": 191.8,
+        "urgency_score": 191.9,
         "latest_urgency": 268.1,
         "hit_count": 41,
-        "total_hits": 448,
+        "total_hits": 449,
         "sum_delta": 714.0,
-        "total_delta": 22322.7,
+        "total_delta": 22322.9,
         "avg_price": 1.76,
         "max_delta": 3568.0,
         "has_psy_pack": true,
@@ -12392,14 +12410,15 @@
       ]
     },
     {
-      "name": "性格城市匹配",
+      "name": "性格城市/五行城市",
       "keywords": [
         "性格城市",
         "城市匹配",
         "天选之城",
-        "五行城市"
+        "五行城市",
+        "五行城市匹配"
       ],
-      "psy_code": "cmt",
+      "psy_code": "wxcs",
       "premium_fit": "mid",
       "suggest_price_band": "¥19–49",
       "has_psy_pack": true,
@@ -12731,7 +12750,8 @@
         "职业测评",
         "天赋测试",
         "天赋潜能",
-        "十大天赋"
+        "十大天赋",
+        "天赋潜能评估"
       ],
       "psy_code": "apt",
       "premium_fit": "mid",
@@ -14074,10 +14094,10 @@
       "sum_delta": 714.0,
       "avg_price": 1.76,
       "max_delta": 3568.0,
-      "urgency_score": 191.8,
+      "urgency_score": 191.9,
       "latest_urgency": 268.1,
-      "total_hits": 448,
-      "total_delta": 22322.7,
+      "total_hits": 449,
+      "total_delta": 22322.9,
       "days_present": 31,
       "day_count": 33,
       "trend": "rising",
@@ -14085,10 +14105,10 @@
       "day_series": [
         {
           "day": "0616",
-          "hit_count": 13,
-          "sum_delta": 42.7,
-          "urgency_score": 94.2,
-          "avg_price": 1.81
+          "hit_count": 14,
+          "sum_delta": 42.9,
+          "urgency_score": 97.1,
+          "avg_price": 2.32
         },
         {
           "day": "0617",
@@ -18373,9 +18393,10 @@
       "name": "霍兰德职业兴趣",
       "keywords": [
         "霍兰德",
-        "职业兴趣"
+        "职业兴趣",
+        "霍兰德职业兴趣测试"
       ],
-      "psy_code": "holland",
+      "psy_code": "hit",
       "premium_fit": "mid",
       "suggest_price_band": "¥29–59",
       "has_psy_pack": true,
@@ -19330,6 +19351,340 @@
       ]
     },
     {
+      "name": "考研/读博适配",
+      "keywords": [
+        "适合考研",
+        "适合读博",
+        "考研适配",
+        "读博吗",
+        "学术潜力"
+      ],
+      "psy_code": "phd",
+      "premium_fit": "mid",
+      "suggest_price_band": "¥29–59",
+      "has_psy_pack": true,
+      "source": "curated",
+      "hit_count": 2,
+      "sum_delta": 116.0,
+      "avg_price": 3.5,
+      "max_delta": 810.0,
+      "urgency_score": 56.8,
+      "latest_urgency": 60.6,
+      "total_hits": 35,
+      "total_delta": 2362.3,
+      "days_present": 20,
+      "day_count": 33,
+      "trend": "rising",
+      "spark": "▂▄▄▄▄▆█▃",
+      "day_series": [
+        {
+          "day": "0616",
+          "hit_count": 1,
+          "sum_delta": 0.3,
+          "urgency_score": 31.5,
+          "avg_price": 12.8
+        },
+        {
+          "day": "0617",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0618",
+          "hit_count": 1,
+          "sum_delta": 1.0,
+          "urgency_score": 50.1,
+          "avg_price": 6.91
+        },
+        {
+          "day": "0619",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0620",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0621",
+          "hit_count": 1,
+          "sum_delta": 1.0,
+          "urgency_score": 50.1,
+          "avg_price": 9.9
+        },
+        {
+          "day": "0622",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0623",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0630",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0724",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0725",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0726",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0727",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0728",
+          "hit_count": 1,
+          "sum_delta": 12.0,
+          "urgency_score": 32.5,
+          "avg_price": 3.0
+        },
+        {
+          "day": "0729",
+          "hit_count": 1,
+          "sum_delta": 43.0,
+          "urgency_score": 39.1,
+          "avg_price": 3.0
+        },
+        {
+          "day": "0730",
+          "hit_count": 3,
+          "sum_delta": 23.0,
+          "urgency_score": 64.3,
+          "avg_price": 4.33
+        },
+        {
+          "day": "0731",
+          "hit_count": 1,
+          "sum_delta": 30.0,
+          "urgency_score": 36.3,
+          "avg_price": 3.0
+        },
+        {
+          "day": "0801",
+          "hit_count": 2,
+          "sum_delta": 30.0,
+          "urgency_score": 61.1,
+          "avg_price": 6.45
+        },
+        {
+          "day": "0802",
+          "hit_count": 1,
+          "sum_delta": 33.0,
+          "urgency_score": 36.9,
+          "avg_price": 3.0
+        },
+        {
+          "day": "0803",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0804",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0805",
+          "hit_count": 1,
+          "sum_delta": 38.0,
+          "urgency_score": 37.8,
+          "avg_price": 3.0
+        },
+        {
+          "day": "0806",
+          "hit_count": 2,
+          "sum_delta": 31.0,
+          "urgency_score": 52.3,
+          "avg_price": 6.45
+        },
+        {
+          "day": "0807",
+          "hit_count": 1,
+          "sum_delta": 36.0,
+          "urgency_score": 54.3,
+          "avg_price": 3.0
+        },
+        {
+          "day": "0808",
+          "hit_count": 1,
+          "sum_delta": 19.0,
+          "urgency_score": 50.8,
+          "avg_price": 3.0
+        },
+        {
+          "day": "0809",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0810",
+          "hit_count": 1,
+          "sum_delta": 810.0,
+          "urgency_score": 90.0,
+          "avg_price": 4.99
+        },
+        {
+          "day": "0811",
+          "hit_count": 3,
+          "sum_delta": 74.0,
+          "urgency_score": 74.4,
+          "avg_price": 3.0
+        },
+        {
+          "day": "0812",
+          "hit_count": 2,
+          "sum_delta": 142.0,
+          "urgency_score": 84.3,
+          "avg_price": 4.0
+        },
+        {
+          "day": "0813",
+          "hit_count": 4,
+          "sum_delta": 109.0,
+          "urgency_score": 89.8,
+          "avg_price": 6.92
+        },
+        {
+          "day": "0814",
+          "hit_count": 3,
+          "sum_delta": 653.0,
+          "urgency_score": 124.8,
+          "avg_price": 5.29
+        },
+        {
+          "day": "0815",
+          "hit_count": 3,
+          "sum_delta": 161.0,
+          "urgency_score": 185.4,
+          "avg_price": 5.96
+        },
+        {
+          "day": "0816",
+          "hit_count": 2,
+          "sum_delta": 116.0,
+          "urgency_score": 60.6,
+          "avg_price": 3.5
+        }
+      ],
+      "top": [
+        {
+          "goods_id": "6a4fb9f231d9b80001da507d",
+          "title": "你适合考研/读博吗？专业升学适配性测评 6维评估升学潜力与方向",
+          "price": 4.99,
+          "delta": 810.0,
+          "pool": "WATCH",
+          "bucket": "watch",
+          "day": "0810"
+        },
+        {
+          "goods_id": "6a4fb9f231d9b80001da507a",
+          "title": "你适合考研/读博吗？专业升学适配性测评 6维评估升学潜力与方向",
+          "price": 3.99,
+          "delta": 628.0,
+          "pool": "WATCH",
+          "bucket": "watch",
+          "day": "0814"
+        },
+        {
+          "goods_id": "6a4fb9f231d9b80001da5077",
+          "title": "你适合考研/读博吗？专业升学适配性测评 6维评估升学潜力与方向",
+          "price": 3.99,
+          "delta": 105.0,
+          "pool": "WATCH",
+          "bucket": "watch",
+          "day": "0816"
+        },
+        {
+          "goods_id": "6a127e2b017ffc0001e7a23e",
+          "title": "【米大师授权】你适合读博吗-学术测试网页模板",
+          "price": 3.0,
+          "delta": 69.0,
+          "pool": "WATCH",
+          "bucket": "watch",
+          "day": "0812"
+        },
+        {
+          "goods_id": "6a377ece590e610001685a2e",
+          "title": "【米大师授权】你适合读博吗？学术测试网页模板",
+          "price": 2.0,
+          "delta": 25.0,
+          "pool": "WATCH",
+          "bucket": "watch",
+          "day": "0811"
+        },
+        {
+          "goods_id": "69dfc270be1ced00156f6073",
+          "title": "四大化学专业课复习，适合考研保研面试",
+          "price": 9.9,
+          "delta": 2.0,
+          "pool": "WATCH",
+          "bucket": "watch",
+          "day": "0801"
+        },
+        {
+          "goods_id": "6a0750c1328348000167d011",
+          "title": "四大化学专业课复习适合考研保研面试",
+          "price": 6.91,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch",
+          "day": "0618"
+        },
+        {
+          "goods_id": "66e121932b7dbe0001a78ec3",
+          "title": "景晴老师药理学学笔记pdf，适合考研，考公，期末考试，考编等",
+          "price": 7.0,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch",
+          "day": "0730"
+        }
+      ]
+    },
+    {
       "name": "暧昧段位/暧昧拉扯",
       "keywords": [
         "暧昧段位",
@@ -19663,312 +20018,6 @@
       ]
     },
     {
-      "name": "考研/读博适配",
-      "keywords": [
-        "适合考研",
-        "适合读博",
-        "考研适配",
-        "读博吗"
-      ],
-      "psy_code": "phd",
-      "premium_fit": "mid",
-      "suggest_price_band": "¥29–59",
-      "has_psy_pack": true,
-      "source": "curated",
-      "hit_count": 2,
-      "sum_delta": 116.0,
-      "avg_price": 3.5,
-      "max_delta": 810.0,
-      "urgency_score": 53.9,
-      "latest_urgency": 60.6,
-      "total_hits": 25,
-      "total_delta": 2352.0,
-      "days_present": 17,
-      "day_count": 33,
-      "trend": "rising",
-      "spark": "▂▅▄▄▄▅█▃",
-      "day_series": [
-        {
-          "day": "0616",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0617",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0618",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0619",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0620",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0621",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0622",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0623",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0630",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0724",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0725",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0726",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0727",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0728",
-          "hit_count": 1,
-          "sum_delta": 12.0,
-          "urgency_score": 32.5,
-          "avg_price": 3.0
-        },
-        {
-          "day": "0729",
-          "hit_count": 1,
-          "sum_delta": 43.0,
-          "urgency_score": 39.1,
-          "avg_price": 3.0
-        },
-        {
-          "day": "0730",
-          "hit_count": 2,
-          "sum_delta": 22.0,
-          "urgency_score": 58.8,
-          "avg_price": 3.0
-        },
-        {
-          "day": "0731",
-          "hit_count": 1,
-          "sum_delta": 30.0,
-          "urgency_score": 36.3,
-          "avg_price": 3.0
-        },
-        {
-          "day": "0801",
-          "hit_count": 1,
-          "sum_delta": 28.0,
-          "urgency_score": 35.8,
-          "avg_price": 3.0
-        },
-        {
-          "day": "0802",
-          "hit_count": 1,
-          "sum_delta": 33.0,
-          "urgency_score": 36.9,
-          "avg_price": 3.0
-        },
-        {
-          "day": "0803",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0804",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0805",
-          "hit_count": 1,
-          "sum_delta": 38.0,
-          "urgency_score": 37.8,
-          "avg_price": 3.0
-        },
-        {
-          "day": "0806",
-          "hit_count": 1,
-          "sum_delta": 30.0,
-          "urgency_score": 36.1,
-          "avg_price": 3.0
-        },
-        {
-          "day": "0807",
-          "hit_count": 1,
-          "sum_delta": 36.0,
-          "urgency_score": 54.3,
-          "avg_price": 3.0
-        },
-        {
-          "day": "0808",
-          "hit_count": 1,
-          "sum_delta": 19.0,
-          "urgency_score": 50.8,
-          "avg_price": 3.0
-        },
-        {
-          "day": "0809",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 25.0,
-          "avg_price": null
-        },
-        {
-          "day": "0810",
-          "hit_count": 1,
-          "sum_delta": 810.0,
-          "urgency_score": 90.0,
-          "avg_price": 4.99
-        },
-        {
-          "day": "0811",
-          "hit_count": 3,
-          "sum_delta": 74.0,
-          "urgency_score": 74.4,
-          "avg_price": 3.0
-        },
-        {
-          "day": "0812",
-          "hit_count": 2,
-          "sum_delta": 142.0,
-          "urgency_score": 84.3,
-          "avg_price": 4.0
-        },
-        {
-          "day": "0813",
-          "hit_count": 2,
-          "sum_delta": 107.0,
-          "urgency_score": 68.3,
-          "avg_price": 3.5
-        },
-        {
-          "day": "0814",
-          "hit_count": 2,
-          "sum_delta": 652.0,
-          "urgency_score": 99.6,
-          "avg_price": 3.5
-        },
-        {
-          "day": "0815",
-          "hit_count": 2,
-          "sum_delta": 160.0,
-          "urgency_score": 171.1,
-          "avg_price": 4.0
-        },
-        {
-          "day": "0816",
-          "hit_count": 2,
-          "sum_delta": 116.0,
-          "urgency_score": 60.6,
-          "avg_price": 3.5
-        }
-      ],
-      "top": [
-        {
-          "goods_id": "6a4fb9f231d9b80001da507d",
-          "title": "你适合考研/读博吗？专业升学适配性测评 6维评估升学潜力与方向",
-          "price": 4.99,
-          "delta": 810.0,
-          "pool": "WATCH",
-          "bucket": "watch",
-          "day": "0810"
-        },
-        {
-          "goods_id": "6a4fb9f231d9b80001da507a",
-          "title": "你适合考研/读博吗？专业升学适配性测评 6维评估升学潜力与方向",
-          "price": 3.99,
-          "delta": 628.0,
-          "pool": "WATCH",
-          "bucket": "watch",
-          "day": "0814"
-        },
-        {
-          "goods_id": "6a4fb9f231d9b80001da5077",
-          "title": "你适合考研/读博吗？专业升学适配性测评 6维评估升学潜力与方向",
-          "price": 3.99,
-          "delta": 105.0,
-          "pool": "WATCH",
-          "bucket": "watch",
-          "day": "0816"
-        },
-        {
-          "goods_id": "6a127e2b017ffc0001e7a23e",
-          "title": "【米大师授权】你适合读博吗-学术测试网页模板",
-          "price": 3.0,
-          "delta": 69.0,
-          "pool": "WATCH",
-          "bucket": "watch",
-          "day": "0812"
-        },
-        {
-          "goods_id": "6a377ece590e610001685a2e",
-          "title": "【米大师授权】你适合读博吗？学术测试网页模板",
-          "price": 2.0,
-          "delta": 25.0,
-          "pool": "WATCH",
-          "bucket": "watch",
-          "day": "0811"
-        }
-      ]
-    },
-    {
       "name": "哈利波特/IP趣味",
       "keywords": [
         "哈利波特",
@@ -19984,14 +20033,14 @@
       "sum_delta": 68.0,
       "avg_price": 3.49,
       "max_delta": 173.0,
-      "urgency_score": 37.6,
+      "urgency_score": 39.8,
       "latest_urgency": 48.2,
-      "total_hits": 29,
-      "total_delta": 643.0,
-      "days_present": 17,
+      "total_hits": 30,
+      "total_delta": 644.0,
+      "days_present": 18,
       "day_count": 33,
       "trend": "rising",
-      "spark": "▁█▁▂▂▃▂▃",
+      "spark": "▁█▂▂▂▃▂▃",
       "day_series": [
         {
           "day": "0616",
@@ -20184,10 +20233,10 @@
         },
         {
           "day": "0811",
-          "hit_count": 0,
-          "sum_delta": 0,
-          "urgency_score": 0.0,
-          "avg_price": null
+          "hit_count": 1,
+          "sum_delta": 1.0,
+          "urgency_score": 21.4,
+          "avg_price": 19.88
         },
         {
           "day": "0812",
@@ -20270,6 +20319,15 @@
           "pool": "WATCH",
           "bucket": "watch",
           "day": "0814"
+        },
+        {
+          "goods_id": "686f40f780b7300001e731eb",
+          "title": "2025哈利波特电子手帐学习计划notability模版goodnotes考研享做",
+          "price": 19.88,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch",
+          "day": "0811"
         },
         {
           "goods_id": "6a55a59b24f0440001850af0",
@@ -21551,6 +21609,275 @@
           "pool": "WATCH",
           "bucket": "watch",
           "day": "0730"
+        }
+      ]
+    },
+    {
+      "name": "恋爱观测试",
+      "keywords": [
+        "恋爱观测试",
+        "恋爱观完整",
+        "恋爱观"
+      ],
+      "psy_code": "rvt",
+      "premium_fit": "high",
+      "suggest_price_band": "¥39–79",
+      "has_psy_pack": true,
+      "source": "curated",
+      "hit_count": 0,
+      "sum_delta": 0.0,
+      "avg_price": null,
+      "max_delta": 1.0,
+      "urgency_score": 19.4,
+      "latest_urgency": 25.0,
+      "total_hits": 1,
+      "total_delta": 1.0,
+      "days_present": 1,
+      "day_count": 33,
+      "trend": "fading",
+      "spark": "▅█▅▅▅▅▅▅",
+      "day_series": [
+        {
+          "day": "0616",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0617",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0618",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0619",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0620",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0621",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0622",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0623",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0630",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0724",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0725",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0726",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0727",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0728",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0729",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0730",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0731",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0801",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0802",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0803",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0804",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0805",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0806",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0807",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0808",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0809",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0810",
+          "hit_count": 1,
+          "sum_delta": 1.0,
+          "urgency_score": 42.6,
+          "avg_price": 9.1
+        },
+        {
+          "day": "0811",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0812",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0813",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0814",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0815",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0816",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        }
+      ],
+      "top": [
+        {
+          "goods_id": "69c558e3c0b0790015144ebb",
+          "title": "树立正确婚恋观走好军旅人生路PPT课件正确恋爱观宣讲培训课件pp",
+          "price": 9.1,
+          "delta": 1.0,
+          "pool": "WATCH",
+          "bucket": "watch",
+          "day": "0810"
         }
       ]
     },
@@ -23379,6 +23706,526 @@
       "psy_code": "wl35",
       "premium_fit": "mid",
       "suggest_price_band": "¥39–69",
+      "has_psy_pack": true,
+      "source": "curated",
+      "hit_count": 0,
+      "sum_delta": 0.0,
+      "avg_price": null,
+      "max_delta": 0.0,
+      "urgency_score": 18.8,
+      "latest_urgency": 25.0,
+      "total_hits": 0,
+      "total_delta": 0.0,
+      "days_present": 0,
+      "day_count": 33,
+      "trend": "stable",
+      "spark": "████████",
+      "day_series": [
+        {
+          "day": "0616",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0617",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0618",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0619",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0620",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0621",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0622",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0623",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0630",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0724",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0725",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0726",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0727",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0728",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0729",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0730",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0731",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0801",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0802",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0803",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0804",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0805",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0806",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0807",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0808",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0809",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0810",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0811",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0812",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0813",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0814",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0815",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0816",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        }
+      ],
+      "top": []
+    },
+    {
+      "name": "渣女/渣男倾向",
+      "keywords": [
+        "渣女测试",
+        "渣男测试",
+        "渣女倾向",
+        "渣男倾向"
+      ],
+      "psy_code": "znt",
+      "premium_fit": "mid",
+      "suggest_price_band": "¥19–49",
+      "has_psy_pack": true,
+      "source": "curated",
+      "hit_count": 0,
+      "sum_delta": 0.0,
+      "avg_price": null,
+      "max_delta": 0.0,
+      "urgency_score": 18.8,
+      "latest_urgency": 25.0,
+      "total_hits": 0,
+      "total_delta": 0.0,
+      "days_present": 0,
+      "day_count": 33,
+      "trend": "stable",
+      "spark": "████████",
+      "day_series": [
+        {
+          "day": "0616",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0617",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0618",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0619",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0620",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0621",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0622",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0623",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0630",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0724",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0725",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0726",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0727",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0728",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0729",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0730",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0731",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0801",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0802",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0803",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0804",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0805",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0806",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0807",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0808",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0809",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0810",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0811",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0812",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0813",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0814",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0815",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        },
+        {
+          "day": "0816",
+          "hit_count": 0,
+          "sum_delta": 0,
+          "urgency_score": 25.0,
+          "avg_price": null
+        }
+      ],
+      "top": []
+    },
+    {
+      "name": "容易被欺负/边界感",
+      "keywords": [
+        "容易被人欺负",
+        "容易被欺负",
+        "被人欺负测试",
+        "边界敏感"
+      ],
+      "psy_code": "vbt",
+      "premium_fit": "mid",
+      "suggest_price_band": "¥19–49",
       "has_psy_pack": true,
       "source": "curated",
       "hit_count": 0,
@@ -32470,6 +33317,22 @@
       "days_present": 0
     },
     {
+      "name": "渣女/渣男倾向",
+      "psy_code": "znt",
+      "has_psy_pack": true,
+      "premium_fit": "mid",
+      "suggest_price_band": "¥19–49",
+      "days_present": 0
+    },
+    {
+      "name": "容易被欺负/边界感",
+      "psy_code": "vbt",
+      "has_psy_pack": true,
+      "premium_fit": "mid",
+      "suggest_price_band": "¥19–49",
+      "days_present": 0
+    },
+    {
       "name": "奶茶/咖啡人格趣味",
       "psy_code": "ncrg",
       "has_psy_pack": true,
@@ -33510,7 +34373,7 @@
       "delta": 1000.0,
       "pool": "WATCH",
       "advice_score": 68.7,
-      "theme": "性格城市匹配",
+      "theme": "性格城市/五行城市",
       "day": "0805"
     },
     {
@@ -33895,7 +34758,7 @@
       "delta": 875.0,
       "pool": "WATCH",
       "advice_score": null,
-      "theme": "性格城市匹配",
+      "theme": "性格城市/五行城市",
       "day": "0725"
     },
     {
@@ -33928,7 +34791,7 @@
       "delta": 838.0,
       "pool": "WATCH",
       "advice_score": null,
-      "theme": "性格城市匹配",
+      "theme": "性格城市/五行城市",
       "day": "0728"
     },
     {
@@ -34115,7 +34978,7 @@
       "delta": 668.0,
       "pool": "WATCH",
       "advice_score": null,
-      "theme": "性格城市匹配",
+      "theme": "性格城市/五行城市",
       "day": "0729"
     },
     {
@@ -34216,7 +35079,7 @@
       "delta": 113.0,
       "pool": "WATCH",
       "advice_score": 60.5,
-      "theme": "性格城市匹配",
+      "theme": "性格城市/五行城市",
       "day": "0816"
     },
     {
@@ -34601,7 +35464,7 @@
       "delta": 18.0,
       "pool": "WATCH",
       "advice_score": 55.4,
-      "theme": "性格城市匹配",
+      "theme": "性格城市/五行城市",
       "day": "0816"
     },
     {
@@ -34634,7 +35497,7 @@
       "delta": 583.0,
       "pool": "WATCH",
       "advice_score": 60.7,
-      "theme": "性格城市匹配",
+      "theme": "性格城市/五行城市",
       "day": "0816"
     },
     {
@@ -35014,37 +35877,19 @@
   ],
   "uncategorized_top": [
     {
-      "goods_id": "6a795164a4f71c00010d0520",
-      "title": "升级版7欧1（保底LSR）测试版",
-      "price": 9.99,
-      "delta": 1568.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0815"
-    },
-    {
-      "goods_id": "671afc60fe8531000117cb3f",
-      "title": "健康人报·青少年心理报纸8-15岁适读 强大内心 情绪管理",
-      "price": 88.0,
+      "goods_id": "6a3bb25a4ab6d3001558c4f6",
+      "title": "【开学季特惠9.9】A4薄脆本高颜值加厚笔记本学生考研考公笔记本",
+      "price": 9.9,
       "delta": 1000.0,
       "pool": "WATCH",
       "theme": "未归类",
       "day": "0814"
     },
     {
-      "goods_id": "6a4250c38cb63f0001854d0a",
-      "title": "SCL心理健康自测问卷-专业报告",
-      "price": 0.98,
-      "delta": 1000.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0815"
-    },
-    {
-      "goods_id": "661a22c5ca031d0001dd13bc",
-      "title": "躲在蚊子后面的大象 德国经典心理疗愈答案之书 拯救抑郁迷茫",
-      "price": 29.9,
-      "delta": 1000.0,
+      "goods_id": "6a438456fcf4ce0001df3817",
+      "title": "【爆款优惠】云图刷题爆款2027考研英语数学政治管综真题实战详解",
+      "price": 22.8,
+      "delta": 541.0,
       "pool": "WATCH",
       "theme": "未归类",
       "day": "0815"
@@ -35077,10 +35922,10 @@
       "day": "0815"
     },
     {
-      "goods_id": "69d5b612d0151a000176f7e7",
-      "title": "200词了解哲学、艺术、心理学 简体中文 200词系列",
-      "price": 164.7,
-      "delta": 143.0,
+      "goods_id": "6a4b5c0524d4bb00017faa76",
+      "title": "考研政治89｜27考研政治全年规划带学带背！",
+      "price": 59.9,
+      "delta": 124.0,
       "pool": "WATCH",
       "theme": "未归类",
       "day": "0814"
@@ -35095,6 +35940,51 @@
       "day": "0814"
     },
     {
+      "goods_id": "685b8bb23970ba0001075230",
+      "title": "【爆款优惠】云图刷题爆款2027考研英语数学政治管综真题实战详解",
+      "price": 10.84,
+      "delta": 117.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0814"
+    },
+    {
+      "goods_id": "69e798adf9b6f10001212de9",
+      "title": "A3/A4可选思维导图草稿纸横线本可撕横板考研学生拍纸本",
+      "price": 8.9,
+      "delta": 114.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0814"
+    },
+    {
+      "goods_id": "699e648736330e00019c94cc",
+      "title": "虚拟资料 | 27考研英语柴荣全程班 | 视频+讲义 | 网盘版",
+      "price": 8.8,
+      "delta": 97.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0814"
+    },
+    {
+      "goods_id": "69131d21b94f26001599465e",
+      "title": "27考研英语核心词汇5500思维导图PDF电子版及100句背单词",
+      "price": 9.99,
+      "delta": 95.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0814"
+    },
+    {
+      "goods_id": "69f224730283e20001471151",
+      "title": "27考研数学数一数二数三历年真题+备考资料汇总",
+      "price": 4.8,
+      "delta": 80.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0814"
+    },
+    {
       "goods_id": "6a4b267ef7c8040001d9cd3f",
       "title": "趣味小测试更了解自己心理",
       "price": 1.99,
@@ -35102,6 +35992,24 @@
       "pool": "WATCH",
       "theme": "未归类",
       "day": "0816"
+    },
+    {
+      "goods_id": "6a4b5c0524d4bb00017faa76",
+      "title": "考研政治89｜27考研政治全年规划带学带背！",
+      "price": 59.9,
+      "delta": 70.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0816"
+    },
+    {
+      "goods_id": "69d620e06f218100013c116b",
+      "title": "27考研英一94分原创作文模板(英一英二大小作文通用) 网盘资料",
+      "price": 19.9,
+      "delta": 69.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0814"
     },
     {
       "goods_id": "6a4b267ef7c8040001d9cd3f",
@@ -35113,13 +36021,85 @@
       "day": "0815"
     },
     {
-      "goods_id": "693f5e5da1f9210001e9058a",
-      "title": "纪念版-《红书》荣格诞辰150周年：心理探索与自我成长的智慧之选",
-      "price": 121.0,
+      "goods_id": "6a3cabb59cf097000181d79d",
+      "title": "2026考研英语8000词看爽文背单词",
+      "price": 2.99,
+      "delta": 61.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0814"
+    },
+    {
+      "goods_id": "69d620e06f218100013c116b",
+      "title": "27考研英一94分原创作文模板(英一英二大小作文通用) 网盘资料",
+      "price": 19.9,
+      "delta": 61.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0816"
+    },
+    {
+      "goods_id": "68d39c63b7d62b0001709d59",
+      "title": "2027考研政治苏一思维导图甄选800题选择题提分背诵手册高清图谱",
+      "price": 56.6,
       "delta": 58.0,
       "pool": "WATCH",
       "theme": "未归类",
       "day": "0815"
+    },
+    {
+      "goods_id": "6a43aa09d0e6f20001be728e",
+      "title": "27考研政治X涛全程资料",
+      "price": 5.99,
+      "delta": 58.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0816"
+    },
+    {
+      "goods_id": "6a1a4deb82f5610015e8fac2",
+      "title": "【前800单10元1本】新款薄脆本A4活页可撕刷题本考研背单词本平摊",
+      "price": 9.76,
+      "delta": 57.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0815"
+    },
+    {
+      "goods_id": "6a26956393291f000109ab4b",
+      "title": "27考研在阅读中背单词逐词翻译本通用本英一英二彩色定制线圈本",
+      "price": 39.9,
+      "delta": 56.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0815"
+    },
+    {
+      "goods_id": "699e648736330e00019c94cc",
+      "title": "虚拟资料 | 27考研英语柴荣全程班 | 视频+讲义 | 网盘版",
+      "price": 8.8,
+      "delta": 53.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0815"
+    },
+    {
+      "goods_id": "6a1d54787e71ab0001ad198f",
+      "title": "考研｜四六级｜专升本｜高中｜轻松记单词",
+      "price": 29.9,
+      "delta": 51.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0814"
+    },
+    {
+      "goods_id": "69a9252ec125ae00017394c0",
+      "title": "看56个言情小故事串联背考研单词必考词+基础词（只发电子版！）",
+      "price": 13.9,
+      "delta": 51.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0814"
     },
     {
       "goods_id": "6a6b018d7350260001cf7bf0",
@@ -35131,28 +36111,118 @@
       "day": "0814"
     },
     {
-      "goods_id": "6a4afdddfcf4ce0001785558",
-      "title": "RPI恋爱占有欲指数|双视角性格分析测试",
-      "price": 0.85,
+      "goods_id": "69d620e06f218100013c116b",
+      "title": "27考研英一94分原创作文模板(英一英二大小作文通用) 网盘资料",
+      "price": 19.9,
+      "delta": 45.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0815"
+    },
+    {
+      "goods_id": "69eb0e26c4fc8200015f3779",
+      "title": "27考研英语一英语二历年真题及解析最新(黄皮书+考研真相版)",
+      "price": 4.99,
+      "delta": 44.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0815"
+    },
+    {
+      "goods_id": "6a54d3c911bb870001f8ecf6",
+      "title": "27考研政治乘风肖1000题精简笔记电子版",
+      "price": 9.9,
+      "delta": 43.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0815"
+    },
+    {
+      "goods_id": "6a0dc4ef001271000172bd1b",
+      "title": "27考研英语阅读唐叔斌斌柴荣方法论精华笔记课件教案背诵PDF",
+      "price": 5.9,
+      "delta": 39.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0814"
+    },
+    {
+      "goods_id": "69131d21b94f26001599465e",
+      "title": "27考研英语核心词汇5500思维导图PDF电子版及100句背单词",
+      "price": 9.99,
       "delta": 36.0,
       "pool": "WATCH",
       "theme": "未归类",
-      "day": "0814"
+      "day": "0815"
     },
     {
-      "goods_id": "69dcc13f98fb9300011706bc",
-      "title": "觉岛原创设计课题分离卡牌心理学卡牌练习边界感内耗觉察自我成长",
-      "price": 39.9,
-      "delta": 33.0,
+      "goods_id": "6a5ce7b70576780001481b12",
+      "title": "四季年华美式薄脆本A4活页本笔记本本子初中高中生大学生考研考公",
+      "price": 9.9,
+      "delta": 36.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0816"
+    },
+    {
+      "goods_id": "69131d21b94f26001599465e",
+      "title": "27考研英语核心词汇5500思维导图PDF电子版及100句背单词",
+      "price": 9.99,
+      "delta": 36.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0816"
+    },
+    {
+      "goods_id": "6a3a2121e503360001eb91e6",
+      "title": "【秒发】考研真题合集历年真题+解析各科都有已更26年下单选科目",
+      "price": 1.99,
+      "delta": 35.0,
       "pool": "WATCH",
       "theme": "未归类",
       "day": "0814"
     },
     {
-      "goods_id": "6989966698142000013c063b",
-      "title": "启明星 · 公益心理",
-      "price": 1.0,
-      "delta": 33.0,
+      "goods_id": "68ea2c0d7c1a03000173fe80",
+      "title": "27考研英语柴r全程班永久可看持续更新到考试赠26版",
+      "price": 8.8,
+      "delta": 35.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0814"
+    },
+    {
+      "goods_id": "6a1d54787e71ab0001ad198f",
+      "title": "考研｜四六级｜专升本｜高中｜轻松记单词",
+      "price": 29.9,
+      "delta": 35.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0815"
+    },
+    {
+      "goods_id": "6a3cabb59cf097000181d79d",
+      "title": "2026考研英语8000词看爽文背单词",
+      "price": 2.99,
+      "delta": 35.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0815"
+    },
+    {
+      "goods_id": "699e648736330e00019c94cc",
+      "title": "虚拟资料 | 27考研英语柴荣全程班 | 视频+讲义 | 网盘版",
+      "price": 8.8,
+      "delta": 35.0,
+      "pool": "WATCH",
+      "theme": "未归类",
+      "day": "0816"
+    },
+    {
+      "goods_id": "69a9252ec125ae00017394c0",
+      "title": "看56个言情小故事串联背考研单词必考词+基础词（只发电子版！）",
+      "price": 13.9,
+      "delta": 34.0,
       "pool": "WATCH",
       "theme": "未归类",
       "day": "0815"
@@ -35165,213 +36235,6 @@
       "pool": "WATCH",
       "theme": "未归类",
       "day": "0814"
-    },
-    {
-      "goods_id": "6a3cafaadb862b0001f41897",
-      "title": "（女生精测版）石剪布属性测试模板",
-      "price": 6.99,
-      "delta": 30.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0814"
-    },
-    {
-      "goods_id": "69faf3f3a5715f0001ecf2c8",
-      "title": "美千通过率测试看下概率",
-      "price": 2.99,
-      "delta": 30.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0815"
-    },
-    {
-      "goods_id": "6a51a0018cb63f000191ff5a",
-      "title": "韩国16型色彩测试色彩诊断-四季型色彩测试穿搭分析模版",
-      "price": 3.99,
-      "delta": 29.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0816"
-    },
-    {
-      "goods_id": "691f0193f735ce0015425b36",
-      "title": "敢于放手的养育 爱孩子正确的方式 就是让他成为自己 心理咨",
-      "price": 39.9,
-      "delta": 28.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0815"
-    },
-    {
-      "goods_id": "6a41e9c5f764ee000116fc95",
-      "title": "【主题班会】人际交往、心理健康、学习激励等中小学主题班会PPT",
-      "price": 4.9,
-      "delta": 27.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0814"
-    },
-    {
-      "goods_id": "6a2a2d64098e2c00019d1898",
-      "title": "让思考上瘾：再来一题！（58道逻辑思维测试 训练你的思考力！）",
-      "price": 49.0,
-      "delta": 27.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0814"
-    },
-    {
-      "goods_id": "6a6b018d7350260001cf7bf0",
-      "title": "安全的依恋：养出情绪健康、有韧性的孩子",
-      "price": 32.0,
-      "delta": 27.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0815"
-    },
-    {
-      "goods_id": "6a51a0018cb63f000191ff5a",
-      "title": "韩国16型色彩测试色彩诊断-四季型色彩测试穿搭分析模版",
-      "price": 3.99,
-      "delta": 26.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0815"
-    },
-    {
-      "goods_id": "69d5b612d0151a000176f7e7",
-      "title": "200词了解哲学、艺术、心理学 简体中文 200词系列",
-      "price": 164.7,
-      "delta": 26.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0815"
-    },
-    {
-      "goods_id": "694b5ab0d96c450001ce2a2f",
-      "title": "社交资料普通人社会化指南20万字社交心理资料",
-      "price": 19.9,
-      "delta": 24.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0815"
-    },
-    {
-      "goods_id": "6a0ad5973283480001bedd1f",
-      "title": "升级版城市+国家测评 附深度分析 职场人选对地方超重要! PPT模板",
-      "price": 3.51,
-      "delta": 24.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0816"
-    },
-    {
-      "goods_id": "6a4f86cf1f5d3000019b7eb3",
-      "title": "【正版】福报指数测评 精准解析人生方向",
-      "price": 1.9,
-      "delta": 23.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0814"
-    },
-    {
-      "goods_id": "6a7591a6c9a3610001e48267",
-      "title": "趣味心理小测试ppt",
-      "price": 2.99,
-      "delta": 23.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0815"
-    },
-    {
-      "goods_id": "69d5b612d0151a000176f7e7",
-      "title": "200词了解哲学、艺术、心理学 简体中文 200词系列",
-      "price": 164.7,
-      "delta": 23.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0816"
-    },
-    {
-      "goods_id": "69bcbb8c9c14650001581e24",
-      "title": "2027阿里测评题（秒拍秒发）",
-      "price": 8.9,
-      "delta": 22.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0814"
-    },
-    {
-      "goods_id": "6894d43de08d4d0001209260",
-      "title": "【远程上岸托管_测评】求职过程全托管 专属导师1对1辅导上岸",
-      "price": 19.9,
-      "delta": 22.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0814"
-    },
-    {
-      "goods_id": "6a2e8e4f5200e70001c6714b",
-      "title": "OC本命花测试（MUMU模板)",
-      "price": 1.99,
-      "delta": 22.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0815"
-    },
-    {
-      "goods_id": "6a26ca20b2a4ab000133ea27",
-      "title": "相亲市场定位测试｜测完才知道自己高估了多少 秒出结果",
-      "price": 4.9,
-      "delta": 22.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0815"
-    },
-    {
-      "goods_id": "6a4a1cf040cf290001eedaf8",
-      "title": "【原创测试】你的小猫塑是什么  |趣味自测人格网页模板",
-      "price": 3.99,
-      "delta": 21.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0814"
-    },
-    {
-      "goods_id": "6a51a0018cb63f000191ff5a",
-      "title": "韩国16型色彩测试色彩诊断-四季型色彩测试穿搭分析模版",
-      "price": 3.99,
-      "delta": 21.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0814"
-    },
-    {
-      "goods_id": "6a4afdddfcf4ce0001785558",
-      "title": "RPI恋爱占有欲指数|双视角性格分析测试",
-      "price": 0.85,
-      "delta": 21.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0815"
-    },
-    {
-      "goods_id": "6a4f86cf1f5d3000019b7eb3",
-      "title": "【正版】福报指数测评 精准解析人生方向",
-      "price": 1.9,
-      "delta": 21.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0816"
-    },
-    {
-      "goods_id": "697afc123cfba3001548d951",
-      "title": "知音 静心篇 走出焦虑陷阱+摆脱内耗黑洞 克服自卑敏感心理学书",
-      "price": 49.8,
-      "delta": 21.0,
-      "pool": "WATCH",
-      "theme": "未归类",
-      "day": "0816"
     }
   ],
   "premium_shortlist": [
@@ -35500,6 +36363,156 @@
       "days_present": 19,
       "trend": "rising",
       "spark": "▅▆▄▄▄▄▅▇"
+    },
+    {
+      "name": "恋爱观测试",
+      "psy_code": "rvt",
+      "urgency_score": 19.4,
+      "latest_urgency": 25.0,
+      "hit_count": 0,
+      "total_hits": 1,
+      "sum_delta": 0.0,
+      "total_delta": 1.0,
+      "avg_price": null,
+      "max_delta": 1.0,
+      "has_psy_pack": true,
+      "suggest_price_band": "¥39–79",
+      "premium_fit": "high",
+      "days_present": 1,
+      "trend": "fading",
+      "spark": "▅█▅▅▅▅▅▅"
+    }
+  ],
+  "shelf_batch_v1": [
+    {
+      "code": "apt",
+      "label": "天赋潜能评估",
+      "has_psy_pack": true,
+      "theme": "天赋/职业测评",
+      "premium_fit": "mid",
+      "urgency_score": 238.5,
+      "days_present": 31,
+      "trend": "rising",
+      "total_hits": 239,
+      "avg_price": 8.76,
+      "hotlib_mapped": true
+    },
+    {
+      "code": "znt",
+      "label": "渣女测试",
+      "has_psy_pack": true,
+      "theme": "渣女/渣男倾向",
+      "premium_fit": "mid",
+      "urgency_score": 18.8,
+      "days_present": 0,
+      "trend": "stable",
+      "total_hits": 0,
+      "avg_price": null,
+      "hotlib_mapped": false
+    },
+    {
+      "code": "rvt",
+      "label": "恋爱观测试",
+      "has_psy_pack": true,
+      "theme": "恋爱观测试",
+      "premium_fit": "high",
+      "urgency_score": 19.4,
+      "days_present": 1,
+      "trend": "fading",
+      "total_hits": 1,
+      "avg_price": null,
+      "hotlib_mapped": true
+    },
+    {
+      "code": "ast",
+      "label": "动物塑测试",
+      "has_psy_pack": true,
+      "theme": "动物塑/动物人格",
+      "premium_fit": "low",
+      "urgency_score": 210.7,
+      "days_present": 32,
+      "trend": "rising",
+      "total_hits": 252,
+      "avg_price": 1.54,
+      "hotlib_mapped": true
+    },
+    {
+      "code": "hit",
+      "label": "霍兰德职业兴趣",
+      "has_psy_pack": true,
+      "theme": "霍兰德职业兴趣",
+      "premium_fit": "mid",
+      "urgency_score": 66.2,
+      "days_present": 29,
+      "trend": "stable",
+      "total_hits": 84,
+      "avg_price": 1.45,
+      "hotlib_mapped": true
+    },
+    {
+      "code": "vbt",
+      "label": "容易被人欺负",
+      "has_psy_pack": true,
+      "theme": "容易被欺负/边界感",
+      "premium_fit": "mid",
+      "urgency_score": 18.8,
+      "days_present": 0,
+      "trend": "stable",
+      "total_hits": 0,
+      "avg_price": null,
+      "hotlib_mapped": false
+    },
+    {
+      "code": "wjt",
+      "label": "这b班值不值",
+      "has_psy_pack": true,
+      "theme": "工作性价比/这b班",
+      "premium_fit": "mid",
+      "urgency_score": 57.6,
+      "days_present": 21,
+      "trend": "rising",
+      "total_hits": 33,
+      "avg_price": 2.0,
+      "hotlib_mapped": true
+    },
+    {
+      "code": "wxcs",
+      "label": "五行城市匹配",
+      "has_psy_pack": true,
+      "theme": "性格城市/五行城市",
+      "premium_fit": "mid",
+      "urgency_score": 265.4,
+      "days_present": 32,
+      "trend": "rising",
+      "total_hits": 297,
+      "avg_price": 1.95,
+      "hotlib_mapped": true
+    },
+    {
+      "code": "phd",
+      "label": "你适合读博吗",
+      "has_psy_pack": true,
+      "theme": "考研/读博适配",
+      "premium_fit": "mid",
+      "urgency_score": 56.8,
+      "days_present": 20,
+      "trend": "rising",
+      "total_hits": 35,
+      "avg_price": 3.5,
+      "hotlib_mapped": true
+    },
+    {
+      "code": "7v7",
+      "label": "七宗罪VS七美德",
+      "has_psy_pack": true,
+      "theme": "七宗罪/危险人格",
+      "premium_fit": "mid",
+      "urgency_score": 315.8,
+      "days_present": 29,
+      "trend": "rising",
+      "total_hits": 440,
+      "avg_price": 13.53,
+      "hotlib_mapped": true
     }
   ]
 }

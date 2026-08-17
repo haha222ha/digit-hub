@@ -51,7 +51,8 @@ ASSESS_GATE = re.compile(
     r"(测试|测评|测验|量表|人格|心理|MBTI|SCL|霍兰德|依恋|内耗|倦怠|"
     r"安全感|高敏感|原生家庭|暧昧|恋爱脑|吸渣|脱单|母单|正缘|复合|"
     r"分手|七宗罪|危险人格|松弛感|讨好型|PUA|心理年龄|症状自评|"
-    r"暗恋|九型|黑暗三角|动物塑|天赋|腹黑|山海经|心软)",
+    r"暗恋|九型|黑暗三角|动物塑|天赋|腹黑|山海经|心软|"
+    r"渣女|渣男|恋爱观|五行|读博|考研|被欺负|边界感|这b班|这B班)",
     re.I,
 )
 
@@ -83,7 +84,7 @@ PACKS: list[tuple[str, list[str], str | None, str, str]] = [
     ("依恋类型", ["依恋类型", "依恋测试"], "yllx", "high", "¥49–99"),
     ("情感安全感", ["情感安全感", "安全感缺失", "安全感测试"], "qgaq", "high", "¥49–99"),
     ("高敏感", ["高敏感"], "gmgt", "mid", "¥29–59"),
-    ("霍兰德职业兴趣", ["霍兰德", "职业兴趣"], "holland", "mid", "¥29–59"),
+    ("霍兰德职业兴趣", ["霍兰德", "职业兴趣", "霍兰德职业兴趣测试"], "hit", "mid", "¥29–59"),
     ("暧昧段位/暧昧拉扯", ["暧昧段位", "暧昧拉扯", "暧昧测试", "暧昧期"], "amdw", "high", "¥39–99"),
     ("暗恋指数", ["暗恋测试", "暗恋·", "暗恋指数", "他有多喜欢你"], "taxh", "high", "¥39–79"),
     ("被爱体质/桃花体质", ["被爱体质", "桃花体质"], "batz", "high", "¥39–79"),
@@ -95,18 +96,58 @@ PACKS: list[tuple[str, list[str], str | None, str, str]] = [
     ("该不该复合", ["该不该复合", "复合测试", "分手复合"], "gbfh", "high", "¥39–79"),
     ("分手自愈/前任执念", ["分手自愈", "前任执念"], "fszy", "high", "¥39–79"),
     ("35岁危机", ["35岁危机", "35岁"], "wl35", "mid", "¥39–69"),
-    ("性格城市匹配", ["性格城市", "城市匹配", "天选之城", "五行城市"], "cmt", "mid", "¥19–49"),
-    ("天赋/职业测评", ["天赋测评", "职业测评", "天赋测试", "天赋潜能", "十大天赋"], "apt", "mid", "¥29–59"),
+    ("性格城市/五行城市", ["性格城市", "城市匹配", "天选之城", "五行城市", "五行城市匹配"], "wxcs", "mid", "¥19–49"),
+    ("天赋/职业测评", ["天赋测评", "职业测评", "天赋测试", "天赋潜能", "十大天赋", "天赋潜能评估"], "apt", "mid", "¥29–59"),
     ("动物塑/动物人格", ["动物塑", "动物系人格", "动物性格", "灵魂动物"], "ast", "low", "¥9.9–29 趣味"),
     ("人格阴影/腹黑", ["人格阴影", "腹黑人格", "深层恐惧"], "amt", "mid", "¥29–59"),
     ("九型人格", ["九型人格"], None, "mid", "¥29–59"),
     ("颜值/骨相皮相", ["颜值测试", "面部分析", "骨相", "皮相美"], "yzt", "low", "¥9.9–29"),
     ("山海经/历史人物趣味", ["山海经", "历史人物", "文学人物", "大明王朝"], "shjss", "low", "¥9.9–29 趣味"),
     ("工作性价比/这b班", ["工作性价比", "这b班", "这B班", "班值不值"], "wjt", "mid", "¥19–49"),
-    ("考研/读博适配", ["适合考研", "适合读博", "考研适配", "读博吗"], "phd", "mid", "¥29–59"),
+    ("考研/读博适配", ["适合考研", "适合读博", "考研适配", "读博吗", "学术潜力"], "phd", "mid", "¥29–59"),
+    ("渣女/渣男倾向", ["渣女测试", "渣男测试", "渣女倾向", "渣男倾向"], "znt", "mid", "¥19–49"),
+    ("恋爱观测试", ["恋爱观测试", "恋爱观完整", "恋爱观"], "rvt", "high", "¥39–79"),
+    ("容易被欺负/边界感", ["容易被人欺负", "容易被欺负", "被人欺负测试", "边界敏感"], "vbt", "mid", "¥19–49"),
     ("ABO/同人趣味", ["ABO人格", "ABO测试", "同人女"], "abo", "low", "¥9.9 引流"),
     ("哈利波特/IP趣味", ["哈利波特", "HPTI", "原神角色"], None, "low", "¥9.9–19 引流"),
 ]
+
+# 千帆在售主图批次（与 HOMEPAGE_MAIN_IMAGE_PACK 对齐），用于报告「货架覆盖」一栏
+SHELF_BATCH_V1: list[tuple[str, str]] = [
+    ("apt", "天赋潜能评估"),
+    ("znt", "渣女测试"),
+    ("rvt", "恋爱观测试"),
+    ("ast", "动物塑测试"),
+    ("hit", "霍兰德职业兴趣"),
+    ("vbt", "容易被人欺负"),
+    ("wjt", "这b班值不值"),
+    ("wxcs", "五行城市匹配"),
+    ("phd", "你适合读博吗"),
+    ("7v7", "七宗罪VS七美德"),
+]
+
+
+def _shelf_coverage(themes: list[dict], psy: set[str]) -> list[dict]:
+    by_code = {str(t.get("psy_code") or ""): t for t in themes if t.get("psy_code")}
+    out = []
+    for code, label in SHELF_BATCH_V1:
+        t = by_code.get(code)
+        out.append(
+            {
+                "code": code,
+                "label": label,
+                "has_psy_pack": code in psy,
+                "theme": (t or {}).get("name") or "",
+                "premium_fit": (t or {}).get("premium_fit") or "",
+                "urgency_score": (t or {}).get("urgency_score"),
+                "days_present": (t or {}).get("days_present") or 0,
+                "trend": (t or {}).get("trend") or "",
+                "total_hits": (t or {}).get("total_hits") or 0,
+                "avg_price": (t or {}).get("avg_price"),
+                "hotlib_mapped": bool(t and int(t.get("days_present") or 0) > 0),
+            }
+        )
+    return out
 
 
 def _day_key(day_dir: Path) -> str:
@@ -986,6 +1027,7 @@ def build_all() -> dict:
         "latest_top_items": latest["top_items"],
         "uncategorized_top": uncat[:40],
         "premium_shortlist": high,
+        "shelf_batch_v1": _shelf_coverage(themes, psy),
     }
     return payload
 
@@ -1082,6 +1124,7 @@ def build_all_from_results(day_results: list[dict], psy: set[str]) -> dict:
         "latest_top_items": latest["top_items"],
         "uncategorized_top": latest.get("uncategorized_top") or [],
         "premium_shortlist": high,
+        "shelf_batch_v1": _shelf_coverage(themes, psy),
     }
 
 
