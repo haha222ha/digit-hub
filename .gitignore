@@ -22,3 +22,9 @@ apps/gen-os/
 *.log
 .venv/
 node_modules/
+
+# 闲鱼桥接本机映射（含 token/密码，勿入库）
+ops/xy_card_bridge_map.json
+ops/_xy_card_bridge_last.json
+ops/.psy_token
+ops/psy_credentials.json

@@ -3,12 +3,24 @@
   "xy_api_base": "http://127.0.0.1:8089/api/v1",
   "xy_username": "admin",
   "xy_password": "admin123",
+  "xy_account_id": "1737335886",
   "xhs_shop_id": "",
+  "psy_api_base": "https://psy.xhs365.cn",
+  "psy_client_id": "xianyu",
+  "allow_generate": true,
   "pairs": [
     {
-      "xhs_product_id": "REPLACE_XHS_PRODUCT_ID",
+      "psy_test_code": "REPLACE_TEST_CODE",
       "xy_item_id": "REPLACE_XY_ITEM_ID",
-      "xy_card_name": "桥接测试卡池",
+      "xy_card_name": "测评链接-闲鱼卡池",
+      "mode": "claim_from_cloud",
+      "claim_count": 5,
+      "allow_generate": true
+    },
+    {
+      "xhs_product_id": "REPLACE_XHS_PRODUCT_ID",
+      "xy_item_id": "REPLACE_XY_ITEM_ID_2",
+      "xy_card_name": "桥接联调卡池(勿作正式源)",
       "mode": "pull_unused_cards",
       "mark_exported_on_xhs": false,
       "max_cards": 50
