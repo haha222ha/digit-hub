@@ -1,0 +1,18 @@
+---
+description: 多系统绝对路径与调用路由（本仓常与 PA/热库协作，防串目录）
+alwaysApply: true
+---
+
+# 多系统路径路由（digit-hub 工作区）
+
+完整 SSOT：`D:\选品报告\资料生产工厂\AGENT_SYSTEMS_PATHS_SSOT.md`
+
+本仓（`digit-hub`）只负责：心象测站、超管、测评链接分销、选品快照展示、ECS 部署。
+
+**不要**在本仓实现：小红书发笔记 / 话题 `#` 格式 / 千帆上架 RPA / 主图生图流水线。  
+那些在：`D:\Program Files\ProductAnalyzer\_internal\overlay\content_studio`  
+文档：`D:\Program Files\ProductAnalyzer\Launcher\resources\docs\NOTE_PUBLISH_PSYCHE_TEST.md`
+
+话题硬约束：`topics[]` 存纯词（无 `#`）；带 `#` 只出现在正文或 LLM 提示输出格式里。清洗：`qianfan_publisher.py` 的 `_extract_topics` / `lstrip("#")`。
+
+热库源：`D:\选品报告\热库全量增量` → 本仓 `python tools/build_psy_selection_intel.py` → `packages/psy-dist/selection-intel/latest.json`。
