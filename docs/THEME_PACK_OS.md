@@ -101,6 +101,12 @@ python tools/theme_pack/build.py validate nly
 # 导出皮肤 + prompt 资产
 python tools/theme_pack/build.py export nly --register-catalog
 
+# 一键上云准备（皮肤 + psy-dist 静态页 + shelf 主图 + catalog）
+python tools/theme_pack/build.py ship-cloud nly
+
+# ECS 热更新（在服务器上）
+# sudo bash /opt/digit-hub/deploy/quick_update.sh
+
 # 复制模板开新主题
 python tools/theme_pack/build.py init my_theme --title "我的主题测"
 ```
