@@ -1,0 +1,18 @@
+{
+  "soft_result": {
+    "layout": "type_quote_tags",
+    "show_radar": true,
+    "share_card": {
+      "aspect": "3:4",
+      "elements": ["type", "quote", "brand_stamp"]
+    }
+  },
+  "full_report": {
+    "sections": ["dominant", "evidence", "scene", "action"]
+  },
+  "note_cover_html": {
+    "template_id": "result_card_aurora_v1",
+    "title_field": "results.{topId}.type",
+    "quote_field": "results.{topId}.quote"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "code": "nly",
+  "skin_id": "niu_lai_ye",
+  "template_id": "result_card_ink_clay_v1",
+  "title_field": "results.{topId}.type",
+  "quote_field": "results.{topId}.quote",
+  "palette": {
+    "paper": "#f3ede3",
+    "ink": "#1c1814",
+    "accent": "#6b4c2a"
+  }
+}

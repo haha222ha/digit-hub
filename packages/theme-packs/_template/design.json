@@ -1,0 +1,21 @@
+{
+  "motif": "主题视觉母题一句话",
+  "tokens": {
+    "--theme-paper": "#f5f0e8",
+    "--theme-ink": "#1a1814",
+    "--theme-accent": "#8b4513",
+    "--theme-wash": "rgba(139,69,19,0.08)",
+    "--theme-radius": "14px"
+  },
+  "materials": ["paper", "ink_wash"],
+  "hero": {
+    "layout": "split_title",
+    "motion": "fadeUp",
+    "badge": "主题限定"
+  },
+  "shelf_prompt": {
+    "prompt_id": "psy_shelf_theme_v1",
+    "size": "800x800",
+    "prompt": "（电商主图 prompt，含气质与禁踩线）"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "scoring": "dims",
+  "minutes": 5,
+  "question_count": 20,
+  "progress": {
+    "style": "segment",
+    "show_dimension_label": true,
+    "segment_by": "dimension"
+  },
+  "duo": false,
+  "askDemo": false,
+  "retest": true,
+  "badge": "主题限定"
+}

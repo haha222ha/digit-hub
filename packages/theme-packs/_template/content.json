@@ -1,0 +1,9 @@
+{
+  "intro": "开测导语",
+  "youGet": ["轻结果称号", "维度分布", "完整报告动作建议"],
+  "dimensions": [
+    { "id": "dim_a", "label": "维度A" }
+  ],
+  "questions": [],
+  "results": {}
+}

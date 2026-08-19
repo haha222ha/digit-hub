@@ -1,0 +1,15 @@
+{
+  "schema": "theme-pack-catalog/v1",
+  "packs": [
+    {
+      "id": "nly",
+      "skin_id": "niu_lai_ye",
+      "dist_code": "nly",
+      "title": "牛来也 · 成长原型测",
+      "status": "review",
+      "version": 1,
+      "source": "电影《牛来》气质隐喻",
+      "path": "nly"
+    }
+  ]
+}

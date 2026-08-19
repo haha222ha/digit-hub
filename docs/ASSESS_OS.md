@@ -79,6 +79,7 @@ python tools/batch_import_legacy.py
 
 - 新 Tone：在 `packages/tones/` 加 JSON + CSS 变量块，登记 `catalog.json`
 - 新皮：题库带 `voice` 三套文案；无 `voice` 时回退基题 + Tone 包装器
+- **新主题包**：走 [Theme Pack OS](./THEME_PACK_OS.md) — `packages/theme-packs/` → `tools/theme_pack/build.py export`
 - 发卡等模块只复用 Base，不强制 Tone；测评模块强制走 OS
 
 同步：`python tools/sync_tones.py` · 变体生成：`python tools/gen_tone_variants.py`

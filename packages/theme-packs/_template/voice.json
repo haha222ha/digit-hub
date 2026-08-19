@@ -1,0 +1,10 @@
+{
+  "tones": ["rigorous", "humor", "funny"],
+  "guidelines": {
+    "rigorous": "克制、结构清晰、少用梗",
+    "humor": "温润吐槽、可分享",
+    "funny": "夸张梗感、娱乐向"
+  },
+  "question_overrides": {},
+  "result_overrides": {}
+}

@@ -31,3 +31,4 @@ python server.py
 
 - 测评站读取 `apps/web/styles` + 皮肤 `styles` 变体
 - 生成 OS 负责编辑与保存；不部署到 ECS
+- **主题包** SSOT 在 `packages/theme-packs/`；本工作台可浏览/编辑 JSON，导出见 [Theme Pack OS](./THEME_PACK_OS.md)

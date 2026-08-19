@@ -1,0 +1,29 @@
+{
+  "tones": ["rigorous", "humor", "funny"],
+  "guidelines": {
+    "rigorous": "结构清晰，少用梗，保留隐喻",
+    "humor": "温润吐槽，可分享",
+    "funny": "夸张梗感，娱乐向"
+  },
+  "question_overrides": {
+    "dream_q1": {
+      "rigorous": { "q": "压力情境下，你的首要应对模式更接近？" },
+      "humor": { "q": "压力一来，你是先脑内开剧场，还是直接开干？" },
+      "funny": { "q": "压力爆表时，你的 CPU 默认跑哪个程序？" }
+    }
+  },
+  "result_overrides": {
+    "dream": {
+      "humor": { "quote": "你是会给现实加柔光滤镜的那种人——不是躺平，是给心留缓冲带。" },
+      "funny": { "quote": "你的大脑：先 SPA 再上班。现实：等等我滤镜还没调完。" }
+    },
+    "leap": {
+      "humor": { "quote": "听见风声你就跳河——快是真的，湿鞋也是真的。" },
+      "funny": { "quote": "别人还在查导航，你已经游到对岸发现忘带毛巾。" }
+    },
+    "moo": {
+      "humor": { "quote": "一声低沉哞，闹钟都省了——醒了就跑，温柔但不好惹。" },
+      "funny": { "quote": "你的起床铃：哞。你的 KPI：自己定自己追。" }
+    }
+  }
+}

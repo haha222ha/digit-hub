@@ -1,0 +1,17 @@
+{
+  "inspiration": {
+    "type": "movie|season|meme|book",
+    "title": "灵感源名称",
+    "year": null,
+    "hook": "一句话卖点（不含剧透）"
+  },
+  "metaphors": [
+    { "symbol": "符号", "meaning": "在测评里代表的心理原型" }
+  ],
+  "audience": "泛娱乐自我探索 / 影迷梗党",
+  "compliance": {
+    "disclaimer": "娱乐向自我探索，非心理咨询或临床评估。",
+    "forbidden": ["医疗诊断", "未授权IP角色名", "风水恐吓"]
+  },
+  "notes": "给 LLM / 编辑的额外约束"
+}

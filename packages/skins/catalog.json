@@ -212,6 +212,16 @@
           "lane": "集邮",
           "source": "灵魂动物测试",
           "file": "soul_animal.json"
+        },
+        {
+          "id": "niu_lai_ye",
+          "title": "牛来也",
+          "minutes": 5,
+          "promise": "【主题】20 题 · 4 型结果",
+          "status": "review",
+          "lane": "主题热点",
+          "file": "niu_lai_ye.json",
+          "source": "theme-pack:nly"
         }
       ]
     }

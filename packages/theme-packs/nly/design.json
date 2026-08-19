@@ -1,0 +1,27 @@
+{
+  "motif": "水墨柔边 × 粗粝 3D 反差 · 牧野成长",
+  "tokens": {
+    "--theme-paper": "#f3ede3",
+    "--theme-ink": "#1c1814",
+    "--theme-accent": "#6b4c2a",
+    "--theme-accent-soft": "#d4c4a8",
+    "--theme-wash": "rgba(107,76,42,0.10)",
+    "--theme-mist": "rgba(243,237,227,0.85)",
+    "--theme-radius": "14px",
+    "--theme-font-display": "\"Noto Serif SC\", \"Source Han Serif SC\", serif"
+  },
+  "materials": ["ink_wash", "rough_clay", "rice_paper"],
+  "hero": {
+    "layout": "split_title",
+    "motion": "fadeUp",
+    "badge": "主题限定 · 2026",
+    "title_plain": "牛来也",
+    "title_grad": "成长原型测"
+  },
+  "shelf_prompt": {
+    "prompt_id": "psy_shelf_nly_v1",
+    "size": "800x800",
+    "aspect": "1:1",
+    "prompt": "测评商品主图 800×800。气质：2026 动画电影《牛来》水墨海报 × 粗粝黏土 3D 小牛的视觉反差——左侧水墨留白与淡墨远山，右侧一只粗粝 3D 小牛犊站在牧草上，天空有云雀剪影。色调：米宣纸 #f3ede3、墨棕 #6b4c2a、淡青远雾。苹果级排版留白，高清 UI 平面海报感。\n\n【文字（图上只允许这些）】\n- 主标题：「牛来也 · 成长原型测」\n- 副标小字：「20 题 · 四型结果 · 娱乐向」\n- 角落印：「心象测」\n\n【禁止】廉价霓虹、花字爆炸、未授权角色脸特写、二维码、价格、店铺名、剧透台词、医疗承诺。\n\n【合规】娱乐向自我探索；禁人像真人、色情擦边。"
+  }
+}
