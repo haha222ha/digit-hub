@@ -13,6 +13,13 @@ SKINS_PKG = ROOT / "packages" / "skins"
 SKINS_WEB = ROOT / "apps" / "web" / "skins"
 BRAND = ROOT / "packages" / "psy-dist" / "brand"
 CATALOG = SKINS_PKG / "catalog.json"
+PSY_TESTS = ROOT / "apps" / "psy-dist" / "tests"
+PSY_SHELF = ROOT / "apps" / "psy-dist" / "images" / "shelf"
+PSY_CATALOG = ROOT / "packages" / "psy-dist" / "tests-catalog.json"
+PSY_CATALOG_CLOUD = (
+    ROOT / "services" / "xhs-cloud" / "cloud_deploy" / "assets" / "psy-dist" / "tests-catalog.json"
+)
+DEFAULT_SHELF_SRC = Path(r"C:\Users\Administrator\.cursor\projects\d-digit-hub\assets\niu-lai-ye-main.png")
 
 REQUIRED = ("pack.json", "brief.json", "design.json", "interaction.json", "content.json", "reveal.json")
 
@@ -264,6 +271,97 @@ def init_pack(code: str, title: str) -> Path:
     return dest
 
 
+def register_psy_catalog(code: str, skin: dict[str, Any]) -> None:
+    pack = load_json(pack_dir(code) / "pack.json")
+    interaction = load_json(pack_dir(code) / "interaction.json")
+    entry = {
+        "code": pack["dist_code"],
+        "name": pack["title"],
+        "questions": len(skin.get("questions") or []),
+        "duration_min": interaction.get("minutes", 5),
+        "hot": True,
+        "dual_perspective": bool(interaction.get("duo")),
+    }
+    for cat_path in (PSY_CATALOG, PSY_CATALOG_CLOUD):
+        if not cat_path.is_file():
+            continue
+        cat = load_json(cat_path)
+        tests = cat.get("tests") or []
+        idx = next((i for i, t in enumerate(tests) if t.get("code") == entry["code"]), None)
+        if idx is not None:
+            tests[idx] = {**tests[idx], **entry}
+        else:
+            tests.append(entry)
+        cat["tests"] = tests
+        cat["total"] = len(tests)
+        cat_path.write_text(json.dumps(cat, ensure_ascii=False, indent=2), encoding="utf-8")
+        print("registered psy catalog →", cat_path.name, entry["code"])
+
+
+def copy_shelf_image(dist_code: str, src: Path | None = None) -> Path:
+    src = src or DEFAULT_SHELF_SRC
+    if not src.is_file():
+        raise SystemExit(f"shelf image source not found: {src}")
+    PSY_SHELF.mkdir(parents=True, exist_ok=True)
+    dest = PSY_SHELF / f"{dist_code}.jpg"
+    try:
+        from PIL import Image
+
+        img = Image.open(src)
+        if img.mode in ("RGBA", "P"):
+            bg = Image.new("RGB", img.size, (243, 237, 227))
+            if img.mode == "P":
+                img = img.convert("RGBA")
+            bg.paste(img, mask=img.split()[-1] if img.mode == "RGBA" else None)
+            img = bg
+        else:
+            img = img.convert("RGB")
+        img.save(dest, "JPEG", quality=92)
+    except ImportError:
+        shutil.copy2(src, dest)
+    print("shelf image →", dest)
+    return dest
+
+
+def export_psy_dist(code: str) -> Path:
+    import sys
+
+    tp = Path(__file__).resolve().parent
+    if str(tp) not in sys.path:
+        sys.path.insert(0, str(tp))
+    from psy_dist import write_psy_dist_bundle
+
+    errs = validate(code)
+    if errs:
+        raise SystemExit("validation failed:\n  " + "\n  ".join(errs))
+
+    d = pack_dir(code)
+    pack = load_json(d / "pack.json")
+    design = load_json(d / "design.json")
+    interaction = load_json(d / "interaction.json")
+    skin = build_skin(code)
+    out = write_psy_dist_bundle(
+        out_dir=PSY_TESTS / pack["dist_code"],
+        dist_code=pack["dist_code"],
+        title=pack["title"],
+        skin=skin,
+        design=design,
+        interaction=interaction,
+    )
+    print("exported psy-dist →", out)
+    register_psy_catalog(code, skin)
+    return out
+
+
+def ship_cloud(code: str, *, shelf_src: Path | None = None, register: bool = True) -> None:
+    """Full pipeline: skin + psy-dist static + shelf + catalogs."""
+    export(code, register=register)
+    export_psy_dist(code)
+    pack = load_json(pack_dir(code) / "pack.json")
+    copy_shelf_image(pack["dist_code"], shelf_src)
+    print("ship_cloud OK:", pack["dist_code"])
+
+
 def main():
     import argparse
 
@@ -276,6 +374,14 @@ def main():
     e = sub.add_parser("export")
     e.add_argument("code")
     e.add_argument("--register-catalog", action="store_true")
+
+    p = sub.add_parser("export-psy-dist")
+    p.add_argument("code")
+
+    s = sub.add_parser("ship-cloud")
+    s.add_argument("code")
+    s.add_argument("--shelf-src", type=Path, default=None)
+    s.add_argument("--no-register-catalog", action="store_true")
 
     i = sub.add_parser("init")
     i.add_argument("code")
@@ -292,6 +398,10 @@ def main():
         print("OK", args.code)
     elif args.cmd == "export":
         export(args.code, register=args.register_catalog)
+    elif args.cmd == "export-psy-dist":
+        export_psy_dist(args.code)
+    elif args.cmd == "ship-cloud":
+        ship_cloud(args.code, shelf_src=args.shelf_src, register=not args.no_register_catalog)
     elif args.cmd == "init":
         init_pack(args.code, args.title)
 

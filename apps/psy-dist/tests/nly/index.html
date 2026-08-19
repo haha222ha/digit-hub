@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="牛来也 · 成长原型测 - 心象测主题限定">
+  <title>牛来也 · 成长原型测</title>
+  <script src="/static/js/test-security.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Serif SC', serif;
+      background: #f3ede3; color: #1c1814;
+      min-height:100vh; max-width:480px; margin:0 auto; overflow-x:hidden;
+    }
+    body.page-disabled { pointer-events:none; opacity:.65; }
+    .screen { display:none; animation: fadeUp .45s ease both; }
+    .screen.active { display:block; }
+    nav { display:flex; justify-content:space-between; align-items:center; padding:18px 20px 0; }
+    .logo { font-size:12px; font-weight:800; color:#9a8f82; letter-spacing:.12em; }
+    .nav-badge { font-size:11px; color:#6b4c2a; background:#d4c4a8; padding:4px 10px; border-radius:20px; }
+    .hero { padding:28px 20px 24px; }
+    .live-badge {
+      display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid #e8e0d4;
+      color:#666; font-size:12px; padding:6px 12px; border-radius:20px; margin-bottom:20px;
+    }
+    .live-dot { width:6px; height:6px; border-radius:50%; background:#22c55e; }
+    h1 { font-size:42px; font-weight:900; line-height:1.08; letter-spacing:-.02em; margin-bottom:14px; }
+    .h1-plain { color:#1c1814; font-family:'Noto Serif SC',serif; }
+    .h1-grad { color:#6b4c2a; font-family:'Noto Serif SC',serif; }
+    .hero-sub { font-size:14px; color:#6b635a; line-height:1.75; margin-bottom:28px; }
+    .btn {
+      width:100%; border:none; cursor:pointer; font-size:16px; font-weight:700;
+      padding:16px; border-radius:14px; transition:transform .15s;
+    }
+    .btn:active { transform:scale(.98); }
+    .btn-primary { background:#1c1814; color:#fff; box-shadow:0 4px 18px rgba(0,0,0,.12); }
+    .btn-ghost { background:#fff; color:#1c1814; border:1.5px solid #e8e0d4; margin-top:10px; }
+    .cta-hint { text-align:center; font-size:12px; color:#b0a89c; margin-top:10px; }
+    .dims-section { padding:0 20px 24px; }
+    .dims-label { font-size:11px; font-weight:700; color:#b0a89c; letter-spacing:.1em; margin-bottom:12px; }
+    .dims-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .dim-card {
+      background:#fff; border-radius:12px; padding:12px; display:flex; gap:10px; align-items:center;
+      box-shadow:0 1px 4px rgba(0,0,0,.04);
+    }
+    .d-icon { font-size:20px; width:36px; height:36px; background:#f3ede3; border-radius:10px;
+      display:flex; align-items:center; justify-content:center; }
+    .d-text { font-size:13px; font-weight:700; }
+    .d-sub { font-size:11px; color:#aaa; margin-top:2px; }
+    .preview-section { padding:0 20px 32px; }
+    .result-ex {
+      background:#fff; border-radius:12px; padding:12px 14px; margin-bottom:8px;
+      box-shadow:0 1px 4px rgba(0,0,0,.04);
+    }
+    .ex-left { display:flex; gap:10px; align-items:center; }
+    .ex-icon { font-size:22px; }
+    .ex-name { font-size:13px; font-weight:700; }
+    .ex-desc { font-size:11px; color:#999; margin-top:2px; }
+    .disclaimer { padding:0 20px 40px; font-size:11px; color:#b0a89c; line-height:1.6; }
+
+    /* quiz */
+    #screen-quiz { height:100dvh; display:none; flex-direction:column; max-width:480px; margin:0 auto; }
+    #screen-quiz.active { display:flex; }
+    .top-bar { padding:16px 20px 10px; flex-shrink:0; }
+    .progress-meta { display:flex; justify-content:space-between; font-size:12px; color:#aaa; margin-bottom:8px; }
+    .progress-track { height:5px; background:#e8e0d4; border-radius:3px; overflow:hidden; }
+    .progress-fill { height:100%; background:#6b4c2a; border-radius:3px; transition:width .35s ease; width:0; }
+    .q-body { flex:1; overflow-y:auto; padding:20px 20px 8px; }
+    .q-tag { display:inline-block; font-size:11px; font-weight:700; color:#6b4c2a;
+      background:#d4c4a8; padding:4px 10px; border-radius:999px; margin-bottom:14px; }
+    .q-title { font-size:22px; font-weight:900; line-height:1.35; margin-bottom:22px; }
+    .opt {
+      background:#fff; border:2px solid #e8e0d4; border-radius:12px; padding:14px 16px;
+      margin-bottom:10px; cursor:pointer; transition:all .15s;
+    }
+    .opt.selected { border-color:#6b4c2a; background:rgba(107,76,42,.06); }
+    .opt-text { font-size:14px; line-height:1.55; font-weight:600; }
+    .quiz-bar { padding:12px 20px 28px; flex-shrink:0; }
+
+    /* result */
+    .result-hero { padding:32px 20px 20px; text-align:center; }
+    .result-emoji { font-size:56px; margin-bottom:12px; }
+    .result-type { font-size:22px; font-weight:900; color:#6b4c2a; margin-bottom:10px; }
+    #result-level { display:none; }
+    .result-quote { font-size:14px; color:#5c534a; line-height:1.8; margin-bottom:20px; padding:0 8px; }
+    .radar-wrap { margin:0 20px 16px; background:#fff; border-radius:16px; padding:16px; }
+    .radar-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; }
+    .radar-bar { flex:1; height:6px; background:#eee; border-radius:3px; margin:0 10px; overflow:hidden; }
+    .radar-fill { height:100%; background:#6b4c2a; border-radius:3px; }
+    .full-section { margin:0 20px 12px; background:#fff; border-radius:12px; padding:14px 16px; }
+    .full-section h3 { font-size:14px; margin-bottom:6px; }
+    .full-section p { font-size:13px; color:#666; line-height:1.7; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+  </style>
+</head>
+<body class="page-disabled">
+  <div id="screen-intro" class="screen active">
+    <nav><div class="logo">心象测</div><div class="nav-badge">主题限定</div></nav>
+    <div class="hero">
+      <div class="live-badge"><div class="live-dot"></div>主题限定 · 20 题</div>
+      <h1><div class="h1-plain">牛来也</div><div class="h1-grad">成长原型测</div></h1>
+      <p class="hero-sub">【主题限定】借「水墨梦 × 粗粝现实」的成长隐喻，测你更接近哪种起跑原型：还在梦乡、惊跳过河、喂过却被排，或哞醒开跑。娱乐向自我探索，非心理咨询。</p>
+      <button class="btn btn-primary" id="btn-start">开始测试 →</button>
+      <div class="cta-hint">约 5 分钟 · 娱乐向自我探索</div>
+    </div>
+    <div class="dims-section">
+      <div class="dims-label">四型成长原型</div>
+      <div class="dims-grid"><div class="dim-card"><div class="d-icon">🌫️</div><div><div class="d-text">梦乡</div><div class="d-sub">还在梦乡 · 柔边缓冲型</div></div></div><div class="dim-card"><div class="d-icon">⚡</div><div><div class="d-text">惊跳</div><div class="d-sub">惊跳过河 · 应激突围型</div></div></div><div class="dim-card"><div class="d-icon">🌾</div><div><div class="d-text">牧群</div><div class="d-sub">喂过却被排 · 牧群边缘</div></div></div><div class="dim-card"><div class="d-icon">🔔</div><div><div class="d-text">哞醒</div><div class="d-sub">哞醒开跑 · 自主起跑型</div></div></div></div>
+    </div>
+    <div class="preview-section">
+      <div class="dims-label">可能的结果</div>
+      <div class="result-ex"><div class="ex-left"><div class="ex-icon">🌫️</div><div class="ex-info"><div class="ex-name">还在梦乡 · 柔边缓冲型</div><div class="ex-desc">你习惯用水墨般的想象力给现实加一层软垫——不是逃避，而是在剧变前先让心有…</div></div></div></div><div class="result-ex"><div class="ex-left"><div class="ex-icon">⚡</div><div class="ex-info"><div class="ex-name">惊跳过河 · 应激突围型</div><div class="ex-desc">危险未至你已起跑——像听见远处水声就跃过岸，快是你的天赋，补丁是你的学费…</div></div></div></div><div class="result-ex"><div class="ex-left"><div class="ex-icon">🌾</div><div class="ex-info"><div class="ex-name">喂过却被排 · 牧群边缘型</div><div class="ex-desc">你在群体里找暖，却常站在圈层的第二圈——被看见的需求和独立的本能在你体内…</div></div></div></div><div class="result-ex"><div class="ex-left"><div class="ex-icon">🔔</div><div class="ex-info"><div class="ex-name">哞醒开跑 · 自主起跑型</div><div class="ex-desc">那一声不高却清晰的唤醒过后，你知道路得自己跑——温柔离开依赖，果断进入下…</div></div></div></div>
+    </div>
+    <div class="disclaimer">娱乐向气质原型匹配，非心理咨询或临床评估；与电影剧情无官方关联。</div>
+    <footer class="welcome-footer"></footer>
+  </div>
+
+  <div id="screen-quiz">
+    <div class="top-bar">
+      <div class="progress-meta"><span id="q-progress">1 / 20</span><span id="q-dim-label"></span></div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <div class="q-body">
+      <div class="q-tag" id="q-tag"></div>
+      <div class="q-title" id="q-title"></div>
+      <div id="q-options"></div>
+    </div>
+    <div class="quiz-bar">
+      <button class="btn btn-primary" id="btn-next" disabled>下一题</button>
+      <button class="btn btn-ghost" id="btn-back" style="display:none">上一题</button>
+    </div>
+  </div>
+
+  <div id="screen-result" class="screen">
+    <nav><div class="logo">心象测</div><div class="nav-badge">结果</div></nav>
+    <div class="result-hero">
+      <div class="result-emoji" id="result-emoji"></div>
+      <div class="result-type" id="result-type"></div>
+      <div id="result-level"></div>
+      <p class="result-quote" id="result-quote"></p>
+    </div>
+    <div class="radar-wrap" id="radar-wrap"></div>
+    <div id="full-sections"></div>
+    <div style="padding:0 20px 40px">
+      <button class="btn btn-primary" id="btn-retry">重新测试</button>
+    </div>
+    <div class="disclaimer">娱乐向气质原型匹配，非心理咨询或临床评估；与电影剧情无官方关联。</div>
+  </div>
+
+  <script>
+  const TEST_DATA = {"dimensions": [{"id": "dream", "label": "梦乡", "icon": "🌫️"}, {"id": "leap", "label": "惊跳", "icon": "⚡"}, {"id": "herd", "label": "牧群", "icon": "🌾"}, {"id": "moo", "label": "哞醒", "icon": "🔔"}], "questions": [{"d": "dream", "t": "梦乡", "q": "压力来袭时，你第一反应更像？", "o": [{"t": "先躲进脑内小剧场，把画面调柔一点", "s": 3}, {"t": "刷点轻松内容，等情绪自己退潮", "s": 2}, {"t": "找人说两句，尽快回到现实任务", "s": 1}, {"t": "立刻列清单开干，越忙越清醒", "s": 0}], "styles": {"rigorous": {"q": "压力情境下，你的首要应对模式更接近？"}, "humor": {"q": "压力一来，你是先脑内开剧场，还是直接开干？"}, "funny": {"q": "压力爆表时，你的 CPU 默认跑哪个程序？"}}}, {"d": "dream", "t": "梦乡", "q": "你对「未来一年」的默认想象是？", "o": [{"t": "像一幅还没上色的水墨长卷，细节可变", "s": 3}, {"t": "有几个美好场景，但时间表模糊", "s": 2}, {"t": "有目标清单，偶尔会被现实打断", "s": 1}, {"t": "季度 OKR 级清晰，不太允许漂移", "s": 0}]}, {"d": "dream", "t": "梦乡", "q": "做重大决定前，你更常？", "o": [{"t": "在脑子里多演几遍「如果怎样」", "s": 3}, {"t": "先拖到有感觉再动", "s": 2}, {"t": "问一圈意见后快速拍板", "s": 1}, {"t": "看数据/规则，少给情绪留位", "s": 0}]}, {"d": "dream", "t": "梦乡", "q": "周末最理想的状态？", "o": [{"t": "发呆、看云、让时间失去刻度", "s": 3}, {"t": "慢节奏散步或看展", "s": 2}, {"t": "约朋友小聚，有互动有产出", "s": 1}, {"t": "运动+学习，把周末当加油站", "s": 0}]}, {"d": "dream", "t": "梦乡", "q": "别人说你「想太多」时，你内心？", "o": [{"t": "那正是我的缓冲层，不想卸", "s": 3}, {"t": "有点认同，但改起来难", "s": 2}, {"t": "会收敛，怕耽误事", "s": 1}, {"t": "不太理解，想多不是更稳吗", "s": 0}]}, {"d": "leap", "t": "惊跳", "q": "突发变故（航班取消/项目变脸），你会？", "o": [{"t": "先冲一个可行方案，边跑边改", "s": 3}, {"t": "快速打电话/发消息摇人", "s": 2}, {"t": "先稳住情绪再规划", "s": 1}, {"t": "等信息全了再动，避免白忙", "s": 0}]}, {"d": "leap", "t": "惊跳", "q": "面对一条「看起来能成」的机会，你？", "o": [{"t": "先跳上去占坑，细节路上补", "s": 3}, {"t": "24 小时内给答复，宁可试", "s": 2}, {"t": "做 mini 调研再决定", "s": 1}, {"t": "没有八成把握就不动", "s": 0}]}, {"d": "leap", "t": "惊跳", "q": "团队僵局时，你更像？", "o": [{"t": "那个拍桌「先试这个」的人", "s": 3}, {"t": "提出折中方案并推动投票", "s": 2}, {"t": "协调情绪、找共识", "s": 1}, {"t": "记录分歧，等负责人定", "s": 0}]}, {"d": "leap", "t": "惊跳", "q": "你的「后悔」通常来自？", "o": [{"t": "冲太快，后续补丁太多", "s": 3}, {"t": "试早了，时机其实未到", "s": 2}, {"t": "犹豫太久，错过窗口", "s": 1}, {"t": "信息不足仍被推着走", "s": 0}]}, {"d": "leap", "t": "惊跳", "q": "运动或冒险类体验，你偏好？", "o": [{"t": "高唤醒：冲刺、跳跃、对抗", "s": 3}, {"t": "有教练带的新手挑战", "s": 2}, {"t": "低强度但坚持型", "s": 1}, {"t": "能选就不冒险", "s": 0}]}, {"d": "herd", "t": "牧群", "q": "进入新集体（班级/项目组），你通常？", "o": [{"t": "先观察谁是小团体核心，再决定靠哪边", "s": 3}, {"t": "努力合群，怕落单", "s": 2}, {"t": "保持礼貌距离，慢慢深交", "s": 1}, {"t": "自带任务，不太依赖群体", "s": 0}]}, {"d": "herd", "t": "牧群", "q": "被忽视或排在外圈时，你内心？", "o": [{"t": "很敏感，会反复想「是不是我不够好」", "s": 3}, {"t": "表面没事，私下找补存在感", "s": 2}, {"t": "换圈子或降低期待", "s": 1}, {"t": "无所谓，本来就不需要所有人喜欢", "s": 0}]}, {"d": "herd", "t": "牧群", "q": "你对「被照顾/被投喂」的态度？", "o": [{"t": "渴望，但又会怀疑是否附带条件", "s": 3}, {"t": "享受被带，也怕被定义", "s": 2}, {"t": "更喜欢对等交换", "s": 1}, {"t": "习惯自己搞定", "s": 0}]}, {"d": "herd", "t": "牧群", "q": "分享好消息时，你更期待？", "o": [{"t": "群体一起欢呼，有「我们」的感觉", "s": 3}, {"t": "几个密友真心为你高兴", "s": 2}, {"t": "记录就好，不一定要围观", "s": 1}, {"t": "继续闷头做下一件", "s": 0}]}, {"d": "herd", "t": "牧群", "q": "「归属感」对你意味着？", "o": [{"t": "安全感的底座，没有会漂", "s": 3}, {"t": "重要，但不想牺牲自我", "s": 2}, {"t": "有更好，没有也能活", "s": 1}, {"t": "更像负担，怕同质化", "s": 0}]}, {"d": "moo", "t": "哞醒", "q": "最近一次「被点醒」的经历，更像？", "o": [{"t": "某句话/某个瞬间，突然知道自己该往哪跑", "s": 3}, {"t": "看别人示范，自己也动起来", "s": 2}, {"t": "慢慢读书/课程，累积改变", "s": 1}, {"t": "很少被外界点醒，靠自驱", "s": 0}]}, {"d": "moo", "t": "哞醒", "q": "当你终于想通一件事，接下来？", "o": [{"t": "当天就迈出第一步，不管完不完美", "s": 3}, {"t": "告诉信任的人，形成外部约束", "s": 2}, {"t": "写计划，选个日子启动", "s": 1}, {"t": "再观察一阵，怕三分钟热度", "s": 0}]}, {"d": "moo", "t": "哞醒", "q": "你对「听长辈/前辈经验」的态度？", "o": [{"t": "能听，但最终路线必须自己定", "s": 3}, {"t": "提取可用部分，其余过滤", "s": 2}, {"t": "大多时候跟着走更省心", "s": 1}, {"t": "保持距离，信息自己搜", "s": 0}]}, {"d": "moo", "t": "哞醒", "q": "独立生活/工作中，你最骄傲的是？", "o": [{"t": "曾从依赖里挣脱，自己跑过一段路", "s": 3}, {"t": "关键节点做了对的选择", "s": 2}, {"t": "稳定输出，没出大错", "s": 1}, {"t": "还在找那个起点", "s": 0}]}, {"d": "moo", "t": "哞醒", "q": "如果要用一种声音形容你的成长？", "o": [{"t": "低沉却清晰的一声「哞」——醒了就跑", "s": 3}, {"t": "闹钟：刺耳但必要", "s": 2}, {"t": "背景音乐：慢慢铺垫", "s": 1}, {"t": "静音：还没到时", "s": 0}]}], "results": {"dream": {"type": "还在梦乡 · 柔边缓冲型", "quote": "你习惯用水墨般的想象力给现实加一层软垫——不是逃避，而是在剧变前先让心有个落点。", "tags": ["梦乡", "柔边", "主题限定"], "emoji": "🌫️", "color": "#9aab8c", "full": [{"h": "主导原型", "p": "还在梦乡型：对不确定有天然容忍，用内心剧场消化压力。优势是创意与共情；代价是启动偏慢、边界有时模糊。"}, {"h": "四维分布", "p": "完整报告会展示梦乡/惊跳/牧群/哞醒四维占比。若梦乡显著高于哞醒，说明「想清楚了再跑」仍是你的默认程序。"}, {"h": "场景提示", "p": "适合需要审美、叙事、陪伴感的工作；纯 KPI 压榨环境会让你更快退回梦里。找「有呼吸感」的节奏比硬扛更有效。"}, {"h": "本周起跑动作", "p": "选一个拖延最久的小决定，设 15 分钟「只写不评」窗口：把选项与后果写在纸上，写完必须勾选一项——不要求完美，只要求落款。"}]}, "leap": {"type": "惊跳过河 · 应激突围型", "quote": "危险未至你已起跑——像听见远处水声就跃过岸，快是你的天赋，补丁是你的学费。", "tags": ["惊跳", "突围", "主题限定"], "emoji": "⚡", "color": "#c45c26", "full": [{"h": "主导原型", "p": "惊跳过河型：对窗口期极度敏感，宁可先占坑再优化。优势是决断与动员力；代价是后续返工、团队有时跟不上你的速度。"}, {"h": "四维分布", "p": "若惊跳维显著高于梦乡，说明你在压力下更信「行动生成信息」。注意区分「必要快」与「焦虑快」。"}, {"h": "场景提示", "p": "创业、救火、0-1 阶段需要你；需要长期精细运营的事，要给自己设「二次校准」检查点。"}, {"h": "本周起跑动作", "p": "下次想立刻开跑前，强制加 10 分钟「预检三问」：最坏情况？可逆吗？谁会被波及？答完再跳，速度不会少太多。"}]}, "herd": {"type": "喂过却被排 · 牧群边缘型", "quote": "你在群体里找暖，却常站在圈层的第二圈——被看见的需求和独立的本能在你体内拉扯。", "tags": ["牧群", "归属", "主题限定"], "emoji": "🌾", "color": "#6b4c2a", "full": [{"h": "主导原型", "p": "喂过却被排型：对归属与认可高度敏感，既渴望被接纳，又害怕失去自我。优势是察言观色与协调；代价是内耗与过度解读。"}, {"h": "四维分布", "p": "牧群维高而哞醒维低时，容易「等别人来带」；牧群与哞醒双高，则是正在从边缘走向自主的过渡期。"}, {"h": "场景提示", "p": "需要协作的岗位你能粘合团队；-toxic 内卷环境会放大你的不安全感。选「规则透明」的集体比选「热闹」更重要。"}, {"h": "本周起跑动作", "p": "列出 3 个你真正想要的「被看见方式」（不是点赞数），选 1 个用具体行为表达，不解释、不讨好评。"}]}, "moo": {"type": "哞醒开跑 · 自主起跑型", "quote": "那一声不高却清晰的唤醒过后，你知道路得自己跑——温柔离开依赖，果断进入下一程。", "tags": ["哞醒", "自主", "主题限定"], "emoji": "🔔", "color": "#1f6b5c", "full": [{"h": "主导原型", "p": "哞醒开跑型：能被点醒，也能自我点火。优势是自主与韧性；代价是有时对「还在梦里的人」缺乏耐心。"}, {"h": "四维分布", "p": "哞醒维领先说明你的成长曲线呈「台阶式」：积累—唤醒—冲刺。完整报告可看是否仍有高梦乡分（隐性缓冲习惯）。"}, {"h": "场景提示", "p": "适合需要自驱与端到端负责的角色。带人时记得留「被唤醒的空间」，别用你的节奏裁剪所有人。"}, {"h": "本周起跑动作", "p": "写下最近一次「哞醒时刻」的三要素：触发者、你做的第一步、如果重来会保留什么。复制到新目标上。"}]}}};
+  let qi = 0;
+  let answers = new Array(TEST_DATA.questions.length).fill(null);
+
+  function scoreResult() {
+    const totals = {};
+    TEST_DATA.dimensions.forEach(d => totals[d.id] = 0);
+    TEST_DATA.questions.forEach((q, i) => {
+      const ai = answers[i];
+      if (ai != null) totals[q.d] += q.o[ai].s;
+    });
+    let topId = TEST_DATA.dimensions[0].id;
+    let max = -1;
+    Object.entries(totals).forEach(([id, v]) => {
+      if (v > max) { max = v; topId = id; }
+    });
+    return { totals, topId };
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+    const el = document.getElementById(id);
+    if (el) { el.classList.add('active'); }
+    if (id === 'screen-quiz') {
+      document.getElementById('screen-quiz').style.display = 'flex';
+    } else {
+      document.getElementById('screen-quiz').style.display = 'none';
+    }
+  }
+
+  function renderQuestion() {
+    const q = TEST_DATA.questions[qi];
+    const total = TEST_DATA.questions.length;
+    document.getElementById('q-progress').textContent = (qi + 1) + ' / ' + total;
+    document.getElementById('q-dim-label').textContent = q.t || '';
+    document.getElementById('progress-fill').style.width = ((qi + 1) / total * 100) + '%';
+    document.getElementById('q-tag').textContent = q.t || '题目';
+    document.getElementById('q-title').textContent = q.q;
+    const host = document.getElementById('q-options');
+    host.innerHTML = q.o.map((opt, i) =>
+      '<div class="opt' + (answers[qi] === i ? ' selected' : '') + '" data-i="' + i + '">' +
+      '<div class="opt-text">' + opt.t + '</div></div>'
+    ).join('');
+    host.querySelectorAll('.opt').forEach(el => {
+      el.onclick = () => {
+        answers[qi] = parseInt(el.dataset.i, 10);
+        host.querySelectorAll('.opt').forEach(x => x.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('btn-next').disabled = false;
+      };
+    });
+    document.getElementById('btn-next').textContent = qi === total - 1 ? '查看结果' : '下一题';
+    document.getElementById('btn-back').style.display = qi > 0 ? 'block' : 'none';
+    document.getElementById('btn-next').disabled = answers[qi] == null;
+  }
+
+  function showResult() {
+    const { totals, topId } = scoreResult();
+    const r = TEST_DATA.results[topId] || {};
+    document.getElementById('result-emoji').textContent = r.emoji || '';
+    document.getElementById('result-type').textContent = r.type || '';
+    document.getElementById('result-level').textContent = r.type || '';
+    document.getElementById('result-quote').textContent = r.quote || '';
+    window.totalScore = totals[topId];
+    const maxV = Math.max(...Object.values(totals), 1);
+    document.getElementById('radar-wrap').innerHTML = TEST_DATA.dimensions.map(d => {
+      const v = totals[d.id] || 0;
+      const pct = Math.round(v / maxV * 100);
+      return '<div class="radar-row"><span>' + d.label + '</span><div class="radar-bar"><div class="radar-fill" style="width:' + pct + '%"></div></div><span>' + v + '</span></div>';
+    }).join('');
+    const full = r.full || [];
+    document.getElementById('full-sections').innerHTML = full.map(s =>
+      '<div class="full-section"><h3>' + s.h + '</h3><p>' + s.p + '</p></div>'
+    ).join('');
+    showScreen('screen-result');
+    if (window.__psyComplete) {
+      window.__psyComplete({ test_code: 'nly', type: topId, score: totals[topId], totals });
+    }
+  }
+
+  document.getElementById('btn-next').onclick = () => {
+    if (answers[qi] == null) return;
+    if (qi < TEST_DATA.questions.length - 1) { qi++; renderQuestion(); }
+    else showResult();
+  };
+  document.getElementById('btn-back').onclick = () => { if (qi > 0) { qi--; renderQuestion(); } };
+  document.getElementById('btn-retry').onclick = () => {
+    qi = 0; answers = new Array(TEST_DATA.questions.length).fill(null);
+    showScreen('screen-intro');
+    document.body.classList.remove('page-disabled');
+  };
+
+  document.getElementById('btn-start').onclick = async function() {
+    if (window.linkValidator) {
+      if (typeof window.linkValidator.validateForUserAction === 'function') {
+        const ok = await window.linkValidator.validateForUserAction();
+        if (!ok) return;
+      }
+      try { await window.linkValidator.startTest(); } catch(e) { console.error(e); return; }
+    }
+    qi = 0; answers = new Array(TEST_DATA.questions.length).fill(null);
+    showScreen('screen-quiz');
+    renderQuestion();
+  };
+  </script>
+
+  <script src="/static/js/link-validator.js"></script>
+  <script>
+  if (typeof PsyTestValidator !== 'undefined') {
+    PsyTestValidator.init('nly', {
+      onSuccess: function() { document.body.classList.remove('page-disabled'); },
+      onError: function() { document.body.classList.remove('page-disabled'); },
+      onLoad: function(data) {
+        setTimeout(function() {
+          if (typeof PsyTestValidator.addPromotionLink === 'function') PsyTestValidator.addPromotionLink();
+        }, 100);
+      }
+    });
+  } else {
+    document.body.classList.remove('page-disabled');
+  }
+  if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
+  </script>
+  <script>window.__PSY_TEST_CODE__ = "nly";</script>
+  <script src="/static/js/ceping-bridge.js"></script>
+</body>
+</html>

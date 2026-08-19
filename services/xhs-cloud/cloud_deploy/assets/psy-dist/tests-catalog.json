@@ -1,6 +1,6 @@
 {
   "source": "digit-hub/packages/psy-dist/tests-catalog.json",
-  "total": 109,
+  "total": 110,
   "url_pattern": {
     "static_test": "/tests/{test_code}/index.html",
     "distribution_link": "/test/{test_code}/{token}"
@@ -875,6 +875,14 @@
       "name": "闺蜜性格反差测试",
       "questions": 10,
       "duration_min": 3,
+      "hot": true,
+      "dual_perspective": false
+    },
+    {
+      "code": "nly",
+      "name": "牛来也 · 成长原型测",
+      "questions": 20,
+      "duration_min": 5,
       "hot": true,
       "dual_perspective": false
     }

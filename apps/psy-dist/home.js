@@ -3,6 +3,7 @@
   if (year) year.textContent = String(new Date().getFullYear());
 
   const SHELF = [
+    { code: "nly", title: "牛来也 · 成长原型测" },
     { code: "7v7", title: "七宗罪 VS 七美德" },
     { code: "phd", title: "你适合读博吗" },
     { code: "wxcs", title: "五行城市匹配" },
