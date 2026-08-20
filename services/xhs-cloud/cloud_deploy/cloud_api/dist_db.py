@@ -50,7 +50,7 @@ def _fmt_ts(val: Any) -> str | None:
 
 
 def resolve_link_policy() -> dict[str, Any]:
-    """链接策略：首次开测后 N 小时内最多 M 次（默认 72h / 3 次，对标源站）。"""
+    """链接策略：首次开测后 N 小时内最多 M 次（默认 72h / 3 次 = 3天内可用3次）。"""
     max_uses = int(os.environ.get("XHS_DIST_LINK_MAX_USES", "3") or 3)
     expire_hours = int(os.environ.get("XHS_DIST_LINK_EXPIRE_HOURS", "72") or 72)
     idle_days = int(os.environ.get("XHS_DIST_LINK_IDLE_DAYS", "90") or 90)
@@ -60,13 +60,17 @@ def resolve_link_policy() -> dict[str, Any]:
         cfg = dist_ops.get_config()
         if cfg.get("link_max_uses") not in (None, ""):
             max_uses = max(1, int(float(cfg["link_max_uses"])))
+        # Prefer expire_type / expire_days (主站口径：3天)；否则回退 link_expire_hours
         expire_type = (cfg.get("expire_type") or "").strip() or "custom_days"
         if expire_type == "permanent":
             expire_hours = 0
         elif expire_type == "24hours":
             expire_hours = 24
-        elif expire_type == "custom_days" and cfg.get("expire_days") not in (None, ""):
-            expire_hours = max(1, int(float(cfg["expire_days"])) * 24)
+        elif expire_type == "custom_days":
+            days_raw = cfg.get("expire_days")
+            if days_raw in (None, ""):
+                days_raw = "3"
+            expire_hours = max(1, int(float(days_raw)) * 24)
         elif cfg.get("link_expire_hours") not in (None, ""):
             expire_hours = max(0, int(float(cfg["link_expire_hours"])))
         if cfg.get("link_idle_days") not in (None, ""):

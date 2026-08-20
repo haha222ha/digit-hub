@@ -263,12 +263,14 @@ function goCompass(){
   setTimeout(()=>{showResult();},3600);
 }
 function mockPay(){if(typeof showResult==='function')showResult();else if(typeof showReport==='function')showReport();}
-function showResult(){__psyHookComplete({test_code:'slpz',source:'autumn-sku'});
-  const {order,pct,keys}=RES;
+function showResult(){
+  const {order,pct,keys}=RES||{};
+  if(!RES||!order){console.error('slpz missing RES',RES);show('result');return;}
   const main=order[0],least=order[3];
   $('rMain').innerHTML='🧭 你的指南针指向：<span class="road" style="color:'+PATHS[main.k].c+'">'+PATHS[main.k].e+' '+PATHS[main.k].n+'</span>';
   $('bars').innerHTML=order.map((o)=>'<div class="brow"><span class="nm">'+PATHS[o.k].n+'</span><div class="track"><div class="fill" id="bf-'+o.k+'" style="background:'+PATHS[o.k].fill+'"></div></div><b id="bp-'+o.k+'">0%</b></div>').join('');
   show('result');window.scrollTo(0,0);
+  __psyHookComplete({test_code:'slpz',source:'autumn-sku'});
   order.forEach((o,i)=>{setTimeout(()=>{
     $('bf-'+o.k).style.width=o.pct+'%';$('bp-'+o.k).textContent=o.pct+'%';
     if(i===0)burst();
@@ -288,6 +290,7 @@ function burst(){const r=$('bars').getBoundingClientRect();
     p.style.setProperty('--dx',Math.cos(ang)*dist+'px');p.style.setProperty('--dy',Math.sin(ang)*dist+'px');
     document.body.appendChild(p);setTimeout(()=>p.remove(),1000);}}
 function showPoster(){show('poster');}
+if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
 </script>
 
 <script>window.__PSY_TEST_CODE__ = "slpz";</script>

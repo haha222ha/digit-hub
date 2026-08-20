@@ -290,14 +290,20 @@ function calc(){
   const tier=TIERS.find(t=>prob>=t.min)||TIERS[3];
   RESULT={prob,tier,dimScore,total};
 }
-function mockPay(){if(typeof showResult==='function')showResult();else if(typeof showReport==='function')showReport();},1200);}
+function mockPay(){if(typeof showResult==='function')showResult();else if(typeof showReport==='function')showReport();}
 
 /* ============ 拆封 ============ */
 let opened=false;
 function openEnv(){if(opened)return;opened=true;
   $('env').classList.add('open');$('unboxTip').textContent='';
   burstParticles();
-  setTimeout(()=>{(__psyHookComplete({test_code:'ofpr',score:(RESULT&&RESULT.prob)||0}),show('result'));renderResult();window.scrollTo(0,0);opened=false;},900);
+  setTimeout(()=>{
+    show('result');
+    renderResult();
+    window.scrollTo(0,0);
+    opened=false;
+    __psyHookComplete({test_code:'ofpr',score:(RESULT&&RESULT.prob)||0});
+  },900);
 }
 function burstParticles(){const r=$('env').getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;
   for(let i=0;i<26;i++){const p=document.createElement('div');p.className='particle';
@@ -323,6 +329,7 @@ function renderResult(){
   $('pBeat').textContent='超过全国 '+Math.min(99,Math.round(prob*0.92))+'% 的求职者 · 你呢？';
 }
 function showPoster(){show('poster');}
+if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
 </script>
 
 <script>window.__PSY_TEST_CODE__ = "ofpr";</script>

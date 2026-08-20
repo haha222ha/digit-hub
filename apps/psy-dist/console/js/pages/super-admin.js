@@ -1673,7 +1673,7 @@ export async function renderSaConfig(root) {
       el("option", { value: "true", text: "是（全员解锁）" }),
     ]),
     link_max_uses: el("input", { type: "number", value: cfg.link_max_uses || "3" }),
-    link_expire_hours: el("input", { type: "number", value: cfg.link_expire_hours || "24" }),
+    link_expire_hours: el("input", { type: "number", value: cfg.link_expire_hours || "72" }),
     wecom_webhook: el("input", { value: cfg.wecom_webhook || "" }),
   };
   const labels = {

@@ -913,8 +913,8 @@
     {
       "code": "xzcp",
       "name": "求职性格测评 · 校招练习版",
-      "questions": 36,
-      "duration_min": 10,
+      "questions": 14,
+      "duration_min": 8,
       "hot": true,
       "dual_perspective": false
     },

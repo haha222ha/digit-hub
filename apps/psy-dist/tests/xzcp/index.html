@@ -272,8 +272,9 @@ function calc(){
   const weakest=['V','N','L'].reduce((a,b)=>mods[a]<mods[b]?a:b);
   RES={mods,pct,weakest};
 }
-function showReport(){__psyHookComplete({test_code:'xzcp',source:'autumn-sku'});
-  const {mods,pct,weakest}=RES;
+function showReport(){
+  const {mods,pct,weakest}=RES||{};
+  if(!RES){console.error('xzcp missing RES');show('result');return;}
   $('repId').textContent=$('ticket').textContent.replace('CT-','');
   $('rPct').textContent='P'+pct;$('rBeat').textContent=pct;
   $('rPass').textContent=Math.min(95,Math.round(pct*0.93))+'%';
@@ -290,7 +291,9 @@ function showReport(){__psyHookComplete({test_code:'xzcp',source:'autumn-sku'});
         '<div class="ra">'+q.ex+'</div>';});
   $('rReview').innerHTML=rv||'<div class="ra">能力题全部正确，无需解析。</div>';
   show('result');window.scrollTo(0,0);
+  __psyHookComplete({test_code:'xzcp',source:'autumn-sku',score:pct});
 }
+if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
 </script>
 
 <script>window.__PSY_TEST_CODE__ = "xzcp";</script>

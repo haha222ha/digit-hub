@@ -206,7 +206,12 @@ function goWalk(){
   const cnt={};QS.forEach((q,i)=>{const k=q.o[answers[i]][1];cnt[k]=(cnt[k]||0)+1;});
   let best='capibara',bn=-1;Object.entries(cnt).forEach(([k,v])=>{if(v>bn){bn=v;best=k;}});
   show('walk');$('walker').textContent=SPIRITS[best].e;$('walker').style.animation='none';void $('walker').offsetWidth;$('walker').style.animation='';
-  setTimeout(()=>{renderResult(best);show('result');window.scrollTo(0,0);},2900);
+  setTimeout(()=>{
+    renderResult(best);
+    show('result');
+    window.scrollTo(0,0);
+    __psyHookComplete({test_code:'irms',source:'autumn-sku',spirit:best});
+  },2900);
 }
 function renderResult(k){
   const s=SPIRITS[k];
@@ -218,6 +223,7 @@ function renderResult(k){
   $('pSlog').textContent=s.slogan;$('pRare').textContent=s.rare;
 }
 function showPoster(){show('poster');}
+if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
 </script>
 
 <script>window.__PSY_TEST_CODE__ = "irms";</script>
