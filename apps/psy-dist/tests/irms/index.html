@@ -184,7 +184,16 @@ const QS=[
  {t:'视频面试你的镜头前布置？',o:[['干净白墙 + 补光灯','hamster'],['书架当背景（书是摆的）','capibara'],['whatever，能露脸就行','sloth']]},
  {t:'许愿题：你希望面试像？',o:[['笔试——写就行不用说','sloth'],['聊天——自然发挥','capibara'],['游戏——有攻略可抄','hamster']]},
 ];
-  function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+  function __psyHookComplete(payload){
+    if(window.__psyComplete){
+      try{
+        const ret=window.__psyComplete(payload||{});
+        if(ret&&typeof ret.then==='function')ret.catch(function(e){console.warn('__psyComplete',e);});
+      }catch(e){console.warn('__psyComplete',e);}
+    }
+    window.totalScore=(payload&&payload.score)||window.totalScore;
+    return undefined;
+  }
 async function __psyStartGate(){
   if(!window.linkValidator) return true;
   try{
@@ -210,22 +219,58 @@ function render(){
   $('qtext').textContent=QS[qi].t;$('opts').innerHTML='';
   QS[qi].o.forEach((o,i)=>{const d=document.createElement('div');
     d.className='opt'+(answers[qi]===i?' sel':'');d.innerHTML='<span>'+o[0]+'</span>';
-    d.onclick=()=>{answers[qi]=i;d.parentElement.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');
-      setTimeout(()=>{qi<9?(qi++,render()):goWalk();},240);};
+    d.onclick=()=>{
+      if(d.dataset.locked==='1')return;
+      d.dataset.locked='1';
+      answers[qi]=i;
+      d.parentElement.querySelectorAll('.opt').forEach(x=>{x.classList.remove('sel');x.dataset.locked='1';});
+      d.classList.add('sel');
+      setTimeout(()=>{
+        try{
+          if(qi<9){qi++;render();}
+          else goWalk();
+        }catch(err){
+          console.error('irms advance failed',err);
+          try{goWalk();}catch(e2){console.error(e2);show('result');}
+        }
+      },240);
+    };
     $('opts').appendChild(d);});
   $('backBtn').classList.toggle('off',qi===0);
 }
 function prevQ(){if(qi>0){qi--;render();}}
+function pickSpirit(){
+  const cnt={};
+  QS.forEach((q,i)=>{
+    const ai=answers[i];
+    if(ai==null||ai<0||!q.o[ai])return;
+    const k=q.o[ai][1];
+    if(!SPIRITS[k])return;
+    cnt[k]=(cnt[k]||0)+1;
+  });
+  let best='capibara',bn=-1;
+  Object.keys(cnt).forEach((k)=>{if(cnt[k]>bn){bn=cnt[k];best=k;}});
+  if(!SPIRITS[best]) best='capibara';
+  return best;
+}
 function goWalk(){
-  const cnt={};QS.forEach((q,i)=>{const k=q.o[answers[i]][1];cnt[k]=(cnt[k]||0)+1;});
-  let best='capibara',bn=-1;Object.entries(cnt).forEach(([k,v])=>{if(v>bn){bn=v;best=k;}});
-  show('walk');$('walker').textContent=SPIRITS[best].e;$('walker').style.animation='none';void $('walker').offsetWidth;$('walker').style.animation='';
+  let best='capibara';
+  try{best=pickSpirit();}catch(e){console.error('irms pickSpirit',e);best='capibara';}
+  try{
+    show('walk');
+    $('walker').textContent=SPIRITS[best].e;
+    $('walker').style.animation='none';void $('walker').offsetWidth;$('walker').style.animation='';
+  }catch(e){console.error('irms walk ui',e);}
   setTimeout(()=>{
-    renderResult(best);
+    try{renderResult(best);}catch(e){console.error('irms renderResult',e);}
     show('result');
     window.scrollTo(0,0);
-    __psyHookComplete({test_code:'irms',source:'autumn-sku',spirit:best});
-  },2900);
+    // complete 失败不得挡住结果页
+    try{
+      const ret=__psyHookComplete({test_code:'irms',source:'autumn-sku',spirit:best});
+      if(ret&&typeof ret.then==='function')ret.catch(function(err){console.warn('irms complete',err);});
+    }catch(e){console.warn('irms complete',e);}
+  },1800);
 }
 function renderResult(k){
   const s=SPIRITS[k];

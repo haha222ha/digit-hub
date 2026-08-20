@@ -222,7 +222,15 @@ const QS=[
  {d:'现实约束',t:'婚恋 / 家庭计划对时间线的影响？',o:[['3 年内不着急',[2,2,1,2]],['希望早点稳定下来',[0,1,3,0]],['顺其自然',[1,1,1,1]]]},
  {d:'现实约束',t:'直觉：夜深人静时你心里的天平偏向？',o:[['继续读书',[3,0,0,0]],['搞钱进大厂',[0,3,0,0]],['上岸体制内',[0,0,3,0]],['出去看看',[0,0,0,3]]]},
 ];
-  function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+  function __psyHookComplete(payload){
+    if(window.__psyComplete){
+      try{
+        const ret=window.__psyComplete(payload||{});
+        if(ret&&typeof ret.then==='function')ret.catch(function(e){console.warn('__psyComplete',e);});
+      }catch(e){console.warn('__psyComplete',e);}
+    }
+    window.totalScore=(payload&&payload.score)||window.totalScore;
+  }
 async function __psyStartGate(){
   if(!window.linkValidator) return true;
   try{

@@ -237,7 +237,15 @@ const QS=[
  {t:'对城市 / 薪资的弹性？',o:['城市薪资都灵活','城市定死，薪资可谈','薪资定死，城市可谈','都不让步'],s:[95,75,75,55]},
  {t:'直觉题：这个秋天你会…',o:['手握多个 offer 挑花眼 ✨','稳稳拿到 1 - 2 个','压哨上岸','不敢想'],s:[100,85,70,50]},
 ];
-  function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+  function __psyHookComplete(payload){
+    if(window.__psyComplete){
+      try{
+        const ret=window.__psyComplete(payload||{});
+        if(ret&&typeof ret.then==='function')ret.catch(function(e){console.warn('__psyComplete',e);});
+      }catch(e){console.warn('__psyComplete',e);}
+    }
+    window.totalScore=(payload&&payload.score)||window.totalScore;
+  }
 async function __psyStartGate(){
   if(!window.linkValidator) return true;
   try{

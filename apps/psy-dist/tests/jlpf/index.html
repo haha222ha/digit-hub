@@ -201,7 +201,15 @@ const QS=[
  {t:'关键词会被机器筛（ATS）到吗？',o:['研究过 JD 关键词并埋入','听说过没操作','不知道 ATS 是什么'],s:[100,65,50]},
  {t:'最近一次改简历是什么时候？',o:['本周，投递反馈驱动迭代','这个月','三个月前','入学时写的一直没动'],s:[95,78,55,38]},
 ];
-  function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+  function __psyHookComplete(payload){
+    if(window.__psyComplete){
+      try{
+        const ret=window.__psyComplete(payload||{});
+        if(ret&&typeof ret.then==='function')ret.catch(function(e){console.warn('__psyComplete',e);});
+      }catch(e){console.warn('__psyComplete',e);}
+    }
+    window.totalScore=(payload&&payload.score)||window.totalScore;
+  }
 async function __psyStartGate(){
   if(!window.linkValidator) return true;
   try{
