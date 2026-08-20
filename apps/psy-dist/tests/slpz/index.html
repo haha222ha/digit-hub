@@ -112,7 +112,7 @@
     <div class="l1">别问别人怎么选<br><span class="hl">24 个问题之后，你自己就知道答案</span></div>
     <div class="l2">考研深造 · 大厂搞钱 · 体制上岸 · 出去看看<br>四条路，只属于你的那条</div>
     <div class="pill">本周已有 <b>2,517</b> 人找到了自己的方向</div>
-    <button class="btn-go" onclick="start()" id="start-btn">开始测试</button>
+    <button class="btn-go" onclick="start()" id="start-btn" data-psy-skip="1">开始测试</button>
     <div class="foot">决策参考工具 · 不构成人生建议</div>
   </div>
 
@@ -223,12 +223,26 @@ const QS=[
  {d:'现实约束',t:'直觉：夜深人静时你心里的天平偏向？',o:[['继续读书',[3,0,0,0]],['搞钱进大厂',[0,3,0,0]],['上岸体制内',[0,0,3,0]],['出去看看',[0,0,0,3]]]},
 ];
   function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+async function __psyStartGate(){
+  if(!window.linkValidator) return true;
+  try{
+    if(typeof window.linkValidator.validateForUserAction==='function'){
+      const ok=await window.linkValidator.validateForUserAction();
+      if(!ok) return false;
+    }
+    await window.linkValidator.startTest();
+    return true;
+  }catch(e){console.error(e);return false;}
+}
 
 let qi=0,answers=new Array(24).fill(-1);
 const $=id=>document.getElementById(id);
 const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');};
 const hide=id=>$(id).classList.remove('on');
-function start(){qi=0;answers=new Array(24).fill(-1);show('quiz');render();}
+async function start(){
+  if(!(await __psyStartGate())) return;
+  qi=0;answers=new Array(24).fill(-1);show('quiz');render();
+}
 function render(){
   const q=QS[qi];
   $('pfill').style.width=(qi/24*100)+'%';$('pnum').textContent=(qi+1)+'/24';

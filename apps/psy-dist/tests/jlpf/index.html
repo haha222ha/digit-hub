@@ -112,7 +112,7 @@
     <div class="l1">7 秒</div>
     <div class="l2">这是 HR 看你简历的时间<br>18 个问题，还原这 7 秒里 TA 脑中闪过的判断</div>
     <div class="pill">本周已体检 <b>2,931</b> 份简历 · 5 个科室</div>
-    <button class="btn-go" id="start-btn">开始测试</button>
+    <button class="btn-go" id="start-btn" data-psy-skip="1">开始测试</button>
     <div class="foot">模拟 HR 评估逻辑 · 结果仅供求职参考</div>
   </div>
 
@@ -202,6 +202,17 @@ const QS=[
  {t:'最近一次改简历是什么时候？',o:['本周，投递反馈驱动迭代','这个月','三个月前','入学时写的一直没动'],s:[95,78,55,38]},
 ];
   function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+async function __psyStartGate(){
+  if(!window.linkValidator) return true;
+  try{
+    if(typeof window.linkValidator.validateForUserAction==='function'){
+      const ok=await window.linkValidator.validateForUserAction();
+      if(!ok) return false;
+    }
+    await window.linkValidator.startTest();
+    return true;
+  }catch(e){console.error(e);return false;}
+}
 
 const GRADES=[
  {min:88,g:'S',tag:'S 级 · HR 眼中的白月光',diag:'你的简历几乎没有短板，HR 的 7 秒在你这里会变成 30 秒的欣赏。你缺的不是简历，是投出去的勇气。',steps:'✅ 保持版本迭代 ✅ 冲刺更高梯队公司 ✅ 开始准备面试叙事'},
@@ -213,7 +224,10 @@ let qi=0,answers=new Array(18).fill(-1);
 const $=id=>document.getElementById(id);
 const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');};
 const hide=id=>$(id).classList.remove('on');
-document.querySelector('.btn-go').onclick=()=>{qi=0;answers=new Array(18).fill(-1);show('quiz');render();};
+document.querySelector('.btn-go').onclick=async ()=>{
+  if(!(await __psyStartGate())) return;
+  qi=0;answers=new Array(18).fill(-1);show('quiz');render();
+};
 function deptOf(n){return DEPTS.find(d=>d.qs.includes(n));}
 function render(){
   const q=QS[qi],dep=deptOf(qi+1);

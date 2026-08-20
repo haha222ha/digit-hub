@@ -92,7 +92,7 @@
     <div class="l1">i 人面试生存指南</div>
     <div class="l2">面试前 10 分钟，你在哪？<br>A 工位假装淡定　B 洗手间深呼吸　C 楼道来回踱步<br><br>10 道题，2 分钟，领走你的面试守护灵</div>
     <div class="pill">已有 <b>9,418</b> 只 i 人找到自己的守护灵</div>
-    <button class="btn-go" onclick="start()" id="start-btn">开始测试</button>
+    <button class="btn-go" onclick="start()" id="start-btn" data-psy-skip="1">开始测试</button>
     <div class="foot">仅供自我认知与娱乐 · 你已经很棒了</div>
   </div>
 
@@ -185,12 +185,26 @@ const QS=[
  {t:'许愿题：你希望面试像？',o:[['笔试——写就行不用说','sloth'],['聊天——自然发挥','capibara'],['游戏——有攻略可抄','hamster']]},
 ];
   function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+async function __psyStartGate(){
+  if(!window.linkValidator) return true;
+  try{
+    if(typeof window.linkValidator.validateForUserAction==='function'){
+      const ok=await window.linkValidator.validateForUserAction();
+      if(!ok) return false;
+    }
+    await window.linkValidator.startTest();
+    return true;
+  }catch(e){console.error(e);return false;}
+}
 
 let qi=0,answers=new Array(10).fill(-1);
 const $=id=>document.getElementById(id);
 const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');};
 const hide=id=>$(id).classList.remove('on');
-function start(){qi=0;answers=new Array(10).fill(-1);show('quiz');render();}
+async function start(){
+  if(!(await __psyStartGate())) return;
+  qi=0;answers=new Array(10).fill(-1);show('quiz');render();
+}
 function render(){
   $('pfill').style.width=(qi/10*100)+'%';$('pnum').textContent=(qi+1)+'/10';
   $('qtext').textContent=QS[qi].t;$('opts').innerHTML='';

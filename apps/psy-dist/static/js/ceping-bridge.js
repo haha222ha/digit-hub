@@ -105,17 +105,34 @@
       btn.dataset.psyIntercepting = "1";
       btn.disabled = true;
 
+      // Avoid "click does nothing" when start-test API hangs (common on weak mobile nets).
+      var startTimeoutMs = 15000;
+      var timedOut = false;
+      var timeoutId = setTimeout(function () {
+        timedOut = true;
+        btn.disabled = false;
+        delete btn.dataset.psyIntercepting;
+        alert("开始超时，请检查网络后重试");
+      }, startTimeoutMs);
+
       Promise.resolve(window.__psyEnsureStart())
         .then(function () {
+          if (timedOut) return;
+          clearTimeout(timeoutId);
           btn.disabled = false;
           delete btn.dataset.psyIntercepting;
           btn.dataset.psyAllow = "1";
           btn.click();
         })
         .catch(function (err) {
+          if (timedOut) return;
+          clearTimeout(timeoutId);
           btn.disabled = false;
           delete btn.dataset.psyIntercepting;
-          alert((err && err.message) || "无法开始测试，请检查链接是否有效");
+          // link-validator already shows a modal on startTest failure; avoid double prompts.
+          if (!(window.linkValidator && window.linkValidator.validationError)) {
+            alert((err && err.message) || "无法开始测试，请检查链接是否有效");
+          }
         });
     },
     true

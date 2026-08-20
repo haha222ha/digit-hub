@@ -128,7 +128,7 @@
     </div>
     <div class="l1">候选人终端</div>
     <div class="l2">完整版 36 题（言语·数字·逻辑·性格·情境）<br>本演示含 <em>12 题</em> 样例 · 能力题<em>限时</em>作答<br><span class="cursor mono">system ready</span></div>
-    <button class="btn-go mono" id="start-btn" onclick="beginExam()">开始测试</button>
+    <button class="btn-go mono" id="start-btn" data-psy-skip="1" onclick="beginExam()">开始测试</button>
     <div class="foot">练习版 · 全部题目自研原创 · 不含任何官方真题</div>
   </div>
 
@@ -225,6 +225,17 @@ const QS=[
   ex:'A 体现"发现即修正 + 主动透明"；B 是被动等待；C 是把风险留到汇报现场——大厂视角里最减分。'},
 ];
   function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+async function __psyStartGate(){
+  if(!window.linkValidator) return true;
+  try{
+    if(typeof window.linkValidator.validateForUserAction==='function'){
+      const ok=await window.linkValidator.validateForUserAction();
+      if(!ok) return false;
+    }
+    await window.linkValidator.startTest();
+    return true;
+  }catch(e){console.error(e);return false;}
+}
 
 let qi=0,answers=new Array(QS.length).fill(-1),timerId=null,tLeft=0;
 const $=id=>document.getElementById(id);
@@ -232,9 +243,12 @@ const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remo
 const hide=id=>$(id).classList.remove('on');
 $('ticket').textContent='CT-'+String(Math.floor(1000+Math.random()*9000));
 
-function beginExam(){show('count');let n=3;$('bigCount').textContent=n;
+async function beginExam(){
+  if(!(await __psyStartGate())) return;
+  show('count');let n=3;$('bigCount').textContent=n;
   const iv=setInterval(()=>{n--;if(n>0){$('bigCount').textContent=n;$('bigCount').style.animation='none';void $('bigCount').offsetWidth;$('bigCount').style.animation='';}
-  else{clearInterval(iv);qi=0;answers=new Array(QS.length).fill(-1);show('quiz');render();}},900);}
+  else{clearInterval(iv);qi=0;answers=new Array(QS.length).fill(-1);show('quiz');render();}},900);
+}
 function render(){
   const q=QS[qi],mod=MODS[q.m];
   $('mod').textContent=q.m+'-'+String(qi+1).padStart(2,'0');

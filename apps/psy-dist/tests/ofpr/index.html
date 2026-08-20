@@ -138,7 +138,7 @@
     <div class="landing-t1">你的秋招 offer 概率测算</div>
     <div class="landing-t2">12 道题 · 3 分钟<br>测出这个秋天属于你的上岸概率</div>
     <div class="social-proof">本周已有 <b>3,286</b> 人拆开了自己的 offer 信封</div>
-    <button class="btn-start" onclick="startQuiz()" id="start-btn">开始测试</button>
+    <button class="btn-start" onclick="startQuiz()" id="start-btn" data-psy-skip="1">开始测试</button>
     <div class="landing-foot">本测试基于公开求职数据建模 · 结果仅供娱乐与自我认知参考</div>
   </div>
 
@@ -238,6 +238,17 @@ const QS=[
  {t:'直觉题：这个秋天你会…',o:['手握多个 offer 挑花眼 ✨','稳稳拿到 1 - 2 个','压哨上岸','不敢想'],s:[100,85,70,50]},
 ];
   function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+async function __psyStartGate(){
+  if(!window.linkValidator) return true;
+  try{
+    if(typeof window.linkValidator.validateForUserAction==='function'){
+      const ok=await window.linkValidator.validateForUserAction();
+      if(!ok) return false;
+    }
+    await window.linkValidator.startTest();
+    return true;
+  }catch(e){console.error(e);return false;}
+}
 
 const FORTUNES=['🔮 简历通过率预测中…','📮 投递策略分析中…','🎯 面试官好感度建模中…','✈️ offer 派送路线规划中…'];
 const TIERS=[
@@ -254,7 +265,10 @@ const $=id=>document.getElementById(id);
 const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');};
 const hide=id=>$(id).classList.remove('on');
 
-function startQuiz(){qi=0;answers=new Array(12).fill(-1);show('quiz');renderQ();}
+async function startQuiz(){
+  if(!(await __psyStartGate())) return;
+  qi=0;answers=new Array(12).fill(-1);show('quiz');renderQ();
+}
 function dimOf(qIdx){for(const d of DIMS){if(d.q.includes(qIdx+1))return d.name;}return '';}
 function renderQ(){
   const q=QS[qi];
