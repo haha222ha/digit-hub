@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>校招人才测评 · 大厂测评练习版</title>
+<style>
+  :root{--term:#0f172a;--cyan:#38bdf8;--purple:#a78bfa;--red:#f43f5e;--grid:#1e293b;}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:#020617;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+  .phone{width:100%;max-width:414px;height:100dvh;max-height:896px;position:relative;overflow:hidden;background:var(--term);box-shadow:0 0 60px rgba(56,189,248,.15);}
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;}
+  .screen.on{display:flex;animation:fadeIn .4s;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .mono{font-family:"JetBrains Mono",Consolas,monospace;}
+
+  /* 登录页 */
+  #login{align-items:center;justify-content:center;text-align:center;padding:34px;color:#e2e8f0;}
+  .term-head{font-size:12px;color:#475569;letter-spacing:1px;margin-bottom:26px;}
+  .cursor::after{content:"▊";color:var(--cyan);animation:blink 1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  .ticket{width:86%;max-width:320px;background:#111a2e;border:1px solid #233047;border-radius:14px;padding:22px;text-align:left;}
+  .ticket .row{display:flex;justify-content:space-between;font-size:12.5px;color:#94a3b8;margin:7px 0;}
+  .ticket .row b{color:#e2e8f0;}
+  .ticket .num{color:var(--cyan);letter-spacing:2px;}
+  .l1{font-size:20px;font-weight:800;margin-top:26px;}
+  .l2{font-size:12.5px;color:#64748b;margin-top:8px;line-height:1.8;}
+  .l2 em{color:var(--cyan);font-style:normal;}
+  .btn-go{margin-top:28px;background:transparent;border:1.5px solid var(--cyan);color:var(--cyan);font-size:15px;font-weight:700;padding:13px 44px;border-radius:8px;cursor:pointer;font-family:inherit;}
+  .btn-go:active{background:rgba(56,189,248,.15);}
+  .foot{position:absolute;bottom:14px;font-size:10px;color:#334155;width:100%;text-align:center;}
+
+  /* 倒计时 */
+  #count{align-items:center;justify-content:center;}
+  .big-count{font-size:110px;font-weight:800;color:var(--cyan);text-shadow:0 0 40px rgba(56,189,248,.5);animation:pop .9s ease-out;}
+  @keyframes pop{from{transform:scale(2.2);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+  /* 答题 */
+  .qtop{padding:13px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #1b2740;}
+  .mod{color:var(--purple);font-size:11.5px;font-weight:700;letter-spacing:1px;min-width:86px;}
+  .pbar{flex:1;height:4px;background:#1b2740;border-radius:99px;overflow:hidden;}
+  .pfill{height:100%;width:0;background:var(--purple);transition:width .4s;}
+  .pnum{color:#64748b;font-size:11.5px;}
+  .timer{padding:8px 18px 0;display:none;}
+  .timer.on{display:block;}
+  .timer .ttrack{height:4px;background:#1b2740;border-radius:99px;overflow:hidden;}
+  .timer .tfill{height:100%;width:100%;background:var(--cyan);transition:width 1s linear;}
+  .timer .tnum{text-align:right;font-size:11px;color:var(--cyan);margin-top:3px;}
+  .qbody{flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 22px 20px;overflow-y:auto;}
+  .qtag{color:#475569;font-size:11px;letter-spacing:2px;margin-bottom:10px;}
+  .qtext{color:#e2e8f0;font-size:16.5px;font-weight:600;line-height:1.7;margin-bottom:20px;}
+  .qtext .hl{color:var(--cyan);}
+  .opt{background:#111a2e;border:1px solid #233047;color:#cbd5e1;border-radius:10px;padding:12px 15px;font-size:13.5px;margin-bottom:9px;cursor:pointer;transition:all .14s;display:flex;gap:11px;align-items:center;}
+  .opt .tag{color:var(--cyan);font-size:12px;font-weight:700;flex-shrink:0;}
+  .opt:active{transform:scale(.98);}
+  .opt.sel{border-color:var(--cyan);background:rgba(56,189,248,.1);color:#e0f2fe;}
+
+  /* 交卷确认 */
+  #submit{align-items:center;justify-content:center;background:rgba(2,6,23,.85);}
+  .sub-card{width:82%;max-width:300px;background:#111a2e;border:1px solid #233047;border-radius:16px;padding:26px;text-align:center;}
+  .sub-card h3{color:#e2e8f0;font-size:17px;}
+  .sub-card p{color:#64748b;font-size:12.5px;margin-top:8px;line-height:1.8;}
+  .sub-btns{display:grid;gap:10px;margin-top:20px;}
+  .btn-ok{background:var(--cyan);color:#04121f;border:none;border-radius:8px;padding:12px;font-size:14.5px;font-weight:800;cursor:pointer;}
+  .btn-no{background:transparent;border:1px solid #334155;color:#94a3b8;border-radius:8px;padding:11px;font-size:13px;cursor:pointer;}
+
+  /* 计算页 */
+  #grading{align-items:center;justify-content:center;color:#64748b;font-size:13px;letter-spacing:2px;}
+  .grade-ring{width:120px;height:120px;border:3px solid #1b2740;border-top-color:var(--cyan);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:28px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* 付费墙 */
+  #paywall{align-items:center;justify-content:center;text-align:center;padding:34px;}
+  .pay-card{background:#fff;border-radius:20px;padding:30px 24px;width:100%;max-width:310px;}
+  .pay-card h3{font-size:18px;color:#0f172a;}
+  .pay-card p{font-size:12.5px;color:#64748b;line-height:1.8;margin-top:8px;}
+  .price-big{margin:16px 0;color:#0369a1;font-size:36px;font-weight:800;}
+  .price-big small{font-size:15px;}
+  .btn-pay{width:100%;background:#0369a1;color:#fff;font-size:15.5px;font-weight:800;padding:13px;border:none;border-radius:8px;cursor:pointer;}
+  .btn-free{margin-top:11px;background:none;border:none;color:#94a3b8;font-size:11.5px;text-decoration:underline;cursor:pointer;}
+
+  /* 报告 */
+  #report{overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--term);}
+  .rep-head{padding:30px 24px 18px;text-align:center;background:linear-gradient(180deg,#0c1626,#0f172a);}
+  .rep-head .id{color:#475569;font-size:11px;letter-spacing:2px;}
+  .rep-head .pct{font-size:64px;font-weight:800;color:var(--cyan);font-family:Consolas,monospace;line-height:1.2;}
+  .rep-head .cap{color:#94a3b8;font-size:12px;}
+  .mods{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;padding:14px 16px 4px;}
+  .modb{background:#111a2e;border:1px solid #1b2740;border-radius:10px;padding:10px 4px;text-align:center;}
+  .modb b{display:block;font-size:17px;color:var(--cyan);}
+  .modb.weak b{color:var(--red);}
+  .modb span{font-size:10px;color:#64748b;}
+  .card{margin:13px 16px;background:#111a2e;border:1px solid #1b2740;border-radius:14px;padding:17px;}
+  .card h4{font-size:13.5px;color:#e2e8f0;margin-bottom:9px;display:flex;gap:7px;align-items:center;}
+  .card h4 .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);}
+  .card p{font-size:12.5px;color:#94a3b8;line-height:1.9;}
+  .card p b{color:#e2e8f0;}
+  .review{margin-top:10px;border-top:1px dashed #1b2740;padding-top:10px;}
+  .review .rq{font-size:12px;color:#cbd5e1;margin:9px 0 4px;font-weight:600;}
+  .review .ra{font-size:11.5px;color:#64748b;line-height:1.8;padding-left:10px;border-left:2px solid #233047;}
+  .review .ra b{color:var(--cyan);}
+  .fixcard{border:1px solid rgba(244,63,94,.35);background:rgba(244,63,94,.06);}
+  .fixcard h4{color:#fda4af;}
+  .pass{margin:12px 16px;background:linear-gradient(135deg,#0c2a3f,#0f172a);border:1px solid #164e63;border-radius:14px;padding:16px;text-align:center;}
+  .pass .pv{font-size:30px;font-weight:800;color:#22d3ee;}
+  .pass p{font-size:11.5px;color:#64748b;margin-top:4px;}
+  .acts{padding:2px 16px 10px;display:grid;gap:9px;}
+  .btn-train{background:var(--cyan);border:none;border-radius:8px;padding:13px;color:#04121f;font-size:14.5px;font-weight:800;cursor:pointer;}
+  .btn-again{background:transparent;border:1px solid #334155;border-radius:8px;padding:11px;color:#94a3b8;font-size:12.5px;cursor:pointer;}
+  .r-foot{padding:4px 28px 24px;text-align:center;font-size:10px;color:#334155;line-height:1.7;}
+
+  body.page-disabled{pointer-events:none;opacity:.65;}
+</style>
+
+  <!-- 引入安全工具库（必须在head中尽早加载） -->
+  <script src="/static/js/test-security.js"></script>
+</head>
+<body>
+<div class="phone">
+
+  <div class="screen on" id="login">
+    <div class="term-head mono">RECRUIT_ASSESS_TRAINER v2.7 // ONLINE</div>
+    <div class="ticket mono">
+      <div class="row"><span>CANDIDATE</span><b class="num" id="ticket">--</b></div>
+      <div class="row"><span>SESSION</span><b>27-AUTUMN</b></div>
+      <div class="row"><span>MODULES</span><b>5</b></div>
+      <div class="row"><span>TYPE</span><b style="color:#a78bfa">练习版 · 非官方题库</b></div>
+    </div>
+    <div class="l1">候选人终端</div>
+    <div class="l2">完整版 36 题（言语·数字·逻辑·性格·情境）<br>本演示含 <em>12 题</em> 样例 · 能力题<em>限时</em>作答<br><span class="cursor mono">system ready</span></div>
+    <button class="btn-go mono" id="start-btn" onclick="beginExam()">开始测试</button>
+    <div class="foot">练习版 · 全部题目自研原创 · 不含任何官方真题</div>
+  </div>
+
+  <div class="screen" id="count"><div class="big-count mono" id="bigCount">3</div></div>
+
+  <div class="screen" id="quiz">
+    <div class="qtop">
+      <div class="mod mono" id="mod">V-01</div>
+      <div class="pbar"><div class="pfill" id="pfill"></div></div>
+      <div class="pnum mono" id="pnum">1/12</div>
+    </div>
+    <div class="timer" id="timer"><div class="ttrack"><div class="tfill" id="tfill"></div></div><div class="tnum mono" id="tnum">75s</div></div>
+    <div class="qbody">
+      <div class="qtag mono" id="qtag"></div>
+      <div class="qtext" id="qtext"></div>
+      <div id="opts"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="submit">
+    <div class="sub-card">
+      <h3>提交答卷？</h3>
+      <p>提交后立即生成百分位报告与错题解析<br><span class="mono" id="subInfo"></span></p>
+      <div class="sub-btns">
+        <button class="btn-ok" onclick="grade()">确认交卷</button>
+        <button class="btn-no" onclick="hide('submit')">返回检查</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="grading">
+    <div class="grade-ring"></div>
+    <span>GRAVING<span class="mono">...</span></span>
+  </div>
+
+  <div class="screen" id="result" class="screen">
+    <div class="rep-head">
+      <div class="id mono">CANDIDATE_REPORT #<span id="repId"></span></div>
+      <div class="pct" id="rPct">P76</div>
+      <div class="cap">综合百分位 · 超过 <span id="rBeat">76</span>% 的练习者</div>
+    </div>
+    <div class="mods" id="mods"></div>
+    <div class="pass">
+      <div class="pv" id="rPass">71%</div>
+      <p>参照历年校招测评通过线（P60-P70）的当前预估通过率</p>
+    </div>
+    <div class="card">
+      <h4><span class="dot"></span>整体诊断</h4>
+      <p id="rDiag"></p>
+    </div>
+    <div class="card">
+      <h4><span class="dot"></span>逐题解析</h4>
+      <div class="review" id="rReview"></div>
+    </div>
+    <div class="card fixcard">
+      <h4>📉 最弱模块 · 专项提升</h4>
+      <p id="rFix"></p>
+    </div>
+    <div class="acts">
+      <button class="btn-train" onclick="location.reload()">🔁 再练一轮</button>
+      <button class="btn-again" onclick="location.reload()">EXIT · 重新测评</button>
+    </div>
+    <div class="r-foot">练习版 · 非任何官方题库 · 全部题目自研原创 · 仅供备考参考</div>
+  </div>
+
+</div>
+<script>
+/* 模块: V言语(75s) N数字(90s) L逻辑(90s) P性格(不限) S情境(不限)  correct=正确项索引; P/S 无对错 */
+const MODS={V:{n:'言语推理',t:75},N:{n:'数字运算',t:90},L:{n:'逻辑推理',t:90},P:{n:'职业性格',t:0},S:{n:'情境判断',t:0}};
+const QS=[
+ {m:'V',t:'某公司规定：所有通过二面的候选人都要参加终面测评；小李没有参加终面测评。由此可以推出：',o:['小李没有通过二面','小李通过了二面但放弃了','小李能力不足'],c:0,
+  ex:'逆否命题：没参加终面测评 → 必然没通过二面。B 犯"无据推断"，C 犯"主观归因"。'},
+ {m:'V',t:'"Z 世代求职者并非不愿意吃苦，而是要求吃苦得有对价。"最能支持该观点的是：',o:['调研显示 Z 世代对"有明确晋升路径的高强度岗位"接受度达 71%','Z 世代平均在职时长仅 14 个月','某高管批评年轻人不能加班'],c:0,
+  ex:'A 直接给出"有对价→愿意吃苦"的证据；B 是无关数据；C 是反例。'},
+ {m:'V',t:'一段材料指出"远程办公提升了 23% 的任务完成率，但也使新员工的成长周期平均延长了 40%"。材料想表达的核心是：',o:['远程办公利弊并存，需分对象看待','远程办公应该全面推行','远程办公弊大于利'],c:0,
+  ex:'材料同时给出正负两面且指向不同人群（老员工 vs 新员工），故选 A。'},
+ {m:'N',t:'某产品 Q1 销量 1.2 万件，Q2 环比增长 25%，Q3 环比下降 10%。Q3 销量约为：',o:['1.35 万','1.38 万','1.5 万'],c:0,
+  ex:'1.2 × 1.25 × 0.9 = 1.35 万。注意"环比"是逐季相乘。'},
+ {m:'N',t:'数列：2, 6, 12, 20, 30, ?',o:['42','40','36'],c:0,
+  ex:'差值 4,6,8,10 → 下一个差 12，30+12=42（通项 n²+n）。'},
+ {m:'N',t:'部门预算 40 万，人力占 45%，市场占 30%，其余为研发。研发预算为：',o:['10 万','12 万','8 万'],c:0,
+  ex:'40 × (1-0.45-0.30) = 40 × 0.25 = 10 万。'},
+ {m:'L',t:'图形序列：△ ◯ △ ◯ △ ?（且图形内部线段数依次为 1,2,3,4,5,6 条）',o:['◯（含 6 条内线）','△（含 6 条内线）','◯（含 5 条内线）'],c:0,
+  ex:'双规律叠加：形状交替 + 内线递增。校招图形题常考复合规律。'},
+ {m:'L',t:'"所有 A 部门员工都会用 X 系统；小王会用 X 系统。" 可以推出：',o:['小王可能是 A 部门员工','小王一定是 A 部门员工','小王一定不是 A 部门员工'],c:0,
+  ex:'"会 X 系统"是 A 部门的必要条件而非充分条件，小王可能属于也可能不属于——只能推出"可能"。'},
+ {m:'P',t:'只能选一个更像你的：',o:['我更喜欢把计划精确到小时','我更喜欢留白，随机应变'],p:0},
+ {m:'P',t:'只能选一个更像你的：',o:['会议中我常是发言的那个','我习惯先听完全部意见再说'],p:1},
+ {m:'P',t:'只能选一个更像你的：',o:['完成任务比追求完美重要','打磨到满意才算完成'],p:0},
+ {m:'P',t:'只能选一个更像你的：',o:['我对批评敏感但恢复快','我对批评钝感但记得久'],p:0},
+ {m:'S',t:'你入职第一周，带教导师让你独立对接一个客户，但你还不熟悉流程。最优做法是：',o:['先自己梳理流程卡点，带着具体问题快速请教导师后再对接','硬着头皮直接对接，边做边学','请导师全程带着做','推说还没准备好'],c:0,sc:[3,1,2,0],
+  ex:'大厂阅卷逻辑：A（主动+求助平衡）> C（稳妥但被动）> B（风险自负）> D（回避）。校招 SJT 最优解几乎永远是"带着思考的求助"。'},
+ {m:'S',t:'你发现明天要汇报的数据表里有一处关键数字算错了，现在已下班。最优做法是：',o:['立即修正数据并同步给直属上级，说明影响和修正结果','先不改，明早提前到公司处理','汇报时口头说明数据有小问题'],c:0,sc:[3,2,1,0],
+  ex:'A 体现"发现即修正 + 主动透明"；B 是被动等待；C 是把风险留到汇报现场——大厂视角里最减分。'},
+];
+  function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+
+let qi=0,answers=new Array(QS.length).fill(-1),timerId=null,tLeft=0;
+const $=id=>document.getElementById(id);
+const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');};
+const hide=id=>$(id).classList.remove('on');
+$('ticket').textContent='CT-'+String(Math.floor(1000+Math.random()*9000));
+
+function beginExam(){show('count');let n=3;$('bigCount').textContent=n;
+  const iv=setInterval(()=>{n--;if(n>0){$('bigCount').textContent=n;$('bigCount').style.animation='none';void $('bigCount').offsetWidth;$('bigCount').style.animation='';}
+  else{clearInterval(iv);qi=0;answers=new Array(QS.length).fill(-1);show('quiz');render();}},900);}
+function render(){
+  const q=QS[qi],mod=MODS[q.m];
+  $('mod').textContent=q.m+'-'+String(qi+1).padStart(2,'0');
+  $('pfill').style.width=(qi/QS.length*100)+'%';$('pnum').textContent=(qi+1)+'/'+QS.length;
+  $('qtag').textContent='MODULE // '+mod.n+(mod.t?' · LIMITED '+mod.t+'s':' · NO LIMIT');
+  $('qtext').innerHTML=q.t;$('opts').innerHTML='';
+  q.o.forEach((o,i)=>{const d=document.createElement('div');
+    d.className='opt'+(answers[qi]===i?' sel':'');d.innerHTML='<span class="tag mono">'+String.fromCharCode(65+i)+'</span><span>'+o+'</span>';
+    d.onclick=()=>{answers[qi]=i;d.parentElement.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');
+      setTimeout(()=>{qi<QS.length-1?(qi++,render()):askSubmit();},240);};
+    $('opts').appendChild(d);});
+  clearInterval(timerId);
+  if(mod.t>0){$('timer').classList.add('on');tLeft=mod.t;$('tfill').style.width='100%';$('tnum').textContent=tLeft+'s';
+    timerId=setInterval(()=>{tLeft--;$('tfill').style.width=(tLeft/mod.t*100)+'%';$('tnum').textContent=tLeft+'s';
+      if(tLeft<=0){clearInterval(timerId);if(answers[qi]<0)answers[qi]=-2;qi<QS.length-1?(qi++,render()):askSubmit();}},1000);}
+  else{$('timer').classList.remove('on');}
+}
+function askSubmit(){
+  const done=answers.filter(a=>a>=0).length;
+  $('subInfo').textContent='ANSWERED '+done+'/'+QS.length;
+  show('submit');
+}
+function grade(){clearInterval(timerId);show('grading');setTimeout(()=>{calc();showReport();},2200);}
+function mockPay(){if(typeof showResult==='function')showResult();else if(typeof showReport==='function')showReport();}
+let RES=null;
+function calc(){
+  const mods={};
+  Object.keys(MODS).forEach(m=>{
+    const idx=QS.map((q,i)=>q.m===m?i:-1).filter(i=>i>=0);
+    if(MODS[m].t>0){const ok=idx.filter(i=>answers[i]===QS[i].c).length;mods[m]=Math.round(ok/idx.length*100);}
+    else{const ok=idx.filter(i=>answers[i]>=0).length;mods[m]=Math.round(ok/idx.length*100);}
+  });
+  const ability=['V','N','L'].reduce((a,m)=>a+mods[m],0)/3;
+  const pct=Math.max(15,Math.min(97,Math.round(ability*0.6+mods.P*0.15+mods.S*0.25)));
+  const weakest=['V','N','L'].reduce((a,b)=>mods[a]<mods[b]?a:b);
+  RES={mods,pct,weakest};
+}
+function showReport(){__psyHookComplete({test_code:'xzcp',source:'autumn-sku'});
+  const {mods,pct,weakest}=RES;
+  $('repId').textContent=$('ticket').textContent.replace('CT-','');
+  $('rPct').textContent='P'+pct;$('rBeat').textContent=pct;
+  $('rPass').textContent=Math.min(95,Math.round(pct*0.93))+'%';
+  $('mods').innerHTML=Object.entries(MODS).map(([m,v])=>
+    '<div class="modb'+(m===weakest?' weak':'')+'"><b>'+(m==='P'?(mods.P>=100?'✓':mods.P):(m==='S'?mods.S:mods[m]))+'</b><span>'+v.n+'</span></div>').join('');
+  $('rDiag').innerHTML='你的能力三模块（言语/数字/逻辑）平均 <b>'+Math.round((mods.V+mods.N+mods.L)/3)+'</b> 分，情境判断 <b>'+mods.S+'</b> 分。'+
+    (pct>=70?'整体处于<b>安全通过区间</b>，保持题感即可。':pct>=50?'处于<b>边缘区间</b>，两周专项训练可稳定过线。':'当前<b>低于常用通过线</b>，建议立即启动系统刷题。');
+  const WN={V:'言语推理',N:'数字运算',L:'逻辑推理'};
+  $('rFix').innerHTML='典型失分集中在<b>'+WN[weakest]+'</b>。已为你生成 8 题专项练习集，预计 2 小时训练可提升 10-15 分。';
+  let rv='';
+  QS.forEach((q,i)=>{if(q.c===undefined)return;
+    const right=answers[i]===q.c;const pick=answers[i]>=0?String.fromCharCode(65+answers[i]):'未答(超时)';
+    rv+='<div class="rq">'+(right?'✅':'❌')+' ['+q.m+'] '+q.t.slice(0,26)+'…　你的答案：'+pick+(right?'':'　正确：'+String.fromCharCode(65+q.c))+'</div>'+
+        '<div class="ra">'+q.ex+'</div>';});
+  $('rReview').innerHTML=rv||'<div class="ra">能力题全部正确，无需解析。</div>';
+  show('result');window.scrollTo(0,0);
+}
+</script>
+
+<script>window.__PSY_TEST_CODE__ = "xzcp";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+
+</body>
+</html>

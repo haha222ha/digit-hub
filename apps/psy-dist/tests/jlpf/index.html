@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>简历竞争力体检报告 · HR 视角 7 秒</title>
+<style>
+  :root{--teal:#0f766e;--teal2:#14b8a6;--mist:#f0fdfa;--warn:#f97316;--ink:#1f2937;--grey:#334155;}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:#134e4a;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+  .phone{width:100%;max-width:414px;height:100dvh;max-height:896px;position:relative;overflow:hidden;background:linear-gradient(180deg,#0f766e,#14b8a6 320px,#f0fdfa 320px);box-shadow:0 0 60px rgba(15,118,110,.4);}
+  .screen{position:absolute;insect:0;inset:0;display:none;flex-direction:column;}
+  .screen.on{display:flex;animation:fadeIn .4s;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  /* 落地页 */
+  #landing{align-items:center;justify-content:center;text-align:center;padding:36px;color:#fff;}
+  .hero7{font-size:64px;}
+  .l1{font-size:24px;font-weight:800;margin-top:20px;letter-spacing:1px;}
+  .l2{font-size:13.5px;opacity:.92;margin-top:12px;line-height:1.9;}
+  .pill{margin-top:20px;background:rgba(255,255,255,.15);font-size:12px;padding:6px 18px;border-radius:99px;}
+  .pill b{color:#5eead4;}
+  .btn-go{margin-top:32px;background:#fff;color:var(--teal);font-size:17px;font-weight:800;padding:15px 48px;border:none;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.25);cursor:pointer;transition:transform .15s;}
+  .btn-go:active{transform:scale(.95);}
+  .foot{position:absolute;bottom:16px;font-size:10.5px;color:rgba(255,255,255,.55);width:100%;text-align:center;}
+
+  /* 答题 */
+  #quiz{background:#f0fdfa;}
+  .qtop{padding:14px 18px 6px;background:linear-gradient(180deg,#0f766e,#0f766e);display:flex;align-items:center;gap:12px;}
+  .back{color:#99f6e4;font-size:20px;cursor:pointer;padding:4px 8px;}
+  .back.off{visibility:hidden;}
+  .pbar{flex:1;height:5px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden;}
+  .pfill{height:100%;width:0;background:#5eead4;transition:width .4s;}
+  .pnum{color:#99f6e4;font-size:12px;font-weight:700;min-width:40px;text-align:right;}
+  .dept{background:#0f766e;padding:8px 22px 14px;color:#ccfbf1;font-size:11.5px;letter-spacing:1px;}
+  .dept b{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:#fff;}
+  .qbody{flex:1;display:flex;flex-direction:column;justify-content:center;padding:6px 22px 24px;overflow-y:auto;}
+  .qtext{color:var(--grey);font-size:18px;font-weight:700;line-height:1.6;margin-bottom:20px;}
+  .opt{background:#fff;border:1.5px solid #ccfbf1;color:#374151;border-radius:13px;padding:13px 16px;font-size:14px;margin-bottom:10px;cursor:pointer;transition:all .16s;display:flex;justify-content:space-between;align-items:center;}
+  .opt .box{width:18px;height:18px;border:1.5px solid #99cbd4;border-radius:4px;flex-shrink:0;position:relative;}
+  .opt.sel{border-color:var(--teal);background:#f0fdfa;color:var(--teal);font-weight:600;}
+  .opt.sel .box{background:var(--teal);border-color:var(--teal);}
+  .opt.sel .box::after{content:"✓";color:#fff;font-size:12px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  .opt:active{transform:scale(.98);}
+
+  /* 计算页 */
+  #calc{align-items:center;justify-content:center;text-align:center;background:#0f766e;color:#fff;}
+  .stamp{width:130px;height:130px;border:4px solid #f87171;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#f87171;font-size:26px;font-weight:800;transform:rotate(-14deg);opacity:0;animation:stamp .5s 2.2s forwards;letter-spacing:2px;}
+  @keyframes stamp{0%{opacity:0;transform:rotate(-14deg) scale(2.2);}70%{opacity:1;transform:rotate(-14deg) scale(.94);}100%{opacity:1;transform:rotate(-14deg) scale(1);}}
+  .scan{width:230px;height:170px;background:#fff;border-radius:12px;position:relative;overflow:hidden;margin-bottom:34px;}
+  .scan::after{content:"";position:absolute;left:0;right:0;height:34px;background:linear-gradient(180deg,transparent,rgba(20,184,166,.45),transparent);animation:scanmove 1.1s linear 2;}
+  @keyframes scanmove{from{top:-34px;}to{top:170px;}}
+  .scan .lines{padding:18px;}
+  .scan .lines i{display:block;height:8px;background:#e2e8f0;border-radius:3px;margin-bottom:10px;}
+  .calc-t{font-size:14px;letter-spacing:2px;opacity:.9;}
+
+  /* 付费墙 */
+  #paywall{align-items:center;justify-content:center;text-align:center;padding:34px;background:#f0fdfa;}
+  .pay-card{background:#fff;border-radius:22px;padding:32px 26px;width:100%;max-width:320px;box-shadow:0 14px 40px rgba(15,118,110,.18);}
+  .pay-card h3{font-size:19px;color:var(--ink);}
+  .pay-card p{font-size:13px;color:#6b7280;line-height:1.8;margin-top:8px;}
+  .price-big{margin:18px 0;color:var(--teal);font-size:38px;font-weight:800;}
+  .price-big small{font-size:16px;}
+  .btn-pay{width:100%;background:var(--teal);color:#fff;font-size:16px;font-weight:700;padding:14px;border:none;border-radius:99px;cursor:pointer;}
+  .btn-free{margin-top:12px;background:none;border:none;color:#94a3b8;font-size:12px;text-decoration:underline;cursor:pointer;}
+
+  /* 结果页 */
+  #result{overflow-y:auto;-webkit-overflow-scrolling:touch;background:#f0fdfa;}
+  .r-hero{background:linear-gradient(180deg,#0f766e,#14b8a6);padding:32px 24px 22px;text-align:center;color:#fff;}
+  .r-hero .cap{font-size:12px;letter-spacing:3px;opacity:.85;}
+  .r-big{font-size:70px;font-weight:800;line-height:1.15;font-family:DIN Alternate,sans-serif;}
+  .r-big small{font-size:26px;}
+  .r-grade{display:inline-block;background:#fff;color:var(--teal);font-weight:800;font-size:14px;padding:5px 22px;border-radius:99px;margin-top:2px;}
+  .r-tagline{font-size:12.5px;margin-top:10px;opacity:.95;}
+  .radar-wrap{background:#fff;margin:16px 18px;border-radius:18px;padding:18px;box-shadow:0 8px 26px rgba(15,118,110,.1);text-align:center;}
+  .radar-wrap h4{font-size:14.5px;color:var(--ink);margin-bottom:4px;}
+  .radar-wrap .sub{font-size:11.5px;color:#64748b;}
+  .rpoly{transition:all 1.2s cubic-bezier(.2,.8,.2,1);}
+  .card{margin:14px 18px;background:#fff;border-radius:18px;padding:19px;box-shadow:0 8px 26px rgba(15,118,110,.08);}
+  .card h4{font-size:14.5px;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .card p{font-size:13px;color:#475569;line-height:1.9;}
+  .steps{margin-top:12px;background:#fff7ed;border-radius:12px;padding:13px 15px;font-size:12.5px;color:#7c2d12;line-height:1.9;}
+  .steps b{color:#c2410c;}
+  .upsell{display:block;margin-top:14px;text-align:center;background:var(--teal);color:#fff;border-radius:99px;padding:12px;font-size:13.5px;font-weight:700;text-decoration:none;}
+  .acts{padding:4px 18px 10px;display:grid;gap:10px;}
+  .btn-share{background:var(--teal);border:none;border-radius:99px;padding:14px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;}
+  .btn-again{background:#fff;border:1px solid #ccfbf1;border-radius:99px;padding:12px;color:var(--teal);font-size:13px;cursor:pointer;}
+  .r-foot{padding:4px 30px 26px;text-align:center;font-size:10.5px;color:#94a3b8;}
+
+  /* 海报 */
+  #poster{align-items:center;justify-content:center;background:rgba(15,118,110,.6);backdrop-filter:blur(4px);}
+  .poster-card{width:86%;max-width:340px;background:linear-gradient(165deg,#0f766e,#134e4a);border:2px solid #5eead4;border-radius:22px;padding:28px 22px;text-align:center;color:#fff;}
+  .poster-card .cap{font-size:11px;letter-spacing:3px;opacity:.8;}
+  .poster-card .big{font-size:58px;font-weight:800;color:#5eead4;}
+  .poster-card .grade{font-size:15px;font-weight:700;margin-top:4px;}
+  .poster-card .beat{font-size:11.5px;opacity:.85;margin-top:8px;}
+  .qr{width:90px;height:90px;margin:16px auto 4px;background:repeating-conic-gradient(#5eead4 0 25%,transparent 0 50%) 0 0/15px 15px;border:6px solid #fff;border-radius:8px;}
+  .qr-tip{font-size:10.5px;opacity:.8;}
+  .poster-close{margin-top:22px;background:none;border:1px solid rgba(94,234,212,.5);color:#5eead4;border-radius:99px;padding:9px 30px;font-size:13px;cursor:pointer;}
+
+  body.page-disabled{pointer-events:none;opacity:.65;}
+</style>
+
+  <!-- 引入安全工具库（必须在head中尽早加载） -->
+  <script src="/static/js/test-security.js"></script>
+</head>
+<body>
+<div class="phone">
+
+  <div class="screen on" id="landing">
+    <div class="hero7">📋</div>
+    <div class="l1">7 秒</div>
+    <div class="l2">这是 HR 看你简历的时间<br>18 个问题，还原这 7 秒里 TA 脑中闪过的判断</div>
+    <div class="pill">本周已体检 <b>2,931</b> 份简历 · 5 个科室</div>
+    <button class="btn-go" id="start-btn">开始测试</button>
+    <div class="foot">模拟 HR 评估逻辑 · 结果仅供求职参考</div>
+  </div>
+
+  <div class="screen" id="quiz">
+    <div class="qtop">
+      <div class="back off" id="backBtn" onclick="prevQ()">←</div>
+      <div class="pbar"><div class="pfill" id="pfill"></div></div>
+      <div class="pnum" id="pnum">1/18</div>
+    </div>
+    <div class="dept" id="dept"></div>
+    <div class="qbody">
+      <div class="qtext" id="qtext"></div>
+      <div id="opts"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="calc">
+    <div class="scan"><div class="lines"><i style="width:70%"></i><i></i><i style="width:85%"></i><i style="width:60%"></i><i></i><i style="width:75%"></i><i style="width:45%"></i></div></div>
+    <div class="calc-t" id="calcT">五科室报告汇总中</div>
+    <div class="stamp">已 检</div>
+  </div>
+
+  <div class="screen" id="result">
+    <div class="r-hero">
+      <div class="cap">简历竞争力体检报告</div>
+      <div class="r-big"><span id="rScore">72</span><small>分</small></div>
+      <div class="r-grade" id="rGrade">B+ · 有亮点但被表达拖累</div>
+      <div class="r-tagline" id="rTag">超过了 64% 的体检者</div>
+    </div>
+    <div class="radar-wrap">
+      <h4>五科室雷达</h4>
+      <div class="sub" id="weakTip"></div>
+      <svg id="radar" width="220" height="185" viewBox="0 0 220 185"></svg>
+    </div>
+    <div class="card">
+      <h4>🔎 主诊结论</h4>
+      <p id="rDiag"></p>
+      <div class="steps" id="rSteps"></div>
+      <p class="upsell" style="font-size:12px;color:#6b7280;margin-top:12px">完整报告仅供娱乐参考 · 非求职承诺</p>
+    </div>
+    <div class="acts">
+      <button class="btn-share" onclick="showPoster()">📤 发给同学，对比体检分数</button>
+      <button class="btn-again" onclick="location.reload()">重新体检</button>
+    </div>
+    <div class="r-foot">已检 21,307 份 · 模拟 HR 评估逻辑，仅供求职参考</div>
+  </div>
+
+  <div class="screen" id="poster">
+    <div class="poster-card">
+      <div class="cap">我的简历体检报告</div>
+      <div class="big" id="pScore">72<span style="font-size:20px">分</span></div>
+      <div class="grade" id="pGrade">B+ · 有亮点但被表达拖累</div>
+      <div class="beat" id="pBeat">超过了 64% 的体检者 · 你的呢？</div>
+      <div class="qr"></div>
+      <div class="qr-tip">扫码给简历做个体检 · 7 秒的事</div>
+    </div>
+    <button class="poster-close" onclick="hide('poster')">关闭</button>
+  </div>
+
+</div>
+<script>
+const DEPTS=[
+ {n:'硬件科',d:'学历 · 实习 · 证书 · 技能',qs:[1,2,3,4],w:.25},
+ {n:'表达科',d:'量化 · 动词 · STAR · 排版',qs:[5,6,7,8,9],w:.25},
+ {n:'差异科',d:'作品 · 竞赛 · 空白期',qs:[10,11,12],w:.20},
+ {n:'匹配科',d:'定制 · 求职信 · 渠道',qs:[13,14,15],w:.20},
+ {n:'AI 科',d:'AI 优化 · ATS 关键词',qs:[16,17,18],w:.10},
+];
+const QS=[
+ {t:'实习经历有几段？',o:['2 段及以上大厂 / 知名企业','1-2 段普通实习','只有校内项目 / 兼职','零经历'],s:[100,78,55,35]},
+ {t:'证书情况（四六级/教资/CPA/软考等）？',o:['目标岗位硬性证书已到手','六级 + 通用证书','只有四级','无证书'],s:[100,80,62,45]},
+ {t:'技能栏与目标 JD 的重合度？',o:['JD 关键词 80%+ 都能写','覆盖一半左右','写得不少但对口的少','没研究过 JD'],s:[100,75,55,40]},
+ {t:'院校专业（自评对 HR 第一眼的加分）？',o:['目标行业目标院校','重点院校','普通院校','跨行跨专业'],s:[100,85,65,55]},
+ {t:'经历描述里有数字吗？（如"提升30%""服务500人"）',o:['几乎每条都有量化结果','一半左右有','个别有','全是"负责…完成…"'],s:[100,78,58,40]},
+ {t:'动词的使用（开头第一个词）？',o:['主导 / 搭建 / 重构 这类强动词','参与 / 协助 / 配合','负责 / 完成','帮忙 / 做了'],s:[100,70,62,45]},
+ {t:'STAR 结构（情境-任务-行动-结果）？',o:['每条经历都体现闭环','重点项目有','听说过没写过','不知道 STAR'],s:[100,80,55,40]},
+ {t:'简历篇幅？',o:['一页纸，信息密度刚好','一页半','两页','三页起步 / 半页都不到'],s:[100,72,58,40]},
+ {t:'排版是？',o:['专业模板，层次分明','干净但朴素','五颜六色 / 花字','纯文字裸排'],s:[95,78,50,42]},
+ {t:'有拿得出手的项目 / 作品集吗？',o:['有链接可点开的作品','有项目无作品集','只有课程作业','没有项目'],s:[100,75,55,40]},
+ {t:'竞赛 / 奖项？',o:['省级以上获奖','校级 / 行业赛入围','参与过没获奖','无'],s:[100,75,60,48]},
+ {t:'空白期（gap）有吗，怎么处理的？',o:['无空白期','有，但写了自学 / 考证 / 项目','有，没解释','空白期较长'],s:[95,80,55,50]},
+ {t:'一份简历投所有岗，还是按岗定制？',o:['每类岗位单独定制','准备了两三版','基本一版通投','海投不看不改'],s:[100,82,55,40]},
+ {t:'求职信 / 自我评价是？',o:['针对公司写，有具体认知','通用模板改名字','一句"吃苦耐劳学习能力强"','没写'],s:[95,65,48,50]},
+ {t:'投递渠道策略？',o:['官网 + 内推 + 校招平台分层投','主要靠内推','只用一个平台海投','随机投'],s:[100,85,58,42]},
+ {t:'用过 AI 优化简历吗？',o:['用 AI 打磨过表达并人工校对','让 AI 全文生成直接用','没用过'],s:[100,60,55]},
+ {t:'关键词会被机器筛（ATS）到吗？',o:['研究过 JD 关键词并埋入','听说过没操作','不知道 ATS 是什么'],s:[100,65,50]},
+ {t:'最近一次改简历是什么时候？',o:['本周，投递反馈驱动迭代','这个月','三个月前','入学时写的一直没动'],s:[95,78,55,38]},
+];
+  function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+
+const GRADES=[
+ {min:88,g:'S',tag:'S 级 · HR 眼中的白月光',diag:'你的简历几乎没有短板，HR 的 7 秒在你这里会变成 30 秒的欣赏。你缺的不是简历，是投出去的勇气。',steps:'✅ 保持版本迭代 ✅ 冲刺更高梯队公司 ✅ 开始准备面试叙事'},
+ {min:75,g:'A',tag:'A 级 · 差一口气',diag:'整体优秀，但有一个科室的细节在消耗你的通过率。改对这一处，回复率通常能上一个台阶。',steps:'✅ 定位雷达最短轴 ✅ 两周内针对性修复 ✅ 用 A/B 投递验证效果'},
+ {min:60,g:'B',tag:'B 级 · 有料但没写好',diag:'你不缺经历，缺表达。你的素材放在 S 级模板和强动词体系里，会是完全不同的简历。',steps:'✅ 每条经历补一个数字 ✅ 把"参与"换成"主导" ✅ 顶部加 3 行个人摘要'},
+ {min:0,g:'C',tag:'C 级 · 从结构重建',diag:'地基阶段——别急着投递。先用两周把结构和素材打好，你的通过率曲线会从这时候才开始上扬。',steps:'✅ 找一份 S 级模板做骨架 ✅ 用 STAR 重写 3 段核心经历 ✅ 完成后再开始投递'},
+];
+let qi=0,answers=new Array(18).fill(-1);
+const $=id=>document.getElementById(id);
+const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');};
+const hide=id=>$(id).classList.remove('on');
+document.querySelector('.btn-go').onclick=()=>{qi=0;answers=new Array(18).fill(-1);show('quiz');render();};
+function deptOf(n){return DEPTS.find(d=>d.qs.includes(n));}
+function render(){
+  const q=QS[qi],dep=deptOf(qi+1);
+  $('pfill').style.width=(qi/18*100)+'%';$('pnum').textContent=(qi+1)+'/18';
+  $('dept').innerHTML='<b>🏥 '+dep.n+'</b><span style="opacity:.75">　'+dep.d+'</span>';
+  $('qtext').textContent=q.t;$('opts').innerHTML='';
+  q.o.forEach((o,i)=>{const d=document.createElement('div');
+    d.className='opt'+(answers[qi]===i?' sel':'');d.innerHTML='<span>'+o+'</span><span class="box"></span>';
+    d.onclick=()=>{answers[qi]=i;d.parentElement.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');
+      setTimeout(()=>{qi<17?(qi++,render()):goCalc();},230);};
+    $('opts').appendChild(d);});
+  $('backBtn').classList.toggle('off',qi===0);
+}
+function prevQ(){if(qi>0){qi--;render();}}
+function goCalc(){$('pfill').style.width='100%';show('calc');
+  const steps=[['硬件科报告生成',500],['表达科报告生成',1000],['差异科报告生成',1500],['匹配科报告生成',2000],['AI 科报告生成',2500]];
+  steps.forEach(([t,d])=>setTimeout(()=>{$('calcT').textContent=t;},d));
+  setTimeout(()=>{calc();showResult();},3400);
+}
+let RES=null;
+function calc(){
+  const dims=DEPTS.map(d=>{const vs=d.qs.map(n=>QS[n-1].s[answers[n-1]]);return{n:d.n,v:vs.reduce((a,b)=>a+b,0)/vs.length};});
+  const score=Math.round(dims.reduce((a,d,i)=>a+d.v*DEPTS[i].w,0));
+  const beat=Math.min(97,Math.round(score*0.9));
+  RES={dims,score,beat,grade:GRADES.find(g=>score>=g.min)};
+}
+function mockPay(){if(typeof showResult==='function')showResult();else if(typeof showReport==='function')showReport();}
+function pt(cx,cy,r,i,n,a0){const ang=a0+i*2*Math.PI/n;return[cx+r*Math.cos(ang),cy+r*Math.sin(ang)];}
+function showResult(){__psyHookComplete({test_code:'jlpf',source:'autumn-sku'});
+  const {dims,score,beat,grade}=RES;
+  $('rScore').textContent=score;$('rGrade').textContent=grade.tag;$('rTag').textContent='超过了 '+beat+'% 的体检者';
+  const weak=dims.reduce((a,b)=>a.v<b.v?a:b);
+  $('weakTip').textContent='最短的一根轴：'+weak.n+'（'+Math.round(weak.v)+'分）';
+  drawRadar(dims);
+  $('rDiag').textContent=grade.diag;
+  $('rSteps').innerHTML='<b>3 步修复：</b><br>'+grade.steps;
+  $('pScore').innerHTML=score+'<span style="font-size:20px">分</span>';
+  $('pGrade').textContent=grade.tag;$('pBeat').textContent='超过了 '+beat+'% 的体检者 · 你的呢？';
+  show('result');window.scrollTo(0,0);
+}
+function drawRadar(dims){
+  const cx=110,cy=95,R=70,n=dims.length,a0=-Math.PI/2;
+  let s='';
+  [1,.66,.33].forEach(k=>{const ps=dims.map((_,i)=>pt(cx,cy,R*k,i,n,a0).map(v=>v.toFixed(1)).join(',')).join(' ');
+    s+='<polygon points="'+ps+'" fill="none" stroke="#d7e7e5" stroke-width="1"/>';});
+  dims.forEach((d,i)=>{const[x,y]=pt(cx,cy,R+16,i,n,a0);
+    s+='<text x="'+x+'" y="'+(y+3)+'" text-anchor="middle" font-size="9.5" fill="#475569">'+d.n.replace('科','')+'</text>';
+    const[tx,ty]=pt(cx,cy,R+2,i,n,a0);});
+  const ps=dims.map((_,i)=>pt(cx,cy,4,i,n,a0).map(v=>v.toFixed(1)).join(',')).join(' ');
+  s+='<polygon id="rp" class="rpoly" points="'+ps+'" fill="rgba(15,118,110,.30)" stroke="#0f766e" stroke-width="2"/>';
+  dims.forEach((d,i)=>{const[x,y]=pt(cx,cy,R,i,n,a0);s+='<circle cx="'+x+'" cy="'+y+'" r="2.5" fill="#0f766e"/>';});
+  $('radar').innerHTML=s;
+  setTimeout(()=>{const pts=dims.map((d,i)=>pt(cx,cy,R*Math.max(.08,d.v/100),i,n,a0).map(v=>v.toFixed(1)).join(',')).join(' ');
+    $('rp').setAttribute('points',pts);},80);
+}
+function showPoster(){show('poster');}
+</script>
+
+<script>window.__PSY_TEST_CODE__ = "jlpf";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+
+</body>
+</html>

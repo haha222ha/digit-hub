@@ -1,6 +1,6 @@
 {
   "source": "digit-hub/packages/psy-dist/tests-catalog.json",
-  "total": 110,
+  "total": 115,
   "url_pattern": {
     "static_test": "/tests/{test_code}/index.html",
     "distribution_link": "/test/{test_code}/{token}"
@@ -883,6 +883,46 @@
       "name": "牛来也 · 成长原型测",
       "questions": 20,
       "duration_min": 5,
+      "hot": true,
+      "dual_perspective": false
+    },
+    {
+      "code": "ofpr",
+      "name": "秋招 offer 概率测算",
+      "questions": 12,
+      "duration_min": 3,
+      "hot": true,
+      "dual_perspective": false
+    },
+    {
+      "code": "jlpf",
+      "name": "简历竞争力评分",
+      "questions": 18,
+      "duration_min": 5,
+      "hot": true,
+      "dual_perspective": false
+    },
+    {
+      "code": "slpz",
+      "name": "考公考研大厂留学 · 四路径适配",
+      "questions": 24,
+      "duration_min": 7,
+      "hot": true,
+      "dual_perspective": false
+    },
+    {
+      "code": "xzcp",
+      "name": "求职性格测评 · 校招练习版",
+      "questions": 36,
+      "duration_min": 10,
+      "hot": true,
+      "dual_perspective": false
+    },
+    {
+      "code": "irms",
+      "name": "i人面试生存指南",
+      "questions": 10,
+      "duration_min": 3,
       "hot": true,
       "dual_perspective": false
     }

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>考公 · 考研 · 大厂 · 留学 · 四路径适配测试</title>
+<style>
+  :root{--night:#1e1b4b;--yan:#8b5cf6;--chang:#0ea5e9;--gong:#f59e0b;--liu:#10b981;}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:#11101f;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+  .phone{width:100%;max-width:414px;height:100dvh;max-height:896px;position:relative;overflow:hidden;background:linear-gradient(180deg,#16132e 0%,#1e1b4b 45%,#262158 100%);box-shadow:0 0 60px rgba(0,0,0,.6);}
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;}
+  .screen.on{display:flex;animation:fadeIn .4s;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  /* 落地页 */
+  #landing{align-items:center;justify-content:center;text-align:center;padding:34px;}
+  .cross{font-size:74px;animation:sway 4s ease-in-out infinite;}
+  @keyframes sway{0%,100%{transform:rotate(-6deg);}50%{transform:rotate(6deg);}}
+  .l1{color:#fff;font-size:24px;font-weight:800;margin-top:22px;line-height:1.5;}
+  .l1 .hl{background:linear-gradient(90deg,#8b5cf6,#0ea5e9,#f59e0b,#10b981);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .l2{color:#a5b0e8;font-size:13.5px;margin-top:12px;line-height:1.9;}
+  .pill{margin-top:20px;color:#8f9ad6;font-size:12px;background:rgba(255,255,255,.07);padding:6px 18px;border-radius:99px;}
+  .pill b{color:#fff;}
+  .btn-go{margin-top:30px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;font-size:17px;font-weight:800;padding:15px 46px;border:none;border-radius:99px;box-shadow:0 8px 26px rgba(139,92,246,.5);cursor:pointer;transition:transform .15s;}
+  .btn-go:active{transform:scale(.95);}
+  .foot{position:absolute;bottom:16px;font-size:10.5px;color:#565f8f;width:100%;text-align:center;}
+
+  /* 答题 */
+  .qtop{padding:14px 18px 6px;display:flex;align-items:center;gap:12px;}
+  .back{color:#8f9ad6;font-size:20px;cursor:pointer;padding:4px 8px;}
+  .back.off{visibility:hidden;}
+  .pbar{flex:1;height:5px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;}
+  .pfill{height:100%;width:0;background:linear-gradient(90deg,#8b5cf6,#0ea5e9);transition:width .4s;}
+  .pnum{color:#a5b0e8;font-size:12px;font-weight:700;min-width:44px;text-align:right;}
+  .dim{padding:14px 24px 0;color:#7d88c9;font-size:11px;letter-spacing:2px;}
+  .qbody{flex:1;display:flex;flex-direction:column;justify-content:center;padding:6px 22px 24px;overflow-y:auto;}
+  .qtext{color:#fff;font-size:18px;font-weight:700;line-height:1.6;margin-bottom:20px;}
+  .opt{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);color:#e2e7ff;border-radius:14px;padding:13px 16px;font-size:14px;margin-bottom:10px;cursor:pointer;transition:all .16s;}
+  .opt:active{transform:scale(.97);}
+  .opt.sel{border-color:#8b5cf6;background:rgba(139,92,246,.2);color:#ddd6fe;}
+  .sign{position:absolute;right:26px;top:86px;font-size:30px;opacity:0;transition:all .5s;pointer-events:none;}
+  .sign.show{opacity:1;transform:translateX(-14px) rotate(-8deg);}
+
+  /* 指南针计算页 */
+  #compass{align-items:center;justify-content:center;text-align:center;}
+  .comp-wrap{position:relative;width:200px;height:200px;}
+  .comp-face{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(255,255,255,.15);background:radial-gradient(circle,#262158,#1a1740);}
+  .comp-face::before{content:"N";position:absolute;top:8px;left:50%;transform:translateX(-50%);color:#8f9ad6;font-size:12px;}
+  .needle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:transform 1.6s cubic-bezier(.3,1.4,.4,1);}
+  .needle .n-red{width:4px;height:84px;background:linear-gradient(180deg,#f43f5e 50%,rgba(255,255,255,.25) 50%);border-radius:4px;}
+  .comp-cap{color:#a5b0e8;font-size:14px;margin-top:30px;letter-spacing:2px;}
+  .comp-cap b{color:#fff;}
+
+  /* 付费墙 */
+  #paywall{align-items:center;justify-content:center;text-align:center;padding:34px;}
+  .pay-card{background:#fff;border-radius:22px;padding:32px 26px;width:100%;max-width:320px;}
+  .pay-card h3{font-size:19px;color:#1f2937;}
+  .pay-card p{font-size:13px;color:#6b7280;line-height:1.8;margin-top:8px;}
+  .price-big{margin:18px 0;color:#6d28d9;font-size:38px;font-weight:800;}
+  .price-big small{font-size:16px;}
+  .btn-pay{width:100%;background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;font-size:16px;font-weight:800;padding:14px;border:none;border-radius:99px;cursor:pointer;}
+  .btn-free{margin-top:12px;background:none;border:none;color:#9ca3af;font-size:12px;text-decoration:underline;cursor:pointer;}
+
+  /* 结果页 */
+  #result{overflow-y:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#1a1740,#1e1b4b 300px,#1e1b4b);}
+  .r-hero{padding:34px 24px 8px;text-align:center;}
+  .r-hero .cap{color:#8f9ad6;font-size:12px;letter-spacing:3px;}
+  .r-main{margin-top:14px;font-size:24px;font-weight:800;color:#fff;}
+  .r-main .road{font-size:30px;}
+  .bars{padding:10px 26px 4px;}
+  .brow{display:flex;align-items:center;gap:10px;margin:13px 0;}
+  .brow .nm{width:44px;font-size:13px;color:#c7cdec;font-weight:600;}
+  .brow .track{flex:1;height:15px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;}
+  .brow .fill{height:100%;width:0;border-radius:99px;transition:width 1s cubic-bezier(.2,.8,.2,1);}
+  .brow b{width:42px;font-size:15px;color:#fff;text-align:right;}
+  .card{margin:16px 18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:19px;}
+  .card h4{font-size:14.5px;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .card p{font-size:13px;color:#c3c9ea;line-height:1.9;}
+  .card ul{margin:8px 0 0 18px;font-size:13px;color:#c3c9ea;line-height:2;}
+  .card .soothe{margin-top:10px;background:rgba(16,185,129,.1);border-radius:10px;padding:10px 13px;font-size:12.5px;color:#8ee6c6;line-height:1.8;}
+  .upsell{display:block;margin-top:14px;text-align:center;background:#f59e0b;color:#3b2205;border-radius:99px;padding:12px;font-size:13.5px;font-weight:700;text-decoration:none;}
+  .acts{padding:4px 18px 10px;display:grid;gap:10px;}
+  .btn-share{background:linear-gradient(135deg,#8b5cf6,#6d28d9);border:none;border-radius:99px;padding:14px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;}
+  .btn-again{background:rgba(255,255,255,.08);border:none;border-radius:99px;padding:12px;color:#a5b0e8;font-size:13px;cursor:pointer;}
+  .r-foot{padding:4px 30px 26px;text-align:center;font-size:10.5px;color:#565f8f;}
+
+  /* 海报 */
+  #poster{align-items:center;justify-content:center;background:rgba(10,8,26,.72);backdrop-filter:blur(4px);}
+  .poster-card{width:86%;max-width:340px;background:linear-gradient(165deg,#262158,#16132e);border:2px solid #8b5cf6;border-radius:22px;padding:28px 22px;text-align:center;color:#fff;}
+  .poster-card .cap{font-size:11px;letter-spacing:3px;color:#8f9ad6;}
+  .poster-card .big{font-size:40px;font-weight:800;margin-top:12px;}
+  .poster-card .sub{font-size:12.5px;color:#c3c9ea;margin-top:10px;line-height:1.8;}
+  .qr{width:90px;height:90px;margin:16px auto 4px;background:repeating-conic-gradient(#a78bfa 0 25%,transparent 0 50%) 0 0/15px 15px;border:6px solid #fff;border-radius:8px;}
+  .qr-tip{font-size:10.5px;color:#8f9ad6;}
+  .poster-close{margin-top:22px;background:none;border:1px solid rgba(167,139,250,.45);color:#a78bfa;border-radius:99px;padding:9px 30px;font-size:13px;cursor:pointer;}
+
+  .particle{position:fixed;width:8px;height:8px;border-radius:50%;pointer-events:none;z-index:99;animation:burst 1s ease-out forwards;}
+  @keyframes burst{from{opacity:1;transform:translate(0,0) scale(1);}to{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2);}}
+
+  body.page-disabled{pointer-events:none;opacity:.65;}
+</style>
+
+  <!-- 引入安全工具库（必须在head中尽早加载） -->
+  <script src="/static/js/test-security.js"></script>
+</head>
+<body>
+<div class="phone">
+
+  <div class="screen on" id="landing">
+    <div class="cross">🧭</div>
+    <div class="l1">别问别人怎么选<br><span class="hl">24 个问题之后，你自己就知道答案</span></div>
+    <div class="l2">考研深造 · 大厂搞钱 · 体制上岸 · 出去看看<br>四条路，只属于你的那条</div>
+    <div class="pill">本周已有 <b>2,517</b> 人找到了自己的方向</div>
+    <button class="btn-go" onclick="start()" id="start-btn">开始测试</button>
+    <div class="foot">决策参考工具 · 不构成人生建议</div>
+  </div>
+
+  <div class="screen" id="quiz">
+    <div class="qtop">
+      <div class="back off" id="backBtn" onclick="prevQ()">←</div>
+      <div class="pbar"><div class="pfill" id="pfill"></div></div>
+      <div class="pnum" id="pnum">1/24</div>
+    </div>
+    <div class="dim" id="qdim"></div>
+    <div class="qbody">
+      <div class="qtext" id="qtext"></div>
+      <div id="opts"></div>
+    </div>
+    <div class="sign" id="sign">🪧</div>
+  </div>
+
+  <div class="screen" id="compass">
+    <div class="comp-wrap">
+      <div class="comp-face"></div>
+      <div class="needle" id="needle"><div class="n-red"></div></div>
+    </div>
+    <div class="comp-cap" id="compCap">指南针校准中<b>…</b></div>
+  </div>
+
+  <div class="screen" id="result">
+    <div class="r-hero">
+      <div class="cap">你的四路径适配度</div>
+      <div class="r-main" id="rMain"></div>
+    </div>
+    <div class="bars" id="bars"></div>
+    <div class="card">
+      <h4>📍 为什么是你</h4>
+      <ul id="rWhy"></ul>
+    </div>
+    <div class="card">
+      <h4>🫂 关于你的最低分路径</h4>
+      <div class="soothe" id="rSoothe"></div>
+    </div>
+    <div class="card">
+      <h4>🎒 出发装备</h4>
+      <p id="rPack"></p>
+      <p class="upsell" style="font-size:12px;color:#6b7280;margin-top:12px">完整报告仅供娱乐参考 · 非求职承诺</p>
+    </div>
+    <div class="acts">
+      <button class="btn-share" onclick="showPoster()">🗺️ 把这张地图发给纠结的朋友</button>
+      <button class="btn-again" onclick="location.reload()">重新导航</button>
+    </div>
+    <div class="r-foot">已测 15,872 人 · 决策参考工具，不构成人生建议</div>
+  </div>
+
+  <div class="screen" id="poster">
+    <div class="poster-card">
+      <div class="cap">我的人生岔路地图</div>
+      <div class="big" id="pMain"></div>
+      <div class="sub" id="pSub"></div>
+      <div class="qr"></div>
+      <div class="qr-tip">扫码绘制你的地图 · 选择困难症互助会</div>
+    </div>
+    <button class="poster-close" onclick="hide('poster')">关闭</button>
+  </div>
+
+</div>
+<script>
+/* 四路径: yan=考研 chang=大厂 gong=考公 liu=留学  分值顺序 [研,厂,公,留] */
+const PATHS={
+ yan:{n:'考研',e:'🎓',c:'#8b5cf6',fill:'linear-gradient(90deg,#8b5cf6,#a78bfa)',
+  why:['你的学习耐力和应试底子，是读研最核心的入场券','你想要的是"领域纵深"而不是"快速变现"，读研恰好给这个','你的风险偏好允许你用 1-2 年换一个更高的起点'],
+  soothe:'大厂的高压快节奏和你的能量曲线不太匹配——不是能力问题，是发动机类型不同。',
+  pack:'装备：目标院校真题集 + 导师邮件模板 + 半年复习节奏表'},
+ chang:{n:'大厂',e:'🏢',c:'#0ea5e9',fill:'linear-gradient(90deg,#0ea5e9,#38bdf8)',
+  why:['你"高压反而高效"的特质，是大厂最买账的发动机类型','你偏好用结果和排名定义自己，这套激励体系适合你','你的执行力和项目上手速度，在市场化环境里溢价最高'],
+  soothe:'考研的长周期备考对你的自律模型是消耗战——你是冲刺型选手，不是马拉松型。',
+  pack:'装备：秋招时间线汇总表 + 简历竞争力体检 + 大厂测评练习'},
+ gong:{n:'考公',e:'🏛️',c:'#f59e0b',fill:'linear-gradient(90deg,#f59e0b,#fbbf24)',
+  why:['你的稳定性需求和家庭期望高度同频——考公不是退路，是最优解','你的应届身份在体制内赛道是最值钱的筹码','你的应试能力和抗压节奏，天然适配公考复习曲线'],
+  soothe:'大厂的"随时优化"文化会持续消耗你的安全感——你值得确定性更强的赛道。',
+  pack:'装备：考编信息表（日更）+ 行测刷题计划 + 申论规范词库'},
+ liu:{n:'留学',e:'✈️',c:'#10b981',fill:'linear-gradient(90deg,#10b981,#5eead4)',
+  why:['你的语言底子和"想去陌生环境"的冲动，是留学的天然燃料','你愿意用较长周期换完全不同的视野和路径','家庭的弹性支持让这条路对你的成本可控'],
+  soothe:'体制内的按章办事会让你的好奇心持续饿肚子——你需要更宽的世界。',
+  pack:'装备：选校清单 + 文书模板 + 语言冲刺计划'},
+};
+const QS=[
+ {d:'风险偏好',t:'毕业第一年，你更能接受哪种状态？',o:[['薪资高但不稳定，随时优化',[1,3,0,1]],['薪资中等但极度稳定',[1,0,3,0]],['暂时没收入，换长期筹码',[3,0,1,3]]]},
+ {d:'风险偏好',t:'家庭能给你的经济缓冲期是？',o:[['1 年以上全力支持',[2,0,1,2]],['半年内要自立',[0,2,2,0]],['毕业即要反哺家庭',[0,2,3,0]]]},
+ {d:'风险偏好',t:'「三年后的自己」你更想成为？',o:[['某领域有深度的专家',[3,1,0,2]],['手握资源的项目负责人',[0,3,1,0]],['生活安稳、离家近',[0,0,3,0]]]},
+ {d:'风险偏好',t:'对「不确定性」的真实感受？',o:[['兴奋，不确定性 = 机会',[1,3,0,2]],['可控范围能接受',[1,1,2,1]],['焦虑，我要确定性',[0,0,3,0]]]},
+ {d:'风险偏好',t:'如果第一选择失败，你的 Plan B 是？',o:[['gap 一年再来',[2,0,2,2]],['先工作再图后计',[0,3,1,0]],['没想过失败',[1,1,1,1]]]},
+ {d:'能力结构',t:'考试型任务（备考冲刺）你的历史战绩？',o:[['逆袭型选手，越到考前越强',[3,0,3,1]],['中等，靠坚持不靠爆发',[2,1,2,1]],['一听考试就头大',[0,3,0,1]]]},
+ {d:'能力结构',t:'动手做项目 / 实习的表现？',o:[['上手快，实习常被留用',[0,3,0,0]],['按部就班能完成',[1,1,1,1]],['更喜欢读文献写东西',[3,0,1,2]]]},
+ {d:'能力结构',t:'英语水平？',o:[['六级 500+ / 雅思托福已考',[1,1,0,3]],['六级飘过',[1,1,1,1]],['四级水平及以下',[1,1,2,0]]]},
+ {d:'能力结构',t:'表达能力（面试 / 答辩 / 汇报）？',o:[['场合越大越兴奋',[0,3,3,1]],['准备了就还行',[2,1,1,2]],['能写不想说',[3,0,1,1]]]},
+ {d:'能力结构',t:'自律程度？',o:[['能独立执行半年计划',[3,1,3,2]],['需要环境带节奏',[1,2,1,2]],['DDL 战士',[0,2,0,0]]]},
+ {d:'能力结构',t:'抗压能力？',o:[['高压下反而高效',[1,3,1,1]],['压力可以，别太长',[1,1,2,1]],['我要岁月静好',[1,0,3,1]]]},
+ {d:'机会成本',t:'应届生身份对你多重要？',o:[['非常重要，不能浪费',[1,2,3,1]],['重要但有弹性',[1,1,1,1]],['没概念',[1,1,1,1]]]},
+ {d:'机会成本',t:'能接受的「无收入准备期」？',o:[['1-3 个月',[0,2,1,0]],['半年 - 一年',[2,0,2,1]],['一年以上（家里支持）',[2,0,1,3]]]},
+ {d:'机会成本',t:'本科院校在目标赛道的竞争力？',o:[['够硬，直接冲',[1,3,2,1]],['一般，需要跳板',[3,1,1,3]],['劣势明显',[2,0,3,2]]]},
+ {d:'机会成本',t:'时间预算（从现在到必须出结果）？',o:[['只有这一个秋招季',[0,3,2,0]],['一年内出结果',[2,1,2,2]],['可以长期规划',[2,0,1,3]]]},
+ {d:'性格适配',t:'理想的工作日常？',o:[['做研究、读 paper、写东西',[3,0,0,2]],['开会、推进、拿结果',[0,3,1,0]],['流程清晰、按章办事',[0,0,3,0]]]},
+ {d:'性格适配',t:'对「人情世故」的态度？',o:[['擅长且不排斥',[0,2,3,0]],['能应付，但不享受',[2,1,1,1]],['极度抗拒，想靠作品说话',[3,2,0,2]]]},
+ {d:'性格适配',t:'加班与节假日的取舍？',o:[['钱到位可以卷',[0,3,0,0]],['要规律双休',[1,0,3,1]],['自由度 > 一切',[2,0,0,3]]]},
+ {d:'性格适配',t:'城市偏好？',o:[['一线 / 新一线，机会最多',[1,3,0,1]],['回家乡省会 / 地级市',[0,0,3,0]],['想去完全陌生的环境',[1,0,0,3]]]},
+ {d:'性格适配',t:'竞争欲？',o:[['要赢，排名是我的燃料',[2,3,2,1]],['和自己比就行',[2,1,1,2]],['peace，不想内卷',[0,0,3,1]]]},
+ {d:'现实约束',t:'家里的期望是？',o:[['稳定压倒一切（体制内）',[0,0,3,0]],['学历越高越好',[3,0,0,2]],['尊重我自己的选择',[1,2,1,2]]]},
+ {d:'现实约束',t:'留学预算（如考虑）？',o:[['30w+/年 无压力',[1,0,0,3]],['20-30w 咬牙可以',[1,0,0,2]],['基本没有预算',[2,2,2,0]]]},
+ {d:'现实约束',t:'婚恋 / 家庭计划对时间线的影响？',o:[['3 年内不着急',[2,2,1,2]],['希望早点稳定下来',[0,1,3,0]],['顺其自然',[1,1,1,1]]]},
+ {d:'现实约束',t:'直觉：夜深人静时你心里的天平偏向？',o:[['继续读书',[3,0,0,0]],['搞钱进大厂',[0,3,0,0]],['上岸体制内',[0,0,3,0]],['出去看看',[0,0,0,3]]]},
+];
+  function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+
+let qi=0,answers=new Array(24).fill(-1);
+const $=id=>document.getElementById(id);
+const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');};
+const hide=id=>$(id).classList.remove('on');
+function start(){qi=0;answers=new Array(24).fill(-1);show('quiz');render();}
+function render(){
+  const q=QS[qi];
+  $('pfill').style.width=(qi/24*100)+'%';$('pnum').textContent=(qi+1)+'/24';
+  $('qdim').textContent='维度 · '+q.d;
+  $('qtext').textContent=q.t;$('opts').innerHTML='';
+  q.o.forEach((o,i)=>{const d=document.createElement('div');
+    d.className='opt'+(answers[qi]===i?' sel':'');d.innerHTML='<span>'+o[0]+'</span>';
+    d.onclick=()=>{answers[qi]=i;d.parentElement.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');
+      if(q.d==='风险偏好'){$('sign').classList.add('show');setTimeout(()=>$('sign').classList.remove('show'),900);}
+      setTimeout(()=>{qi<23?(qi++,render()):goCompass();},240);};
+    $('opts').appendChild(d);});
+  $('backBtn').classList.toggle('off',qi===0);
+}
+function prevQ(){if(qi>0){qi--;render();}}
+let RES=null;
+function goCompass(){
+  show('compass');
+  const sum=[0,0,0,0];QS.forEach((q,i)=>{q.o[answers[i]][1].forEach((v,k)=>sum[k]+=v);});
+  const keys=['yan','chang','gong','liu'];
+  const maxV=Math.max(...sum),T=6;
+  const exps=sum.map(v=>Math.exp(v/T));const sExp=exps.reduce((a,b)=>a+b,0);
+  const pct=exps.map(e=>Math.round(e/sExp*100));
+  const order=keys.map((k,i)=>({k,pct:pct[i],s:sum[i]})).sort((a,b)=>b.pct-a.pct);
+  RES={order,pct,keys};
+  const caps=[['指南针校准中',400],['路径权重计算中',1100],['方向锁定',1900]];
+  caps.forEach(([t,d])=>setTimeout(()=>{$('compCap').innerHTML=t+'<b>…</b>';},d));
+  setTimeout(()=>{
+    const mainIdx=keys.indexOf(order[0].k);
+    $('needle').style.transform='rotate('+(mainIdx*90)+'deg)';
+    $('compCap').innerHTML='指南针指向 <b>'+PATHS[order[0].k].e+' '+PATHS[order[0].k].n+'</b>';
+  },2300);
+  setTimeout(()=>{showResult();},3600);
+}
+function mockPay(){if(typeof showResult==='function')showResult();else if(typeof showReport==='function')showReport();}
+function showResult(){__psyHookComplete({test_code:'slpz',source:'autumn-sku'});
+  const {order,pct,keys}=RES;
+  const main=order[0],least=order[3];
+  $('rMain').innerHTML='🧭 你的指南针指向：<span class="road" style="color:'+PATHS[main.k].c+'">'+PATHS[main.k].e+' '+PATHS[main.k].n+'</span>';
+  $('bars').innerHTML=order.map((o)=>'<div class="brow"><span class="nm">'+PATHS[o.k].n+'</span><div class="track"><div class="fill" id="bf-'+o.k+'" style="background:'+PATHS[o.k].fill+'"></div></div><b id="bp-'+o.k+'">0%</b></div>').join('');
+  show('result');window.scrollTo(0,0);
+  order.forEach((o,i)=>{setTimeout(()=>{
+    $('bf-'+o.k).style.width=o.pct+'%';$('bp-'+o.k).textContent=o.pct+'%';
+    if(i===0)burst();
+  },400+i*450);});
+  $('rWhy').innerHTML=PATHS[main.k].why.map(w=>'<li>'+w+'</li>').join('');
+  $('rSoothe').innerHTML='<b style="color:#fff">'+PATHS[least.k].e+' '+PATHS[least.k].n+'（'+least.pct+'%）</b><br>'+PATHS[least.k].soothe+' 它不是被否定了，只是和你的出厂设置错位。';
+  $('rPack').textContent=PATHS[main.k].pack;
+  $('pMain').innerHTML=PATHS[main.k].e+' '+PATHS[main.k].n+' '+main.pct+'%';
+  const second=order[1];
+  $('pSub').innerHTML='考研 '+pct[0]+'% · 大厂 '+pct[1]+'% · 考公 '+pct[2]+'% · 留学 '+pct[3]+'%<br>第二适配：'+PATHS[second.k].n+'（'+second.pct+'%）· 你呢？';
+}
+function burst(){const r=$('bars').getBoundingClientRect();
+  for(let i=0;i<20;i++){const p=document.createElement('div');p.className='particle';
+    p.style.left=(r.left+30)+'px';p.style.top=(r.top+40)+'px';
+    p.style.background=['#8b5cf6','#0ea5e9','#f59e0b','#10b981'][i%4];
+    const ang=Math.random()*Math.PI*2,dist=50+Math.random()*120;
+    p.style.setProperty('--dx',Math.cos(ang)*dist+'px');p.style.setProperty('--dy',Math.sin(ang)*dist+'px');
+    document.body.appendChild(p);setTimeout(()=>p.remove(),1000);}}
+function showPoster(){show('poster');}
+</script>
+
+<script>window.__PSY_TEST_CODE__ = "slpz";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+
+</body>
+</html>

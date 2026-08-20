@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>i 人面试生存指南 · 守护灵测试</title>
+<style>
+  :root{--milk:#fdf2f8;--purple:#c084fc;--pink:#fda4af;--mint:#5eead4;--ink:#4a3753;}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:#e9d5ff;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+  .phone{width:100%;max-width:414px;height:100dvh;max-height:896px;position:relative;overflow:hidden;background:linear-gradient(180deg,#fdf2f8 0%,#fae8ff 60%,#f5d0fe 100%);box-shadow:0 0 60px rgba(192,132,252,.35);}
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;transition:opacity .35s;}
+  .screen.on{display:flex;animation:fadeIn .4s;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  /* 落地页 */
+  #landing{align-items:center;justify-content:center;text-align:center;padding:36px;}
+  .hero{font-size:80px;animation:breathe 3s ease-in-out infinite;}
+  @keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+  .l1{color:var(--ink);font-size:25px;font-weight:800;margin-top:24px;}
+  .l2{color:#8b7196;font-size:13.5px;margin-top:10px;line-height:1.9;}
+  .pill{margin-top:20px;color:#7c5a8c;font-size:12px;background:rgba(255,255,255,.75);padding:6px 18px;border-radius:99px;}
+  .pill b{color:#a21caf;}
+  .btn-go{margin-top:32px;background:linear-gradient(135deg,#c084fc,#fda4af);color:#fff;font-size:17px;font-weight:800;padding:15px 50px;border:none;border-radius:99px;box-shadow:0 8px 24px rgba(192,132,252,.45);cursor:pointer;transition:transform .15s;}
+  .btn-go:active{transform:scale(.95);}
+  .foot{position:absolute;bottom:16px;font-size:10.5px;color:#b19abf;width:100%;text-align:center;}
+
+  /* 答题 */
+  .qtop{padding:16px 18px 8px;display:flex;align-items:center;gap:12px;}
+  .back{color:#a78bfa;font-size:20px;cursor:pointer;padding:4px 8px;}
+  .back.off{visibility:hidden;}
+  .pbar{flex:1;height:5px;background:rgba(192,132,252,.2);border-radius:99px;overflow:hidden;}
+  .pfill{height:100%;width:0;background:linear-gradient(90deg,#c084fc,#fda4af);border-radius:99px;transition:width .4s;}
+  .pnum{color:#a21caf;font-size:12px;font-weight:700;min-width:34px;text-align:right;}
+  .qbody{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 24px 30px;}
+  .qtext{color:var(--ink);font-size:19px;font-weight:700;line-height:1.6;margin-bottom:24px;min-height:60px;}
+  .opt{background:rgba(255,255,255,.8);border:1.5px solid rgba(192,132,252,.18);color:#5b4666;border-radius:16px;padding:14px 18px;font-size:14.5px;margin-bottom:11px;cursor:pointer;transition:all .18s;}
+  .opt:active{transform:scale(.97);}
+  .opt.sel{background:linear-gradient(135deg,rgba(192,132,252,.18),rgba(253,164,175,.18));border-color:var(--purple);color:#7c3aed;font-weight:600;}
+
+  /* 守护灵接近动效 */
+  #walk{align-items:center;justify-content:center;text-align:center;background:linear-gradient(180deg,#fdf2f8,#f5d0fe);}
+  .walker{font-size:60px;animation:approach 2.8s ease-in-out forwards;}
+  @keyframes approach{0%{transform:translateY(90px) scale(.25);opacity:0;}35%{opacity:1;}100%{transform:translateY(0) scale(1.25);opacity:1;}}
+  .walk-txt{color:#8b7196;font-size:14px;margin-top:36px;letter-spacing:1px;}
+  .walk-txt b{color:#a21caf;}
+
+  /* 结果页 */
+  #result{overflow-y:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#f5d0fe,#fdf2f8 300px);}
+  .r-hero{padding:34px 24px 10px;text-align:center;}
+  .spirit{font-size:86px;animation:breathe 3s ease-in-out infinite;filter:drop-shadow(0 10px 20px rgba(192,132,252,.35));}
+  .r-name{font-size:22px;font-weight:800;color:var(--ink);margin-top:10px;}
+  .r-slogan{color:#a21caf;font-size:13px;margin-top:8px;background:#fff;border-radius:99px;display:inline-block;padding:6px 20px;}
+  .r-sub{color:#6b5576;font-size:13px;line-height:1.9;padding:14px 30px 0;}
+  .card{margin:16px 18px;background:#fff;border-radius:20px;padding:20px;box-shadow:0 8px 26px rgba(192,132,252,.14);}
+  .card h4{font-size:15px;color:var(--ink);margin-bottom:12px;display:flex;gap:8px;align-items:center;}
+  .tip{display:flex;gap:12px;background:linear-gradient(135deg,#fdf4ff,#fff7ed);border-radius:14px;padding:13px 15px;font-size:13px;color:#6b5576;line-height:1.75;margin-bottom:10px;}
+  .tip .n{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#c084fc,#fda4af);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+  .rare{background:linear-gradient(135deg,#fdf2f8,#ecfeff);border-radius:14px;padding:12px 15px;font-size:12.5px;color:#7c5a8c;line-height:1.8;}
+  .rare b{color:#a21caf;}
+  .dist{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
+  .dist span{font-size:11px;background:#fdf4ff;color:#7c3aed;border-radius:99px;padding:4px 12px;}
+  .dist span.me{background:linear-gradient(135deg,#c084fc,#fda4af);color:#fff;font-weight:700;}
+  .acts{padding:6px 18px 12px;display:grid;gap:10px;}
+  .btn-share{background:linear-gradient(135deg,#c084fc,#fda4af);border:none;border-radius:99px;padding:14px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;}
+  .btn-again{background:rgba(255,255,255,.8);border:none;border-radius:99px;padding:12px;color:#8b7196;font-size:13px;cursor:pointer;}
+  .r-foot{padding:6px 30px 28px;text-align:center;font-size:10.5px;color:#b19abf;}
+
+  /* 海报 */
+  #poster{align-items:center;justify-content:center;background:rgba(74,55,83,.55);backdrop-filter:blur(4px);}
+  .poster-card{width:86%;max-width:340px;background:linear-gradient(160deg,#fdf2f8,#fae8ff 55%,#fff7ed);border:2px solid #c084fc;border-radius:24px;padding:30px 24px;text-align:center;}
+  .poster-card .cap{color:#a78bfa;font-size:11px;letter-spacing:3px;}
+  .poster-card .spirit{font-size:64px;}
+  .poster-card .type{color:var(--ink);font-size:18px;font-weight:800;}
+  .poster-card .slog{color:#a21caf;font-size:12px;margin-top:6px;}
+  .poster-card .rare2{margin-top:10px;color:#7c5a8c;font-size:11.5px;}
+  .qr{width:92px;height:92px;margin:16px auto 4px;background:repeating-conic-gradient(#7c3aed 0 25%,transparent 0 50%) 0 0/15px 15px;border:6px solid #fff;border-radius:8px;box-shadow:0 4px 14px rgba(124,58,237,.2);}
+  .qr-tip{color:#a78bfa;font-size:10.5px;}
+  .poster-close{margin-top:22px;background:none;border:1px solid rgba(124,58,237,.35);color:#7c3aed;border-radius:99px;padding:9px 30px;font-size:13px;cursor:pointer;}
+
+  body.page-disabled{pointer-events:none;opacity:.65;}
+</style>
+
+  <!-- 引入安全工具库（必须在head中尽早加载） -->
+  <script src="/static/js/test-security.js"></script>
+</head>
+<body>
+<div class="phone">
+
+  <div class="screen on" id="landing">
+    <div class="hero">🫂</div>
+    <div class="l1">i 人面试生存指南</div>
+    <div class="l2">面试前 10 分钟，你在哪？<br>A 工位假装淡定　B 洗手间深呼吸　C 楼道来回踱步<br><br>10 道题，2 分钟，领走你的面试守护灵</div>
+    <div class="pill">已有 <b>9,418</b> 只 i 人找到自己的守护灵</div>
+    <button class="btn-go" onclick="start()" id="start-btn">开始测试</button>
+    <div class="foot">仅供自我认知与娱乐 · 你已经很棒了</div>
+  </div>
+
+  <div class="screen" id="quiz">
+    <div class="qtop">
+      <div class="back off" id="backBtn" onclick="prevQ()">←</div>
+      <div class="pbar"><div class="pfill" id="pfill"></div></div>
+      <div class="pnum" id="pnum">1/10</div>
+    </div>
+    <div class="qbody">
+      <div class="qtext" id="qtext"></div>
+      <div id="opts"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="walk">
+    <div class="walker" id="walker">🐾</div>
+    <div class="walk-txt" id="walkTxt">你的面试守护灵正在接近<b>…</b></div>
+  </div>
+
+  <div class="screen" id="result">
+    <div class="r-hero">
+      <div class="spirit" id="rSpirit">🦫</div>
+      <div class="r-name" id="rName">水豚型选手</div>
+      <div class="r-slogan" id="rSlogan">「稳到让面试官怀疑你是不是不紧张」</div>
+      <div class="r-sub" id="rSub"></div>
+    </div>
+    <div class="card">
+      <h4>🎒 你的 survival 三件套</h4>
+      <div id="tips"></div>
+    </div>
+    <div class="card">
+      <h4> rarity · 守护灵图鉴</h4>
+      <div class="rare" id="rare"></div>
+      <div class="dist" id="dist"></div>
+    </div>
+    <div class="acts">
+      <button class="btn-share" onclick="showPoster()">🫂 抱抱我的守护灵 · 生成卡片</button>
+      <button class="btn-again" onclick="location.reload()">再测一次</button>
+    </div>
+    <div class="r-foot">已测 9,418 只 i 人 · 仅供自我认知娱乐</div>
+  </div>
+
+  <div class="screen" id="poster">
+    <div class="poster-card">
+      <div class="cap">我的面试守护灵</div>
+      <div class="spirit" id="pSpirit">🦫</div>
+      <div class="type" id="pType">水豚型 · 稳如老狗</div>
+      <div class="slog" id="pSlog"></div>
+      <div class="rare2" id="pRare"></div>
+      <div class="qr"></div>
+      <div class="qr-tip">扫码找到你的守护灵 · i 人不孤单</div>
+    </div>
+    <button class="poster-close" onclick="hide('poster')">关闭</button>
+  </div>
+
+</div>
+<script>
+/* 6 种守护灵: capibara水豚 hamster仓鼠 sloth树懒 hedgehog刺猬 owl猫头鹰 rabbit兔兔 */
+const SPIRITS={
+ capibara:{e:'🦫',name:'水豚型选手',slogan:'「稳到让面试官怀疑你是不是不紧张」',
+  sub:'你不是不紧张，你只是把紧张调成了静音模式。外松内紧的水豚型，最大的敌人是"看起来不够渴望"。',
+  tips:['开场主动说"我准备了三个问题想请教您"——把渴望说出口','紧张时握拳 5 秒再松开，重复 3 次（旁人看不见）','结束时说一句真心话代替标准感谢'],rare:'仅 17% 的 i 人是水豚型'},
+ hamster:{e:'🐹',name:'仓鼠型选手',slogan:'「你的备忘录就是面试圣经」',
+  sub:'准备到牙齿的仓鼠型，题库里躺着 100 道预演题。你的风险不是不会答，而是被没准备的问题打乱节奏。',
+  tips:['准备 3 个"万能故事"，任何没见过的问题都往故事上靠','每场面试留 20% 不准备——练习即兴','答题卡壳时说"让我想 3 秒"，没人会扣分'],rare:'仅 21% 的 i 人是仓鼠型'},
+ sloth:{e:'🦥',name:'树懒型选手',slogan:'「前三分钟是你的冬眠期」',
+  sub:'慢热启动的树懒型，往往在面试后半段才进入状态——可惜印象分在前三分钟就打完了。',
+  tips:['把自我介绍背到肌肉记忆，用嘴的惯性带动大脑开机','面试前 15 分钟大声朗读任意文字，预热发声系统','准备一句强开场："先说结论——我是最适合这个岗位的人，因为…"'],rare:'仅 15% 的 i 人是树懒型'},
+ hedgehog:{e:'🦔',name:'刺猬型选手',slogan:'「被问就炸毛，防御性回答正在偷走 offer」',
+  sub:'高敏防御的刺猬型，把面试官的每个追问都识别为攻击。你的答案其实很好，只是裹了一层刺。',
+  tips:['把"但是"换成"同时"，防御感立减 50%','被追问时先重复问题："您问的是…对吗"——争取 3 秒缓冲','每天对着镜子说一次：追问 = 感兴趣，不是找茬'],rare:'仅 8% 的 i 人是刺猬型（稀有！）'},
+ owl:{e:'🦉',name:'猫头鹰型选手',slogan:'「凌晨三点的自我面试」',
+  sub:'深夜复盘家猫头鹰型，每场面试后要在脑内重播 800 遍。复盘是你的超能力，也是你的睡眠杀手。',
+  tips:['复盘限时 15 分钟，写 3 条就停笔','把"我那句话是不是说错了"改成"下次我可以说什么"','面试后立刻安排一件沉浸小事（游戏/剧），抢占重播带宽'],rare:'仅 19% 的 i 人是猫头鹰型'},
+ rabbit:{e:'🐰',name:'兔兔型选手',slogan:'「面试官一个皱眉你能想一天」',
+  sub:'敏感雷达全开的兔兔型，能捕捉面试官最微小的表情变化。共情是你的天赋，过度解读是你的税。',
+  tips:['给表情信号 30 分钟保质期，过时自动清空','准备一个"已尽力"仪式：出大楼时听一首固定的歌','把敏感用对地方：面试官累了就主动说"我尽量讲简短些"——这是你的主场优势'],rare:'仅 20% 的 i 人是兔兔型'},
+};
+const QS=[
+ {t:'面试前一晚，你的状态是？',o:[['把可能问到的问题全写下来逐个背','hamster'],['心里预演 800 遍但一个字没写','rabbit'],['刷手机逃避到凌晨','sloth']]},
+ {t:'被问到"说说你的缺点"，你心里？',o:[['早准备好了标准答案','hamster'],['瞬间大脑空白三秒','rabbit'],['想说的太真实不敢说','hedgehog']]},
+ {t:'群面（无领导小组）你的真实角色？',o:[['记录 + 总结的那个人','owl'],['被迫发言，说完就后悔','hedgehog'],['能不说话就不说话','sloth']]},
+ {t:'面试官说"随便聊聊"，你的感受？',o:[['"随便"两个字让我更紧张','rabbit'],['真的随便聊，反而放松','capibara'],['疯狂分析这句话的深意','owl']]},
+ {t:'自我介绍时你的眼睛在看哪？',o:[['努力对视，眼神交流拉满','capibara'],['看眉心，假装对视','hamster'],['看桌子 / 墙角 / 任何安全区','hedgehog']]},
+ {t:'面试结束后你最常做的事？',o:[['复盘每个回答并记录','owl'],['给朋友发 60 秒语音疯狂复盘','rabbit'],['躺平，什么都不想想','sloth']]},
+ {t:'收到"面试通过"消息的 5 分钟内？',o:[['淡定回复，心里放烟花','capibara'],['原地转圈尖叫','rabbit'],['先怀疑是不是发错了','hedgehog']]},
+ {t:'面试官迟到了 10 分钟，你会？',o:[['再过一遍笔记','hamster'],['脑补是不是自己来错了时间','owl'],['观察会议室绿植并给它们命名','sloth']]},
+ {t:'视频面试你的镜头前布置？',o:[['干净白墙 + 补光灯','hamster'],['书架当背景（书是摆的）','capibara'],['whatever，能露脸就行','sloth']]},
+ {t:'许愿题：你希望面试像？',o:[['笔试——写就行不用说','sloth'],['聊天——自然发挥','capibara'],['游戏——有攻略可抄','hamster']]},
+];
+  function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+
+let qi=0,answers=new Array(10).fill(-1);
+const $=id=>document.getElementById(id);
+const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');};
+const hide=id=>$(id).classList.remove('on');
+function start(){qi=0;answers=new Array(10).fill(-1);show('quiz');render();}
+function render(){
+  $('pfill').style.width=(qi/10*100)+'%';$('pnum').textContent=(qi+1)+'/10';
+  $('qtext').textContent=QS[qi].t;$('opts').innerHTML='';
+  QS[qi].o.forEach((o,i)=>{const d=document.createElement('div');
+    d.className='opt'+(answers[qi]===i?' sel':'');d.innerHTML='<span>'+o[0]+'</span>';
+    d.onclick=()=>{answers[qi]=i;d.parentElement.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');
+      setTimeout(()=>{qi<9?(qi++,render()):goWalk();},240);};
+    $('opts').appendChild(d);});
+  $('backBtn').classList.toggle('off',qi===0);
+}
+function prevQ(){if(qi>0){qi--;render();}}
+function goWalk(){
+  const cnt={};QS.forEach((q,i)=>{const k=q.o[answers[i]][1];cnt[k]=(cnt[k]||0)+1;});
+  let best='capibara',bn=-1;Object.entries(cnt).forEach(([k,v])=>{if(v>bn){bn=v;best=k;}});
+  show('walk');$('walker').textContent=SPIRITS[best].e;$('walker').style.animation='none';void $('walker').offsetWidth;$('walker').style.animation='';
+  setTimeout(()=>{renderResult(best);show('result');window.scrollTo(0,0);},2900);
+}
+function renderResult(k){
+  const s=SPIRITS[k];
+  $('rSpirit').textContent=s.e;$('rName').textContent=s.name;$('rSlogan').textContent=s.slogan;$('rSub').textContent=s.sub;
+  $('tips').innerHTML=s.tips.map((t,i)=>'<div class="tip"><div class="n">'+(i+1)+'</div><div>'+t+'</div></div>').join('');
+  $('rare').innerHTML='🧬 '+s.rare+'<br>每只守护灵都有自己的生存智慧——<b>'+s.name.replace('选手','')+'的优势，别人学不来。</b>';
+  $('dist').innerHTML=Object.entries(SPIRITS).map(([kk,v)=>'<span class="'+(kk===k?'me':'')+'">'+v.e+' '+v.name.replace('选手','')+'</span>').join('');
+  $('pSpirit').textContent=s.e;$('pType').textContent=s.name.replace('选手','')+' · '+s.slogan.slice(1,-1).split('，')[0];
+  $('pSlog').textContent=s.slogan;$('pRare').textContent=s.rare;
+}
+function showPoster(){show('poster');}
+</script>
+
+<script>window.__PSY_TEST_CODE__ = "irms";</script>
+<script src="/static/js/link-validator.js"></script>
+<script src="/static/js/ceping-bridge.js"></script>
+
+</body>
+</html>
