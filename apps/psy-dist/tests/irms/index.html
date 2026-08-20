@@ -232,7 +232,7 @@ function renderResult(k){
   $('rSpirit').textContent=s.e;$('rName').textContent=s.name;$('rSlogan').textContent=s.slogan;$('rSub').textContent=s.sub;
   $('tips').innerHTML=s.tips.map((t,i)=>'<div class="tip"><div class="n">'+(i+1)+'</div><div>'+t+'</div></div>').join('');
   $('rare').innerHTML='🧬 '+s.rare+'<br>每只守护灵都有自己的生存智慧——<b>'+s.name.replace('选手','')+'的优势，别人学不来。</b>';
-  $('dist').innerHTML=Object.entries(SPIRITS).map(([kk,v)=>'<span class="'+(kk===k?'me':'')+'">'+v.e+' '+v.name.replace('选手','')+'</span>').join('');
+  $('dist').innerHTML=Object.entries(SPIRITS).map(([kk,v])=>'<span class="'+(kk===k?'me':'')+'">'+v.e+' '+v.name.replace('选手','')+'</span>').join('');
   $('pSpirit').textContent=s.e;$('pType').textContent=s.name.replace('选手','')+' · '+s.slogan.slice(1,-1).split('，')[0];
   $('pSlog').textContent=s.slogan;$('pRare').textContent=s.rare;
 }
