@@ -224,7 +224,15 @@ const QS=[
  {m:'S',t:'你发现明天要汇报的数据表里有一处关键数字算错了，现在已下班。最优做法是：',o:['立即修正数据并同步给直属上级，说明影响和修正结果','先不改，明早提前到公司处理','汇报时口头说明数据有小问题'],c:0,sc:[3,2,1,0],
   ex:'A 体现"发现即修正 + 主动透明"；B 是被动等待；C 是把风险留到汇报现场——大厂视角里最减分。'},
 ];
-  function __psyHookComplete(payload){if(window.__psyComplete){try{window.__psyComplete(payload||{});}catch(e){}}window.totalScore=(payload&&payload.score)||window.totalScore;}
+  function __psyHookComplete(payload){
+    if(window.__psyComplete){
+      try{
+        const ret=window.__psyComplete(payload||{});
+        if(ret&&typeof ret.then==='function')ret.catch(function(e){console.warn('__psyComplete',e);});
+      }catch(e){console.warn('__psyComplete',e);}
+    }
+    window.totalScore=(payload&&payload.score)||window.totalScore;
+  }
 async function __psyStartGate(){
   if(!window.linkValidator) return true;
   try{
