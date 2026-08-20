@@ -159,7 +159,7 @@
     </div>
     <div class="acts">
       <button class="btn-share" onclick="showPoster()">🗺️ 把这张地图发给纠结的朋友</button>
-      <button class="btn-again" onclick="location.reload()">重新导航</button>
+      <button class="btn-again" onclick="again()">重新导航</button>
     </div>
     <div class="r-foot">已测 15,872 人 · 决策参考工具，不构成人生建议</div>
   </div>
@@ -232,13 +232,15 @@ const QS=[
     window.totalScore=(payload&&payload.score)||window.totalScore;
   }
 async function __psyStartGate(){
-  if(!window.linkValidator) return true;
+  if(window.__psySessionStarted) return true;
+  if(!window.linkValidator){ window.__psySessionStarted=true; return true; }
   try{
     if(typeof window.linkValidator.validateForUserAction==='function'){
       const ok=await window.linkValidator.validateForUserAction();
       if(!ok) return false;
     }
     await window.linkValidator.startTest();
+    window.__psySessionStarted=true;
     return true;
   }catch(e){console.error(e);return false;}
 }
@@ -258,9 +260,18 @@ function render(){
   $('qtext').textContent=q.t;$('opts').innerHTML='';
   q.o.forEach((o,i)=>{const d=document.createElement('div');
     d.className='opt'+(answers[qi]===i?' sel':'');d.innerHTML='<span>'+o[0]+'</span>';
-    d.onclick=()=>{answers[qi]=i;d.parentElement.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');
+    d.onclick=()=>{
+      if(d.dataset.locked==='1')return;
+      d.dataset.locked='1';
+      answers[qi]=i;
+      d.parentElement.querySelectorAll('.opt').forEach(x=>{x.classList.remove('sel');x.dataset.locked='1';});
+      d.classList.add('sel');
       if(q.d==='风险偏好'){$('sign').classList.add('show');setTimeout(()=>$('sign').classList.remove('show'),900);}
-      setTimeout(()=>{qi<23?(qi++,render()):goCompass();},240);};
+      setTimeout(()=>{
+        try{ qi<23?(qi++,render()):goCompass(); }
+        catch(err){console.error('slpz advance',err);try{goCompass();}catch(e2){show('result');}}
+      },240);
+    };
     $('opts').appendChild(d);});
   $('backBtn').classList.toggle('off',qi===0);
 }
@@ -312,6 +323,7 @@ function burst(){const r=$('bars').getBoundingClientRect();
     p.style.setProperty('--dx',Math.cos(ang)*dist+'px');p.style.setProperty('--dy',Math.sin(ang)*dist+'px');
     document.body.appendChild(p);setTimeout(()=>p.remove(),1000);}}
 function showPoster(){show('poster');}
+function again(){qi=0;answers=new Array(24).fill(-1);RES=null;show('landing');}
 if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
 </script>
 

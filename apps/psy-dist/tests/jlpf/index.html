@@ -155,7 +155,7 @@
     </div>
     <div class="acts">
       <button class="btn-share" onclick="showPoster()">📤 发给同学，对比体检分数</button>
-      <button class="btn-again" onclick="location.reload()">重新体检</button>
+      <button class="btn-again" onclick="again()">重新体检</button>
     </div>
     <div class="r-foot">已检 21,307 份 · 模拟 HR 评估逻辑，仅供求职参考</div>
   </div>
@@ -211,13 +211,15 @@ const QS=[
     window.totalScore=(payload&&payload.score)||window.totalScore;
   }
 async function __psyStartGate(){
-  if(!window.linkValidator) return true;
+  if(window.__psySessionStarted) return true;
+  if(!window.linkValidator){ window.__psySessionStarted=true; return true; }
   try{
     if(typeof window.linkValidator.validateForUserAction==='function'){
       const ok=await window.linkValidator.validateForUserAction();
       if(!ok) return false;
     }
     await window.linkValidator.startTest();
+    window.__psySessionStarted=true;
     return true;
   }catch(e){console.error(e);return false;}
 }
@@ -244,8 +246,17 @@ function render(){
   $('qtext').textContent=q.t;$('opts').innerHTML='';
   q.o.forEach((o,i)=>{const d=document.createElement('div');
     d.className='opt'+(answers[qi]===i?' sel':'');d.innerHTML='<span>'+o+'</span><span class="box"></span>';
-    d.onclick=()=>{answers[qi]=i;d.parentElement.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');
-      setTimeout(()=>{qi<17?(qi++,render()):goCalc();},230);};
+    d.onclick=()=>{
+      if(d.dataset.locked==='1')return;
+      d.dataset.locked='1';
+      answers[qi]=i;
+      d.parentElement.querySelectorAll('.opt').forEach(x=>{x.classList.remove('sel');x.dataset.locked='1';});
+      d.classList.add('sel');
+      setTimeout(()=>{
+        try{ qi<17?(qi++,render()):goCalc(); }
+        catch(err){console.error('jlpf advance',err);try{goCalc();}catch(e2){show('result');}}
+      },230);
+    };
     $('opts').appendChild(d);});
   $('backBtn').classList.toggle('off',qi===0);
 }
@@ -294,6 +305,7 @@ function drawRadar(dims){
     $('rp').setAttribute('points',pts);},80);
 }
 function showPoster(){show('poster');}
+function again(){qi=0;answers=new Array(18).fill(-1);RES=null;show('landing');}
 if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
 </script>
 

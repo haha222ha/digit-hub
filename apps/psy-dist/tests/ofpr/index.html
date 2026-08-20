@@ -195,7 +195,7 @@
     </div>
     <div class="r-actions">
       <button class="btn-share" onclick="showPoster()">🔮 生成我的 offer 好运海报</button>
-      <button class="btn-again" onclick="location.reload()">重新测试</button>
+      <button class="btn-again" onclick="again()">重新测试</button>
     </div>
     <div class="r-foot">已测 38,642 人 · 本测试基于公开求职数据建模，结果仅供娱乐与自我认知参考</div>
   </div>
@@ -247,13 +247,15 @@ const QS=[
     window.totalScore=(payload&&payload.score)||window.totalScore;
   }
 async function __psyStartGate(){
-  if(!window.linkValidator) return true;
+  if(window.__psySessionStarted) return true;
+  if(!window.linkValidator){ window.__psySessionStarted=true; return true; }
   try{
     if(typeof window.linkValidator.validateForUserAction==='function'){
       const ok=await window.linkValidator.validateForUserAction();
       if(!ok) return false;
     }
     await window.linkValidator.startTest();
+    window.__psySessionStarted=true;
     return true;
   }catch(e){console.error(e);return false;}
 }
@@ -288,9 +290,19 @@ function renderQ(){
   q.o.forEach((o,i)=>{
     const d=document.createElement('div');d.className='opt'+(answers[qi]===i?' sel':'');
     d.innerHTML='<span>'+o+'</span>';
-    d.onclick=()=>{answers[qi]=i;
-      d.parentElement.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');
-      setTimeout(()=>{if(qi<11){qi++;renderQ();maybeFortune();}else{goCalc();}},260);};
+    d.onclick=()=>{
+      if(d.dataset.locked==='1')return;
+      d.dataset.locked='1';
+      answers[qi]=i;
+      d.parentElement.querySelectorAll('.opt').forEach(x=>{x.classList.remove('sel');x.dataset.locked='1';});
+      d.classList.add('sel');
+      setTimeout(()=>{
+        try{
+          if(qi<11){qi++;renderQ();maybeFortune();}
+          else goCalc();
+        }catch(err){console.error('ofpr advance',err);try{goCalc();}catch(e2){show('result');}}
+      },260);
+    };
     $('opts').appendChild(d);
   });
   $('backBtn').classList.toggle('off',qi===0);
@@ -351,6 +363,7 @@ function renderResult(){
   $('pBeat').textContent='超过全国 '+Math.min(99,Math.round(prob*0.92))+'% 的求职者 · 你呢？';
 }
 function showPoster(){show('poster');}
+function again(){qi=0;answers=new Array(12).fill(-1);RESULT=null;opened=false;show('landing');}
 if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
 </script>
 

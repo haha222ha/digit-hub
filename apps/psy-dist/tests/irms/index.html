@@ -131,7 +131,7 @@
     </div>
     <div class="acts">
       <button class="btn-share" onclick="showPoster()">🫂 抱抱我的守护灵 · 生成卡片</button>
-      <button class="btn-again" onclick="location.reload()">再测一次</button>
+      <button class="btn-again" onclick="again()">再测一次</button>
     </div>
     <div class="r-foot">已测 9,418 只 i 人 · 仅供自我认知娱乐</div>
   </div>
@@ -195,13 +195,15 @@ const QS=[
     return undefined;
   }
 async function __psyStartGate(){
-  if(!window.linkValidator) return true;
+  if(window.__psySessionStarted) return true;
+  if(!window.linkValidator){ window.__psySessionStarted=true; return true; }
   try{
     if(typeof window.linkValidator.validateForUserAction==='function'){
       const ok=await window.linkValidator.validateForUserAction();
       if(!ok) return false;
     }
     await window.linkValidator.startTest();
+    window.__psySessionStarted=true;
     return true;
   }catch(e){console.error(e);return false;}
 }
@@ -282,6 +284,7 @@ function renderResult(k){
   $('pSlog').textContent=s.slogan;$('pRare').textContent=s.rare;
 }
 function showPoster(){show('poster');}
+function again(){qi=0;answers=new Array(10).fill(-1);show('landing');}
 if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
 </script>
 

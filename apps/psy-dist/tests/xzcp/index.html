@@ -188,8 +188,8 @@
       <p id="rFix"></p>
     </div>
     <div class="acts">
-      <button class="btn-train" onclick="location.reload()">🔁 再练一轮</button>
-      <button class="btn-again" onclick="location.reload()">EXIT · 重新测评</button>
+      <button class="btn-train" onclick="again()">🔁 再练一轮</button>
+      <button class="btn-again" onclick="again()">EXIT · 重新测评</button>
     </div>
     <div class="r-foot">练习版 · 非任何官方题库 · 全部题目自研原创 · 仅供备考参考</div>
   </div>
@@ -234,13 +234,15 @@ const QS=[
     window.totalScore=(payload&&payload.score)||window.totalScore;
   }
 async function __psyStartGate(){
-  if(!window.linkValidator) return true;
+  if(window.__psySessionStarted) return true;
+  if(!window.linkValidator){ window.__psySessionStarted=true; return true; }
   try{
     if(typeof window.linkValidator.validateForUserAction==='function'){
       const ok=await window.linkValidator.validateForUserAction();
       if(!ok) return false;
     }
     await window.linkValidator.startTest();
+    window.__psySessionStarted=true;
     return true;
   }catch(e){console.error(e);return false;}
 }
@@ -265,8 +267,17 @@ function render(){
   $('qtext').innerHTML=q.t;$('opts').innerHTML='';
   q.o.forEach((o,i)=>{const d=document.createElement('div');
     d.className='opt'+(answers[qi]===i?' sel':'');d.innerHTML='<span class="tag mono">'+String.fromCharCode(65+i)+'</span><span>'+o+'</span>';
-    d.onclick=()=>{answers[qi]=i;d.parentElement.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');
-      setTimeout(()=>{qi<QS.length-1?(qi++,render()):askSubmit();},240);};
+    d.onclick=()=>{
+      if(d.dataset.locked==='1')return;
+      d.dataset.locked='1';
+      answers[qi]=i;
+      d.parentElement.querySelectorAll('.opt').forEach(x=>{x.classList.remove('sel');x.dataset.locked='1';});
+      d.classList.add('sel');
+      setTimeout(()=>{
+        try{ qi<QS.length-1?(qi++,render()):askSubmit(); }
+        catch(err){console.error('xzcp advance',err);try{askSubmit();}catch(e2){show('result');}}
+      },240);
+    };
     $('opts').appendChild(d);});
   clearInterval(timerId);
   if(mod.t>0){$('timer').classList.add('on');tLeft=mod.t;$('tfill').style.width='100%';$('tnum').textContent=tLeft+'s';
@@ -315,6 +326,7 @@ function showReport(){
   show('result');window.scrollTo(0,0);
   __psyHookComplete({test_code:'xzcp',source:'autumn-sku',score:pct});
 }
+function again(){clearInterval(timerId);qi=0;answers=new Array(QS.length).fill(-1);RES=null;show('landing');}
 if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
 </script>
 
