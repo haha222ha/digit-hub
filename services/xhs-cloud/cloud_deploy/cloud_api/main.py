@@ -59,6 +59,7 @@ from cloud_deploy.cloud_api.insight_routes import router as insight_router
 from cloud_deploy.cloud_api.advisor_member_routes import router as advisor_member_router
 from cloud_deploy.cloud_api.advisor_routes import router as advisor_internal_router
 from cloud_deploy.cloud_api.member_entitlements import assess_access_for_user, enrich_member_profile
+from cloud_deploy.cloud_api.sms_hook_routes import router as sms_hook_router
 
 _ASSETS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets")
 
@@ -69,6 +70,7 @@ app.include_router(advisor_internal_router)
 app.include_router(dist_router)
 app.include_router(dist_compat_router)
 app.include_router(dist_ops_router)
+app.include_router(sms_hook_router)
 
 
 @app.on_event("startup")
