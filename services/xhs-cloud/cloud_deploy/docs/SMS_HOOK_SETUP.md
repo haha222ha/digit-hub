@@ -10,24 +10,34 @@
 
 Header 亦可：`X-Sms-Token: 你的TOKEN`
 
+## 手机 SMS Forward 模板
+
+建议整段纯文本：
+
+```text
+{发件人号码} {短信正文} {{手机尾号4位}}{发送时间}
+```
+
+示例：
+
+```text
+95188 【支付宝】支付宝验证码：448291，请勿向他人泄露您的验证码！唯一热线95188 {{7214}}2026-08-22 00:36:25
+```
+
+服务器会抽取 `448291`，并记下尾号 `7214`。可选环境变量 `XHS_SMS_PHONE_TAIL=7214` 只接受匹配尾号的短信。
+
 ## 服务器配置
 
 在 `/opt/xhs-cloud/.env`（或本地 `.env`）增加：
 
 ```bash
 XHS_SMS_HOOK_TOKEN=请换成足够长的随机串
+XHS_SMS_PHONE_TAIL=7214
 ```
 
 代码：`cloud_api/sms_hook_routes.py`（已挂到 `main.py`）。
 
 重启云 API 后生效。落盘：`$XHS_DATA_DIR/sms_hook_latest.json`。
-
-## 手机 SMS Forward
-
-1. 安装 SMS Forward / SMS Forwarder 类应用  
-2. Webhook URL 填上面的 **POST** 地址（带 token）  
-3. 过滤建议：发件人含银行/支付宝，或正文含「验证码」「支付宝」  
-4. 请求体：JSON `{"text":"..."}` 或纯文本均可  
 
 ## 电脑 order_core
 
@@ -36,7 +46,8 @@ XHS_SMS_HOOK_TOKEN=请换成足够长的随机串
 ```json
 {
   "sms_hook_base": "https://monitor.xhs365.cn",
-  "sms_hook_token": "与 XHS_SMS_HOOK_TOKEN 相同"
+  "sms_hook_token": "与 XHS_SMS_HOOK_TOKEN 相同",
+  "sms_phone_tail": "7214"
 }
 ```
 

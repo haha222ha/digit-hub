@@ -5,8 +5,13 @@
   POST https://monitor.xhs365.cn/api/v1/hooks/sms-forward?token=<TOKEN>
   GET  https://monitor.xhs365.cn/api/v1/hooks/sms-code/latest?token=<TOKEN>&consume=1
 
+手机模板建议（纯文本整段推送）:
+  {发件人手机号} {短信正文} {{手机尾号4位}}{发送时间}
+  例: 95188 【支付宝】支付宝验证码：448291，… {{7214}}2026-08-22 00:36:25
+
 环境变量:
-  XHS_SMS_HOOK_TOKEN  必填（与 order_config.sms_hook_token 一致）
+  XHS_SMS_HOOK_TOKEN   必填（与 order_config.sms_hook_token 一致）
+  XHS_SMS_PHONE_TAIL   可选，只接受 {{尾号}} 匹配的短信（如 7214）
 """
 from __future__ import annotations
 
@@ -25,12 +30,26 @@ from cloud_deploy.cloud_api.config import get_settings
 router = APIRouter(tags=["sms-hook"])
 
 _lock = threading.Lock()
+
+# 支付宝常见：支付宝验证码：448291 / 验证码448291
+_ALIPAY_CODE_RE = re.compile(
+    r"(?:支付宝)?验证码\s*[：:\s]\s*(\d{6})",
+    re.I,
+)
 _CODE_RE = re.compile(
     r"(?:验证码|校验码|动态码|code)[^\d]{0,12}(\d{6})"
     r"|(\d{6})[^\d]{0,12}(?:验证码|校验码|为您的|动态)",
     re.I,
 )
 _CODE_FALLBACK = re.compile(r"(?<!\d)(\d{6})(?!\d)")
+# 模板尾：{{7214}}2026-08-22 00:36:25
+_TAIL_MARK_RE = re.compile(
+    r"\{\{(\d{4})\}\}\s*"
+    r"(?:\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2})?)?"
+)
+_LEADING_SENDER_RE = re.compile(
+    r"^\s*(\+?\d{5,15}|106\d{5,})\s+"
+)
 
 
 def _token_ok(token: str | None, header_token: str | None = None) -> bool:
@@ -49,6 +68,10 @@ def _auth(request: Request, token: str | None) -> None:
         raise HTTPException(status_code=401, detail="invalid sms hook token")
 
 
+def _expected_phone_tail() -> str:
+    return (os.environ.get("XHS_SMS_PHONE_TAIL") or "").strip()
+
+
 def _store_path() -> str:
     s = get_settings()
     base = s.xhs_data_dir or os.path.join(s.xhs_cloud_root, "data")
@@ -56,14 +79,38 @@ def _store_path() -> str:
     return os.path.join(base, "sms_hook_latest.json")
 
 
+def _strip_template_noise(text: str) -> str:
+    """去掉 {{尾号}}时间 与热线干扰，便于抽码。"""
+    t = _TAIL_MARK_RE.sub(" ", text or "")
+    t = re.sub(r"唯一热线\s*\d+", " ", t)
+    t = re.sub(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2})?", " ", t)
+    return t
+
+
+def _extract_phone_tail(text: str) -> str:
+    m = _TAIL_MARK_RE.search(text or "")
+    return m.group(1) if m else ""
+
+
+def _extract_leading_sender(text: str) -> str:
+    m = _LEADING_SENDER_RE.match(text or "")
+    return m.group(1) if m else ""
+
+
 def _extract_code(text: str) -> str | None:
     text = (text or "").strip()
     if not text:
         return None
-    m = _CODE_RE.search(text)
+    body = _strip_template_noise(text)
+    m = _ALIPAY_CODE_RE.search(body) or _ALIPAY_CODE_RE.search(text)
+    if m:
+        return m.group(1)
+    m = _CODE_RE.search(body) or _CODE_RE.search(text)
     if m:
         return next(g for g in m.groups() if g)
-    nums = _CODE_FALLBACK.findall(text)
+    nums = _CODE_FALLBACK.findall(body)
+    # 排除明显不像验证码的（年份开头等）
+    nums = [n for n in nums if not n.startswith(("19", "20"))]
     if len(nums) == 1:
         return nums[0]
     if "支付宝" in text or "alipay" in text.lower() or "验证码" in text:
@@ -147,13 +194,23 @@ async def sms_forward(
         payload = {"text": raw}
 
     text = _pick_text(payload, raw)
-    sender = _pick_sender(payload)
+    sender = _pick_sender(payload) or _extract_leading_sender(text)
+    phone_tail = _extract_phone_tail(text)
     code = _extract_code(text)
+
+    expected_tail = _expected_phone_tail()
+    if expected_tail and phone_tail and phone_tail != expected_tail:
+        return PlainTextResponse(
+            f"ignored tail={phone_tail} expect={expected_tail}",
+            status_code=200,
+        )
+
     now = time.time()
     rec = {
         "ts": now,
         "iso": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(now)),
         "sender": sender,
+        "phone_tail": phone_tail,
         "text": text[:2000],
         "code": code,
         "used": False,
@@ -162,7 +219,8 @@ async def sms_forward(
         _write_store(rec)
 
     return PlainTextResponse(
-        f"ok code={'yes' if code else 'no'}",
+        f"ok code={'yes' if code else 'no'}"
+        + (f" tail={phone_tail}" if phone_tail else ""),
         status_code=200,
     )
 
@@ -174,14 +232,28 @@ async def sms_code_latest(
     token: str | None = Query(default=None),
     consume: int = Query(default=1, ge=0, le=1),
     max_age: int = Query(default=180, ge=30, le=600),
+    phone_tail: str | None = Query(default=None),
 ):
     """电脑脚本拉取最新验证码。默认 consume=1 用后标记已用。"""
     _auth(request, token)
+
+    want_tail = (phone_tail or _expected_phone_tail() or "").strip()
 
     with _lock:
         rec = _read_store()
         if not rec or not rec.get("code"):
             return JSONResponse({"ok": False, "code": None, "reason": "empty"})
+        if want_tail:
+            got_tail = str(rec.get("phone_tail") or "").strip()
+            if got_tail and got_tail != want_tail:
+                return JSONResponse(
+                    {
+                        "ok": False,
+                        "code": None,
+                        "reason": "tail_mismatch",
+                        "phone_tail": got_tail,
+                    }
+                )
         age = time.time() - float(rec.get("ts") or 0)
         if age > max_age:
             return JSONResponse(
@@ -202,6 +274,7 @@ async def sms_code_latest(
                 "code": code,
                 "age": int(age),
                 "sender": rec.get("sender") or "",
+                "phone_tail": rec.get("phone_tail") or "",
                 "iso": rec.get("iso") or "",
             }
         )
