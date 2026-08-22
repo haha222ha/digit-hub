@@ -1,0 +1,41 @@
+.past-result { padding-bottom: 24px; }
+.past-hero { padding: 28px 20px 20px; text-align: center; }
+.past-hero-name { font-size: 28px; font-weight: 900; color: #7a4b12; margin-bottom: 6px; font-family: 'Noto Serif SC', serif; }
+.past-hero-sub { font-size: 13px; color: #8a7f72; margin-bottom: 14px; }
+.past-hero-quote { font-size: 14px; color: #5c534a; line-height: 1.85; margin-bottom: 14px; padding: 0 6px; }
+.past-tag-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 8px; }
+.past-tag { font-size: 11px; background: #fff; border: 1px solid #e5ddd0; padding: 5px 12px; border-radius: 999px; color: #666; }
+.past-block { margin: 0 20px 14px; background: #fff; border-radius: 14px; padding: 16px; }
+.past-section-title { font-size: 15px; font-weight: 900; color: #3d2914; margin-bottom: 12px; letter-spacing: .02em; }
+.past-profile p { font-size: 13px; color: #5f574d; line-height: 1.85; margin-bottom: 10px; }
+.past-profile p:last-child { margin-bottom: 0; }
+.past-radar-box { margin-bottom: 14px; }
+.past-radar-legend { display: flex; justify-content: center; gap: 18px; font-size: 11px; color: #8a7f72; margin-top: 8px; }
+.past-legend-item { display: flex; align-items: center; gap: 6px; }
+.past-legend-line { width: 22px; height: 0; border-top: 2px solid #b85c4a; }
+.past-legend-line.ref { border-top-style: dashed; border-color: #9a7b4f; }
+.past-dim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.past-dim-card { background: #faf7f2; border: 1px solid #efe6d8; border-radius: 12px; padding: 12px; }
+.past-dim-label { font-size: 12px; font-weight: 800; color: #3d2914; margin-bottom: 6px; }
+.past-dim-scores { font-size: 11px; color: #8a7f72; margin-bottom: 6px; }
+.past-dim-scores strong { color: #b85c4a; font-size: 13px; }
+.past-dim-scores .ref-val { color: #9a7b4f; }
+.past-dim-desc { font-size: 11px; color: #8a7f72; line-height: 1.55; }
+.past-mirror-summary { font-size: 13px; color: #7a4b12; font-weight: 700; margin-bottom: 14px; line-height: 1.6; }
+.past-step { padding: 12px 0; border-top: 1px solid #efe6d8; }
+.past-step:first-of-type { border-top: none; padding-top: 0; }
+.past-step-label { font-size: 11px; font-weight: 800; color: #b0a89c; margin-bottom: 4px; }
+.past-step-title { font-size: 14px; font-weight: 800; color: #3d2914; margin-bottom: 6px; }
+.past-step-copy { font-size: 13px; color: #666; line-height: 1.75; }
+.past-scene { padding: 14px 0; border-top: 1px solid #efe6d8; }
+.past-scene:first-of-type { border-top: none; padding-top: 0; }
+.past-scene-pill { display: inline-block; font-size: 11px; font-weight: 700; color: #7a4b12; background: #f4efe6; padding: 4px 10px; border-radius: 999px; margin-bottom: 8px; }
+.past-scene-title { font-size: 15px; font-weight: 900; color: #3d2914; margin-bottom: 8px; }
+.past-scene-copy { font-size: 13px; color: #666; line-height: 1.75; margin-bottom: 10px; }
+.past-scene-signal { font-size: 13px; color: #5c534a; line-height: 1.7; padding-left: 12px; border-left: 3px solid #d4c4a8; }
+.past-closing { margin: 0 20px 16px; background: #fff; border-radius: 14px; padding: 16px; font-size: 14px; color: #5c534a; line-height: 1.85; text-align: center; }
+.past-actions { display: flex; gap: 10px; padding: 0 20px 8px; }
+.past-actions .btn { flex: 1; }
+.past-actions-stack { padding: 0 20px 32px; }
+.past-actions-stack .btn { width: 100%; margin-top: 10px; }
+.past-order { font-size: 11px; color: #b0a89c; margin-bottom: 10px; }

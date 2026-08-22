@@ -11,3 +11,17 @@ alwaysApply: true
 - 本规则覆盖默认的「未明确要求则不提交」
 - 仍禁止：secrets、`.env`、凭证、`force push`、改 git config、把无关脏文件塞进同一提交
 - 提交说明写清 why；push 到当前跟踪分支（通常 `origin/main`）
+
+## 主机部署（用户在本机 push 后于 ECS 执行）
+
+```bash
+cd /opt/digit-hub && git pull && sudo bash deploy/quick_update.sh
+```
+
+若本次改动涉及 `deploy/nginx_apply.sh` 或新增静态路径（如 `/shared/`）：
+
+```bash
+sudo bash deploy/nginx_apply.sh && sudo nginx -s reload
+```
+
+Agent 只负责 push；**不在 ECS 上代跑** deploy（除非用户明确要求）。

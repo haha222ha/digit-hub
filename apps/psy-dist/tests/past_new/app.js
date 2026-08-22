@@ -1,5 +1,6 @@
 import { scoreAnswers } from './vendor/scoring-CuPx53JQ-rBnOF_ZDsobST.js';
 import { a as qpack } from './vendor/questions-Ct3o4EnI-rBnOF_ZDsobST.js';
+import { renderPastResult } from '../../shared/past-result-ui.js';
 
 const uiQuestions = qpack.questions;
 const GENDER_QID = '__historyGenderPreference';
@@ -53,10 +54,6 @@ function showScreen(id) {
   if (quiz) quiz.style.display = id === 'screen-quiz' ? 'flex' : 'none';
 }
 
-function renderGender() {
-  $('screen-gender').classList.add('active');
-}
-
 function renderQuestion() {
   const q = uiQuestions[state.qi];
   const total = uiQuestions.length;
@@ -82,38 +79,17 @@ function renderQuestion() {
   $('btn-back').style.display = state.qi > 0 ? 'block' : 'none';
 }
 
-function renderStats(stats) {
-  const maxV = Math.max(...stats.map(s => s.value), 1);
-  $('radar-wrap').innerHTML = stats.map(s => {
-    const pct = Math.round(s.value / maxV * 100);
-    return `<div class="radar-row"><span>${s.label}</span><div class="radar-bar"><div class="radar-fill" style="width:${pct}%"></div></div><span>${s.value}</span></div>`;
-  }).join('');
-}
-
 function renderResult(result) {
   const p = result.primary;
-  $('result-type').textContent = p.name;
-  $('result-sub').textContent = `${p.author} · ${p.source}`;
-  $('result-quote').textContent = p.quote || '';
-  $('result-tags').innerHTML = (p.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
-  $('result-order').textContent = `匹配度 ${p.orderIndex}/${p.totalArchetypes}`;
-  const profiles = p.profile || [];
-  $('full-sections').innerHTML = profiles.map((txt, i) =>
-    `<div class="full-section"><h3>${i === 0 ? '精神画像' : '内在张力'}</h3><p>${txt}</p></div>`
-  ).join('');
-  const br = p.bottomReport || {};
-  const steps = (br.path && br.path.steps) || [];
-  const scenes = br.scenes || [];
-  let extra = '';
-  if (br.intro) extra += `<div class="full-section"><h3>报告导语</h3><p>${br.intro}</p></div>`;
-  steps.forEach(step => {
-    extra += `<div class="full-section"><h3>${step.label} ${step.title}</h3><p>${step.copy}</p></div>`;
+  renderPastResult($('result-root'), result, {
+    showActions: true,
+    onRetry: () => {
+      state.qi = 0;
+      state.answers = {};
+      showScreen('screen-intro');
+      document.body.classList.remove('page-disabled');
+    },
   });
-  scenes.forEach(scene => {
-    extra += `<div class="full-section scene-card"><h3>${scene.label}</h3><p class="scene-title">${scene.title}</p><p>${scene.copy}</p><p class="scene-signal">${scene.actionLabel || ''}：${scene.signal || ''}</p></div>`;
-  });
-  $('full-sections').innerHTML += extra;
-  renderStats(result.stats || []);
   showScreen('screen-result');
   if (window.__psyComplete) {
     window.__psyComplete({
@@ -122,6 +98,7 @@ function renderResult(result) {
       name: p.name,
       score: p.orderIndex,
       stats: result.stats,
+      referenceStats: result.referenceStats,
     });
   }
 }
@@ -175,12 +152,6 @@ function bindUi() {
       state.qi--;
       renderQuestion();
     }
-  };
-  $('btn-retry').onclick = () => {
-    state.qi = 0;
-    state.answers = {};
-    showScreen('screen-intro');
-    document.body.classList.remove('page-disabled');
   };
 }
 

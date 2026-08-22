@@ -6,6 +6,7 @@
   <meta name="description" content="历史人物匹配·新 - 心象测 XlxTest 克隆">
   <title>历史人物匹配·新</title>
   <script src="/static/js/test-security.js"></script>
+  <link rel="stylesheet" href="../../shared/past-result-ui.css">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     body {
@@ -85,15 +86,6 @@
     .result-quote { font-size:14px; color:#5c534a; line-height:1.8; margin-bottom:16px; padding:0 8px; }
     .tag-row { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:16px; }
     .tag { font-size:11px; background:#fff; border:1px solid #e5ddd0; padding:4px 10px; border-radius:999px; color:#666; }
-    .radar-wrap { margin:0 20px 16px; background:#fff; border-radius:16px; padding:16px; }
-    .radar-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; }
-    .radar-bar { flex:1; height:6px; background:#eee; border-radius:3px; margin:0 10px; overflow:hidden; }
-    .radar-fill { height:100%; background:#7a4b12; border-radius:3px; }
-    .full-section { margin:0 20px 12px; background:#fff; border-radius:12px; padding:14px 16px; }
-    .full-section h3 { font-size:14px; margin-bottom:6px; color:#7a4b12; }
-    .full-section p { font-size:13px; color:#666; line-height:1.7; }
-    .scene-title { font-weight:800; color:#333; margin-bottom:6px; }
-    .scene-signal { margin-top:8px; color:#7a4b12; font-size:12px; }
     @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
   </style>
 </head>
@@ -140,19 +132,8 @@
 
   <div id="screen-result" class="screen">
     <nav><div class="logo">心象测</div><div class="nav-badge">结果</div></nav>
-    <div class="result-hero">
-      <div class="result-type" id="result-type"></div>
-      <div class="result-sub" id="result-sub"></div>
-      <div class="result-order" id="result-order"></div>
-      <div class="tag-row" id="result-tags"></div>
-      <p class="result-quote" id="result-quote"></p>
-    </div>
-    <div class="radar-wrap" id="radar-wrap"></div>
-    <div id="full-sections"></div>
-    <div style="padding:0 20px 40px">
-      <button class="btn btn-primary" id="btn-retry">重新测试</button>
-    </div>
-    <div class="disclaimer">趣味历史人物气质对照，不构成史学评价、职业或性格诊断。结果仅供娱乐向自我觉察。</div>
+    <div id="result-root"></div>
+    <div class="disclaimer" style="padding:0 20px 24px">趣味历史人物气质对照，不构成史学评价、职业或性格诊断。结果仅供娱乐向自我觉察。</div>
   </div>
 
   <script type="module" src="./app.js"></script>

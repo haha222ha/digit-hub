@@ -136,6 +136,10 @@ ${GZIP_DIRECTIVES}
     location /tests/ {
         try_files \$uri \$uri/ =404;
     }
+    location /shared/ {
+        try_files \$uri =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
     location /static/ {
         try_files \$uri =404;
     }

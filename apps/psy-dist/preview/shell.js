@@ -90,6 +90,10 @@ function bindUi() {
     setVariantInUrl('');
     showScreen('screen-index');
   };
+  window.__previewGoIndex = () => {
+    setVariantInUrl('');
+    showScreen('screen-index');
+  };
 }
 
 async function loadManifestAndData(code) {
