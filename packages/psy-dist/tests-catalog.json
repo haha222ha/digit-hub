@@ -932,27 +932,13 @@
       "dual_perspective": false
     },
     {
-      "code": "past_xlx",
-      "name": "历史人物匹配·原站UI",
+      "code": "past_new",
+      "name": "历史人物匹配",
       "questions": 26,
       "duration_min": 8,
       "hot": true,
       "source": "xlxtest_mirror",
-      "legacy_note": "L3 镜像整站 Vue；分销链接 + 原站结果页/雷达/晒单",
-      "preview": {
-        "supported": true,
-        "renderer": "xlx_past_v1",
-        "theme": "past"
-      }
-    },
-    {
-      "code": "past_new",
-      "name": "历史人物匹配·新",
-      "questions": 26,
-      "duration_min": 8,
-      "hot": false,
-      "source": "xlxtest_clone",
-      "legacy_note": "平行于无旧版；XlxTest past 1:1 场景叙事",
+      "legacy_note": "L3 原站 Vue 镜像（雷达/晒单/多维分析）；旧手写 UI 见 tests/past_new/legacy.html",
       "preview": {
         "supported": true,
         "renderer": "xlx_past_v1",

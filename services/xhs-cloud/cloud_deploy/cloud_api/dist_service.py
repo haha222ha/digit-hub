@@ -17,6 +17,17 @@ _ALLOCATE_AUTOTOPUP_COUNT = max(
     1, min(int(os.environ.get("XHS_DIST_ALLOCATE_AUTOTOPUP", "50")), 50)
 )
 
+# past_new 与 past_xlx 共用 L3 镜像，分销链接可互通校验
+_PAST_TEST_CODES = frozenset({"past_new", "past_xlx"})
+
+
+def _test_codes_compatible(expected: str | None, actual: str | None) -> bool:
+    if not expected or not actual:
+        return True
+    if expected == actual:
+        return True
+    return expected in _PAST_TEST_CODES and actual in _PAST_TEST_CODES
+
 
 def _resolve_catalog_path() -> Path:
     """digit-hub monorepo 与 ECS /opt/xhs-cloud 双布局均可找到 catalog。"""
@@ -374,7 +385,7 @@ def validate_token(token: str, test_code: str | None = None) -> dict:
         return out
     meta = _test_meta(out.get("testCode") or test_code or "")
     out["is_dual_perspective"] = bool(meta and meta.get("is_dual_perspective"))
-    if test_code and out.get("testCode") and out["testCode"] != test_code:
+    if test_code and out.get("testCode") and not _test_codes_compatible(test_code, out["testCode"]):
         return {"valid": False, "message": "链接与测题不匹配"}
     return out
 

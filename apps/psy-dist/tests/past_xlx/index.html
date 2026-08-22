@@ -2,89 +2,11 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="历史人物匹配 - 原站 Vue 完整体验">
-  <title>历史人物匹配</title>
-  <script src="/static/js/test-security.js"></script>
-  <style>
-    html, body { margin: 0; height: 100%; background: #fafbfc; }
-    body.page-disabled iframe { opacity: 0.35; pointer-events: none; }
-    #gate {
-      position: fixed; inset: 0; z-index: 9999;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: #fafbfc; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
-      color: #909399; font-size: 14px;
-    }
-    #gate.hidden { display: none; }
-    #gate .spinner {
-      width: 32px; height: 32px; border: 3px solid #e4e7ed;
-      border-top-color: #7a4b12; border-radius: 50%;
-      animation: spin .8s linear infinite; margin-bottom: 12px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    iframe { width: 100%; height: 100%; border: 0; display: block; }
-  </style>
-  <script src="/static/js/link-validator.js"></script>
+  <meta http-equiv="refresh" content="0;url=/tests/past_new/index.html">
+  <script>location.replace('/tests/past_new/index.html' + location.search + location.hash);</script>
+  <title>跳转中…</title>
 </head>
-<body class="page-disabled">
-  <div id="gate">
-    <div class="spinner"></div>
-    <span>正在验证链接…</span>
-  </div>
-  <iframe id="xlx-frame" title="历史人物匹配" allow="clipboard-write"></iframe>
-  <script>
-    (function () {
-      var TEST_CODE = 'past_xlx';
-      var params = new URLSearchParams(location.search);
-      var token = params.get('token') || '';
-      var unlimited = params.get('unlimited') === 'true';
-
-      function mirrorSrc() {
-        var q = new URLSearchParams();
-        q.set('psy_integrated', '1');
-        q.set('test_code', TEST_CODE);
-        q.set('scale', 'past');
-        q.set('token', token);
-        if (unlimited) q.set('unlimited', 'true');
-        return '/xlx-mirror/past?' + q.toString();
-      }
-
-      function showError(msg) {
-        var gate = document.getElementById('gate');
-        gate.classList.remove('hidden');
-        gate.innerHTML =
-          '<p style="color:#c45656;font-size:15px;margin:0 24px 8px;text-align:center">链接无效</p>' +
-          '<p style="color:#909399;font-size:13px;margin:0 24px;text-align:center;line-height:1.6">' +
-          (msg || '请检查分销链接是否过期') + '</p>';
-      }
-
-      if (!token) {
-        showError('缺少访问令牌，请通过分销链接打开');
-        return;
-      }
-
-      PsyTestValidator.init(TEST_CODE, {
-        onSuccess: function () {
-          document.body.classList.remove('page-disabled');
-          document.getElementById('gate').classList.add('hidden');
-          document.getElementById('xlx-frame').src = mirrorSrc();
-        },
-        onError: function (err) {
-          showError((err && err.message) || '链接校验失败');
-        },
-      });
-
-      window.addEventListener('message', function (ev) {
-        if (!ev.data || ev.data.type !== 'psy-xlx-complete') return;
-        if (ev.origin !== location.origin) return;
-        if (typeof PsyTestValidator === 'undefined') return;
-        var v = PsyTestValidator.getInstance && PsyTestValidator.getInstance();
-        if (v && typeof v.completeTest === 'function' && !v._xlxCompleted) {
-          v._xlxCompleted = true;
-          v.completeTest(undefined, ev.data.report || {});
-        }
-      });
-    })();
-  </script>
+<body>
+  <p>正在跳转到 <a href="/tests/past_new/index.html">历史人物匹配</a>…</p>
 </body>
 </html>

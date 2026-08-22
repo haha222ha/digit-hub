@@ -4,13 +4,13 @@
 
 ## 访问地址
 
-### 分销接入（推荐）
+### 分销接入（默认 past_new）
 
 ```
-https://psy.xhs365.cn/test/past_xlx/{token}
+https://psy.xhs365.cn/test/past_new/{token}
 ```
 
-走 digit-hub 分销链接校验、开始/完成记录；内嵌原站 Vue（欢迎页→答题→原站结果页）。
+`past_new` 已切换为 L3 原站 Vue；`past_xlx` 路径自动跳转到 `past_new`（旧链接仍可用）。
 
 ### 演示/内测（无 token）
 
@@ -28,8 +28,8 @@ https://psy.xhs365.cn/xlx-mirror/past
 ## 架构
 
 ```
-/test/past_xlx/{token}
-  └─ tests/past_xlx/index.html  （PsyTestValidator 校验）
+/test/past_new/{token}
+  └─ tests/past_new/index.html  （PsyTestValidator 校验）
        └─ iframe /xlx-mirror/past?token=...&psy_integrated=1
             └─ xlx-digit-integration.js + 原站 Vue chunks
 ```

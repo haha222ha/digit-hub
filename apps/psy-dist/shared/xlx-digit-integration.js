@@ -12,7 +12,7 @@
 
   var params = new URLSearchParams(location.search);
   var distToken = params.get('token') || '';
-  var testCode = params.get('test_code') || 'past_xlx';
+  var testCode = params.get('test_code') || 'past_new';
   var scaleCode = params.get('scale') || 'past';
   var unlimited = params.get('unlimited') === 'true';
   var origin = location.origin;
@@ -20,6 +20,13 @@
   if (!distToken) {
     console.error('[xlx-digit] missing token');
     return;
+  }
+
+  var PAST_CODES = { past_new: 1, past_xlx: 1 };
+
+  function codesMatch(expected, actual) {
+    if (!expected || !actual || expected === actual) return true;
+    return !!(PAST_CODES[expected] && PAST_CODES[actual]);
   }
 
   var state = {
@@ -111,7 +118,7 @@
       if (res.code !== 200 || !data || !data.valid) {
         throw new Error((res && res.message) || (data && data.message) || '链接无效或已过期');
       }
-      if (data.testCode && data.testCode !== testCode) {
+      if (data.testCode && !codesMatch(testCode, data.testCode)) {
         throw new Error('链接与测题不匹配');
       }
       state.validated = true;

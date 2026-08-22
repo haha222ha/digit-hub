@@ -3,158 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="历史人物匹配·新 - 心象测 XlxTest 克隆">
-  <title>历史人物匹配·新</title>
+  <meta name="description" content="历史人物匹配 - 原站 Vue 完整体验">
+  <title>历史人物匹配</title>
   <script src="/static/js/test-security.js"></script>
-  <link rel="stylesheet" href="../../shared/past-result-ui.css">
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Serif SC', serif;
-      background: #f4efe6; color: #1a1612;
-      min-height:100vh; max-width:480px; margin:0 auto; overflow-x:hidden;
+    html, body { margin: 0; height: 100%; background: #fafbfc; }
+    body.page-disabled iframe { opacity: 0.35; pointer-events: none; }
+    #gate {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: #fafbfc; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+      color: #909399; font-size: 14px;
     }
-    body.page-disabled { pointer-events:none; opacity:.65; }
-    .screen { display:none; animation: fadeUp .45s ease both; }
-    .screen.active { display:block; }
-    nav { display:flex; justify-content:space-between; align-items:center; padding:18px 20px 0; }
-    .logo { font-size:12px; font-weight:800; color:#8a7f72; letter-spacing:.12em; }
-    .nav-badge { font-size:11px; color:#5c3d1e; background:#e8dcc8; padding:4px 10px; border-radius:20px; }
-    .hero { padding:28px 20px 24px; }
-    .live-badge {
-      display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid #e5ddd0;
-      color:#666; font-size:12px; padding:6px 12px; border-radius:20px; margin-bottom:20px;
+    #gate.hidden { display: none; }
+    #gate .spinner {
+      width: 32px; height: 32px; border: 3px solid #e4e7ed;
+      border-top-color: #7a4b12; border-radius: 50%;
+      animation: spin .8s linear infinite; margin-bottom: 12px;
     }
-    .live-dot { width:6px; height:6px; border-radius:50%; background:#b8860b; }
-    h1 { font-size:38px; font-weight:900; line-height:1.08; letter-spacing:-.02em; margin-bottom:14px; }
-    .h1-plain { color:#1a1612; font-family:'Noto Serif SC',serif; }
-    .h1-grad { color:#7a4b12; font-family:'Noto Serif SC',serif; }
-    .hero-sub { font-size:14px; color:#5f574d; line-height:1.75; margin-bottom:28px; }
-    .btn {
-      width:100%; border:none; cursor:pointer; font-size:16px; font-weight:700;
-      padding:16px; border-radius:14px; transition:transform .15s;
-    }
-    .btn:active { transform:scale(.98); }
-    .btn-primary { background:#3d2914; color:#fff; box-shadow:0 4px 18px rgba(0,0,0,.12); }
-    .btn-ghost { background:#fff; color:#1a1612; border:1.5px solid #e5ddd0; margin-top:10px; }
-    .btn:disabled { opacity:.45; cursor:not-allowed; }
-    .cta-hint { text-align:center; font-size:12px; color:#b0a89c; margin-top:10px; }
-    .dims-section { padding:0 20px 24px; }
-    .dims-label { font-size:11px; font-weight:700; color:#b0a89c; letter-spacing:.1em; margin-bottom:12px; }
-    .dims-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .dim-card {
-      background:#fff; border-radius:12px; padding:12px; display:flex; gap:10px; align-items:center;
-      box-shadow:0 1px 4px rgba(0,0,0,.04);
-    }
-    .d-icon { font-size:18px; width:36px; height:36px; background:#f4efe6; border-radius:10px;
-      display:flex; align-items:center; justify-content:center; }
-    .d-text { font-size:13px; font-weight:700; }
-    .d-sub { font-size:11px; color:#aaa; margin-top:2px; }
-    .gender-grid { display:grid; gap:10px; padding:0 20px 24px; }
-    .gender-opt {
-      background:#fff; border:2px solid #e5ddd0; border-radius:12px; padding:14px 16px; cursor:pointer;
-      display:flex; gap:12px; align-items:flex-start;
-    }
-    .gender-opt.selected { border-color:#7a4b12; background:rgba(122,75,18,.05); }
-    .gender-mark { font-size:18px; font-weight:900; color:#7a4b12; width:28px; }
-    .gender-title { font-size:15px; font-weight:800; }
-    .gender-desc { font-size:12px; color:#777; margin-top:4px; line-height:1.55; }
-    .disclaimer { padding:0 20px 40px; font-size:11px; color:#b0a89c; line-height:1.6; }
-    #screen-quiz { height:100dvh; display:none; flex-direction:column; max-width:480px; margin:0 auto; }
-    #screen-quiz.active { display:flex; }
-    .top-bar { padding:16px 20px 10px; flex-shrink:0; }
-    .progress-meta { display:flex; justify-content:space-between; font-size:12px; color:#aaa; margin-bottom:8px; }
-    .progress-track { height:5px; background:#e5ddd0; border-radius:3px; overflow:hidden; }
-    .progress-fill { height:100%; background:#7a4b12; border-radius:3px; transition:width .35s ease; width:0; }
-    .q-body { flex:1; overflow-y:auto; padding:20px 20px 8px; }
-    .q-tag { display:inline-block; font-size:11px; font-weight:700; color:#7a4b12;
-      background:#e8dcc8; padding:4px 10px; border-radius:999px; margin-bottom:8px; }
-    .q-note { font-size:12px; color:#8a7f72; margin-bottom:14px; line-height:1.6; }
-    .q-title { font-size:21px; font-weight:900; line-height:1.35; margin-bottom:22px; }
-    .opt {
-      background:#fff; border:2px solid #e5ddd0; border-radius:12px; padding:14px 16px;
-      margin-bottom:10px; cursor:pointer; transition:all .15s; display:flex; gap:10px;
-    }
-    .opt.selected { border-color:#7a4b12; background:rgba(122,75,18,.06); }
-    .opt-id { font-weight:900; color:#7a4b12; width:18px; flex-shrink:0; }
-    .opt-text { font-size:14px; line-height:1.55; font-weight:600; }
-    .quiz-bar { padding:12px 20px 28px; flex-shrink:0; }
-    .result-hero { padding:32px 20px 20px; text-align:center; }
-    .result-type { font-size:24px; font-weight:900; color:#7a4b12; margin-bottom:6px; }
-    .result-sub { font-size:13px; color:#8a7f72; margin-bottom:10px; }
-    .result-order { font-size:12px; color:#aaa; margin-bottom:12px; }
-    .result-quote { font-size:14px; color:#5c534a; line-height:1.8; margin-bottom:16px; padding:0 8px; }
-    .tag-row { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:16px; }
-    .tag { font-size:11px; background:#fff; border:1px solid #e5ddd0; padding:4px 10px; border-radius:999px; color:#666; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    iframe { width: 100%; height: 100%; border: 0; display: block; }
   </style>
+  <script src="/static/js/link-validator.js"></script>
+  <script src="/shared/past-mirror-entry.js"></script>
 </head>
 <body class="page-disabled">
-  <div id="screen-intro" class="screen active">
-    <nav><div class="logo">心象测</div><div class="nav-badge">·新</div></nav>
-    <div class="hero">
-      <div class="live-badge"><div class="live-dot"></div>场景叙事 · 26 题</div>
-      <h1><div class="h1-plain">历史人物</div><div class="h1-grad">匹配·新</div></h1>
-      <p class="hero-sub">【·新】26 道历史场景代入题：曹操、诸葛亮、项羽、韩信……在两难情境里做选择，测出你最像哪位历史人物的精神原型。娱乐向自我探索，非史学研究或人物定论。</p>
-    </div>
-    <div class="dims-section">
-      <div class="dims-label">六维精神坐标</div>
-      <div class="dims-grid"><div class="dim-card"><div class="d-icon">⚔️</div><div><div class="d-text">行动力</div><div class="d-sub">action</div></div></div><div class="dim-card"><div class="d-icon">🎯</div><div><div class="d-text">洞察力</div><div class="d-sub">insight</div></div></div><div class="dim-card"><div class="d-icon">🤝</div><div><div class="d-text">共情力</div><div class="d-sub">empathy</div></div></div><div class="dim-card"><div class="d-icon">🛡️</div><div><div class="d-text">韧性</div><div class="d-sub">resilience</div></div></div><div class="dim-card"><div class="d-icon">📜</div><div><div class="d-text">统筹力</div><div class="d-sub">coordination</div></div></div><div class="dim-card"><div class="d-icon">🌅</div><div><div class="d-text">开放度</div><div class="d-sub">openness</div></div></div></div>
-    </div>
-    <div class="gender-grid" id="screen-gender">
-      <div class="dims-label">先选代入视角（影响人物池匹配）</div>
-      <div class="gender-opt" data-gender="female"><div class="gender-mark">女</div><div><div class="gender-title">女性视角</div><div class="gender-desc">优先匹配女性历史人物与精神原型</div></div></div>
-      <div class="gender-opt" data-gender="male"><div class="gender-mark">男</div><div><div class="gender-title">男性视角</div><div class="gender-desc">优先匹配男性历史人物与精神原型</div></div></div>
-      <div class="gender-opt selected" data-gender="all"><div class="gender-mark">合</div><div><div class="gender-title">不限</div><div class="gender-desc">在全人物池中匹配最接近的精神原型</div></div></div>
-    </div>
-    <div style="padding:0 20px 12px">
-      <button class="btn btn-primary" id="btn-start">开始测试 →</button>
-      <div class="cta-hint">约 8 分钟 · 娱乐向自我探索</div>
-    </div>
-    <div class="disclaimer">趣味历史人物气质对照，不构成史学评价、职业或性格诊断。结果仅供娱乐向自我觉察。</div>
+  <div id="gate">
+    <div class="spinner"></div>
+    <span>正在验证链接…</span>
   </div>
-
-  <div id="screen-quiz">
-    <div class="top-bar">
-      <div class="progress-meta"><span id="q-progress">1 / 26</span><span>历史场景</span></div>
-      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-    </div>
-    <div class="q-body">
-      <div class="q-tag" id="q-tag"></div>
-      <div class="q-note" id="q-note"></div>
-      <div class="q-title" id="q-title"></div>
-      <div id="q-options"></div>
-    </div>
-    <div class="quiz-bar">
-      <button class="btn btn-ghost" id="btn-back" style="display:none">上一题</button>
-    </div>
-  </div>
-
-  <div id="screen-result" class="screen">
-    <nav><div class="logo">心象测</div><div class="nav-badge">结果</div></nav>
-    <div id="result-root"></div>
-    <div class="disclaimer" style="padding:0 20px 24px">趣味历史人物气质对照，不构成史学评价、职业或性格诊断。结果仅供娱乐向自我觉察。</div>
-  </div>
-
-  <script type="module" src="./app.js"></script>
-  <script src="/static/js/link-validator.js"></script>
+  <iframe id="xlx-frame" title="历史人物匹配" allow="clipboard-write"></iframe>
   <script>
-  if (typeof PsyTestValidator !== 'undefined') {
-    PsyTestValidator.init('past_new', {
-      onSuccess: function() { document.body.classList.remove('page-disabled'); },
-      onError: function() { document.body.classList.remove('page-disabled'); },
-      onLoad: function(data) {
-        setTimeout(function() {
-          if (typeof PsyTestValidator.addPromotionLink === 'function') PsyTestValidator.addPromotionLink();
-        }, 100);
-      }
-    });
-  } else {
-    document.body.classList.remove('page-disabled');
-  }
-  if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
+    PsyPastMirrorEntry.boot('past_new');
+    if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
   </script>
-  <script>window.__PSY_TEST_CODE__ = "past_new";</script>
-  <script src="/static/js/ceping-bridge.js"></script>
 </body>
 </html>
