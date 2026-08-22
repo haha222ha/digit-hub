@@ -6,8 +6,6 @@
   var MIRROR_BASE = '/xlx-mirror';
   var path = location.pathname || '';
   var onMirror = path.indexOf(MIRROR_BASE) === 0;
-  var SCALE_ROUTE =
-    /^\/(past|muse|ero|city|six|drk|taa|dkm|scl90|apt|sins|face)(\/|$)/.test(path);
 
   if (window.__PUBLIC_CONFIG__) {
     window.__PUBLIC_CONFIG__.domain_lock_enabled = 0;
@@ -18,18 +16,10 @@
   var distToken = searchParams.get('token') || '';
   var integrated = searchParams.get('psy_integrated') === '1' || !!distToken;
 
-  // 清除上次 chunk 重试计数，避免「反复载入」卡死
+  // 分包路径：index.html 已含 <base href="/xlx-mirror/">
   try {
     sessionStorage.removeItem('chunk-global-retry');
   } catch (e) {}
-
-  // 分包路径始终指向 /xlx-mirror/assets/（即使地址栏显示 /past）
-  if (onMirror || SCALE_ROUTE) {
-    var baseEl = document.createElement('base');
-    baseEl.href = location.origin + MIRROR_BASE + '/';
-    var head = document.head || document.getElementsByTagName('head')[0];
-    if (head) head.insertBefore(baseEl, head.firstChild);
-  }
 
   if (integrated && distToken) {
     document.write('<script src="/shared/xlx-digit-integration.js"><\/script>');

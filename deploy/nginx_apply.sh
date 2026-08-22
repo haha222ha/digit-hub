@@ -149,7 +149,11 @@ ${GZIP_DIRECTIVES}
         try_files \$uri \$uri/ /xlx-mirror/index.html;
         add_header Cache-Control "no-store, no-cache, must-revalidate";
     }
-    # 镜像 history shim 会把地址改为 /past 等；须回落到 xlx-mirror SPA，不能进 console 首页
+    # history shim 后分包可能请求 /past/assets/*，须转到 xlx-mirror/assets（不能回落 index.html）
+    location ~ ^/(past|muse)/assets/ {
+        rewrite ^/(past|muse)/assets/(.*)$ /xlx-mirror/assets/$1 last;
+    }
+    # 镜像 history shim 会把地址改为 /past 等；须回落 xlx-mirror SPA
     location ~ ^/(past|muse|ero|city|six|drk|taa|dkm|scl90|apt|sins|face)(/.*)?$ {
         try_files \$uri /xlx-mirror/index.html;
         add_header Cache-Control "no-store, no-cache, must-revalidate";

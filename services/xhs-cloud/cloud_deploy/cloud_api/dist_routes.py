@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from pydantic import BaseModel, Field
 
 from cloud_deploy.cloud_api import database as db
@@ -231,21 +231,21 @@ def _assert_dist_can_login(user_id: int) -> None:
         raise HTTPException(status_code=403, detail="账号已停用或已删除，请联系管理员")
 
 
-@compat_router.get("/test/{test_code}/{token}", response_class=HTMLResponse)
+@compat_router.get("/test/{test_code}/{token}")
 def compat_test_iframe_shell(test_code: str, token: str):
-    """C 端分销入口：iframe 壳内嵌测题页（past 类走 L3 镜像单层 iframe）。"""
+    """C 端分销入口：past 类全页跳转镜像；其它测题 iframe 内嵌。"""
     safe_code = (test_code or "").replace('"', "")
     safe_token = (token or "").replace('"', "")
-    # past_new / past_xlx 使用 L3 镜像，避免 tests/index → xlx-mirror 双层 iframe（微信内易白屏）
     if safe_code in ("past_new", "past_xlx"):
-        iframe_src = (
-            f"/xlx-mirror/past?psy_integrated=1&test_code={safe_code}"
-            f"&scale=past&token={safe_token}"
+        return RedirectResponse(
+            url=(
+                f"/xlx-mirror/past?psy_integrated=1&test_code={safe_code}"
+                f"&scale=past&token={safe_token}"
+            ),
+            status_code=302,
         )
-    else:
-        iframe_src = f"/tests/{safe_code}/index.html?token={safe_token}"
     return HTMLResponse(
-        f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>心象测</title><style>html,body,iframe{{margin:0;height:100%;width:100%;border:0}}</style></head><body><iframe src="{iframe_src}"></iframe></body></html>"""
+        f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>心象测</title><style>html,body,iframe{{margin:0;height:100%;width:100%;border:0}}</style></head><body><iframe src="/tests/{safe_code}/index.html?token={safe_token}"></iframe></body></html>"""
     )
 
 
