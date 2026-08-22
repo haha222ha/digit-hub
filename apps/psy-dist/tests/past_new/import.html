@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>从 xlxtest 导入历史结果 · 历史人物匹配</title>
+  <link rel="stylesheet" href="../../shared/past-result-ui.css">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', serif; background:#f4efe6; color:#1a1612; max-width:480px; margin:0 auto; padding:20px; }
+    h1 { font-size:22px; margin-bottom:8px; color:#7a4b12; }
+    .hint { font-size:13px; color:#666; line-height:1.7; margin-bottom:16px; }
+    textarea { width:100%; min-height:120px; border:1.5px solid #e5ddd0; border-radius:12px; padding:12px; font-size:12px; font-family:monospace; }
+    .btn { width:100%; margin-top:10px; border:none; padding:14px; border-radius:12px; font-weight:700; cursor:pointer; }
+    .btn-primary { background:#3d2914; color:#fff; }
+    .btn-ghost { background:#fff; border:1.5px solid #e5ddd0; color:#333; }
+    .pick-list { margin:12px 0; }
+    .pick-item { background:#fff; border:1px solid #e5ddd0; border-radius:10px; padding:12px; margin-bottom:8px; cursor:pointer; text-align:left; width:100%; }
+    .pick-item:hover { border-color:#7a4b12; }
+    .pick-name { font-weight:800; }
+    .pick-meta { font-size:12px; color:#888; margin-top:4px; }
+    pre.cmd { background:#fff; border-radius:8px; padding:10px; font-size:11px; overflow:auto; margin:10px 0; }
+    .err { color:#b85c4a; font-size:13px; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <h1>xlxtest 答卷导入</h1>
+  <p class="hint">在 xlxtest.com 完成测试后，于<strong>同一浏览器</strong>控制台执行下方命令，复制 JSON 粘贴到此处，即可在本站复现<strong>完全相同</strong>的分数与报告（含雷达对比）。</p>
+  <pre class="cmd">copy(localStorage.getItem('xlxtest:history:past:v1'))</pre>
+  <textarea id="raw" placeholder="粘贴 xlxtest:history:past:v1 的 JSON…"></textarea>
+  <button class="btn btn-primary" id="btn-parse">解析历史记录</button>
+  <div id="pick" class="pick-list"></div>
+  <div id="err" class="err"></div>
+  <div id="result-root"></div>
+  <button class="btn btn-ghost" id="btn-back" style="display:none;margin-top:16px">重新选择</button>
+
+  <script type="module">
+    import { renderPastResult } from '../../shared/past-result-ui.js';
+
+    const $ = (id) => document.getElementById(id);
+    let entries = [];
+
+    function parseRaw() {
+      $('err').textContent = '';
+      $('pick').innerHTML = '';
+      $('result-root').innerHTML = '';
+      $('btn-back').style.display = 'none';
+      const raw = $('raw').value.trim();
+      if (!raw) { $('err').textContent = '请先粘贴 JSON'; return; }
+      let data;
+      try { data = JSON.parse(raw); } catch (e) { $('err').textContent = 'JSON 解析失败'; return; }
+      if (!Array.isArray(data)) { $('err').textContent = '格式应为数组'; return; }
+      entries = data.filter((it) => it?.reportData?.result?.primary);
+      if (!entries.length) { $('err').textContent = '未找到含 reportData.result 的记录'; return; }
+      entries.forEach((it, idx) => {
+        const p = it.reportData.result.primary;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pick-item';
+        btn.innerHTML = `<div class="pick-name">${p.name || it.label}</div><div class="pick-meta">${p.author || ''} · ${p.source || ''} · ${it.finishedAt || ''}</div>`;
+        btn.onclick = () => showEntry(idx);
+        $('pick').appendChild(btn);
+      });
+    }
+
+    function showEntry(idx) {
+      const it = entries[idx];
+      const result = it.reportData.result;
+      $('pick').style.display = 'none';
+      $('raw').style.display = 'none';
+      $('btn-parse').style.display = 'none';
+      $('btn-back').style.display = 'block';
+      renderPastResult($('result-root'), result, {
+        showActions: true,
+        onRetry: () => location.reload(),
+      });
+    }
+
+    $('btn-parse').onclick = parseRaw;
+    $('btn-back').onclick = () => location.reload();
+
+    const q = new URLSearchParams(location.search).get('data');
+    if (q) {
+      try { $('raw').value = decodeURIComponent(q); parseRaw(); } catch (_) {}
+    }
+  </script>
+</body>
+</html>
