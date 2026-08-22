@@ -66,7 +66,7 @@ export function buildPastResultHtml(result, options = {}) {
       <div class="capture-area">
         <div class="brand-bar">
           <div class="logo">心象测</div>
-          <div class="meta">历史人物原型</div>
+          <div class="meta">历史人物匹配</div>
         </div>
         <header class="hero">
           <div class="hero-label">${esc(heroLabel)}</div>
