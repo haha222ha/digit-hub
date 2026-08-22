@@ -151,7 +151,7 @@ ${GZIP_DIRECTIVES}
     }
     # history shim 后分包可能请求 /past/assets/*，须转到 xlx-mirror/assets（不能回落 index.html）
     location ~ ^/(past|muse)/assets/ {
-        rewrite ^/(past|muse)/assets/(.*)$ /xlx-mirror/assets/$1 last;
+        rewrite ^/(past|muse)/assets/(.*)$ /xlx-mirror/assets/\$1 last;
     }
     # 镜像 history shim 会把地址改为 /past 等；须回落 xlx-mirror SPA
     location ~ ^/(past|muse|ero|city|six|drk|taa|dkm|scl90|apt|sins|face)(/.*)?$ {
