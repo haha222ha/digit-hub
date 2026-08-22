@@ -1,0 +1,1 @@
+import{G as e}from"./index-DWIgfZ_Z-rBnOF_ZDsobST.js";const t={verify:t=>e("/api/verify",t),heartbeat:t=>e("/api/verify/heartbeat",{verifyToken:t})},a={fetchQuestions:t=>e("/api/test/questions",t)};export{t as a,a as s};

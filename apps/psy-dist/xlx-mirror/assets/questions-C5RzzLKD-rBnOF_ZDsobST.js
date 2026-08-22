@@ -1,0 +1,1 @@
+import{Q as t,L as o}from"./content-Cg21lgiM-rBnOF_ZDsobST.js";const e=o.map(t=>({id:t.v,text:t.l})),i=t.map(t=>({id:t.id,text:t.t,dimension:t.d,reverse:"r"in t&&Boolean(t.r),options:e}));export{i as questions};

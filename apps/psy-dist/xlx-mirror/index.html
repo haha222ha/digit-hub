@@ -1,0 +1,638 @@
+<!doctype html>
+<html>
+  <head>
+    <script type="module" crossorigin src="/xlx-mirror/assets/polyfills-SRf75bJA-rBnOF_ZDsobST.js"></script>
+
+    <title>XlxTest</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="XlxTest - 趣味自我探索平台"
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+
+    <style>
+      /* 防止页面刷新时白屏的初始样式 */
+      html {
+        background-color: #fafbfc;
+      }
+
+      html.dark {
+        background-color: #070707;
+      }
+
+      /* Loading spinner */
+      #app-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #909399;
+        font-size: 14px;
+      }
+      html.dark #app-loading { color: #a3a6ad; }
+
+      #app-loading .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #e4e7ed;
+        border-top-color: #409eff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 12px;
+      }
+      html.dark #app-loading .spinner {
+        border-color: #3a3a3c;
+        border-top-color: #409eff;
+      }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      /* CSS 缺失检测标记：正常 CSS 加载后会被 app.scss 覆盖 */
+      body::after {
+        content: 'css-missing-fallback';
+        display: none;
+      }
+    </style>
+
+    <script>
+      // ========================================
+      // 1. 主题初始化（避免白屏闪烁）
+      // ========================================
+      ;(function () {
+        try {
+          if (typeof Storage === 'undefined' || !window.localStorage) return
+          var themeType = localStorage.getItem('sys-theme')
+          if (themeType === 'dark') {
+            document.documentElement.classList.add('dark')
+          }
+        } catch (e) {}
+      })()
+
+      // ========================================
+      // 2. 环境检测
+      // ========================================
+      var ua = navigator.userAgent
+      var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+      var isSafari = /^((?!chrome|android).)*safari/i.test(ua)
+
+      var storageAvailable = false
+      try {
+        localStorage.setItem('__t', '1')
+        localStorage.removeItem('__t')
+        storageAvailable = true
+      } catch (e) {}
+
+      var sessionStorageAvailable = false
+      try {
+        sessionStorage.setItem('__t', '1')
+        sessionStorage.removeItem('__t')
+        sessionStorageAvailable = true
+      } catch (e) {}
+
+      // ========================================
+      // 3. ChunkLoadError 自动重试（HTML 层兜底）
+      // ========================================
+      var CHUNK_RETRY_PARAM = '__cr'
+      var CHUNK_RETRY_TS_PARAM = '__ct'
+      var maxChunkRetry = 3
+      var chunkRetryCount = 0
+      var startupRecoveryPending = false
+      var startupRetryTimer = null
+      var startupTimeoutTimer = null
+      var STARTUP_TIMEOUT_MS = 15000
+
+      // 错误诊断信息收集
+      var errorDiagnostics = {
+        errors: [],
+        failedResources: [],
+        timings: { pageStart: Date.now() }
+      }
+
+      function isAppMounted() {
+        return window.__XLX_APP_MOUNTED__ === true
+      }
+
+      function clearStartupRecoveryState() {
+        startupRecoveryPending = false
+        if (startupRetryTimer) {
+          clearTimeout(startupRetryTimer)
+          startupRetryTimer = null
+        }
+        if (startupTimeoutTimer) {
+          clearTimeout(startupTimeoutTimer)
+          startupTimeoutTimer = null
+        }
+        try { sessionStorage.removeItem('chunk-global-retry') } catch (e) {}
+        clearUrlRetryCount()
+      }
+
+      function recoverStartup(reason, source) {
+        if (isAppMounted() || startupRecoveryPending) return
+        startupRecoveryPending = true
+        lastErrorInfo = reason
+        lastErrorUrl = source || ''
+        errorDiagnostics.errors.push({
+          type: 'startup',
+          message: reason,
+          url: source || '',
+          time: Date.now() - errorDiagnostics.timings.pageStart
+        })
+
+        handleChunkError(true)
+      }
+
+      window.addEventListener('xlx:app-mounted', clearStartupRecoveryState)
+
+      window.addEventListener('xlx:route-load-failed', function (event) {
+        var detail = event && event.detail ? event.detail : {}
+        lastErrorInfo = detail.message || 'Route module failed to load'
+        lastErrorStack = detail.stack || ''
+        lastErrorUrl = detail.url || location.href
+        errorDiagnostics.errors.push({
+          type: 'route',
+          message: lastErrorInfo,
+          url: lastErrorUrl,
+          stack: lastErrorStack,
+          time: Date.now() - errorDiagnostics.timings.pageStart
+        })
+        showErrorUI()
+      })
+
+      // Keep a visible recovery path when the entry module stalls before Vue mounts.
+      startupTimeoutTimer = setTimeout(function () {
+        startupTimeoutTimer = null
+        if (!isAppMounted()) recoverStartup('Application startup timed out')
+      }, STARTUP_TIMEOUT_MS)
+
+      // 监听资源加载失败（script/link）
+      window.addEventListener('error', function (e) {
+        if (e.target && (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK')) {
+          var src = e.target.src || e.target.href
+          errorDiagnostics.failedResources.push({
+            type: e.target.tagName,
+            url: src,
+            time: Date.now() - errorDiagnostics.timings.pageStart
+          })
+          console.warn('[App] 资源加载失败:', src)
+
+          var isCriticalLink = e.target.tagName === 'LINK' &&
+            (e.target.rel === 'stylesheet' || e.target.rel === 'modulepreload')
+          if (e.target.tagName === 'SCRIPT' || isCriticalLink) {
+            recoverStartup('Application resource failed to load', src)
+          }
+        }
+      }, true)
+
+      function isChunkLoadError(msg) {
+        if (!msg) return false
+        var s = String(msg).toLowerCase()
+        return s.indexOf('loading chunk') !== -1 ||
+               s.indexOf('failed to fetch') !== -1 ||
+               s.indexOf('loading css chunk') !== -1 ||
+               s.indexOf('unable to preload') !== -1 ||
+               s.indexOf('dynamically imported module') !== -1 ||
+               s.indexOf("unexpected token '<'") !== -1 ||
+               s.indexOf('syntax error') !== -1 ||
+               (s.indexOf('mime type') !== -1 && s.indexOf('text/html') !== -1) ||
+               s.indexOf('chunkloaderror') !== -1 ||
+               s.indexOf('network error') !== -1 ||
+               s.indexOf('module specifier') !== -1
+      }
+
+      function getUrlRetryCount() {
+        try {
+          var url = new URL(location.href)
+          return parseInt(url.searchParams.get(CHUNK_RETRY_PARAM) || '0', 10) || 0
+        } catch (e) { return 0 }
+      }
+
+      function setUrlRetryCount(count) {
+        try {
+          var url = new URL(location.href)
+          url.searchParams.set(CHUNK_RETRY_PARAM, String(count))
+          url.searchParams.set(CHUNK_RETRY_TS_PARAM, String(Date.now()))
+          location.replace(url.toString())
+        } catch (e) {
+          location.href = location.href.split('?')[0] + '?__t=' + Date.now()
+        }
+      }
+
+      function clearUrlRetryCount() {
+        try {
+          var url = new URL(location.href)
+          if (!url.searchParams.has(CHUNK_RETRY_PARAM)) return
+          url.searchParams.delete(CHUNK_RETRY_PARAM)
+          url.searchParams.delete(CHUNK_RETRY_TS_PARAM)
+          history.replaceState(null, '', url.toString())
+        } catch (e) {}
+      }
+
+      function hardReload() {
+        try {
+          if ('caches' in window) {
+            caches.keys().then(function (names) {
+              names.forEach(function (name) { caches.delete(name) })
+            })
+          }
+        } catch (e) {}
+        var baseUrl = location.href.split('?')[0]
+        location.href = baseUrl + '?__nocache=' + Date.now()
+      }
+
+      function handleChunkError(cancelWhenMounted) {
+        try {
+          chunkRetryCount = parseInt(sessionStorage.getItem('chunk-global-retry') || '0', 10)
+        } catch (e) {
+          chunkRetryCount = getUrlRetryCount()
+        }
+
+        console.warn('[App] Chunk 加载失败，当前重试次数:', chunkRetryCount, '/', maxChunkRetry)
+
+        if (chunkRetryCount < maxChunkRetry) {
+          try {
+            sessionStorage.setItem('chunk-global-retry', String(chunkRetryCount + 1))
+          } catch (e) {}
+
+          var delay = (isSafari || isIOS) ? 800 : 500
+          var retry = function () {
+            startupRetryTimer = null
+            if (cancelWhenMounted && isAppMounted()) {
+              clearStartupRecoveryState()
+              return
+            }
+            setUrlRetryCount(chunkRetryCount + 1)
+          }
+          if (cancelWhenMounted) {
+            startupRetryTimer = setTimeout(retry, delay)
+          } else {
+            setTimeout(retry, delay)
+          }
+          return true
+        } else {
+          try { sessionStorage.removeItem('chunk-global-retry') } catch (e) {}
+          clearUrlRetryCount()
+          showErrorUI()
+          return false
+        }
+      }
+
+      // ========================================
+      // 4. 错误诊断收集
+      // ========================================
+      var lastErrorInfo = ''
+      var lastErrorStack = ''
+      var lastErrorUrl = ''
+
+      function collectDiagnostics() {
+        var info = {
+          timestamp: new Date().toISOString(),
+          url: location.href,
+          referrer: document.referrer,
+          userAgent: ua,
+          platform: navigator.platform,
+          language: navigator.language,
+          cookieEnabled: navigator.cookieEnabled,
+          isIOS: isIOS,
+          isSafari: isSafari,
+          iosVersion: (ua.match(/OS (\d+)_(\d+)/) || []).slice(1).join('.') || 'N/A',
+          safariVersion: (ua.match(/Version\/(\d+\.\d+)/) || [])[1] || 'N/A',
+          online: navigator.onLine,
+          connection: null,
+          localStorageAvailable: storageAvailable,
+          sessionStorageAvailable: sessionStorageAvailable,
+          errors: errorDiagnostics.errors,
+          failedResources: errorDiagnostics.failedResources,
+          retryCount: chunkRetryCount,
+          loadDuration: Date.now() - errorDiagnostics.timings.pageStart,
+          timing: null,
+          memory: null,
+          resourceCount: 0,
+          failedResourceDetails: []
+        }
+        if (navigator.connection) {
+          info.connection = {
+            effectiveType: navigator.connection.effectiveType,
+            downlink: navigator.connection.downlink,
+            rtt: navigator.connection.rtt,
+            saveData: navigator.connection.saveData
+          }
+        }
+        if (window.performance) {
+          try {
+            var t = performance.timing
+            if (t) {
+              info.timing = {
+                dns: t.domainLookupEnd - t.domainLookupStart,
+                tcp: t.connectEnd - t.connectStart,
+                ttfb: t.responseStart - t.requestStart,
+                download: t.responseEnd - t.responseStart,
+                domReady: t.domContentLoadedEventEnd - t.navigationStart,
+                load: t.loadEventEnd - t.navigationStart
+              }
+            }
+            // 资源加载失败详情（transferSize=0 且 decodedBodySize=0 视为失败）
+            var resources = performance.getEntriesByType('resource')
+            info.resourceCount = resources.length
+            info.failedResourceDetails = resources
+              .filter(function (r) { return r.transferSize === 0 && r.decodedBodySize === 0 })
+              .map(function (r) { return { name: r.name, duration: r.duration, type: r.initiatorType } })
+              .slice(0, 10)
+          } catch (e) {}
+          // Chrome 内存使用量
+          if (performance.memory) {
+            info.memory = {
+              usedJSHeapSize: performance.memory.usedJSHeapSize,
+              totalJSHeapSize: performance.memory.totalJSHeapSize,
+              jsHeapSizeLimit: performance.memory.jsHeapSizeLimit
+            }
+          }
+        }
+        return info
+      }
+
+      // ========================================
+      // 5. 错误上报（三路冗余）
+      // ========================================
+      function reportError(diagnostics) {
+        try {
+          var publicConfig = window.__PUBLIC_CONFIG__
+          if (publicConfig && publicConfig.error_report_enabled === false) return
+        } catch (e) {}
+
+        var json = JSON.stringify(diagnostics)
+        // sendBeacon（页面关闭时也能发出）
+        // 必须用 Blob 显式指定 application/json，否则浏览器按 text/plain 发送，
+        // 后端 express.json() 不解析 → req.body 为空 → 入库为空 UNKNOWN 记录
+        var sent = false
+        if (navigator.sendBeacon) {
+          try {
+            sent = navigator.sendBeacon('/api/error-report', new Blob([json], { type: 'application/json' }))
+          } catch (e) {}
+        }
+        // fetch 兜底：仅当 sendBeacon 不可用或发送失败（如超出 64KB 上限）时执行，避免重复上报
+        if (!sent) {
+          try {
+            fetch('/api/error-report', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: json,
+              keepalive: true
+            }).catch(function () {})
+          } catch (e) {}
+        }
+        // localStorage 存档（供后续查看）
+        try {
+          var log = JSON.parse(localStorage.getItem('__error_log') || '[]')
+          log.push(diagnostics)
+          if (log.length > 5) log = log.slice(-5)
+          localStorage.setItem('__error_log', JSON.stringify(log))
+        } catch (e) {}
+      }
+
+      // ========================================
+      // 6. 错误 UI
+      // ========================================
+      function showErrorUI() {
+        var el = document.getElementById('app')
+        if (!el) el = document.getElementById('app-loading')
+        if (!el) return
+        el.style.display = 'block'
+
+        var errorCode = 'E' + Date.now().toString(36).toUpperCase().slice(-6)
+        var deviceInfo = (isIOS ? 'iOS' : 'Other') + '/' + (isSafari ? 'Safari' : 'Browser')
+        var diagnostics = collectDiagnostics()
+        diagnostics.errorCode = errorCode
+        diagnostics.lastError = lastErrorInfo
+        diagnostics.lastErrorStack = lastErrorStack
+        diagnostics.lastErrorUrl = lastErrorUrl
+        reportError(diagnostics)
+
+        var diagSummary = [
+          isIOS ? 'iOS: ' + diagnostics.iosVersion : '',
+          isSafari ? 'Safari: ' + diagnostics.safariVersion : '',
+          diagnostics.online ? '在线' : '离线',
+          diagnostics.connection ? diagnostics.connection.effectiveType : '',
+          !diagnostics.localStorageAvailable ? '存储不可用' : '',
+          '重试' + diagnostics.retryCount + '次'
+        ].filter(Boolean).join(' | ')
+
+        var failedList = diagnostics.failedResources.length > 0
+          ? '<p style="color:#909399;font-size:9px;margin-top:8px;word-break:break-all;">失败: ' +
+            diagnostics.failedResources.map(function (r) { return r.url.split('/').pop() }).slice(0, 3).join(', ') + '</p>'
+          : ''
+
+        var iosTip = isIOS
+          ? '<p style="color:#e6a23c;font-size:11px;margin-top:8px;">iOS: 设置 - Safari - 清除历史记录与网站数据</p>'
+          : ''
+
+        var isDark = document.documentElement.classList.contains('dark')
+
+        el.innerHTML =
+          '<div style="text-align:center;padding:20px;max-width:360px;margin:0 auto;">' +
+            '<p style="color:#f56c6c;margin-bottom:12px;font-size:16px;">页面加载出错</p>' +
+            '<p style="color:' + (isDark ? '#a3a6ad' : '#909399') + ';font-size:13px;margin-bottom:8px;">可能是网络波动或缓存问题</p>' +
+            iosTip +
+            '<div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;">' +
+              '<button onclick="clearAllAndReload()" style="padding:10px 24px;background:#409eff;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;">清除数据并刷新</button>' +
+              '<button onclick="hardReload()" style="padding:10px 24px;background:#e6a23c;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;">强制刷新</button>' +
+            '</div>' +
+            '<p style="color:#c0c4cc;font-size:10px;margin-top:16px;">错误码: ' + errorCode + ' | ' + deviceInfo + '</p>' +
+            '<p style="color:#c0c4cc;font-size:9px;margin-top:4px;">' + diagSummary + '</p>' +
+            failedList +
+            '<button onclick="toggleDiagDetails()" style="margin-top:12px;padding:6px 12px;background:transparent;color:#909399;border:1px solid #dcdfe6;border-radius:4px;cursor:pointer;font-size:11px;">显示诊断信息</button>' +
+            '<pre id="diag-details" style="display:none;text-align:left;font-size:9px;background:' + (isDark ? '#1a1a1a' : '#f5f7fa') + ';padding:10px;border-radius:4px;margin-top:10px;max-height:200px;overflow:auto;white-space:pre-wrap;word-break:break-all;"></pre>' +
+            '<button onclick="copyDiagnostics()" id="copy-btn" style="display:none;margin-top:8px;padding:6px 12px;background:#67c23a;color:white;border:none;border-radius:4px;cursor:pointer;font-size:11px;">复制诊断信息</button>' +
+          '</div>'
+
+        var _diagData = diagnostics
+        var detailsEl = document.getElementById('diag-details')
+        if (detailsEl) detailsEl.textContent = JSON.stringify(diagnostics, null, 2)
+
+        console.error('[App] 错误码:', errorCode, diagnostics)
+      }
+
+      function toggleDiagDetails() {
+        var el = document.getElementById('diag-details')
+        var btn = document.getElementById('copy-btn')
+        if (el) {
+          var isHidden = el.style.display === 'none'
+          el.style.display = isHidden ? 'block' : 'none'
+          if (btn) btn.style.display = isHidden ? 'inline-block' : 'none'
+        }
+      }
+
+      function copyDiagnostics() {
+        var el = document.getElementById('diag-details')
+        var text = el ? el.textContent : ''
+        if (!text) return
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text).then(function () {
+            alert('已复制，请发送给技术支持')
+          }).catch(function () { prompt('请复制:', text) })
+        } else {
+          prompt('请复制:', text)
+        }
+      }
+
+      function clearAllAndReload() {
+        try { localStorage.clear() } catch (e) {}
+        try { sessionStorage.clear() } catch (e) {}
+        try {
+          if ('caches' in window) {
+            caches.keys().then(function (names) {
+              names.forEach(function (name) { caches.delete(name) })
+            })
+          }
+        } catch (e) {}
+        setTimeout(function () {
+          location.href = location.href.split('?')[0] + '?__cleared=' + Date.now()
+        }, 100)
+      }
+
+      // ========================================
+      // 7. 全局错误捕获
+      // ========================================
+      window.onerror = function (msg, url, line, col, error) {
+        console.error('全局错误:', msg, url, line, col, error)
+        lastErrorInfo = 'onerror: ' + String(msg).substring(0, 300)
+        lastErrorStack = (error && error.stack) ? error.stack.substring(0, 500) : ''
+        lastErrorUrl = url || ''
+
+        errorDiagnostics.errors.push({
+          type: 'onerror',
+          message: String(msg).substring(0, 300),
+          url: url,
+          line: line,
+          col: col,
+          stack: lastErrorStack,
+          time: Date.now() - errorDiagnostics.timings.pageStart
+        })
+
+        if (isChunkLoadError(msg) || (error && isChunkLoadError(error.message))) {
+          console.warn('[App] 检测到 Chunk 加载失败，准备重试...')
+          return handleChunkError(!isAppMounted())
+        }
+
+        if (!isAppMounted()) {
+          recoverStartup('Application script failed before mount', url)
+        }
+
+        return false
+      }
+
+      // 捕获未处理的 Promise rejection（动态 import 失败）
+      window.onunhandledrejection = function (event) {
+        var reason = event.reason
+        var msg = reason && (reason.message || String(reason))
+        var stack = (reason && reason.stack) ? reason.stack.substring(0, 500) : ''
+
+        lastErrorInfo = 'rejection: ' + String(msg).substring(0, 300)
+        lastErrorStack = stack
+
+        errorDiagnostics.errors.push({
+          type: 'unhandledrejection',
+          message: String(msg).substring(0, 300),
+          stack: stack,
+          time: Date.now() - errorDiagnostics.timings.pageStart
+        })
+
+        if (isChunkLoadError(msg)) {
+          console.warn('[App] 检测到 Promise rejection (Chunk 加载失败):', msg)
+          event.preventDefault()
+          handleChunkError(!isAppMounted())
+        } else if (!isAppMounted()) {
+          recoverStartup('Application promise failed before mount')
+        }
+      }
+
+      // ========================================
+      // 8. 加载成功 / CSS 缺失检测
+      // ========================================
+      window.addEventListener('load', function () {
+        // Do not clear retries merely because HTML finished loading. On iOS a module
+        // can still fail or stall after this event and before Vue mounts.
+        if (isAppMounted()) clearStartupRecoveryState()
+
+        // CSS 缺失检测：检查 body::after 伪元素是否还存在 fallback 标记
+        setTimeout(function () {
+          try {
+            var bodyAfter = window.getComputedStyle(document.body, '::after')
+            var content = bodyAfter.getPropertyValue('content')
+            if (content && content.indexOf('css-missing-fallback') !== -1) {
+              console.warn('[App] 检测到 CSS 文件缺失，触发刷新...')
+              var cssRetryKey = '__css_missing_retry'
+              var cssRetryCount = parseInt(sessionStorage.getItem(cssRetryKey) || '0', 10)
+              if (cssRetryCount < 2) {
+                sessionStorage.setItem(cssRetryKey, String(cssRetryCount + 1))
+                location.href = location.href.split('?')[0] + '?__css_fix=' + Date.now()
+              } else {
+                sessionStorage.removeItem(cssRetryKey)
+                console.error('[App] CSS 缺失问题持续，已达重试上限')
+              }
+            } else {
+              try { sessionStorage.removeItem('__css_missing_retry') } catch (e) {}
+              // CSS 正常加载后，清除 URL 中残留的 __css_fix 参数
+              if (location.search.indexOf('__css_fix') !== -1) {
+                try { history.replaceState(null, '', location.pathname + location.hash) } catch (e) {}
+              }
+            }
+          } catch (e) {
+            console.warn('[App] CSS 检测失败:', e)
+          }
+        }, 1000)
+      })
+
+      // Safari 隐私模式提示
+      if ((isSafari || isIOS) && !storageAvailable) {
+        console.warn('[App] 检测到 Safari 隐私模式，部分功能可能受限')
+      }
+    </script>
+    <script type="module" crossorigin src="/xlx-mirror/assets/index-DWIgfZ_Z-rBnOF_ZDsobST.js"></script>
+    <link rel="modulepreload" crossorigin href="/xlx-mirror/assets/vue-vendor-CF7IGgvF-rBnOF_ZDsobST.js">
+    <link rel="modulepreload" crossorigin href="/xlx-mirror/assets/libs-zt8pkMeb-rBnOF_ZDsobST.js">
+    <link rel="stylesheet" crossorigin href="/xlx-mirror/assets/libs-BgDCIyLK.css">
+    <link rel="stylesheet" crossorigin href="/xlx-mirror/assets/index-Dpuel1Br.css">
+  
+
+<!-- PUBLIC_CONFIG_START --><script>window.__PUBLIC_CONFIG__={"site_name":"趣味测试-深度探索","shop_channels":[{"name":"小红书店铺","url":"https://xhslink.com/m/1hT7AO9QbAQ","color":"#FF2442","icon":"xiaohongshu","visible":true}],"verify_tips":[],"heartbeat_enabled":0,"heartbeat_interval":10,"input_placeholder":"镜像模式 · 无需授权码","icp_number":"","police_number":"","submit_button_text":"开始探索","domain_lock_enabled":0,"domain_lock_domains":"","reward_popup_enabled":1,"reward_popup_btn_text":"晒单有礼","reward_popup_title":"晒单有礼","reward_popup_rules":[],"reward_popup_footer_title":"","reward_popup_footer_desc":"","error_report_enabled":false}</script><!-- PUBLIC_CONFIG_END -->
+<script src="/xlx-mirror/mirror-bootstrap.js"></script>
+
+</head>
+
+  <body>
+    <div id="app">
+      <div id="app-loading">
+        <div class="spinner"></div>
+        <span>加载中...</span>
+      </div>
+    </div>
+    <script>
+      // Restore the cached title for public scale routes. The loading state must
+      // remain visible until Vue mounts so a failed entry script never becomes blank.
+      // 用正向白名单识别公开路径（首页 / 量表列表 / 量表落地）
+      // 避免反向排除时把后台路径关键字编入 HTML
+      ;(function() {
+        var p = location.pathname
+        var isPublicRoute = p === '/' || p === '/scales' ||
+          /^\/[a-z0-9-]+(?:\/(?:quiz|report)\/[^/]+)?\/?$/.test(p)
+
+        if (isPublicRoute) {
+          // 量表路由：从专属缓存恢复标题（避免闪现 XlxTest 或 量表）
+          // 路径格式: /:key 或 /:key/quiz/:token 或 /:key/report/:token
+          var seg = p.split('/')[1]
+          if (seg && seg !== 'scales') {
+            try {
+              var t = sessionStorage.getItem('scale-title:' + seg)
+              if (t) document.title = t
+            } catch(e) {}
+          }
+        }
+      })()
+    </script>
+  </body>
+</html>

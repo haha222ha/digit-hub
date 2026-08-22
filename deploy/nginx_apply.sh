@@ -140,6 +140,15 @@ ${GZIP_DIRECTIVES}
         try_files \$uri =404;
         add_header Cache-Control "no-store, no-cache, must-revalidate";
     }
+    # xlxtest L3 整站镜像（历史人物 past 等 Vue SPA）
+    location ^~ /xlx-mirror/assets/ {
+        try_files \$uri =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+    location ^~ /xlx-mirror/ {
+        try_files \$uri \$uri/ /xlx-mirror/index.html;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
     location /static/ {
         try_files \$uri =404;
     }

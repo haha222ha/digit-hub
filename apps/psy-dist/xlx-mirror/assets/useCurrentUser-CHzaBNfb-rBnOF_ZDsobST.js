@@ -1,0 +1,1 @@
+import{a6 as r}from"./index-DWIgfZ_Z-rBnOF_ZDsobST.js";import{g as e}from"./vue-vendor-CF7IGgvF-rBnOF_ZDsobST.js";function o(){const o=r(),n=e(()=>{var r;return"super_admin"===(null==(r=o.info)?void 0:r.role)});return{userStore:o,isSuperAdmin:n,isOwner:r=>{var e;return!!n.value||r.creator_id===(null==(e=o.info)?void 0:e.userId)&&"staff"===r.creator_type}}}export{o as u};
