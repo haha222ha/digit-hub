@@ -65,6 +65,19 @@
     const unlimitedToken = searchParams.get('token');
     
     if (unlimited && unlimitedToken) {
+      // 平台结果直显中心 /preview/ 或 /preview/index.html?test={code}
+      const previewHubMatch = path.match(/^\/preview\/?$/) || path.match(/^\/preview\/index\.html$/);
+      if (previewHubMatch) {
+        const testFromQuery = searchParams.get('test');
+        if (testFromQuery) {
+          return {
+            testCode: testFromQuery,
+            token: unlimitedToken,
+            unlimited: true
+          };
+        }
+      }
+
       // 无限测试模式：从URL路径获取test_code，从查询参数获取token
       // 支持两种格式：
       // 1. /test/{test_code}?unlimited=true&token={token}

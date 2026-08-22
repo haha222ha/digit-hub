@@ -933,7 +933,12 @@
       "duration_min": 8,
       "hot": false,
       "source": "xlxtest_clone",
-      "legacy_note": "平行于无旧版；XlxTest past 1:1 场景叙事"
+      "legacy_note": "平行于无旧版；XlxTest past 1:1 场景叙事",
+      "preview": {
+        "supported": true,
+        "renderer": "xlx_past_v1",
+        "theme": "past"
+      }
     },
     {
       "code": "muse_new",
@@ -942,7 +947,12 @@
       "duration_min": 10,
       "hot": false,
       "source": "xlxtest_clone",
-      "legacy_note": "平行于无旧版；XlxTest muse 1:1 文学场景"
+      "legacy_note": "平行于无旧版；XlxTest muse 1:1 文学场景",
+      "preview": {
+        "supported": true,
+        "renderer": "xlx_muse_v1",
+        "theme": "muse"
+      }
     }
   ]
 }

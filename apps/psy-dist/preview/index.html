@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="心象测 · 结果直显中心">
+  <title>结果直显 · 心象测</title>
+  <script src="/static/js/test-security.js"></script>
+  <link rel="stylesheet" href="./shell.css">
+</head>
+<body class="page-disabled theme-default">
+  <div id="screen-index" class="screen active">
+    <nav><div class="logo">心象测</div><div class="nav-badge" id="nav-badge">结果直显</div></nav>
+    <div class="hero">
+      <h1 id="hero-title">加载中…</h1>
+      <p class="hero-sub" id="hero-sub">无需答题，直接浏览全部结果类型，方便截图发笔记。</p>
+    </div>
+    <div class="search"><input id="search-input" type="search" placeholder="搜索结果类型…"></div>
+    <div class="index-meta-row"><span id="index-count">0 种结果</span></div>
+    <div class="index-grid" id="index-grid"></div>
+  </div>
+
+  <div id="screen-result" class="screen">
+    <nav><div class="logo">心象测</div><div class="nav-badge">结果预览</div></nav>
+    <div class="preview-bar">
+      <button class="btn btn-ghost" id="btn-back-index">返回列表</button>
+      <button class="btn btn-primary" id="btn-prev">上一个</button>
+      <button class="btn btn-primary" id="btn-next-result">下一个</button>
+    </div>
+    <div class="preview-pos" id="preview-pos"></div>
+    <div id="result-root"></div>
+    <div style="height:32px"></div>
+  </div>
+
+  <div id="screen-error" class="screen">
+    <nav><div class="logo">心象测</div><div class="nav-badge">提示</div></nav>
+    <div class="hero">
+      <h1>无法加载</h1>
+      <p class="hero-sub" id="error-msg"></p>
+    </div>
+  </div>
+
+  <script type="module" src="./shell.js"></script>
+  <script src="/static/js/link-validator.js"></script>
+</body>
+</html>

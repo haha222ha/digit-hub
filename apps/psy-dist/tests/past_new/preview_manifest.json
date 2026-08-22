@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "test_code": "past_new",
+  "test_name": "历史人物匹配·新",
+  "renderer": "xlx_past_v1",
+  "supported": true,
+  "theme": "past",
+  "data_url": "preview_results.json"
+}

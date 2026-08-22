@@ -941,6 +941,8 @@ def compat_unlimited_start(body: UnlimitedStartBody, request: Request):
     except HTTPException as e:
         return JSONResponse(_fail(str(e.detail), code=e.status_code), status_code=200)
     session = dist_db.create_unlimited_session(int(dist["id"] or _user["id"]), body.testCode)
+    origin = (request.headers.get("origin") or str(request.base_url)).rstrip("/")
+    session.update(svc.unlimited_session_urls(session.get("test_code") or body.testCode, session.get("token") or "", origin))
     return _ok(session, "免费测试已开启（24小时内有效）")
 
 

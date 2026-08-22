@@ -50,6 +50,21 @@ def _load_catalog() -> dict:
     return {"tests": []}
 
 
+def unlimited_session_urls(test_code: str, token: str, origin: str | None = None) -> dict[str, str]:
+    """生成免费测试 / 结果直显相关 URL（商家后台与 API 共用）。"""
+    from urllib.parse import quote
+
+    base = (origin or os.environ.get("XHS_PUBLIC_ORIGIN") or "https://psy.xhs365.cn").rstrip("/")
+    code = (test_code or "").strip()
+    tok = quote(token or "", safe="")
+    q = f"unlimited=true&token={tok}"
+    return {
+        "quiz_url": f"{base}/tests/{code}/index.html?{q}",
+        "preview_url": f"{base}/preview/?test={code}&{q}",
+        "preview_variant_url_template": f"{base}/preview/?test={code}&variant={{variant}}&{q}",
+    }
+
+
 def list_tests(*, include_disabled: bool = False) -> list[dict]:
     raw = _load_catalog().get("tests") or []
     out = []
@@ -69,6 +84,8 @@ def list_tests(*, include_disabled: bool = False) -> list[dict]:
                 "show_on_homepage": True,
                 "display_order": i + 1,
                 "page_path": f"/tests/{code}/index.html",
+                "preview_supported": bool((t.get("preview") or {}).get("supported")),
+                "preview_renderer": (t.get("preview") or {}).get("renderer"),
             }
         )
     try:

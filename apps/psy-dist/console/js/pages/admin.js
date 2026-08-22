@@ -20,6 +20,7 @@ const NAV = [
   { path: "/admin/test-results", label: "测题结果" },
   { path: "/admin/quota-logs", label: "额度日志" },
   { path: "/admin/unlimited-test", label: "免费测试" },
+  { path: "/admin/result-preview", label: "结果直显" },
   { path: "/admin/purchase-quota", label: "购买额度" },
   { path: "/admin/redeem-quota", label: "兑换额度" },
   { path: "/admin/invite-promotion", label: "邀请推广" },
@@ -65,7 +66,12 @@ function canUnlimited() {
 }
 
 function merchantNav() {
-  return NAV.filter((item) => item.path !== "/admin/unlimited-test" || canUnlimited());
+  return NAV.filter((item) => {
+    if (item.path === "/admin/unlimited-test" || item.path === "/admin/result-preview") {
+      return canUnlimited();
+    }
+    return true;
+  });
 }
 
 function navLabelNode(item) {
@@ -1346,15 +1352,40 @@ export async function renderUnlimited(root) {
       const session = await api.unlimitedStart(select.value);
       const token = session.token || session.session_token || "";
       const code = session.test_code || select.value;
-      const url = `${location.origin}/tests/${code}/index.html?unlimited=true&token=${encodeURIComponent(token)}`;
-      resultHost.append(flash("ok", "已开启免费测试会话"));
-      const copyBtn = el("button", { className: "btn btn-ghost", type: "button", text: "复制" });
+      const url = session.quiz_url || `${location.origin}/tests/${code}/index.html?unlimited=true&token=${encodeURIComponent(token)}`;
+      const previewUrl = session.preview_url || `${location.origin}/preview/?test=${encodeURIComponent(code)}&unlimited=true&token=${encodeURIComponent(token)}`;
+      resultHost.append(flash("ok", "已开启免费测试会话（24小时内有效）"));
+      const copyBtn = el("button", { className: "btn btn-ghost", type: "button", text: "复制答题链接" });
       bindCopyButton(copyBtn, url);
+      const copyPreviewBtn = el("button", { className: "btn btn-ghost", type: "button", text: "复制直显链接" });
+      bindCopyButton(copyPreviewBtn, previewUrl);
       resultHost.append(
         el("div", { className: "link-item" }, [
+          el("p", { className: "muted", text: "完整答题体验" }),
           el("code", { text: url }),
           copyBtn,
           el("a", { className: "btn btn-primary", href: url, target: "_blank", text: "打开测试", style: "width:auto" }),
+        ])
+      );
+      resultHost.append(
+        el("div", { className: "link-item", style: "margin-top:12px" }, [
+          el("p", { className: "muted", text: "结果直显（无需答题，发笔记用）" }),
+          el("code", { text: previewUrl }),
+          copyPreviewBtn,
+          el("a", {
+            className: "btn btn-primary",
+            href: previewUrl,
+            target: "_blank",
+            text: "打开直显",
+            style: "width:auto",
+          }),
+          el("a", {
+            className: "btn btn-ghost",
+            href: "#/admin/result-preview",
+            onClick: (e) => linkClick(e, "/admin/result-preview"),
+            text: "选择具体结果类型 →",
+            style: "width:auto;margin-top:8px",
+          }),
         ])
       );
     } catch (err) {
@@ -1368,6 +1399,162 @@ export async function renderUnlimited(root) {
     shell("/admin/unlimited-test", [
       el("h1", { className: "page-title", text: "免费测试" }),
       el("p", { className: "page-lead", text: "不耗额度体验完整测评流程。" }),
+      form,
+    ])
+  );
+}
+
+function buildPreviewVariantUrl(session, code, variantId) {
+  const tpl = session.preview_variant_url_template;
+  if (tpl) return tpl.replace("{variant}", encodeURIComponent(variantId));
+  const token = session.token || session.session_token || "";
+  return `${location.origin}/preview/?test=${encodeURIComponent(code)}&variant=${encodeURIComponent(variantId)}&unlimited=true&token=${encodeURIComponent(token)}`;
+}
+
+export async function renderResultPreview(root) {
+  await refreshSessionQuota();
+  if (!canUnlimited()) {
+    root.append(
+      shell("/admin/dashboard", [
+        el("h1", { className: "page-title", text: "结果直显" }),
+        flash(
+          "error",
+          `剩余额度需大于 10 才能使用结果直显（当前 ${remainingQuota()}）。请先购买或兑换额度；超管不受此限。`
+        ),
+      ])
+    );
+    return;
+  }
+
+  const errHost = el("div");
+  const select = el("select", { required: "true" });
+  select.append(el("option", { value: "", text: "请选择测评项目" }));
+  const sessionHost = el("div");
+  const variantHost = el("div");
+  let previewTests = [];
+  let activeSession = null;
+
+  try {
+    const data = await api.testsList();
+    previewTests = ((data && data.tests) || []).filter((t) => t.preview_supported);
+    if (!previewTests.length) {
+      errHost.append(flash("error", "暂无支持结果直显的测题，请联系平台更新。"));
+    }
+    for (const t of previewTests) {
+      select.append(el("option", { value: t.test_code, text: t.test_name }));
+    }
+  } catch (e) {
+    errHost.append(flash("error", e.message || "测题加载失败"));
+  }
+
+  async function loadVariants(code, session) {
+    variantHost.replaceChildren();
+    try {
+      const manifestRes = await fetch(`/tests/${code}/preview_manifest.json`);
+      if (!manifestRes.ok) throw new Error("该测题暂未配置预览清单");
+      const manifest = await manifestRes.json();
+      const dataRes = await fetch(`/tests/${code}/${manifest.data_url || "preview_results.json"}`);
+      if (!dataRes.ok) throw new Error("预览数据加载失败");
+      const pdata = await dataRes.json();
+      const items = (pdata.items || []).slice().sort((a, b) =>
+        (a.name || a.result?.title || "").localeCompare(b.name || b.result?.title || "", "zh-CN")
+      );
+      if (!items.length) {
+        variantHost.append(flash("error", "暂无结果变体数据"));
+        return;
+      }
+
+      const listUrl = session.preview_url || `${location.origin}/preview/?test=${encodeURIComponent(code)}&unlimited=true&token=${encodeURIComponent(session.token || "")}`;
+      sessionHost.append(
+        el("div", { className: "link-item" }, [
+          el("p", { className: "muted", text: "结果列表页（浏览全部类型）" }),
+          el("code", { text: listUrl }),
+          (() => {
+            const b = el("button", { className: "btn btn-ghost", type: "button", text: "复制" });
+            bindCopyButton(b, listUrl);
+            return b;
+          })(),
+          el("a", { className: "btn btn-primary", href: listUrl, target: "_blank", text: "打开", style: "width:auto" }),
+        ])
+      );
+
+      variantHost.append(el("h2", { className: "section-title", text: `全部结果类型（${items.length}）` }));
+      variantHost.append(
+        el("p", {
+          className: "muted",
+          text: "复制下方链接可直接打开某一结果的完整报告页，无需答题，适合截图发笔记。",
+        })
+      );
+      const table = el("div", { className: "variant-list" });
+      for (const it of items) {
+        const vid = it.code || it.id || it.name;
+        const url = buildPreviewVariantUrl(session, code, vid);
+        const title = it.name || it.result?.title || vid;
+        const sub = it.author || it.alias || it.label || it.result?.description || "";
+        const copyBtn = el("button", { className: "btn btn-ghost", type: "button", text: "复制链接" });
+        bindCopyButton(copyBtn, url);
+        table.append(
+          el("div", { className: "link-item", style: "margin-bottom:10px" }, [
+            el("strong", { text: title }),
+            el("div", { className: "muted", text: sub }),
+            el("code", { text: url, style: "display:block;margin:6px 0;font-size:11px;word-break:break-all" }),
+            el("div", { className: "row-actions" }, [
+              copyBtn,
+              el("a", { className: "btn btn-primary", href: url, target: "_blank", text: "打开", style: "width:auto" }),
+            ]),
+          ])
+        );
+      }
+      variantHost.append(table);
+    } catch (err) {
+      variantHost.append(flash("error", err.message || "加载变体失败"));
+    }
+  }
+
+  const btn = el("button", { className: "btn btn-primary", type: "submit", text: "开启预览会话", style: "width:auto" });
+  const form = el("form", { className: "panel" }, [
+    errHost,
+    el("p", {
+      className: "muted",
+      text: isSuper()
+        ? "超管与额度充足的商家可用：无需答题，直接打开任意结果页截图发笔记。"
+        : "剩余额度 > 10 时可使用结果直显（不耗额度），方便发小红书笔记。",
+    }),
+    el("div", { className: "field" }, [el("label", { text: "测评项目" }), select]),
+    el("div", { className: "row-actions" }, [btn]),
+    sessionHost,
+    variantHost,
+  ]);
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errHost.replaceChildren();
+    sessionHost.replaceChildren();
+    variantHost.replaceChildren();
+    if (!select.value) {
+      errHost.append(flash("error", "请选择测评项目"));
+      return;
+    }
+    btn.disabled = true;
+    try {
+      activeSession = await api.unlimitedStart(select.value);
+      const code = activeSession.test_code || select.value;
+      sessionHost.append(flash("ok", "预览会话已开启（24小时内有效）"));
+      await loadVariants(code, activeSession);
+    } catch (err) {
+      errHost.append(flash("error", err.message || "开启失败"));
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  root.append(
+    shell("/admin/result-preview", [
+      el("h1", { className: "page-title", text: "结果直显" }),
+      el("p", {
+        className: "page-lead",
+        text: "为发笔记准备：选择测题与具体结果类型，一键复制直达链接。",
+      }),
       form,
     ])
   );

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "test_code": "muse_new",
+  "test_name": "文学原型·新",
+  "renderer": "xlx_muse_v1",
+  "supported": true,
+  "theme": "muse",
+  "data_url": "preview_results.json"
+}
