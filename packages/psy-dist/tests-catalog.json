@@ -938,7 +938,7 @@
       "duration_min": 8,
       "hot": true,
       "source": "xlxtest_mirror",
-      "legacy_note": "稳定手写版；答题动效 + 结果页截图分享/晒单有礼",
+      "legacy_note": "稳定手写版；past 结果页已同构镜像 default-HAMcHMCE",
       "preview": {
         "supported": true,
         "renderer": "xlx_past_v1",
