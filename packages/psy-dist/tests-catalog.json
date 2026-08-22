@@ -938,7 +938,7 @@
       "duration_min": 8,
       "hot": true,
       "source": "xlxtest_mirror",
-      "legacy_note": "稳定手写版；past 结果页已同构镜像 default-HAMcHMCE",
+      "legacy_note": "稳定手写同构：欢迎/答题/结果均对齐 xlx 镜像 CSS",
       "preview": {
         "supported": true,
         "renderer": "xlx_past_v1",

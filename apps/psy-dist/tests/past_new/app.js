@@ -1,7 +1,7 @@
 import { scoreAnswers } from './vendor/scoring-CuPx53JQ-rBnOF_ZDsobST.js';
 import { a as qpack } from './vendor/questions-Ct3o4EnI-rBnOF_ZDsobST.js';
 import { renderPastResult } from '../../shared/past-result-ui.js';
-import { flashQuestionBody, optionDelayStyle } from '../../shared/psy-quiz-motion.js';
+import { optionDelayStyle } from '../../shared/psy-quiz-motion.js';
 
 const uiQuestions = qpack.questions;
 const GENDER_QID = '__historyGenderPreference';
@@ -24,6 +24,22 @@ function clearAdvanceTimer() {
   }
 }
 
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));
+  const el = $(id);
+  if (el) el.classList.add('active');
+}
+
+function showPreferenceFlow() {
+  $('pref-flow').hidden = false;
+  $('quiz-flow').hidden = true;
+}
+
+function showQuizFlow() {
+  $('pref-flow').hidden = true;
+  $('quiz-flow').hidden = false;
+}
+
 function advanceAfterSelect() {
   const q = uiQuestions[state.qi];
   if (!state.answers[q.id]) return;
@@ -40,19 +56,11 @@ function advanceAfterSelect() {
       } else {
         optionLocked = false;
       }
-    }, 300);
+    }, 320);
   } else {
     clearAdvanceTimer();
-    setTimeout(() => showResult(), 300);
+    setTimeout(() => showResult(), 320);
   }
-}
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-  const el = $(id);
-  if (el) el.classList.add('active');
-  const quiz = $('screen-quiz');
-  if (quiz) quiz.style.display = id === 'screen-quiz' ? 'flex' : 'none';
 }
 
 function renderQuestion() {
@@ -65,20 +73,24 @@ function renderQuestion() {
   $('q-title').textContent = q.text;
   const host = $('q-options');
   host.innerHTML = q.options.map((opt, i) => {
-    const sel = state.answers[q.id] === opt.id ? ' selected' : '';
-    return `<div class="opt${sel}" data-id="${opt.id}" style="${optionDelayStyle(i)}"><div class="opt-id">${opt.id}.</div><div class="opt-text">${opt.text}</div></div>`;
+    const sel = state.answers[q.id] === opt.id ? ' active' : '';
+    const locked = optionLocked ? ' locked' : '';
+    return `<button type="button" class="fig-quiz-option quiz-enter${sel}${locked}" data-id="${opt.id}" style="${optionDelayStyle(i)}">
+      <span class="fig-option-id">${opt.id}.</span>
+      <span class="fig-option-text">${opt.text}</span>
+    </button>`;
   }).join('');
-  flashQuestionBody();
-  host.querySelectorAll('.opt').forEach(el => {
+  host.querySelectorAll('.fig-quiz-option').forEach((el) => {
     el.onclick = () => {
       if (optionLocked) return;
       state.answers[q.id] = el.dataset.id;
-      host.querySelectorAll('.opt').forEach(x => x.classList.remove('selected'));
-      el.classList.add('selected');
+      host.querySelectorAll('.fig-quiz-option').forEach((x) => x.classList.remove('active'));
+      el.classList.add('active');
       advanceAfterSelect();
     };
   });
-  $('btn-back').style.display = state.qi > 0 ? 'block' : 'none';
+  $('btn-back').style.visibility = state.qi > 0 ? 'visible' : 'hidden';
+  $('btn-back').disabled = state.qi <= 0;
 }
 
 function renderResult(result) {
@@ -107,7 +119,7 @@ function renderResult(result) {
 }
 
 function collectAnswers() {
-  const rows = uiQuestions.map(q => ({
+  const rows = uiQuestions.map((q) => ({
     questionId: String(q.id),
     optionId: String(state.answers[q.id] || 'A'),
   }));
@@ -124,18 +136,21 @@ function showResult() {
   renderResult(payload.result);
 }
 
-function bindUi() {
-  document.querySelectorAll('[data-gender]').forEach(btn => {
+function bindGenderOptions() {
+  document.querySelectorAll('[data-gender]').forEach((btn) => {
     btn.onclick = () => {
       state.gender = btn.dataset.gender;
       state.genderChosen = true;
-      document.querySelectorAll('[data-gender]').forEach(x => x.classList.remove('selected'));
-      btn.classList.add('selected');
-      $('btn-start').disabled = false;
+      document.querySelectorAll('[data-gender]').forEach((x) => x.classList.remove('active'));
+      btn.classList.add('active');
     };
   });
+}
+
+function bindUi() {
+  bindGenderOptions();
+
   $('btn-start').onclick = async () => {
-    if (!state.genderChosen) return;
     if (window.linkValidator) {
       if (typeof window.linkValidator.validateForUserAction === 'function') {
         const ok = await window.linkValidator.validateForUserAction();
@@ -146,8 +161,19 @@ function bindUi() {
     state.qi = 0;
     state.answers = {};
     showScreen('screen-quiz');
+    showPreferenceFlow();
+  };
+
+  $('btn-pref-back').onclick = () => {
+    showScreen('screen-intro');
+  };
+
+  $('btn-pref-next').onclick = () => {
+    if (!state.genderChosen) return;
+    showQuizFlow();
     renderQuestion();
   };
+
   $('btn-back').onclick = () => {
     if (state.qi > 0) {
       clearAdvanceTimer();
@@ -155,6 +181,15 @@ function bindUi() {
       state.qi--;
       renderQuestion();
     }
+  };
+
+  $('btn-home').onclick = () => {
+    if (!confirm('确定返回首页？当前答题进度将丢失。')) return;
+    clearAdvanceTimer();
+    optionLocked = false;
+    state.qi = 0;
+    state.answers = {};
+    showScreen('screen-intro');
   };
 }
 

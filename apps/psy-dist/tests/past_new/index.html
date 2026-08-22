@@ -6,128 +6,114 @@
   <meta name="description" content="历史人物匹配 - 心象测">
   <title>历史人物匹配</title>
   <script src="/static/js/test-security.js"></script>
+  <link rel="stylesheet" href="../../shared/past-welcome-mirror.css">
+  <link rel="stylesheet" href="../../shared/past-quiz-mirror.css">
   <link rel="stylesheet" href="../../shared/past-result-mirror.css">
   <link rel="stylesheet" href="../../shared/past-result-ui.css">
+  <link rel="stylesheet" href="../../shared/past-shell-overrides.css">
   <link rel="stylesheet" href="../../shared/psy-quiz-shell.css">
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Serif SC', serif;
-      background: #f4efe6; color: #1a1612;
-      min-height:100vh; max-width:480px; margin:0 auto; overflow-x:hidden;
-    }
-    body.page-disabled { pointer-events:none; opacity:.65; }
-    .screen { display:none; animation: fadeUp .45s ease both; }
-    .screen.active { display:block; }
-    nav { display:flex; justify-content:space-between; align-items:center; padding:18px 20px 0; }
-    .logo { font-size:12px; font-weight:800; color:#8a7f72; letter-spacing:.12em; }
-    .nav-badge { font-size:11px; color:#5c3d1e; background:#e8dcc8; padding:4px 10px; border-radius:20px; }
-    .hero { padding:28px 20px 24px; }
-    .live-badge {
-      display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid #e5ddd0;
-      color:#666; font-size:12px; padding:6px 12px; border-radius:20px; margin-bottom:20px;
-    }
-    .live-dot { width:6px; height:6px; border-radius:50%; background:#b8860b; }
-    h1 { font-size:38px; font-weight:900; line-height:1.08; letter-spacing:-.02em; margin-bottom:14px; }
-    .h1-plain { color:#1a1612; font-family:'Noto Serif SC',serif; }
-    .h1-grad { color:#7a4b12; font-family:'Noto Serif SC',serif; }
-    .hero-sub { font-size:14px; color:#5f574d; line-height:1.75; margin-bottom:28px; }
-    .btn {
-      width:100%; border:none; cursor:pointer; font-size:16px; font-weight:700;
-      padding:16px; border-radius:14px; transition:transform .15s;
-    }
-    .btn:active { transform:scale(.98); }
-    .btn-primary { background:#3d2914; color:#fff; box-shadow:0 4px 18px rgba(0,0,0,.12); }
-    .btn-ghost { background:#fff; color:#1a1612; border:1.5px solid #e5ddd0; margin-top:10px; }
-    .btn:disabled { opacity:.45; cursor:not-allowed; }
-    .cta-hint { text-align:center; font-size:12px; color:#b0a89c; margin-top:10px; }
-    .dims-section { padding:0 20px 24px; }
-    .dims-label { font-size:11px; font-weight:700; color:#b0a89c; letter-spacing:.1em; margin-bottom:12px; }
-    .dims-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .dim-card {
-      background:#fff; border-radius:12px; padding:12px; display:flex; gap:10px; align-items:center;
-      box-shadow:0 1px 4px rgba(0,0,0,.04);
-    }
-    .d-icon { font-size:18px; width:36px; height:36px; background:#f4efe6; border-radius:10px;
-      display:flex; align-items:center; justify-content:center; }
-    .d-text { font-size:13px; font-weight:700; }
-    .d-sub { font-size:11px; color:#aaa; margin-top:2px; }
-    .gender-grid { display:grid; gap:10px; padding:0 20px 24px; }
-    .gender-opt {
-      background:#fff; border:2px solid #e5ddd0; border-radius:12px; padding:14px 16px; cursor:pointer;
-      display:flex; gap:12px; align-items:flex-start;
-    }
-    .gender-opt.selected { border-color:#7a4b12; background:rgba(122,75,18,.05); }
-    .gender-mark { font-size:18px; font-weight:900; color:#7a4b12; width:28px; }
-    .gender-title { font-size:15px; font-weight:800; }
-    .gender-desc { font-size:12px; color:#777; margin-top:4px; line-height:1.55; }
-    .disclaimer { padding:0 20px 40px; font-size:11px; color:#b0a89c; line-height:1.6; }
-    #screen-quiz { height:100dvh; display:none; flex-direction:column; max-width:480px; margin:0 auto; }
-    #screen-quiz.active { display:flex; }
-    .top-bar { padding:16px 20px 10px; flex-shrink:0; }
-    .progress-meta { display:flex; justify-content:space-between; font-size:12px; color:#aaa; margin-bottom:8px; }
-    .progress-track { height:5px; background:#e5ddd0; border-radius:3px; overflow:hidden; }
-    .progress-fill { height:100%; background:#7a4b12; border-radius:3px; transition:width .35s ease; width:0; }
-    .q-body { flex:1; overflow-y:auto; padding:20px 20px 8px; }
-    .q-tag { display:inline-block; font-size:11px; font-weight:700; color:#7a4b12;
-      background:#e8dcc8; padding:4px 10px; border-radius:999px; margin-bottom:8px; }
-    .q-note { font-size:12px; color:#8a7f72; margin-bottom:14px; line-height:1.6; }
-    .q-title { font-size:21px; font-weight:900; line-height:1.35; margin-bottom:22px; }
-    .opt {
-      background:#fff; border:2px solid #e5ddd0; border-radius:12px; padding:14px 16px;
-      margin-bottom:10px; cursor:pointer; display:flex; gap:10px;
-    }
-    .opt.selected { border-color:#7a4b12; background:rgba(122,75,18,.06); }
-    .opt-id { font-weight:900; color:#7a4b12; width:18px; flex-shrink:0; }
-    .opt-text { font-size:14px; line-height:1.55; font-weight:600; }
-    .quiz-bar { padding:12px 20px 28px; flex-shrink:0; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
-  </style>
 </head>
-<body class="page-disabled">
+<body class="past-test-body page-disabled">
   <div id="screen-intro" class="screen active">
-    <nav><div class="logo">心象测</div><div class="nav-badge">历史人物</div></nav>
-    <div class="hero">
-      <div class="live-badge"><div class="live-dot"></div>场景叙事 · 26 题</div>
-      <h1><div class="h1-plain">历史人物</div><div class="h1-grad">匹配</div></h1>
-      <p class="hero-sub">26 道历史场景代入题：曹操、诸葛亮、项羽、韩信……在两难情境里做选择，测出你最像哪位历史人物的精神原型。</p>
+    <div class="fig-welcome">
+      <div class="fig-card">
+        <p class="fig-archive">心象测 · Historical Archive</p>
+        <p class="fig-subtitle">场景叙事 · 26 题</p>
+        <h1 class="fig-title">PAST</h1>
+        <div class="fig-title-cn">历史人物匹配</div>
+        <div class="fig-desc">
+          <span class="fig-desc-line">26 道历史场景代入题：曹操、诸葛亮、项羽、韩信……</span>
+          <span class="fig-desc-line">在两难情境里做选择，测出你最像哪位历史人物的精神原型。</span>
+        </div>
+        <div class="fig-dots">· · ·</div>
+        <button type="button" class="fig-btn" id="btn-start">开始探索</button>
+        <div class="fig-footer">
+          <div class="fig-method-note">
+            <p class="fig-method-kicker">Method · 六维精神坐标</p>
+            <p class="fig-method-title">从六个维度勾勒你的精神轮廓</p>
+            <p class="fig-method-lead">行动力、洞察力、共情力、韧性、统筹力、开放度——与 102 位历史人物参照比对。</p>
+            <div class="fig-method-points">
+              <p><span class="fig-method-index">01</span><span>行动力 action · 洞察 insight · 共情 empathy</span></p>
+              <p><span class="fig-method-index">02</span><span>韧性 resilience · 统筹 coordination · 开放 openness</span></p>
+              <p><span class="fig-method-index">03</span><span>约 8 分钟 · 娱乐向自我探索，不构成史学或性格诊断</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="dims-section">
-      <div class="dims-label">六维精神坐标</div>
-      <div class="dims-grid"><div class="dim-card"><div class="d-icon">⚔️</div><div><div class="d-text">行动力</div><div class="d-sub">action</div></div></div><div class="dim-card"><div class="d-icon">🎯</div><div><div class="d-text">洞察力</div><div class="d-sub">insight</div></div></div><div class="dim-card"><div class="d-icon">🤝</div><div><div class="d-text">共情力</div><div class="d-sub">empathy</div></div></div><div class="dim-card"><div class="d-icon">🛡️</div><div><div class="d-text">韧性</div><div class="d-sub">resilience</div></div></div><div class="dim-card"><div class="d-icon">📜</div><div><div class="d-text">统筹力</div><div class="d-sub">coordination</div></div></div><div class="dim-card"><div class="d-icon">🌅</div><div><div class="d-text">开放度</div><div class="d-sub">openness</div></div></div></div>
-    </div>
-    <div class="gender-grid" id="screen-gender">
-      <div class="dims-label">先选代入视角（影响人物池匹配）</div>
-      <div class="gender-opt" data-gender="female"><div class="gender-mark">女</div><div><div class="gender-title">女性视角</div><div class="gender-desc">优先匹配女性历史人物与精神原型</div></div></div>
-      <div class="gender-opt" data-gender="male"><div class="gender-mark">男</div><div><div class="gender-title">男性视角</div><div class="gender-desc">优先匹配男性历史人物与精神原型</div></div></div>
-      <div class="gender-opt selected" data-gender="all"><div class="gender-mark">合</div><div><div class="gender-title">不限</div><div class="gender-desc">在全人物池中匹配最接近的精神原型</div></div></div>
-    </div>
-    <div class="intro-cta" style="padding:0 20px 12px">
-      <button class="btn btn-primary" id="btn-start">开始测试 →</button>
-      <div class="cta-hint">约 8 分钟 · 娱乐向自我探索</div>
-    </div>
-    <div class="disclaimer">趣味历史人物气质对照，不构成史学评价、职业或性格诊断。结果仅供娱乐向自我觉察。</div>
+    <p class="past-test-disclaimer">趣味历史人物气质对照，不构成史学评价、职业或性格诊断。结果仅供娱乐向自我觉察。</p>
   </div>
 
-  <div id="screen-quiz">
-    <div class="top-bar">
-      <div class="progress-meta"><span id="q-progress">1 / 26</span><span>历史场景</span></div>
-      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-    </div>
-    <div class="q-body">
-      <div class="q-tag" id="q-tag"></div>
-      <div class="q-note" id="q-note"></div>
-      <div class="q-title" id="q-title"></div>
-      <div id="q-options"></div>
-    </div>
-    <div class="quiz-bar">
-      <button class="btn btn-ghost" id="btn-back" style="display:none">上一题</button>
+  <div id="screen-quiz" class="screen">
+    <div class="fig-quiz">
+      <div class="fig-quiz-shell">
+        <div id="pref-flow" class="fig-preference-flow" hidden>
+          <div class="fig-preference-card">
+            <div class="fig-preference-topline">
+              <span>Historical Preference</span>
+              <span>历史人物</span>
+            </div>
+            <div class="fig-preference-title-block">
+              <p class="fig-preference-kicker">代入视角</p>
+              <h2 class="fig-preference-title">先选你的代入视角</h2>
+              <p class="fig-preference-copy">会影响人物池匹配权重；可随时在下一题返回修改。</p>
+            </div>
+            <div class="fig-preference-options" id="gender-options">
+              <button type="button" class="fig-preference-option" data-gender="female">
+                <span class="fig-preference-mark">女</span>
+                <span class="fig-preference-option-main">
+                  <span class="fig-preference-option-title">女性视角</span>
+                  <span class="fig-preference-option-desc">优先匹配女性历史人物与精神原型</span>
+                </span>
+              </button>
+              <button type="button" class="fig-preference-option" data-gender="male">
+                <span class="fig-preference-mark">男</span>
+                <span class="fig-preference-option-main">
+                  <span class="fig-preference-option-title">男性视角</span>
+                  <span class="fig-preference-option-desc">优先匹配男性历史人物与精神原型</span>
+                </span>
+              </button>
+              <button type="button" class="fig-preference-option active" data-gender="all">
+                <span class="fig-preference-mark">合</span>
+                <span class="fig-preference-option-main">
+                  <span class="fig-preference-option-title">不限</span>
+                  <span class="fig-preference-option-desc">在全人物池中匹配最接近的精神原型</span>
+                </span>
+              </button>
+            </div>
+            <div class="fig-quiz-nav" style="margin-top:28px">
+              <button type="button" class="fig-nav-btn fig-nav-btn-prev" id="btn-pref-back">返回</button>
+              <span></span>
+              <button type="button" class="fig-nav-btn fig-nav-btn-next" id="btn-pref-next">进入测试</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="quiz-flow" class="fig-quiz-flow" hidden>
+          <div class="fig-quiz-card">
+            <div class="fig-quiz-header">
+              <span class="fig-quiz-kicker" id="q-tag">历史场景</span>
+              <span class="fig-quiz-count" id="q-progress">1 / 26</span>
+            </div>
+            <div class="fig-quiz-bar"><div class="fig-quiz-bar-fill" id="progress-fill"></div></div>
+            <p class="fig-preference-copy" id="q-note" style="margin:0 0 16px"></p>
+            <h2 class="fig-quiz-text" id="q-title"></h2>
+            <div class="fig-quiz-options" id="q-options"></div>
+            <div class="fig-quiz-nav">
+              <button type="button" class="fig-nav-btn fig-nav-btn-prev" id="btn-back">上一题</button>
+              <button type="button" class="fig-nav-btn fig-nav-btn-home" id="btn-home" title="返回首页">⌂</button>
+              <button type="button" class="fig-nav-btn fig-nav-btn-auto" id="btn-next-hint" disabled>自动下一题</button>
+            </div>
+            <div class="fig-quiz-hint"><span class="fig-quiz-hint-dot">·</span> 选择后自动进入下一题</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <div id="screen-result" class="screen">
     <div id="result-root"></div>
-    <div class="disclaimer" style="padding:0 20px 24px">趣味历史人物气质对照，不构成史学评价、职业或性格诊断。结果仅供娱乐向自我觉察。</div>
+    <p class="past-test-disclaimer">趣味历史人物气质对照，不构成史学评价、职业或性格诊断。结果仅供娱乐向自我觉察。</p>
   </div>
 
   <script type="module" src="./app.js"></script>
