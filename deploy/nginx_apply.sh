@@ -280,6 +280,11 @@ ${GZIP_DIRECTIVES}
         add_header Cloudflare-CDN-Cache-Control "no-store";
     }
 
+    # past 分销：nginx 直跳镜像（不经过 API iframe，避免内嵌首页）
+    location ~ ^/test/(past_new|past_xlx)/([^/]+)$ {
+        return 302 /xlx-mirror/past?psy_integrated=1&test_code=\$1&scale=past&token=\$2;
+    }
+
     location ~ ^/test/([^/]+)/([^/]+)$ {
         proxy_pass http://127.0.0.1:8080;
         proxy_set_header Host \$host;

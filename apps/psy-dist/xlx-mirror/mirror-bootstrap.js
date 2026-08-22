@@ -53,6 +53,11 @@
     }
   }
 
+  // Vue 偶发落到 / 时会加载营销首页；分销镜像带 token 时拉回 /past
+  if (integrated && distToken && (path === '/' || path === '')) {
+    location.replace('/past' + location.search + location.hash);
+  }
+
   var origFetch = window.fetch;
   window.fetch = function (input, init) {
     var url = typeof input === 'string' ? input : (input && input.url) || '';
