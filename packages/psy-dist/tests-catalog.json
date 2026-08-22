@@ -938,7 +938,7 @@
       "duration_min": 8,
       "hot": true,
       "source": "xlxtest_mirror",
-      "legacy_note": "稳定分销版（vendor 计分 + past-result-ui）；L3 原站镜像见 /xlx-mirror/past 内测",
+      "legacy_note": "稳定分销版；结果页含截图分享卡 + 晒单有礼弹窗（L2 优化中）",
       "preview": {
         "supported": true,
         "renderer": "xlx_past_v1",

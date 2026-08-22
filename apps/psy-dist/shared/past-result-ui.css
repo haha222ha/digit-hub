@@ -39,3 +39,278 @@
 .past-actions-stack { padding: 0 20px 32px; }
 .past-actions-stack .btn { width: 100%; margin-top: 10px; }
 .past-order { font-size: 11px; color: #b0a89c; margin-bottom: 10px; }
+
+/* 结果页操作按钮（借鉴原站 action-row） */
+.past-actions .past-action-share {
+  border: 1.5px solid #e5ddd0;
+  background: #fff;
+  color: #3d2914;
+}
+.past-actions .past-action-reward {
+  background: linear-gradient(135deg, #17130f, #2b231d);
+  border: 1px solid rgba(24, 18, 14, .9);
+  color: #f7f2e8;
+  box-shadow: 0 8px 20px rgba(26, 20, 14, .15);
+}
+
+/* 分享图卡片（离屏渲染） */
+.past-share-card {
+  width: 375px;
+  background: #faf7f0;
+  color: #17130f;
+  font-family: "PingFang SC", "Noto Serif SC", serif;
+  overflow: hidden;
+}
+.past-share-brand {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 28px 0;
+}
+.past-share-logo {
+  font-size: 12px;
+  letter-spacing: .28em;
+  color: #5f5143;
+}
+.past-share-meta {
+  font-size: 11px;
+  color: #756754;
+  letter-spacing: .06em;
+}
+.past-share-hero {
+  padding: 36px 28px 18px;
+  text-align: center;
+}
+.past-share-label {
+  font-size: 12px;
+  color: #6d604f;
+  letter-spacing: .14em;
+  font-style: italic;
+  margin-bottom: 12px;
+}
+.past-share-name {
+  font-family: "Noto Serif SC", serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+  letter-spacing: .06em;
+}
+.past-share-sub {
+  font-size: 12px;
+  color: #8a7f72;
+  margin-bottom: 14px;
+}
+.past-share-quote {
+  margin: 0 auto;
+  max-width: 300px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #2f2922;
+  font-style: italic;
+}
+.past-share-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+}
+.past-share-tag {
+  font-size: 11px;
+  padding: 5px 12px;
+  border: 1px solid #aa967b;
+  border-radius: 20px;
+  color: #4c4135;
+  background: rgba(255, 252, 246, .32);
+}
+.past-share-section {
+  padding: 0 28px 8px;
+}
+.past-share-kicker {
+  font-family: "Noto Serif SC", serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #241d17;
+  margin-bottom: 10px;
+  letter-spacing: .06em;
+}
+.past-share-lead {
+  font-size: 13px;
+  line-height: 1.85;
+  color: #211b16;
+  margin: 0;
+  text-align: justify;
+}
+.past-share-radar-section .past-radar-box { margin-bottom: 0; }
+.past-share-foot {
+  padding: 14px 28px 24px;
+  text-align: center;
+  font-size: 10px;
+  color: #9a8d7d;
+  letter-spacing: .08em;
+}
+
+/* 弹窗通用 */
+body.past-modal-open { overflow: hidden; }
+.past-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(15, 12, 8, .92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+.past-overlay-close {
+  position: fixed;
+  top: 18px;
+  right: 22px;
+  border: none;
+  background: transparent;
+  color: #f4f1ea;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 10001;
+}
+.past-share-loading {
+  color: #f4f1ea;
+  font-size: 14px;
+  letter-spacing: .1em;
+}
+.past-share-preview {
+  display: block;
+  max-width: 90%;
+  max-height: 62vh;
+  border-radius: 6px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .45);
+}
+.past-share-hint {
+  color: #f4f1ea;
+  margin: 20px 0 6px;
+  font-size: 13px;
+  letter-spacing: .12em;
+}
+.past-share-brand-note {
+  display: block;
+  color: #a59886;
+  font-size: 11px;
+  font-style: italic;
+  margin-bottom: 16px;
+}
+.past-share-download {
+  width: min(280px, 80vw);
+  margin: 0 auto;
+}
+
+/* 晒单有礼弹窗 */
+.past-reward-overlay {
+  background: rgba(23, 19, 15, .56);
+  backdrop-filter: blur(6px);
+  padding: 20px;
+}
+.past-reward-box {
+  width: min(382px, 100%);
+  max-height: min(82vh, 760px);
+  overflow-y: auto;
+  padding: 28px 24px 24px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #fffcf8, #faf5ed);
+  border: 1px solid rgba(196, 184, 160, .66);
+  box-shadow: 0 24px 64px rgba(27, 21, 15, .22);
+  text-align: left;
+}
+.past-reward-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(217, 207, 191, .7);
+}
+.past-reward-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.past-reward-seal {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #b45a4d, #8d3328);
+  color: #fff9f1;
+  font-family: "Noto Serif SC", serif;
+  font-size: 14px;
+}
+.past-reward-title-text {
+  font-family: "Noto Serif SC", serif;
+  font-size: 18px;
+  color: #251d17;
+  letter-spacing: .08em;
+}
+.past-reward-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(125, 111, 96, .12);
+  color: #5e5144;
+  font-size: 18px;
+  cursor: pointer;
+}
+.past-reward-rule {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(217, 207, 191, .45);
+}
+.past-reward-rule:last-child { border-bottom: none; padding-bottom: 0; }
+.past-reward-num {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(167, 69, 56, .1);
+  color: #a74538;
+  font-size: 12px;
+  font-weight: 700;
+}
+.past-reward-text {
+  font-size: 13px;
+  line-height: 1.75;
+  color: #4a4036;
+}
+.past-reward-text strong { color: #c92a2a; font-weight: 700; }
+.past-reward-footer {
+  margin-top: 18px;
+  background: linear-gradient(135deg, rgba(167, 69, 56, .05), rgba(196, 184, 160, .16));
+  border: 1px solid rgba(196, 184, 160, .55);
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+}
+.past-reward-footer-title {
+  margin-bottom: 8px;
+  font-family: "Noto Serif SC", serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #3a2b20;
+  letter-spacing: .08em;
+}
+.past-reward-footer-desc {
+  font-size: 12px;
+  line-height: 1.75;
+  color: #7a6b5b;
+}

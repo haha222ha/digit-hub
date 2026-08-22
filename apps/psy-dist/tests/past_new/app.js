@@ -83,6 +83,7 @@ function renderResult(result) {
   const p = result.primary;
   renderPastResult($('result-root'), result, {
     showActions: true,
+    result,
     onRetry: () => {
       state.qi = 0;
       state.answers = {};
