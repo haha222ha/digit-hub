@@ -1517,8 +1517,8 @@ export async function renderResultPreview(root) {
     el("p", {
       className: "muted",
       text: isSuper()
-        ? "超管与额度充足的商家可用：无需答题，直接打开任意结果页截图发笔记。"
-        : "剩余额度 > 10 时可使用结果直显（不耗额度），方便发小红书笔记。",
+        ? "超管与额度充足的商家可用：无需答题，直接打开任意结果页截图发笔记。当前仅部分测题已开通直显（持续增加中）。"
+        : "剩余额度 > 10 时可使用结果直显（不耗额度）。若下拉为空，表示该测题尚未开通直显。",
     }),
     el("div", { className: "field" }, [el("label", { text: "测评项目" }), select]),
     el("div", { className: "row-actions" }, [btn]),
