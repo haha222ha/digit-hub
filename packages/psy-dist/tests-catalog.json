@@ -934,6 +934,15 @@
       "hot": false,
       "source": "xlxtest_clone",
       "legacy_note": "平行于无旧版；XlxTest past 1:1 场景叙事"
+    },
+    {
+      "code": "muse_new",
+      "name": "文学原型·新",
+      "questions": 26,
+      "duration_min": 10,
+      "hot": false,
+      "source": "xlxtest_clone",
+      "legacy_note": "平行于无旧版；XlxTest muse 1:1 文学场景"
     }
   ]
 }
