@@ -22,30 +22,27 @@
         <p class="m-title-en">Literary Archetype</p>
         <div class="m-hero">
           <div class="m-hero__rule"></div>
-          <p class="m-hero__question">在字里行间，测出你最共振的文学精神原型</p>
-          <p class="m-hero__desc">26 道文学气质情境题 · 题目顺序随机</p>
+          <p class="m-hero__question">你的灵魂深处，住着哪一位文人？</p>
+          <p class="m-hero__desc">穿越一段文学场景之旅，在虚构与真实的边界，<br>找到与你灵魂共振的那位文人。</p>
         </div>
         <button type="button" class="m-btn" id="btn-start"><span class="m-btn__text">开始测试</span></button>
-        <p class="m-meta">约 10 分钟 · 娱乐向自我探索</p>
+        <p class="m-meta">约 10 分钟 · 凭直觉作答</p>
         <div class="m-cards">
-          <div class="m-card"><span class="m-card__seal">旁</span><div class="m-card__body"><span class="m-card__title">旁观感</span><span class="m-card__desc">detachment</span></div></div>
-          <div class="m-card"><span class="m-card__seal">洞</span><div class="m-card__body"><span class="m-card__title">洞察力</span><span class="m-card__desc">insight</span></div></div>
-          <div class="m-card"><span class="m-card__seal">热</span><div class="m-card__body"><span class="m-card__title">热忱度</span><span class="m-card__desc">passion</span></div></div>
-          <div class="m-card"><span class="m-card__seal">骨</span><div class="m-card__body"><span class="m-card__title">反骨度</span><span class="m-card__desc">defiance</span></div></div>
-          <div class="m-card"><span class="m-card__seal">逸</span><div class="m-card__body"><span class="m-card__title">飘逸度</span><span class="m-card__desc">ethereal</span></div></div>
-          <div class="m-card"><span class="m-card__seal">思</span><div class="m-card__body"><span class="m-card__title">沉思力</span><span class="m-card__desc">contemplation</span></div></div>
+          <div class="m-card"><span class="m-card__seal">卷</span><div class="m-card__body"><span class="m-card__title">文学场景</span><span class="m-card__desc">以沉浸式文学场景为引，唤起你真实的精神直觉。</span></div></div>
+          <div class="m-card"><span class="m-card__seal">棱</span><div class="m-card__body"><span class="m-card__title">精神坐标</span><span class="m-card__desc">多维向量刻画灵魂轮廓，发现你未曾看见的自己。</span></div></div>
+          <div class="m-card"><span class="m-card__seal">鉴</span><div class="m-card__body"><span class="m-card__title">灵魂原型</span><span class="m-card__desc">匹配与你精神最相近的文人，获得专属人格报告。</span></div></div>
         </div>
         <div class="m-steps">
-          <div class="m-step"><span class="m-step__num">01</span><span class="m-step__text">情境代入</span></div>
+          <div class="m-step"><span class="m-step__num">01</span><span class="m-step__text">阅读场景，跟随直觉选择</span></div>
           <span class="m-step__arrow">→</span>
-          <div class="m-step"><span class="m-step__num">02</span><span class="m-step__text">气质坐标</span></div>
+          <div class="m-step"><span class="m-step__num">02</span><span class="m-step__text">系统生成精神向量图谱</span></div>
           <span class="m-step__arrow">→</span>
-          <div class="m-step"><span class="m-step__num">03</span><span class="m-step__text">原型匹配</span></div>
+          <div class="m-step"><span class="m-step__num">03</span><span class="m-step__text">揭晓你的文学灵魂原型</span></div>
         </div>
         <div class="m-footer">
-          <p class="m-footer__quote">趣味文学气质原型匹配，不构成文学批评、职业或临床人格诊断。</p>
+          <p class="m-footer__quote">「 这不是测试，是一面镜子。<br>你不需要被定义，你只需要被看见。 」</p>
           <div class="m-footer__rule"></div>
-          <p class="m-footer__brand">心象测 · MUSE</p>
+          <p class="m-footer__brand">MUSE · Literary Archetype</p>
         </div>
       </div>
     </div>
@@ -54,7 +51,19 @@
   <div id="screen-quiz" class="screen">
     <div class="wx-quiz">
       <div class="wx-quiz__container">
-        <div class="wx-quiz__screen">
+        <div id="muse-transition" class="muse-transition" hidden>
+          <div class="mt__ambient" aria-hidden="true"></div>
+          <p class="mt__badge">你的灵魂正在显影</p>
+          <h2 class="mt__title">回溯二十六道意象印记…</h2>
+          <p class="mt__sub">二十五位文学灵魂，正在辨认你的轮廓…</p>
+          <div class="mt__divider" aria-hidden="true"></div>
+          <div class="mt__ring">
+            <div class="mt__ring-center">
+              <span class="mt__ring-pct" id="mt-pct">0%</span>
+            </div>
+          </div>
+        </div>
+        <div class="wx-quiz__screen" id="quiz-panel">
           <div class="wx-quiz__card">
             <div class="wx-quiz__header">
               <span class="wx-quiz__progress" id="q-progress">1 / 26</span>
@@ -70,7 +79,7 @@
               <button type="button" class="wx-quiz__nav-btn wx-quiz__nav-btn--home" id="btn-home" title="返回首页">⌂</button>
               <button type="button" class="wx-quiz__nav-btn wx-quiz__nav-btn--auto" disabled>自动下一题</button>
             </div>
-            <div class="wx-quiz__hint"><span class="wx-quiz__hint-dot">·</span><span class="wx-quiz__hint-item">选择后自动进入下一题</span></div>
+            <div class="wx-quiz__hint"><span class="wx-quiz__hint-dot">·</span><span class="wx-quiz__hint-item">选择后自动跳转</span></div>
           </div>
         </div>
       </div>

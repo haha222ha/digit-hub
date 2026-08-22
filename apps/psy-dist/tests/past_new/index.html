@@ -17,25 +17,26 @@
   <div id="screen-intro" class="screen active">
     <div class="fig-welcome">
       <div class="fig-card">
-        <p class="fig-archive">心象测 · Historical Archive</p>
-        <p class="fig-subtitle">场景叙事 · 26 题</p>
-        <h1 class="fig-title">PAST</h1>
-        <div class="fig-title-cn">历史人物匹配</div>
+        <p class="fig-archive">HISTORIA · ARCHIVE NO. 01</p>
+        <p class="fig-subtitle">A HISTORICAL PERSONALITY PROTOTYPE</p>
+        <h1 class="fig-title">HISTORIA</h1>
+        <div class="fig-title-cn">历史人物原型</div>
         <div class="fig-desc">
-          <span class="fig-desc-line">26 道历史场景代入题：曹操、诸葛亮、项羽、韩信……</span>
-          <span class="fig-desc-line">在两难情境里做选择，测出你最像哪位历史人物的精神原型。</span>
+          <span class="fig-desc-line">26 个历史瞬间，邀你以身入境</span>
+          <span class="fig-desc-line">立于风云变幻的关头，权衡立场、代价与归处</span>
+          <span class="fig-desc-line">循着每一次取舍，照见与你相近的历史人物</span>
         </div>
         <div class="fig-dots">· · ·</div>
         <button type="button" class="fig-btn" id="btn-start">开始探索</button>
         <div class="fig-footer">
           <div class="fig-method-note">
-            <p class="fig-method-kicker">Method · 六维精神坐标</p>
-            <p class="fig-method-title">从六个维度勾勒你的精神轮廓</p>
-            <p class="fig-method-lead">行动力、洞察力、共情力、韧性、统筹力、开放度——与 102 位历史人物参照比对。</p>
+            <p class="fig-method-kicker">HISTORIA · IMMERSION NOTE</p>
+            <h2 class="fig-method-title">以身入境，照见选择的来处</h2>
+            <p class="fig-method-lead">历史现场是入口，真正被凝视的始终是你。在秩序与改变、忠诚与立场、行动与时机之间，每一次取舍都会留下属于你的回声。</p>
             <div class="fig-method-points">
-              <p><span class="fig-method-index">01</span><span>行动力 action · 洞察 insight · 共情 empathy</span></p>
-              <p><span class="fig-method-index">02</span><span>韧性 resilience · 统筹 coordination · 开放 openness</span></p>
-              <p><span class="fig-method-index">03</span><span>约 8 分钟 · 娱乐向自我探索，不构成史学或性格诊断</span></p>
+              <p><span class="fig-method-index">01</span><span>进入情境，先听见自己在关键时刻真正守护的东西。</span></p>
+              <p><span class="fig-method-index">02</span><span>人物不是标签，而是被时代、立场与代价淬炼出的选择路径。</span></p>
+              <p><span class="fig-method-index">03</span><span>最终照见的，不只是你与谁相似，更是某种力量的方向与边界。</span></p>
             </div>
           </div>
         </div>
@@ -50,34 +51,34 @@
         <div id="pref-flow" class="fig-preference-flow" hidden>
           <div class="fig-preference-card">
             <div class="fig-preference-topline">
-              <span>Historical Preference</span>
-              <span>历史人物</span>
+              <span>ARCHIVE GATE</span>
+              <span>人物卷宗</span>
             </div>
             <div class="fig-preference-title-block">
-              <p class="fig-preference-kicker">代入视角</p>
-              <h2 class="fig-preference-title">先选你的代入视角</h2>
-              <p class="fig-preference-copy">会影响人物池匹配权重；可随时在下一题返回修改。</p>
+              <p class="fig-preference-kicker">入卷之前</p>
+              <h2 class="fig-preference-title">选择这次更有代入感的人物卷</h2>
+              <p class="fig-preference-copy">先选你更愿意参照的人物范围。它只影响历史样本，不会替你决定答案。</p>
             </div>
             <div class="fig-preference-options" id="gender-options">
               <button type="button" class="fig-preference-option" data-gender="female">
                 <span class="fig-preference-mark">女</span>
                 <span class="fig-preference-option-main">
-                  <span class="fig-preference-option-title">女性视角</span>
-                  <span class="fig-preference-option-desc">优先匹配女性历史人物与精神原型</span>
+                  <span class="fig-preference-option-title">女性人物卷</span>
+                  <span class="fig-preference-option-desc">女帝、太后、公主、才女、女将与名美人</span>
                 </span>
               </button>
               <button type="button" class="fig-preference-option" data-gender="male">
                 <span class="fig-preference-mark">男</span>
                 <span class="fig-preference-option-main">
-                  <span class="fig-preference-option-title">男性视角</span>
-                  <span class="fig-preference-option-desc">优先匹配男性历史人物与精神原型</span>
+                  <span class="fig-preference-option-title">男性人物卷</span>
+                  <span class="fig-preference-option-desc">帝王、谋臣、将相、诗人、游侠与改革者</span>
                 </span>
               </button>
               <button type="button" class="fig-preference-option active" data-gender="all">
                 <span class="fig-preference-mark">合</span>
                 <span class="fig-preference-option-main">
-                  <span class="fig-preference-option-title">不限</span>
-                  <span class="fig-preference-option-desc">在全人物池中匹配最接近的精神原型</span>
+                  <span class="fig-preference-option-title">合卷匹配</span>
+                  <span class="fig-preference-option-desc">不限定人物方向，在全卷中择近者</span>
                 </span>
               </button>
             </div>
@@ -104,7 +105,7 @@
               <button type="button" class="fig-nav-btn fig-nav-btn-home" id="btn-home" title="返回首页">⌂</button>
               <button type="button" class="fig-nav-btn fig-nav-btn-auto" id="btn-next-hint" disabled>自动下一题</button>
             </div>
-            <div class="fig-quiz-hint"><span class="fig-quiz-hint-dot">·</span> 选择后自动进入下一题</div>
+            <div class="fig-quiz-hint"><span class="fig-quiz-hint-dot">·</span> 选择后自动跳转</div>
           </div>
         </div>
       </div>

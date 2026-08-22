@@ -31,12 +31,14 @@ function poly(points) {
   return points.map((p) => p.join(',')).join(' ');
 }
 
+const BOOK_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
+
 function sectionTitle(text) {
-  return `<div class="section-label"><span class="title-icon" aria-hidden="true">✦</span><span class="title-text">${esc(text)}</span></div>`;
+  return `<div class="section-label"><span class="title-icon" aria-hidden="true">${BOOK_ICON}</span><span class="title-text">${esc(text)}</span></div>`;
 }
 
 function sectionKicker(text) {
-  return `<div class="section-kicker"><span class="title-icon" aria-hidden="true">✦</span><span class="title-text">${esc(text)}</span></div>`;
+  return `<div class="section-kicker"><span class="title-icon" aria-hidden="true">${BOOK_ICON}</span><span class="title-text">${esc(text)}</span></div>`;
 }
 
 /** 镜像同构雷达 + 六维图例（default-HAMcHMCE） */
@@ -83,10 +85,11 @@ export function renderMirrorRadarBlock(userStats, refStats) {
   }).join('');
 
   const keyHtml = hasRef ? `
-    <div class="radar-key">
-      <span class="radar-key-item"><span class="radar-key-swatch radar-key-swatch--user"></span>实线为你</span>
-      <span class="radar-key-item"><span class="radar-key-swatch radar-key-swatch--reference"></span>虚线为人物参照轮廓</span>
-    </div>` : '';
+    <div class="radar-key" aria-label="雷达图图例">
+      <span class="radar-key-item"><i class="radar-key-swatch radar-key-swatch--user"></i>实线为你</span>
+      <span class="radar-key-item"><i class="radar-key-swatch radar-key-swatch--reference"></i>人物参照轮廓</span>
+    </div>
+    <div class="radar-note">历史人物只作参照，你的选择才是报告主线。</div>` : '';
 
   return `<div class="radar-wrap">
     <svg class="radar-chart" viewBox="0 0 320 320" width="100%" aria-label="行为画像雷达图">

@@ -49,3 +49,11 @@ body.muse-test-body.page-disabled {
   font-style: italic;
   margin: 0 0 14px;
 }
+
+#quiz-panel[hidden] {
+  display: none !important;
+}
+
+#muse-transition[hidden] {
+  display: none !important;
+}

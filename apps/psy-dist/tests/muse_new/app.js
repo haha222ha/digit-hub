@@ -57,10 +57,45 @@ function currentQuestion() {
   return state.order[state.qi];
 }
 
+function playTransitionThen(callback) {
+  const transition = $('muse-transition');
+  const panel = $('quiz-panel');
+  const pctEl = $('mt-pct');
+  if (!transition || !panel) {
+    callback();
+    return;
+  }
+  panel.hidden = true;
+  transition.hidden = false;
+  if (pctEl) pctEl.textContent = '0%';
+  const start = performance.now();
+  const duration = 1800;
+  function tick(now) {
+    const t = Math.min(1, (now - start) / duration);
+    if (pctEl) pctEl.textContent = `${Math.round(t * 100)}%`;
+    if (t < 1) requestAnimationFrame(tick);
+    else {
+      transition.hidden = true;
+      panel.hidden = false;
+      callback();
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+function resetQuizChrome() {
+  const transition = $('muse-transition');
+  const panel = $('quiz-panel');
+  if (transition) transition.hidden = true;
+  if (panel) panel.hidden = false;
+  if ($('mt-pct')) $('mt-pct').textContent = '0%';
+}
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));
   const el = $(id);
   if (el) el.classList.add('active');
+  if (id !== 'screen-quiz') resetQuizChrome();
 }
 
 function renderQuestion() {
@@ -128,7 +163,7 @@ function showResult() {
     alert('评分失败，请重试');
     return;
   }
-  renderResultView(payload.result);
+  playTransitionThen(() => renderResultView(payload.result));
 }
 
 function bindUi() {
@@ -143,6 +178,7 @@ function bindUi() {
     state.order = shuffle(allQuestions);
     state.qi = 0;
     state.answers = {};
+    resetQuizChrome();
     showScreen('screen-quiz');
     renderQuestion();
   };
