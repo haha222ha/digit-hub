@@ -12,7 +12,13 @@
     window.__PUBLIC_CONFIG__.domain_lock_domains = '';
   }
 
-  if (onMirror) {
+  var searchParams = new URLSearchParams(location.search);
+  var distToken = searchParams.get('token') || '';
+  var integrated = searchParams.get('psy_integrated') === '1' || !!distToken;
+
+  if (integrated && distToken) {
+    document.write('<script src="/shared/xlx-digit-integration.js"><\/script>');
+  } else if (onMirror) {
     var VERIFY_TOKEN = 'mirror.' + 'A'.repeat(40);
     try {
       var authPayload = {

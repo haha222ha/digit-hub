@@ -159,14 +159,14 @@ copy(localStorage.getItem('xlxtest:history:past:v1'))
 - **优点**：雷达、维度卡、晒单、文案 95%+ 一致。
 - **缺点**：仍依赖 Vue + 部分 `index-DWIgfZ_Z` 工具函数。
 
-### 方法 C：整路由静态镜像（L3，已实现）
+### 方法 C：整路由静态镜像（L3，已接入分销）
 
-- **访问**：`https://psy.xhs365.cn/xlx-mirror/past`
-- **目录**：`apps/psy-dist/xlx-mirror/`（289 assets + `mirror-bootstrap.js`）
-- **构建**：`ProductAnalyzer/tools/_build_xlx_mirror.py`
-- **说明**：`mirror-bootstrap.js` 关闭 domain_lock、mock `/api/verify`、history shim 子路径
-- **优点**：几乎 1:1（原站 Vue 结果页、晒单、雷达）。
-- **缺点**：~12MB 包体；API 除 public 外均 mock；升级需重跑构建脚本。
+- **C 端入口**：`/test/past_xlx/{token}` → 原站 Vue 完整体验
+- **演示/内测**：`https://psy.xhs365.cn/xlx-mirror/past`（无 token 时 mock 授权）
+- **目录**：`apps/psy-dist/xlx-mirror/` + `shared/xlx-digit-integration.js`
+- **桥接**：分销 `token` → xlxtest `verifyToken` + `start-test` / `complete-test`
+- **优点**：几乎 1:1（原站 Vue 结果页、晒单、雷达）+ 走 digit-hub 配额。
+- **缺点**：~12MB 包体；升级需重跑构建脚本。
 
 ### 方法 D：localStorage / reportData 导入（★ 个人精确复现）
 

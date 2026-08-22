@@ -4,25 +4,35 @@
 
 ## 访问地址
 
-部署后：
+### 分销接入（推荐）
+
+```
+https://psy.xhs365.cn/test/past_xlx/{token}
+```
+
+走 digit-hub 分销链接校验、开始/完成记录；内嵌原站 Vue（欢迎页→答题→原站结果页）。
+
+### 演示/内测（无 token）
 
 ```
 https://psy.xhs365.cn/xlx-mirror/past
 ```
 
-或：
-
-```
-https://psy.xhs365.cn/xlx-mirror/
-```
-
-（自动进入 `/past`）
-
 ## 特性
 
 - 完整原站 UI：欢迎页、答题、雷达对比结果、晒单弹窗、截图分享
-- `mirror-bootstrap.js`：关闭 domain_lock、mock `/api/verify`、预置 past 授权
+- **分销桥接** `shared/xlx-digit-integration.js`：token → verifyToken、start/complete-test
+- **演示模式** `mirror-bootstrap.js`：无 token 时 mock 授权
 - 历史记录仍写入浏览器 `xlxtest:history:past:v1`（可与 `past_new/import.html` 互通）
+
+## 架构
+
+```
+/test/past_xlx/{token}
+  └─ tests/past_xlx/index.html  （PsyTestValidator 校验）
+       └─ iframe /xlx-mirror/past?token=...&psy_integrated=1
+            └─ xlx-digit-integration.js + 原站 Vue chunks
+```
 
 ## 部署
 

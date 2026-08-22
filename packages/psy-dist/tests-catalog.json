@@ -932,6 +932,20 @@
       "dual_perspective": false
     },
     {
+      "code": "past_xlx",
+      "name": "历史人物匹配·原站UI",
+      "questions": 26,
+      "duration_min": 8,
+      "hot": true,
+      "source": "xlxtest_mirror",
+      "legacy_note": "L3 镜像整站 Vue；分销链接 + 原站结果页/雷达/晒单",
+      "preview": {
+        "supported": true,
+        "renderer": "xlx_past_v1",
+        "theme": "past"
+      }
+    },
+    {
       "code": "past_new",
       "name": "历史人物匹配·新",
       "questions": 26,
