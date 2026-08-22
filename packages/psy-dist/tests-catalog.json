@@ -532,7 +532,12 @@
       "questions": 28,
       "duration_min": 6,
       "hot": true,
-      "dual_perspective": false
+      "dual_perspective": false,
+      "preview": {
+        "supported": true,
+        "renderer": "skin_v1",
+        "theme": "default"
+      }
     },
     {
       "code": "qxjc",

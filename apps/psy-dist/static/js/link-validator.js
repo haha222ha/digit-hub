@@ -48,6 +48,11 @@
     isMobile: isMobileDevice
   };
 
+  function isPreviewHubPage() {
+    const path = window.location.pathname || '';
+    return /^\/preview(?:\/index\.html)?\/?$/.test(path);
+  }
+
   /**
    * 从URL中提取test_code和token
    * 支持的URL格式：
@@ -66,7 +71,7 @@
     
     if (unlimited && unlimitedToken) {
       // 平台结果直显中心 /preview/ 或 /preview/index.html?test={code}
-      const previewHubMatch = path.match(/^\/preview\/?$/) || path.match(/^\/preview\/index\.html$/);
+      const previewHubMatch = path.match(/^\/preview(?:\/index\.html)?\/?$/);
       if (previewHubMatch) {
         const testFromQuery = searchParams.get('test');
         if (testFromQuery) {
@@ -1059,14 +1064,23 @@
         const normalizedPerspective = normalizePerspective(perspective);
         
         if (this.unlimited) {
-          // 无限测试模式
-          validateResult = await validateUnlimitedTest(this.token, this.testCode);
-          if (validateResult.valid) {
-            this.adminId = validateResult.admin_id;
-            this.isDualPerspective = validateResult.is_dual_perspective || false;
+          // 结果直显页：持 unlimited token 即可验证，无需商家后台 JWT（方便手机截图发笔记）
+          if (isPreviewHubPage()) {
+            validateResult = await validateLink(this.token, normalizedPerspective);
+            if (validateResult.valid) {
+              validateResult.unlimited = true;
+              this.isDualPerspective = validateResult.is_dual_perspective || validateResult.isDualPerspective || false;
+            } else {
+              this.validationError = validateResult.message || '预览链接无效或已过期，请从商家后台重新开启预览会话';
+            }
           } else {
-            // 验证失败，设置错误信息（无限测试模式的特殊提示）
-            this.validationError = validateResult.message || '此测试仅限管理员使用，请先登录管理员账户';
+            validateResult = await validateUnlimitedTest(this.token, this.testCode);
+            if (validateResult.valid) {
+              this.adminId = validateResult.admin_id;
+              this.isDualPerspective = validateResult.is_dual_perspective || false;
+            } else {
+              this.validationError = validateResult.message || '此测试仅限管理员使用，请先登录管理员账户';
+            }
           }
         } else {
           // 普通模式（传递标准化后的perspective）
@@ -1448,9 +1462,24 @@
       
       try {
         // 从URL中提取参数
-        const params = extractParamsFromUrl();
+        let params = extractParamsFromUrl();
         if (!params) {
-          const errorMsg = '无法从URL中提取test_code和token，请使用正确的测试链接访问';
+          const sp = new URLSearchParams(window.location.search);
+          const unlimited = sp.get('unlimited') === 'true';
+          const token = sp.get('token');
+          const testFromQuery = sp.get('test');
+          if (unlimited && token && (testCode || testFromQuery)) {
+            params = {
+              testCode: testCode || testFromQuery,
+              token,
+              unlimited: true
+            };
+          }
+        }
+        if (!params) {
+          const errorMsg = isPreviewHubPage()
+            ? '预览链接不完整：请从商家后台「结果直显」复制带 unlimited=true 和 token 的完整链接'
+            : '无法从URL中提取test_code和token，请使用正确的测试链接访问';
           console.error(errorMsg);
           
           // 先调用onError回调，如果返回true或suppressErrors为true，则不显示错误弹窗

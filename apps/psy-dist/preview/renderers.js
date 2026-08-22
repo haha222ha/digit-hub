@@ -32,7 +32,47 @@ export function renderVariant(root, rendererId, item) {
     renderMuse(root, item);
     return;
   }
+  if (rendererId === 'skin_v1') {
+    renderSkin(root, item);
+    return;
+  }
   root.append(el('div', 'empty', '暂不支持该测题的结果渲染器'));
+}
+
+function renderSkin(root, item) {
+  const r = item.result || {};
+  const hero = el('div', 'result-hero');
+  hero.innerHTML = `
+    <div class="result-type"></div>
+    <div class="result-sub"></div>
+    <div class="result-quote"></div>
+    <div class="tag-row"></div>`;
+  if (r.emoji) {
+    const em = el('div', '', r.emoji);
+    em.style.fontSize = '42px';
+    em.style.marginBottom = '8px';
+    hero.prepend(em);
+  }
+  hero.querySelector('.result-type').textContent = r.type || item.name || '';
+  hero.querySelector('.result-sub').textContent = r.short || item.label || '';
+  hero.querySelector('.result-quote').textContent = r.quote || '';
+  hero.querySelector('.tag-row').innerHTML = (r.tags || []).map((t) => `<span class="tag">${t}</span>`).join('');
+
+  const sections = el('div');
+  (r.full || []).forEach((sec) => {
+    sections.append(el('div', 'full-section', `<h3>${sec.h || ''}</h3><p>${sec.p || ''}</p>`));
+  });
+
+  let radar = null;
+  if (r.totals && Object.keys(r.totals).length) {
+    radar = el('div', 'radar-wrap');
+    const stats = Object.entries(r.totals).map(([label, value]) => ({ label, value: Number(value) }));
+    renderStats(radar, stats);
+  }
+
+  root.append(hero);
+  if (radar) root.append(radar);
+  root.append(sections);
 }
 
 function renderPast(root, item) {

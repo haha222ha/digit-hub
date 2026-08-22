@@ -247,6 +247,17 @@ ${GZIP_DIRECTIVES}
         add_header Cloudflare-CDN-Cache-Control "no-store";
     }
 
+    # 平台结果直显中心（禁止回落到 console SPA）
+    location = /preview {
+        return 302 /preview/;
+    }
+    location ^~ /preview/ {
+        try_files \$uri \$uri/ /preview/index.html;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header CDN-Cache-Control "no-store";
+        add_header Cloudflare-CDN-Cache-Control "no-store";
+    }
+
     location ~ ^/test/([^/]+)/([^/]+)$ {
         proxy_pass http://127.0.0.1:8080;
         proxy_set_header Host \$host;

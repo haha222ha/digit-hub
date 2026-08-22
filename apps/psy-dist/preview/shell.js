@@ -108,25 +108,35 @@ async function loadManifestAndData(code) {
   if (!items.length) throw new Error('暂无预览结果数据');
 }
 
-function initAuth(code) {
-  return new Promise((resolve) => {
-    if (typeof PsyTestValidator === 'undefined') {
+async function initAuth(code) {
+  const sp = urlParams();
+  if (!sp.get('unlimited') || !sp.get('token')) {
+    showError('预览链接不完整：请从商家后台「结果直显」开启会话后，复制带 token 的完整链接（不要只打开 /preview/）。');
+    document.body.classList.remove('page-disabled');
+    return false;
+  }
+  if (typeof PsyTestValidator === 'undefined') {
+    document.body.classList.remove('page-disabled');
+    return false;
+  }
+  const validator = await PsyTestValidator.init(code, {
+    suppressErrors: true,
+    onSuccess() {
       document.body.classList.remove('page-disabled');
-      resolve(false);
-      return;
-    }
-    PsyTestValidator.init(code, {
-      onSuccess() {
-        document.body.classList.remove('page-disabled');
-        resolve(true);
-      },
-      onError() {
-        document.body.classList.remove('page-disabled');
-        resolve(false);
-      },
-    });
-    if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
+    },
+    onError(err) {
+      document.body.classList.remove('page-disabled');
+      showError((err && err.message) || '预览链接无效或已过期，请从商家后台重新开启预览会话');
+    },
   });
+  if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
+  if (!validator || validator.valid === false) {
+    if (!$('screen-error').classList.contains('active')) {
+      showError('预览链接无效或已过期，请从商家后台重新开启预览会话');
+    }
+    return false;
+  }
+  return true;
 }
 
 async function boot() {
@@ -138,7 +148,8 @@ async function boot() {
     return;
   }
 
-  await initAuth(testCode);
+  const authed = await initAuth(testCode);
+  if (!authed || $('screen-error').classList.contains('active')) return;
 
   try {
     await loadManifestAndData(testCode);
