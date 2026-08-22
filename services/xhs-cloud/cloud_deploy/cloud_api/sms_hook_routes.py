@@ -33,15 +33,17 @@ _lock = threading.Lock()
 
 # 支付宝常见：支付宝验证码：448291 / 验证码448291
 _ALIPAY_CODE_RE = re.compile(
-    r"(?:支付宝)?验证码\s*[：:\s]\s*(\d{6})",
+    r"(?:支付宝)?验证码\s*[：:\s]*(\d{4,8})",
     re.I,
 )
+# 仅匹配「验证码」关键词之后的 6 位，避免 106980095188000001 末尾 000001 误命中
 _CODE_RE = re.compile(
-    r"(?:验证码|校验码|动态码|code)[^\d]{0,12}(\d{6})"
-    r"|(\d{6})[^\d]{0,12}(?:验证码|校验码|为您的|动态)",
+    r"(?:验证码|校验码|动态码|code)[^\d]{0,12}(\d{4,8})",
     re.I,
 )
 _CODE_FALLBACK = re.compile(r"(?<!\d)(\d{6})(?!\d)")
+_LEADING_LONG_DIGITS_RE = re.compile(r"^\d{12,}")
+_HOTLINE_RE = re.compile(r"95188\d+")
 # 模板尾：{{7214}}2026-08-22 00:36:25
 _TAIL_MARK_RE = re.compile(
     r"\{\{(\d{4})\}\}\s*"
@@ -97,25 +99,56 @@ def _extract_leading_sender(text: str) -> str:
     return m.group(1) if m else ""
 
 
+def _is_plausible_code(code: str, text: str) -> bool:
+    if not code or not code.isdigit() or not (4 <= len(code) <= 8):
+        return False
+    if len(code) == 6 and code.startswith(("106", "095", "880", "000")):
+        return False
+    if code.startswith("95188"):
+        return False
+    pos = text.find(code)
+    if pos >= 0 and pos < 18:
+        kw = text.find("验证码")
+        if kw < 0 or pos < kw:
+            return False
+    return True
+
+
 def _extract_code(text: str) -> str | None:
     text = (text or "").strip()
     if not text:
         return None
     body = _strip_template_noise(text)
-    m = _ALIPAY_CODE_RE.search(body) or _ALIPAY_CODE_RE.search(text)
-    if m:
-        return m.group(1)
-    m = _CODE_RE.search(body) or _CODE_RE.search(text)
-    if m:
-        return next(g for g in m.groups() if g)
-    nums = _CODE_FALLBACK.findall(body)
-    # 排除明显不像验证码的（年份开头等）
-    nums = [n for n in nums if not n.startswith(("19", "20"))]
+    body = _LEADING_LONG_DIGITS_RE.sub("", body)
+    body = _HOTLINE_RE.sub(" ", body)
+    body = re.sub(r"唯一热线\s*\d+", " ", body)
+
+    for src in (body, text):
+        m = _ALIPAY_CODE_RE.search(src)
+        if m:
+            code = m.group(1)
+            if _is_plausible_code(code, text):
+                return code
+        m = _CODE_RE.search(src)
+        if m:
+            code = m.group(1)
+            if _is_plausible_code(code, text):
+                return code
+
+    nums = [
+        n for n in _CODE_FALLBACK.findall(body)
+        if _is_plausible_code(n, text)
+    ]
     if len(nums) == 1:
         return nums[0]
-    if "支付宝" in text or "alipay" in text.lower() or "验证码" in text:
-        if nums:
-            return nums[0]
+    if nums and ("支付宝" in text or "alipay" in text.lower() or "验证码" in text):
+        # 优先取「验证码」关键词之后出现的数字
+        kw = text.find("验证码")
+        if kw >= 0:
+            after = [n for n in nums if text.find(n) > kw]
+            if after:
+                return after[0]
+        return nums[0]
     return None
 
 
@@ -276,5 +309,6 @@ async def sms_code_latest(
                 "sender": rec.get("sender") or "",
                 "phone_tail": rec.get("phone_tail") or "",
                 "iso": rec.get("iso") or "",
+                "raw_preview": str(rec.get("text") or "")[:240],
             }
         )
