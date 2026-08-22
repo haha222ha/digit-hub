@@ -53,11 +53,7 @@
           showError('链接与测题不匹配');
           return;
         }
-        document.body.classList.remove('page-disabled');
-        var gate = document.getElementById('gate');
-        if (gate) gate.classList.add('hidden');
-        var frame = document.getElementById('xlx-frame');
-        if (frame) frame.src = mirrorSrc();
+        location.replace(mirrorSrc());
       },
       onError: function (err) {
         showError((err && err.message) || '链接校验失败');
