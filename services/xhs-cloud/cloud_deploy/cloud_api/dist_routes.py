@@ -233,15 +233,12 @@ def _assert_dist_can_login(user_id: int) -> None:
 
 @compat_router.get("/test/{test_code}/{token}")
 def compat_test_iframe_shell(test_code: str, token: str):
-    """C 端分销入口：past 类全页跳转镜像；其它测题 iframe 内嵌。"""
+    """C 端分销入口：past 走稳定测题页；其它测题 iframe 内嵌。"""
     safe_code = (test_code or "").replace('"', "")
     safe_token = (token or "").replace('"', "")
     if safe_code in ("past_new", "past_xlx"):
         return RedirectResponse(
-            url=(
-                f"/xlx-mirror/past?psy_integrated=1&test_code={safe_code}"
-                f"&scale=past&token={safe_token}"
-            ),
+            url=f"/tests/past_new/index.html?token={safe_token}",
             status_code=302,
         )
     return HTMLResponse(

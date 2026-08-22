@@ -938,7 +938,7 @@
       "duration_min": 8,
       "hot": true,
       "source": "xlxtest_mirror",
-      "legacy_note": "L3 原站 Vue 镜像（雷达/晒单/多维分析）；旧手写 UI 见 tests/past_new/legacy.html",
+      "legacy_note": "稳定分销版（vendor 计分 + past-result-ui）；L3 原站镜像见 /xlx-mirror/past 内测",
       "preview": {
         "supported": true,
         "renderer": "xlx_past_v1",

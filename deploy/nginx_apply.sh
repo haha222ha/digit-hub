@@ -280,9 +280,9 @@ ${GZIP_DIRECTIVES}
         add_header Cloudflare-CDN-Cache-Control "no-store";
     }
 
-    # past 分销：nginx 直跳镜像（不经过 API iframe，避免内嵌首页）
+    # past 分销：直跳稳定版测题页（不走 L3 镜像，避免 chunk 重试跳首页）
     location ~ ^/test/(past_new|past_xlx)/([^/]+)$ {
-        return 302 /xlx-mirror/past?psy_integrated=1&test_code=\$1&scale=past&token=\$2;
+        return 302 /tests/past_new/index.html?token=\$2;
     }
 
     location ~ ^/test/([^/]+)/([^/]+)$ {
