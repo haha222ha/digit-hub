@@ -1,157 +1,18 @@
-.past-result { padding-bottom: 24px; }
-.past-hero { padding: 28px 20px 20px; text-align: center; }
-.past-hero-name { font-size: 28px; font-weight: 900; color: #7a4b12; margin-bottom: 6px; font-family: 'Noto Serif SC', serif; }
-.past-hero-sub { font-size: 13px; color: #8a7f72; margin-bottom: 14px; }
-.past-hero-quote { font-size: 14px; color: #5c534a; line-height: 1.85; margin-bottom: 14px; padding: 0 6px; }
-.past-tag-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 8px; }
-.past-tag { font-size: 11px; background: #fff; border: 1px solid #e5ddd0; padding: 5px 12px; border-radius: 999px; color: #666; }
-.past-block { margin: 0 20px 14px; background: #fff; border-radius: 14px; padding: 16px; }
-.past-section-title { font-size: 15px; font-weight: 900; color: #3d2914; margin-bottom: 12px; letter-spacing: .02em; }
-.past-profile p { font-size: 13px; color: #5f574d; line-height: 1.85; margin-bottom: 10px; }
-.past-profile p:last-child { margin-bottom: 0; }
-.past-radar-box { margin-bottom: 14px; }
-.past-radar-legend { display: flex; justify-content: center; gap: 18px; font-size: 11px; color: #8a7f72; margin-top: 8px; }
-.past-legend-item { display: flex; align-items: center; gap: 6px; }
-.past-legend-line { width: 22px; height: 0; border-top: 2px solid #b85c4a; }
-.past-legend-line.ref { border-top-style: dashed; border-color: #9a7b4f; }
-.past-dim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.past-dim-card { background: #faf7f2; border: 1px solid #efe6d8; border-radius: 12px; padding: 12px; }
-.past-dim-label { font-size: 12px; font-weight: 800; color: #3d2914; margin-bottom: 6px; }
-.past-dim-scores { font-size: 11px; color: #8a7f72; margin-bottom: 6px; }
-.past-dim-scores strong { color: #b85c4a; font-size: 13px; }
-.past-dim-scores .ref-val { color: #9a7b4f; }
-.past-dim-desc { font-size: 11px; color: #8a7f72; line-height: 1.55; }
-.past-mirror-summary { font-size: 13px; color: #7a4b12; font-weight: 700; margin-bottom: 14px; line-height: 1.6; }
-.past-step { padding: 12px 0; border-top: 1px solid #efe6d8; }
-.past-step:first-of-type { border-top: none; padding-top: 0; }
-.past-step-label { font-size: 11px; font-weight: 800; color: #b0a89c; margin-bottom: 4px; }
-.past-step-title { font-size: 14px; font-weight: 800; color: #3d2914; margin-bottom: 6px; }
-.past-step-copy { font-size: 13px; color: #666; line-height: 1.75; }
-.past-scene { padding: 14px 0; border-top: 1px solid #efe6d8; }
-.past-scene:first-of-type { border-top: none; padding-top: 0; }
-.past-scene-pill { display: inline-block; font-size: 11px; font-weight: 700; color: #7a4b12; background: #f4efe6; padding: 4px 10px; border-radius: 999px; margin-bottom: 8px; }
-.past-scene-title { font-size: 15px; font-weight: 900; color: #3d2914; margin-bottom: 8px; }
-.past-scene-copy { font-size: 13px; color: #666; line-height: 1.75; margin-bottom: 10px; }
-.past-scene-signal { font-size: 13px; color: #5c534a; line-height: 1.7; padding-left: 12px; border-left: 3px solid #d4c4a8; }
-.past-closing { margin: 0 20px 16px; background: #fff; border-radius: 14px; padding: 16px; font-size: 14px; color: #5c534a; line-height: 1.85; text-align: center; }
-.past-actions { display: flex; gap: 10px; padding: 0 20px 8px; }
-.past-actions .btn { flex: 1; }
-.past-actions-stack { padding: 0 20px 32px; }
-.past-actions-stack .btn { width: 100%; margin-top: 10px; }
-.past-order { font-size: 11px; color: #b0a89c; margin-bottom: 10px; }
+/* past 结果页：镜像 CSS 嵌套修正 + 弹窗样式保留 */
 
-/* 结果页操作按钮（借鉴原站 action-row） */
-.past-actions .past-action-share {
-  border: 1.5px solid #e5ddd0;
-  background: #fff;
-  color: #3d2914;
-}
-.past-actions .past-action-reward {
-  background: linear-gradient(135deg, #17130f, #2b231d);
-  border: 1px solid rgba(24, 18, 14, .9);
-  color: #f7f2e8;
-  box-shadow: 0 8px 20px rgba(26, 20, 14, .15);
+#result-root .past-history-result {
+  min-height: auto;
+  padding: 0;
+  background: transparent;
 }
 
-/* 分享图卡片（离屏渲染） */
-.past-share-card {
-  width: 375px;
-  background: #faf7f0;
-  color: #17130f;
-  font-family: "PingFang SC", "Noto Serif SC", serif;
-  overflow: hidden;
-}
-.past-share-brand {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 28px 0;
-}
-.past-share-logo {
-  font-size: 12px;
-  letter-spacing: .28em;
-  color: #5f5143;
-}
-.past-share-meta {
-  font-size: 11px;
-  color: #756754;
-  letter-spacing: .06em;
-}
-.past-share-hero {
-  padding: 36px 28px 18px;
-  text-align: center;
-}
-.past-share-label {
-  font-size: 12px;
-  color: #6d604f;
-  letter-spacing: .14em;
-  font-style: italic;
-  margin-bottom: 12px;
-}
-.past-share-name {
-  font-family: "Noto Serif SC", serif;
-  font-size: 28px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 6px;
-  letter-spacing: .06em;
-}
-.past-share-sub {
-  font-size: 12px;
-  color: #8a7f72;
-  margin-bottom: 14px;
-}
-.past-share-quote {
-  margin: 0 auto;
-  max-width: 300px;
-  font-size: 14px;
-  line-height: 1.8;
-  color: #2f2922;
-  font-style: italic;
-}
-.past-share-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 16px;
-}
-.past-share-tag {
-  font-size: 11px;
-  padding: 5px 12px;
-  border: 1px solid #aa967b;
-  border-radius: 20px;
-  color: #4c4135;
-  background: rgba(255, 252, 246, .32);
-}
-.past-share-section {
-  padding: 0 28px 8px;
-}
-.past-share-kicker {
-  font-family: "Noto Serif SC", serif;
-  font-size: 15px;
-  font-weight: 600;
-  color: #241d17;
-  margin-bottom: 10px;
-  letter-spacing: .06em;
-}
-.past-share-lead {
-  font-size: 13px;
-  line-height: 1.85;
-  color: #211b16;
-  margin: 0;
-  text-align: justify;
-}
-.past-share-radar-section .past-radar-box { margin-bottom: 0; }
-.past-share-foot {
-  padding: 14px 28px 24px;
-  text-align: center;
-  font-size: 10px;
-  color: #9a8d7d;
-  letter-spacing: .08em;
+#result-root .past-history-result .result-inner {
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
 }
 
-/* 弹窗通用 */
+/* 分享 / 晒单弹窗（手写壳，非镜像 reward-overlay） */
 body.past-modal-open { overflow: hidden; }
 .past-overlay {
   position: fixed;
@@ -205,9 +66,17 @@ body.past-modal-open { overflow: hidden; }
 .past-share-download {
   width: min(280px, 80vw);
   margin: 0 auto;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  background: #3d2914;
+  color: #fff;
 }
 
-/* 晒单有礼弹窗 */
+/* 晒单弹窗 */
 .past-reward-overlay {
   background: rgba(23, 19, 15, .56);
   backdrop-filter: blur(6px);
@@ -314,3 +183,57 @@ body.past-modal-open { overflow: hidden; }
   line-height: 1.75;
   color: #7a6b5b;
 }
+
+/* 分享卡（离屏渲染，旧版简化雷达） */
+.past-share-card {
+  width: 375px;
+  background: #faf7f0;
+  color: #17130f;
+  font-family: "PingFang SC", "Noto Serif SC", serif;
+  overflow: hidden;
+}
+.past-share-brand {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 28px 0;
+}
+.past-share-logo { font-size: 12px; letter-spacing: .28em; color: #5f5143; }
+.past-share-meta { font-size: 11px; color: #756754; }
+.past-share-hero { padding: 32px 28px 16px; text-align: center; }
+.past-share-label {
+  font-size: 12px; color: #6d604f; letter-spacing: .14em; font-style: italic; margin-bottom: 12px;
+}
+.past-share-name {
+  font-family: "Noto Serif SC", serif; font-size: 28px; font-weight: 600;
+  color: #1a1a1a; margin-bottom: 6px;
+}
+.past-share-sub { font-size: 12px; color: #8a7f72; margin-bottom: 14px; }
+.past-share-quote {
+  margin: 0 auto; max-width: 300px; font-size: 14px; line-height: 1.8;
+  color: #2f2922; font-style: italic;
+}
+.past-share-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+.past-share-tag {
+  font-size: 11px; padding: 5px 12px; border: 1px solid #aa967b;
+  border-radius: 20px; color: #4c4135; background: rgba(255, 252, 246, .32);
+}
+.past-share-section { padding: 0 28px 10px; }
+.past-share-kicker {
+  font-family: "Noto Serif SC", serif; font-size: 15px; font-weight: 600;
+  margin-bottom: 10px; color: #241d17;
+}
+.past-share-lead { font-size: 13px; line-height: 1.85; color: #211b16; margin: 0; text-align: justify; }
+.past-share-radar-section .past-radar-box { margin-bottom: 0; }
+.past-share-foot {
+  padding: 14px 28px 24px; text-align: center; font-size: 10px;
+  color: #9a8d7d; letter-spacing: .08em;
+}
+.past-radar-box { margin-bottom: 14px; }
+.past-radar-legend {
+  display: flex; justify-content: center; gap: 18px; font-size: 11px;
+  color: #8a7f72; margin-top: 8px;
+}
+.past-legend-item { display: flex; align-items: center; gap: 6px; }
+.past-legend-line { width: 22px; height: 0; border-top: 2px solid #b85c4a; }
+.past-legend-line.ref { border-top-style: dashed; border-color: #9a7b4f; }

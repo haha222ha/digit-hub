@@ -10,7 +10,7 @@ export function esc(s) {
 
 function byKey(stats) {
   const map = new Map();
-  (stats || []).forEach((s) => map.set(s.key, s));
+  (stats || []).forEach((item) => map.set(item.key, item));
   return map;
 }
 
@@ -31,6 +31,78 @@ function poly(points) {
   return points.map((p) => p.join(',')).join(' ');
 }
 
+function sectionTitle(text) {
+  return `<div class="section-label"><span class="title-icon" aria-hidden="true">✦</span><span class="title-text">${esc(text)}</span></div>`;
+}
+
+function sectionKicker(text) {
+  return `<div class="section-kicker"><span class="title-icon" aria-hidden="true">✦</span><span class="title-text">${esc(text)}</span></div>`;
+}
+
+/** 镜像同构雷达 + 六维图例（default-HAMcHMCE） */
+export function renderMirrorRadarBlock(userStats, refStats) {
+  const user = orderedStats(userStats);
+  const ref = orderedStats(refStats);
+  const hasRef = ref.length > 0;
+  const labels = user.map((s) => s.label);
+  const userVals = user.map((s) => s.value);
+  const refVals = hasRef ? ref.map((s) => s.value) : [];
+  const cx = 160;
+  const cy = 160;
+  const radius = 92;
+  const rings = [25, 50, 75, 100];
+  const ringPolys = rings.map((pct) => {
+    const pts = radarPoints(Array(labels.length).fill(pct), cx, cy, radius);
+    return `<polygon class="radar-grid" points="${poly(pts)}"/>`;
+  }).join('');
+  const axes = labels.map((label, i) => {
+    const angle = (-Math.PI / 2) + (i * 2 * Math.PI) / labels.length;
+    const x2 = cx + radius * Math.cos(angle);
+    const y2 = cy + radius * Math.sin(angle);
+    const lx = cx + (radius + 24) * Math.cos(angle);
+    const ly = cy + (radius + 24) * Math.sin(angle);
+    const anchor = Math.abs(Math.cos(angle)) < 0.2 ? 'middle' : (Math.cos(angle) > 0 ? 'start' : 'end');
+    return `<line class="radar-axis" x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}"/>
+      <text class="radar-label" x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle">${esc(label)}</text>`;
+  }).join('');
+  const refPoly = hasRef ? radarPoints(refVals, cx, cy, radius) : [];
+  const userPoly = radarPoints(userVals, cx, cy, radius);
+  const userDots = userPoly.map(([x, y]) => `<circle class="radar-point" cx="${x}" cy="${y}" r="3.2"/>`).join('');
+  const refDots = hasRef ? refPoly.map(([x, y]) => `<circle class="radar-reference-point" cx="${x}" cy="${y}" r="2.8"/>`).join('') : '';
+
+  const legendHtml = user.map((u, i) => {
+    const r = hasRef ? ref[i] : null;
+    const refLine = r ? `<small>参照 ${r.value}%</small>` : '';
+    return `<div class="radar-legend-item">
+      <div class="radar-legend-head">
+        <span class="radar-legend-name">${esc(u.label)}</span>
+        <span class="radar-legend-value"><strong>你 ${u.value}%</strong>${refLine}</span>
+      </div>
+      <div class="radar-legend-desc">${esc(u.desc)}</div>
+    </div>`;
+  }).join('');
+
+  const keyHtml = hasRef ? `
+    <div class="radar-key">
+      <span class="radar-key-item"><span class="radar-key-swatch radar-key-swatch--user"></span>实线为你</span>
+      <span class="radar-key-item"><span class="radar-key-swatch radar-key-swatch--reference"></span>虚线为人物参照轮廓</span>
+    </div>` : '';
+
+  return `<div class="radar-wrap">
+    <svg class="radar-chart" viewBox="0 0 320 320" width="100%" aria-label="行为画像雷达图">
+      ${ringPolys}
+      ${axes}
+      ${hasRef ? `<polygon class="radar-reference-area" points="${poly(refPoly)}"/>` : ''}
+      <polygon class="radar-area" points="${poly(userPoly)}"/>
+      ${refDots}
+      ${userDots}
+    </svg>
+    ${keyHtml}
+    <div class="radar-legend">${legendHtml}</div>
+  </div>`;
+}
+
+/** 分享卡等仍用简化雷达 */
 export function renderRadarSvg(userStats, refStats) {
   const user = orderedStats(userStats);
   const ref = orderedStats(refStats);
@@ -86,3 +158,5 @@ export function renderDimGrid(userStats, refStats) {
     </div>`;
   }).join('')}</div>`;
 }
+
+export { sectionTitle, sectionKicker };

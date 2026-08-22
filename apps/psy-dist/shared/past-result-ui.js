@@ -1,4 +1,9 @@
-import { esc, renderRadarSvg, renderDimGrid } from './past-result-ui-core.js';
+import {
+  esc,
+  renderMirrorRadarBlock,
+  sectionTitle,
+  sectionKicker,
+} from './past-result-ui-core.js';
 import { openSharePreview, openRewardModal } from './past-share-modal.js';
 
 export { renderRadarSvg } from './past-result-ui-core.js';
@@ -13,65 +18,89 @@ export function buildPastResultHtml(result, options = {}) {
   const showActions = options.showActions !== false;
   const showOrder = options.showOrder === true;
   const orderText = options.orderText || (p.orderIndex ? `匹配度 ${p.orderIndex}/${p.totalArchetypes}` : '');
+  const profiles = p.profile || [];
 
-  const profileHtml = (p.profile || []).map((txt) => `<p>${esc(txt)}</p>`).join('');
+  const profileHtml = profiles.map((txt, i) => {
+    const cls = i === 0 ? 'persona-text persona-text--lead' : 'persona-text';
+    return `<p class="${cls}">${esc(txt)}</p>`;
+  }).join('');
+
   const stepsHtml = steps.map((step) => `
-    <div class="past-step">
-      <div class="past-step-label">${esc(step.label)}</div>
-      <div class="past-step-title">${esc(step.title)}</div>
-      <div class="past-step-copy">${esc(step.copy)}</div>
+    <div class="bottom-report-step">
+      <div class="bottom-report-step-index">${esc(step.label)}</div>
+      <div>
+        <div class="bottom-report-step-title">${esc(step.title)}</div>
+        <div class="bottom-report-step-copy">${esc(step.copy)}</div>
+      </div>
     </div>`).join('');
-  const scenesHtml = scenes.map((scene) => `
-    <div class="past-scene">
-      <div class="past-scene-pill">${esc(scene.label)}</div>
-      <div class="past-scene-title">${esc(scene.title)}</div>
-      <div class="past-scene-copy">${esc(scene.copy)}</div>
-      <div class="past-scene-signal">${esc(scene.signal || '')}</div>
-    </div>`).join('');
+
+  const scenesHtml = scenes.map((scene, i) => `
+    <article class="scene-entry">
+      <div class="scene-entry-meta">
+        <span class="scene-entry-index">${String(i + 1).padStart(2, '0')}</span>
+        <span class="scene-entry-label">${esc(scene.label)}</span>
+      </div>
+      <div class="scene-entry-content">
+        <h3 class="scene-entry-title">${esc(scene.title)}</h3>
+        <p class="scene-entry-copy">${esc(scene.copy)}</p>
+        ${scene.signal ? `<div class="scene-entry-signal"><span class="scene-entry-signal-copy">${esc(scene.signal)}</span></div>` : ''}
+      </div>
+    </article>`).join('');
 
   const actionsHtml = showActions ? `
-    <div class="past-actions">
-      <button type="button" class="btn btn-ghost past-action-share" data-past-action="share">截图分享</button>
-      <button type="button" class="btn btn-primary past-action-reward" data-past-action="reward">晒单有礼</button>
-    </div>
-    <div class="past-actions-stack">
-      <button type="button" class="btn btn-ghost" data-past-action="retry">重新探索</button>
+    <div class="bottom-area">
+      <div class="actions">
+        <button type="button" class="action-btn action-btn-outline" data-past-action="share">截图分享</button>
+        <button type="button" class="action-btn action-btn-solid reward-btn-inline" data-past-action="reward">
+          <span class="reward-btn__text">晒单有礼</span>
+        </button>
+      </div>
+      <button type="button" class="restart-btn retake-btn-secondary" data-past-action="retry">重新探索</button>
     </div>` : '';
 
-  return `<article class="past-result" data-past-result>
-    <header class="past-hero">
-      <div class="past-hero-name">${esc(p.name)}</div>
-      <div class="past-hero-sub">${esc(p.author)} · ${esc(p.source)}</div>
-      ${showOrder && orderText ? `<div class="past-order">${esc(orderText)}</div>` : ''}
-      <p class="past-hero-quote">${esc(p.quote)}</p>
-      <div class="past-tag-row">${(p.tags || []).map((t) => `<span class="past-tag">${esc(t)}</span>`).join('')}</div>
-    </header>
-    <section class="past-block past-profile">
-      <h2 class="past-section-title">你的核心轮廓</h2>
-      ${profileHtml}
-    </section>
-    <section class="past-block">
-      <h2 class="past-section-title">你的行为画像</h2>
-      ${renderRadarSvg(result.stats, refStats)}
-      ${renderDimGrid(result.stats, refStats)}
-    </section>
-    <section class="past-block">
-      <h2 class="past-section-title">你与${esc(p.name)}的相照之处</h2>
-      ${path.summary ? `<p class="past-mirror-summary">${esc(path.summary)}</p>` : ''}
-      ${stepsHtml}
-    </section>
-    <section class="past-block">
-      <h2 class="past-section-title">现实中的你</h2>
-      ${scenesHtml}
-    </section>
-    ${br.intro ? `<div class="past-closing">${esc(br.intro)}</div>` : ''}
-    ${actionsHtml}
-  </article>`;
+  const heroMeta = [p.author, p.source].filter(Boolean).join(' · ');
+  const heroLabel = showOrder && orderText ? orderText : 'Historical Archetype';
+
+  return `<div class="past-history-result" data-past-result>
+    <div class="result-inner">
+      <div class="capture-area">
+        <div class="brand-bar">
+          <div class="logo">心象测</div>
+          <div class="meta">历史人物匹配</div>
+        </div>
+        <header class="hero">
+          <div class="hero-label">${esc(heroLabel)}</div>
+          ${heroMeta ? `<div class="hero-meaning">${esc(heroMeta)}</div>` : ''}
+          <div class="hero-cn-name">${esc(p.name)}</div>
+          <blockquote class="epigraph">${esc(p.quote)}</blockquote>
+          <div class="tags">${(p.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>
+        </header>
+        <section class="section result-section">
+          ${sectionTitle('你的核心轮廓')}
+          ${profileHtml}
+        </section>
+        <section class="meter-card">
+          ${sectionTitle('你的行为画像')}
+          ${renderMirrorRadarBlock(result.stats, refStats)}
+        </section>
+        <section class="path-report result-section">
+          ${sectionKicker(`你与${p.name || 'TA'}的相照之处`)}
+          ${path.summary ? `<p class="bottom-report-summary">${esc(path.summary)}</p>` : ''}
+          <div class="bottom-report-steps">${stepsHtml}</div>
+        </section>
+        <section class="modern-section result-section">
+          ${sectionKicker('现实中的你')}
+          <div class="scene-entries">${scenesHtml}</div>
+        </section>
+        ${br.intro ? `<div class="result-closing-note"><p>${esc(br.intro)}</p></div>` : ''}
+      </div>
+      ${actionsHtml}
+    </div>
+  </div>`;
 }
 
 export function bindPastResultActions(root, options = {}) {
   if (!root) return;
-  const resultNode = root.querySelector('[data-past-result]') || root;
   const resultData = options.result;
 
   root.querySelector('[data-past-action="share"]')?.addEventListener('click', () => {
