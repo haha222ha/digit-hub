@@ -1,11 +1,13 @@
 /**
  * xlxtest L3 mirror bootstrap — load synchronously before Vue app.
- * Disables domain lock, mocks verify API, patches history for /xlx-mirror/* subpath.
+ * Disables domain lock, mocks verify API, normalizes /xlx-mirror/* → /past for Vue router.
  */
 (function () {
   var MIRROR_BASE = '/xlx-mirror';
   var path = location.pathname || '';
   var onMirror = path.indexOf(MIRROR_BASE) === 0;
+  var SCALE_ROUTE =
+    /^\/(past|muse|ero|city|six|drk|taa|dkm|scl90|apt|sins|face)(\/|$)/.test(path);
 
   if (window.__PUBLIC_CONFIG__) {
     window.__PUBLIC_CONFIG__.domain_lock_enabled = 0;
@@ -15,6 +17,19 @@
   var searchParams = new URLSearchParams(location.search);
   var distToken = searchParams.get('token') || '';
   var integrated = searchParams.get('psy_integrated') === '1' || !!distToken;
+
+  // 清除上次 chunk 重试计数，避免「反复载入」卡死
+  try {
+    sessionStorage.removeItem('chunk-global-retry');
+  } catch (e) {}
+
+  // 分包路径始终指向 /xlx-mirror/assets/（即使地址栏显示 /past）
+  if (onMirror || SCALE_ROUTE) {
+    var baseEl = document.createElement('base');
+    baseEl.href = location.origin + MIRROR_BASE + '/';
+    var head = document.head || document.getElementsByTagName('head')[0];
+    if (head) head.insertBefore(baseEl, head.firstChild);
+  }
 
   if (integrated && distToken) {
     document.write('<script src="/shared/xlx-digit-integration.js"><\/script>');
@@ -37,20 +52,8 @@
       } catch (e) {}
     }
 
-    var origPush = history.pushState;
+    // Vue 路由认 /past；只改一次地址栏，不再 wrap pushState（避免 /past ↔ /xlx-mirror 振荡）
     var origReplace = history.replaceState;
-    function fixUrl(url) {
-      if (typeof url !== 'string' || !url.charAt(0) || url.indexOf('http') === 0) return url;
-      if (url.indexOf(MIRROR_BASE) === 0) return url;
-      return MIRROR_BASE + (url.charAt(0) === '/' ? url : '/' + url);
-    }
-    history.pushState = function (state, title, url) {
-      return origPush.call(this, state, title, fixUrl(url));
-    };
-    history.replaceState = function (state, title, url) {
-      return origReplace.call(this, state, title, fixUrl(url));
-    };
-
     var rest = path.slice(MIRROR_BASE.length) || '/past';
     if (!rest || rest === '/') rest = '/past';
     origReplace.call(history, null, '', rest + location.search + location.hash);
@@ -75,6 +78,9 @@
     }
 
     if (url.indexOf('/api/verify') !== -1 && method.toUpperCase() !== 'GET') {
+      if (integrated && distToken) {
+        return origFetch.apply(this, arguments);
+      }
       return Promise.resolve(
         new Response(
           JSON.stringify({
@@ -99,6 +105,14 @@
             headers: { 'Content-Type': 'application/json' },
           });
         });
+    }
+
+    if (
+      integrated &&
+      distToken &&
+      (url.indexOf('/api/links/') !== -1 || url.indexOf('/api/admin/unlimited-test/') !== -1)
+    ) {
+      return origFetch.apply(this, arguments);
     }
 
     if (url.indexOf('/api/') !== -1) {
