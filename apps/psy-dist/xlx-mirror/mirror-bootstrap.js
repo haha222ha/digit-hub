@@ -18,20 +18,24 @@
 
   if (integrated && distToken) {
     document.write('<script src="/shared/xlx-digit-integration.js"><\/script>');
-  } else if (onMirror) {
-    var VERIFY_TOKEN = 'mirror.' + 'A'.repeat(40);
-    try {
-      var authPayload = {
-        code: 'MIRROR',
-        questionnaireKey: 'past',
-        scaleCode: 'past',
-        verifyToken: VERIFY_TOKEN,
-        activatedAt: Date.now(),
-        reportTemplate: 'default',
-        deviceId: 'mirror-device-001',
-      };
-      localStorage.setItem('xlxtest_authcode_past', JSON.stringify(authPayload));
-    } catch (e) {}
+  }
+
+  if (onMirror) {
+    if (!integrated || !distToken) {
+      var VERIFY_TOKEN = 'mirror.' + 'A'.repeat(40);
+      try {
+        var authPayload = {
+          code: 'MIRROR',
+          questionnaireKey: 'past',
+          scaleCode: 'past',
+          verifyToken: VERIFY_TOKEN,
+          activatedAt: Date.now(),
+          reportTemplate: 'default',
+          deviceId: 'mirror-device-001',
+        };
+        localStorage.setItem('xlxtest_authcode_past', JSON.stringify(authPayload));
+      } catch (e) {}
+    }
 
     var origPush = history.pushState;
     var origReplace = history.replaceState;
