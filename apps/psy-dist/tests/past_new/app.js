@@ -10,7 +10,40 @@ const state = {
   genderChosen: true,
 };
 
+let advanceTimer = null;
+let optionLocked = false;
+
 function $(id) { return document.getElementById(id); }
+
+function clearAdvanceTimer() {
+  if (advanceTimer) {
+    clearTimeout(advanceTimer);
+    advanceTimer = null;
+  }
+}
+
+function advanceAfterSelect() {
+  const q = uiQuestions[state.qi];
+  if (!state.answers[q.id]) return;
+  if (state.qi < uiQuestions.length - 1) {
+    optionLocked = true;
+    clearAdvanceTimer();
+    advanceTimer = setTimeout(() => {
+      advanceTimer = null;
+      const cur = uiQuestions[state.qi];
+      if (state.answers[cur.id]) {
+        state.qi++;
+        optionLocked = false;
+        renderQuestion();
+      } else {
+        optionLocked = false;
+      }
+    }, 300);
+  } else {
+    clearAdvanceTimer();
+    setTimeout(() => showResult(), 300);
+  }
+}
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
@@ -39,15 +72,14 @@ function renderQuestion() {
   }).join('');
   host.querySelectorAll('.opt').forEach(el => {
     el.onclick = () => {
+      if (optionLocked) return;
       state.answers[q.id] = el.dataset.id;
       host.querySelectorAll('.opt').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
-      $('btn-next').disabled = false;
+      advanceAfterSelect();
     };
   });
-  $('btn-next').textContent = state.qi === total - 1 ? '查看结果' : '下一题';
   $('btn-back').style.display = state.qi > 0 ? 'block' : 'none';
-  $('btn-next').disabled = !state.answers[q.id];
 }
 
 function renderStats(stats) {
@@ -136,12 +168,14 @@ function bindUi() {
     showScreen('screen-quiz');
     renderQuestion();
   };
-  $('btn-next').onclick = () => {
-    if (!state.answers[uiQuestions[state.qi].id]) return;
-    if (state.qi < uiQuestions.length - 1) { state.qi++; renderQuestion(); }
-    else showResult();
+  $('btn-back').onclick = () => {
+    if (state.qi > 0) {
+      clearAdvanceTimer();
+      optionLocked = false;
+      state.qi--;
+      renderQuestion();
+    }
   };
-  $('btn-back').onclick = () => { if (state.qi > 0) { state.qi--; renderQuestion(); } };
   $('btn-retry').onclick = () => {
     state.qi = 0;
     state.answers = {};

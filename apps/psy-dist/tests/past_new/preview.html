@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="历史人物匹配·新 - 超管结果预览">
+  <title>历史人物匹配·新 · 结果预览</title>
+  <script src="/static/js/test-security.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Serif SC', serif;
+      background: #f4efe6; color: #1a1612;
+      min-height:100vh; max-width:480px; margin:0 auto; overflow-x:hidden;
+    }
+    body.page-disabled { pointer-events:none; opacity:.65; }
+    .screen { display:none; animation: fadeUp .45s ease both; }
+    .screen.active { display:block; }
+    nav { display:flex; justify-content:space-between; align-items:center; padding:18px 20px 0; }
+    .logo { font-size:12px; font-weight:800; color:#8a7f72; letter-spacing:.12em; }
+    .nav-badge { font-size:11px; color:#5c3d1e; background:#e8dcc8; padding:4px 10px; border-radius:20px; }
+    .hero { padding:20px 20px 12px; }
+    h1 { font-size:28px; font-weight:900; line-height:1.15; margin-bottom:8px; color:#7a4b12; }
+    .hero-sub { font-size:13px; color:#5f574d; line-height:1.6; margin-bottom:14px; }
+    .search { margin:0 20px 12px; }
+    .search input {
+      width:100%; border:1.5px solid #e5ddd0; border-radius:12px; padding:12px 14px;
+      font-size:14px; background:#fff;
+    }
+    .index-meta-row { padding:0 20px 10px; font-size:12px; color:#8a7f72; }
+    .index-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 20px 28px; }
+    .index-card {
+      background:#fff; border:1.5px solid #e5ddd0; border-radius:12px; padding:12px;
+      text-align:left; cursor:pointer;
+    }
+    .index-name { font-size:14px; font-weight:800; margin-bottom:4px; }
+    .index-meta { font-size:11px; color:#8a7f72; margin-bottom:4px; }
+    .index-code { font-size:10px; color:#b0a89c; }
+    .preview-bar {
+      display:flex; gap:10px; padding:12px 20px 0; position:sticky; top:0;
+      background:#f4efe6; z-index:2;
+    }
+    .btn {
+      flex:1; border:none; cursor:pointer; font-size:14px; font-weight:700;
+      padding:12px; border-radius:12px;
+    }
+    .btn-primary { background:#3d2914; color:#fff; }
+    .btn-ghost { background:#fff; color:#1a1612; border:1.5px solid #e5ddd0; }
+    .preview-pos { text-align:center; font-size:12px; color:#8a7f72; padding:8px 20px 0; }
+    .result-hero { padding:20px 20px 16px; text-align:center; }
+    .result-type { font-size:24px; font-weight:900; color:#7a4b12; margin-bottom:6px; }
+    .result-sub { font-size:13px; color:#8a7f72; margin-bottom:10px; }
+    .result-order { font-size:12px; color:#aaa; margin-bottom:12px; }
+    .result-quote { font-size:14px; color:#5c534a; line-height:1.8; margin-bottom:16px; padding:0 8px; }
+    .tag-row { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:16px; }
+    .tag { font-size:11px; background:#fff; border:1px solid #e5ddd0; padding:4px 10px; border-radius:999px; color:#666; }
+    .radar-wrap { margin:0 20px 16px; background:#fff; border-radius:16px; padding:16px; }
+    .radar-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; }
+    .radar-bar { flex:1; height:6px; background:#eee; border-radius:3px; margin:0 10px; overflow:hidden; }
+    .radar-fill { height:100%; background:#7a4b12; border-radius:3px; }
+    .full-section { margin:0 20px 12px; background:#fff; border-radius:12px; padding:14px 16px; }
+    .full-section h3 { font-size:14px; margin-bottom:6px; color:#7a4b12; }
+    .full-section p { font-size:13px; color:#666; line-height:1.7; }
+    .scene-title { font-weight:800; color:#333; margin-bottom:6px; }
+    .scene-signal { margin-top:8px; color:#7a4b12; font-size:12px; }
+    .empty { padding:20px; color:#8a7f72; text-align:center; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+  </style>
+</head>
+<body class="page-disabled">
+  <div id="screen-index" class="screen active">
+    <nav><div class="logo">心象测</div><div class="nav-badge">超管预览</div></nav>
+    <div class="hero">
+      <h1>历史人物匹配·新</h1>
+      <p class="hero-sub">浏览全部结果类型，方便截图生成笔记。需超管无限测试令牌。</p>
+    </div>
+    <div class="search"><input id="search-input" type="search" placeholder="搜索人物、原型、作者…"></div>
+    <div class="index-meta-row"><span id="index-count">0 种结果</span></div>
+    <div class="index-grid" id="index-grid"></div>
+  </div>
+
+  <div id="screen-result" class="screen">
+    <nav><div class="logo">心象测</div><div class="nav-badge">结果预览</div></nav>
+    <div class="preview-bar">
+      <button class="btn btn-ghost" id="btn-back-index">返回列表</button>
+      <button class="btn btn-primary" id="btn-prev">上一个</button>
+      <button class="btn btn-primary" id="btn-next-result">下一个</button>
+    </div>
+    <div class="preview-pos" id="preview-pos"></div>
+    <div class="result-hero">
+      <div class="result-type" id="result-type"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-order" id="result-order"></div>
+      <div class="tag-row" id="result-tags"></div>
+      <p class="result-quote" id="result-quote"></p>
+    </div>
+    <div class="radar-wrap" id="radar-wrap"></div>
+    <div id="full-sections"></div>
+    <div style="height:32px"></div>
+  </div>
+
+  <script type="module" src="./preview.js"></script>
+  <script src="/static/js/link-validator.js"></script>
+  <script>
+  if (typeof PsyTestValidator !== 'undefined') {
+    PsyTestValidator.init('past_new', {
+      onSuccess: function() { document.body.classList.remove('page-disabled'); },
+      onError: function() { document.body.classList.remove('page-disabled'); }
+    });
+  } else {
+    document.body.classList.remove('page-disabled');
+  }
+  if (typeof TestSecurity !== 'undefined') TestSecurity.enable();
+  </script>
+</body>
+</html>
