@@ -952,7 +952,7 @@
       "duration_min": 10,
       "hot": false,
       "source": "xlxtest_clone",
-      "legacy_note": "稳定手写版；答题动效 + 结果页截图分享/晒单有礼",
+      "legacy_note": "稳定手写同构：欢迎/答题/结果均对齐 xlx 镜像 CSS",
       "preview": {
         "supported": true,
         "renderer": "xlx_muse_v1",

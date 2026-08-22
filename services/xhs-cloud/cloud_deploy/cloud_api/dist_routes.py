@@ -241,6 +241,11 @@ def compat_test_iframe_shell(test_code: str, token: str):
             url=f"/tests/past_new/index.html?token={safe_token}",
             status_code=302,
         )
+    if safe_code == "muse_new":
+        return RedirectResponse(
+            url=f"/tests/muse_new/index.html?token={safe_token}",
+            status_code=302,
+        )
     return HTMLResponse(
         f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>心象测</title><style>html,body,iframe{{margin:0;height:100%;width:100%;border:0}}</style></head><body><iframe src="/tests/{safe_code}/index.html?token={safe_token}"></iframe></body></html>"""
     )

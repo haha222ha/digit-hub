@@ -1,0 +1,51 @@
+/* muse 测题壳：屏幕切换与页级修正 */
+
+body.muse-test-body {
+  margin: 0;
+  background: #faf8f4;
+  color: #1a1714;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body.muse-test-body.page-disabled {
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+.muse-test-body .screen { display: none; }
+.muse-test-body #screen-intro.active { display: block; }
+.muse-test-body #screen-quiz.active { display: block; }
+.muse-test-body #screen-result.active { display: block; }
+
+#result-root .wx {
+  max-width: none;
+  margin: 0;
+}
+
+.muse-test-disclaimer {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 0 20px 32px;
+  font-size: 11px;
+  color: #a09484;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.wx-quiz__option.quiz-enter {
+  animation: museQuizFade 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes museQuizFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.wx-quiz__guide {
+  font-size: 12px;
+  color: #8a7e6a;
+  line-height: 1.7;
+  font-style: italic;
+  margin: 0 0 14px;
+}

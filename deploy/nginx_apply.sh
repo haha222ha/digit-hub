@@ -280,9 +280,12 @@ ${GZIP_DIRECTIVES}
         add_header Cloudflare-CDN-Cache-Control "no-store";
     }
 
-    # past 分销：直跳稳定版测题页（不走 L3 镜像，避免 chunk 重试跳首页）
+    # past / muse 分销：直跳稳定版测题页（不走 L3 镜像，避免 chunk 重试跳首页）
     location ~ ^/test/(past_new|past_xlx)/([^/]+)$ {
         return 302 /tests/past_new/index.html?token=\$2;
+    }
+    location ~ ^/test/muse_new/([^/]+)$ {
+        return 302 /tests/muse_new/index.html?token=\$1;
     }
 
     location ~ ^/test/([^/]+)/([^/]+)$ {

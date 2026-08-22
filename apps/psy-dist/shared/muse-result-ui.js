@@ -1,65 +1,91 @@
 import { esc } from './past-result-ui-core.js';
+import { renderMuseRadarSvg, renderMuseDimGrid } from './muse-result-ui-core.js';
 import { openMuseSharePreview } from './muse-share-modal.js';
 import { openRewardModal } from './psy-result-modals.js';
 
-function renderScoreBars(scores, accent) {
-  const entries = Object.entries(scores || {});
-  const maxV = Math.max(...entries.map(([, v]) => Number(v)), 1);
-  return entries.map(([label, value]) => {
-    const pct = Math.round(Number(value) / maxV * 100);
-    return `<div class="muse-radar-row">
-      <span>${esc(label)}</span>
-      <div class="muse-radar-bar"><div class="muse-radar-fill" style="width:${pct}%;background:${accent}"></div></div>
-      <span>${esc(value)}</span>
-    </div>`;
-  }).join('');
+function sectHead(seal, title, alt = false) {
+  return `<div class="wx-sect__head">
+    <span class="wx-sect__seal${alt ? ' wx-sect__seal--alt' : ''}">${esc(seal)}</span>
+    <h2 class="wx-sect__title">${esc(title)}</h2>
+  </div>`;
 }
 
 export function buildMuseResultHtml(result, options = {}) {
-  const accent = result.color || '#2d4a6f';
+  const accent = result.color || '#8B7EC8';
   const showActions = options.showActions !== false;
   const score = result.extra?.primaryScore ?? '--';
   const sug = result.suggestions || [];
   const echo = result.extra?.echo;
+  const tags = (result.tags || []).slice(0, 4);
 
   let sectionsHtml = '';
   if (sug[0]) {
-    sectionsHtml += `<section class="muse-block"><h2 class="muse-section-title">铠甲 · 你的力量</h2><p class="muse-text">${esc(sug[0])}</p></section>`;
+    sectionsHtml += `<section class="wx-sect">
+      ${sectHead('铠', '铠甲 · 你的力量')}
+      <div class="wx-prose-soft"><p>${esc(sug[0])}</p></div>
+    </section>`;
   }
   if (sug[1]) {
-    sectionsHtml += `<section class="muse-block muse-block-crack"><h2 class="muse-section-title">裂缝 · 你的张力</h2><p class="muse-text">${esc(sug[1])}</p></section>`;
+    sectionsHtml += `<section class="wx-sect">
+      ${sectHead('裂', '裂缝 · 你的张力', true)}
+      <div class="wx-prose-soft"><p>${esc(sug[1])}</p></div>
+    </section>`;
   }
+
+  sectionsHtml += `<section class="wx-sect">
+    ${sectHead('象', '六维气质坐标')}
+    ${renderMuseRadarSvg(result.scores, accent)}
+    ${renderMuseDimGrid(result.scores, accent)}
+  </section>`;
+
   if (echo) {
-    sectionsHtml += `<section class="muse-block muse-block-echo">
-      <h2 class="muse-section-title">精神共振 · 第二名</h2>
-      <p class="muse-echo-name"><strong>${esc(echo.name)}</strong> · ${esc(echo.alias || '')}</p>
-      <p class="muse-echo-score">共振度 ${esc(result.extra.echoScore || 0)}%</p>
+    const echoScore = result.extra?.echoScore || 0;
+    sectionsHtml += `<section class="wx-sect">
+      ${sectHead('鸣', '精神共振 · 第二名', true)}
+      <div class="wx-mirror">
+        <div class="wx-mirror__card wx-mirror__card--dark">
+          <span class="wx-mirror__label">RESONANCE</span>
+          <div class="wx-mirror__name">${esc(echo.name)}</div>
+          <div class="wx-mirror__alias">${esc(echo.alias || '')}</div>
+          <div class="wx-mirror__bar"><div class="wx-mirror__bar-fill wx-mirror__bar-fill--green" style="width:${echoScore}%"></div></div>
+          <div class="wx-mirror__pct">共振度 ${esc(echoScore)}%</div>
+        </div>
+      </div>
     </section>`;
   }
 
   const actionsHtml = showActions ? `
-    <div class="muse-actions">
-      <button type="button" class="btn btn-ghost muse-action-share" data-muse-action="share">截图分享</button>
-      <button type="button" class="btn btn-primary muse-action-reward" data-muse-action="reward">晒单有礼</button>
-    </div>
-    <div class="muse-actions-stack">
-      <button type="button" class="btn btn-ghost" data-muse-action="retry">重新探索</button>
-    </div>` : '';
+    <footer class="wx-foot">
+      <div class="wx-foot__line">匹配度 <strong>${esc(result.title)}</strong><em>${esc(score)}%</em></div>
+      <div class="wx-foot__actions">
+        <div class="wx-foot__btns">
+          <button type="button" class="wx-foot__btn" data-muse-action="share">截图分享</button>
+          <button type="button" class="wx-foot__btn wx-foot__btn--reward" data-muse-action="reward">
+            <span class="wx-reward-btn__text">晒单有礼</span>
+          </button>
+        </div>
+        <button type="button" class="wx-retake-btn-secondary" data-muse-action="retry">重新探索</button>
+      </div>
+      <p class="wx-foot__brand">心象测 · 文学原型·新</p>
+    </footer>` : '';
 
-  return `<article class="muse-result" data-muse-result style="--muse-accent:${accent}">
-    <header class="muse-hero">
-      <div class="muse-hero-name">${esc(result.title)}</div>
-      <div class="muse-hero-sub">${esc(result.description)}</div>
-      <div class="muse-hero-score">匹配度 ${esc(score)}%</div>
-      <div class="muse-tag-row">${(result.tags || []).map((t) => `<span class="muse-tag">${esc(t)}</span>`).join('')}</div>
+  return `<div class="wx" data-muse-result style="--c-accent:${accent};--c-red:${accent}">
+    <div class="wx__bg" aria-hidden="true"></div>
+    <div class="wx-brand">
+      <div class="wx-brand__logo">心象测</div>
+      <div class="wx-brand__no">MUSE / 文学原型</div>
+    </div>
+    <header class="wx-hero">
+      <div class="wx-hero__glow" aria-hidden="true"></div>
+      <p class="wx-hero__kicker">Literary Archetype</p>
+      <h1 class="wx-hero__name">${esc(result.title)}</h1>
+      <p class="wx-hero__sub">${esc(result.description)}</p>
+      <div class="wx-hero__tags">${tags.map((t) => `<span class="wx-tag">${esc(t)}</span>`).join('')}</div>
+      <p class="wx-hero__diag">匹配度 ${esc(score)}%</p>
     </header>
-    <section class="muse-block">
-      <h2 class="muse-section-title">六维气质坐标</h2>
-      <div class="muse-radar-wrap">${renderScoreBars(result.scores, accent)}</div>
-    </section>
     ${sectionsHtml}
     ${actionsHtml}
-  </article>`;
+  </div>`;
 }
 
 export function bindMuseResultActions(root, options = {}) {
@@ -92,8 +118,6 @@ export function bindMuseResultActions(root, options = {}) {
 
 export function renderMuseResult(container, result, options = {}) {
   if (!container || !result) return;
-  const accent = result.color || '#2d4a6f';
-  document.documentElement.style.setProperty('--accent', accent);
   container.innerHTML = buildMuseResultHtml(result, options);
   bindMuseResultActions(container, { ...options, result });
 }

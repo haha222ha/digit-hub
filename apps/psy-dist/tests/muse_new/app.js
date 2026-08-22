@@ -1,7 +1,7 @@
 import { scoreAnswers } from './vendor/scoring-CcgIfi_e-rBnOF_ZDsobST.js';
 import { questions as allQuestions } from './vendor/questions-DpFs-59k-rBnOF_ZDsobST.js';
 import { renderMuseResult } from '../../shared/muse-result-ui.js';
-import { flashQuestionBody, optionDelayStyle } from '../../shared/psy-quiz-motion.js';
+import { optionDelayStyle } from '../../shared/psy-quiz-motion.js';
 
 const state = {
   qi: 0,
@@ -37,10 +37,10 @@ function advanceAfterSelect() {
       } else {
         optionLocked = false;
       }
-    }, 300);
+    }, 320);
   } else {
     clearAdvanceTimer();
-    setTimeout(() => showResult(), 300);
+    setTimeout(() => showResult(), 320);
   }
 }
 
@@ -58,11 +58,9 @@ function currentQuestion() {
 }
 
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));
   const el = $(id);
   if (el) el.classList.add('active');
-  const quiz = $('screen-quiz');
-  if (quiz) quiz.style.display = id === 'screen-quiz' ? 'flex' : 'none';
 }
 
 function renderQuestion() {
@@ -70,25 +68,28 @@ function renderQuestion() {
   const total = state.order.length;
   $('q-progress').textContent = `${state.qi + 1} / ${total}`;
   $('progress-fill').style.width = `${((state.qi + 1) / total) * 100}%`;
-  $('q-tag').textContent = q.topic || '文学场景';
-  $('q-note').textContent = q.guide || '';
+  $('q-note').textContent = q.guide || q.topic || '';
   $('q-title').textContent = q.text;
   const host = $('q-options');
   host.innerHTML = q.options.map((opt, i) => {
-    const sel = state.answers[q.id] === opt.id ? ' selected' : '';
-    return `<div class="opt${sel}" data-id="${opt.id}" style="${optionDelayStyle(i)}"><div class="opt-id">${opt.id}.</div><div class="opt-text">${opt.text}</div></div>`;
+    const sel = state.answers[q.id] === opt.id ? ' wx-quiz__option--selected' : '';
+    const locked = optionLocked ? ' style="pointer-events:none;opacity:.7"' : ` style="${optionDelayStyle(i)}"`;
+    return `<button type="button" class="wx-quiz__option quiz-enter${sel}" data-id="${opt.id}"${locked}>
+      <span class="wx-quiz__radio"></span>
+      <span class="wx-quiz__option-text"><strong>${opt.id}.</strong> ${opt.text}</span>
+    </button>`;
   }).join('');
-  flashQuestionBody();
-  host.querySelectorAll('.opt').forEach(el => {
+  host.querySelectorAll('.wx-quiz__option').forEach((el) => {
     el.onclick = () => {
       if (optionLocked) return;
       state.answers[q.id] = el.dataset.id;
-      host.querySelectorAll('.opt').forEach(x => x.classList.remove('selected'));
-      el.classList.add('selected');
+      host.querySelectorAll('.wx-quiz__option').forEach((x) => x.classList.remove('wx-quiz__option--selected'));
+      el.classList.add('wx-quiz__option--selected');
       advanceAfterSelect();
     };
   });
-  $('btn-back').style.display = state.qi > 0 ? 'block' : 'none';
+  $('btn-back').disabled = state.qi <= 0;
+  $('btn-back').style.visibility = state.qi > 0 ? 'visible' : 'hidden';
 }
 
 function renderResultView(result) {
@@ -115,7 +116,7 @@ function renderResultView(result) {
 }
 
 function collectAnswers() {
-  return allQuestions.map(q => ({
+  return allQuestions.map((q) => ({
     questionId: String(q.id),
     optionId: String(state.answers[q.id] || 'A'),
   }));
@@ -145,6 +146,7 @@ function bindUi() {
     showScreen('screen-quiz');
     renderQuestion();
   };
+
   $('btn-back').onclick = () => {
     if (state.qi > 0) {
       clearAdvanceTimer();
@@ -152,6 +154,15 @@ function bindUi() {
       state.qi--;
       renderQuestion();
     }
+  };
+
+  $('btn-home').onclick = () => {
+    if (!confirm('确定返回首页？当前答题进度将丢失。')) return;
+    clearAdvanceTimer();
+    optionLocked = false;
+    state.qi = 0;
+    state.answers = {};
+    showScreen('screen-intro');
   };
 }
 
