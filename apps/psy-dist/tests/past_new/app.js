@@ -1,6 +1,7 @@
 import { scoreAnswers } from './vendor/scoring-CuPx53JQ-rBnOF_ZDsobST.js';
 import { a as qpack } from './vendor/questions-Ct3o4EnI-rBnOF_ZDsobST.js';
 import { renderPastResult } from '../../shared/past-result-ui.js';
+import { flashQuestionBody, optionDelayStyle } from '../../shared/psy-quiz-motion.js';
 
 const uiQuestions = qpack.questions;
 const GENDER_QID = '__historyGenderPreference';
@@ -63,10 +64,11 @@ function renderQuestion() {
   $('q-note').textContent = q.note || '';
   $('q-title').textContent = q.text;
   const host = $('q-options');
-  host.innerHTML = q.options.map(opt => {
+  host.innerHTML = q.options.map((opt, i) => {
     const sel = state.answers[q.id] === opt.id ? ' selected' : '';
-    return `<div class="opt${sel}" data-id="${opt.id}"><div class="opt-id">${opt.id}.</div><div class="opt-text">${opt.text}</div></div>`;
+    return `<div class="opt${sel}" data-id="${opt.id}" style="${optionDelayStyle(i)}"><div class="opt-id">${opt.id}.</div><div class="opt-text">${opt.text}</div></div>`;
   }).join('');
+  flashQuestionBody();
   host.querySelectorAll('.opt').forEach(el => {
     el.onclick = () => {
       if (optionLocked) return;

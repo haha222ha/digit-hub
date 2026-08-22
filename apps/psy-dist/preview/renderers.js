@@ -1,4 +1,5 @@
 import { renderPastResult } from '../shared/past-result-ui.js';
+import { renderMuseResult } from '../shared/muse-result-ui.js';
 
 function el(tag, cls, html) {
   const n = document.createElement(tag);
@@ -91,30 +92,15 @@ function renderPast(root, item) {
 }
 
 function renderMuse(root, item) {
-  const result = item.result;
-  const hero = el('div', 'result-hero');
-  hero.innerHTML = `
-    <div class="result-type"></div>
-    <div class="result-sub"></div>
-    <div class="result-score"></div>
-    <div class="tag-row"></div>`;
-  hero.querySelector('.result-type').textContent = result.title || item.name || '';
-  hero.querySelector('.result-sub').textContent = result.description || item.alias || '';
-  hero.querySelector('.result-score').textContent = `匹配度 ${result.extra?.primaryScore ?? '--'}%`;
-  hero.querySelector('.tag-row').innerHTML = (result.tags || []).map((t) => `<span class="tag">${t}</span>`).join('');
-
-  const sections = el('div');
-  const sug = result.suggestions || [];
-  if (sug[0]) sections.append(el('div', 'full-section', `<h3>铠甲 · 你的力量</h3><p>${sug[0]}</p>`));
-  if (sug[1]) sections.append(el('div', 'full-section', `<h3>裂缝 · 你的张力</h3><p>${sug[1]}</p>`));
-  const echo = result.extra?.echo;
-  if (echo) {
-    sections.append(el('div', 'full-section', `<h3>精神共振 · 第二名</h3><p><strong>${echo.name}</strong> · ${echo.alias || ''}</p><p class="echo-score">共振度 ${result.extra.echoScore || 0}%</p>`));
-  }
-
-  const radar = el('div', 'radar-wrap');
-  renderScoreBars(radar, result.scores || {});
-  root.append(hero, sections, radar);
+  const host = el('div', 'muse-result-host');
+  renderMuseResult(host, item.result, {
+    showActions: true,
+    result: item.result,
+    onRetry: () => {
+      if (typeof window.__previewGoIndex === 'function') window.__previewGoIndex();
+    },
+  });
+  root.append(host);
 }
 
 export function itemSearchText(item) {

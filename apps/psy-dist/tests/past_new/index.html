@@ -7,6 +7,7 @@
   <title>历史人物匹配</title>
   <script src="/static/js/test-security.js"></script>
   <link rel="stylesheet" href="../../shared/past-result-ui.css">
+  <link rel="stylesheet" href="../../shared/psy-quiz-shell.css">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     body {
@@ -73,7 +74,7 @@
     .q-title { font-size:21px; font-weight:900; line-height:1.35; margin-bottom:22px; }
     .opt {
       background:#fff; border:2px solid #e5ddd0; border-radius:12px; padding:14px 16px;
-      margin-bottom:10px; cursor:pointer; transition:all .15s; display:flex; gap:10px;
+      margin-bottom:10px; cursor:pointer; display:flex; gap:10px;
     }
     .opt.selected { border-color:#7a4b12; background:rgba(122,75,18,.06); }
     .opt-id { font-weight:900; color:#7a4b12; width:18px; flex-shrink:0; }
@@ -100,7 +101,7 @@
       <div class="gender-opt" data-gender="male"><div class="gender-mark">男</div><div><div class="gender-title">男性视角</div><div class="gender-desc">优先匹配男性历史人物与精神原型</div></div></div>
       <div class="gender-opt selected" data-gender="all"><div class="gender-mark">合</div><div><div class="gender-title">不限</div><div class="gender-desc">在全人物池中匹配最接近的精神原型</div></div></div>
     </div>
-    <div style="padding:0 20px 12px">
+    <div class="intro-cta" style="padding:0 20px 12px">
       <button class="btn btn-primary" id="btn-start">开始测试 →</button>
       <div class="cta-hint">约 8 分钟 · 娱乐向自我探索</div>
     </div>

@@ -1,5 +1,7 @@
 import { scoreAnswers } from './vendor/scoring-CcgIfi_e-rBnOF_ZDsobST.js';
 import { questions as allQuestions } from './vendor/questions-DpFs-59k-rBnOF_ZDsobST.js';
+import { renderMuseResult } from '../../shared/muse-result-ui.js';
+import { flashQuestionBody, optionDelayStyle } from '../../shared/psy-quiz-motion.js';
 
 const state = {
   qi: 0,
@@ -72,10 +74,11 @@ function renderQuestion() {
   $('q-note').textContent = q.guide || '';
   $('q-title').textContent = q.text;
   const host = $('q-options');
-  host.innerHTML = q.options.map(opt => {
+  host.innerHTML = q.options.map((opt, i) => {
     const sel = state.answers[q.id] === opt.id ? ' selected' : '';
-    return `<div class="opt${sel}" data-id="${opt.id}"><div class="opt-id">${opt.id}.</div><div class="opt-text">${opt.text}</div></div>`;
+    return `<div class="opt${sel}" data-id="${opt.id}" style="${optionDelayStyle(i)}"><div class="opt-id">${opt.id}.</div><div class="opt-text">${opt.text}</div></div>`;
   }).join('');
+  flashQuestionBody();
   host.querySelectorAll('.opt').forEach(el => {
     el.onclick = () => {
       if (optionLocked) return;
@@ -88,35 +91,17 @@ function renderQuestion() {
   $('btn-back').style.display = state.qi > 0 ? 'block' : 'none';
 }
 
-function renderScoreBars(scores) {
-  const entries = Object.entries(scores || {});
-  const maxV = Math.max(...entries.map(([, v]) => Number(v)), 1);
-  $('radar-wrap').innerHTML = entries.map(([label, value]) => {
-    const pct = Math.round(Number(value) / maxV * 100);
-    return `<div class="radar-row"><span>${label}</span><div class="radar-bar"><div class="radar-fill" style="width:${pct}%"></div></div><span>${value}</span></div>`;
-  }).join('');
-}
-
-function renderResult(result) {
-  const accent = result.color || '#2d4a6f';
-  document.documentElement.style.setProperty('--accent', accent);
-  $('result-type').textContent = result.title || '';
-  $('result-sub').textContent = result.description || '';
-  $('result-score').textContent = `匹配度 ${result.extra?.primaryScore ?? '--'}%`;
-  $('result-tags').innerHTML = (result.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
-  const sug = result.suggestions || [];
-  $('full-sections').innerHTML = '';
-  if (sug[0]) {
-    $('full-sections').innerHTML += `<div class="full-section"><h3>铠甲 · 你的力量</h3><p>${sug[0]}</p></div>`;
-  }
-  if (sug[1]) {
-    $('full-sections').innerHTML += `<div class="full-section crack"><h3>裂缝 · 你的张力</h3><p>${sug[1]}</p></div>`;
-  }
-  const echo = result.extra?.echo;
-  if (echo) {
-    $('full-sections').innerHTML += `<div class="full-section echo"><h3>精神共振 · 第二名</h3><p><strong>${echo.name}</strong> · ${echo.alias || ''}</p><p class="echo-score">共振度 ${result.extra.echoScore || 0}%</p></div>`;
-  }
-  renderScoreBars(result.scores || {});
+function renderResultView(result) {
+  renderMuseResult($('result-root'), result, {
+    showActions: true,
+    result,
+    onRetry: () => {
+      state.qi = 0;
+      state.answers = {};
+      showScreen('screen-intro');
+      document.body.classList.remove('page-disabled');
+    },
+  });
   showScreen('screen-result');
   if (window.__psyComplete) {
     window.__psyComplete({
@@ -142,7 +127,7 @@ function showResult() {
     alert('评分失败，请重试');
     return;
   }
-  renderResult(payload.result);
+  renderResultView(payload.result);
 }
 
 function bindUi() {
@@ -167,12 +152,6 @@ function bindUi() {
       state.qi--;
       renderQuestion();
     }
-  };
-  $('btn-retry').onclick = () => {
-    state.qi = 0;
-    state.answers = {};
-    showScreen('screen-intro');
-    document.body.classList.remove('page-disabled');
   };
 }
 

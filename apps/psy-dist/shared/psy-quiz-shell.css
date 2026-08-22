@@ -1,0 +1,138 @@
+/* 心象测 · 手写测题壳通用动效（past / muse 共用） */
+
+@keyframes quizFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes quizFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes quizScaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes quizPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@keyframes quizShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(220%); }
+}
+
+.screen.active {
+  animation: quizFadeUp 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+#screen-intro.active .hero {
+  animation: quizFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+#screen-intro.active .dims-section {
+  animation: quizFadeUp 0.55s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+#screen-intro.active .gender-grid,
+#screen-intro.active .intro-cta {
+  animation: quizFadeUp 0.55s 0.14s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.dim-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dim-card:active {
+  transform: scale(0.98);
+}
+
+.gender-opt,
+.choice-opt {
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.gender-opt:active,
+.choice-opt:active {
+  transform: scale(0.98);
+}
+
+.gender-opt.selected,
+.choice-opt.selected {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.btn-primary {
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.btn-primary:not(:disabled):hover {
+  filter: brightness(1.04);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.14);
+}
+
+.progress-track {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill {
+  position: relative;
+  transition: width 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: quizShimmer 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.q-body.quiz-enter {
+  animation: quizFadeUp 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.q-title {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.opt,
+.choice-opt {
+  animation: quizFadeUp 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.opt.selected,
+.choice-opt.selected {
+  transform: scale(1.01);
+}
+
+.opt.selected .opt-id,
+.choice-opt.selected .opt-id {
+  animation: quizScaleIn 0.25s ease both;
+}
+
+.live-dot {
+  animation: quizPulse 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen.active,
+  #screen-intro.active .hero,
+  #screen-intro.active .dims-section,
+  #screen-intro.active .gender-grid,
+  #screen-intro.active .intro-cta,
+  .q-body.quiz-enter,
+  .opt,
+  .choice-opt,
+  .progress-fill::after,
+  .live-dot {
+    animation: none !important;
+    transition: none !important;
+  }
+}

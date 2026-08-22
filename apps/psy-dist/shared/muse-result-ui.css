@@ -1,0 +1,93 @@
+.muse-result { padding-bottom: 24px; }
+.muse-hero { padding: 28px 20px 20px; text-align: center; }
+.muse-hero-name {
+  font-size: 28px; font-weight: 900; color: var(--muse-accent, #2d4a6f);
+  margin-bottom: 6px; font-family: 'Noto Serif SC', serif;
+}
+.muse-hero-sub { font-size: 15px; color: #7a8494; margin-bottom: 8px; font-style: italic; }
+.muse-hero-score { font-size: 12px; color: #b0a89c; margin-bottom: 14px; }
+.muse-tag-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.muse-tag {
+  font-size: 11px; background: #fff; border: 1px solid #e5e0d6;
+  padding: 5px 12px; border-radius: 999px; color: #666;
+}
+.muse-block {
+  margin: 0 20px 14px; background: #fff; border-radius: 14px; padding: 16px;
+}
+.muse-block-crack .muse-section-title { color: #8b5a6b; }
+.muse-block-echo { border: 1px dashed #d8dde6; }
+.muse-section-title {
+  font-size: 15px; font-weight: 900; color: #1c2430; margin-bottom: 12px;
+}
+.muse-text { font-size: 13px; color: #5f6570; line-height: 1.85; }
+.muse-echo-name { font-size: 14px; color: #1c2430; margin-bottom: 6px; }
+.muse-echo-score { font-size: 12px; color: var(--muse-accent, #2d4a6f); }
+.muse-radar-wrap { display: flex; flex-direction: column; gap: 10px; }
+.muse-radar-row {
+  display: flex; align-items: center; gap: 10px; font-size: 13px; color: #5f6570;
+}
+.muse-radar-bar {
+  flex: 1; height: 6px; background: #eee; border-radius: 3px; overflow: hidden;
+}
+.muse-radar-fill { height: 100%; border-radius: 3px; transition: width 0.35s ease; }
+.muse-actions { display: flex; gap: 10px; padding: 0 20px 8px; }
+.muse-actions .btn { flex: 1; }
+.muse-actions .muse-action-share {
+  border: 1.5px solid #e5e0d6; background: #fff; color: #1c2430;
+}
+.muse-actions .muse-action-reward {
+  background: linear-gradient(135deg, #1c2430, #2d4a6f);
+  border: 1px solid rgba(24, 30, 40, .9);
+  color: #f7f2e8;
+  box-shadow: 0 8px 20px rgba(26, 32, 44, .15);
+}
+.muse-actions-stack { padding: 0 20px 32px; }
+.muse-actions-stack .btn { width: 100%; margin-top: 10px; }
+
+/* muse 分享卡 */
+.muse-share-card {
+  width: 375px;
+  background: #f8f5ef;
+  color: #1c2430;
+  font-family: "PingFang SC", "Noto Serif SC", serif;
+  overflow: hidden;
+}
+.muse-share-brand {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 28px 0;
+}
+.muse-share-logo { font-size: 12px; letter-spacing: .28em; color: #7a8494; }
+.muse-share-meta { font-size: 11px; color: #8a93a3; }
+.muse-share-hero { padding: 32px 28px 16px; text-align: center; }
+.muse-share-label {
+  font-size: 12px; color: #7a8494; letter-spacing: .14em; font-style: italic; margin-bottom: 12px;
+}
+.muse-share-name {
+  font-family: "Noto Serif SC", serif; font-size: 28px; font-weight: 600;
+  color: var(--muse-accent, #2d4a6f); margin-bottom: 6px;
+}
+.muse-share-sub { font-size: 14px; color: #7a8494; font-style: italic; margin-bottom: 14px; }
+.muse-share-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.muse-share-tag {
+  font-size: 11px; padding: 5px 12px; border: 1px solid #c8d0dc;
+  border-radius: 20px; color: #4c5563; background: rgba(255, 255, 255, .5);
+}
+.muse-share-section { padding: 0 28px 10px; }
+.muse-share-kicker {
+  font-family: "Noto Serif SC", serif; font-size: 15px; font-weight: 600;
+  margin-bottom: 10px; color: #1c2430;
+}
+.muse-share-lead { font-size: 13px; line-height: 1.85; color: #4a5563; margin: 0; text-align: justify; }
+.muse-share-bar-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px;
+}
+.muse-share-bar-label { width: 52px; flex-shrink: 0; color: #6b7585; }
+.muse-share-bar-track {
+  flex: 1; height: 6px; background: #e8e4dc; border-radius: 3px; overflow: hidden;
+}
+.muse-share-bar-fill { height: 100%; border-radius: 3px; }
+.muse-share-bar-val { width: 28px; text-align: right; color: #6b7585; }
+.muse-share-foot {
+  padding: 14px 28px 24px; text-align: center; font-size: 10px;
+  color: #9aa3b0; letter-spacing: .08em;
+}

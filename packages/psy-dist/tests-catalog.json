@@ -938,7 +938,7 @@
       "duration_min": 8,
       "hot": true,
       "source": "xlxtest_mirror",
-      "legacy_note": "稳定分销版；结果页含截图分享卡 + 晒单有礼弹窗（L2 优化中）",
+      "legacy_note": "稳定手写版；答题动效 + 结果页截图分享/晒单有礼",
       "preview": {
         "supported": true,
         "renderer": "xlx_past_v1",
@@ -952,7 +952,7 @@
       "duration_min": 10,
       "hot": false,
       "source": "xlxtest_clone",
-      "legacy_note": "平行于无旧版；XlxTest muse 1:1 文学场景",
+      "legacy_note": "稳定手写版；答题动效 + 结果页截图分享/晒单有礼",
       "preview": {
         "supported": true,
         "renderer": "xlx_muse_v1",
