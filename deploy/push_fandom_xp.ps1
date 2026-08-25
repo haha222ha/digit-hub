@@ -10,7 +10,7 @@ $probe = ssh -o BatchMode=yes -o ConnectTimeout=15 $SshHost "echo OK && whoami &
 if ($LASTEXITCODE -ne 0) {
   Write-Host $probe
   Write-Host ""
-  Write-Host "SSH 失败。请按 deploy/MIGRATE_STATUS.md 配置公钥后重试。"
+  Write-Host "SSH failed. See deploy/MIGRATE_STATUS.md to add your public key, then retry."
   exit 1
 }
 Write-Host $probe
@@ -32,17 +32,18 @@ Write-Host "==> upload"
 scp $LocalTgz "${SshHost}:${RemoteTgz}"
 
 Write-Host "==> remote apply + quick_update"
-ssh $SshHost @"
-set -e
-sudo mkdir -p /tmp/fandom_xp_unpack /opt/digit-hub/apps/psy-dist/tests /opt/digit-hub/packages/psy-dist
-sudo tar -xzf $RemoteTgz -C /tmp/fandom_xp_unpack
-sudo rm -rf /opt/digit-hub/apps/psy-dist/tests/fandom_xp
-sudo mv /tmp/fandom_xp_unpack/fandom_xp /opt/digit-hub/apps/psy-dist/tests/fandom_xp
-sudo cp -f /tmp/fandom_xp_unpack/packages/psy-dist/tests-catalog.json /opt/digit-hub/packages/psy-dist/tests-catalog.json
-sudo rm -rf /tmp/fandom_xp_unpack $RemoteTgz
-sudo bash /opt/digit-hub/deploy/quick_update.sh
-curl -sS -o /dev/null -w 'fandom_xp_index:%{http_code}\n' http://127.0.0.1/tests/fandom_xp/index.html -H 'Host: psy.xhs365.cn' || true
-"@
+$remoteCmd = (
+  "set -e",
+  "sudo mkdir -p /tmp/fandom_xp_unpack /opt/digit-hub/apps/psy-dist/tests /opt/digit-hub/packages/psy-dist",
+  "sudo tar -xzf $RemoteTgz -C /tmp/fandom_xp_unpack",
+  "sudo rm -rf /opt/digit-hub/apps/psy-dist/tests/fandom_xp",
+  "sudo mv /tmp/fandom_xp_unpack/fandom_xp /opt/digit-hub/apps/psy-dist/tests/fandom_xp",
+  "sudo cp -f /tmp/fandom_xp_unpack/packages/psy-dist/tests-catalog.json /opt/digit-hub/packages/psy-dist/tests-catalog.json",
+  "sudo rm -rf /tmp/fandom_xp_unpack $RemoteTgz",
+  "sudo bash /opt/digit-hub/deploy/quick_update.sh",
+  "curl -sS -o /dev/null -w 'fandom_xp_index:%{http_code}\n' http://127.0.0.1/tests/fandom_xp/index.html -H 'Host: psy.xhs365.cn' || true"
+) -join "; "
+ssh $SshHost $remoteCmd
 
 Write-Host ""
-Write-Host "DONE. 浏览器验收: https://psy.xhs365.cn/tests/fandom_xp/index.html?token=YOUR_TOKEN"
+Write-Host "DONE. Open: https://psy.xhs365.cn/tests/fandom_xp/index.html?token=YOUR_TOKEN"
