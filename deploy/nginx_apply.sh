@@ -410,12 +410,29 @@ purge_stale_monitor_configs() {
 
 write_rate_limit_zone() {
   echo "==> write ${CONF_D}/digit-hub-rate-limit.conf"
-  cat > "${CONF_D}/digit-hub-rate-limit.conf" <<'NGX'
+  # limit_req_status 是 http 上下文指令，全局只能定义一次。
+  # 若 nginx 主配置已 include monitor 系统的 insight-limits.conf（内含 limit_req_status），
+  # 则这里不再重复生成，避免 nginx [emerg] duplicate 导致 reload 失败。
+  local have_status=no
+  if grep -rq 'limit_req_status' /etc/nginx/nginx.conf /etc/nginx/snippets/ /etc/nginx/conf.d/ 2>/dev/null; then
+    have_status=yes
+  fi
+  if [[ "${have_status}" == "yes" ]]; then
+    echo "==> 检测到已有全局 limit_req_status（insight-limits.conf 等），仅写 zone 定义"
+    cat > "${CONF_D}/digit-hub-rate-limit.conf" <<'NGX'
+# digit-hub managed — limit auth code brute-force + payment create spam
+# NOTE: limit_req_status 已由全局配置（如 /etc/nginx/snippets/insight-limits.conf）定义，此处不再重复
+limit_req_zone $binary_remote_addr zone=digit_hub_auth:10m rate=10r/m;
+limit_req_zone $binary_remote_addr zone=digit_hub_pay:10m rate=6r/m;
+NGX
+  else
+    cat > "${CONF_D}/digit-hub-rate-limit.conf" <<'NGX'
 # digit-hub managed — limit auth code brute-force + payment create spam
 limit_req_zone $binary_remote_addr zone=digit_hub_auth:10m rate=10r/m;
 limit_req_zone $binary_remote_addr zone=digit_hub_pay:10m rate=6r/m;
 limit_req_status 429;
 NGX
+  fi
 }
 
 verify_written_config() {
