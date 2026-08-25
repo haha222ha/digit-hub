@@ -1,6 +1,6 @@
 {
   "source": "digit-hub/packages/psy-dist/tests-catalog.json",
-  "total": 115,
+  "total": 118,
   "url_pattern": {
     "static_test": "/tests/{test_code}/index.html",
     "distribution_link": "/test/{test_code}/{token}"
@@ -957,6 +957,20 @@
         "supported": true,
         "renderer": "xlx_muse_v1",
         "theme": "muse"
+      }
+    },
+    {
+      "code": "fandom_xp",
+      "name": "同人女XP锦标赛",
+      "questions": 55,
+      "duration_min": 3,
+      "hot": true,
+      "dual_perspective": false,
+      "source": "fandom-xp-tournament-src",
+      "legacy_note": "React 单页打包接入 digit-hub 鉴权（ceping-bridge）",
+      "preview": {
+        "supported": false,
+        "renderer": "fandom_xp_react"
       }
     }
   ]

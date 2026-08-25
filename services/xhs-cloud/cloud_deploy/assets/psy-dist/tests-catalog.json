@@ -1,6 +1,6 @@
 {
   "source": "digit-hub/packages/psy-dist/tests-catalog.json",
-  "total": 115,
+  "total": 118,
   "url_pattern": {
     "static_test": "/tests/{test_code}/index.html",
     "distribution_link": "/test/{test_code}/{token}"
@@ -532,7 +532,12 @@
       "questions": 28,
       "duration_min": 6,
       "hot": true,
-      "dual_perspective": false
+      "dual_perspective": false,
+      "preview": {
+        "supported": true,
+        "renderer": "skin_v1",
+        "theme": "default"
+      }
     },
     {
       "code": "qxjc",
@@ -925,6 +930,48 @@
       "duration_min": 3,
       "hot": true,
       "dual_perspective": false
+    },
+    {
+      "code": "past_new",
+      "name": "历史人物匹配",
+      "questions": 26,
+      "duration_min": 8,
+      "hot": true,
+      "source": "xlxtest_mirror",
+      "legacy_note": "稳定手写同构：欢迎/答题/结果均对齐 xlx 镜像 CSS",
+      "preview": {
+        "supported": true,
+        "renderer": "xlx_past_v1",
+        "theme": "past"
+      }
+    },
+    {
+      "code": "muse_new",
+      "name": "文学原型·新",
+      "questions": 26,
+      "duration_min": 10,
+      "hot": false,
+      "source": "xlxtest_clone",
+      "legacy_note": "稳定手写同构：欢迎/答题/结果均对齐 xlx 镜像 CSS",
+      "preview": {
+        "supported": true,
+        "renderer": "xlx_muse_v1",
+        "theme": "muse"
+      }
+    },
+    {
+      "code": "fandom_xp",
+      "name": "同人女XP锦标赛",
+      "questions": 55,
+      "duration_min": 3,
+      "hot": true,
+      "dual_perspective": false,
+      "source": "fandom-xp-tournament-src",
+      "legacy_note": "React 单页打包接入 digit-hub 鉴权（ceping-bridge）",
+      "preview": {
+        "supported": false,
+        "renderer": "fandom_xp_react"
+      }
     }
   ]
 }

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>同人女XP锦标赛 - 测试</title>
+    <link rel="stylesheet" href="assets/js/fandom-xp.app.css">
+    <!-- 安全工具库（必须在 head 尽早加载） -->
+    <script src="/static/js/test-security.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: #faf9f7; min-height: 100vh; }
+        .fandomxp-shell { max-width: 560px; margin: 0 auto; padding: 16px; }
+        /* 介绍页（鉴权通过后隐藏） */
+        #fandomxpIntro { min-height: calc(100vh - 32px); display: flex; flex-direction: column; justify-content: center; }
+        .intro-hero { text-align: center; padding: 24px 8px 12px; }
+        .intro-eyebrow { color: #993556; font-size: 11px; letter-spacing: .14em; font-weight: 600; }
+        .intro-title { margin: 10px 0 0; color: #4b1528; font-size: 28px; font-weight: 700; line-height: 1.3; }
+        .intro-sub { margin: 8px 0 0; color: #888780; font-size: 13px; line-height: 1.7; }
+        .intro-card { margin-top: 20px; padding: 22px 18px; border: 1px solid #ece9e2; border-radius: 16px; background: #fff; }
+        .intro-card h3 { margin-bottom: 10px; color: #4b1528; font-size: 15px; font-weight: 600; }
+        .intro-card ul { list-style: none; }
+        .intro-card li { position: relative; padding: 6px 0 6px 22px; color: #5f5e5a; font-size: 13px; line-height: 1.7; }
+        .intro-card li::before { content: "✦"; position: absolute; left: 2px; color: #d4537e; }
+        .intro-disclaimer { margin-top: 14px; color: #9a9495; font-size: 11px; line-height: 1.7; text-align: center; }
+        #startTestBtn { display: block; width: 100%; min-height: 52px; margin-top: 22px; border: none; border-radius: 12px; background: #d4537e; color: #fff; font-size: 17px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all .2s ease; box-shadow: 0 8px 20px rgba(212,83,126,.28); }
+        #startTestBtn:active { transform: scale(.98); opacity: .92; }
+        #startTestBtn:disabled { opacity: .6; cursor: not-allowed; }
+        .fandomxp-app { display: none; }
+        /* 鉴权失败提示（默认隐藏） */
+        #accessError { display: none; margin-top: 14px; padding: 12px; border-radius: 10px; background: #fff1f2; color: #a83f55; font-size: 13px; line-height: 1.6; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="fandomxp-shell">
+        <!-- 介绍页 -->
+        <div id="fandomxpIntro">
+            <div class="intro-hero">
+                <div class="intro-eyebrow">同人女 XP 锦标赛</div>
+                <h1 class="intro-title">55 个 XP 两两 PK<br>决出你内心最吃的那一个</h1>
+                <p class="intro-sub">层层淘汰，直到冠军诞生。测试你的 xp DNA，看看你的口味到底是什么。</p>
+            </div>
+            <div class="intro-card">
+                <h3>玩法说明</h3>
+                <ul>
+                    <li>55 个 XP 标签两两 PK，你只需选更心动的那一个</li>
+                    <li>每轮淘汰一半，直到决出你的冠军</li>
+                    <li>结束时生成你的 xp DNA 与六强分析</li>
+                    <li>全程约 2-3 分钟，凭第一直觉作答</li>
+                </ul>
+            </div>
+            <button id="start-test-btn" data-psy-skip="0">开始测试</button>
+            <div id="accessError"></div>
+            <p class="intro-disclaimer">本测试仅供娱乐和自我探索，不构成心理评估、医学诊断或专业建议。</p>
+        </div>
+
+        <!-- React 应用挂载点 -->
+        <div id="fandomxpApp" class="fandomxp-app"></div>
+    </div>
+
+    <script>window.__PSY_TEST_CODE__ = "fandom_xp";</script>
+    <script src="/static/js/link-validator.js"></script>
+    <script src="/static/js/ceping-bridge.js"></script>
+    <script src="assets/js/fandom-xp.app.js"></script>
+    <script>
+        (function () {
+            "use strict";
+
+            var intro = document.getElementById("fandomxpIntro");
+            var appBox = document.getElementById("fandomxpApp");
+            var startBtn = document.getElementById("start-test-btn");
+            var errorBox = document.getElementById("accessError");
+            var mounted = false;
+
+            // 鉴权无效时禁用开始按钮并提示
+            function showAccessError(msg) {
+                if (errorBox) {
+                    errorBox.style.display = "block";
+                    errorBox.textContent = msg || "测试链接无效或已失效，请通过有效链接访问。";
+                }
+                if (startBtn) {
+                    startBtn.disabled = true;
+                    startBtn.textContent = "链接不可用";
+                }
+            }
+
+            // 点击开始：ceping-bridge 会拦截并先调 startTest，再放行到此处
+            startBtn.addEventListener("click", function () {
+                if (mounted) return;
+                mounted = true;
+                intro.style.display = "none";
+                appBox.style.display = "block";
+                if (window.FandomXpApp && typeof window.FandomXpApp.mount === "function") {
+                    window.FandomXpApp.mount(appBox, { homeHref: "/" });
+                } else {
+                    appBox.innerHTML = '<p style="text-align:center;color:#a83f55;padding:40px 0;">应用加载失败，请刷新重试</p>';
+                }
+            });
+
+            // 由 link-validator / cepying-bridge 回调驱动
+            var originalOnError = window.__onPsyError || null;
+            if (typeof PsyTestValidator !== "undefined") {
+                // cepying-bridge 内部已调用 init；此处补充：
+                // 若最终验证失败，linkValidator.validationError 会存在
+                var checkTimer = window.setInterval(function () {
+                    var v = window.linkValidator;
+                    if (!v) return;
+                    window.clearInterval(checkTimer);
+                    if (v.validationError) {
+                        showAccessError(v.validationError);
+                    }
+                }, 500);
+                window.setTimeout(function () {
+                    window.clearInterval(checkTimer);
+                }, 12000);
+            }
+        })();
+    </script>
+</body>
+</html>
