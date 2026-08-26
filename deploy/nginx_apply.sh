@@ -125,6 +125,27 @@ ${GZIP_DIRECTIVES}
     root ${PSY_DIST_ROOT};
     index index.html;
 
+    # 会员中心（FastAPI /member + /assets/member_*）— 须在 console 回落与 Vue /assets/ 之前
+    location = /member {
+        proxy_pass http://127.0.0.1:8080/member;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+    location ^~ /member/ {
+        return 301 /member\$is_args\$args;
+    }
+    location ~ ^/assets/member {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+
     # Vue / 测题静态资源必须走磁盘，不能 proxy 到 xhs-cloud /assets/
     location /assets/ {
         try_files \$uri =404;
@@ -296,6 +317,26 @@ ${GZIP_DIRECTIVES}
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
+    # 商家工作台登录/注册 — 显式命中 console SPA，避免被其它回落规则干扰
+    location = /login {
+        try_files /console/index.html =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header CDN-Cache-Control "no-store";
+        add_header Cloudflare-CDN-Cache-Control "no-store";
+    }
+    location = /register {
+        try_files /console/index.html =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header CDN-Cache-Control "no-store";
+        add_header Cloudflare-CDN-Cache-Control "no-store";
+    }
+    location = /reset-password {
+        try_files /console/index.html =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header CDN-Cache-Control "no-store";
+        add_header Cloudflare-CDN-Cache-Control "no-store";
+    }
+
     # 登录 / 注册 / 管理台等 → 新控制台；不再回落仿站 app.html
     location / {
         try_files \$uri \$uri/ /console/index.html;
@@ -326,6 +367,17 @@ server {
 
 ${GZIP_DIRECTIVES}
 
+    # 商家工作台在 psy 域；monitor / assess / IP 直访 /login 会误进 apps/web 哈希路由
+    location = /login {
+        return 302 https://${PSY_DOMAIN}/login\$is_args\$args;
+    }
+    location = /register {
+        return 302 https://${PSY_DOMAIN}/register\$is_args\$args;
+    }
+    location = /reset-password {
+        return 302 https://${PSY_DOMAIN}/reset-password\$is_args\$args;
+    }
+
     location / {
         try_files \$uri \$uri/ /index.html;
         add_header Cache-Control "no-cache, must-revalidate";
@@ -353,6 +405,16 @@ server {
     ${MARKER}
 
 ${GZIP_DIRECTIVES}
+
+    location = /login {
+        return 302 https://${PSY_DOMAIN}/login\$is_args\$args;
+    }
+    location = /register {
+        return 302 https://${PSY_DOMAIN}/register\$is_args\$args;
+    }
+    location = /reset-password {
+        return 302 https://${PSY_DOMAIN}/reset-password\$is_args\$args;
+    }
 
     location / {
         try_files \$uri \$uri/ /index.html;
@@ -542,4 +604,26 @@ if command -v ss >/dev/null 2>&1 && ss -tln | grep -q ':443 '; then
   smoke_admin https "https://127.0.0.1/admin/index.html" "admin_https_index" 200 || exit 1
 fi
 
-echo "DONE nginx_apply -> https://${MONITOR_DOMAIN}/admin/"
+echo "==> smoke psy-dist auth + member portal"
+psy_login_code=$(curl -sS -o /dev/null -w '%{http_code}' -H "Host: ${PSY_DOMAIN}" http://127.0.0.1/login 2>/dev/null || echo "000")
+echo "psy_login: code=${psy_login_code}"
+[[ "${psy_login_code}" == "200" ]] || { echo "ERROR: ${PSY_DOMAIN}/login expected 200"; exit 1; }
+
+psy_member_code=$(curl -sS -o /dev/null -w '%{http_code}' -H "Host: ${PSY_DOMAIN}" http://127.0.0.1/member 2>/dev/null || echo "000")
+psy_member_size=$(curl -sS -H "Host: ${PSY_DOMAIN}" http://127.0.0.1/member 2>/dev/null | wc -c | tr -d ' ')
+echo "psy_member: code=${psy_member_code} bytes=${psy_member_size}"
+if [[ "${psy_member_code}" != "200" || "${psy_member_size}" -lt 50000 ]]; then
+  echo "ERROR: ${PSY_DOMAIN}/member portal broken (expected HTML >= 50KB)"
+  exit 1
+fi
+
+psy_member_css=$(curl -sS -o /dev/null -w '%{http_code}' -H "Host: ${PSY_DOMAIN}" http://127.0.0.1/assets/member_theme.css 2>/dev/null || echo "000")
+echo "psy_member_asset: code=${psy_member_css}"
+[[ "${psy_member_css}" == "200" ]] || { echo "ERROR: ${PSY_DOMAIN}/assets/member_theme.css expected 200"; exit 1; }
+
+monitor_login_code=$(curl -sS -o /dev/null -w '%{redirect_url}' -H "Host: ${MONITOR_DOMAIN}" http://127.0.0.1/login 2>/dev/null || echo "")
+echo "monitor_login_redirect: ${monitor_login_code}"
+echo "${monitor_login_code}" | grep -q "https://${PSY_DOMAIN}/login" \
+  || echo "WARN: monitor /login should 302 to https://${PSY_DOMAIN}/login"
+
+echo "DONE nginx_apply -> https://${MONITOR_DOMAIN}/admin/ | https://${PSY_DOMAIN}/login | https://${PSY_DOMAIN}/member"
