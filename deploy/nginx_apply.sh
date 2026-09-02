@@ -259,6 +259,19 @@ ${GZIP_DIRECTIVES}
         try_files /pricing/index.html =404;
         add_header Cache-Control "no-store, no-cache, must-revalidate";
     }
+    location = /get {
+        return 302 /get/;
+    }
+    location = /get/ {
+        try_files /get/index.html =404;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+    location = /get/get.css {
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+    location = /get/get.js {
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
     # 买家公开领链接：禁止回落到 /console（否则会弹出商家登录）
     location = /order-claim {
         try_files /order-claim.html /order-claim/index.html =404;

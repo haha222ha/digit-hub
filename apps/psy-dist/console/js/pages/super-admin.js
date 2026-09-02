@@ -1666,6 +1666,22 @@ export async function renderSaConfig(root) {
     customer_service_qrcode: el("input", { value: cfg.customer_service_qrcode || "", placeholder: "二维码图片 URL，或下方上传" }),
     xianyu_shop_link: el("input", { value: cfg.xianyu_shop_link || "" }),
     xianyu_shop_qrcode: el("input", { value: cfg.xianyu_shop_qrcode || "", placeholder: "闲鱼二维码 URL，或下方上传" }),
+    xianyu_link_quota_100: el("input", { value: cfg.xianyu_link_quota_100 || "", placeholder: "100次规格闲鱼 item 链接" }),
+    xianyu_link_quota_500: el("input", { value: cfg.xianyu_link_quota_500 || "", placeholder: "500次规格闲鱼 item 链接" }),
+    xianyu_link_quota_2000: el("input", { value: cfg.xianyu_link_quota_2000 || "", placeholder: "2000次规格闲鱼 item 链接" }),
+    xianyu_price_hint_quota_100: el("input", { value: cfg.xianyu_price_hint_quota_100 || "¥49.9" }),
+    xianyu_price_hint_quota_500: el("input", { value: cfg.xianyu_price_hint_quota_500 || "¥128" }),
+    xianyu_price_hint_quota_2000: el("input", { value: cfg.xianyu_price_hint_quota_2000 || "¥238" }),
+    promo_hero_title: el("input", { value: cfg.promo_hero_title || "" }),
+    promo_hero_subtitle: el("input", { value: cfg.promo_hero_subtitle || "" }),
+    promo_online_enabled: el("select", {}, [
+      el("option", { value: "true", text: "展示在线支付" }),
+      el("option", { value: "false", text: "隐藏在线支付" }),
+    ]),
+    promo_xianyu_enabled: el("select", {}, [
+      el("option", { value: "true", text: "展示闲鱼购买" }),
+      el("option", { value: "false", text: "隐藏闲鱼购买" }),
+    ]),
     tutorial_unlock_min_price_yuan: el("input", { type: "number", value: cfg.tutorial_unlock_min_price_yuan || "59" }),
     tutorial_unlock_min_redeem_quota: el("input", { type: "number", value: cfg.tutorial_unlock_min_redeem_quota || "300" }),
     tutorial_unlocked: el("select", {}, [
@@ -1683,8 +1699,18 @@ export async function renderSaConfig(root) {
     customer_service_hours: "客服时间",
     customer_service_response_time: "响应说明",
     customer_service_qrcode: "客服二维码 URL",
-    xianyu_shop_link: "闲鱼链接",
+    xianyu_shop_link: "闲鱼链接（默认/兜底）",
     xianyu_shop_qrcode: "闲鱼二维码 URL",
+    xianyu_link_quota_100: "闲鱼链·100次",
+    xianyu_link_quota_500: "闲鱼链·500次",
+    xianyu_link_quota_2000: "闲鱼链·2000次",
+    xianyu_price_hint_quota_100: "闲鱼展示价·100次",
+    xianyu_price_hint_quota_500: "闲鱼展示价·500次",
+    xianyu_price_hint_quota_2000: "闲鱼展示价·2000次",
+    promo_hero_title: "推广页 /get 标题",
+    promo_hero_subtitle: "推广页 /get 副标题",
+    promo_online_enabled: "推广页·在线支付",
+    promo_xianyu_enabled: "推广页·闲鱼购买",
     tutorial_unlock_min_price_yuan: "教程解锁最低购额(元)",
     tutorial_unlock_min_redeem_quota: "教程解锁最低兑换额度",
     tutorial_unlocked: "教程全员解锁",
@@ -1697,6 +1723,16 @@ export async function renderSaConfig(root) {
   )
     ? "true"
     : "false";
+  fields.promo_online_enabled.value = ["0", "false", "no", "off"].includes(
+    String(cfg.promo_online_enabled || "true").toLowerCase()
+  )
+    ? "false"
+    : "true";
+  fields.promo_xianyu_enabled.value = ["0", "false", "no", "off"].includes(
+    String(cfg.promo_xianyu_enabled || "true").toLowerCase()
+  )
+    ? "false"
+    : "true";
   const preview = el("img", {
     src: cfg.customer_service_qrcode || "",
     alt: "客服二维码预览",

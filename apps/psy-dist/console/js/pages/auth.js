@@ -15,6 +15,16 @@ function homeLink(label = "查看营销首页") {
   });
 }
 
+function postAuthNavigate(defaultPath = "/admin/dashboard") {
+  const params = new URLSearchParams(location.search);
+  const next = (params.get("next") || "").trim();
+  if (next.startsWith("/") && !next.startsWith("//")) {
+    navigate(next, { replace: true });
+  } else {
+    navigate(defaultPath, { replace: true });
+  }
+}
+
 function loadAuthMarketingPreview(host) {
   if (!host) return;
   fetch("/api/stats/homepage", { headers: { Accept: "application/json" } })
@@ -144,7 +154,7 @@ export function renderLogin(root) {
         try {
           const data = await api.login(user.value.trim(), pass.value);
           setSession(data.token, data.user);
-          navigate("/admin/dashboard", { replace: true });
+          postAuthNavigate("/admin/dashboard");
         } catch (err) {
           errHost.append(flash("error", err.message || "登录失败"));
         } finally {
@@ -240,7 +250,7 @@ export function renderRegister(root) {
         email: "",
       });
       setSession(data.token, data.user);
-      navigate("/admin/dashboard", { replace: true });
+      postAuthNavigate("/admin/dashboard");
     } catch (err) {
       errHost.append(flash("error", err.message || "注册失败"));
     } finally {
