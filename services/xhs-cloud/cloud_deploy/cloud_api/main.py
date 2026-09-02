@@ -1168,6 +1168,70 @@ def admin_list_codes(
     return {"items": items}
 
 
+@app.get("/api/v1/admin/auth-codes/stock")
+def admin_auth_code_stock(
+    _: None = Depends(verify_sync_key),
+    product: str = "",
+    sku: str = "",
+    plan_code: str = "",
+    limit: int = 500,
+):
+    """闲鱼自动补卡用：按 product/sku 或 plan_code 统计未兑激活码库存。"""
+    from cloud_deploy.cloud_api.auth_product_registry import resolve_plan, resolve_sku
+
+    plan = (plan_code or "").strip()
+    prod = (product or "").strip().lower()
+    sid = (sku or "").strip().lower()
+    label = plan
+    if not plan and prod and sid:
+        try:
+            spec = resolve_sku(prod, sid)
+            plan = spec["plan_code"]
+            label = f"{spec.get('product_label') or prod} · {spec.get('sku_label') or sid}"
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+    elif plan:
+        spec = resolve_plan(plan)
+        if spec:
+            label = f"{spec.get('product_label') or ''} · {spec.get('sku_label') or plan}".strip(
+                " ·"
+            )
+            prod = prod or str(spec.get("product") or "")
+            sid = sid or str(spec.get("sku") or "")
+    if not plan:
+        raise HTTPException(status_code=400, detail="需要 product+sku 或 plan_code")
+
+    try:
+        items = db.list_auth_codes(limit=max(1, min(int(limit or 500), 2000)))
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"数据库未就绪: {e}") from e
+
+    matched = [it for it in items if str(it.get("plan_code") or "") == plan]
+    unused = [
+        it
+        for it in matched
+        if str(it.get("status") or "") in ("unused", "pending", "")
+        and int(it.get("current_activations") or 0) < int(it.get("max_activations") or 1)
+    ]
+    # status 常见为 unused / active / revoked；未激活通常 current_activations=0
+    if not unused:
+        unused = [
+            it
+            for it in matched
+            if int(it.get("current_activations") or 0) == 0
+            and str(it.get("status") or "") not in ("revoked", "disabled")
+        ]
+    return {
+        "product": prod or None,
+        "sku": sid or None,
+        "plan_code": plan,
+        "label": label,
+        "scanned": len(matched),
+        "unused_count": len(unused),
+        "note": "闲鱼卡池水位以 XY data_content 为准；本接口仅反映云端 auth_codes 未兑量",
+    }
+
+
 @app.post("/api/v1/admin/auth-codes/{code}/revoke")
 def admin_revoke_code(code: str, _: None = Depends(verify_sync_key)):
     try:

@@ -4,16 +4,23 @@
 
 依赖：
   - 闲鱼 backend-web :8089
-  - P0b：心象测云端 https://psy.xhs365.cn（claim-links）
+  - P0b：心象测云端 https://psy.xhs365.cn（claim-links · 测题链接卡）
+  - P0c：monitor/psy Sync Key（auth-codes · 分销额度激活码卡）
   - P0 联调可选：发货助手本地 API :19527（勿作正式库存源）
 
 用法：
   1. 复制 ops/xy_card_bridge_map.example.json → ops/xy_card_bridge_map.json 并填映射
-  2. 设置 PSY_INTEGRATION_TOKEN（推荐），或 ops/.psy_token，或 map 内 psy_token / psy_username+psy_password
-  3. python ops/xy_card_bridge.py --dry-run
-  4. python ops/xy_card_bridge.py
-  5. 低水位巡检：python ops/xy_card_bridge.py --only-low-water
+  2. 测题链接卡：设置 PSY_INTEGRATION_TOKEN（或 ops/.psy_token / map 凭证）
+  3. 额度激活码卡：设置 XHS_CLOUD_SYNC_KEY（或 D:\\xhs-data\\config\\local_sync.env）
+  4. python ops/xy_card_bridge.py --dry-run
+  5. python ops/xy_card_bridge.py
+  6. 低水位巡检：python ops/xy_card_bridge.py --only-low-water
      （Windows 计划任务可跑 ops/xy_card_autotopup.bat）
+
+pair.mode:
+  - claim_from_cloud      测题链接（一链一测）
+  - auth_code_from_cloud   分销额度激活码（product+sku → 云端发码 → 写入闲鱼卡池）
+  - pull_unused_cards     旧：从发货助手拉未用卡（勿作正式源）
 """
 from __future__ import annotations
 
@@ -31,6 +38,16 @@ MAP_PATH = ROOT / "ops" / "xy_card_bridge_map.json"
 OUT_PATH = ROOT / "ops" / "_xy_card_bridge_last.json"
 PSY_TOKEN_FILE = ROOT / "ops" / ".psy_token"
 DEFAULT_PSY_API = "https://psy.xhs365.cn"
+DEFAULT_CLOUD_API = "https://monitor.xhs365.cn"
+SYNC_ENV_CANDIDATES = (
+    Path(r"D:\xhs-data\config\local_sync.env"),
+    Path(r"E:\xhs-data\config\local_sync.env"),
+    ROOT / "ops" / ".cloud_sync.env",
+)
+BROWSER_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+)
 
 # 闲鱼站内打不开 psy 链接，只引导复制到手机浏览器；###### 拆成多条 IM（段间约 0.5s）
 XY_LINK_CARD_DESCRIPTION = "\n".join(
@@ -45,6 +62,23 @@ XY_LINK_CARD_DESCRIPTION = "\n".join(
         "该链接可在三天内重复测三次，开始测试后72小时之后将失效，请及时测试并截图保存结果~有问题滴滴客服哈~",
         "######",
         "宝，链接在上面哈，具体往上滑动屏幕可以看到~",
+    ]
+)
+
+# 额度激活码发卡文案：{DELIVERY_CONTENT} = 卡池弹出的兑换码
+XY_AUTH_CODE_DESCRIPTION = "\n".join(
+    [
+        "【心象测 · 分销额度兑换码】",
+        "{DELIVERY_CONTENT}",
+        "######",
+        "使用方法：",
+        "1.打开 https://psy.xhs365.cn 注册/登录",
+        "2.后台进入「兑换额度」，粘贴上方兑换码",
+        "3.额度到账后，「生成链接」选测题再去卖",
+        "######",
+        "说明：一码一用；兑换成功不退；不是源码；娱乐向测评非医疗诊断",
+        "######",
+        "有问题请发订单号，未兑换可补发同档码~",
     ]
 )
 
@@ -160,9 +194,14 @@ def resolve_delivery_description(cfg: dict[str, Any], pair: dict[str, Any]) -> s
     raw = (
         pair.get("delivery_description")
         or cfg.get("delivery_description")
-        or XY_LINK_CARD_DESCRIPTION
+        or ""
     )
-    return str(raw).strip() or XY_LINK_CARD_DESCRIPTION
+    if str(raw).strip():
+        return str(raw).strip()
+    mode = str(pair.get("mode") or "").strip()
+    if mode == "auth_code_from_cloud":
+        return XY_AUTH_CODE_DESCRIPTION
+    return XY_LINK_CARD_DESCRIPTION
 
 
 def merge_lines(existing: str | None, new_lines: list[str]) -> str:
@@ -442,6 +481,272 @@ def psy_claim_links(
     }
 
 
+def _parse_env_file(path: Path) -> dict[str, str]:
+    out: dict[str, str] = {}
+    if not path.is_file():
+        return out
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        out[k.strip()] = v.strip().strip('"').strip("'")
+    return out
+
+
+def resolve_cloud_sync_key(cfg: dict[str, Any]) -> tuple[str, str, str]:
+    """返回 (sync_key, api_base, source_label)。"""
+    env_key = (os.environ.get("XHS_CLOUD_SYNC_KEY") or "").strip()
+    env_api = (os.environ.get("XHS_CLOUD_API_URL") or "").strip()
+    if env_key:
+        api = (env_api or cfg.get("cloud_api_base") or DEFAULT_CLOUD_API).rstrip("/")
+        return env_key, api, "env:XHS_CLOUD_SYNC_KEY"
+
+    map_key = str(cfg.get("cloud_sync_key") or cfg.get("xhs_cloud_sync_key") or "").strip()
+    if map_key:
+        api = str(cfg.get("cloud_api_base") or DEFAULT_CLOUD_API).rstrip("/")
+        return map_key, api, "map:cloud_sync_key"
+
+    for path in SYNC_ENV_CANDIDATES:
+        vals = _parse_env_file(path)
+        key = (vals.get("XHS_CLOUD_SYNC_KEY") or "").strip()
+        if not key:
+            continue
+        api = (
+            vals.get("XHS_CLOUD_API_URL")
+            or cfg.get("cloud_api_base")
+            or DEFAULT_CLOUD_API
+        )
+        return key, str(api).rstrip("/"), f"file:{path}"
+
+    raise RuntimeError(
+        "缺少云端 Sync Key：请设置 XHS_CLOUD_SYNC_KEY，"
+        f"或写入 {SYNC_ENV_CANDIDATES[0]}，或 map.cloud_sync_key"
+    )
+
+
+def cloud_mint_auth_codes(
+    api_base: str,
+    sync_key: str,
+    *,
+    product: str,
+    sku: str,
+    count: int,
+    channel: str = "",
+) -> dict[str, Any]:
+    """云端发激活码（写入 auth_codes，可兑换）。需 Sync Key。"""
+    count = max(1, min(int(count), 100))
+    payload = {
+        "product": product,
+        "sku": sku,
+        "count": count,
+        "channel": channel or f"xy-autotopup-{product}-{sku}",
+    }
+    r = requests.post(
+        f"{api_base}/api/v1/admin/auth-codes",
+        headers={
+            "X-Sync-Key": sync_key,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": BROWSER_UA,
+        },
+        json=payload,
+        timeout=60,
+    )
+    r.raise_for_status()
+    body = r.json() if r.content else {}
+    codes = list(body.get("codes") or [])
+    if not codes:
+        raise RuntimeError(f"cloud mint returned no codes: {body}")
+    return {
+        "codes": [str(c).strip() for c in codes if str(c).strip()],
+        "plan_code": body.get("plan_code"),
+        "label": body.get("label"),
+        "product": body.get("product") or product,
+        "sku": body.get("sku") or sku,
+        "channel": body.get("channel") or payload["channel"],
+        "raw": body,
+    }
+
+
+def auth_code_from_cloud(
+    cfg: dict[str, Any],
+    pair: dict[str, Any],
+    xy_token: str,
+    dry_run: bool,
+    *,
+    only_low_water: bool = False,
+) -> dict[str, Any]:
+    """分销额度激活码：云端 mint → 写入闲鱼 data 卡池（一行一码）。"""
+    product = str(pair.get("auth_product") or pair.get("product") or "psy_dist").strip()
+    sku = str(pair.get("auth_sku") or pair.get("sku") or "").strip()
+    xy_item = str(pair.get("xy_item_id") or "").strip()
+    name = str(
+        pair.get("xy_card_name") or f"额度激活码-{product}-{sku}-{xy_item}"
+    ).strip()
+    if not sku:
+        return {"ok": False, "error": "missing auth_sku/sku（如 quota_500）"}
+    if not xy_item:
+        return {"ok": False, "error": "missing xy_item_id"}
+
+    refill = max(
+        1,
+        min(
+            int(
+                pair.get("refill_batch")
+                or pair.get("mint_count")
+                or cfg.get("refill_batch")
+                or 20
+            ),
+            100,
+        ),
+    )
+    low_water = int(pair.get("low_water") or cfg.get("low_water") or 10)
+    codes_per_order = max(1, int(pair.get("codes_per_order") or 1))
+    channel = str(
+        pair.get("channel")
+        or cfg.get("auth_channel")
+        or f"xianyu-{product}-{sku}"
+    ).strip()
+    description = resolve_delivery_description(cfg, pair)
+
+    cards = list_xy_cards(cfg["xy_api_base"], xy_token)
+    existing = find_card_for_item(cards, xy_item, name)
+    stock_now = stock_lines_of(existing)
+    # 多码/单：库存按「可发单数」估算
+    sellable = stock_now // codes_per_order if codes_per_order > 1 else stock_now
+
+    if only_low_water or pair.get("respect_low_water", True):
+        if sellable >= low_water:
+            synced = False
+            bind_synced = False
+            if existing and existing.get("id") and not dry_run:
+                cid = int(existing["id"])
+                bind_ids = [xy_item]
+                for extra in pair.get("xy_item_aliases") or []:
+                    e = str(extra or "").strip()
+                    if e and e not in bind_ids:
+                        bind_ids.append(e)
+                cur_desc = str(existing.get("description") or "")
+                if cur_desc.strip() != description.strip():
+                    requests.put(
+                        f"{cfg['xy_api_base']}/cards/{cid}",
+                        headers=xy_headers(xy_token),
+                        json={
+                            "name": name,
+                            "type": "data",
+                            "enabled": True,
+                            "data_content": existing.get("data_content") or "",
+                            "description": description,
+                        },
+                        timeout=60,
+                    ).raise_for_status()
+                    synced = True
+                requests.put(
+                    f"{cfg['xy_api_base']}/cards/{cid}/items",
+                    headers=xy_headers(xy_token),
+                    json={"item_ids": bind_ids},
+                    timeout=30,
+                )
+                bind_synced = True
+            return {
+                "ok": True,
+                "skipped": True,
+                "mode": "auth_code_from_cloud",
+                "auth_product": product,
+                "auth_sku": sku,
+                "xy_item_id": xy_item,
+                "stock_lines": stock_now,
+                "sellable_orders": sellable,
+                "codes_per_order": codes_per_order,
+                "low_water": low_water,
+                "description_synced": synced,
+                "bind_synced": bind_synced,
+                "note": f"可发单数 {sellable} >= 低水位 {low_water}，跳过发码"
+                + ("（已同步发卡文案）" if synced else "")
+                + ("（已同步别名绑定）" if bind_synced else ""),
+            }
+
+    # 补到至少 refill 个「可发单」所需的码行
+    need_orders = max(refill, low_water - sellable)
+    mint_count = need_orders * codes_per_order
+    mint_count = max(codes_per_order, min(mint_count, 100))
+
+    sync_key, cloud_api, key_source = resolve_cloud_sync_key(cfg)
+    if dry_run:
+        return {
+            "ok": True,
+            "dry_run": True,
+            "mode": "auth_code_from_cloud",
+            "auth_product": product,
+            "auth_sku": sku,
+            "xy_item_id": xy_item,
+            "stock_lines": stock_now,
+            "sellable_orders": sellable,
+            "low_water": low_water,
+            "would_mint": mint_count,
+            "codes_per_order": codes_per_order,
+            "cloud_api": cloud_api,
+            "sync_key_source": key_source,
+            "note": "dry-run 不调用云端发码，不改闲鱼卡池",
+        }
+
+    minted = cloud_mint_auth_codes(
+        cloud_api,
+        sync_key,
+        product=product,
+        sku=sku,
+        count=mint_count,
+        channel=channel,
+    )
+    codes = list(minted.get("codes") or [])
+    if not codes:
+        return {
+            "ok": False,
+            "error": "云端未返回激活码",
+            "auth_product": product,
+            "auth_sku": sku,
+            "sync_key_source": key_source,
+        }
+
+    aliases = [
+        str(x).strip()
+        for x in (pair.get("xy_item_aliases") or [])
+        if str(x).strip()
+    ]
+    result = upsert_xy_data_card(
+        cfg["xy_api_base"],
+        xy_token,
+        item_id=xy_item,
+        name=name,
+        lines=codes,
+        dry_run=False,
+        description=description,
+        pair_aliases=aliases,
+    )
+    result.update(
+        {
+            "ok": True if result.get("ok") else bool(result.get("ok")),
+            "mode": "auth_code_from_cloud",
+            "auth_product": product,
+            "auth_sku": sku,
+            "plan_code": minted.get("plan_code"),
+            "label": minted.get("label"),
+            "xy_item_id": xy_item,
+            "imported": len(codes),
+            "codes_per_order": codes_per_order,
+            "stock_before": stock_now,
+            "low_water": low_water,
+            "channel": minted.get("channel"),
+            "sample_code": codes[0],
+            "cloud_api": cloud_api,
+            "sync_key_source": key_source,
+            "note": "已云端发激活码并写入闲鱼卡池；买家兑码后额度到账",
+        }
+    )
+    return result
+
+
 def claim_from_cloud(
     cfg: dict[str, Any],
     pair: dict[str, Any],
@@ -697,6 +1002,11 @@ def run_pair(
 
     if mode == "claim_from_cloud":
         return claim_from_cloud(
+            cfg, pair, token, dry_run, only_low_water=only_low_water
+        )
+
+    if mode == "auth_code_from_cloud":
+        return auth_code_from_cloud(
             cfg, pair, token, dry_run, only_low_water=only_low_water
         )
 

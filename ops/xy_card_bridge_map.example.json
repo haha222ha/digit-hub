@@ -7,17 +7,29 @@
   "xhs_shop_id": "",
   "psy_api_base": "https://psy.xhs365.cn",
   "psy_client_id": "xianyu",
+  "cloud_api_base": "https://monitor.xhs365.cn",
   "allow_generate": true,
   "low_water": 5,
   "refill_batch": 8,
   "pairs": [
     {
       "psy_test_code": "rvt",
-      "xy_item_id": "REPLACE_XY_ITEM_ID",
+      "xy_item_id": "REPLACE_XY_ITEM_ID_LINK",
       "xy_card_name": "恋爱观-闲鱼链接卡池",
       "mode": "claim_from_cloud",
       "low_water": 5,
       "refill_batch": 8
+    },
+    {
+      "mode": "auth_code_from_cloud",
+      "auth_product": "psy_dist",
+      "auth_sku": "quota_500",
+      "xy_item_id": "REPLACE_XY_ITEM_ID_QUOTA500",
+      "xy_card_name": "心象测-额度500-激活码",
+      "low_water": 8,
+      "refill_batch": 20,
+      "codes_per_order": 1,
+      "channel": "xianyu-q500"
     }
   ]
 }
