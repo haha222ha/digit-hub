@@ -102,7 +102,7 @@
         ],
         urls: {
           register: "/register?next=/admin/purchase-quota",
-          login: "/login",
+          login: "/login?next=/admin/purchase-quota",
           redeem: "/admin/redeem-quota",
         },
         support_email: "support@xhs365.cn",
