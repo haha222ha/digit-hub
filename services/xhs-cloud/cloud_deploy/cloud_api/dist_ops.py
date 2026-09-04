@@ -98,6 +98,16 @@ _DEFAULT_CONFIG = {
     "customer_service_qrcode": "",
     "xianyu_shop_link": "",
     "xianyu_shop_qrcode": "",
+    "xianyu_link_quota_100": "",
+    "xianyu_link_quota_500": "",
+    "xianyu_link_quota_2000": "",
+    "xianyu_price_hint_quota_100": "¥49.9",
+    "xianyu_price_hint_quota_500": "¥128",
+    "xianyu_price_hint_quota_2000": "¥238",
+    "promo_hero_title": "心象测 · 测评链接分销 SaaS",
+    "promo_hero_subtitle": "100+ 趣味测题 · 云端生成链接 · 适合小红书/闲鱼二次分发 · 非源码",
+    "promo_online_enabled": "true",
+    "promo_xianyu_enabled": "true",
     "link_max_uses": "3",
     "link_expire_hours": "72",
     "expire_type": "custom_days",
@@ -145,6 +155,94 @@ def get_config() -> dict[str, Any]:
     out["payment_notify_base"] = (os.environ.get("XHS_PAY_NOTIFY_BASE") or "").rstrip("/")
     out["payment_test_enabled"] = os.environ.get("XHS_PSY_PAY_TEST", "").strip() in ("1", "true", "yes")
     return out
+
+
+def _truthy(val: str | None, *, default: bool = True) -> bool:
+    raw = str(val if val is not None else ("true" if default else "false")).strip().lower()
+    if raw in ("0", "false", "no", "off"):
+        return False
+    if raw in ("1", "true", "yes", "on"):
+        return True
+    return default
+
+
+def get_public_purchase_options() -> dict[str, Any]:
+    """公开引导页 /get：闲鱼链 + 在线套餐（无需登录）。"""
+    from cloud_deploy.cloud_api.payment_plans import list_psy_dist_plans, public_plan_row
+
+    cfg = get_config()
+    default_xy = (cfg.get("xianyu_shop_link") or "").strip()
+    sku_rows = [
+        (
+            "quota_100",
+            "100 次体验",
+            (cfg.get("xianyu_link_quota_100") or default_xy).strip(),
+            100,
+            (cfg.get("xianyu_price_hint_quota_100") or "¥49.9").strip(),
+        ),
+        (
+            "quota_500",
+            "500 次主力",
+            (cfg.get("xianyu_link_quota_500") or default_xy).strip(),
+            500,
+            (cfg.get("xianyu_price_hint_quota_500") or "¥128").strip(),
+        ),
+        (
+            "quota_2000",
+            "2000 次囤货",
+            (cfg.get("xianyu_link_quota_2000") or default_xy).strip(),
+            2000,
+            (cfg.get("xianyu_price_hint_quota_2000") or "¥238").strip(),
+        ),
+    ]
+    xianyu_skus = [
+        {
+            "sku": sku,
+            "label": label,
+            "quota_amount": quota,
+            "link": link,
+            "price_hint": hint,
+        }
+        for sku, label, link, quota, hint in sku_rows
+        if link
+    ]
+    online_enabled = _truthy(cfg.get("promo_online_enabled"), default=True)
+    xianyu_enabled = _truthy(cfg.get("promo_xianyu_enabled"), default=True) and bool(
+        xianyu_skus or default_xy
+    )
+    if xianyu_enabled and not xianyu_skus and default_xy:
+        xianyu_skus = [
+            {
+                "sku": "default",
+                "label": "闲鱼购买",
+                "quota_amount": 0,
+                "link": default_xy,
+                "price_hint": "",
+            }
+        ]
+    plans = [public_plan_row(p) for p in list_psy_dist_plans()]
+    return {
+        "hero_title": (cfg.get("promo_hero_title") or "").strip()
+        or "心象测 · 测评链接分销 SaaS",
+        "hero_subtitle": (cfg.get("promo_hero_subtitle") or "").strip()
+        or "100+ 趣味测题 · 云端生成链接 · 适合小红书/闲鱼二次分发 · 非源码",
+        "online_enabled": online_enabled,
+        "xianyu_enabled": xianyu_enabled,
+        "xianyu_default_link": default_xy or None,
+        "xianyu_qrcode": (cfg.get("xianyu_shop_qrcode") or "").strip() or None,
+        "xianyu_skus": xianyu_skus,
+        "online_plans": plans,
+        "urls": {
+            "register": "/register?next=/admin/purchase-quota",
+            "login": "/login?next=/admin/purchase-quota",
+            "purchase": "/admin/purchase-quota",
+            "redeem": "/admin/redeem-quota",
+            "home": "/",
+            "pricing": "/pricing/",
+            "get": "/get",
+        },
+        "support_email": "support@xhs365.cn",
+    }
 
 
 def update_payment_config(payload: dict[str, Any]) -> dict[str, Any]:

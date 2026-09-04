@@ -342,6 +342,14 @@ def compat_homepage_stats():
     return _ok(svc.homepage_stats(), "获取首页数据成功")
 
 
+@compat_router.get("/api/public/purchase-options")
+def compat_public_purchase_options():
+    """引导页 /get：闲鱼 + 在线支付双通道（公开，无需登录）。"""
+    from cloud_deploy.cloud_api import dist_ops
+
+    return _ok(dist_ops.get_public_purchase_options(), "ok")
+
+
 @compat_router.post("/api/auth/login")
 def compat_auth_login(body: DistLoginBody, request: Request):
     username = (body.usernameOrEmail or body.username or "").strip()
