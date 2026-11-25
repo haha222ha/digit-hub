@@ -1139,6 +1139,43 @@
   }
 
   /**
+   * hub 收尾生命周期：立即挂条 + 常驻监听 + 短延迟重挂（防测题 onLoad/改 DOM 冲掉）
+   */
+  function ensureHubContinueLifecycle(validator) {
+    if (!isHubValidator(validator)) return;
+    try {
+      mountHubContinueBar(validator);
+    } catch (e) {
+      console.warn('mountHubContinueBar failed:', e);
+    }
+    try {
+      if (!window.__xxHubContinueMo && document.body) {
+        window.__xxHubContinueMo = new MutationObserver(function () {
+          const v = window.linkValidator || validator;
+          if (!v || !isHubValidator(v)) return;
+          if (isHubResultSurfaceVisible() || document.getElementById(HUB_CONTINUE_BAR_ID)) {
+            mountHubContinueBar(v);
+          }
+        });
+        window.__xxHubContinueMo.observe(document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['class', 'hidden', 'style']
+        });
+      }
+    } catch (_) {
+      /* ignore */
+    }
+    [0, 300, 1200, 3000].forEach(function (ms) {
+      setTimeout(function () {
+        const v = window.linkValidator || validator;
+        if (v && isHubValidator(v)) mountHubContinueBar(v);
+      }, ms);
+    });
+  }
+
+  /**
    * 交卷后弹一次闭环提示（有剩余次数才弹）
    */
   function showHubContinueModal(validator, remaining) {
@@ -1948,48 +1985,34 @@
         console.log('链接验证成功:', validateResult);
         console.log('是否有本地测试结果:', hasLocalResult);
 
-        // 调用成功回调
-        if (options.onSuccess) {
-          options.onSuccess(validateResult, validator);
+        // 调用成功回调（测题 onLoad 若抛错，不能阻断 hub 收尾挂载）
+        try {
+          if (options.onSuccess) {
+            options.onSuccess(validateResult, validator);
+          }
+        } catch (cbErr) {
+          console.warn('PsyTestValidator onSuccess error:', cbErr);
         }
 
-        // 调用加载完成回调（用于双视角测试和决定显示测试页面还是报告页面）
-        if (options.onLoad) {
-          options.onLoad({
-            valid: true,
-            is_dual_perspective: validator.isDualPerspective,
-            perspectives: validator.perspectives,
-            unlimited: validator.unlimited,
-            has_local_result: hasLocalResult
-          });
+        try {
+          if (options.onLoad) {
+            options.onLoad({
+              valid: true,
+              is_dual_perspective: validator.isDualPerspective,
+              perspectives: validator.perspectives,
+              unlimited: validator.unlimited,
+              has_local_result: hasLocalResult
+            });
+          }
+        } catch (cbErr) {
+          console.warn('PsyTestValidator onLoad error:', cbErr);
         }
 
         // 添加推广链接（无论链接是否有效都显示）
         addPromotionLink();
 
-        // hub：全程挂底部条（不依赖 2 分钟内出结果）；结果区出现时刷新文案
-        if (isHubValidator(validator)) {
-          mountHubContinueBar(validator);
-          try {
-            if (!window.__xxHubContinueMo) {
-              window.__xxHubContinueMo = new MutationObserver(function () {
-                if (!window.linkValidator || !isHubValidator(window.linkValidator)) return;
-                // 结果区亮起，或条已存在时持续同步剩余次数
-                if (isHubResultSurfaceVisible() || document.getElementById(HUB_CONTINUE_BAR_ID)) {
-                  mountHubContinueBar(window.linkValidator);
-                }
-              });
-              window.__xxHubContinueMo.observe(document.body, {
-                childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['class', 'hidden', 'style']
-              });
-            }
-          } catch (_) {
-            /* ignore */
-          }
-        }
+        // hub：全程挂底部条；并延迟重挂，避免测题脚本改 DOM 后条丢失
+        ensureHubContinueLifecycle(validator);
 
         return validator;
       } catch (error) {
@@ -2064,7 +2087,8 @@
     /**
      * hub 选题闭环：结果页挂「继续测评」条
      */
-    mountHubContinueBar: mountHubContinueBar
+    mountHubContinueBar: mountHubContinueBar,
+    ensureHubContinueLifecycle: ensureHubContinueLifecycle
   };
 
   /**
