@@ -543,6 +543,11 @@ function showPage(id){
     if (id === 'page-cover' || id === 'page-result') {
         addPromotionLinkDelayed();
     }
+    if (id === 'page-result' && window.linkValidator && window.PsyTestValidator && typeof window.PsyTestValidator.mountHubContinueBar === 'function') {
+        try {
+            window.PsyTestValidator.mountHubContinueBar(window.linkValidator);
+        } catch (e) {}
+    }
 }
 
 function getStorageKey(token){

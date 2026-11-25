@@ -970,6 +970,35 @@
   }
 
   /**
+   * 识别「结果区已展示」（兼容 class=hidden / [hidden] / display:none）
+   */
+  function isHubResultSurfaceVisible() {
+    const nodes = document.querySelectorAll(
+      '#page-result, #result-page, #report-page, .result-page, .report-page, [id*="result"], [class*="result-page"], [class*="report-page"]'
+    );
+    for (let i = 0; i < nodes.length; i++) {
+      const el = nodes[i];
+      if (!el || el.nodeType !== 1) continue;
+      const id = String(el.id || '').toLowerCase();
+      // 过程中的分析区不算结果页
+      if (id === 'analysis-result' || id === 'quiz-result' || id.indexOf('partial') >= 0) continue;
+      if (el.classList && el.classList.contains('hidden')) continue;
+      if (el.hasAttribute('hidden')) continue;
+      let st;
+      try {
+        st = window.getComputedStyle(el);
+      } catch (_) {
+        continue;
+      }
+      if (!st || st.display === 'none' || st.visibility === 'hidden' || Number(st.opacity) === 0) continue;
+      // 结果容器通常有实质高度
+      if (el.offsetHeight < 40 && el.scrollHeight < 40) continue;
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * 结果页 / 测题页底部：选题链接闭环入口（剩余次数 → 回 /pick/）
    */
   function mountHubContinueBar(validator, remainingOverride) {
@@ -1062,6 +1091,51 @@
 
     bar.appendChild(textWrap);
     bar.appendChild(btn);
+
+    // 结果 footer 再挂一颗显式按钮（避免只有「重新测验」、看不到底部条）
+    try {
+      if (isHubResultSurfaceVisible()) {
+        const footers = document.querySelectorAll('.report-footer, .result-actions, #page-result, #result-page');
+        for (let i = 0; i < footers.length; i++) {
+          const footer = footers[i];
+          if (!footer || footer.querySelector('#xx-hub-continue-inline')) continue;
+          // 只挂在真正的操作区，避免整页乱插
+          const isAction =
+            (footer.classList &&
+              (footer.classList.contains('report-footer') || footer.classList.contains('result-actions'))) ||
+            footer.querySelector('button, .btn');
+          if (!isAction && footer.id !== 'page-result' && footer.id !== 'result-page') continue;
+          const host =
+            footer.classList &&
+            (footer.classList.contains('report-footer') || footer.classList.contains('result-actions'))
+              ? footer
+              : footer.querySelector('.report-footer, .result-actions') || footer;
+          if (!host || host.querySelector('#xx-hub-continue-inline')) continue;
+          const inline = document.createElement('a');
+          inline.id = 'xx-hub-continue-inline';
+          inline.href = '/pick/';
+          inline.textContent = hasLeft ? '继续选题测评（换一套 / 再测）' : '更换授权码继续测';
+          inline.style.cssText = [
+            'display:block',
+            'width:100%',
+            'box-sizing:border-box',
+            'margin:12px 0 0',
+            'padding:14px 16px',
+            'border-radius:10px',
+            'background:#0f766e',
+            'color:#fff',
+            'font-size:15px',
+            'font-weight:700',
+            'text-align:center',
+            'text-decoration:none'
+          ].join(';');
+          host.appendChild(inline);
+          break;
+        }
+      }
+    } catch (_) {
+      /* ignore */
+    }
   }
 
   /**
@@ -1893,28 +1967,25 @@
         // 添加推广链接（无论链接是否有效都显示）
         addPromotionLink();
 
-        // hub：结果页 / 已有本地结果时挂上「继续选题」条；并监听结果区出现
+        // hub：全程挂底部条（不依赖 2 分钟内出结果）；结果区出现时刷新文案
         if (isHubValidator(validator)) {
-          if (hasLocalResult || /result|report/i.test(location.pathname + location.search + location.hash)) {
-            mountHubContinueBar(validator);
-          }
+          mountHubContinueBar(validator);
           try {
-            const mo = new MutationObserver(function () {
-              const resultVisible = document.querySelector(
-                '#result-page.active, .result-page.active, #result-page:not([hidden]), .result-page:not([hidden]), #report-page, .report-page, [id*="result"]:not([hidden])'
-              );
-              if (resultVisible || document.getElementById(HUB_CONTINUE_BAR_ID)) {
-                mountHubContinueBar(validator);
-              }
-            });
-            mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'hidden', 'style'] });
-            setTimeout(function () {
-              try {
-                mo.disconnect();
-              } catch (_) {
-                /* ignore */
-              }
-            }, 120000);
+            if (!window.__xxHubContinueMo) {
+              window.__xxHubContinueMo = new MutationObserver(function () {
+                if (!window.linkValidator || !isHubValidator(window.linkValidator)) return;
+                // 结果区亮起，或条已存在时持续同步剩余次数
+                if (isHubResultSurfaceVisible() || document.getElementById(HUB_CONTINUE_BAR_ID)) {
+                  mountHubContinueBar(window.linkValidator);
+                }
+              });
+              window.__xxHubContinueMo.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class', 'hidden', 'style']
+              });
+            }
           } catch (_) {
             /* ignore */
           }
