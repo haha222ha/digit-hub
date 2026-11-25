@@ -1140,8 +1140,19 @@
         throw new Error('服务器返回数据格式错误');
       }
       const used = out.usedCount != null ? out.usedCount : (out.link && (out.link.usedCount || out.link.used_count));
-      const max = out.link && (out.link.maxUses || out.link.max_uses);
-      if (used != null) syncHubSessionUses(token, used, max);
+      const max =
+        (out.maxUses != null ? out.maxUses : null) ||
+        (out.link && (out.link.maxUses || out.link.max_uses));
+      const mode = String(
+        out.linkMode ||
+          (out.link && (out.link.linkMode || out.link.link_mode)) ||
+          ''
+      ).toLowerCase();
+      const stored = String(
+        (out.link && (out.link.test_code || out.link.testCode)) || ''
+      );
+      const isHub = mode === 'hub' || stored === '__hub__';
+      if (used != null) syncHubSessionUses(token, used, max, { forceHub: isHub });
       return out;
     } catch (error) {
       console.error('记录测试开始失败:', error);

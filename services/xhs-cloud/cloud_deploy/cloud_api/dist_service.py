@@ -421,8 +421,11 @@ def validate_token(token: str, test_code: str | None = None) -> dict:
 
 
 def start_test(token: str) -> dict:
-    dist_db.start_link_test(token)
-    return {"success": True}
+    # 必须回传 usedCount / link，C 端才能同步 hub 剩余次数（扣次在 start 原子 +1）
+    out = dist_db.start_link_test(token)
+    if isinstance(out, dict) and "success" not in out:
+        out = {**out, "success": True}
+    return out
 
 
 def complete_test(
