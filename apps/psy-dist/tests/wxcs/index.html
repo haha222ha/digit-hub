@@ -543,11 +543,6 @@ function showPage(id){
     if (id === 'page-cover' || id === 'page-result') {
         addPromotionLinkDelayed();
     }
-    if (id === 'page-result' && window.linkValidator && window.PsyTestValidator && typeof window.PsyTestValidator.mountHubContinueBar === 'function') {
-        try {
-            window.PsyTestValidator.mountHubContinueBar(window.linkValidator);
-        } catch (e) {}
-    }
 }
 
 function getStorageKey(token){
@@ -838,7 +833,7 @@ async function showResult(){
 }
 </script>
 
-<script src="/static/js/link-validator.js?v=20261125h5"></script>
+<script src="/static/js/link-validator.js?v=20261125h6"></script>
 <script>
 (function() {
     let validatorInstance = null;

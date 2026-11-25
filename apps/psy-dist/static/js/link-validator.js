@@ -970,205 +970,129 @@
   }
 
   /**
-   * 识别「结果区已展示」（兼容 class=hidden / [hidden] / display:none）
-   */
-  function isHubResultSurfaceVisible() {
-    const nodes = document.querySelectorAll(
-      '#page-result, #result-page, #report-page, .result-page, .report-page, [id*="result"], [class*="result-page"], [class*="report-page"]'
-    );
-    for (let i = 0; i < nodes.length; i++) {
-      const el = nodes[i];
-      if (!el || el.nodeType !== 1) continue;
-      const id = String(el.id || '').toLowerCase();
-      // 过程中的分析区不算结果页
-      if (id === 'analysis-result' || id === 'quiz-result' || id.indexOf('partial') >= 0) continue;
-      if (el.classList && el.classList.contains('hidden')) continue;
-      if (el.hasAttribute('hidden')) continue;
-      let st;
-      try {
-        st = window.getComputedStyle(el);
-      } catch (_) {
-        continue;
-      }
-      if (!st || st.display === 'none' || st.visibility === 'hidden' || Number(st.opacity) === 0) continue;
-      // 结果容器通常有实质高度
-      if (el.offsetHeight < 40 && el.scrollHeight < 40) continue;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * 结果页 / 测题页底部：选题链接闭环入口（剩余次数 → 回 /pick/）
-   * 注意：禁止在 MutationObserver 里无脑重绘，否则会改 DOM→再触发观察→卡死页面
+   * 仅挂固定底部条（不做全页扫描 / 观察器 / 轮询，避免卡死）
    */
   function mountHubContinueBar(validator, remainingOverride) {
-    if (!isHubValidator(validator)) return;
-    if (window.__xxHubMounting) return;
-    window.__xxHubMounting = true;
-    try {
-      const remaining =
-        remainingOverride != null ? Number(remainingOverride) : hubRemainingFrom(validator, null);
-      const maxUses = (function () {
-        const sess = readHubSession();
-        if (sess && sess.token === validator.token && sess.maxUses) return Number(sess.maxUses);
-        if (validator.link && (validator.link.maxUses || validator.link.max_uses)) {
-          return Number(validator.link.maxUses || validator.link.max_uses);
-        }
-        return 3;
-      })();
+    if (!isHubValidator(validator) || !document.body) return;
 
-      const hasLeft = remaining == null ? true : remaining > 0;
-      const title = hasLeft
-        ? remaining == null
-          ? '本授权码还可继续选题测评'
-          : `本授权码还可开测 ${remaining} / ${maxUses} 次`
-        : '本授权码次数已用尽';
-      const cta = hasLeft ? '继续选题测评' : '更换授权码';
-      const hint = hasLeft ? '可换一套题，也可同题复测' : '请输入新的授权码继续';
-      const sig = title + '|' + cta + '|' + hint;
-
-      let bar = document.getElementById(HUB_CONTINUE_BAR_ID);
-      if (!bar) {
-        bar = document.createElement('div');
-        bar.id = HUB_CONTINUE_BAR_ID;
-        bar.setAttribute('role', 'region');
-        bar.setAttribute('aria-label', '继续测评');
-        bar.style.cssText = [
-          'position:fixed',
-          'left:0',
-          'right:0',
-          'bottom:0',
-          'z-index:9998',
-          'display:flex',
-          'align-items:center',
-          'justify-content:space-between',
-          'gap:12px',
-          'padding:12px 16px',
-          'padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px))',
-          'background:rgba(11,28,24,0.94)',
-          'color:#f3f7f5',
-          'font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif',
-          'box-shadow:0 -8px 24px rgba(0,0,0,0.18)',
-          'box-sizing:border-box'
-        ].join(';');
-        document.body.appendChild(bar);
-        if (!document.getElementById('xx-hub-continue-pad')) {
-          const pad = document.createElement('div');
-          pad.id = 'xx-hub-continue-pad';
-          pad.style.cssText = 'height:88px;width:100%;pointer-events:none;';
-          document.body.appendChild(pad);
-        }
+    const remaining =
+      remainingOverride != null ? Number(remainingOverride) : hubRemainingFrom(validator, null);
+    const maxUses = (function () {
+      const sess = readHubSession();
+      if (sess && sess.token === validator.token && sess.maxUses) return Number(sess.maxUses);
+      if (validator.link && (validator.link.maxUses || validator.link.max_uses)) {
+        return Number(validator.link.maxUses || validator.link.max_uses);
       }
+      return 3;
+    })();
 
-      // 文案未变则不重绘，避免观察器反馈环
-      if (bar.getAttribute('data-xx-sig') !== sig) {
-        bar.setAttribute('data-xx-sig', sig);
-        bar.replaceChildren();
-        const textWrap = document.createElement('div');
-        textWrap.style.cssText = 'min-width:0;flex:1';
-        const t1 = document.createElement('div');
-        t1.textContent = title;
-        t1.style.cssText = 'font-size:14px;font-weight:600;line-height:1.35';
-        const t2 = document.createElement('div');
-        t2.textContent = hint;
-        t2.style.cssText = 'font-size:12px;opacity:0.78;margin-top:2px';
-        textWrap.appendChild(t1);
-        textWrap.appendChild(t2);
-        const btn = document.createElement('a');
-        btn.href = '/pick/';
-        btn.textContent = cta;
-        btn.style.cssText = [
-          'flex-shrink:0',
-          'display:inline-flex',
-          'align-items:center',
-          'justify-content:center',
-          'padding:10px 14px',
-          'border-radius:10px',
-          'background:#14b8a6',
-          'color:#0b1c18',
-          'font-size:14px',
-          'font-weight:700',
-          'text-decoration:none',
-          'white-space:nowrap'
-        ].join(';');
-        bar.appendChild(textWrap);
-        bar.appendChild(btn);
-      }
+    const hasLeft = remaining == null ? true : remaining > 0;
+    const title = hasLeft
+      ? remaining == null
+        ? '本授权码还可继续选题测评'
+        : `本授权码还可开测 ${remaining} / ${maxUses} 次`
+      : '本授权码次数已用尽';
+    const cta = hasLeft ? '继续选题测评' : '更换授权码';
+    const hint = hasLeft ? '可换一套题，也可同题复测' : '请输入新的授权码继续';
+    const sig = title + '|' + cta + '|' + hint;
 
-      // 结果 footer 显式按钮：已存在则跳过
-      if (isHubResultSurfaceVisible() && !document.getElementById('xx-hub-continue-inline')) {
-        const footers = document.querySelectorAll('.report-footer, .result-actions');
-        for (let i = 0; i < footers.length; i++) {
-          const host = footers[i];
-          if (!host || host.querySelector('#xx-hub-continue-inline')) continue;
-          const inline = document.createElement('a');
-          inline.id = 'xx-hub-continue-inline';
-          inline.href = '/pick/';
-          inline.textContent = hasLeft ? '继续选题测评（换一套 / 再测）' : '更换授权码继续测';
-          inline.style.cssText = [
-            'display:block',
-            'width:100%',
-            'box-sizing:border-box',
-            'margin:12px 0 0',
-            'padding:14px 16px',
-            'border-radius:10px',
-            'background:#0f766e',
-            'color:#fff',
-            'font-size:15px',
-            'font-weight:700',
-            'text-align:center',
-            'text-decoration:none'
-          ].join(';');
-          host.appendChild(inline);
-          break;
-        }
+    let bar = document.getElementById(HUB_CONTINUE_BAR_ID);
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = HUB_CONTINUE_BAR_ID;
+      bar.setAttribute('role', 'region');
+      bar.setAttribute('aria-label', '继续测评');
+      bar.style.cssText =
+        'position:fixed;left:0;right:0;bottom:0;z-index:9998;display:flex;align-items:center;' +
+        'justify-content:space-between;gap:12px;padding:12px 16px;' +
+        'padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));' +
+        'background:rgba(11,28,24,0.94);color:#f3f7f5;' +
+        'font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;' +
+        'box-shadow:0 -8px 24px rgba(0,0,0,0.18);box-sizing:border-box';
+      document.body.appendChild(bar);
+      if (!document.getElementById('xx-hub-continue-pad')) {
+        const pad = document.createElement('div');
+        pad.id = 'xx-hub-continue-pad';
+        pad.style.cssText = 'height:88px;width:100%;pointer-events:none;';
+        document.body.appendChild(pad);
       }
-    } finally {
-      window.__xxHubMounting = false;
     }
+
+    if (bar.getAttribute('data-xx-sig') === sig) return;
+    bar.setAttribute('data-xx-sig', sig);
+    while (bar.firstChild) bar.removeChild(bar.firstChild);
+
+    const textWrap = document.createElement('div');
+    textWrap.style.cssText = 'min-width:0;flex:1';
+    const t1 = document.createElement('div');
+    t1.textContent = title;
+    t1.style.cssText = 'font-size:14px;font-weight:600;line-height:1.35';
+    const t2 = document.createElement('div');
+    t2.textContent = hint;
+    t2.style.cssText = 'font-size:12px;opacity:0.78;margin-top:2px';
+    textWrap.appendChild(t1);
+    textWrap.appendChild(t2);
+
+    const btn = document.createElement('a');
+    btn.href = '/pick/';
+    btn.textContent = cta;
+    btn.style.cssText =
+      'flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;' +
+      'padding:10px 14px;border-radius:10px;background:#14b8a6;color:#0b1c18;' +
+      'font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap';
+
+    bar.appendChild(textWrap);
+    bar.appendChild(btn);
+  }
+
+  /** 交卷后往可见的 report-footer 塞一颗按钮（只调用一次，不扫描全页） */
+  function injectHubContinueInline(hasLeft) {
+    if (document.getElementById('xx-hub-continue-inline')) return;
+    const host =
+      document.querySelector('#page-result:not(.hidden) .report-footer') ||
+      document.querySelector('#result-page:not(.hidden) .report-footer') ||
+      document.querySelector('.result-page:not(.hidden) .report-footer') ||
+      document.querySelector('.report-footer') ||
+      document.querySelector('.result-actions');
+    if (!host) return;
+    const inline = document.createElement('a');
+    inline.id = 'xx-hub-continue-inline';
+    inline.href = '/pick/';
+    inline.textContent = hasLeft ? '继续选题测评（换一套 / 再测）' : '更换授权码继续测';
+    inline.style.cssText =
+      'display:block;width:100%;box-sizing:border-box;margin:12px 0 0;padding:14px 16px;' +
+      'border-radius:10px;background:#0f766e;color:#fff;font-size:15px;font-weight:700;' +
+      'text-align:center;text-decoration:none';
+    host.appendChild(inline);
   }
 
   /**
-   * hub 收尾生命周期：挂条 + 轻量轮询结果区（不用全树 MutationObserver，避免卡死）
+   * hub 收尾：只挂一次底栏；清掉旧版可能残留的观察器/轮询
    */
   function ensureHubContinueLifecycle(validator) {
     if (!isHubValidator(validator)) return;
+    try {
+      if (window.__xxHubContinueMo) {
+        window.__xxHubContinueMo.disconnect();
+        window.__xxHubContinueMo = null;
+      }
+    } catch (_) {
+      /* ignore */
+    }
+    if (window.__xxHubContinuePoll) {
+      clearInterval(window.__xxHubContinuePoll);
+      window.__xxHubContinuePoll = null;
+    }
     try {
       mountHubContinueBar(validator);
     } catch (e) {
       console.warn('mountHubContinueBar failed:', e);
     }
-
-    // 短延迟补挂一次（覆盖测题 onLoad 改 DOM），不做高频重绘
-    [400, 1500].forEach(function (ms) {
-      setTimeout(function () {
-        const v = window.linkValidator || validator;
-        if (v && isHubValidator(v)) mountHubContinueBar(v);
-      }, ms);
-    });
-
-    // 轻量轮询：仅在结果区出现且还没 inline 按钮时补挂；最多 3 分钟
-    if (!window.__xxHubContinuePoll) {
-      let ticks = 0;
-      window.__xxHubContinuePoll = setInterval(function () {
-        ticks += 1;
-        if (ticks > 90) {
-          clearInterval(window.__xxHubContinuePoll);
-          window.__xxHubContinuePoll = null;
-          return;
-        }
-        const v = window.linkValidator;
-        if (!v || !isHubValidator(v)) return;
-        if (!document.getElementById(HUB_CONTINUE_BAR_ID)) {
-          mountHubContinueBar(v);
-          return;
-        }
-        if (isHubResultSurfaceVisible() && !document.getElementById('xx-hub-continue-inline')) {
-          mountHubContinueBar(v);
-        }
-      }, 2000);
-    }
+    // 仅再补挂一次，覆盖测题 onLoad；不再轮询
+    setTimeout(function () {
+      const v = window.linkValidator || validator;
+      if (v && isHubValidator(v)) mountHubContinueBar(v);
+    }, 500);
   }
 
   /**
@@ -1176,10 +1100,11 @@
    */
   function showHubContinueModal(validator, remaining) {
     if (!isHubValidator(validator)) return;
-    if (remaining == null || remaining <= 0) {
-      mountHubContinueBar(validator, remaining);
-      return;
-    }
+    const hasLeft = remaining == null ? true : Number(remaining) > 0;
+    mountHubContinueBar(validator, remaining);
+    injectHubContinueInline(hasLeft);
+    if (!hasLeft) return;
+
     const maxUses = (readHubSession() && readHubSession().maxUses) || 3;
     showModal(
       `报告已生成。<br><br>本授权码还可开测 <strong>${remaining}</strong> / ${maxUses} 次（可换题或同题复测）。`,
@@ -1188,7 +1113,6 @@
         /* 关闭后底部条仍在 */
       }
     );
-    // 用「继续选题 / 先看报告」替换默认「确定」
     setTimeout(function () {
       const modal = document.getElementById('link-validator-modal');
       if (!modal) return;
@@ -1216,13 +1140,11 @@
       stay.onclick = function () {
         modal.remove();
         document.body.style.overflow = '';
-        mountHubContinueBar(validator, remaining);
       };
       actions.appendChild(go);
       actions.appendChild(stay);
       content.appendChild(actions);
     }, 0);
-    mountHubContinueBar(validator, remaining);
   }
 
   /**
