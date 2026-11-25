@@ -6,14 +6,14 @@
     <meta name="robots" content="noindex,nofollow" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=7" />
     <title>授权码选题 · 心象测</title>
-    <meta name="description" content="输入授权码，选择测题开始测评" />
+    <meta name="description" content="输入授权码，浏览测题列表并开始测评" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/pick/pick.css?v=20261125h2" />
+    <link rel="stylesheet" href="/pick/pick.css?v=20261125h3" />
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true"></div>
@@ -34,7 +34,7 @@
       <!-- 授权码登录 -->
       <section id="authPanel" class="pick-panel" aria-labelledby="auth-title" hidden>
         <h1 id="auth-title">输入授权码</h1>
-        <p class="hint" id="authHint">请输入商家提供的选题授权码。登录状态会保存在本机，下次可直接选题。</p>
+        <p class="hint" id="authHint">请输入商家提供的选题授权码。下方可先浏览全部测题。</p>
 
         <label class="field-label" for="authInput">授权码</label>
         <input
@@ -49,7 +49,7 @@
 
         <p id="authStatus" class="status" role="status" hidden></p>
         <button type="button" id="authBtn" class="btn-primary">验证并进入</button>
-        <p class="foot-note">一个授权码最多开测 3 次（可同题复测）。用尽后可在此输入新授权码。</p>
+        <p class="foot-note">一个授权码最多开测 3 次（可同题复测）。用尽后可换新码。</p>
       </section>
 
       <!-- 已登录选题 -->
@@ -61,7 +61,7 @@
         <p class="hint" id="remainHint">同步使用次数中…</p>
         <p class="session-meta" id="sessionMeta" hidden></p>
 
-        <label class="field-label" for="testSelect">测题</label>
+        <label class="field-label" for="testSelect">快捷下拉</label>
         <select id="testSelect" disabled>
           <option value="">加载测题列表…</option>
         </select>
@@ -69,9 +69,26 @@
         <p id="statusMsg" class="status" role="status" hidden></p>
 
         <button type="button" id="enterBtn" class="btn-primary" disabled>进入测试</button>
-        <p class="foot-note">进入测题页后点「开始测试」会计入一次；本机已记住登录与剩余次数。</p>
+        <p class="foot-note">也可在下方测题列表中点选；进入测题页后点「开始测试」计 1 次。</p>
+      </section>
+
+      <!-- 测题列表（登录前后都可见） -->
+      <section id="catalogPanel" class="catalog-panel" aria-labelledby="catalog-title">
+        <div class="catalog-head">
+          <h2 id="catalog-title">测题列表</h2>
+          <p class="catalog-lead" id="catalogLead">加载中…</p>
+        </div>
+        <div class="catalog-toolbar">
+          <input id="catalogSearch" type="search" placeholder="搜索测题名称" autocomplete="off" />
+          <label class="chip-toggle">
+            <input id="catalogHotOnly" type="checkbox" />
+            <span>只看热门</span>
+          </label>
+        </div>
+        <div id="catalogGrid" class="catalog-grid" role="list"></div>
+        <p id="catalogEmpty" class="catalog-empty" hidden>没有匹配的测题</p>
       </section>
     </main>
-    <script src="/pick/pick.js?v=20261125h2" defer></script>
+    <script src="/pick/pick.js?v=20261125h3" defer></script>
   </body>
 </html>

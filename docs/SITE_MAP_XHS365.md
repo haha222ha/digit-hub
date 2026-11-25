@@ -83,7 +83,8 @@ Cloudflare DNS（*.xhs365.cn A → 47.239.181.111）
 | `/tests/{code}/` | `apps/psy-dist/tests/*/index.html` | 单套测题静态页 |
 | `/test/{code}/{token}` | nginx → API | 分销链接入口（一测一链） |
 | `/test/hub/{token}` | nginx → API → `/pick/` | **选题链接**入口（全库下拉 · 三次） |
-| `/pick/` | `apps/psy-dist/pick/index.html` | C 端授权码登录 + 选题（localStorage 记次数） |
+| `/pick/` | `apps/psy-dist/pick/index.html` | C 端授权码登录 + 选题 + 测题卡片列表（localStorage 记次数） |
+| `/catalog/` | `apps/psy-dist/catalog/index.html` | C 端测题产品列表（无需授权码，可先逛） |
 | `/shared/` | 静态 | 共享资源 |
 
 ### 2.2 商家工作台（需登录）

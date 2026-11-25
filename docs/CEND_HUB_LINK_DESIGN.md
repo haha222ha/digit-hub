@@ -72,6 +72,6 @@
 |----|------|
 | DB/业务 | `services/xhs-cloud/cloud_deploy/cloud_api/dist_db.py` · `dist_service.py` · `dist_routes.py` |
 | B 端 | `apps/psy-dist/console/js/pages/admin.js` · `api.js` |
-| C 端 | `apps/psy-dist/pick/` · `static/js/link-validator.js` |
+| C 端 | `apps/psy-dist/pick/` · `apps/psy-dist/catalog/` · `static/js/link-validator.js` |
 | 站点地图 | `docs/SITE_MAP_XHS365.md` |
-| nginx | `deploy/nginx_apply.sh`（`/pick/` 静态；`/test/hub/` 走 API） |
+| nginx | `deploy/nginx_apply.sh`（`/pick/` `/catalog/` 静态；`/test/hub/` 走 API） |

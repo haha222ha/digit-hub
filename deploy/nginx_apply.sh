@@ -325,6 +325,17 @@ ${GZIP_DIRECTIVES}
         add_header Cloudflare-CDN-Cache-Control "no-store";
     }
 
+    # C 端测题产品列表（无需授权码，可先逛）
+    location = /catalog {
+        return 302 /catalog/;
+    }
+    location ^~ /catalog/ {
+        try_files \$uri \$uri/ /catalog/index.html;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header CDN-Cache-Control "no-store";
+        add_header Cloudflare-CDN-Cache-Control "no-store";
+    }
+
     # past / muse 分销：直跳稳定版测题页（不走 L3 镜像，避免 chunk 重试跳首页）
     location ~ ^/test/(past_new|past_xlx)/([^/]+)$ {
         return 302 /tests/past_new/index.html?token=\$2;
