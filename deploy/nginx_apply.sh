@@ -314,12 +314,31 @@ ${GZIP_DIRECTIVES}
         add_header Cloudflare-CDN-Cache-Control "no-store";
     }
 
+    # C 端选题页（全库下拉）
+    location = /pick {
+        return 302 /pick/;
+    }
+    location ^~ /pick/ {
+        try_files \$uri \$uri/ /pick/index.html;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header CDN-Cache-Control "no-store";
+        add_header Cloudflare-CDN-Cache-Control "no-store";
+    }
+
     # past / muse 分销：直跳稳定版测题页（不走 L3 镜像，避免 chunk 重试跳首页）
     location ~ ^/test/(past_new|past_xlx)/([^/]+)$ {
         return 302 /tests/past_new/index.html?token=\$2;
     }
     location ~ ^/test/muse_new/([^/]+)$ {
         return 302 /tests/muse_new/index.html?token=\$1;
+    }
+    # 选题链接：API 302 → /pick/?token=
+    location ~ ^/test/hub/([^/]+)$ {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
     location ~ ^/test/([^/]+)/([^/]+)$ {

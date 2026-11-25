@@ -81,7 +81,9 @@ Cloudflare DNS（*.xhs365.cn A → 47.239.181.111）
 | `/privacy/` | `apps/psy-dist/privacy/index.html` | 隐私政策 |
 | `/order-claim` | `apps/psy-dist/order-claim.html` | 买家凭订单领链（C 端） |
 | `/tests/{code}/` | `apps/psy-dist/tests/*/index.html` | 单套测题静态页 |
-| `/test/{code}/{token}` | nginx → API | 分销链接入口 |
+| `/test/{code}/{token}` | nginx → API | 分销链接入口（一测一链） |
+| `/test/hub/{token}` | nginx → API → `/pick/` | **选题链接**入口（全库下拉 · 三次） |
+| `/pick/` | `apps/psy-dist/pick/index.html` | C 端授权码登录 + 选题（localStorage 记次数） |
 | `/shared/` | 静态 | 共享资源 |
 
 ### 2.2 商家工作台（需登录）

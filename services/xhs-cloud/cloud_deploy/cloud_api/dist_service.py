@@ -201,12 +201,30 @@ def redeem_quota_code(user_id: int, code: str) -> dict:
     return {"added": quota_amount, "quota": dist["quota"], "remaining_quota": dist["remaining_quota"]}
 
 
-def generate_links(user_id: int, test_code: str, count: int) -> dict:
+def generate_links(
+    user_id: int,
+    test_code: str,
+    count: int,
+    *,
+    link_mode: str = dist_db.SINGLE_LINK_MODE,
+) -> dict:
+    mode = (link_mode or dist_db.SINGLE_LINK_MODE).strip().lower()
+    if mode == dist_db.HUB_LINK_MODE:
+        links = dist_db.generate_links(
+            user_id,
+            dist_db.HUB_TEST_CODE,
+            count,
+            max_uses=_LINK_MAX_USES,
+            link_mode=dist_db.HUB_LINK_MODE,
+        )
+        return {"links": links, "generatedCount": len(links), "linkMode": dist_db.HUB_LINK_MODE}
     meta = _test_meta(test_code)
     if not meta:
         raise ValueError("测试项目不存在")
-    links = dist_db.generate_links(user_id, test_code, count, max_uses=_LINK_MAX_USES)
-    return {"links": links, "generatedCount": len(links)}
+    links = dist_db.generate_links(
+        user_id, test_code, count, max_uses=_LINK_MAX_USES, link_mode=dist_db.SINGLE_LINK_MODE
+    )
+    return {"links": links, "generatedCount": len(links), "linkMode": dist_db.SINGLE_LINK_MODE}
 
 
 def _resolve_test_code_for_allocate(user_id: int, order_id: str, product_id: str = "") -> str:
@@ -383,9 +401,21 @@ def validate_token(token: str, test_code: str | None = None) -> dict:
     out = dist_db.validate_link_token(token)
     if not out.get("valid"):
         return out
-    meta = _test_meta(out.get("testCode") or test_code or "")
+    link_mode = (out.get("linkMode") or "").strip().lower()
+    stored = (out.get("testCode") or "").strip()
+    is_hub = link_mode == dist_db.HUB_LINK_MODE or stored == dist_db.HUB_TEST_CODE
+    out["linkMode"] = dist_db.HUB_LINK_MODE if is_hub else (link_mode or dist_db.SINGLE_LINK_MODE)
+    # hub：不校验 URL 测题与库内绑定；用请求中的 test_code（若有）取双视角元数据
+    check_code = (test_code or "").strip() if is_hub else (stored or test_code or "")
+    meta = _test_meta(check_code) if check_code and check_code != dist_db.HUB_TEST_CODE else None
     out["is_dual_perspective"] = bool(meta and meta.get("is_dual_perspective"))
-    if test_code and out.get("testCode") and not _test_codes_compatible(test_code, out["testCode"]):
+    out["isDualPerspective"] = out["is_dual_perspective"]
+    if (
+        not is_hub
+        and test_code
+        and out.get("testCode")
+        and not _test_codes_compatible(test_code, out["testCode"])
+    ):
         return {"valid": False, "message": "链接与测题不匹配"}
     return out
 
@@ -395,8 +425,16 @@ def start_test(token: str) -> dict:
     return {"success": True}
 
 
-def complete_test(token: str, *, result_data: Any = None, perspective: str | None = None) -> dict:
-    return dist_db.complete_link_test(token, result_data=result_data, perspective=perspective)
+def complete_test(
+    token: str,
+    *,
+    result_data: Any = None,
+    perspective: str | None = None,
+    test_code: str | None = None,
+) -> dict:
+    return dist_db.complete_link_test(
+        token, result_data=result_data, perspective=perspective, test_code=test_code
+    )
 
 
 def fulfill_quota_from_payment(user_id: int, plan_code: str, order_no: str) -> None:

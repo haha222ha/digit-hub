@@ -221,6 +221,57 @@ class DistApiTest(unittest.TestCase):
         again = dist_db.claim_links_for_faka(uid, test_code="7v7", count=2)
         self.assertEqual(again["claimed"], 2)
 
+    def test_hub_link_pick_three_uses_and_retest(self):
+        """选题链接：全库模式、扣 1 额度、跨题/同题均可、第 4 次拒绝；单测题链接仍校验绑定。"""
+        profile = db.register_user_account("hubuser1", "pass123456")
+        uid = int(profile["id"])
+        dist_db.ensure_distributor(uid, default_quota=10)
+        before = dist_db.ensure_distributor(uid)["remaining_quota"]
+
+        single = svc.generate_links(uid, "mbti", 1, link_mode="single")
+        sl = single["links"][0]
+        self.assertEqual(sl.get("link_mode") or sl.get("linkMode"), "single")
+        self.assertEqual(sl.get("test_code"), "mbti")
+        self.assertIn("/test/mbti/", dist_db.link_public_url(sl["test_code"], sl["token"], link_mode="single"))
+
+        hub = svc.generate_links(uid, "", 1, link_mode="hub")
+        hl = hub["links"][0]
+        self.assertEqual(hl.get("link_mode") or hl.get("linkMode"), "hub")
+        self.assertEqual(hl.get("test_code"), dist_db.HUB_TEST_CODE)
+        url = dist_db.link_public_url(hl["test_code"], hl["token"], link_mode="hub")
+        self.assertIn("/test/hub/", url)
+
+        after = dist_db.ensure_distributor(uid)["remaining_quota"]
+        self.assertEqual(before - after, 2)
+
+        # hub 允许任意测题码校验通过
+        v_hub = svc.validate_token(hl["token"], test_code="7v7")
+        self.assertTrue(v_hub.get("valid"))
+        self.assertEqual(v_hub.get("linkMode"), "hub")
+        self.assertEqual(v_hub.get("remainingUses"), 3)
+
+        # 三次开测（同题复测也算）
+        for _ in range(3):
+            svc.start_test(hl["token"])
+        with self.assertRaises(ValueError):
+            svc.start_test(hl["token"])
+
+        # 交卷写入实际测题
+        hub2 = svc.generate_links(uid, "", 1, link_mode="hub")
+        tok2 = hub2["links"][0]["token"]
+        svc.start_test(tok2)
+        done = svc.complete_test(tok2, result_data={"score": 9}, test_code="mbti")
+        self.assertTrue(done.get("success"))
+        self.assertTrue(done.get("resultSaved"))
+        rows = dist_db.list_test_results_page(uid, page=1, per_page=20, test_code="mbti")
+        self.assertTrue(any(r.get("token") == tok2 for r in (rows.get("results") or [])))
+
+        # 单测题链接仍要求匹配
+        bad = svc.validate_token(sl["token"], test_code="7v7")
+        self.assertFalse(bad.get("valid"))
+        ok = svc.validate_token(sl["token"], test_code="mbti")
+        self.assertTrue(ok.get("valid"))
+
 
 if __name__ == "__main__":
     unittest.main()

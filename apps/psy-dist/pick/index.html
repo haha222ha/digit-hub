@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="robots" content="noindex,nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=7" />
+    <title>授权码选题 · 心象测</title>
+    <meta name="description" content="输入授权码，选择测题开始测评" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/pick/pick.css?v=20261125h2" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true"></div>
+    <main class="pick-shell">
+      <header class="pick-brand">
+        <svg class="brand-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="40" height="40" aria-hidden="true" focusable="false">
+          <circle cx="73" cy="100" r="54" fill="#0F766E" />
+          <circle cx="127" cy="100" r="54" fill="#0F766E" />
+          <path fill="#FFFFFF" d="M100 46.14 A54 54 0 0 0 100 153.86 A54 54 0 0 0 100 46.14 Z" />
+          <path fill="#B8952E" d="M100 90.5 C104.8 96.8 104.8 105.2 100 111.5 C95.2 105.2 95.2 96.8 100 90.5 Z" />
+        </svg>
+        <div>
+          <p class="brand-name">心象测</p>
+          <p class="brand-sub">授权码选题测评</p>
+        </div>
+      </header>
+
+      <!-- 授权码登录 -->
+      <section id="authPanel" class="pick-panel" aria-labelledby="auth-title" hidden>
+        <h1 id="auth-title">输入授权码</h1>
+        <p class="hint" id="authHint">请输入商家提供的选题授权码。登录状态会保存在本机，下次可直接选题。</p>
+
+        <label class="field-label" for="authInput">授权码</label>
+        <input
+          id="authInput"
+          type="text"
+          inputmode="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="粘贴或输入授权码"
+          maxlength="128"
+        />
+
+        <p id="authStatus" class="status" role="status" hidden></p>
+        <button type="button" id="authBtn" class="btn-primary">验证并进入</button>
+        <p class="foot-note">一个授权码最多开测 3 次（可同题复测）。用尽后可在此输入新授权码。</p>
+      </section>
+
+      <!-- 已登录选题 -->
+      <section id="pickPanel" class="pick-panel" aria-labelledby="pick-title" hidden>
+        <div class="pick-head">
+          <h1 id="pick-title">选择一套测评</h1>
+          <button type="button" id="switchCodeBtn" class="btn-text">更换授权码</button>
+        </div>
+        <p class="hint" id="remainHint">同步使用次数中…</p>
+        <p class="session-meta" id="sessionMeta" hidden></p>
+
+        <label class="field-label" for="testSelect">测题</label>
+        <select id="testSelect" disabled>
+          <option value="">加载测题列表…</option>
+        </select>
+
+        <p id="statusMsg" class="status" role="status" hidden></p>
+
+        <button type="button" id="enterBtn" class="btn-primary" disabled>进入测试</button>
+        <p class="foot-note">进入测题页后点「开始测试」会计入一次；本机已记住登录与剩余次数。</p>
+      </section>
+    </main>
+    <script src="/pick/pick.js?v=20261125h2" defer></script>
+  </body>
+</html>

@@ -69,8 +69,10 @@ class DistRegisterBody(BaseModel):
 
 
 class LinkGenerateBody(BaseModel):
-    testCode: str
+    testCode: str = ""
     count: int = Field(default=1, ge=1, le=50)
+    linkMode: str = "single"
+    link_mode: str | None = None
 
 
 class LinkFillMissingBody(BaseModel):
@@ -88,6 +90,8 @@ class CompleteTestBody(BaseModel):
     token: str = Field(min_length=8)
     resultData: Any = None
     perspective: str | None = None
+    testCode: str | None = None
+    test_code: str | None = None
 
 
 class RedeemBody(BaseModel):
@@ -231,11 +235,22 @@ def _assert_dist_can_login(user_id: int) -> None:
         raise HTTPException(status_code=403, detail="账号已停用或已删除，请联系管理员")
 
 
+@compat_router.get("/test/hub/{token}")
+def compat_hub_pick_shell(token: str):
+    """C 端选题链接入口 → 选题页。"""
+    from urllib.parse import quote
+
+    safe_token = quote((token or "").strip(), safe="")
+    return RedirectResponse(url=f"/pick/?token={safe_token}", status_code=302)
+
+
 @compat_router.get("/test/{test_code}/{token}")
 def compat_test_iframe_shell(test_code: str, token: str):
     """C 端分销入口：past 走稳定测题页；其它测题 iframe 内嵌。"""
     safe_code = (test_code or "").replace('"', "")
     safe_token = (token or "").replace('"', "")
+    if safe_code == "hub":
+        return compat_hub_pick_shell(safe_token)
     if safe_code in ("past_new", "past_xlx"):
         return RedirectResponse(
             url=f"/tests/past_new/index.html?token={safe_token}",
@@ -264,10 +279,19 @@ def dist_quota_info_v1(user: dict = Depends(current_user)):
     return _ok(svc.quota_info(user["id"]), "查询额度信息成功")
 
 
+def _link_mode_from_body(body: LinkGenerateBody) -> str:
+    return ((body.linkMode or body.link_mode or "single") or "single").strip().lower()
+
+
 @router.post("/api/v1/dist/links/generate")
 def dist_links_generate_v1(body: LinkGenerateBody, user: dict = Depends(current_user)):
     try:
-        return _ok(svc.generate_links(user["id"], body.testCode, body.count), "生成链接成功")
+        return _ok(
+            svc.generate_links(
+                user["id"], body.testCode, body.count, link_mode=_link_mode_from_body(body)
+            ),
+            "生成链接成功",
+        )
     except ValueError as e:
         return JSONResponse(_fail(str(e)), status_code=200)
 
@@ -305,8 +329,14 @@ def dist_links_start_v1(body: TokenBody):
 @router.post("/api/v1/dist/links/complete-test")
 def dist_links_complete_v1(body: CompleteTestBody):
     try:
+        tc = (body.testCode or body.test_code or "").strip() or None
         return _ok(
-            svc.complete_test(body.token, result_data=body.resultData, perspective=body.perspective),
+            svc.complete_test(
+                body.token,
+                result_data=body.resultData,
+                perspective=body.perspective,
+                test_code=tc,
+            ),
             "测试完成记录成功",
         )
     except ValueError as e:
@@ -550,7 +580,12 @@ def compat_quota_redeem(body: RedeemBody, request: Request):
 def compat_links_generate(body: LinkGenerateBody, request: Request):
     user = _dist_token(request)
     try:
-        return _ok(svc.generate_links(user["id"], body.testCode, body.count), "生成链接成功")
+        return _ok(
+            svc.generate_links(
+                user["id"], body.testCode, body.count, link_mode=_link_mode_from_body(body)
+            ),
+            "生成链接成功",
+        )
     except ValueError as e:
         return JSONResponse(_fail(str(e)), status_code=200)
 
@@ -931,7 +966,14 @@ def compat_links_export(body: LinksExportBody, request: Request):
         code = l.get("test_code") or ""
         token = l.get("token") or ""
         st = l.get("status") or ""
-        lines.append(f"{code}\t/test/{code}/{token}\t{st}")
+        mode = (l.get("link_mode") or l.get("linkMode") or "").strip().lower()
+        if mode == "hub" or code == "__hub__":
+            path = f"/test/hub/{token}"
+            label = "选题链接"
+        else:
+            path = f"/test/{code}/{token}"
+            label = code
+        lines.append(f"{label}\t{path}\t{st}")
     blob = "\n".join(lines) + ("\n" if lines else "")
     headers = {
         "Content-Disposition": 'attachment; filename="links_export.txt"',

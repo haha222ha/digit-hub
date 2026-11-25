@@ -434,6 +434,15 @@ export async function renderGenerate(root) {
   const count = el("input", { type: "number", min: "1", max: "50", value: "1", required: "true" });
   const resultHost = el("div");
   const btn = el("button", { className: "btn btn-primary", type: "submit", text: "生成链接", style: "width:auto" });
+  const modeSingle = el("input", { type: "radio", name: "linkMode", value: "single", checked: "true", id: "linkModeSingle" });
+  const modeHub = el("input", { type: "radio", name: "linkMode", value: "hub", id: "linkModeHub" });
+  const testField = el("div", { className: "field" }, [el("label", { text: "测评项目" }), select]);
+  const hubHint = el("p", {
+    className: "muted",
+    style: "display:none;margin:0",
+    text: "C 端将看到全部已启用测题的下拉框，同一链接最多开测 3 次（可同题复测）。",
+  });
+  let linkMode = "single";
   let ruleText = "首次开测后 3 天内可复测 3 次";
   let testsCache = [];
   try {
@@ -458,10 +467,34 @@ export async function renderGenerate(root) {
     errHost.append(flash("error", e.message || "测题列表加载失败"));
   }
 
+  function syncModeUI() {
+    linkMode = modeHub.checked ? "hub" : "single";
+    testField.style.display = linkMode === "hub" ? "none" : "";
+    hubHint.style.display = linkMode === "hub" ? "" : "none";
+    select.required = linkMode !== "hub";
+    if (linkMode === "hub") select.value = "";
+  }
+  modeSingle.addEventListener("change", syncModeUI);
+  modeHub.addEventListener("change", syncModeUI);
+
   const form = el("form", { className: "panel" }, [
     errHost,
+    el("div", { className: "field" }, [
+      el("label", { text: "链接类型" }),
+      el("div", { className: "row-actions", style: "gap:16px;flex-wrap:wrap" }, [
+        el("label", { style: "display:flex;align-items:center;gap:6px;cursor:pointer;margin:0" }, [
+          modeSingle,
+          el("span", { text: "单测题链接（一测一链）" }),
+        ]),
+        el("label", { style: "display:flex;align-items:center;gap:6px;cursor:pointer;margin:0" }, [
+          modeHub,
+          el("span", { text: "选题链接（全库下拉）" }),
+        ]),
+      ]),
+      hubHint,
+    ]),
     el("div", { className: "grid-2" }, [
-      el("div", { className: "field" }, [el("label", { text: "测评项目" }), select]),
+      testField,
       el("div", { className: "field" }, [el("label", { text: "生成数量（1–50）" }), count]),
     ]),
     el("p", {
@@ -488,13 +521,19 @@ export async function renderGenerate(root) {
     e.preventDefault();
     errHost.replaceChildren();
     resultHost.replaceChildren();
+    syncModeUI();
+    if (linkMode === "single" && !select.value) {
+      errHost.append(flash("error", "请选择测评项目"));
+      return;
+    }
     btn.disabled = true;
     try {
       const n = Math.min(50, Math.max(1, Number(count.value) || 1));
-      const data = await api.generateLinks(select.value, n);
+      const data = await api.generateLinks(linkMode === "hub" ? "" : select.value, n, linkMode);
       const links = (data && data.links) || [];
       const urls = links.map((link) => linkFullUrl(link, select.value));
-      resultHost.append(flash("ok", `已生成 ${links.length} 条链接（可一键复制到自动发卡）`));
+      const modeLabel = linkMode === "hub" ? "选题链接" : "单测题链接";
+      resultHost.append(flash("ok", `已生成 ${links.length} 条${modeLabel}（可一键复制到自动发卡）`));
 
       const bulkBar = el("div", { className: "row-actions", style: "margin:12px 0;flex-wrap:wrap;gap:8px" });
       const copyAllBtn = el("button", {
@@ -522,7 +561,8 @@ export async function renderGenerate(root) {
         onOk: () => showToast(`已复制 ${urls.length} 条链接`),
       });
       exportBtn.addEventListener("click", () => {
-        downloadPlainTxt(fakaTxtFromUrls(urls), `psy_links_${select.value || "batch"}_${Date.now()}.txt`);
+        const tag = linkMode === "hub" ? "hub" : select.value || "batch";
+        downloadPlainTxt(fakaTxtFromUrls(urls), `psy_links_${tag}_${Date.now()}.txt`);
         exportBtn.textContent = "已下载";
         showToast(`已导出 ${urls.length} 条（发卡格式）`);
         setTimeout(() => {
@@ -552,7 +592,10 @@ export async function renderGenerate(root) {
   root.append(
     shell("/admin/generate-link", [
       el("h1", { className: "page-title", text: "生成链接" }),
-      el("p", { className: "page-lead", text: "选择测评项目，生成可发给用户的分销链接。" }),
+      el("p", {
+        className: "page-lead",
+        text: "单测题链接保持一测一链；也可生成选题链接，让 C 端下拉选择测题。",
+      }),
       el("div", { className: "stat-row cols-3" }, [
         el("div", { className: "stat" }, [
           el("div", { className: "k", text: "剩余额度" }),
@@ -819,8 +862,18 @@ function buildFillMissingPanel(tests, quota) {
   ]);
 }
 
+function isHubLink(link) {
+  if (!link) return false;
+  const mode = String(link.link_mode || link.linkMode || "").toLowerCase();
+  const code = String(link.test_code || link.testCode || "");
+  return mode === "hub" || code === "__hub__";
+}
+
 function linkFullUrl(link, fallbackCode = "") {
   const token = link.token || "";
+  if (isHubLink(link) || fallbackCode === "__hub__" || fallbackCode === "hub") {
+    return `${location.origin}/test/hub/${token}`;
+  }
   const code = link.test_code || link.testCode || fallbackCode || "";
   return `${location.origin}/test/${code}/${token}`;
 }
@@ -1165,6 +1218,8 @@ export async function renderLinks(root) {
         });
         const copyBtn = el("button", { className: "btn btn-ghost", type: "button", text: "复制" });
         bindCopyButton(copyBtn, url);
+        const hub = isHubLink(link);
+        const codeLabel = hub ? "选题链接（全库）" : code;
         const detailBtn = el("button", {
           className: "btn btn-ghost",
           type: "button",
@@ -1172,8 +1227,10 @@ export async function renderLinks(root) {
           onClick: () => {
             openDrawer("链接详情", [
               el("dl", { className: "link-detail-grid" }, [
+                el("dt", { text: "类型" }),
+                el("dd", { text: hub ? "选题链接（hub）" : "单测题链接" }),
                 el("dt", { text: "测题" }),
-                el("dd", { text: code }),
+                el("dd", { text: codeLabel }),
                 el("dt", { text: "链接" }),
                 el("dd", { text: url }),
                 el("dt", { text: "状态" }),
@@ -1222,10 +1279,16 @@ export async function renderLinks(root) {
             })
           );
         }
+        const codeCell = hub
+          ? el("td", {}, [
+              el("span", { className: "tag tag-ok", text: "选题" }),
+              el("span", { className: "muted small", style: "margin-left:6px", text: "全库下拉" }),
+            ])
+          : el("td", { text: code });
         tbody.append(
           el("tr", {}, [
             el("td", {}, [cb]),
-            el("td", { text: code }),
+            codeCell,
             el("td", {}, [el("div", { className: "url-cell", text: url })]),
             el("td", {}, [
               el("div", { className: "link-metric" }, [

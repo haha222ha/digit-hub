@@ -227,6 +227,7 @@ def _migrate_dist_schema() -> None:
         "ALTER TABLE dist_links ADD COLUMN fulfill_order_id TEXT",
         "ALTER TABLE dist_links ADD COLUMN fulfill_channel TEXT",
         "ALTER TABLE dist_links ADD COLUMN fulfilled_at TEXT",
+        "ALTER TABLE dist_links ADD COLUMN link_mode TEXT DEFAULT 'single'",
         "CREATE UNIQUE INDEX IF NOT EXISTS idx_dist_links_fulfill_order ON dist_links(user_id, fulfill_order_id) WHERE fulfill_order_id IS NOT NULL AND fulfill_order_id != ''",
         """CREATE TABLE IF NOT EXISTS dist_product_bindings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -272,6 +273,7 @@ def _migrate_dist_schema() -> None:
         "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS fulfill_order_id TEXT",
         "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS fulfill_channel TEXT",
         "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS fulfilled_at TIMESTAMP",
+        "ALTER TABLE dist_links ADD COLUMN IF NOT EXISTS link_mode TEXT NOT NULL DEFAULT 'single'",
         "CREATE UNIQUE INDEX IF NOT EXISTS idx_dist_links_fulfill_order ON dist_links(user_id, fulfill_order_id) WHERE fulfill_order_id IS NOT NULL AND fulfill_order_id != ''",
         """CREATE TABLE IF NOT EXISTS dist_product_bindings (
             id SERIAL PRIMARY KEY,
@@ -1088,16 +1090,37 @@ def adjust_quota(user_id: int, amount: int, *, remark: str = "") -> dict:
     return ensure_distributor(user_id)
 
 
-def generate_links(user_id: int, test_code: str, count: int, *, max_uses: int = 3) -> list[dict]:
+# 选题链接占位测题码（link_mode=hub）；C 端实际测题由用户下拉选择
+HUB_TEST_CODE = "__hub__"
+HUB_LINK_MODE = "hub"
+SINGLE_LINK_MODE = "single"
+
+
+def generate_links(
+    user_id: int,
+    test_code: str,
+    count: int,
+    *,
+    max_uses: int = 3,
+    link_mode: str = SINGLE_LINK_MODE,
+) -> list[dict]:
     init_dist_tables()
     dist = ensure_distributor(user_id)
     count = max(1, min(int(count), 50))
     remaining = dist["remaining_quota"]
     if remaining < count:
         raise ValueError(f"可用额度不足，当前可用：{remaining}，需要：{count}")
-    test_code = (test_code or "").strip()
-    if not test_code:
-        raise ValueError("请选择测题")
+    mode = (link_mode or SINGLE_LINK_MODE).strip().lower()
+    if mode not in (SINGLE_LINK_MODE, HUB_LINK_MODE):
+        raise ValueError("linkMode 仅支持 single 或 hub")
+    if mode == HUB_LINK_MODE:
+        test_code = HUB_TEST_CODE
+        remark_label = "选题链接"
+    else:
+        test_code = (test_code or "").strip()
+        if not test_code:
+            raise ValueError("请选择测题")
+        remark_label = test_code
     links: list[dict] = []
     if _USE_PG:
         conn = _pg_conn()
@@ -1106,9 +1129,10 @@ def generate_links(user_id: int, test_code: str, count: int, *, max_uses: int = 
         for _ in range(count):
             token = _gen_token()
             c.execute(
-                """INSERT INTO dist_links (token, user_id, test_code, max_uses)
-                   VALUES (%s,%s,%s,%s) RETURNING id, token, test_code, status, used_count, max_uses, created_at""",
-                (token, user_id, test_code, max_uses),
+                """INSERT INTO dist_links (token, user_id, test_code, max_uses, link_mode)
+                   VALUES (%s,%s,%s,%s,%s)
+                   RETURNING id, token, test_code, status, used_count, max_uses, link_mode, created_at""",
+                (token, user_id, test_code, max_uses, mode),
             )
             row = c.fetchone()
             links.append(_map_link_row(row, c.description))
@@ -1120,7 +1144,7 @@ def generate_links(user_id: int, test_code: str, count: int, *, max_uses: int = 
             """INSERT INTO dist_quota_logs
                (user_id, change_type, amount, before_remaining, after_remaining, remark)
                VALUES (%s,'consume',%s,%s,%s,%s)""",
-            (user_id, count, before, before - count, f"生成 {count} 个 {test_code} 链接"),
+            (user_id, count, before, before - count, f"生成 {count} 个 {remark_label}"),
         )
         conn.commit()
         conn.close()
@@ -1132,9 +1156,9 @@ def generate_links(user_id: int, test_code: str, count: int, *, max_uses: int = 
         for _ in range(count):
             token = _gen_token()
             c.execute(
-                """INSERT INTO dist_links (token, user_id, test_code, max_uses, created_at)
-                   VALUES (?,?,?,?,?)""",
-                (token, user_id, test_code, max_uses, now),
+                """INSERT INTO dist_links (token, user_id, test_code, max_uses, link_mode, created_at)
+                   VALUES (?,?,?,?,?,?)""",
+                (token, user_id, test_code, max_uses, mode, now),
             )
             lid = c.lastrowid
             c.execute("SELECT * FROM dist_links WHERE id=?", (lid,))
@@ -1147,7 +1171,7 @@ def generate_links(user_id: int, test_code: str, count: int, *, max_uses: int = 
             """INSERT INTO dist_quota_logs
                (user_id, change_type, amount, before_remaining, after_remaining, remark, created_at)
                VALUES (?,?,?,?,?,?,?)""",
-            (user_id, "consume", count, before, before - count, f"生成 {count} 个 {test_code} 链接", now),
+            (user_id, "consume", count, before, before - count, f"生成 {count} 个 {remark_label}", now),
         )
         conn.commit()
         conn.close()
@@ -1163,11 +1187,15 @@ def _map_link(row: dict | None) -> dict:
     used_count = int(row.get("used_count") or 0)
     max_uses = int(row.get("max_uses") or 3)
     faka_claimed = bool(faka_claimed_at)
+    link_mode = (row.get("link_mode") or SINGLE_LINK_MODE).strip() or SINGLE_LINK_MODE
+    if (row.get("test_code") or "") == HUB_TEST_CODE:
+        link_mode = HUB_LINK_MODE
     out = {
         "id": row.get("id"),
         "token": row.get("token"),
         "user_id": row.get("user_id"),
         "test_code": row.get("test_code"),
+        "link_mode": link_mode,
         "status": row.get("status") or "unused",
         "used_count": used_count,
         "max_uses": max_uses,
@@ -1182,6 +1210,7 @@ def _map_link(row: dict | None) -> dict:
         "fulfill_channel": (row.get("fulfill_channel") or "") or "",
         "fulfilled_at": _fmt_ts(row.get("fulfilled_at")),
         # SDK / 源站兼容字段
+        "linkMode": link_mode,
         "usedCount": used_count,
         "maxUses": max_uses,
         "expiresAt": expires_at,
@@ -1202,10 +1231,19 @@ def public_link_origin() -> str:
     return "https://psy.xhs365.cn"
 
 
-def link_public_url(test_code: str, token: str, *, origin: str | None = None) -> str:
+def link_public_url(
+    test_code: str,
+    token: str,
+    *,
+    origin: str | None = None,
+    link_mode: str | None = None,
+) -> str:
     base = (origin or public_link_origin()).rstrip("/")
     code = (test_code or "").strip()
     tok = (token or "").strip()
+    mode = (link_mode or "").strip().lower()
+    if mode == HUB_LINK_MODE or code == HUB_TEST_CODE:
+        return f"{base}/test/hub/{tok}"
     return f"{base}/test/{code}/{tok}"
 
 
@@ -1403,7 +1441,9 @@ def claim_links_for_faka(
         links_out.append(
             {
                 **link,
-                "url": link_public_url(code, token, origin=origin),
+                "url": link_public_url(
+                    code, token, origin=origin, link_mode=link.get("link_mode")
+                ),
             }
         )
     return {
@@ -1907,7 +1947,7 @@ def allocate_link_for_order(
         tc = existing.get("test_code") or ""
         tok = existing.get("token") or ""
         return {
-            "url": link_public_url(tc, tok),
+            "url": link_public_url(tc, tok, link_mode=existing.get("link_mode")),
             "test_code": tc,
             "testCode": tc,
             "token": tok,
@@ -2065,7 +2105,7 @@ def allocate_link_for_order(
     code = claimed_row.get("test_code") or tc
     tok = claimed_row.get("token") or ""
     return {
-        "url": link_public_url(code, tok),
+        "url": link_public_url(code, tok, link_mode=claimed_row.get("link_mode")),
         "test_code": code,
         "testCode": code,
         "token": tok,
@@ -2245,6 +2285,7 @@ def validate_link_token(token: str) -> dict:
             "message": "无限测试模式",
             "unlimited": True,
             "testCode": unlimited.get("test_code"),
+            "linkMode": SINGLE_LINK_MODE,
         }
     link = get_link_by_token(token)
     if not link:
@@ -2253,7 +2294,17 @@ def validate_link_token(token: str) -> dict:
     if err:
         # 刷新状态后的最新 link
         link = get_link_by_token(token) or link
-        return {"valid": False, "message": err, "link": link}
+        return {
+            "valid": False,
+            "message": err,
+            "link": link,
+            "linkMode": link.get("link_mode") or SINGLE_LINK_MODE,
+            "usedCount": int(link.get("used_count") or 0),
+            "maxUses": int(link.get("max_uses") or 3),
+        }
+    mode = link.get("link_mode") or SINGLE_LINK_MODE
+    used = int(link.get("used_count") or 0)
+    max_uses = int(link.get("max_uses") or 3)
     return {
         "valid": True,
         "message": "链接有效",
@@ -2261,6 +2312,10 @@ def validate_link_token(token: str) -> dict:
         "unlimited": False,
         "testCode": link.get("test_code"),
         "expiresAt": link.get("expires_at"),
+        "linkMode": mode,
+        "usedCount": used,
+        "maxUses": max_uses,
+        "remainingUses": max(0, max_uses - used),
     }
 
 
@@ -2350,6 +2405,7 @@ def complete_link_test(
     *,
     result_data: Any = None,
     perspective: str | None = None,
+    test_code: str | None = None,
 ) -> dict:
     unlimited = get_unlimited_session(token)
     result_id = None
@@ -2358,7 +2414,7 @@ def complete_link_test(
             result_id = _insert_test_result(
                 link_id=None,
                 token=token,
-                test_code=str(unlimited.get("test_code") or ""),
+                test_code=str(test_code or unlimited.get("test_code") or ""),
                 user_id=int(unlimited.get("user_id") or 0),
                 perspective=perspective,
                 result_data=result_data,
@@ -2383,11 +2439,22 @@ def complete_link_test(
     if err:
         raise ValueError(err)
 
+    stored_code = str(link.get("test_code") or "")
+    is_hub = (link.get("link_mode") or "") == HUB_LINK_MODE or stored_code == HUB_TEST_CODE
+    actual_code = (test_code or "").strip() if is_hub else stored_code
+    if is_hub:
+        if not actual_code or actual_code == HUB_TEST_CODE:
+            actual_code = (test_code or "").strip()
+        if not actual_code or actual_code == HUB_TEST_CODE:
+            raise ValueError("选题链接交卷须指定测题")
+    elif not actual_code:
+        actual_code = stored_code
+
     if result_data is not None:
         result_id = _insert_test_result(
             link_id=link.get("id"),
             token=token,
-            test_code=str(link.get("test_code") or ""),
+            test_code=actual_code,
             user_id=int(link.get("user_id") or 0) if link.get("user_id") else None,
             perspective=perspective,
             result_data=result_data,

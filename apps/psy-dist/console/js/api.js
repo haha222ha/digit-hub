@@ -117,11 +117,15 @@ export const api = {
     }),
   testsList: () => request("/api/tests/list"),
   quotaInfo: () => request("/api/quota/info", { auth: true }),
-  generateLinks: (testCode, count) =>
+  generateLinks: (testCode, count, linkMode = "single") =>
     request("/api/links/generate", {
       method: "POST",
       auth: true,
-      body: { testCode, count },
+      body: {
+        testCode: testCode || "",
+        count,
+        linkMode: linkMode || "single",
+      },
     }),
   fillMissingLinks: (payload = {}) =>
     request("/api/links/fill-missing", {

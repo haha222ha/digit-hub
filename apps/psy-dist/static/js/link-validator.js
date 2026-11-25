@@ -883,6 +883,30 @@
     return null;
   }
 
+  const HUB_SESSION_LS_KEY = 'xx_hub_session_v1';
+
+  /**
+   * 同步 C 端选题授权码会话（localStorage）的使用次数
+   */
+  function syncHubSessionUses(token, usedCount, maxUses) {
+    try {
+      if (!token) return;
+      const raw = localStorage.getItem(HUB_SESSION_LS_KEY);
+      if (!raw) return;
+      const sess = JSON.parse(raw);
+      if (!sess || sess.token !== token) return;
+      const used = Number(usedCount != null ? usedCount : sess.usedCount || 0);
+      const max = Number(maxUses != null ? maxUses : sess.maxUses || 3);
+      sess.usedCount = used;
+      sess.maxUses = max;
+      sess.remainingUses = Math.max(0, max - used);
+      sess.updatedAt = new Date().toISOString();
+      localStorage.setItem(HUB_SESSION_LS_KEY, JSON.stringify(sess));
+    } catch (e) {
+      console.warn('同步 hub session 失败', e);
+    }
+  }
+
   /**
    * 记录测试开始
    */
@@ -895,14 +919,19 @@
       const result = await callAPI(config.startTestEndpoint, 'POST', data);
       
       // 检查返回数据结构
+      let out;
       if (result.data) {
-        return result.data;
+        out = result.data;
       } else if (result.success !== undefined) {
         // 如果直接返回结果
-        return result;
+        out = result;
       } else {
         throw new Error('服务器返回数据格式错误');
       }
+      const used = out.usedCount != null ? out.usedCount : (out.link && (out.link.usedCount || out.link.used_count));
+      const max = out.link && (out.link.maxUses || out.link.max_uses);
+      if (used != null) syncHubSessionUses(token, used, max);
+      return out;
     } catch (error) {
       console.error('记录测试开始失败:', error);
       // 确保错误信息友好
@@ -916,7 +945,7 @@
   /**
    * 记录测试完成
    */
-  async function completeTest(token, perspective, resultData) {
+  async function completeTest(token, perspective, resultData, testCode) {
     try {
       const data = { token };
       if (perspective) {
@@ -924,6 +953,9 @@
       }
       if (resultData) {
         data.resultData = resultData;
+      }
+      if (testCode) {
+        data.testCode = testCode;
       }
       console.log('📤 发送completeTest API请求:', {
         endpoint: config.completeTestEndpoint,
@@ -981,6 +1013,7 @@
       this.testCode = testCode;
       this.unlimited = unlimited || false;
       this.link = null;
+      this.linkMode = 'single';
       this.isDualPerspective = false;
       this.perspectives = null;
       this.adminId = null;
@@ -1087,7 +1120,18 @@
           validateResult = await validateLink(this.token, normalizedPerspective);
           if (validateResult.valid) {
             this.link = validateResult.link;
-            this.isDualPerspective = validateResult.isDualPerspective || false;
+            const mode = String(
+              validateResult.linkMode ||
+                (validateResult.link && (validateResult.link.linkMode || validateResult.link.link_mode)) ||
+                ''
+            ).toLowerCase();
+            const stored = String(
+              validateResult.testCode ||
+                (validateResult.link && (validateResult.link.test_code || validateResult.link.testCode)) ||
+                ''
+            );
+            this.linkMode = mode === 'hub' || stored === '__hub__' ? 'hub' : 'single';
+            this.isDualPerspective = validateResult.isDualPerspective || validateResult.is_dual_perspective || false;
             this.perspectives = validateResult.perspectives || null;
           }
         }
@@ -1398,7 +1442,13 @@
         }
 
         // 普通模式：先完成服务端记次/解锁，成功后再写 localStorage
-        const result = await completeTest(this.token, normalizedPerspective, resultData);
+        // hub 选题链接交卷时带上实际测题码，写入 dist_test_results
+        const result = await completeTest(
+          this.token,
+          normalizedPerspective,
+          resultData,
+          this.testCode || undefined
+        );
 
         if (resultData) {
           this.saveResultToLocalStorage(resultData, perspective);
@@ -1413,6 +1463,8 @@
         // 记录使用次数（如果返回了）
         if (result.usedCount !== undefined) {
           console.log('当前使用次数:', result.usedCount);
+          const max = result.link && (result.link.maxUses || result.link.max_uses);
+          syncHubSessionUses(this.token, result.usedCount, max);
         }
 
         // 检查是否所有视角都完成（双视角测试）
