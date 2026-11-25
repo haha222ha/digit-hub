@@ -30,9 +30,10 @@
   → 得到 https://psy.xhs365.cn/test/hub/{token}
   → C 端打开 → /pick/?token=… 或直接打开 /pick/ 手动输入授权码
   → 校验成功后写入 localStorage（xx_hub_session_v1：token / usedCount / maxUses / remainingUses）
-  → 下拉选题 → /tests/{code}/index.html?token=…
+  → 下拉/卡片选题 → /tests/{code}/index.html?token=…
   → link-validator 开始测试时同步剩余次数到 localStorage
-  → 次数用尽 → 提示「更换授权码」→ 清会话 → 输入新码
+  → 出报告后：弹窗「继续选题测评 / 先看报告」+ 底部固定条回 /pick/（展示剩余次数）
+  → 次数用尽 → 底部条改为「更换授权码」→ /pick/ 清会话输入新码
 ```
 
 ## C 端本机会话（localStorage）

@@ -884,27 +884,238 @@
   }
 
   const HUB_SESSION_LS_KEY = 'xx_hub_session_v1';
+  const HUB_CONTINUE_BAR_ID = 'xx-hub-continue-bar';
+
+  function maskHubToken(token) {
+    const t = String(token || '');
+    if (t.length <= 8) return t.slice(0, 2) + '***';
+    return t.slice(0, 4) + '…' + t.slice(-4);
+  }
+
+  function readHubSession() {
+    try {
+      const raw = localStorage.getItem(HUB_SESSION_LS_KEY);
+      if (!raw) return null;
+      const sess = JSON.parse(raw);
+      if (!sess || !sess.token) return null;
+      return sess;
+    } catch {
+      return null;
+    }
+  }
 
   /**
-   * 同步 C 端选题授权码会话（localStorage）的使用次数
+   * 同步 / 写入 C 端选题授权码会话（localStorage）
+   * hub 模式下即使本机尚无会话也会补建，保证结果页能闭环跳回选题
    */
-  function syncHubSessionUses(token, usedCount, maxUses) {
+  function syncHubSessionUses(token, usedCount, maxUses, opts) {
     try {
-      if (!token) return;
+      if (!token) return null;
+      const forceHub = !!(opts && opts.forceHub);
       const raw = localStorage.getItem(HUB_SESSION_LS_KEY);
-      if (!raw) return;
-      const sess = JSON.parse(raw);
-      if (!sess || sess.token !== token) return;
+      let sess = null;
+      if (raw) {
+        try {
+          sess = JSON.parse(raw);
+        } catch {
+          sess = null;
+        }
+      }
+      if (sess && sess.token && sess.token !== token) {
+        if (!forceHub) return null;
+        sess = null;
+      }
+      if (!sess) {
+        if (!forceHub) return null;
+        sess = { token: token, linkMode: 'hub' };
+      }
       const used = Number(usedCount != null ? usedCount : sess.usedCount || 0);
       const max = Number(maxUses != null ? maxUses : sess.maxUses || 3);
+      sess.token = token;
+      sess.linkMode = 'hub';
       sess.usedCount = used;
       sess.maxUses = max;
       sess.remainingUses = Math.max(0, max - used);
+      sess.masked = maskHubToken(token);
       sess.updatedAt = new Date().toISOString();
       localStorage.setItem(HUB_SESSION_LS_KEY, JSON.stringify(sess));
+      return sess;
     } catch (e) {
       console.warn('同步 hub session 失败', e);
+      return null;
     }
+  }
+
+  function isHubValidator(validator) {
+    if (!validator || validator.unlimited) return false;
+    if (String(validator.linkMode || '').toLowerCase() === 'hub') return true;
+    const sess = readHubSession();
+    return !!(sess && sess.token === validator.token && String(sess.linkMode || '').toLowerCase() === 'hub');
+  }
+
+  function hubRemainingFrom(validator, result) {
+    if (result && result.remainingUses != null) return Number(result.remainingUses);
+    if (result && result.usedCount != null) {
+      const max =
+        (result.link && (result.link.maxUses || result.link.max_uses)) ||
+        (validator && validator.link && (validator.link.maxUses || validator.link.max_uses)) ||
+        3;
+      return Math.max(0, Number(max) - Number(result.usedCount));
+    }
+    const sess = readHubSession();
+    if (sess && validator && sess.token === validator.token) {
+      return Number(sess.remainingUses != null ? sess.remainingUses : 0);
+    }
+    return null;
+  }
+
+  /**
+   * 结果页 / 测题页底部：选题链接闭环入口（剩余次数 → 回 /pick/）
+   */
+  function mountHubContinueBar(validator, remainingOverride) {
+    if (!isHubValidator(validator)) return;
+
+    const remaining =
+      remainingOverride != null ? Number(remainingOverride) : hubRemainingFrom(validator, null);
+    const maxUses = (function () {
+      const sess = readHubSession();
+      if (sess && sess.token === validator.token && sess.maxUses) return Number(sess.maxUses);
+      if (validator.link && (validator.link.maxUses || validator.link.max_uses)) {
+        return Number(validator.link.maxUses || validator.link.max_uses);
+      }
+      return 3;
+    })();
+
+    let bar = document.getElementById(HUB_CONTINUE_BAR_ID);
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = HUB_CONTINUE_BAR_ID;
+      bar.setAttribute('role', 'region');
+      bar.setAttribute('aria-label', '继续测评');
+      document.body.appendChild(bar);
+      // 给页面底部留出空间，避免挡住报告内容
+      if (!document.getElementById('xx-hub-continue-pad')) {
+        const pad = document.createElement('div');
+        pad.id = 'xx-hub-continue-pad';
+        pad.style.cssText = 'height:88px;width:100%;pointer-events:none;';
+        document.body.appendChild(pad);
+      }
+    }
+
+    const hasLeft = remaining == null ? true : remaining > 0;
+    const title = hasLeft
+      ? remaining == null
+        ? '本授权码还可继续选题测评'
+        : `本授权码还可开测 ${remaining} / ${maxUses} 次`
+      : '本授权码次数已用尽';
+    const cta = hasLeft ? '继续选题测评' : '更换授权码';
+    const hint = hasLeft ? '可换一套题，也可同题复测' : '请输入新的授权码继续';
+
+    bar.style.cssText = [
+      'position:fixed',
+      'left:0',
+      'right:0',
+      'bottom:0',
+      'z-index:9998',
+      'display:flex',
+      'align-items:center',
+      'justify-content:space-between',
+      'gap:12px',
+      'padding:12px 16px',
+      'padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px))',
+      'background:rgba(11,28,24,0.94)',
+      'color:#f3f7f5',
+      'font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif',
+      'box-shadow:0 -8px 24px rgba(0,0,0,0.18)',
+      'box-sizing:border-box'
+    ].join(';');
+
+    bar.innerHTML = '';
+    const textWrap = document.createElement('div');
+    textWrap.style.cssText = 'min-width:0;flex:1';
+    const t1 = document.createElement('div');
+    t1.textContent = title;
+    t1.style.cssText = 'font-size:14px;font-weight:600;line-height:1.35';
+    const t2 = document.createElement('div');
+    t2.textContent = hint;
+    t2.style.cssText = 'font-size:12px;opacity:0.78;margin-top:2px';
+    textWrap.appendChild(t1);
+    textWrap.appendChild(t2);
+
+    const btn = document.createElement('a');
+    btn.href = '/pick/';
+    btn.textContent = cta;
+    btn.style.cssText = [
+      'flex-shrink:0',
+      'display:inline-flex',
+      'align-items:center',
+      'justify-content:center',
+      'padding:10px 14px',
+      'border-radius:10px',
+      'background:#14b8a6',
+      'color:#0b1c18',
+      'font-size:14px',
+      'font-weight:700',
+      'text-decoration:none',
+      'white-space:nowrap'
+    ].join(';');
+
+    bar.appendChild(textWrap);
+    bar.appendChild(btn);
+  }
+
+  /**
+   * 交卷后弹一次闭环提示（有剩余次数才弹）
+   */
+  function showHubContinueModal(validator, remaining) {
+    if (!isHubValidator(validator)) return;
+    if (remaining == null || remaining <= 0) {
+      mountHubContinueBar(validator, remaining);
+      return;
+    }
+    const maxUses = (readHubSession() && readHubSession().maxUses) || 3;
+    showModal(
+      `报告已生成。<br><br>本授权码还可开测 <strong>${remaining}</strong> / ${maxUses} 次（可换题或同题复测）。`,
+      '继续测评',
+      function () {
+        /* 关闭后底部条仍在 */
+      }
+    );
+    // 用「继续选题 / 先看报告」替换默认「确定」
+    setTimeout(function () {
+      const modal = document.getElementById('link-validator-modal');
+      if (!modal) return;
+      const content = modal.firstElementChild;
+      if (!content || content.querySelector('#xx-hub-continue-modal-btn')) return;
+      Array.prototype.forEach.call(content.querySelectorAll('button'), function (b) {
+        if (b.textContent === '确定') b.style.display = 'none';
+      });
+      const actions = document.createElement('div');
+      actions.style.cssText = 'display:flex;gap:8px;margin-top:16px;flex-wrap:wrap';
+      const go = document.createElement('button');
+      go.id = 'xx-hub-continue-modal-btn';
+      go.type = 'button';
+      go.textContent = '继续选题测评';
+      go.style.cssText =
+        'flex:1;min-width:120px;padding:12px 16px;border:0;border-radius:8px;background:#0f766e;color:#fff;font-size:15px;font-weight:600;cursor:pointer';
+      go.onclick = function () {
+        location.href = '/pick/';
+      };
+      const stay = document.createElement('button');
+      stay.type = 'button';
+      stay.textContent = '先看报告';
+      stay.style.cssText =
+        'flex:1;min-width:120px;padding:12px 16px;border:1px solid #d0d7d4;border-radius:8px;background:#fff;color:#243a34;font-size:15px;cursor:pointer';
+      stay.onclick = function () {
+        modal.remove();
+        document.body.style.overflow = '';
+        mountHubContinueBar(validator, remaining);
+      };
+      actions.appendChild(go);
+      actions.appendChild(stay);
+      content.appendChild(actions);
+    }, 0);
+    mountHubContinueBar(validator, remaining);
   }
 
   /**
@@ -1133,6 +1344,19 @@
             this.linkMode = mode === 'hub' || stored === '__hub__' ? 'hub' : 'single';
             this.isDualPerspective = validateResult.isDualPerspective || validateResult.is_dual_perspective || false;
             this.perspectives = validateResult.perspectives || null;
+            if (this.linkMode === 'hub') {
+              const used = Number(
+                validateResult.usedCount != null
+                  ? validateResult.usedCount
+                  : (validateResult.link && (validateResult.link.used_count || validateResult.link.usedCount)) || 0
+              );
+              const max = Number(
+                validateResult.maxUses != null
+                  ? validateResult.maxUses
+                  : (validateResult.link && (validateResult.link.max_uses || validateResult.link.maxUses)) || 3
+              );
+              syncHubSessionUses(this.token, used, max, { forceHub: true });
+            }
           }
         }
 
@@ -1464,7 +1688,9 @@
         if (result.usedCount !== undefined) {
           console.log('当前使用次数:', result.usedCount);
           const max = result.link && (result.link.maxUses || result.link.max_uses);
-          syncHubSessionUses(this.token, result.usedCount, max);
+          syncHubSessionUses(this.token, result.usedCount, max, {
+            forceHub: this.linkMode === 'hub'
+          });
         }
 
         // 检查是否所有视角都完成（双视角测试）
@@ -1476,6 +1702,16 @@
               p.completed = true;
             });
           }
+        }
+
+        // hub 选题：出结果后闭环 → 提示剩余次数并回 /pick/
+        const dualPending =
+          this.isDualPerspective &&
+          result.allPerspectivesCompleted !== true &&
+          !(this.perspectives && this.perspectives.every(function (p) { return p.completed; }));
+        if (this.linkMode === 'hub' && !dualPending) {
+          const remaining = hubRemainingFrom(this, result);
+          showHubContinueModal(this, remaining);
         }
 
         return result;
@@ -1646,6 +1882,33 @@
         // 添加推广链接（无论链接是否有效都显示）
         addPromotionLink();
 
+        // hub：结果页 / 已有本地结果时挂上「继续选题」条；并监听结果区出现
+        if (isHubValidator(validator)) {
+          if (hasLocalResult || /result|report/i.test(location.pathname + location.search + location.hash)) {
+            mountHubContinueBar(validator);
+          }
+          try {
+            const mo = new MutationObserver(function () {
+              const resultVisible = document.querySelector(
+                '#result-page.active, .result-page.active, #result-page:not([hidden]), .result-page:not([hidden]), #report-page, .report-page, [id*="result"]:not([hidden])'
+              );
+              if (resultVisible || document.getElementById(HUB_CONTINUE_BAR_ID)) {
+                mountHubContinueBar(validator);
+              }
+            });
+            mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'hidden', 'style'] });
+            setTimeout(function () {
+              try {
+                mo.disconnect();
+              } catch (_) {
+                /* ignore */
+              }
+            }, 120000);
+          } catch (_) {
+            /* ignore */
+          }
+        }
+
         return validator;
       } catch (error) {
         // 验证失败，不显示弹窗（根据需求文档，页面加载时不显示弹窗）
@@ -1714,7 +1977,12 @@
     /**
      * 添加推广链接（手动调用）
      */
-    addPromotionLink: addPromotionLink
+    addPromotionLink: addPromotionLink,
+
+    /**
+     * hub 选题闭环：结果页挂「继续测评」条
+     */
+    mountHubContinueBar: mountHubContinueBar
   };
 
   /**
