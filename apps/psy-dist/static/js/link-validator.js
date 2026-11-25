@@ -1000,116 +1000,107 @@
 
   /**
    * 结果页 / 测题页底部：选题链接闭环入口（剩余次数 → 回 /pick/）
+   * 注意：禁止在 MutationObserver 里无脑重绘，否则会改 DOM→再触发观察→卡死页面
    */
   function mountHubContinueBar(validator, remainingOverride) {
     if (!isHubValidator(validator)) return;
-
-    const remaining =
-      remainingOverride != null ? Number(remainingOverride) : hubRemainingFrom(validator, null);
-    const maxUses = (function () {
-      const sess = readHubSession();
-      if (sess && sess.token === validator.token && sess.maxUses) return Number(sess.maxUses);
-      if (validator.link && (validator.link.maxUses || validator.link.max_uses)) {
-        return Number(validator.link.maxUses || validator.link.max_uses);
-      }
-      return 3;
-    })();
-
-    let bar = document.getElementById(HUB_CONTINUE_BAR_ID);
-    if (!bar) {
-      bar = document.createElement('div');
-      bar.id = HUB_CONTINUE_BAR_ID;
-      bar.setAttribute('role', 'region');
-      bar.setAttribute('aria-label', '继续测评');
-      document.body.appendChild(bar);
-      // 给页面底部留出空间，避免挡住报告内容
-      if (!document.getElementById('xx-hub-continue-pad')) {
-        const pad = document.createElement('div');
-        pad.id = 'xx-hub-continue-pad';
-        pad.style.cssText = 'height:88px;width:100%;pointer-events:none;';
-        document.body.appendChild(pad);
-      }
-    }
-
-    const hasLeft = remaining == null ? true : remaining > 0;
-    const title = hasLeft
-      ? remaining == null
-        ? '本授权码还可继续选题测评'
-        : `本授权码还可开测 ${remaining} / ${maxUses} 次`
-      : '本授权码次数已用尽';
-    const cta = hasLeft ? '继续选题测评' : '更换授权码';
-    const hint = hasLeft ? '可换一套题，也可同题复测' : '请输入新的授权码继续';
-
-    bar.style.cssText = [
-      'position:fixed',
-      'left:0',
-      'right:0',
-      'bottom:0',
-      'z-index:9998',
-      'display:flex',
-      'align-items:center',
-      'justify-content:space-between',
-      'gap:12px',
-      'padding:12px 16px',
-      'padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px))',
-      'background:rgba(11,28,24,0.94)',
-      'color:#f3f7f5',
-      'font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif',
-      'box-shadow:0 -8px 24px rgba(0,0,0,0.18)',
-      'box-sizing:border-box'
-    ].join(';');
-
-    bar.innerHTML = '';
-    const textWrap = document.createElement('div');
-    textWrap.style.cssText = 'min-width:0;flex:1';
-    const t1 = document.createElement('div');
-    t1.textContent = title;
-    t1.style.cssText = 'font-size:14px;font-weight:600;line-height:1.35';
-    const t2 = document.createElement('div');
-    t2.textContent = hint;
-    t2.style.cssText = 'font-size:12px;opacity:0.78;margin-top:2px';
-    textWrap.appendChild(t1);
-    textWrap.appendChild(t2);
-
-    const btn = document.createElement('a');
-    btn.href = '/pick/';
-    btn.textContent = cta;
-    btn.style.cssText = [
-      'flex-shrink:0',
-      'display:inline-flex',
-      'align-items:center',
-      'justify-content:center',
-      'padding:10px 14px',
-      'border-radius:10px',
-      'background:#14b8a6',
-      'color:#0b1c18',
-      'font-size:14px',
-      'font-weight:700',
-      'text-decoration:none',
-      'white-space:nowrap'
-    ].join(';');
-
-    bar.appendChild(textWrap);
-    bar.appendChild(btn);
-
-    // 结果 footer 再挂一颗显式按钮（避免只有「重新测验」、看不到底部条）
+    if (window.__xxHubMounting) return;
+    window.__xxHubMounting = true;
     try {
-      if (isHubResultSurfaceVisible()) {
-        const footers = document.querySelectorAll('.report-footer, .result-actions, #page-result, #result-page');
+      const remaining =
+        remainingOverride != null ? Number(remainingOverride) : hubRemainingFrom(validator, null);
+      const maxUses = (function () {
+        const sess = readHubSession();
+        if (sess && sess.token === validator.token && sess.maxUses) return Number(sess.maxUses);
+        if (validator.link && (validator.link.maxUses || validator.link.max_uses)) {
+          return Number(validator.link.maxUses || validator.link.max_uses);
+        }
+        return 3;
+      })();
+
+      const hasLeft = remaining == null ? true : remaining > 0;
+      const title = hasLeft
+        ? remaining == null
+          ? '本授权码还可继续选题测评'
+          : `本授权码还可开测 ${remaining} / ${maxUses} 次`
+        : '本授权码次数已用尽';
+      const cta = hasLeft ? '继续选题测评' : '更换授权码';
+      const hint = hasLeft ? '可换一套题，也可同题复测' : '请输入新的授权码继续';
+      const sig = title + '|' + cta + '|' + hint;
+
+      let bar = document.getElementById(HUB_CONTINUE_BAR_ID);
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.id = HUB_CONTINUE_BAR_ID;
+        bar.setAttribute('role', 'region');
+        bar.setAttribute('aria-label', '继续测评');
+        bar.style.cssText = [
+          'position:fixed',
+          'left:0',
+          'right:0',
+          'bottom:0',
+          'z-index:9998',
+          'display:flex',
+          'align-items:center',
+          'justify-content:space-between',
+          'gap:12px',
+          'padding:12px 16px',
+          'padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px))',
+          'background:rgba(11,28,24,0.94)',
+          'color:#f3f7f5',
+          'font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif',
+          'box-shadow:0 -8px 24px rgba(0,0,0,0.18)',
+          'box-sizing:border-box'
+        ].join(';');
+        document.body.appendChild(bar);
+        if (!document.getElementById('xx-hub-continue-pad')) {
+          const pad = document.createElement('div');
+          pad.id = 'xx-hub-continue-pad';
+          pad.style.cssText = 'height:88px;width:100%;pointer-events:none;';
+          document.body.appendChild(pad);
+        }
+      }
+
+      // 文案未变则不重绘，避免观察器反馈环
+      if (bar.getAttribute('data-xx-sig') !== sig) {
+        bar.setAttribute('data-xx-sig', sig);
+        bar.replaceChildren();
+        const textWrap = document.createElement('div');
+        textWrap.style.cssText = 'min-width:0;flex:1';
+        const t1 = document.createElement('div');
+        t1.textContent = title;
+        t1.style.cssText = 'font-size:14px;font-weight:600;line-height:1.35';
+        const t2 = document.createElement('div');
+        t2.textContent = hint;
+        t2.style.cssText = 'font-size:12px;opacity:0.78;margin-top:2px';
+        textWrap.appendChild(t1);
+        textWrap.appendChild(t2);
+        const btn = document.createElement('a');
+        btn.href = '/pick/';
+        btn.textContent = cta;
+        btn.style.cssText = [
+          'flex-shrink:0',
+          'display:inline-flex',
+          'align-items:center',
+          'justify-content:center',
+          'padding:10px 14px',
+          'border-radius:10px',
+          'background:#14b8a6',
+          'color:#0b1c18',
+          'font-size:14px',
+          'font-weight:700',
+          'text-decoration:none',
+          'white-space:nowrap'
+        ].join(';');
+        bar.appendChild(textWrap);
+        bar.appendChild(btn);
+      }
+
+      // 结果 footer 显式按钮：已存在则跳过
+      if (isHubResultSurfaceVisible() && !document.getElementById('xx-hub-continue-inline')) {
+        const footers = document.querySelectorAll('.report-footer, .result-actions');
         for (let i = 0; i < footers.length; i++) {
-          const footer = footers[i];
-          if (!footer || footer.querySelector('#xx-hub-continue-inline')) continue;
-          // 只挂在真正的操作区，避免整页乱插
-          const isAction =
-            (footer.classList &&
-              (footer.classList.contains('report-footer') || footer.classList.contains('result-actions'))) ||
-            footer.querySelector('button, .btn');
-          if (!isAction && footer.id !== 'page-result' && footer.id !== 'result-page') continue;
-          const host =
-            footer.classList &&
-            (footer.classList.contains('report-footer') || footer.classList.contains('result-actions'))
-              ? footer
-              : footer.querySelector('.report-footer, .result-actions') || footer;
+          const host = footers[i];
           if (!host || host.querySelector('#xx-hub-continue-inline')) continue;
           const inline = document.createElement('a');
           inline.id = 'xx-hub-continue-inline';
@@ -1133,13 +1124,13 @@
           break;
         }
       }
-    } catch (_) {
-      /* ignore */
+    } finally {
+      window.__xxHubMounting = false;
     }
   }
 
   /**
-   * hub 收尾生命周期：立即挂条 + 常驻监听 + 短延迟重挂（防测题 onLoad/改 DOM 冲掉）
+   * hub 收尾生命周期：挂条 + 轻量轮询结果区（不用全树 MutationObserver，避免卡死）
    */
   function ensureHubContinueLifecycle(validator) {
     if (!isHubValidator(validator)) return;
@@ -1148,31 +1139,36 @@
     } catch (e) {
       console.warn('mountHubContinueBar failed:', e);
     }
-    try {
-      if (!window.__xxHubContinueMo && document.body) {
-        window.__xxHubContinueMo = new MutationObserver(function () {
-          const v = window.linkValidator || validator;
-          if (!v || !isHubValidator(v)) return;
-          if (isHubResultSurfaceVisible() || document.getElementById(HUB_CONTINUE_BAR_ID)) {
-            mountHubContinueBar(v);
-          }
-        });
-        window.__xxHubContinueMo.observe(document.body, {
-          childList: true,
-          subtree: true,
-          attributes: true,
-          attributeFilter: ['class', 'hidden', 'style']
-        });
-      }
-    } catch (_) {
-      /* ignore */
-    }
-    [0, 300, 1200, 3000].forEach(function (ms) {
+
+    // 短延迟补挂一次（覆盖测题 onLoad 改 DOM），不做高频重绘
+    [400, 1500].forEach(function (ms) {
       setTimeout(function () {
         const v = window.linkValidator || validator;
         if (v && isHubValidator(v)) mountHubContinueBar(v);
       }, ms);
     });
+
+    // 轻量轮询：仅在结果区出现且还没 inline 按钮时补挂；最多 3 分钟
+    if (!window.__xxHubContinuePoll) {
+      let ticks = 0;
+      window.__xxHubContinuePoll = setInterval(function () {
+        ticks += 1;
+        if (ticks > 90) {
+          clearInterval(window.__xxHubContinuePoll);
+          window.__xxHubContinuePoll = null;
+          return;
+        }
+        const v = window.linkValidator;
+        if (!v || !isHubValidator(v)) return;
+        if (!document.getElementById(HUB_CONTINUE_BAR_ID)) {
+          mountHubContinueBar(v);
+          return;
+        }
+        if (isHubResultSurfaceVisible() && !document.getElementById('xx-hub-continue-inline')) {
+          mountHubContinueBar(v);
+        }
+      }, 2000);
+    }
   }
 
   /**
